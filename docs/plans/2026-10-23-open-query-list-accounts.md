@@ -166,7 +166,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
 - **Acceptance criteria:**
   - [x] Tests green.
 
-### [ ] T9 — Sign-up form: errors (~10 min)
+### [x] T9 — Sign-up form: errors (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -177,7 +177,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   2. A `DomainException` from the service: the form comes back with its message and keeps the entered data.
   3. Tests: blank holder; malformed IBAN (`@Pattern`); insufficient deposit; duplicate account number.
 - **Acceptance criteria:**
-  - [ ] Tests green. No form error ends in a 500 page.
+  - [x] Tests green. No form error ends in a 500 page.
 
 ### [ ] T10 — End-to-end integration (~10 min)
 

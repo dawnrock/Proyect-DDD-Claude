@@ -4,6 +4,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -23,10 +26,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import com.pronoide.ddd.application.AccountSummary;
 import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.application.OpenAccountCommand;
+import com.pronoide.ddd.domain.model.AccountNumber;
+import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
+import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
+import com.pronoide.ddd.domain.model.MonetaryAmount;
 
 @WebMvcTest(AccountWebController.class)
 class AccountWebControllerTests {
@@ -120,6 +128,76 @@ class AccountWebControllerTests {
                     .initialDeposit(new BigDecimal("100.00"))
                     .currency("EUR")
                     .build());
+        }
+    }
+
+    @Nested
+    @DisplayName("Errores del alta de cuenta")
+    class ErroresDelAlta {
+
+        private MockHttpServletRequestBuilder altaCon(String accountNumber, String holderName, String deposit) {
+            return post("/accounts/new")
+                    .param("accountNumber", accountNumber)
+                    .param("holderName", holderName)
+                    .param("segment", "RETAIL")
+                    .param("initialDeposit", deposit)
+                    .param("currency", "EUR");
+        }
+
+        @Test
+        @DisplayName("Un titular en blanco vuelve al formulario con el error del campo y sin llamar al servicio")
+        void un_titular_en_blanco_vuelve_al_formulario_con_el_error_del_campo_y_sin_llamar_al_servicio()
+                throws Exception {
+            mvc.perform(altaCon("ES1234567890123456789012", "  ", "100.00"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/new"))
+                    .andExpect(model().attributeHasFieldErrors("form", "holderName"))
+                    .andExpect(content().string(containsString("El titular es obligatorio")));
+
+            verifyNoInteractions(service);
+        }
+
+        @Test
+        @DisplayName("Un IBAN mal formado vuelve al formulario con el error del campo y conserva los datos")
+        void un_iban_mal_formado_vuelve_al_formulario_con_el_error_del_campo_y_conserva_los_datos()
+                throws Exception {
+            mvc.perform(altaCon("ES12-345", "Ana Lopez", "100.00"))
+                    .andExpect(status().isOk())
+                    .andExpect(model().attributeHasFieldErrors("form", "accountNumber"))
+                    .andExpect(content().string(containsString("ES12-345")))
+                    .andExpect(content().string(containsString("Ana Lopez")));
+
+            verifyNoInteractions(service);
+        }
+
+        @Test
+        @DisplayName("Un depósito insuficiente vuelve al formulario con el mensaje del dominio y conserva los datos")
+        void un_deposito_insuficiente_vuelve_al_formulario_con_el_mensaje_del_dominio_y_conserva_los_datos()
+                throws Exception {
+            var error = new InsufficientInitialDepositException(
+                    MonetaryAmount.euros("10.00"), MonetaryAmount.euros("50.00"));
+            when(service.openAccount(any())).thenThrow(error);
+
+            mvc.perform(altaCon("ES1234567890123456789012", "Ana Lopez", "10.00"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/new"))
+                    .andExpect(model().attributeHasErrors("form"))
+                    .andExpect(content().string(containsString(
+                            "no alcanza el mínimo exigido")))
+                    .andExpect(content().string(containsString("ES1234567890123456789012")))
+                    .andExpect(content().string(containsString("Ana Lopez")));
+        }
+
+        @Test
+        @DisplayName("Un número de cuenta duplicado vuelve al formulario con el mensaje del dominio")
+        void un_numero_de_cuenta_duplicado_vuelve_al_formulario_con_el_mensaje_del_dominio() throws Exception {
+            var error = new DuplicateAccountNumberException(new AccountNumber("ES1234567890123456789012"));
+            when(service.openAccount(any())).thenThrow(error);
+
+            mvc.perform(altaCon("ES1234567890123456789012", "Ana Lopez", "100.00"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/new"))
+                    .andExpect(content().string(containsString(error.getMessage())));
         }
     }
 }
