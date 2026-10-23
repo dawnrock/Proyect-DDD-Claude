@@ -32,8 +32,7 @@ jobs:
 
       - name: Run Claude Code
         id: claude
-        # Fijada: desde v1.0.255 la acción termina con is_error:true en ~2 s sin llegar al modelo (ver docs/adr/0001)
-        uses: anthropics/claude-code-action@v1.0.254
+        uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
