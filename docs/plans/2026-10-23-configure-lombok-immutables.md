@@ -37,7 +37,7 @@ Dejar el build preparado para usar Lombok e Immutables según la tabla "dónde s
 
 ## Tareas
 
-### [ ] T1 — Lombok en el build con accesores fluidos (~10 min)
+### [x] T1 — Lombok en el build con accesores fluidos (~10 min)
 
 - **Capa:** build
 - **Archivos:** `pom.xml`, `lombok.config`, `src/test/java/com/pronoide/ddd/build/LombokSetupTests.java`
@@ -49,8 +49,8 @@ Dejar el build preparado para usar Lombok e Immutables según la tabla "dónde s
   4. Excluir `lombok` del JAR en `spring-boot-maven-plugin`.
   5. Crear `lombok.config` con `config.stopBubbling = true`, `lombok.accessors.fluent = true` y `lombok.addLombokGeneratedAnnotation = true`.
 - **Criterios de aceptación:**
-  - [ ] `./mvnw test -Dtest=LombokSetupTests` pasa, y el accesor generado es `name()`, no `getName()`.
-  - [ ] `./mvnw verify` en verde, con las 22 pruebas anteriores más la nueva.
+  - [x] `./mvnw test -Dtest=LombokSetupTests` pasa, y el accesor generado es `name()`, no `getName()`.
+  - [x] `./mvnw verify` en verde, con las 22 pruebas anteriores más la nueva.
 
 ### [ ] T2 — Procesador de Immutables en el build (~5 min)
 
