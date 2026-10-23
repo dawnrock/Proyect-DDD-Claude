@@ -79,6 +79,20 @@ Dejar por escrito, antes de escribir código de la fase 1, el lenguaje ubicuo de
   - [x] El ADR cita los capítulos 14, 17 y 18 (y el 18.1) del curso de DDD.
   - [x] `docs/adr/README.md` enlaza el ADR 0004 con estado "Aceptada".
 
+### [x] T4 — Correcciones de la revisión de revisor-ddd (~5 min)
+
+- **Capa:** docs
+- **Archivos:** `docs/arquitectura/fase-1-capas.md`, `docs/dominio/glosario.md`, `docs/adr/0004-arquitectura-en-capas.md`
+- **Depende de:** T3
+- **Qué hacer:**
+  1. R3 lanza `IllegalArgumentException` (no `DomainException`): corregir el diagrama de secuencia y documentar la traducción de errores (400 / 422 / 404).
+  2. D4 y D6 se contradecían: fusionarlas en D4 (presentation solo conoce las excepciones de dominio), flecha punteada en el diagrama y referencias D1-D5.
+  3. Lenguaje ubicuo: "transacción" y "reintegro" como sinónimos heredados de "movimiento" y "retirada", con su alineación pendiente.
+- **Criterios de aceptación:**
+  - [x] Ningún documento atribuye R3 a `DomainException`.
+  - [x] No hay dos reglas de dependencia incompatibles; el diagrama muestra la dependencia de presentation con las excepciones.
+  - [x] Los sinónimos heredados están documentados.
+
 ## Criterios de aceptación globales
 
 **Específicos:**

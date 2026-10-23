@@ -11,11 +11,11 @@ Términos del dominio de cuentas corrientes. El código usa el nombre en inglés
 | Segmento de cliente | `CustomerSegment` | Enumerado | Clasificación comercial del titular: `RETAIL` (minorista) o `HIGH_NET_WORTH` (alto patrimonio). Determina si puede quedar en descubierto. |
 | Número de cuenta | `AccountNumber` | Objeto de valor | IBAN español que identifica la cuenta (R14). |
 | Importe | `MonetaryAmount` | Objeto de valor | Cantidad y divisa. Inmutable y normalizado a los decimales de su divisa (R12, R13). Se crea con `MonetaryAmount.euros("100.00")`. |
-| Movimiento | `Transaction` | Entidad (hija del agregado) | Ingreso o retirada sobre una cuenta, con importe, instante (`occurredOn`) y estado. Solo lo crea y lo resuelve la cuenta. |
+| Movimiento | `Transaction` | Entidad (hija del agregado) | Ingreso o retirada sobre una cuenta, con importe, instante (`occurredOn`) y estado. Solo lo crea y lo resuelve la cuenta. *Sinónimo heredado:* "transacción" (mensaje de `Transaction.requirePending` y algún test); el término canónico es **movimiento**. |
 | Tipo de movimiento | `TransactionType` | Enumerado | `DEPOSIT` (ingreso) o `WITHDRAWAL` (retirada). |
 | Estado del movimiento | `TransactionStatus` | Enumerado | `PENDING` (pendiente, al crearse), `APPROVED` (aprobado) o `REJECTED` (rechazado). Un movimiento se resuelve una sola vez (R11). |
 | Ingreso | `deposit` | Operación de la cuenta | Suma el importe al saldo. Siempre se aprueba si el importe es válido (R3, R4). |
-| Retirada (reintegro) | `tryWithdraw` | Operación de la cuenta | Resta el importe si el saldo resultante es válido; si no, el movimiento queda rechazado y el saldo no cambia (R5-R9). |
+| Retirada | `tryWithdraw` | Operación de la cuenta | Resta el importe si el saldo resultante es válido; si no, el movimiento queda rechazado y el saldo no cambia (R5-R9). *Sinónimo heredado:* "reintegro" (algunos tests); el término canónico es **retirada** (`WITHDRAWAL`, `WithdrawCommand`). |
 | Depósito inicial mínimo | `MINIMUM_INITIAL_DEPOSIT` | Regla | 50,00 € (R1). |
 | Descubierto | `OVERDRAFT_LIMIT` | Regla | Saldo negativo permitido solo a alto patrimonio, con un límite de -1.000,00 € (R6-R8). |
 | Error de dominio | `DomainException` | Excepción de dominio (abstracta) | Base de los errores de negocio. Su mensaje, en español, se muestra tal cual al usuario. |
@@ -45,6 +45,10 @@ Cada regla cita el test que la demuestra (`src/test/java/com/pronoide/ddd/domain
 | R13 | Un importe es inmutable: las operaciones devuelven instancias nuevas; no existe sin divisa | `MonetaryAmountTests#las_operaciones_devuelven_nuevas_instancias`, `MonetaryAmountTests#un_importe_no_puede_construirse_sin_divisa` |
 | R14 | El número de cuenta es un IBAN español: `ES` seguido de 22 dígitos, normalizado sin espacios y en mayúsculas. **No se valida el dígito de control.** | `AccountNumberTests#el_numero_de_cuenta_se_normaliza`, `AccountNumberTests#un_iban_con_formato_incorrecto_no_llega_a_construirse` |
 | R15 | Un titular conserva su identidad aunque cambien sus atributos, y dos titulares con los mismos datos son distintos | `AccountHolderTests#un_titular_mantiene_su_identidad_aunque_cambien_sus_atributos`, `AccountHolderTests#dos_titulares_con_los_mismos_datos_son_entidades_distintas` |
+
+### Pendientes de alinear con el glosario
+
+- Los sinónimos heredados "transacción" y "reintegro" siguen en un mensaje de error (`Transaction.requirePending`) y en nombres de tests. Se renombrarán a "movimiento" y "retirada" en la primera issue que toque esas clases, sin cambiar el comportamiento.
 
 ### Reglas implementadas sin test
 

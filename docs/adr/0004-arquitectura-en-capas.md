@@ -20,7 +20,8 @@ Y propone, con cuidado, el **bypass entre capas (capítulo 18.1)**: permitir de 
 - **Clases concretas, sin interfaces de puerto.** La aplicación usa `InMemoryCheckingAccountRepository` directamente. Es el rasgo que diferencia esta fotografía de la hexagonal, donde el dominio declarará el puerto (`CheckingAccountRepository`) y la dependencia se invertirá.
 - **Contra el anemic translation:** las vistas y commands de `application` (Immutables) son el único tipo intermedio. La presentación no define otro modelo del mismo concepto salvo los DTOs REST cuando el formato JSON lo exija, y todos usan los nombres del [glosario](../dominio/glosario.md).
 - **Contra el layer cake:** no se crea una capa o método que solo reenvíe; las consultas simples no se duplican en cada capa por simetría.
-- Las reglas de dependencia D1-D6 de `fase-1-capas.md` se verifican con ArchUnit (`LayeredArchitectureTests`, issue #12).
+- `presentation` solo conoce del dominio las excepciones (`DomainException` y subclases), para traducirlas a HTTP o a mensajes de pantalla; nunca agregados, entidades ni objetos de valor (regla D4).
+- Las reglas de dependencia D1-D5 de `fase-1-capas.md` se verifican con ArchUnit (`LayeredArchitectureTests`, issue #12).
 
 ## Alternativas
 
