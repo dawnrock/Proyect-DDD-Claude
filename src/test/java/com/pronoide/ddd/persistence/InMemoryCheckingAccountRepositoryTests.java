@@ -3,6 +3,7 @@ package com.pronoide.ddd.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 import java.util.UUID;
 
@@ -46,12 +47,50 @@ class InMemoryCheckingAccountRepositoryTests {
             CheckingAccount cuenta = cuentaCon("ES9121000418450200051332");
 
             repository.save(cuenta);
-            cuenta.deposit(MonetaryAmount.euros("25.00"));
             repository.save(cuenta);
 
-            assertThat(repository.findById(cuenta.id()))
-                    .hasValueSatisfying(guardada ->
-                            assertThat(guardada.currentBalance()).isEqualTo(MonetaryAmount.euros("125.00")));
+            assertThat(repository.findAll()).containsExactly(cuenta);
+        }
+
+        @Test
+        @DisplayName("El repositorio guarda la propia cuenta, no una copia")
+        void el_repositorio_guarda_la_propia_cuenta_no_una_copia() {
+            CheckingAccount cuenta = cuentaCon("ES9121000418450200051332");
+            repository.save(cuenta);
+
+            cuenta.deposit(MonetaryAmount.euros("25.00"));
+
+            assertThat(repository.findById(cuenta.id())).containsSame(cuenta);
+            assertThat(cuenta.currentBalance()).isEqualTo(MonetaryAmount.euros("125.00"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Argumentos obligatorios")
+    class RequiredArguments {
+
+        @Test
+        @DisplayName("No se puede guardar una cuenta nula")
+        void no_se_puede_guardar_una_cuenta_nula() {
+            assertThatNullPointerException()
+                    .isThrownBy(() -> repository.save(null))
+                    .withMessage("La cuenta a guardar es obligatoria");
+        }
+
+        @Test
+        @DisplayName("No se puede buscar por un id nulo")
+        void no_se_puede_buscar_por_un_id_nulo() {
+            assertThatNullPointerException()
+                    .isThrownBy(() -> repository.findById(null))
+                    .withMessage("El id de la cuenta es obligatorio");
+        }
+
+        @Test
+        @DisplayName("No se puede buscar por un número de cuenta nulo")
+        void no_se_puede_buscar_por_un_numero_de_cuenta_nulo() {
+            assertThatNullPointerException()
+                    .isThrownBy(() -> repository.findByAccountNumber(null))
+                    .withMessage("El número de cuenta es obligatorio");
         }
     }
 

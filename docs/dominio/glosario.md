@@ -60,6 +60,8 @@ Cada regla cita el test que la demuestra (`src/test/java/com/pronoide/ddd/domain
 | ------- | ------------ | ---- | ---------- |
 | Repositorio de cuentas | `InMemoryCheckingAccountRepository` | Repositorio del agregado (en memoria, simulado) | Guarda y recupera cuentas corrientes completas, con sus movimientos: `save` (guarda o sustituye por id), `findById`, `findByAccountNumber` y `findAll` (ordenadas por número de cuenta, lista no modificable). **El número de cuenta es único**: guardar otra cuenta con un número ya usado lanza `IllegalStateException`, como un índice único en una base de datos. Guarda referencias, no copias, así que los casos de uso deben llamar siempre a `save` después de modificar una cuenta. Tests: `InMemoryCheckingAccountRepositoryTests`. |
 
+**Número de cuenta único como regla de negocio:** el repositorio lo vigila como una restricción técnica (`IllegalStateException`, que no es una `DomainException`). El caso de uso "abrir cuenta" (#5) debe comprobarlo antes con `findByAccountNumber` y lanzar una excepción de dominio, para que la presentación lo traduzca (D4) en lugar de devolver un error 500.
+
 ## Términos previstos
 
 Llegan con issues posteriores de la fase 1; se pasan a la tabla principal cuando existan en el código.
