@@ -5,7 +5,7 @@
 - **Phase:** 1 · Layered monolith
 - **Base branch:** `Monolithic`
 - **Date:** 2026-10-23
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~120 min (12 tasks: T0 + 6 back + 3 web + 2 both)
 
 > Approved by the user on 2026-10-23 (written in Spanish and published on the issue; translated to English when committed, following the documentation language convention from PR #38).
@@ -224,24 +224,24 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
 
 **Specific:**
 
-- [ ] Contract agreed and frozen in `docs/contracts/open-query-list-accounts.md`.
-- [ ] Service tests: open with a valid deposit; reject a deposit below the minimum; reject a duplicate account number; query an unknown account.
-- [ ] `@WebMvcTest` tests for REST and web (web with the mocked service).
-- [ ] `curl` open account → 201; in the browser an account is opened and appears in the list.
+- [x] Contract agreed and frozen in `docs/contracts/open-query-list-accounts.md`.
+- [x] Service tests: open with a valid deposit; reject a deposit below the minimum; reject a duplicate account number; query an unknown account.
+- [x] `@WebMvcTest` tests for REST and web (web with the mocked service).
+- [x] `curl` open account → 201; in the browser an account is opened and appears in the list.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The layered architecture is respected (D4, D5), verified by ArchUnit where rules exist and by `revisor-ddd`.
-- [ ] The domain does not depend on Spring, `jakarta` or `org.immutables`, and does not use `@Data`, `@Setter`, `@Builder` or `@AllArgsConstructor` (`check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones.
-- [ ] `docs/api/openapi.yaml` reflects the changes and the Redocly lint has no errors.
-- [ ] The new business term ("Número de cuenta duplicado") is in `docs/dominio/glosario.md`.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The layered architecture is respected (D4, D5), verified by ArchUnit where rules exist and by `revisor-ddd`.
+- [x] The domain does not depend on Spring, `jakarta` or `org.immutables`, and does not use `@Data`, `@Setter`, `@Builder` or `@AllArgsConstructor` (`check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones.
+- [x] `docs/api/openapi.yaml` reflects the changes and the Redocly lint has no errors.
+- [x] The new business term ("Número de cuenta duplicado") is in `docs/dominio/glosario.md`.
+- [x] Documentation written or changed by this plan is in English (new documents: plan, contract, OpenAPI). Additions to documents still in Spanish (glossary, `fase-1-capas.md`, project status) were kept in Spanish to avoid mixing languages; they are translated with the rest (pending item in the project status).
+- [x] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
 
 ## Decisions taken at approval
 
