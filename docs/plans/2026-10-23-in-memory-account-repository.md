@@ -69,7 +69,7 @@ Que la aplicación pueda guardar y recuperar cuentas corrientes en la capa `pers
   - [x] Con el repositorio vacío devuelve una lista vacía; con tres cuentas, las devuelve ordenadas.
   - [x] `findAll().clear()` lanza `UnsupportedOperationException` y no vacía el repositorio.
 
-### [ ] T4 — Glosario: el repositorio de cuentas ya existe (~5 min)
+### [x] T4 — Glosario: el repositorio de cuentas ya existe (~5 min)
 
 - **Capa:** docs
 - **Archivos:** `docs/dominio/glosario.md`
@@ -77,7 +77,7 @@ Que la aplicación pueda guardar y recuperar cuentas corrientes en la capa `pers
 - **Qué hacer:**
   1. Pasar "Repositorio de cuentas" de "Términos previstos" a una sección nueva "Persistencia", describiendo sus operaciones y la regla de número único.
 - **Criterios de aceptación:**
-  - [ ] `InMemoryCheckingAccountRepository` ya no aparece como previsto.
+  - [x] `InMemoryCheckingAccountRepository` ya no aparece como previsto.
 
 ## Criterios de aceptación globales
 
