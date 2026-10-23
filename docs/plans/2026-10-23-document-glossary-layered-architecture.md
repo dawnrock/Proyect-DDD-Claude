@@ -60,7 +60,7 @@ Dejar por escrito, antes de escribir código de la fase 1, el lenguaje ubicuo de
   3. Añadir un diagrama de secuencia Mermaid de un caso de uso, el ingreso (`POST /api/accounts/{id}/deposits`, ruta definida en la #8), que recorra las capas y muestre dónde vive cada responsabilidad (validar, cargar, regla de negocio, guardar, traducir el error).
   4. Añadir la tabla **"Issues de la fase"**: issue → capa y clases que introduce (#4 a #12).
 - **Criterios de aceptación:**
-  - [ ] El diagrama muestra las cuatro capas y el sentido de las dependencias, y se renderiza en la vista de GitHub de la PR.
+  - [x] El diagrama muestra las cuatro capas y el sentido de las dependencias, y se renderiza en la vista de GitHub de la PR.
   - [x] Cada regla de la tabla "Dependencias" se puede expresar como una regla de ArchUnit (se indica el paquete de origen y de destino).
 
 ### [x] T3 — ADR 0004 · Arquitectura en capas (~10 min)
@@ -116,7 +116,6 @@ Dejar por escrito, antes de escribir código de la fase 1, el lenguaje ubicuo de
 
 ## Riesgos y preguntas abiertas
 
-- **Pendiente de confirmar en la PR:** que los diagramas Mermaid de `fase-1-capas.md` se renderizan en GitHub (criterio de T2 sin marcar: no se puede comprobar sin navegador).
 - **Desviación:** la tabla "Issues de la fase" refleja el backlog reorganizado por la #31 (#4, #8 y las verticales #5-#7 en equipo) en lugar de la lista #4-#12 original; #9 y #10 están cerradas.
 - **Desviación:** la regla "el nombre del titular es obligatorio" no tiene test; se documenta aparte y no como `Rn`.
 
