@@ -99,6 +99,37 @@ class InMemoryCheckingAccountRepositoryTests {
         }
     }
 
+    @Nested
+    @DisplayName("Listar todas las cuentas")
+    class FindAll {
+
+        @Test
+        @DisplayName("Sin cuentas guardadas la lista está vacía")
+        void sin_cuentas_guardadas_la_lista_esta_vacia() {
+            assertThat(repository.findAll()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Las cuentas se listan ordenadas por número de cuenta")
+        void las_cuentas_se_listan_ordenadas_por_numero_de_cuenta() {
+            CheckingAccount tercera = repository.save(cuentaCon("ES9121000418450200051332"));
+            CheckingAccount primera = repository.save(cuentaCon("ES1000492352082414205416"));
+            CheckingAccount segunda = repository.save(cuentaCon("ES7620770024003102575766"));
+
+            assertThat(repository.findAll()).containsExactly(primera, segunda, tercera);
+        }
+
+        @Test
+        @DisplayName("La lista de cuentas no puede modificarse desde fuera del repositorio")
+        void la_lista_de_cuentas_no_puede_modificarse_desde_fuera_del_repositorio() {
+            repository.save(cuentaCon("ES9121000418450200051332"));
+
+            assertThatExceptionOfType(UnsupportedOperationException.class)
+                    .isThrownBy(() -> repository.findAll().clear());
+            assertThat(repository.findAll()).hasSize(1);
+        }
+    }
+
     static CheckingAccount cuentaCon(String iban) {
         AccountHolder titular = AccountHolder.register("Ada Lovelace", CustomerSegment.RETAIL);
         return CheckingAccount.open(new AccountNumber(iban), titular, MonetaryAmount.euros("100.00"));

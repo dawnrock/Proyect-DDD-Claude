@@ -57,7 +57,7 @@ Que la aplicación pueda guardar y recuperar cuentas corrientes en la capa `pers
   - [x] Los tests nuevos pasan junto con los de T1.
   - [x] Guardar de nuevo la misma cuenta (mismo id y número) no se considera duplicado.
 
-### [ ] T3 — Listar todas las cuentas en orden estable (~5 min)
+### [x] T3 — Listar todas las cuentas en orden estable (~5 min)
 
 - **Capa:** persistence
 - **Archivos:** los mismos que T1
@@ -66,8 +66,8 @@ Que la aplicación pueda guardar y recuperar cuentas corrientes en la capa `pers
   1. **Rojo:** test de `findAll()`: devuelve todas las cuentas ordenadas por número de cuenta, y la lista devuelta no se puede modificar desde fuera.
   2. **Verde:** `List.copyOf` de los valores ordenados por `accountNumber().value()`.
 - **Criterios de aceptación:**
-  - [ ] Con el repositorio vacío devuelve una lista vacía; con tres cuentas, las devuelve ordenadas.
-  - [ ] `findAll().clear()` lanza `UnsupportedOperationException` y no vacía el repositorio.
+  - [x] Con el repositorio vacío devuelve una lista vacía; con tres cuentas, las devuelve ordenadas.
+  - [x] `findAll().clear()` lanza `UnsupportedOperationException` y no vacía el repositorio.
 
 ### [ ] T4 — Glosario: el repositorio de cuentas ya existe (~5 min)
 

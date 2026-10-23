@@ -1,5 +1,7 @@
 package com.pronoide.ddd.persistence;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -52,5 +54,12 @@ public class InMemoryCheckingAccountRepository {
         return accounts.values().stream()
                 .filter(account -> account.accountNumber().equals(accountNumber))
                 .findFirst();
+    }
+
+    /** Todas las cuentas, ordenadas por número de cuenta, en una lista que no se puede modificar. */
+    public List<CheckingAccount> findAll() {
+        return accounts.values().stream()
+                .sorted(Comparator.comparing(account -> account.accountNumber().value()))
+                .toList();
     }
 }
