@@ -63,6 +63,27 @@ public class CheckingAccountService {
         return repository.findAll().stream().map(CheckingAccountService::toSummary).toList();
     }
 
+    /**
+     * Ingresa un importe en la cuenta y la guarda. Contrato: {@code docs/contracts/deposits-withdrawals.md}.
+     *
+     * @throws AccountNotFoundException si no existe ninguna cuenta con ese id
+     * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el importe no está en la divisa de la cuenta
+     */
+    public TransactionSummary deposit(DepositCommand command) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
+    /**
+     * Intenta retirar un importe de la cuenta y la guarda. Una retirada que dejaría la cuenta por debajo de lo
+     * permitido no es un error: se devuelve el movimiento con estado {@code REJECTED} y el saldo no cambia.
+     *
+     * @throws AccountNotFoundException si no existe ninguna cuenta con ese id
+     * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el importe no está en la divisa de la cuenta
+     */
+    public TransactionSummary withdraw(WithdrawCommand command) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
     private static AccountDetails toDetails(CheckingAccount account) {
         return AccountDetails.builder()
                 .id(account.id())
