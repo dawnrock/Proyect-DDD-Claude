@@ -161,4 +161,52 @@ class CheckingAccountServiceTests {
                             tuple(IBAN, "Ada Lovelace"));
         }
     }
+
+    @Nested
+    @DisplayName("Ingresar")
+    class Deposit {
+
+        @Test
+        @DisplayName("Un ingreso aprobado actualiza el saldo y aparece entre los movimientos")
+        void un_ingreso_aprobado_actualiza_el_saldo_y_aparece_entre_los_movimientos() {
+            UUID id = service.openAccount(command(IBAN).build()).id();
+
+            TransactionSummary transaction = service.deposit(
+                    DepositCommand.builder().accountId(id).amount(new BigDecimal("25.50")).build());
+
+            assertThat(transaction.type()).isEqualTo("DEPOSIT");
+            assertThat(transaction.status()).isEqualTo("APPROVED");
+            assertThat(transaction.amount()).isEqualByComparingTo("25.50");
+            assertThat(transaction.currency()).isEqualTo("EUR");
+            AccountDetails details = service.findAccount(id);
+            assertThat(details.balance()).isEqualByComparingTo("125.50");
+            assertThat(details.transactions()).extracting(TransactionSummary::id).last().isEqualTo(transaction.id());
+            assertThat(details.transactions()).hasSize(2);
+        }
+
+        @Test
+        @DisplayName("Una cuenta desconocida lanza AccountNotFoundException")
+        void una_cuenta_desconocida_lanza_account_not_found_exception() {
+            UUID unknown = UUID.randomUUID();
+            DepositCommand command = DepositCommand.builder().accountId(unknown).amount(BigDecimal.TEN).build();
+
+            assertThatExceptionOfType(AccountNotFoundException.class)
+                    .isThrownBy(() -> service.deposit(command))
+                    .withMessageContaining(unknown.toString());
+        }
+
+        @Test
+        @DisplayName("Un ingreso en otra divisa lanza CurrencyMismatchException y no cambia el saldo")
+        void un_ingreso_en_otra_divisa_lanza_currency_mismatch_exception_y_no_cambia_el_saldo() {
+            UUID id = service.openAccount(command(IBAN).build()).id();
+            DepositCommand dollars =
+                    DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).currency("USD").build();
+
+            assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> service.deposit(dollars));
+
+            AccountDetails details = service.findAccount(id);
+            assertThat(details.balance()).isEqualByComparingTo("100.00");
+            assertThat(details.transactions()).hasSize(1);
+        }
+    }
 }

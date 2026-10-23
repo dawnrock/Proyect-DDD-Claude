@@ -89,7 +89,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
 - **Acceptance criteria:**
   - [x] Tests green.
 
-### [ ] T3 — "Deposit" use case (~10 min)
+### [x] T3 — "Deposit" use case (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -99,7 +99,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   1. `deposit`: load the account (or `AccountNotFoundException`), `account.deposit(...)`, `save`, return the `TransactionSummary`.
   2. Tests (`@Nested` "Ingresar"): approved deposit updates the balance and appears among the transactions; unknown account → `AccountNotFoundException`; another currency → `CurrencyMismatchException` and the balance does not change.
 - **Acceptance criteria:**
-  - [ ] Tests green. No business rules in the service.
+  - [x] Tests green. No business rules in the service.
 
 ### [ ] T4 — "Withdraw" use case (~10 min)
 
