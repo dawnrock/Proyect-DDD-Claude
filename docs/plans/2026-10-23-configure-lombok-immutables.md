@@ -52,7 +52,7 @@ Dejar el build preparado para usar Lombok e Immutables según la tabla "dónde s
   - [x] `./mvnw test -Dtest=LombokSetupTests` pasa, y el accesor generado es `name()`, no `getName()`.
   - [x] `./mvnw verify` en verde, con las 22 pruebas anteriores más la nueva.
 
-### [ ] T2 — Procesador de Immutables en el build (~5 min)
+### [x] T2 — Procesador de Immutables en el build (~5 min)
 
 - **Capa:** build
 - **Archivos:** `pom.xml`
@@ -62,8 +62,8 @@ Dejar el build preparado para usar Lombok e Immutables según la tabla "dónde s
   2. Dependencia `org.immutables:value-annotations` (`provided`).
   3. Añadir `org.immutables:value` (`${immutables.version}`) a `annotationProcessorPaths`, junto a Lombok.
 - **Criterios de aceptación:**
-  - [ ] `./mvnw verify` en verde: Lombok sigue funcionando con los dos procesadores declarados.
-  - [ ] `org.immutables:value` no aparece en `./mvnw dependency:tree` (solo `value-annotations`, con scope `provided`).
+  - [x] `./mvnw verify` en verde: Lombok sigue funcionando con los dos procesadores declarados.
+  - [x] `org.immutables:value` no aparece en `./mvnw dependency:tree` (solo `value-annotations`, con scope `provided`).
 
 ### [ ] T3 — Estilo común `@ApplicationValue` y test de Immutables (~15 min)
 
