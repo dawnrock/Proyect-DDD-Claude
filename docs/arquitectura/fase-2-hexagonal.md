@@ -1,6 +1,5 @@
 # Fase 2 · Arquitectura hexagonal (rama `Hexagonal`)
 
-
 ![Arquitectura hexagonal: el dominio en el centro, la aplicación alrededor con sus puertos, los adaptadores de entrada a la izquierda (REST, web, CLI) y los de salida a la derecha (persistencia, eventos, agencia tributaria); config conecta puertos y adaptadores](img/hexagonal.svg)
 
 El dominio ocupa el centro; la aplicación lo rodea y expone los puertos de entrada. Los adaptadores de la izquierda **usan** esos puertos y los de la derecha **implementan** los puertos de salida que declara el dominio: en los dos lados la dependencia apunta hacia dentro.
