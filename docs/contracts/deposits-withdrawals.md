@@ -1,7 +1,7 @@
 # Contract: deposits and withdrawals with account details
 
 - **Issue:** [#6](https://github.com/dawnrock/Proyect-DDD-Claude/issues/6) · **Plan:** `docs/plans/2026-10-23-deposits-withdrawals.md`
-- **Status:** agreed
+- **Status:** frozen at `dbc59e5`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed, clarifications merged by the lead)
 
 Builds on the frozen contract of #5 (`open-query-list-accounts.md`): `CheckingAccountService`, `AccountDetails`, `TransactionSummary`, `AccountNotFoundException` and the shared presentation validation are reused as they are.

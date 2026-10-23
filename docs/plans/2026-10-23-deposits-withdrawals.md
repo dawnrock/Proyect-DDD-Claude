@@ -43,7 +43,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
 
 ## Tasks
 
-### [ ] T0 — Contract (~15 min)
+### [x] T0 — Contract (~15 min)
 
 - **Side:** both
 - **Layer:** application · docs
@@ -60,9 +60,9 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   2. Create the types without logic: the two service methods with `UnsupportedOperationException("pendiente: backend-dev")` bodies and the two `*Def` commands.
   3. Write the OpenAPI fragment for both operations, reusing the `Transaction` schema and the `BadRequest`, `NotFound` and `UnprocessableContent` responses.
 - **Acceptance criteria:**
-  - [ ] Contract agreed by both teammates and frozen in a `docs(contract): ...` commit, with its hash noted.
-  - [ ] `./mvnw verify` compiles and passes against the contract types.
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
+  - [x] Contract agreed by both teammates and frozen in a `docs(contract): ...` commit, with its hash noted.
+  - [x] `./mvnw verify` compiles and passes against the contract types.
+  - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
 
 ### [ ] T1 — Overdraft-limit withdrawal tests and legacy synonyms (~10 min)
 
