@@ -1,6 +1,6 @@
 # scripts/
 
-Scripts deterministas que usan las skills y los hooks. Solo necesitan Node 18+ (y `gh` para las issues).
+Scripts deterministas que usan las skills y los hooks. Solo necesitan Node 16+ (sin dependencias npm) y `gh` para las issues.
 
 ## seed-issues.mjs
 
