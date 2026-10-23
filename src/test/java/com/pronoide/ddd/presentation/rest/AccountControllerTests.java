@@ -37,6 +37,7 @@ import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
 import com.pronoide.ddd.application.TransactionSummary;
+import com.pronoide.ddd.application.WithdrawCommand;
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
@@ -372,6 +373,86 @@ class AccountControllerTests {
                     .content("{\"amount\": 10, \"currency\": \"XYZ\"}"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.title").value("Petición no válida"));
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/accounts/{id}/withdrawals")
+    class Withdraw {
+
+        private static final String BODY = "{\"amount\": 25.50, \"currency\": \"EUR\"}";
+
+        private TransactionSummary withdrawal(String status) {
+            return TransactionSummary.builder().id(UUID.fromString("66666666-7777-8888-9999-000000000000"))
+                    .type("WITHDRAWAL").amount(new BigDecimal("25.50")).currency("EUR")
+                    .occurredOn(Instant.parse("2026-10-23T10:15:30Z")).status(status).build();
+        }
+
+        @Test
+        @DisplayName("Una retirada aprobada responde 201 con el movimiento APPROVED y sin Location")
+        void una_retirada_aprobada_responde_201_con_el_movimiento_approved_y_sin_location() throws Exception {
+            given(service.withdraw(any())).willReturn(withdrawal("APPROVED"));
+
+            mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
+                    .content(BODY))
+                    .andExpect(status().isCreated())
+                    .andExpect(header().doesNotExist("Location"))
+                    .andExpect(jsonPath("$.type").value("WITHDRAWAL"))
+                    .andExpect(jsonPath("$.amount").value(25.50))
+                    .andExpect(jsonPath("$.status").value("APPROVED"));
+
+            ArgumentCaptor<WithdrawCommand> captor = ArgumentCaptor.forClass(WithdrawCommand.class);
+            verify(service).withdraw(captor.capture());
+            assertThat(captor.getValue().accountId()).isEqualTo(ID);
+            assertThat(captor.getValue().amount()).isEqualByComparingTo("25.50");
+            assertThat(captor.getValue().currency()).isEqualTo("EUR");
+        }
+
+        @Test
+        @DisplayName("Una retirada rechazada no es un error: responde 201 con el movimiento REJECTED")
+        void una_retirada_rechazada_responde_201_con_el_movimiento_rejected() throws Exception {
+            given(service.withdraw(any())).willReturn(withdrawal("REJECTED"));
+
+            mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
+                    .content(BODY))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.status").value("REJECTED"));
+        }
+
+        @ParameterizedTest(name = "importe {0}")
+        @DisplayName("Un importe cero o negativo responde 400 con el error del campo")
+        @ValueSource(strings = {"0", "-5"})
+        void un_importe_cero_o_negativo_responde_400_con_el_error_del_campo(String amount) throws Exception {
+            mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"amount\": " + amount + "}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Petición no válida"))
+                    .andExpect(jsonPath("$.errors.amount").exists());
+
+            verifyNoInteractions(service);
+        }
+
+        @Test
+        @DisplayName("Una cuenta desconocida responde 404 Recurso inexistente")
+        void una_cuenta_desconocida_responde_404_recurso_inexistente() throws Exception {
+            given(service.withdraw(any())).willThrow(new AccountNotFoundException(ID));
+
+            mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
+                    .content(BODY))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.title").value("Recurso inexistente"));
+        }
+
+        @Test
+        @DisplayName("Una divisa distinta a la de la cuenta responde 422 Regla de negocio incumplida")
+        void una_divisa_distinta_a_la_de_la_cuenta_responde_422() throws Exception {
+            given(service.withdraw(any())).willThrow(
+                    new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD")));
+
+            mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"amount\": 10, \"currency\": \"USD\"}"))
+                    .andExpect(status().isUnprocessableContent())
+                    .andExpect(jsonPath("$.title").value("Regla de negocio incumplida"));
         }
     }
 }

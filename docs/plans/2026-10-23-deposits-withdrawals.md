@@ -125,7 +125,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
 - **Acceptance criteria:**
   - [x] Tests green.
 
-### [ ] T6 — `POST /api/accounts/{id}/withdrawals` (~10 min)
+### [x] T6 — `POST /api/accounts/{id}/withdrawals` (~10 min)
 
 - **Side:** back
 - **Layer:** presentation
@@ -135,7 +135,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   1. Same as T5 with `WithdrawCommand`.
   2. Tests: 201 with `APPROVED`; 201 with `REJECTED` (not an error); 400; 404; 422.
 - **Acceptance criteria:**
-  - [ ] Tests green. Responses match the OpenAPI fragment.
+  - [x] Tests green. Responses match the OpenAPI fragment.
 
 ### [ ] T7 — Account detail page (~10 min)
 

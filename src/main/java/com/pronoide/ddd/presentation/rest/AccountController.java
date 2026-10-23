@@ -19,6 +19,7 @@ import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
 import com.pronoide.ddd.application.TransactionSummary;
+import com.pronoide.ddd.application.WithdrawCommand;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -68,6 +69,16 @@ public class AccountController {
             command.currency(request.currency());
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(service.deposit(command.build())));
+    }
+
+    @PostMapping("/{id}/withdrawals")
+    public ResponseEntity<TransactionResponse> withdraw(
+            @PathVariable UUID id, @Valid @RequestBody MovementRequest request) {
+        WithdrawCommand.Builder command = WithdrawCommand.builder().accountId(id).amount(request.amount());
+        if (request.currency() != null) {
+            command.currency(request.currency());
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(service.withdraw(command.build())));
     }
 
     private static AccountSummaryResponse toResponse(AccountSummary summary) {
