@@ -113,7 +113,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
 - **Acceptance criteria:**
   - [x] Tests green.
 
-### [ ] T5 — `POST /api/accounts/{id}/deposits` (~10 min)
+### [x] T5 — `POST /api/accounts/{id}/deposits` (~10 min)
 
 - **Side:** back
 - **Layer:** presentation
@@ -123,7 +123,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   1. Map the request to `DepositCommand`, respond `201` with the transaction.
   2. `@WebMvcTest` tests with the mocked service: 201; 400 with `errors` for amount 0 or negative; 404 unknown account; 422 `CurrencyMismatchException`.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
 ### [ ] T6 — `POST /api/accounts/{id}/withdrawals` (~10 min)
 
