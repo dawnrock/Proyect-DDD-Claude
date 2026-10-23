@@ -110,7 +110,7 @@ Con esto, los contratos de la #5 en adelante ya parten de unos errores y unos ti
   - [x] `npx @redocly/cli lint docs/api/openapi.yaml` pasa en local y en el paso de lint del CI de la PR.
   - [x] Las respuestas de error documentadas coinciden con las que devuelve `RestExceptionHandler` (mismos códigos y `title`).
 
-### [ ] T5 — Thymeleaf y plantilla base (~10 min)
+### [x] T5 — Thymeleaf y plantilla base (~10 min)
 
 - **Lado:** web
 - **Capa:** presentation
@@ -120,7 +120,7 @@ Con esto, los contratos de la #5 en adelante ya parten de unos errores y unos ti
   1. Añadir `spring-boot-starter-thymeleaf` (y su `-test` si Spring Boot 4 lo separa, como pasa con `webmvc`).
   2. Fragmentos de plantilla (`head`, `header`, `footer`) con el nombre de la aplicación y un CSS mínimo propio, sin frameworks de frontend ni el *layout dialect* (con los fragmentos nativos de Thymeleaf basta).
 - **Criterios de aceptación:**
-  - [ ] `./mvnw verify` en verde con la nueva dependencia.
+  - [x] `./mvnw verify` en verde con la nueva dependencia.
   - [ ] Los fragmentos se usan desde la plantilla de T6, que prueba que se resuelven.
 
 ### [ ] T6 — Página 404 propia (~10 min)
