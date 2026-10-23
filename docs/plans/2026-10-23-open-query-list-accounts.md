@@ -117,7 +117,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
 - **Acceptance criteria:**
   - [x] Tests green.
 
-### [ ] T5 — `POST /api/accounts` (~10 min)
+### [x] T5 — `POST /api/accounts` (~10 min)
 
 - **Side:** back
 - **Layer:** presentation
@@ -127,9 +127,9 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   1. The controller maps the request to `OpenAccountCommand` and responds 201 with `Location: /api/accounts/{id}`.
   2. `@WebMvcTest` tests with the mocked service: 201 with body and `Location`; 400 with `errors` if the holder is missing; 422 if the service throws `InsufficientInitialDepositException`.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
-### [ ] T6 — `GET /api/accounts` and `GET /api/accounts/{id}` (~10 min)
+### [x] T6 — `GET /api/accounts` and `GET /api/accounts/{id}` (~10 min)
 
 - **Side:** back
 - **Layer:** presentation
@@ -138,7 +138,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
 - **What to do:**
   1. Tests: list → 200 with an array; detail → 200 with its transactions; unknown id → 404 `Recurso inexistente`; non-UUID id → 400.
 - **Acceptance criteria:**
-  - [ ] Tests green. Responses match the OpenAPI fragment schemas.
+  - [x] Tests green. Responses match the OpenAPI fragment schemas.
 
 ### [ ] T7 — Account list at `/` (~10 min)
 
