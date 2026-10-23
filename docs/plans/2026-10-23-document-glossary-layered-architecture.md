@@ -49,7 +49,7 @@ Dejar por escrito, antes de escribir código de la fase 1, el lenguaje ubicuo de
   - [x] Cada una de las 11 clases de `src/main/java/com/pronoide/ddd/domain/model/` aparece en el glosario. Se comprueba buscando el nombre de cada archivo `.java` en el glosario.
   - [x] Cada regla `Rn` cita un test existente en `src/test/java/com/pronoide/ddd/domain/model/`.
 
-### [ ] T2 — Completar el diseño de la arquitectura en capas (~10 min)
+### [x] T2 — Completar el diseño de la arquitectura en capas (~10 min)
 
 - **Capa:** docs
 - **Archivos:** `docs/arquitectura/fase-1-capas.md`
@@ -61,7 +61,7 @@ Dejar por escrito, antes de escribir código de la fase 1, el lenguaje ubicuo de
   4. Añadir la tabla **"Issues de la fase"**: issue → capa y clases que introduce (#4 a #12).
 - **Criterios de aceptación:**
   - [ ] El diagrama muestra las cuatro capas y el sentido de las dependencias, y se renderiza en la vista de GitHub de la PR.
-  - [ ] Cada regla de la tabla "Dependencias" se puede expresar como una regla de ArchUnit (se indica el paquete de origen y de destino).
+  - [x] Cada regla de la tabla "Dependencias" se puede expresar como una regla de ArchUnit (se indica el paquete de origen y de destino).
 
 ### [ ] T3 — ADR 0004 · Arquitectura en capas (~10 min)
 
