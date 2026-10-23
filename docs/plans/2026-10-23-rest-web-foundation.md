@@ -51,7 +51,7 @@ Con esto, los contratos de la #5 en adelante ya parten de unos errores y unos ti
 
 ## Tareas
 
-### [ ] T1 — Reglas de negocio → 422 con ProblemDetail (~10 min)
+### [x] T1 — Reglas de negocio → 422 con ProblemDetail (~10 min)
 
 - **Lado:** back
 - **Capa:** presentation
@@ -61,7 +61,7 @@ Con esto, los contratos de la #5 en adelante ya parten de unos errores y unos ti
   1. **Rojo:** `@WebMvcTest` del controlador de prueba, que lanza una `InsufficientInitialDepositException` real. Se espera un 422 con `Content-Type: application/problem+json`, el mensaje del dominio en `detail` y un `title` fijo ("Regla de negocio incumplida").
   2. **Verde:** `@RestControllerAdvice(annotations = RestController.class)` que extiende `ResponseEntityExceptionHandler` y tiene un `@ExceptionHandler(DomainException.class)`.
 - **Criterios de aceptación:**
-  - [ ] El test pasa y `./mvnw verify` está en verde.
+  - [x] El test pasa y `./mvnw verify` está en verde.
 
 ### [ ] T2 — Recurso inexistente → 404 y argumentos inválidos → 400 (~10 min)
 
