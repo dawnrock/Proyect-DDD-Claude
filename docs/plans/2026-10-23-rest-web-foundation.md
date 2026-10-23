@@ -79,7 +79,7 @@ Con esto, los contratos de la #5 en adelante ya parten de unos errores y unos ti
   - [x] Los tres casos devuelven el código y un `ProblemDetail` con `title` y `detail`.
   - [x] Ningún error de los cubiertos acaba en 500.
 
-### [ ] T3 — Comprobar Immutables con Jackson 3 (~10 min)
+### [x] T3 — Comprobar Immutables con Jackson 3 (~10 min)
 
 - **Lado:** back
 - **Capa:** presentation (tests) · docs
@@ -90,8 +90,8 @@ Con esto, los contratos de la #5 en adelante ya parten de unos errores y unos ti
   2. **Si funciona:** fijar en el ADR 0003 la forma exacta de anotarlo (por ejemplo, `@JsonSerialize`/`@JsonDeserialize`, o el builder con `@JsonPOJOBuilder`) y dejar el test como ejemplo.
   3. **Si no funciona:** sustituir el test por uno equivalente con un `record`, y decidir en el ADR 0003 que **los DTOs REST serán `record`**. Immutables se queda en los commands y vistas de `application`.
 - **Criterios de aceptación:**
-  - [ ] Hay un test en verde que demuestra el tipo de DTO elegido (ida y vuelta JSON).
-  - [ ] El ADR 0003 recoge el resultado y la regla para los DTOs de la #5 en adelante.
+  - [x] Hay un test en verde que demuestra el tipo de DTO elegido (ida y vuelta JSON).
+  - [x] El ADR 0003 recoge el resultado y la regla para los DTOs de la #5 en adelante.
 
 ### [ ] T4 — OpenAPI inicial y lint en CI (~10 min)
 
