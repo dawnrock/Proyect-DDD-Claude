@@ -5,7 +5,7 @@
 - **Fase:** 1 · Monolito en capas
 - **Rama base:** `Monolithic`
 - **Fecha:** 2026-10-23
-- **Estado:** en curso
+- **Estado:** completado
 - **Estimación total:** ~35 min (4 tareas)
 
 ## Objetivo
@@ -93,24 +93,26 @@ Dejar el build preparado para usar Lombok e Immutables según la tabla "dónde s
 
 **Específicos:**
 
-- [ ] Una clase con `@Getter` genera accesores fluidos (`name()`).
-- [ ] Un `@Value.Immutable` con `@ApplicationValue` genera su builder con el nombre sin el sufijo `Def`.
-- [ ] Lombok no se incluye en el JAR ejecutable (`target/ddd-lab-0.0.1-SNAPSHOT.jar` sin `BOOT-INF/lib/lombok-*.jar`).
-- [ ] `docs/adr/0003-lombok-immutables.md` recoge las versiones elegidas.
+- [x] Una clase con `@Getter` genera accesores fluidos (`name()`).
+- [x] Un `@Value.Immutable` con `@ApplicationValue` genera su builder con el nombre sin el sufijo `Def`.
+- [x] Lombok no se incluye en el JAR ejecutable (`target/ddd-lab-0.0.1-SNAPSHOT.jar` sin `BOOT-INF/lib/lombok-*.jar`).
+- [x] `docs/adr/0003-lombok-immutables.md` recoge las versiones elegidas.
 
 **Fijos:**
 
-- [ ] Todas las tareas y sus criterios están marcados como cumplidos.
-- [ ] `./mvnw verify` termina en `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` arranca y `GET /actuator/health` responde `{"status":"UP"}`.
-- [ ] Se respeta la arquitectura de la fase (capas: cada capa solo usa la inferior), verificado por ArchUnit. Las reglas de capas llegan en la #12; hoy aplica `DomainIsolationTests`.
-- [ ] El dominio no depende de Spring, `jakarta` ni `org.immutables`, y no usa `@Data`, `@Setter`, `@Builder` ni `@AllArgsConstructor` (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` sin errores).
-- [ ] Los tests nuevos siguen `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` en español).
-- [ ] No se añaden dependencias fuera de las previstas (Lombok e Immutables están previstas en el ADR 0003).
-- [ ] Si se toca la API: no aplica.
-- [ ] Si aparece un término de negocio nuevo, está en `docs/dominio/glosario.md`: no aplica.
+- [x] Todas las tareas y sus criterios están marcados como cumplidos.
+- [x] `./mvnw verify` termina en `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` arranca y `GET /actuator/health` responde `{"status":"UP"}`.
+- [x] Se respeta la arquitectura de la fase (capas: cada capa solo usa la inferior), verificado por ArchUnit. Las reglas de capas llegan en la #12; hoy aplica `DomainIsolationTests`.
+- [x] El dominio no depende de Spring, `jakarta` ni `org.immutables`, y no usa `@Data`, `@Setter`, `@Builder` ni `@AllArgsConstructor` (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` sin errores).
+- [x] Los tests nuevos siguen `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` en español).
+- [x] No se añaden dependencias fuera de las previstas (Lombok e Immutables están previstas en el ADR 0003).
+- [x] Si se toca la API: no aplica.
+- [x] Si aparece un término de negocio nuevo, está en `docs/dominio/glosario.md`: no aplica.
 
 ## Riesgos y preguntas abiertas
+
+- **Observado al implementar:** `spring-boot-maven-plugin` empaqueta las dependencias `provided`, así que `value-annotations-2.12.3.jar` (solo anotaciones) aparece en `BOOT-INF/lib`. El procesador `org.immutables:value` y Lombok **no** están en el JAR. Es inocuo; si se quiere un JAR más limpio, se puede excluir igual que Lombok en una issue futura.
 
 - **Immutables 2.12.3 se publicó hace 12 días.** Si diera algún problema con JDK 21 o junto a Lombok, se baja a la 2.12.2 y se anota en el ADR.
 - **Los IDE necesitan el procesador de anotaciones activado** (Eclipse/STS con el plugin de Lombok; IntelliJ con "Enable annotation processing"). Afecta solo al IDE, no a `./mvnw`. Se menciona en el ADR.
