@@ -16,13 +16,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.pronoide.ddd.application.AccountSummary;
 import com.pronoide.ddd.application.CheckingAccountService;
+import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
+import com.pronoide.ddd.application.TransactionSummary;
 import com.pronoide.ddd.domain.model.DomainException;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-/** Pantallas web de las cuentas corrientes: listado y alta. */
+/** Pantallas web de las cuentas corrientes: listado, alta, detalle, ingresos y retiradas. */
 @Controller
 @RequiredArgsConstructor
 public class AccountWebController {
@@ -30,6 +32,8 @@ public class AccountWebController {
     private static final String FORM_VIEW = "accounts/new";
 
     private static final String DETAIL_VIEW = "accounts/detail";
+
+    private static final List<String> CURRENCIES = List.of("EUR", "USD", "GBP");
 
     private final CheckingAccountService service;
 
@@ -41,8 +45,45 @@ public class AccountWebController {
 
     @GetMapping("/accounts/{id}")
     public String detail(@PathVariable UUID id, Model model) {
+        model.addAttribute("depositForm", new MovementForm());
+        model.addAttribute("withdrawalForm", new MovementForm());
+        return renderDetail(id, model);
+    }
+
+    @PostMapping("/accounts/{id}/deposits")
+    public String deposit(@PathVariable UUID id, @Valid @ModelAttribute("depositForm") MovementForm form,
+                          BindingResult result, Model model, RedirectAttributes redirect) {
+        if (!result.hasErrors()) {
+            DepositCommand command = null;
+            try {
+                command = DepositCommand.builder()
+                        .accountId(id).amount(form.getAmount()).currency(form.getCurrency()).build();
+            } catch (IllegalArgumentException e) {
+                result.reject("invalid", e.getMessage());
+            }
+            if (command != null) {
+                try {
+                    TransactionSummary deposit = service.deposit(command);
+                    redirect.addFlashAttribute("message",
+                            "Ingreso de %s %s aprobado".formatted(deposit.amount(), deposit.currency()));
+                    return redirectToDetail(id);
+                } catch (DomainException e) {
+                    result.reject("domain", e.getMessage());
+                }
+            }
+        }
+        model.addAttribute("withdrawalForm", new MovementForm());
+        return renderDetail(id, model);
+    }
+
+    private String renderDetail(UUID id, Model model) {
         model.addAttribute("account", service.findAccount(id));
+        model.addAttribute("currencies", CURRENCIES);
         return DETAIL_VIEW;
+    }
+
+    private static String redirectToDetail(UUID id) {
+        return "redirect:/accounts/" + id;
     }
 
     @GetMapping("/accounts/new")

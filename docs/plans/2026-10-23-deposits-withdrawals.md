@@ -151,7 +151,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
 - **Acceptance criteria:**
   - [x] Tests green. The view uses no domain types.
 
-### [ ] T8 — Deposit form (~10 min)
+### [x] T8 — Deposit form (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -162,7 +162,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   2. Errors: field error for amount ≤ 0; `DomainException` (another currency) → detail page again with the message and the entered amount.
   3. Tests for the happy path and both errors.
 - **Acceptance criteria:**
-  - [ ] Tests green. No form error ends in a 500 page.
+  - [x] Tests green. No form error ends in a 500 page.
 
 ### [ ] T9 — Withdrawal form (~10 min)
 

@@ -3,6 +3,7 @@ package com.pronoide.ddd.presentation.web;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -17,12 +18,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -32,6 +36,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountNotFoundException;
 import com.pronoide.ddd.application.AccountSummary;
+import com.pronoide.ddd.application.DepositCommand;
+import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.application.TransactionSummary;
 import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.application.OpenAccountCommand;
@@ -180,6 +186,105 @@ class AccountWebControllerTests {
 
             mvc.perform(get("/"))
                     .andExpect(content().string(containsString("href=\"/accounts/" + ACCOUNT_ID + "\"")));
+        }
+    }
+
+    @Nested
+    @DisplayName("Ingresos")
+    class Ingresos {
+
+        private MockHttpServletRequestBuilder ingresoDe(String amount, String currency) {
+            return post("/accounts/" + ACCOUNT_ID + "/deposits")
+                    .param("amount", amount)
+                    .param("currency", currency);
+        }
+
+        @Test
+        @DisplayName("El detalle ofrece el formulario de ingreso con euro, dólar y libra, y el euro por defecto")
+        void el_detalle_ofrece_el_formulario_de_ingreso_con_euro_dolar_y_libra_y_el_euro_por_defecto()
+                throws Exception {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(content().string(containsString("/accounts/" + ACCOUNT_ID + "/deposits")))
+                    .andExpect(content().string(containsString("name=\"amount\"")))
+                    .andExpect(content().string(containsString("value=\"USD\"")))
+                    .andExpect(content().string(containsString("value=\"GBP\"")))
+                    .andExpect(content().string(matchesPattern("(?s).*<option value=\"EUR\" selected=\"selected\".*")));
+        }
+
+        @Test
+        @DisplayName("Un ingreso válido llama al servicio con el comando esperado y redirige al detalle con un mensaje")
+        void un_ingreso_valido_llama_al_servicio_con_el_comando_esperado_y_redirige_al_detalle_con_un_mensaje()
+                throws Exception {
+            when(service.deposit(any())).thenReturn(transaction("DEPOSIT", "50.00", "APPROVED"));
+
+            mvc.perform(ingresoDe("50.00", "EUR"))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
+                    .andExpect(flash().attribute("message", "Ingreso de 50.00 EUR aprobado"));
+
+            verify(service).deposit(DepositCommand.builder()
+                    .accountId(ACCOUNT_ID)
+                    .amount(new BigDecimal("50.00"))
+                    .currency("EUR")
+                    .build());
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"0", "-5.00"})
+        @DisplayName("Un importe no positivo vuelve al detalle con el error del campo y sin llamar al servicio")
+        void un_importe_no_positivo_vuelve_al_detalle_con_el_error_del_campo_y_sin_llamar_al_servicio(String amount)
+                throws Exception {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+
+            mvc.perform(ingresoDe(amount, "EUR"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"))
+                    .andExpect(model().attributeHasFieldErrors("depositForm", "amount"))
+                    .andExpect(model().attributeHasNoErrors("withdrawalForm"))
+                    .andExpect(content().string(containsString("El importe debe ser positivo")))
+                    .andExpect(content().string(containsString("ES1234567890123456789012")));
+
+            verify(service, never()).deposit(any());
+        }
+
+        @Test
+        @DisplayName("Un importe ausente vuelve al detalle con el error del campo")
+        void un_importe_ausente_vuelve_al_detalle_con_el_error_del_campo() throws Exception {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+
+            mvc.perform(post("/accounts/" + ACCOUNT_ID + "/deposits").param("currency", "EUR"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("El importe es obligatorio")));
+
+            verify(service, never()).deposit(any());
+        }
+
+        @Test
+        @DisplayName("Otra divisa vuelve al detalle con el mensaje del dominio y conserva el importe")
+        void otra_divisa_vuelve_al_detalle_con_el_mensaje_del_dominio_y_conserva_el_importe() throws Exception {
+            var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD"));
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.deposit(any())).thenThrow(error);
+
+            mvc.perform(ingresoDe("75.50", "USD"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"))
+                    .andExpect(model().attributeHasErrors("depositForm"))
+                    .andExpect(model().attributeHasNoErrors("withdrawalForm"))
+                    .andExpect(content().string(containsString(error.getMessage())))
+                    .andExpect(content().string(containsString("75.50")));
+        }
+
+        @Test
+        @DisplayName("Un ingreso en una cuenta desconocida devuelve la página 404")
+        void un_ingreso_en_una_cuenta_desconocida_devuelve_la_pagina_404() throws Exception {
+            when(service.deposit(any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
+
+            mvc.perform(ingresoDe("10.00", "EUR"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(view().name("error/404"));
         }
     }
 
