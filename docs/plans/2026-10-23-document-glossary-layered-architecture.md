@@ -63,7 +63,7 @@ Dejar por escrito, antes de escribir código de la fase 1, el lenguaje ubicuo de
   - [ ] El diagrama muestra las cuatro capas y el sentido de las dependencias, y se renderiza en la vista de GitHub de la PR.
   - [x] Cada regla de la tabla "Dependencias" se puede expresar como una regla de ArchUnit (se indica el paquete de origen y de destino).
 
-### [ ] T3 — ADR 0004 · Arquitectura en capas (~10 min)
+### [x] T3 — ADR 0004 · Arquitectura en capas (~10 min)
 
 - **Capa:** docs
 - **Archivos:** `docs/adr/0004-arquitectura-en-capas.md`, `docs/adr/README.md`
@@ -76,8 +76,8 @@ Dejar por escrito, antes de escribir código de la fase 1, el lenguaje ubicuo de
   2. Enlazar el glosario, `fase-1-capas.md` y los capítulos 14, 17 y 18 del curso.
   3. Actualizar la fila 0004 de `docs/adr/README.md`: enlace y estado "Aceptada".
 - **Criterios de aceptación:**
-  - [ ] El ADR cita los capítulos 14, 17 y 18 (y el 18.1) del curso de DDD.
-  - [ ] `docs/adr/README.md` enlaza el ADR 0004 con estado "Aceptada".
+  - [x] El ADR cita los capítulos 14, 17 y 18 (y el 18.1) del curso de DDD.
+  - [x] `docs/adr/README.md` enlaza el ADR 0004 con estado "Aceptada".
 
 ## Criterios de aceptación globales
 
