@@ -203,6 +203,19 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
 - **Acceptance criteria:**
   - [ ] Lint without errors. Glossary and status updated.
 
+### [x] T12 — Review fixes (~10 min)
+
+- **Side:** both
+- **Layer:** presentation · tests
+- **Files:** `presentation/web/AccountWebController.java`, `presentation/web/AccountWebControllerTests.java`
+- **Depends on:** T10 (added after the `revisor-ddd` review; no blocking findings)
+- **What to do:**
+  1. The rejected-withdrawal flash said "la cuenta no puede quedar en descubierto", which is wrong for high-net-worth customers (they can; they hit the -1,000.00 limit). It now reads "el saldo resultante no está permitido para esta cuenta", valid for both segments, without duplicating the rule in presentation. Confirmed in the browser with a high-net-worth account at the limit.
+  2. Web tests for the command's rejection (amount that rounds to zero, `0.001`; unknown currency, `XYZ`) in both forms: the only path through `catch (IllegalArgumentException)`.
+- **Acceptance criteria:**
+  - [x] Rejection text test red before the change, green after.
+  - [x] Command-rejection tests validated by temporarily removing the catch (4 failures), then green. `./mvnw verify` green (180 tests).
+
 ## Global acceptance criteria
 
 **Specific:**

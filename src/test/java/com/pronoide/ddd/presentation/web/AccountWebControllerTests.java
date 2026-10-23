@@ -26,6 +26,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -278,6 +279,24 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("75.50")));
         }
 
+        @ParameterizedTest
+        @CsvSource({"0.001, EUR, El importe debe ser positivo", "10.00, XYZ, XYZ no es un c"})
+        @DisplayName("Un importe que redondea a cero o una divisa inexistente vuelven al detalle con el error del command")
+        void un_importe_que_redondea_a_cero_o_una_divisa_inexistente_vuelven_al_detalle_con_el_error_del_command(
+                String amount, String currency, String message) throws Exception {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+
+            mvc.perform(ingresoDe(amount, currency))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"))
+                    .andExpect(model().attributeHasErrors("depositForm"))
+                    .andExpect(model().attributeHasNoErrors("withdrawalForm"))
+                    .andExpect(content().string(containsString(message)))
+                    .andExpect(content().string(containsString(amount)));
+
+            verify(service, never()).deposit(any());
+        }
+
         @Test
         @DisplayName("Un ingreso en una cuenta desconocida devuelve la página 404")
         void un_ingreso_en_una_cuenta_desconocida_devuelve_la_pagina_404() throws Exception {
@@ -335,7 +354,8 @@ class AccountWebControllerTests {
             mvc.perform(retiradaDe("500.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
-                    .andExpect(flash().attributeExists("rejection"))
+                    .andExpect(flash().attribute("rejection",
+                            "Retirada de 500.00 EUR rechazada: el saldo resultante no está permitido para esta cuenta"))
                     .andExpect(flash().attributeCount(1));
         }
 
@@ -379,6 +399,24 @@ class AccountWebControllerTests {
                     .andExpect(model().attributeHasNoErrors("depositForm"))
                     .andExpect(content().string(containsString(error.getMessage())))
                     .andExpect(content().string(containsString("20.25")));
+        }
+
+        @ParameterizedTest
+        @CsvSource({"0.001, EUR, El importe debe ser positivo", "10.00, XYZ, XYZ no es un c"})
+        @DisplayName("Un importe que redondea a cero o una divisa inexistente vuelven al detalle con el error del command")
+        void un_importe_que_redondea_a_cero_o_una_divisa_inexistente_vuelven_al_detalle_con_el_error_del_command(
+                String amount, String currency, String message) throws Exception {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+
+            mvc.perform(retiradaDe(amount, currency))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"))
+                    .andExpect(model().attributeHasErrors("withdrawalForm"))
+                    .andExpect(model().attributeHasNoErrors("depositForm"))
+                    .andExpect(content().string(containsString(message)))
+                    .andExpect(content().string(containsString(amount)));
+
+            verify(service, never()).withdraw(any());
         }
 
         @Test

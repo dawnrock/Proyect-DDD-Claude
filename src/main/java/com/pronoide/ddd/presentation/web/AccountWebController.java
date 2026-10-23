@@ -94,7 +94,8 @@ public class AccountWebController {
                     String amount = "%s %s".formatted(withdrawal.amount(), withdrawal.currency());
                     if ("REJECTED".equals(withdrawal.status())) {
                         redirect.addFlashAttribute("rejection",
-                                "Retirada de %s rechazada: la cuenta no puede quedar en descubierto".formatted(amount));
+                                "Retirada de %s rechazada: el saldo resultante no está permitido para esta cuenta"
+                                        .formatted(amount));
                     } else {
                         redirect.addFlashAttribute("message", "Retirada de %s aprobada".formatted(amount));
                     }
