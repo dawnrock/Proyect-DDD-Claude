@@ -77,7 +77,7 @@ Dejar el build preparado para usar Lombok e Immutables según la tabla "dónde s
   - [x] `./mvnw test -Dtest=ImmutablesSetupTests` pasa (con `@Nested` o tests separados para builder, igualdad y atributo obligatorio).
   - [x] `DomainIsolationTests` pasa y `node .claude/skills/ddd-building-block/scripts/check-domain.mjs` no da errores.
 
-### [ ] T4 — Documentar versiones y configuración en el ADR 0003 (~5 min)
+### [x] T4 — Documentar versiones y configuración en el ADR 0003 (~5 min)
 
 - **Capa:** docs
 - **Archivos:** `docs/adr/0003-lombok-immutables.md`
@@ -86,8 +86,8 @@ Dejar el build preparado para usar Lombok e Immutables según la tabla "dónde s
   1. Añadir una sección "Configuración" con las versiones (Lombok 1.18.46 gestionado por Spring Boot 4.1.1, Immutables 2.12.3), el porqué de `annotationProcessorPaths` con los dos procesadores, `lombok.config` y la meta-anotación `@ApplicationValue`.
   2. Cambiar el estado a "aceptada" (sin "versiones pendientes").
 - **Criterios de aceptación:**
-  - [ ] El ADR enlaza `pom.xml`, `lombok.config` y `ApplicationValue.java`.
-  - [ ] `./mvnw verify` en verde.
+  - [x] El ADR enlaza `pom.xml`, `lombok.config` y `ApplicationValue.java`.
+  - [x] `./mvnw verify` en verde.
 
 ## Criterios de aceptación globales
 
