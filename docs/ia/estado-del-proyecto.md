@@ -2,7 +2,7 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores. **Se actualiza en cada PR que cierra una issue** (lo exigen `implement-plan`, `implement-plan-team`, la plantilla de los planes y el CI).
 
-- **Última actualización:** 2026-10-24 · PR de la #6 (ingresos y retiradas)
+- **Última actualización:** 2026-10-24 · PR #41 (ingresos y retiradas)
 - **Rama activa:** `Monolithic` (fase 1). `master` congelada. `Hexagonal` aún no existe.
 
 ## Dónde estamos
@@ -74,4 +74,4 @@ Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sec
 | 2026-10-23 | #38 | — | Documentación en inglés; plan de la #5 aprobado |
 | 2026-10-23 | #39 | #5 | Abrir, consultar y listar cuentas (REST + web), primera issue en equipo |
 | 2026-10-23 | #40 | — | Interruptor `TELEGRAM_DISABLED` para silenciar los avisos |
-| 2026-10-24 | PR de la #6 | #6 | Ingresos y retiradas con detalle de la cuenta (REST + web); cierra el pendiente de sinónimos heredados |
+| 2026-10-24 | #41 | #6 | Ingresos y retiradas con detalle de la cuenta (REST + web); cierra el pendiente de sinónimos heredados |
