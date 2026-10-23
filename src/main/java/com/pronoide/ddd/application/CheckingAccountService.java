@@ -85,7 +85,10 @@ public class CheckingAccountService {
      * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el importe no está en la divisa de la cuenta
      */
     public TransactionSummary withdraw(WithdrawCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        CheckingAccount account = load(command.accountId());
+        Transaction transaction = account.tryWithdraw(toAmount(command.amount(), command.currency()));
+        repository.save(account);
+        return toTransaction(transaction);
     }
 
     private CheckingAccount load(UUID id) {

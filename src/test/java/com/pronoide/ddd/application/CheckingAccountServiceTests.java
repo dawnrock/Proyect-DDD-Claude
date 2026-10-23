@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CurrencyMismatchException;
@@ -203,6 +205,75 @@ class CheckingAccountServiceTests {
                     DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).currency("USD").build();
 
             assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> service.deposit(dollars));
+
+            AccountDetails details = service.findAccount(id);
+            assertThat(details.balance()).isEqualByComparingTo("100.00");
+            assertThat(details.transactions()).hasSize(1);
+        }
+    }
+
+    @Nested
+    @DisplayName("Retirar")
+    class Withdraw {
+
+        @ParameterizedTest(name = "{0} con 100.00 retira {1}: {2}, saldo {3}")
+        @DisplayName("Las retiradas en el límite del descubierto se aprueban o se rechazan según el segmento")
+        @CsvSource({
+                "RETAIL, 100.00, APPROVED, 0.00",
+                "RETAIL, 100.01, REJECTED, 100.00",
+                "HIGH_NET_WORTH, 1100.00, APPROVED, -1000.00",
+                "HIGH_NET_WORTH, 1100.01, REJECTED, 100.00"
+        })
+        void las_retiradas_en_el_limite_del_descubierto_dependen_del_segmento(
+                String segment, String amount, String status, String finalBalance) {
+            UUID id = service.openAccount(command(IBAN).segment(segment).build()).id();
+
+            TransactionSummary transaction = service.withdraw(
+                    WithdrawCommand.builder().accountId(id).amount(new BigDecimal(amount)).build());
+
+            assertThat(transaction.type()).isEqualTo("WITHDRAWAL");
+            assertThat(transaction.status()).isEqualTo(status);
+            assertThat(transaction.amount()).isEqualByComparingTo(amount);
+            assertThat(service.findAccount(id).balance()).isEqualByComparingTo(finalBalance);
+        }
+
+        @Test
+        @DisplayName("Una retirada rechazada no cambia el saldo pero queda registrada")
+        void una_retirada_rechazada_no_cambia_el_saldo_pero_queda_registrada() {
+            UUID id = service.openAccount(command(IBAN).build()).id();
+
+            TransactionSummary transaction = service.withdraw(
+                    WithdrawCommand.builder().accountId(id).amount(new BigDecimal("500")).build());
+
+            AccountDetails details = service.findAccount(id);
+            assertThat(transaction.status()).isEqualTo("REJECTED");
+            assertThat(details.balance()).isEqualByComparingTo("100.00");
+            assertThat(details.transactions()).hasSize(2);
+            assertThat(details.transactions()).last().satisfies(last -> {
+                assertThat(last.id()).isEqualTo(transaction.id());
+                assertThat(last.status()).isEqualTo("REJECTED");
+            });
+        }
+
+        @Test
+        @DisplayName("Una cuenta desconocida lanza AccountNotFoundException")
+        void una_cuenta_desconocida_lanza_account_not_found_exception() {
+            UUID unknown = UUID.randomUUID();
+            WithdrawCommand command = WithdrawCommand.builder().accountId(unknown).amount(BigDecimal.TEN).build();
+
+            assertThatExceptionOfType(AccountNotFoundException.class)
+                    .isThrownBy(() -> service.withdraw(command))
+                    .withMessageContaining(unknown.toString());
+        }
+
+        @Test
+        @DisplayName("Una retirada en otra divisa lanza CurrencyMismatchException y no cambia el saldo")
+        void una_retirada_en_otra_divisa_lanza_currency_mismatch_exception_y_no_cambia_el_saldo() {
+            UUID id = service.openAccount(command(IBAN).build()).id();
+            WithdrawCommand dollars =
+                    WithdrawCommand.builder().accountId(id).amount(BigDecimal.TEN).currency("USD").build();
+
+            assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> service.withdraw(dollars));
 
             AccountDetails details = service.findAccount(id);
             assertThat(details.balance()).isEqualByComparingTo("100.00");

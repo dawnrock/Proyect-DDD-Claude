@@ -101,7 +101,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
 - **Acceptance criteria:**
   - [x] Tests green. No business rules in the service.
 
-### [ ] T4 — "Withdraw" use case (~10 min)
+### [x] T4 — "Withdraw" use case (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -111,7 +111,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   1. `withdraw`: load, `account.tryWithdraw(...)`, `save`, return the `TransactionSummary` (approved or rejected).
   2. Tests (`@Nested` "Retirar"): parameterized retail / high net worth cases around the overdraft limit returning `APPROVED` or `REJECTED`; a rejected withdrawal leaves the balance unchanged and is still recorded; unknown account → `AccountNotFoundException`.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
 ### [ ] T5 — `POST /api/accounts/{id}/deposits` (~10 min)
 
