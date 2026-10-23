@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 import java.util.Currency;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class CheckingAccountTests {
 
@@ -33,12 +35,12 @@ class CheckingAccountTests {
     }
 
     @Test
-    @DisplayName("Un reintegro con saldo suficiente se aprueba y actualiza el saldo")
-    void un_reintegro_con_saldo_suficiente_se_aprueba() {
+    @DisplayName("Una retirada con saldo suficiente se aprueba y actualiza el saldo")
+    void una_retirada_con_saldo_suficiente_se_aprueba() {
         CheckingAccount cuenta = cuentaDe(CustomerSegment.RETAIL, "500.00");
-        Transaction reintegro = cuenta.tryWithdraw(MonetaryAmount.euros("200.00"));
+        Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("200.00"));
         
-        assertThat(reintegro.isApproved()).isTrue();
+        assertThat(retirada.isApproved()).isTrue();
         assertThat(cuenta.currentBalance()).isEqualTo(MonetaryAmount.euros("300.00"));
         assertThat(cuenta.transactions()).hasSize(2);
     }
@@ -47,9 +49,9 @@ class CheckingAccountTests {
     @DisplayName("Un cliente minorista no puede dejar la cuenta en descubierto")
     void un_cliente_minorista_no_puede_dejar_la_cuenta_en_descubierto() {
         CheckingAccount cuenta = cuentaDe(CustomerSegment.RETAIL, "500.00");
-        Transaction reintegro = cuenta.tryWithdraw(MonetaryAmount.euros("600.00"));
+        Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("600.00"));
 
-        assertThat(reintegro.isRejected()).isTrue();
+        assertThat(retirada.isRejected()).isTrue();
         assertThat(cuenta.currentBalance()).isEqualTo(MonetaryAmount.euros("500.00"));
         assertThat(cuenta.transactions()).hasSize(2);
     }
@@ -58,9 +60,9 @@ class CheckingAccountTests {
     @DisplayName("Un cliente de alto patrimonio puede dejar la cuenta en descubierto")
     void un_cliente_de_alto_patrimonio_puede_dejar_la_cuenta_en_descubierto() {
         CheckingAccount cuenta = cuentaDe(CustomerSegment.HIGH_NET_WORTH, "500.00");
-        Transaction reintegro = cuenta.tryWithdraw(MonetaryAmount.euros("900.00"));
+        Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("900.00"));
 
-        assertThat(reintegro.isApproved()).isTrue();
+        assertThat(retirada.isApproved()).isTrue();
         assertThat(cuenta.currentBalance()).isEqualTo(MonetaryAmount.euros("-400.00"));
     }
 
@@ -68,9 +70,27 @@ class CheckingAccountTests {
     @DisplayName("Ningún cliente puede superar el límite de descubierto")
     void ningun_cliente_puede_superar_el_limite_de_descubierto() {
         CheckingAccount cuenta = cuentaDe(CustomerSegment.HIGH_NET_WORTH, "500.00");
-        Transaction reintegro = cuenta.tryWithdraw(MonetaryAmount.euros("1600.00"));
-        assertThat(reintegro.isRejected()).isTrue();
+        Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("1600.00"));
+        assertThat(retirada.isRejected()).isTrue();
         assertThat(cuenta.currentBalance()).isEqualTo(MonetaryAmount.euros("500.00"));
+    }
+
+    @ParameterizedTest(name = "{0} con 500.00 retira {1}: {2}, saldo {3}")
+    @DisplayName("Las retiradas en el límite del descubierto se aprueban o se rechazan según el segmento")
+    @CsvSource({
+            "RETAIL, 500.00, APPROVED, 0.00",
+            "RETAIL, 500.01, REJECTED, 500.00",
+            "HIGH_NET_WORTH, 1500.00, APPROVED, -1000.00",
+            "HIGH_NET_WORTH, 1500.01, REJECTED, 500.00"
+    })
+    void las_retiradas_en_el_limite_del_descubierto_dependen_del_segmento(
+            CustomerSegment segmento, String importe, TransactionStatus estado, String saldoFinal) {
+        CheckingAccount cuenta = cuentaDe(segmento, "500.00");
+
+        Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros(importe));
+
+        assertThat(retirada.status()).isEqualTo(estado);
+        assertThat(cuenta.currentBalance()).isEqualTo(MonetaryAmount.euros(saldoFinal));
     }
 
     @Test
@@ -107,8 +127,8 @@ class CheckingAccountTests {
     }
 
     @Test
-    @DisplayName("Una transacción ya resuelta no puede volver a resolverse")
-    void una_transaccion_ya_resuelta_no_puede_volver_a_resolverse() {
+    @DisplayName("Un movimiento ya resuelto no puede volver a resolverse")
+    void un_movimiento_ya_resuelto_no_puede_volver_a_resolverse() {
         CheckingAccount cuenta = cuentaDe(CustomerSegment.RETAIL, "500.00");
 
         Transaction deposito = cuenta.transactions().get(0);

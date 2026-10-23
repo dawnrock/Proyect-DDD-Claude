@@ -16,7 +16,7 @@ public class Transaction {
 
     private Transaction(UUID accountId, TransactionType type, MonetaryAmount amount) {
         this.id = UUID.randomUUID();
-        this.accountId = Objects.requireNonNull(accountId, "La cuenta de la transacción es obligatoria");
+        this.accountId = Objects.requireNonNull(accountId, "La cuenta del movimiento es obligatoria");
         this.type = type;
         this.amount = amount;
         this.occurredOn = Instant.now();
@@ -77,7 +77,7 @@ public class Transaction {
     private void requirePending() {
         if (status != TransactionStatus.PENDING) {
             throw new IllegalStateException(
-                    "La transacción %s ya se resolvió con el estado %s".formatted(id, status));
+                    "El movimiento %s ya se resolvió con el estado %s".formatted(id, status));
         }
     }
 

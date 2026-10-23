@@ -64,7 +64,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   - [x] `./mvnw verify` compiles and passes against the contract types.
   - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
 
-### [ ] T1 — Overdraft-limit withdrawal tests and legacy synonyms (~10 min)
+### [x] T1 — Overdraft-limit withdrawal tests and legacy synonyms (~10 min)
 
 - **Side:** back
 - **Layer:** domain
@@ -74,8 +74,8 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   1. `@ParameterizedTest` + `@CsvSource` for withdrawals at the overdraft limit: retail (balance exactly 0 approved, 0.01 below rejected) and high net worth (exactly -1,000.00 approved, -1,000.01 rejected), checking status and balance.
   2. Rename `un_reintegro_con_saldo_suficiente_se_aprueba` → `una_retirada_...` and `una_transaccion_ya_resuelta_...` → `un_movimiento_ya_resuelto_...` (with their `@DisplayName`), and the `Transaction.requirePending` message "La transacción…" → "El movimiento…".
 - **Acceptance criteria:**
-  - [ ] Parameterized tests green (characterization: validated by temporarily breaking the limit in `isAllowed`).
-  - [ ] No "reintegro" or "transacción" left in `src/`. `check-domain.mjs` without errors.
+  - [x] Parameterized tests green (characterization: validated by temporarily breaking the limit in `isAllowed`).
+  - [x] No "reintegro" or "transacción" left in `src/`. `check-domain.mjs` without errors.
 
 ### [ ] T2 — `DepositCommand` and `WithdrawCommand` validation (~10 min)
 
