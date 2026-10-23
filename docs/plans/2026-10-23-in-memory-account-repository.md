@@ -33,7 +33,7 @@ Que la aplicación pueda guardar y recuperar cuentas corrientes en la capa `pers
 
 ## Tareas
 
-### [ ] T1 — Guardar y recuperar por id (~10 min)
+### [x] T1 — Guardar y recuperar por id (~10 min)
 
 - **Capa:** persistence
 - **Archivos:** `persistence/InMemoryCheckingAccountRepository.java`, `persistence/InMemoryCheckingAccountRepositoryTests.java`
@@ -42,8 +42,8 @@ Que la aplicación pueda guardar y recuperar cuentas corrientes en la capa `pers
   1. **Rojo:** tests que guardan una cuenta abierta con `CheckingAccount.open(...)` y la recuperan con `findById(id)`; que `findById` de un id inexistente devuelve `Optional.empty()`; y que volver a guardar la misma cuenta la sustituye, sin duplicarla.
   2. **Verde:** clase `@Repository` con un `ConcurrentHashMap<UUID, CheckingAccount>`, `save(CheckingAccount)` (devuelve la cuenta guardada) y `findById(UUID)`. Rechaza argumentos nulos con `Objects.requireNonNull`.
 - **Criterios de aceptación:**
-  - [ ] `./mvnw test -Dtest=InMemoryCheckingAccountRepositoryTests` pasa (guardar y recuperar, inexistente → vacío, guardar dos veces → una sola cuenta).
-  - [ ] `./mvnw verify` en verde.
+  - [x] `./mvnw test -Dtest=InMemoryCheckingAccountRepositoryTests` pasa (guardar y recuperar, inexistente → vacío, guardar dos veces → una sola cuenta).
+  - [x] `./mvnw verify` en verde.
 
 ### [ ] T2 — Buscar por número de cuenta y número único (~10 min)
 
