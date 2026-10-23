@@ -35,7 +35,7 @@ Dejar por escrito, antes de escribir código de la fase 1, el lenguaje ubicuo de
 
 ## Tareas
 
-### [ ] T1 — Completar el glosario con el dominio actual (~10 min)
+### [x] T1 — Completar el glosario con el dominio actual (~10 min)
 
 - **Capa:** docs
 - **Archivos:** `docs/dominio/glosario.md`
@@ -46,8 +46,8 @@ Dejar por escrito, antes de escribir código de la fase 1, el lenguaje ubicuo de
   3. Añadir la sección **"Reglas de negocio"**, numerada (`R1`, `R2`, …), con cada regla y el test que la demuestra. Por ejemplo, R1 sería el depósito inicial mínimo de 50,00 €, demostrado por `CheckingAccountTests`. Las reglas se sacan de `CheckingAccount`, `Transaction`, `MonetaryAmount`, `AccountNumber` y `AccountHolder`.
   4. Añadir la sección **"Términos previstos"** (transferencia → #7, commands y vistas de aplicación → #5…), separada de lo que ya existe.
 - **Criterios de aceptación:**
-  - [ ] Cada una de las 11 clases de `src/main/java/com/pronoide/ddd/domain/model/` aparece en el glosario. Se comprueba buscando el nombre de cada archivo `.java` en el glosario.
-  - [ ] Cada regla `Rn` cita un test existente en `src/test/java/com/pronoide/ddd/domain/model/`.
+  - [x] Cada una de las 11 clases de `src/main/java/com/pronoide/ddd/domain/model/` aparece en el glosario. Se comprueba buscando el nombre de cada archivo `.java` en el glosario.
+  - [x] Cada regla `Rn` cita un test existente en `src/test/java/com/pronoide/ddd/domain/model/`.
 
 ### [ ] T2 — Completar el diseño de la arquitectura en capas (~10 min)
 
