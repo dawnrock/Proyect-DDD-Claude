@@ -164,7 +164,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
 - **Acceptance criteria:**
   - [x] Tests green. No form error ends in a 500 page.
 
-### [ ] T9 — Withdrawal form (~10 min)
+### [x] T9 — Withdrawal form (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -175,7 +175,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   2. Same error handling as T8.
   3. Tests: approved flash; rejected flash; field error; domain error.
 - **Acceptance criteria:**
-  - [ ] Tests green. A rejected withdrawal is shown as such.
+  - [x] Tests green. A rejected withdrawal is shown as such.
 
 ### [ ] T10 — End-to-end integration (~10 min)
 

@@ -37,6 +37,7 @@ import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountNotFoundException;
 import com.pronoide.ddd.application.AccountSummary;
 import com.pronoide.ddd.application.DepositCommand;
+import com.pronoide.ddd.application.WithdrawCommand;
 import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.application.TransactionSummary;
 import com.pronoide.ddd.application.CheckingAccountService;
@@ -283,6 +284,109 @@ class AccountWebControllerTests {
             when(service.deposit(any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
 
             mvc.perform(ingresoDe("10.00", "EUR"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(view().name("error/404"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Retiradas")
+    class Retiradas {
+
+        private MockHttpServletRequestBuilder retiradaDe(String amount, String currency) {
+            return post("/accounts/" + ACCOUNT_ID + "/withdrawals")
+                    .param("amount", amount)
+                    .param("currency", currency);
+        }
+
+        @Test
+        @DisplayName("El detalle ofrece el formulario de retirada")
+        void el_detalle_ofrece_el_formulario_de_retirada() throws Exception {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(content().string(containsString("/accounts/" + ACCOUNT_ID + "/withdrawals")));
+        }
+
+        @Test
+        @DisplayName("Una retirada aprobada redirige al detalle con un mensaje de éxito")
+        void una_retirada_aprobada_redirige_al_detalle_con_un_mensaje_de_exito() throws Exception {
+            when(service.withdraw(any())).thenReturn(transaction("WITHDRAWAL", "30.00", "APPROVED"));
+
+            mvc.perform(retiradaDe("30.00", "EUR"))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
+                    .andExpect(flash().attribute("message", "Retirada de 30.00 EUR aprobada"))
+                    .andExpect(flash().attributeCount(1));
+
+            verify(service).withdraw(WithdrawCommand.builder()
+                    .accountId(ACCOUNT_ID)
+                    .amount(new BigDecimal("30.00"))
+                    .currency("EUR")
+                    .build());
+        }
+
+        @Test
+        @DisplayName("Una retirada rechazada redirige al detalle con un aviso de rechazo distinto del de éxito")
+        void una_retirada_rechazada_redirige_al_detalle_con_un_aviso_de_rechazo_distinto_del_de_exito()
+                throws Exception {
+            when(service.withdraw(any())).thenReturn(transaction("WITHDRAWAL", "500.00", "REJECTED"));
+
+            mvc.perform(retiradaDe("500.00", "EUR"))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
+                    .andExpect(flash().attributeExists("rejection"))
+                    .andExpect(flash().attributeCount(1));
+        }
+
+        @Test
+        @DisplayName("El aviso de rechazo se pinta con el estilo de advertencia y no con el de éxito")
+        void el_aviso_de_rechazo_se_pinta_con_el_estilo_de_advertencia_y_no_con_el_de_exito() throws Exception {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID).flashAttr("rejection", "Retirada de 500.00 EUR rechazada"))
+                    .andExpect(content().string(containsString("flash flash-warning")))
+                    .andExpect(content().string(containsString("Retirada de 500.00 EUR rechazada")));
+        }
+
+        @Test
+        @DisplayName("Un importe no positivo vuelve al detalle con el error del campo y sin llamar al servicio")
+        void un_importe_no_positivo_vuelve_al_detalle_con_el_error_del_campo_y_sin_llamar_al_servicio()
+                throws Exception {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+
+            mvc.perform(retiradaDe("-1", "EUR"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"))
+                    .andExpect(model().attributeHasFieldErrors("withdrawalForm", "amount"))
+                    .andExpect(model().attributeHasNoErrors("depositForm"))
+                    .andExpect(content().string(containsString("El importe debe ser positivo")));
+
+            verify(service, never()).withdraw(any());
+        }
+
+        @Test
+        @DisplayName("Otra divisa vuelve al detalle con el mensaje del dominio y conserva el importe")
+        void otra_divisa_vuelve_al_detalle_con_el_mensaje_del_dominio_y_conserva_el_importe() throws Exception {
+            var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("GBP"));
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.withdraw(any())).thenThrow(error);
+
+            mvc.perform(retiradaDe("20.25", "GBP"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"))
+                    .andExpect(model().attributeHasErrors("withdrawalForm"))
+                    .andExpect(model().attributeHasNoErrors("depositForm"))
+                    .andExpect(content().string(containsString(error.getMessage())))
+                    .andExpect(content().string(containsString("20.25")));
+        }
+
+        @Test
+        @DisplayName("Una retirada en una cuenta desconocida devuelve la página 404")
+        void una_retirada_en_una_cuenta_desconocida_devuelve_la_pagina_404() throws Exception {
+            when(service.withdraw(any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
+
+            mvc.perform(retiradaDe("10.00", "EUR"))
                     .andExpect(status().isNotFound())
                     .andExpect(view().name("error/404"));
         }

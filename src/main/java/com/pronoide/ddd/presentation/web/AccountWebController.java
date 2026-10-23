@@ -19,6 +19,7 @@ import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
 import com.pronoide.ddd.application.TransactionSummary;
+import com.pronoide.ddd.application.WithdrawCommand;
 import com.pronoide.ddd.domain.model.DomainException;
 
 import jakarta.validation.Valid;
@@ -73,6 +74,37 @@ public class AccountWebController {
             }
         }
         model.addAttribute("withdrawalForm", new MovementForm());
+        return renderDetail(id, model);
+    }
+
+    @PostMapping("/accounts/{id}/withdrawals")
+    public String withdraw(@PathVariable UUID id, @Valid @ModelAttribute("withdrawalForm") MovementForm form,
+                           BindingResult result, Model model, RedirectAttributes redirect) {
+        if (!result.hasErrors()) {
+            WithdrawCommand command = null;
+            try {
+                command = WithdrawCommand.builder()
+                        .accountId(id).amount(form.getAmount()).currency(form.getCurrency()).build();
+            } catch (IllegalArgumentException e) {
+                result.reject("invalid", e.getMessage());
+            }
+            if (command != null) {
+                try {
+                    TransactionSummary withdrawal = service.withdraw(command);
+                    String amount = "%s %s".formatted(withdrawal.amount(), withdrawal.currency());
+                    if ("REJECTED".equals(withdrawal.status())) {
+                        redirect.addFlashAttribute("rejection",
+                                "Retirada de %s rechazada: la cuenta no puede quedar en descubierto".formatted(amount));
+                    } else {
+                        redirect.addFlashAttribute("message", "Retirada de %s aprobada".formatted(amount));
+                    }
+                    return redirectToDetail(id);
+                } catch (DomainException e) {
+                    result.reject("domain", e.getMessage());
+                }
+            }
+        }
+        model.addAttribute("depositForm", new MovementForm());
         return renderDetail(id, model);
     }
 
