@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' · Cuentas corrientes'">Cuentas corrientes</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header th:fragment="header" class="app-header">
+    <a class="app-brand" th:href="@{/}">Cuentas corrientes</a>
+</header>
+<footer th:fragment="footer" class="app-footer">
+    Proyect-DDD-Claude · fase 1 · monolito en capas
+</footer>
+</body>
+</html>

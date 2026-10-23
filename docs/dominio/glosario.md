@@ -62,13 +62,21 @@ Cada regla cita el test que la demuestra (`src/test/java/com/pronoide/ddd/domain
 
 **Número de cuenta único como regla de negocio:** el repositorio lo vigila como una restricción técnica (`IllegalStateException`, que no es una `DomainException`). El caso de uso "abrir cuenta" (#5) debe comprobarlo antes con `findByAccountNumber` y lanzar una excepción de dominio, para que la presentación lo traduzca (D4) en lugar de devolver un error 500.
 
+## Aplicación y presentación
+
+| Término | En el código | Tipo | Definición |
+| ------- | ------------ | ---- | ---------- |
+| Recurso inexistente | `NotFoundException` (`application`) | Error de aplicación (abstracto) | Base de los errores "lo que se pide no existe". No es una regla de negocio: lo decide el caso de uso al consultar la persistencia. La API REST lo traduce a **404** con el título "Recurso inexistente"; sus subclases concretas (por ejemplo, `AccountNotFoundException`, #5) aportan el mensaje. |
+| Regla de negocio incumplida | `DomainException` → 422 | Traducción HTTP | Título del `ProblemDetail` con el que la API devuelve cualquier excepción de dominio. |
+| Petición no válida | `IllegalArgumentException` y validación → 400 | Traducción HTTP | Título del `ProblemDetail` para formatos, validaciones o argumentos que el dominio rechaza; la validación añade `errors` con un mensaje por campo. |
+
 ## Términos previstos
 
 Llegan con issues posteriores de la fase 1; se pasan a la tabla principal cuando existan en el código.
 
 | Término | En el código | Tipo | Issue |
 | ------- | ------------ | ---- | ----- |
-| Cuenta inexistente | `AccountNotFoundException` | Error de aplicación | #5 |
+| Cuenta inexistente | `AccountNotFoundException` (hereda de `NotFoundException`) | Error de aplicación | #5 |
 | Abrir cuenta (orden) | `OpenAccountCommand` | Command de aplicación | #5 |
 | Resumen y detalle de cuenta | `AccountSummary`, `AccountDetails` | Vistas de aplicación | #5 |
 | Ingreso / retirada (orden) | `DepositCommand`, `WithdrawCommand` | Commands de aplicación | #6 |
