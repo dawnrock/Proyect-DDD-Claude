@@ -5,7 +5,7 @@
 - **Fase:** 1 · Monolito en capas
 - **Rama base:** `Monolithic`
 - **Fecha:** 2026-10-23
-- **Estado:** en curso
+- **Estado:** completado
 - **Estimación total:** ~30 min (3 tareas)
 
 ## Objetivo
@@ -97,23 +97,27 @@ Dejar por escrito, antes de escribir código de la fase 1, el lenguaje ubicuo de
 
 **Específicos:**
 
-- [ ] Cada clase de `domain.model` tiene su término en el glosario.
-- [ ] El diagrama muestra las cuatro capas y el sentido de las dependencias.
-- [ ] El ADR enlaza con los capítulos 14, 17 y 18 del curso (capas, layer cake, anemic translation).
-- [ ] Todos los enlaces relativos entre `glosario.md`, `fase-1-capas.md`, el ADR 0004 y `CLAUDE.md` apuntan a archivos que existen.
+- [x] Cada clase de `domain.model` tiene su término en el glosario.
+- [x] El diagrama muestra las cuatro capas y el sentido de las dependencias.
+- [x] El ADR enlaza con los capítulos 14, 17 y 18 del curso (capas, layer cake, anemic translation).
+- [x] Todos los enlaces relativos entre `glosario.md`, `fase-1-capas.md`, el ADR 0004 y `CLAUDE.md` apuntan a archivos que existen.
 
 **Fijos:**
 
-- [ ] Todas las tareas y sus criterios están marcados como cumplidos.
-- [ ] `./mvnw verify` termina en `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` arranca y `GET /actuator/health` responde `{"status":"UP"}`: no aplica (no se toca código).
-- [ ] Se respeta la arquitectura de la fase: no aplica (solo documentación).
-- [ ] El dominio no depende de Spring, `jakarta` ni `org.immutables`, y no usa `@Data`, `@Setter`, `@Builder` ni `@AllArgsConstructor` (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` sin errores).
-- [ ] Los tests nuevos siguen `src/test/CLAUDE.md`: no aplica (no hay tests nuevos).
-- [ ] No se añaden dependencias fuera de las previstas: no aplica.
-- [ ] Si se toca la API: no aplica.
-- [ ] Si aparece un término de negocio nuevo, está en `docs/dominio/glosario.md`.
+- [x] Todas las tareas y sus criterios están marcados como cumplidos.
+- [x] `./mvnw verify` termina en `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` arranca y `GET /actuator/health` responde `{"status":"UP"}`: no aplica (no se toca código).
+- [x] Se respeta la arquitectura de la fase: no aplica (solo documentación).
+- [x] El dominio no depende de Spring, `jakarta` ni `org.immutables`, y no usa `@Data`, `@Setter`, `@Builder` ni `@AllArgsConstructor` (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` sin errores).
+- [x] Los tests nuevos siguen `src/test/CLAUDE.md`: no aplica (no hay tests nuevos).
+- [x] No se añaden dependencias fuera de las previstas: no aplica.
+- [x] Si se toca la API: no aplica.
+- [x] Si aparece un término de negocio nuevo, está en `docs/dominio/glosario.md`.
 
 ## Riesgos y preguntas abiertas
+
+- **Pendiente de confirmar en la PR:** que los diagramas Mermaid de `fase-1-capas.md` se renderizan en GitHub (criterio de T2 sin marcar: no se puede comprobar sin navegador).
+- **Desviación:** la tabla "Issues de la fase" refleja el backlog reorganizado por la #31 (#4, #8 y las verticales #5-#7 en equipo) en lugar de la lista #4-#12 original; #9 y #10 están cerradas.
+- **Desviación:** la regla "el nombre del titular es obligatorio" no tiene test; se documenta aparte y no como `Rn`.
 
 - **`AccountNumber` no valida el dígito de control del IBAN.** Se documenta como comportamiento actual. Si se quiere validarlo, hace falta una issue aparte con su test, porque es una regla nueva.
