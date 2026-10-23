@@ -11,6 +11,7 @@
 //
 // Sin variables, termina con código 0 y un aviso: las notificaciones son opcionales.
 import { readFileSync } from 'node:fs';
+import { request } from 'node:https';
 import { fileURLToPath } from 'node:url';
 
 export async function sendTelegram(text) {
@@ -19,13 +20,25 @@ export async function sendTelegram(text) {
   if (!token || !chatId) {
     return { sent: false, reason: 'TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID no configurados' };
   }
-  const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text: text.slice(0, 4000), disable_web_page_preview: true }),
+  const body = JSON.stringify({ chat_id: chatId, text: text.slice(0, 4000), disable_web_page_preview: true });
+  // node:https en lugar de fetch: fetch solo existe a partir de Node 18
+  const { status, response } = await new Promise((resolve, reject) => {
+    const req = request(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
+      timeout: 8000,
+    }, (res) => {
+      let data = '';
+      res.setEncoding('utf8');
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => resolve({ status: res.statusCode, response: data }));
+    });
+    req.on('timeout', () => req.destroy(new Error('tiempo de espera agotado')));
+    req.on('error', reject);
+    req.end(body);
   });
-  if (!res.ok) {
-    throw new Error(`Telegram respondió ${res.status}: ${await res.text()}`);
+  if (status < 200 || status >= 300) {
+    throw new Error(`Telegram respondió ${status}: ${response}`);
   }
   return { sent: true };
 }
