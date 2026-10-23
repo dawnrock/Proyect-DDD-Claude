@@ -19,4 +19,8 @@ El proyecto sirve para practicar a la vez DDD en Java y el trabajo con agentes. 
 - Las notificaciones son opcionales: sin token, nada falla.
 - Los workflows de Claude necesitan el secreto `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`) y, como GitHub ejecuta los de issues desde la rama por defecto, esa rama debe ser la de la fase activa (ADR 0002).
 
+## Nota · 2026-10-23: versión fijada de `claude-code-action`
+
+Desde la v1.0.255, `claude-code-review.yml` terminaba con `is_error: true` en ~2 s, 1 turno y 0 $, sin llegar al modelo. Fallaba también en curso-claude con su token anterior, y `claude -p` funcionaba en local con la misma configuración. Los workflows se fijan a `anthropics/claude-code-action@v1.0.254`, la última versión con la que funcionó. Antes de volver a `@v1`, hay que comprobar en una PR que la versión nueva ya pasa.
+
 Detalle de cada pieza: [docs/ia/arquitectura-ia.md](../ia/arquitectura-ia.md).
