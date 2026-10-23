@@ -201,7 +201,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   3. `fase-1-capas.md`: "Implementado en la #6".
   4. Project status: #6 done, #31 closed, next step `/plan-feature 7`, history row.
 - **Acceptance criteria:**
-  - [ ] Lint without errors. Glossary and status updated.
+  - [x] Lint without errors. Glossary and status updated.
 
 ### [x] T12 — Review fixes (~10 min)
 
