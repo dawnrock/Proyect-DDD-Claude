@@ -32,3 +32,7 @@ Sin configuración no pasa nada: el script avisa de que no está configurado y l
    ```
 
 El token da control sobre el bot: no lo pegues en el chat con Claude ni lo commitees.
+
+## Desactivar los avisos sin borrar la configuración
+
+Con `TELEGRAM_DISABLED=1`, `scripts/notify.mjs` no envía nada (responde "Notificación no enviada: desactivado…") y los hooks `Notification` y `Stop` tampoco, porque usan el mismo script. Se define en el bloque `env` de `.claude/settings.local.json` o de `~/.claude/settings.json`, y se aplica al abrir una sesión nueva de Claude Code. Para reactivar los avisos, se quita la variable. No afecta a la CI, que no la define.

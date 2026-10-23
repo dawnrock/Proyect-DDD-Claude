@@ -8,6 +8,7 @@
 // Variables de entorno (nunca en el repositorio; ver docs/ia/notificaciones.md):
 //   TELEGRAM_BOT_TOKEN  token que da @BotFather
 //   TELEGRAM_CHAT_ID    id del chat al que se envía
+//   TELEGRAM_DISABLED   si vale 1, no envía nada (también silencia el hook notify-telegram.mjs)
 //
 // Sin variables, termina con código 0 y un aviso: las notificaciones son opcionales.
 import { readFileSync } from 'node:fs';
@@ -15,6 +16,9 @@ import { request } from 'node:https';
 import { fileURLToPath } from 'node:url';
 
 export async function sendTelegram(text) {
+  if (process.env.TELEGRAM_DISABLED === '1') {
+    return { sent: false, reason: 'desactivado con TELEGRAM_DISABLED=1' };
+  }
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
   if (!token || !chatId) {
