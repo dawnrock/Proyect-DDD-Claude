@@ -34,7 +34,8 @@ En ambas fases el dominio no depende de Spring ni de `jakarta` y su estado es pr
 
 ## Convenciones
 
-- Código (clases, métodos, variables) en inglés; documentación, mensajes de error del dominio, commits y `@DisplayName` en español.
+- Código (clases, métodos, variables) y **documentación** (`docs/`: planes, contratos, ADR, arquitectura, glosario, OpenAPI; y las plantillas que los generan) en **inglés**. Los documentos que aún están en español se traducen en una issue aparte; los nuevos ya se escriben en inglés.
+- La conversación con el usuario, los mensajes de error del dominio, los commits y los `@DisplayName` siguen en español.
 - Accesores estilo record (`id()`, `currentBalance()`), nunca `getX()`/`setX()` en el dominio.
 - Los agregados se crean con métodos factoría estáticos (`CheckingAccount.open(...)`) y constructor privado; solo cambian de estado mediante métodos de negocio.
 - Lenguaje ubicuo: usa los términos de `docs/dominio/glosario.md`. Si aparece un término nuevo, añádelo allí.

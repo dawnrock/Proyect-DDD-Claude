@@ -9,13 +9,12 @@
 
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
-| 1 · Monolito en capas | #2 Lombok/Immutables · #3 glosario, capas y ADR 0004 · #4 repositorio en memoria · #8 base REST + web | #31 flujo en equipo (falta planificar #5 con `T0 · Contrato`) | #5 → #6 → #7 (en equipo) → #11 → #12 → #13 |
+| 1 · Monolito en capas | #2 Lombok/Immutables · #3 glosario, capas y ADR 0004 · #4 repositorio en memoria · #8 base REST + web | #5 plan aprobado (`docs/plans/2026-10-23-open-query-list-accounts.md`, entra con la PR de la #5) · #31 flujo en equipo (el plan de la #5 ya sale con `T0 · Contrato` y `Lado`; falta decidir si se cierra ya o con la PR de la #5) | #5 → #6 → #7 (en equipo) → #11 → #12 → #13 |
 | 2 · Hexagonal | — | — | #14 → #23 (se empieza al cerrar #13, creando `Hexagonal` desde `Monolithic`) |
 
 ## Siguiente paso
 
-1. `/plan-feature 5`: es la primera issue en equipo, así que el plan debe salir con `T0 · Contrato` y `Lado` en cada tarea. Al comprobarlo, cerrar #31.
-2. `/implement-plan-team 5`.
+1. `/implement-plan-team 5` (plan aprobado por el usuario el 2026-10-23). El plan se escribió en español antes de la convención de idioma: se traduce al inglés al commitearlo, y el contrato de `docs/contracts/` ya se redacta en inglés.
 
 Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sección "Issues de la fase".
 
@@ -26,7 +25,7 @@ Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sec
 - **`CLAUDE.md` y la configuración de `.claude/`** solo se cambian con su visto bueno explícito, nunca a petición de un agente.
 - **Los diagramas se le enseñan antes de commitearlos.** Estilo de los diagramas: escala de grises, sin colores.
 - El usuario puede seguir la sesión desde el móvil (Remote Control) y recibe avisos por Telegram.
-- Idioma: conversación, documentación, commits y `@DisplayName` en español; código en inglés.
+- Idioma: conversación, commits, `@DisplayName` y mensajes de error del dominio en español; código y **documentación en inglés** (desde la PR de convención de idioma, 2026-10-23). Los documentos existentes en español se traducirán en una issue aparte.
 
 ## Decisiones ya tomadas que afectan a lo que viene
 
@@ -37,6 +36,8 @@ Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sec
 - **Los commands validan antes de llamar al dominio.** El 400 por `IllegalArgumentException` es solo una red de seguridad.
 
 ## Pendientes sueltos
+
+- Traducir al inglés la documentación existente (`docs/`, `README`), que sigue en español (issue aparte).
 
 - Renombrar los sinónimos heredados "transacción" y "reintegro" a "movimiento" y "retirada" (mensaje de `Transaction.requirePending` y nombres de tests) en la primera issue que toque esas clases.
 - Test que falta: "el nombre del titular es obligatorio" (`AccountHolder`).

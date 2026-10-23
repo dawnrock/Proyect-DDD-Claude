@@ -33,11 +33,11 @@ Issue indicada por el usuario: $ARGUMENTS
 - `.claude/worktrees/` está en `.gitignore`; si no lo estuviera, avísalo en el informe.
 - Si el plan no está commiteado en la rama base, cópialo al worktree y haz un primer commit `docs: añade el plan <slug>`.
 - A partir de aquí **todo** se hace dentro del worktree. Comprueba que las rutas absolutas incluyen `.claude/worktrees/<slug>/` antes de editar.
-- Cambia `**Estado:**` del plan a `en curso`.
+- Cambia `**Status:**` del plan a `in progress`.
 
 ### 3. Implementar cada tarea con TDD estricto
 
-En orden, de una en una, respetando `**Depende de:**`. No empieces una tarea sin haber commiteado la anterior.
+En orden, de una en una, respetando `**Depends on:**`. No empieces una tarea sin haber commiteado la anterior.
 
 1. **Rojo.** Escribe primero el test JUnit que expresa el criterio de la tarea. Ejecuta `./mvnw test -Dtest=<Clase>` y confirma que **falla por el motivo esperado** (aserción o clase inexistente), no por un error del propio test.
 2. **Verde.** Escribe el código mínimo para que pase. Ejecuta `./mvnw verify`: deben pasar el test nuevo y **todos** los anteriores, incluidas las reglas de ArchUnit.
@@ -70,7 +70,7 @@ Si un test no se puede poner en verde sin salirte del plan o un criterio no se p
    - Revisa el "Siguiente paso".
    - Añade a "Decisiones" o a "Pendientes sueltos" lo que haya surgido (avisos de la revisión para issues futuras, desviaciones).
    - Añade una fila al "Historial" y cambia la fecha de "Última actualización".
-4. `**Estado:**` → `completado` y commit `docs: completa el plan <slug>` (incluye el estado del proyecto).
+4. `**Status:**` → `done` y commit `docs: completa el plan <slug>` (incluye el estado del proyecto).
 
 ### 7. Crear la PR
 
