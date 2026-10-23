@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" width="1000" height="640" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title>Arquitectura hexagonal de la fase 2</title>
+  <defs>
+    <marker id="arrow-in" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#374151"/>
+    </marker>
+    <marker id="arrow-out" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#374151"/>
+    </marker>
+  </defs>
+
+  <!-- Fondo propio para que se lea igual en tema claro y oscuro -->
+  <rect x="0" y="0" width="1000" height="640" rx="16" fill="#ffffff"/>
+
+  <!-- Cabeceras de los lados -->
+  <text x="130" y="140" text-anchor="middle" font-size="15" font-weight="700" fill="#374151">Lado de entrada</text>
+  <text x="130" y="158" text-anchor="middle" font-size="12" fill="#4b5563">driving · usan los puertos</text>
+  <text x="870" y="140" text-anchor="middle" font-size="15" font-weight="700" fill="#374151">Lado de salida</text>
+  <text x="870" y="158" text-anchor="middle" font-size="12" fill="#4b5563">driven · implementan los puertos</text>
+
+  <!-- Hexágono exterior: aplicación -->
+  <polygon points="690,300 595,464.5 405,464.5 310,300 405,135.5 595,135.5" fill="#ffffff" stroke="#374151" stroke-width="3"/>
+  <text x="500" y="168" text-anchor="middle" font-size="16" font-weight="700" fill="#111827">Aplicación</text>
+  <text x="500" y="187" text-anchor="middle" font-size="12" fill="#111827">application · casos de uso · listener</text>
+  <text x="500" y="420" text-anchor="middle" font-size="11" fill="#111827">puertos de entrada: Commands / Queries</text>
+  <text x="500" y="436" text-anchor="middle" font-size="11" fill="#111827">(los de salida viven en domain.model)</text>
+
+  <!-- Hexágono interior: dominio -->
+  <polygon points="600,300 550,386.6 450,386.6 400,300 450,213.4 550,213.4" fill="#f3f4f6" stroke="#374151" stroke-width="3"/>
+  <text x="500" y="268" text-anchor="middle" font-size="18" font-weight="700" fill="#111827">Dominio</text>
+  <text x="500" y="292" text-anchor="middle" font-size="12" fill="#111827">domain.model</text>
+  <text x="500" y="309" text-anchor="middle" font-size="11" fill="#111827">agregados · VO · eventos</text>
+  <text x="500" y="326" text-anchor="middle" font-size="11" fill="#111827">+ puertos de salida</text>
+  <text x="500" y="350" text-anchor="middle" font-size="12" fill="#111827">domain.service</text>
+
+  <!-- Adaptadores de entrada -->
+  <g font-size="12" fill="#111827">
+    <rect x="30" y="183" width="200" height="64" rx="10" fill="#ffffff" stroke="#374151" stroke-width="2"/>
+    <text x="130" y="210" text-anchor="middle" font-size="14" font-weight="700">REST</text>
+    <text x="130" y="230" text-anchor="middle" fill="#4b5563">adapter.in.rest</text>
+
+    <rect x="30" y="268" width="200" height="64" rx="10" fill="#ffffff" stroke="#374151" stroke-width="2"/>
+    <text x="130" y="295" text-anchor="middle" font-size="14" font-weight="700">Web (Thymeleaf)</text>
+    <text x="130" y="315" text-anchor="middle" fill="#4b5563">adapter.in.web</text>
+
+    <rect x="30" y="353" width="200" height="64" rx="10" fill="#ffffff" stroke="#374151" stroke-width="2"/>
+    <text x="130" y="380" text-anchor="middle" font-size="14" font-weight="700">Línea de comandos</text>
+    <text x="130" y="400" text-anchor="middle" fill="#4b5563">adapter.in.cli</text>
+  </g>
+
+  <!-- Flechas de entrada: el adaptador usa el puerto -->
+  <g stroke="#374151" stroke-width="2.5" fill="none">
+    <line x1="232" y1="215" x2="350" y2="215" marker-end="url(#arrow-in)"/>
+    <line x1="232" y1="300" x2="300" y2="300" marker-end="url(#arrow-in)"/>
+    <line x1="232" y1="385" x2="350" y2="385" marker-end="url(#arrow-in)"/>
+  </g>
+  <g fill="#374151">
+    <circle cx="359" cy="215" r="7"/>
+    <circle cx="310" cy="300" r="7"/>
+    <circle cx="359" cy="385" r="7"/>
+  </g>
+  <g font-size="10.5" fill="#374151" text-anchor="middle">
+    <text x="292" y="207">Commands / Queries</text>
+    <text x="266" y="292">usa</text>
+    <text x="292" y="377">Commands / Queries</text>
+  </g>
+
+  <!-- Adaptadores de salida -->
+  <g font-size="12" fill="#111827">
+    <rect x="770" y="183" width="200" height="64" rx="10" fill="#ffffff" stroke="#374151" stroke-width="2"/>
+    <text x="870" y="210" text-anchor="middle" font-size="14" font-weight="700">Persistencia</text>
+    <text x="870" y="230" text-anchor="middle" fill="#4b5563">adapter.out.persistence · en memoria</text>
+
+    <rect x="770" y="268" width="200" height="64" rx="10" fill="#ffffff" stroke="#374151" stroke-width="2"/>
+    <text x="870" y="295" text-anchor="middle" font-size="14" font-weight="700">Eventos</text>
+    <text x="870" y="315" text-anchor="middle" fill="#4b5563">adapter.out.event · Spring</text>
+
+    <rect x="770" y="353" width="200" height="64" rx="10" fill="#ffffff" stroke="#374151" stroke-width="2"/>
+    <text x="870" y="380" text-anchor="middle" font-size="14" font-weight="700">Agencia tributaria</text>
+    <text x="870" y="400" text-anchor="middle" fill="#4b5563">adapter.out.taxagency · simulada</text>
+  </g>
+
+  <!-- Flechas de salida: el adaptador implementa el puerto (dependencia hacia dentro) -->
+  <g stroke="#374151" stroke-width="2.5" stroke-dasharray="7 5" fill="none">
+    <line x1="768" y1="215" x2="650" y2="215" marker-end="url(#arrow-out)"/>
+    <line x1="768" y1="300" x2="700" y2="300" marker-end="url(#arrow-out)"/>
+    <line x1="768" y1="385" x2="650" y2="385" marker-end="url(#arrow-out)"/>
+  </g>
+  <g fill="#374151">
+    <circle cx="641" cy="215" r="7"/>
+    <circle cx="690" cy="300" r="7"/>
+    <circle cx="641" cy="385" r="7"/>
+  </g>
+  <g font-size="10.5" fill="#374151" text-anchor="middle">
+    <text x="708" y="207">AccountRepository</text>
+    <text x="734" y="292">EventPublisher</text>
+    <text x="708" y="377">IncomeVerifier</text>
+  </g>
+
+  <!-- Configuración -->
+  <rect x="300" y="500" width="400" height="52" rx="10" fill="#f1f5f9" stroke="#64748b" stroke-width="2" stroke-dasharray="4 4"/>
+  <text x="500" y="522" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">config · DomainConfiguration</text>
+  <text x="500" y="541" text-anchor="middle" font-size="11.5" fill="#4b5563">construye el núcleo y conecta cada puerto con su adaptador</text>
+
+  <!-- Leyenda -->
+  <g font-size="12" fill="#334155">
+    <line x1="60" y1="597" x2="110" y2="597" stroke="#374151" stroke-width="2.5" marker-end="url(#arrow-in)"/>
+    <text x="120" y="601">usa el puerto de entrada</text>
+    <line x1="320" y1="597" x2="370" y2="597" stroke="#374151" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#arrow-out)"/>
+    <text x="380" y="601">implementa el puerto de salida</text>
+    <text x="940" y="601" text-anchor="end" font-weight="700">Todas las dependencias apuntan hacia el hexágono</text>
+  </g>
+</svg>
