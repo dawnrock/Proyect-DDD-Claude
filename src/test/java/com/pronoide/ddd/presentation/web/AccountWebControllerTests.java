@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,7 +29,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import com.pronoide.ddd.application.AccountDetails;
+import com.pronoide.ddd.application.AccountNotFoundException;
 import com.pronoide.ddd.application.AccountSummary;
+import com.pronoide.ddd.application.TransactionSummary;
 import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.application.OpenAccountCommand;
 import com.pronoide.ddd.domain.model.AccountNumber;
@@ -77,6 +81,105 @@ class AccountWebControllerTests {
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("Todavía no hay cuentas")))
                     .andExpect(content().string(containsString("Abrir cuenta")));
+        }
+    }
+
+    private static final UUID ACCOUNT_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
+
+    private static TransactionSummary transaction(String type, String amount, String status) {
+        return TransactionSummary.builder()
+                .id(UUID.randomUUID())
+                .type(type)
+                .amount(new BigDecimal(amount))
+                .currency("EUR")
+                .occurredOn(Instant.parse("2026-10-23T10:15:00Z"))
+                .status(status)
+                .build();
+    }
+
+    private static AccountDetails details(TransactionSummary... transactions) {
+        return AccountDetails.builder()
+                .id(ACCOUNT_ID)
+                .accountNumber("ES1234567890123456789012")
+                .holderName("Ana Pérez")
+                .segment("HIGH_NET_WORTH")
+                .balance(new BigDecimal("150.00"))
+                .currency("EUR")
+                .addTransactions(transactions)
+                .build();
+    }
+
+    @Nested
+    @DisplayName("Detalle de cuenta")
+    class Detalle {
+
+        @Test
+        @DisplayName("El detalle muestra los datos de la cuenta, el segmento en español y sus movimientos")
+        void el_detalle_muestra_los_datos_de_la_cuenta_el_segmento_en_espanol_y_sus_movimientos() throws Exception {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details(
+                    transaction("DEPOSIT", "100.00", "APPROVED"),
+                    transaction("WITHDRAWAL", "30.00", "APPROVED")));
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"))
+                    .andExpect(content().string(containsString("ES1234567890123456789012")))
+                    .andExpect(content().string(containsString("Ana Pérez")))
+                    .andExpect(content().string(containsString("Alto patrimonio")))
+                    .andExpect(content().string(containsString("150.00 EUR")))
+                    .andExpect(content().string(containsString("Ingreso")))
+                    .andExpect(content().string(containsString("Retirada")))
+                    .andExpect(content().string(containsString("100.00 EUR")))
+                    .andExpect(content().string(containsString("Aprobado")))
+                    .andExpect(content().string(containsString("/2026")));
+        }
+
+        @Test
+        @DisplayName("Una retirada rechazada se muestra marcada como rechazada")
+        void una_retirada_rechazada_se_muestra_marcada_como_rechazada() throws Exception {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details(
+                    transaction("WITHDRAWAL", "500.00", "REJECTED")));
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("row-rejected")))
+                    .andExpect(content().string(containsString("Rechazado")));
+        }
+
+        @Test
+        @DisplayName("Una cuenta sin movimientos muestra el mensaje de estado vacío")
+        void una_cuenta_sin_movimientos_muestra_el_mensaje_de_estado_vacio() throws Exception {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("Todavía no hay movimientos")));
+        }
+
+        @Test
+        @DisplayName("Una cuenta desconocida devuelve la página 404 con estado 404")
+        void una_cuenta_desconocida_devuelve_la_pagina_404_con_estado_404() throws Exception {
+            when(service.findAccount(ACCOUNT_ID)).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isNotFound())
+                    .andExpect(view().name("error/404"))
+                    .andExpect(content().string(containsString("Página no encontrada")));
+        }
+
+        @Test
+        @DisplayName("Cada fila del listado enlaza con el detalle de su cuenta")
+        void cada_fila_del_listado_enlaza_con_el_detalle_de_su_cuenta() throws Exception {
+            when(service.listAccounts()).thenReturn(List.of(AccountSummary.builder()
+                    .id(ACCOUNT_ID)
+                    .accountNumber("ES1234567890123456789012")
+                    .holderName("Ana Pérez")
+                    .balance(new BigDecimal("150.00"))
+                    .currency("EUR")
+                    .build()));
+
+            mvc.perform(get("/"))
+                    .andExpect(content().string(containsString("href=\"/accounts/" + ACCOUNT_ID + "\"")));
         }
     }
 

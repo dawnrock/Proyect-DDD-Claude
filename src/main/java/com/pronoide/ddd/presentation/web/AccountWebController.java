@@ -3,12 +3,14 @@ package com.pronoide.ddd.presentation.web;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -27,12 +29,20 @@ public class AccountWebController {
 
     private static final String FORM_VIEW = "accounts/new";
 
+    private static final String DETAIL_VIEW = "accounts/detail";
+
     private final CheckingAccountService service;
 
     @GetMapping("/")
     public String list(Model model) {
         model.addAttribute("accounts", service.listAccounts());
         return "accounts/list";
+    }
+
+    @GetMapping("/accounts/{id}")
+    public String detail(@PathVariable UUID id, Model model) {
+        model.addAttribute("account", service.findAccount(id));
+        return DETAIL_VIEW;
     }
 
     @GetMapping("/accounts/new")

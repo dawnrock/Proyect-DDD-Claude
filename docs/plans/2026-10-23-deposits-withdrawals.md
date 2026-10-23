@@ -137,7 +137,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
 - **Acceptance criteria:**
   - [ ] Tests green. Responses match the OpenAPI fragment.
 
-### [ ] T7 — Account detail page (~10 min)
+### [x] T7 — Account detail page (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -149,7 +149,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   3. Each row of the list links to its detail.
   4. `@WebMvcTest` tests with `@MockitoBean`: detail with transactions; unknown account → 404; the list links to the detail.
 - **Acceptance criteria:**
-  - [ ] Tests green. The view uses no domain types.
+  - [x] Tests green. The view uses no domain types.
 
 ### [ ] T8 — Deposit form (~10 min)
 
