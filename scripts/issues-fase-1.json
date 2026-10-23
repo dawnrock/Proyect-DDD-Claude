@@ -1,0 +1,81 @@
+{
+  "milestone": {
+    "title": "Fase 1 · Monolito en capas",
+    "description": "Aplicación web mínima sobre el dominio de cuentas corrientes con arquitectura en capas (presentation → application → domain → persistence). Rama: Monolithic. Termina con la etiqueta v1-monolito."
+  },
+  "phaseLabel": "fase:1-monolito",
+  "issues": [
+    {
+      "title": "Configurar Lombok e Immutables en el build",
+      "type": "build",
+      "layers": ["config"],
+      "body": "## Objetivo\n\nPreparar el build para usar Lombok e Immutables según la tabla de `CLAUDE.md` (dónde sí y dónde no).\n\n## Alcance\n\n- Dependencias `org.projectlombok:lombok` (versión gestionada por Spring Boot) e `org.immutables:value` (versión explícita, `provided`).\n- `maven-compiler-plugin` con `annotationProcessorPaths` para ambos procesadores.\n- `lombok.config` en la raíz (`lombok.accessors.fluent = true`, `config.stopBubbling = true`, `lombok.addLombokGeneratedAnnotation = true`).\n- Estilo común de Immutables (`@Value.Style`) en una meta-anotación del paquete `application`.\n- Un test mínimo que demuestre que los dos procesadores generan código.\n\n## Fuera de alcance\n\n- Usar Lombok o Immutables en clases existentes del dominio.\n\n## Criterios de aceptación\n\n- [ ] `./mvnw verify` en verde, con las 22 pruebas existentes pasando.\n- [ ] Una clase de prueba con `@Getter` genera accesores fluidos (`name()`).\n- [ ] Un `@Value.Immutable` de prueba genera su builder.\n- [ ] `docs/adr/0003-lombok-immutables.md` actualizado con las versiones elegidas."
+    },
+    {
+      "title": "Documentar el glosario y la arquitectura en capas de la fase 1",
+      "type": "docs",
+      "layers": ["docs"],
+      "body": "## Objetivo\n\nDejar por escrito el lenguaje ubicuo y el diseño objetivo de la fase 1 antes de escribir código.\n\n## Alcance\n\n- Completar `docs/dominio/glosario.md` con los términos y reglas de negocio del dominio actual (cuenta corriente, titular, segmento, importe, movimiento, depósito mínimo, descubierto…).\n- Completar `docs/arquitectura/fase-1-capas.md`: paquetes, responsabilidades y reglas de dependencia, con un diagrama Mermaid.\n- ADR `docs/adr/0004-arquitectura-en-capas.md` (contexto, decisión, consecuencias).\n\n## Criterios de aceptación\n\n- [ ] Cada clase de `domain.model` tiene su término en el glosario.\n- [ ] El diagrama muestra las cuatro capas y el sentido de las dependencias.\n- [ ] El ADR enlaza con los capítulos 14, 17 y 18 del curso (capas, layer cake, anemic translation)."
+    },
+    {
+      "title": "Persistencia en memoria de las cuentas corrientes",
+      "type": "feature",
+      "layers": ["persistence"],
+      "body": "## Objetivo\n\nGuardar y recuperar cuentas corrientes en la capa `persistence` con un repositorio **en memoria** (simulado).\n\n## Alcance\n\n- `persistence.InMemoryCheckingAccountRepository` (clase concreta, sin interfaz: en la fase 1 no hay puertos): `save`, `findById`, `findByAccountNumber`, `findAll`.\n- Almacenamiento en un `ConcurrentHashMap`, componente de Spring.\n- Un repositorio por agregado: los movimientos se guardan dentro de la cuenta.\n\n## Criterios de aceptación\n\n- [ ] Tests JUnit: guardar y recuperar por id y por número de cuenta; `findById` de una cuenta inexistente devuelve `Optional.empty()`.\n- [ ] `domain` no depende de `persistence`; `persistence` solo depende de `domain` (regla del ADR 0004).\n- [ ] `./mvnw verify` en verde."
+    },
+    {
+      "title": "Servicio de aplicación: abrir, consultar y listar cuentas",
+      "type": "feature",
+      "layers": ["application"],
+      "body": "## Objetivo\n\nPrimer caso de uso de la capa `application`: abrir una cuenta para un titular nuevo, consultarla y listarlas.\n\n## Alcance\n\n- `application.CheckingAccountService` (`@Service`, `@RequiredArgsConstructor`).\n- Commands y vistas con **Immutables**: `OpenAccountCommand`, `AccountSummary`, `AccountDetails` (con movimientos).\n- Error de aplicación `AccountNotFoundException` cuando la cuenta no existe.\n- El servicio orquesta; las reglas (depósito mínimo, divisa) siguen en el agregado.\n\n## Criterios de aceptación\n\n- [ ] Tests JUnit del servicio con el repositorio en memoria real: abrir con depósito válido, rechazar depósito inferior al mínimo (`InsufficientInitialDepositException`), consultar inexistente.\n- [ ] El servicio no devuelve agregados a quien lo llama, solo vistas.\n- [ ] `./mvnw verify` en verde."
+    },
+    {
+      "title": "Ingresos y retiradas de efectivo",
+      "type": "feature",
+      "layers": ["application"],
+      "body": "## Objetivo\n\nCasos de uso de ingreso (`deposit`) y retirada (`tryWithdraw`) sobre una cuenta existente.\n\n## Alcance\n\n- Commands `DepositCommand` y `WithdrawCommand` (Immutables).\n- El servicio carga la cuenta, invoca el agregado y la guarda. Una retirada rechazada no es un error: devuelve el movimiento con estado `REJECTED`.\n\n## Criterios de aceptación\n\n- [ ] Tests parametrizados (`@ParameterizedTest`) de retiradas para cliente minorista y de alto patrimonio en el límite del descubierto.\n- [ ] Importes no positivos o en otra divisa se rechazan con la excepción del dominio.\n- [ ] `./mvnw verify` en verde."
+    },
+    {
+      "title": "Transferencias entre cuentas con un servicio de dominio",
+      "type": "feature",
+      "layers": ["domain", "application"],
+      "body": "## Objetivo\n\nTransferir dinero entre dos cuentas. La regla abarca dos agregados, así que vive en un **servicio de dominio** (Lab 26 del curso).\n\n## Alcance\n\n- `domain.service.MoneyTransferService`: retira de origen y, solo si se aprueba, ingresa en destino; prohíbe transferir a la misma cuenta.\n- Caso de uso `transfer` en `CheckingAccountService` con `TransferCommand` (Immutables).\n\n## Criterios de aceptación\n\n- [ ] Tests del servicio de dominio sin Spring: transferencia aprobada, rechazada por saldo y a la misma cuenta.\n- [ ] Test del caso de uso: ambas cuentas quedan guardadas con sus nuevos saldos.\n- [ ] `check-domain.mjs` sin errores y `./mvnw verify` en verde."
+    },
+    {
+      "title": "API REST de cuentas con traducción centralizada de errores",
+      "type": "feature",
+      "layers": ["presentation"],
+      "body": "## Objetivo\n\nExponer los casos de uso por HTTP en `presentation.rest`.\n\n## Alcance\n\n- `GET /api/accounts`, `GET /api/accounts/{id}`, `POST /api/accounts`, `POST /api/accounts/{id}/deposits`, `POST /api/accounts/{id}/withdrawals`, `POST /api/transfers`.\n- DTOs de petición/respuesta (Immutables; si Jackson 3 da problemas, `record` y se documenta en el ADR 0003).\n- `@RestControllerAdvice` único que traduce errores a HTTP: cuenta inexistente → 404, regla de negocio → 422, validación → 400 (`ProblemDetail`).\n- Contrato en `docs/api/openapi.yaml`.\n\n## Criterios de aceptación\n\n- [ ] Tests `@WebMvcTest` de cada endpoint con el servicio simulado (Mockito).\n- [ ] `npx @redocly/cli lint docs/api/openapi.yaml` sin errores.\n- [ ] `curl` de abrir cuenta → 201 y de depósito inválido → 422."
+    },
+    {
+      "title": "Interfaz web con Thymeleaf: listado y alta de cuentas",
+      "type": "feature",
+      "layers": ["presentation"],
+      "body": "## Objetivo\n\nPrimera pantalla web en `presentation.web` con Thymeleaf (ver ADR 0005).\n\n## Alcance\n\n- Dependencia `spring-boot-starter-thymeleaf`.\n- `GET /` listado de cuentas (número, titular, saldo) y formulario de alta (`GET/POST /accounts/new`) con validación y mensajes de error del dominio.\n- Plantilla base con un CSS mínimo propio, sin frameworks de frontend.\n\n## Criterios de aceptación\n\n- [ ] Tests `@WebMvcTest`: el listado renderiza las cuentas; un alta inválida vuelve al formulario con el mensaje de error.\n- [ ] `./mvnw spring-boot:run` y en el navegador se puede abrir una cuenta y verla en el listado."
+    },
+    {
+      "title": "Interfaz web: detalle de cuenta, movimientos y operaciones",
+      "type": "feature",
+      "layers": ["presentation"],
+      "body": "## Objetivo\n\nPantalla de detalle de una cuenta con sus movimientos y formularios de ingreso, retirada y transferencia.\n\n## Alcance\n\n- `GET /accounts/{id}`: datos de la cuenta y tabla de movimientos (tipo, importe, estado, fecha).\n- Formularios `POST` de ingreso, retirada y transferencia con patrón Post/Redirect/Get y mensajes flash (aprobada / rechazada).\n\n## Criterios de aceptación\n\n- [ ] Tests `@WebMvcTest` de cada formulario, incluido una retirada rechazada que se muestra como tal.\n- [ ] Una cuenta inexistente muestra una página 404 propia."
+    },
+    {
+      "title": "Datos de demostración al arrancar la aplicación",
+      "type": "feature",
+      "layers": ["application"],
+      "body": "## Objetivo\n\nQue la aplicación arranque con cuentas de ejemplo para poder probarla (equivalente al `DomainModelRunner` del curso).\n\n## Alcance\n\n- `ApplicationRunner` activo solo con el perfil `demo` (y en `spring-boot:run` por defecto) que abre 3 cuentas (minorista, alto patrimonio) usando **los casos de uso**, no el repositorio directamente.\n- Builder de datos de test con `@Builder` de Lombok en `src/test/.../support` para los tests que necesiten cuentas.\n\n## Criterios de aceptación\n\n- [ ] Con el perfil `demo`, `GET /api/accounts` devuelve 3 cuentas.\n- [ ] Sin el perfil, los tests no cargan los datos de demostración."
+    },
+    {
+      "title": "Reglas de ArchUnit para la arquitectura en capas",
+      "type": "test",
+      "layers": ["config"],
+      "body": "## Objetivo\n\nQue la arquitectura en capas se verifique automáticamente (capítulo 18.1 del curso).\n\n## Alcance\n\n- `LayeredArchitectureTests` con `layeredArchitecture()`: `presentation` → `application` → (`domain`, `persistence`), `persistence` → `domain`, y nada depende de `presentation` ni de `application` desde abajo.\n- Regla: el dominio no tiene métodos públicos `set*`.\n- Regla: los controladores no acceden al repositorio.\n\n## Criterios de aceptación\n\n- [ ] Las reglas pasan sobre el código actual.\n- [ ] Cada regla se ha validado rompiéndola temporalmente (se indica en la PR).\n- [ ] `./mvnw verify` en verde."
+    },
+    {
+      "title": "Cerrar la fase 1: documentación final y etiqueta v1-monolito",
+      "type": "docs",
+      "layers": ["docs"],
+      "body": "## Objetivo\n\nDejar la fotografía monolítica documentada y congelada, y preparar el inicio de la fase 2.\n\n## Alcance\n\n- Actualizar `README.md` y `docs/arquitectura/fase-1-capas.md` con el estado final (diagrama, endpoints, pantallas, cómo arrancar).\n- `docs/ia/arquitectura-ia.md`: qué skills, agentes y hooks se usaron en la fase y con qué resultado (enlaces a planes y PRs).\n- Etiqueta `v1-monolito` sobre `Monolithic`.\n- Crear la rama `Hexagonal` desde `Monolithic` y hacerla la rama por defecto del repo.\n\n## Criterios de aceptación\n\n- [ ] Todas las issues del milestone cerradas.\n- [ ] `git tag v1-monolito` publicado y rama `Hexagonal` creada.\n- [ ] `./mvnw verify` en verde en `Monolithic`."
+    }
+  ]
+}

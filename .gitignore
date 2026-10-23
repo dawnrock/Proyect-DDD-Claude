@@ -31,3 +31,11 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Secretos locales ###
+.env
+.env.*
+
+### Claude Code ###
+.claude/worktrees/
+.claude/settings.local.json

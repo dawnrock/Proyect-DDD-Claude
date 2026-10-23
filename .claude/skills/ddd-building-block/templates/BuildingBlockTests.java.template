@@ -1,0 +1,39 @@
+package {{package}};
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+class {{Name}}Tests {
+
+    @Nested
+    @DisplayName("{{Regla de negocio 1}}")
+    class {{Regla1}} {
+
+        @Test
+        @DisplayName("{{Frase completa de lo que se espera}}")
+        void {{frase_en_snake_case}}() {
+            // Given / When / Then
+        }
+    }
+
+    @ParameterizedTest(name = "{0} → {1}")
+    @CsvSource({
+        "{{entrada}}, {{esperado}}",
+    })
+    @DisplayName("{{Casos límite}}")
+    void {{casos_limite}}(String input, String expected) {
+    }
+
+    @Test
+    @DisplayName("{{No se puede crear un ... inválido}}")
+    void {{no_se_puede_crear_invalido}}() {
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> {{Name}}.of(null));
+    }
+}

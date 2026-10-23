@@ -1,0 +1,20 @@
+package com.pronoide.ddd.adapter.out.{{technology}};
+
+import {{portPackage}}.{{PortName}};
+
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Adaptador de salida que implementa {@link {{PortName}}} con {{tecnología}}.
+ * {{Si es simulado: "Implementación simulada (en memoria) para el proyecto de práctica."}}
+ */
+@Slf4j
+class {{Technology}}{{PortName}} implements {{PortName}} {
+
+    @Override
+    public {{ReturnType}} {{operation}}({{ParamType}} {{param}}) {
+        log.debug("{{operation}} {}", {{param}});
+        // Traduce entre el modelo y la tecnología; sin reglas de negocio aquí.
+        throw new UnsupportedOperationException("TODO");
+    }
+}

@@ -1,0 +1,38 @@
+package {{package}};
+
+import java.util.Objects;
+import java.util.UUID;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+/**
+ * {{Descripción en español de la entidad o raíz de agregado}}.
+ */
+@Getter
+@ToString
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class {{Name}} {
+
+    @EqualsAndHashCode.Include
+    private final UUID id;
+    private {{Type}} {{field}};
+
+    private {{Name}}(UUID id, {{Type}} {{field}}) {
+        this.id = id;
+        this.{{field}} = {{field}};
+    }
+
+    /** Factoría con un verbo del lenguaje ubicuo (open, register, issue...). */
+    public static {{Name}} {{factoryVerb}}({{Type}} {{field}}) {
+        Objects.requireNonNull({{field}}, "{{El campo}} es obligatorio");
+        return new {{Name}}(UUID.randomUUID(), {{field}});
+    }
+
+    /** Cambio de estado mediante un método de negocio, nunca con un setter. */
+    public void {{businessMethod}}({{Type}} new{{Field}}) {
+        // Comprueba la invariante antes de cambiar el estado.
+        this.{{field}} = Objects.requireNonNull(new{{Field}}, "{{El campo}} es obligatorio");
+    }
+}

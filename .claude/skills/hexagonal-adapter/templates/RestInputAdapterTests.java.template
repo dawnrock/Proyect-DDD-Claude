@@ -1,0 +1,34 @@
+package com.pronoide.ddd.adapter.in.rest;
+
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import com.pronoide.ddd.application.{{InputPort}};
+
+@WebMvcTest({{Resource}}Controller.class)
+class {{Resource}}ControllerTests {
+
+    @Autowired
+    private MockMvc mvc;
+
+    @MockitoBean
+    private {{InputPort}} {{inputPort}};
+
+    @Test
+    @DisplayName("{{Devuelve ... cuando ...}}")
+    void {{devuelve_cuando}}() throws Exception {
+        given({{inputPort}}.{{query}}("id")).willReturn({{fixture}});
+
+        mvc.perform(get("/api/{{resource}}/id"))
+           .andExpect(status().isOk())
+           .andExpect(jsonPath("$.{{field}}").value("{{valor}}"));
+    }
+}
