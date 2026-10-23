@@ -191,7 +191,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
 - **Acceptance criteria:**
   - [x] Test green. `curl` → 201. Browser check done.
 
-### [ ] T11 — Documentation (~10 min)
+### [x] T11 — Documentation (~10 min)
 
 - **Side:** both
 - **Layer:** docs
@@ -204,8 +204,8 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   4. `fase-1-capas.md`: add "Implemented in #5".
   5. Project status: #5 done; next step `/plan-feature 6`; history row.
 - **Acceptance criteria:**
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors or unused-component warnings.
-  - [ ] Glossary and status updated.
+  - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors or unused-component warnings.
+  - [x] Glossary and status updated.
 
 ### [x] T12 — Review fixes (~10 min)
 

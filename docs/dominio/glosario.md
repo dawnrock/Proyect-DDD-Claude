@@ -21,6 +21,7 @@ Términos del dominio de cuentas corrientes. El código usa el nombre en inglés
 | Error de dominio | `DomainException` | Excepción de dominio (abstracta) | Base de los errores de negocio. Su mensaje, en español, se muestra tal cual al usuario. |
 | Depósito inicial insuficiente | `InsufficientInitialDepositException` | Excepción de dominio | La cuenta se intenta abrir por debajo del depósito mínimo (R1). |
 | Divisa distinta | `CurrencyMismatchException` | Excepción de dominio | Se combinan importes de divisas distintas o se opera en una divisa distinta a la de la cuenta (R4). |
+| Número de cuenta duplicado | `DuplicateAccountNumberException` | Excepción de dominio | Se intenta abrir una cuenta con un número que ya usa otra (R16). La lanza el caso de uso "abrir cuenta", que es quien consulta el repositorio. |
 
 Los argumentos nulos o inválidos que no son reglas de negocio (por ejemplo, un importe no positivo o un IBAN mal formado) se rechazan con `IllegalArgumentException` o `NullPointerException`.
 
@@ -45,6 +46,7 @@ Cada regla cita el test que la demuestra (`src/test/java/com/pronoide/ddd/domain
 | R13 | Un importe es inmutable: las operaciones devuelven instancias nuevas; no existe sin divisa | `MonetaryAmountTests#las_operaciones_devuelven_nuevas_instancias`, `MonetaryAmountTests#un_importe_no_puede_construirse_sin_divisa` |
 | R14 | El número de cuenta es un IBAN español: `ES` seguido de 22 dígitos, normalizado sin espacios y en mayúsculas. **No se valida el dígito de control.** | `AccountNumberTests#el_numero_de_cuenta_se_normaliza`, `AccountNumberTests#un_iban_con_formato_incorrecto_no_llega_a_construirse` |
 | R15 | Un titular conserva su identidad aunque cambien sus atributos, y dos titulares con los mismos datos son distintos | `AccountHolderTests#un_titular_mantiene_su_identidad_aunque_cambien_sus_atributos`, `AccountHolderTests#dos_titulares_con_los_mismos_datos_son_entidades_distintas` |
+| R16 | No se puede abrir una cuenta con un número que ya usa otra, aunque venga con espacios o en minúsculas | `CheckingAccountServiceTests#un_numero_de_cuenta_en_uso_se_rechaza_aunque_venga_con_espacios_o_en_minusculas`, `DuplicateAccountNumberExceptionTests#un_numero_de_cuenta_duplicado_es_una_regla_de_negocio_incumplida` |
 
 ### Pendientes de alinear con el glosario
 
@@ -60,7 +62,7 @@ Cada regla cita el test que la demuestra (`src/test/java/com/pronoide/ddd/domain
 | ------- | ------------ | ---- | ---------- |
 | Repositorio de cuentas | `InMemoryCheckingAccountRepository` | Repositorio del agregado (en memoria, simulado) | Guarda y recupera cuentas corrientes completas, con sus movimientos: `save` (guarda o sustituye por id), `findById`, `findByAccountNumber` y `findAll` (ordenadas por número de cuenta, lista no modificable). **El número de cuenta es único**: guardar otra cuenta con un número ya usado lanza `IllegalStateException`, como un índice único en una base de datos. Guarda referencias, no copias, así que los casos de uso deben llamar siempre a `save` después de modificar una cuenta. Tests: `InMemoryCheckingAccountRepositoryTests`. |
 
-**Número de cuenta único como regla de negocio:** el repositorio lo vigila como una restricción técnica (`IllegalStateException`, que no es una `DomainException`). El caso de uso "abrir cuenta" (#5) debe comprobarlo antes con `findByAccountNumber` y lanzar una excepción de dominio, para que la presentación lo traduzca (D4) en lugar de devolver un error 500.
+**Número de cuenta único como regla de negocio:** el repositorio lo vigila como una restricción técnica (`IllegalStateException`, que no es una `DomainException`). El caso de uso "abrir cuenta" (#5) lo comprueba antes con `findByAccountNumber` y lanza `DuplicateAccountNumberException` (R16), que la presentación traduce (D4) a 422 o a un mensaje en el formulario. Limitación conocida: dos altas simultáneas con el mismo número pueden pasar la comprobación, y entonces `save` lanza `IllegalStateException` (500); se acepta en un repositorio en memoria de práctica.
 
 ## Aplicación y presentación
 
@@ -69,6 +71,11 @@ Cada regla cita el test que la demuestra (`src/test/java/com/pronoide/ddd/domain
 | Recurso inexistente | `NotFoundException` (`application`) | Error de aplicación (abstracto) | Base de los errores "lo que se pide no existe". No es una regla de negocio: lo decide el caso de uso al consultar la persistencia. La API REST lo traduce a **404** con el título "Recurso inexistente"; sus subclases concretas (por ejemplo, `AccountNotFoundException`, #5) aportan el mensaje. |
 | Regla de negocio incumplida | `DomainException` → 422 | Traducción HTTP | Título del `ProblemDetail` con el que la API devuelve cualquier excepción de dominio. |
 | Petición no válida | `IllegalArgumentException` y validación → 400 | Traducción HTTP | Título del `ProblemDetail` para formatos, validaciones o argumentos que el dominio rechaza; la validación añade `errors` con un mensaje por campo. |
+| Servicio de cuentas | `CheckingAccountService` | Servicio de aplicación | Casos de uso abrir (`openAccount`), consultar (`findAccount`) y listar (`listAccounts`) cuentas. Carga y guarda el agregado; sin reglas de negocio salvo la comprobación de R16. Contrato: `docs/contracts/open-query-list-accounts.md`. |
+| Cuenta inexistente | `AccountNotFoundException` (hereda de `NotFoundException`) | Error de aplicación | Se consulta una cuenta con un id que no existe → 404. |
+| Abrir cuenta (orden) | `OpenAccountCommand` | Command de aplicación | Número de cuenta, titular, segmento, depósito inicial y divisa (`EUR` por defecto). Valida sus campos al construirse (`IllegalArgumentException`). |
+| Resumen y detalle de cuenta | `AccountSummary`, `AccountDetails` | Vistas de aplicación | Lo que la presentación ve de una cuenta, sin exponer el agregado; el detalle incluye el segmento y los movimientos. |
+| Movimiento (vista) | `TransactionSummary` | Vista de aplicación | Tipo, importe, divisa, instante y estado de un movimiento. |
 
 ## Términos previstos
 
@@ -76,8 +83,5 @@ Llegan con issues posteriores de la fase 1; se pasan a la tabla principal cuando
 
 | Término | En el código | Tipo | Issue |
 | ------- | ------------ | ---- | ----- |
-| Cuenta inexistente | `AccountNotFoundException` (hereda de `NotFoundException`) | Error de aplicación | #5 |
-| Abrir cuenta (orden) | `OpenAccountCommand` | Command de aplicación | #5 |
-| Resumen y detalle de cuenta | `AccountSummary`, `AccountDetails` | Vistas de aplicación | #5 |
 | Ingreso / retirada (orden) | `DepositCommand`, `WithdrawCommand` | Commands de aplicación | #6 |
 | Transferencia | `MoneyTransferService`, `TransferCommand` | Servicio de dominio y command | #7 |
