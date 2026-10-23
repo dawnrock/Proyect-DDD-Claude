@@ -1,86 +1,87 @@
-# Plan: <título breve>
+# Plan: <short title>
 
-- **Issue:** [#N](<URL de la issue>)
-- **Tipo:** feature | fix | refactor
-- **Fase:** 1 · Monolito en capas | 2 · Arquitectura hexagonal
-- **Rama base:** `Monolithic` | `Hexagonal`
-- **Fecha:** AAAA-MM-DD
-- **Estado:** borrador
-- **Estimación total:** ~N min (N tareas)
+- **Issue:** [#N](<issue URL>)
+- **Type:** feature | fix | refactor
+- **Phase:** 1 · Layered monolith | 2 · Hexagonal architecture
+- **Base branch:** `Monolithic` | `Hexagonal`
+- **Date:** YYYY-MM-DD
+- **Status:** draft
+- **Total estimate:** ~N min (N tasks)
 
-## Objetivo
+## Goal
 
-<!-- Qué se quiere conseguir y por qué, en 2-4 frases. Fix: comportamiento actual vs. esperado. Refactor: qué mejora y qué NO debe cambiar. -->
+<!-- What we want to achieve and why, in 2-4 sentences. Fix: current vs. expected behaviour. Refactor: what improves and what must NOT change. -->
 
-### Fuera de alcance
+### Out of scope
 
 - ...
 
-## Contexto
+## Context
 
-<!-- Archivos y capas afectados, bloques DDD implicados (VO, entidad, agregado, evento, factoría, servicio, puerto, adaptador) y decisiones técnicas. -->
+<!-- Affected files and layers, DDD building blocks involved (VO, entity, aggregate, event, factory, service, port, adapter) and technical decisions. -->
 
-| Capa / paquete | Archivo | Cambio |
-| -------------- | ------- | ------ |
+| Layer / package | File | Change |
+| --------------- | ---- | ------ |
 | `domain.model` | `src/main/java/com/pronoide/ddd/domain/model/...` | ... |
 
-## Tareas
+## Tasks
 
-<!-- Cada tarea: 5-10 min, una capa, 1-2 archivos + test, deja ./mvnw verify en verde. De dentro hacia fuera.
-     Si la issue toca back y web: empieza por "T0 — Contrato" (Lado: ambos, ver implement-plan-team/assets/contract-template.md),
-     añade **Lado:** a cada tarea y haz que las de back y web dependan solo de T0. -->
+<!-- Each task: 5-10 min, one layer, 1-2 files + test, leaves ./mvnw verify green. Inside out.
+     If the issue touches back and web: start with "T0 — Contract" (Side: both, see implement-plan-team/assets/contract-template.md),
+     add **Side:** to every task and make back and web tasks depend only on T0. -->
 
-### [ ] T0 — Contrato (~10 min) <!-- solo si toca back y web; si no, bórrala -->
+### [ ] T0 — Contract (~10 min) <!-- only if it touches back and web; otherwise delete it -->
 
-- **Lado:** ambos
-- **Capa:** application · docs
-- **Archivos:** `docs/contracts/<slug>.md`, tipos del contrato en `application`, fragmento de `docs/api/openapi.yaml`
-- **Depende de:** —
-- **Qué hacer:**
-  1. Redactar el contrato y crear los tipos sin lógica; backend-dev y web-dev lo revisan y acuerdan.
-- **Criterios de aceptación:**
-  - [ ] Contrato acordado y congelado en un commit; `./mvnw verify` compila contra él.
+- **Side:** both
+- **Layer:** application · docs
+- **Files:** `docs/contracts/<slug>.md`, contract types in `application`, fragment of `docs/api/openapi.yaml`
+- **Depends on:** —
+- **What to do:**
+  1. Write the contract and create the types without logic; backend-dev and web-dev review and agree on it.
+- **Acceptance criteria:**
+  - [ ] Contract agreed and frozen in a commit; `./mvnw verify` compiles against it.
 
-### [ ] T1 — <título> (~5 min)
+### [ ] T1 — <title> (~5 min)
 
-- **Lado:** back | web | ambos <!-- solo si el plan tiene T0 · Contrato -->
-- **Capa:** domain | application | persistence | presentation | adapter.in | adapter.out | config | tests | docs | build
-- **Archivos:** `src/...`
-- **Depende de:** —
-- **Qué hacer:**
+- **Side:** back | web | both <!-- only if the plan has T0 · Contract -->
+- **Layer:** domain | application | persistence | presentation | adapter.in | adapter.out | config | tests | docs | build
+- **Files:** `src/...`
+- **Depends on:** —
+- **What to do:**
   1. ...
-- **Criterios de aceptación:**
+- **Acceptance criteria:**
   - [ ] ...
 
-### [ ] T2 — <título> (~10 min)
+### [ ] T2 — <title> (~10 min)
 
-- **Capa:** ...
-- **Archivos:** `src/...`
-- **Depende de:** T1
-- **Qué hacer:**
+- **Layer:** ...
+- **Files:** `src/...`
+- **Depends on:** T1
+- **What to do:**
   1. ...
-- **Criterios de aceptación:**
+- **Acceptance criteria:**
   - [ ] ...
 
-## Criterios de aceptación globales
+## Global acceptance criteria
 
-**Específicos:**
+**Specific:**
 
 - [ ] ...
 
-**Fijos:**
+**Fixed:**
 
-- [ ] Todas las tareas y sus criterios están marcados como cumplidos.
-- [ ] `./mvnw verify` termina en `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` arranca y `GET /actuator/health` responde `{"status":"UP"}`.
-- [ ] Se respeta la arquitectura de la fase (capas: cada capa solo usa la inferior / hexagonal: las dependencias apuntan al hexágono), verificado por ArchUnit.
-- [ ] El dominio no depende de Spring, `jakarta` ni `org.immutables`, y no usa `@Data`, `@Setter`, `@Builder` ni `@AllArgsConstructor` (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` sin errores).
-- [ ] Los tests nuevos siguen `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` en español).
-- [ ] No se añaden dependencias fuera de las previstas (o se justifica en un ADR).
-- [ ] Si se toca la API: `docs/api/openapi.yaml` refleja los cambios y `npx @redocly/cli lint docs/api/openapi.yaml` no da errores (si no, "no aplica").
-- [ ] Si aparece un término de negocio nuevo, está en `docs/dominio/glosario.md`.
-- [ ] `docs/ia/estado-del-proyecto.md` actualizado: estado de la issue, siguiente paso, pendientes nuevos y fila del historial.
+- [ ] All tasks and their criteria are checked.
+- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [ ] The phase architecture is respected (layers: each layer only uses the one below / hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [ ] The domain does not depend on Spring, `jakarta` or `org.immutables`, and does not use `@Data`, `@Setter`, `@Builder` or `@AllArgsConstructor` (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
+- [ ] If the API changes: `docs/api/openapi.yaml` reflects it and `npx @redocly/cli lint docs/api/openapi.yaml` has no errors (otherwise, "n/a").
+- [ ] Any new business term is in `docs/dominio/glosario.md`.
+- [ ] Documentation written or changed by this plan is in English.
+- [ ] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
 
-## Riesgos y preguntas abiertas
+## Risks and open questions
 
 - ...

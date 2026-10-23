@@ -1,55 +1,55 @@
-# Contrato: <funcionalidad>
+# Contract: <feature>
 
-- **Issue:** [#N](<URL>) · **Plan:** `docs/plans/AAAA-MM-DD-<slug>.md`
-- **Estado:** borrador | acordado | congelado en `<hash>`
-- **Acordado por:** backend-dev, web-dev (rondas: N)
+- **Issue:** [#N](<URL>) · **Plan:** `docs/plans/YYYY-MM-DD-<slug>.md`
+- **Status:** draft | agreed | frozen at `<hash>`
+- **Agreed by:** backend-dev, web-dev (rounds: N)
 
-## Servicio de aplicación
+## Application service
 
-Fase 1: clase concreta en `application`. Fase 2: puertos de entrada `*Commands` / `*Queries`.
+Phase 1: concrete class in `application`. Phase 2: input ports `*Commands` / `*Queries`.
 
 ```java
-public class <Nombre>Service {
-    <Vista> <operación>(<Command> command);   // qué hace, en una frase
-    List<<Vista>> <consulta>();
+public class <Name>Service {
+    <View> <operation>(<Command> command);   // what it does, in one sentence
+    List<<View>> <query>();
 }
 ```
 
-## Commands (entrada)
+## Commands (input)
 
-| Command (`*Def`) | Campo | Tipo | Obligatorio | Reglas |
-| ---------------- | ----- | ---- | ----------- | ------ |
-| `<Command>Def` | `holderName` | `String` | sí | no vacío |
+| Command (`*Def`) | Field | Type | Required | Rules |
+| ---------------- | ----- | ---- | -------- | ----- |
+| `<Command>Def` | `holderName` | `String` | yes | not blank |
 
-## Vistas (salida)
+## Views (output)
 
-| Vista (`*Def`) | Campo | Tipo | Notas |
-| -------------- | ----- | ---- | ----- |
-| `<Vista>Def` | `accountNumber` | `String` | IBAN normalizado |
+| View (`*Def`) | Field | Type | Notes |
+| ------------- | ----- | ---- | ----- |
+| `<View>Def` | `accountNumber` | `String` | normalized IBAN |
 
-Las vistas no exponen agregados ni entidades del dominio.
+Views never expose domain aggregates or entities.
 
-## Errores
+## Errors
 
-| Excepción | Cuándo | Web (qué ve el usuario) | REST (código + `ProblemDetail.title`) |
-| --------- | ------ | ----------------------- | ------------------------------------- |
-| `InsufficientInitialDepositException` | depósito < mínimo | vuelve al formulario con el mensaje | 422 |
-| `AccountNotFoundException` | id inexistente | página 404 propia | 404 |
+| Exception | When | Web (what the user sees) | REST (status + `ProblemDetail.title`) |
+| --------- | ---- | ------------------------ | ------------------------------------- |
+| `InsufficientInitialDepositException` | deposit < minimum | back to the form with the message | 422 |
+| `AccountNotFoundException` | unknown id | custom 404 page | 404 |
 
-## REST (fragmento de `docs/api/openapi.yaml`)
+## REST (fragment of `docs/api/openapi.yaml`)
 
-| Método y ruta | Petición | Respuesta |
-| ------------- | -------- | --------- |
+| Method and path | Request | Response |
+| --------------- | ------- | -------- |
 | `POST /api/accounts` | `OpenAccountRequest` | 201 + `AccountSummary` |
 
-## Pantallas (web)
+## Screens (web)
 
-| Ruta | Usa | Muestra |
-| ---- | --- | ------- |
-| `GET /` | `<consulta>()` | tabla de cuentas |
+| Path | Uses | Shows |
+| ---- | ---- | ----- |
+| `GET /` | `<query>()` | accounts table |
 
-## Cambios
+## Changes
 
-<!-- Cada renegociación: fecha, quién la pidió, qué cambió y por qué. -->
+<!-- Each renegotiation: date, who asked, what changed and why. -->
 
 - —

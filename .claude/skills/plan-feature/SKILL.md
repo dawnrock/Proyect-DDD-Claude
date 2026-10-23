@@ -43,8 +43,8 @@ Cada tarea debe poder hacerse en **5-10 minutos**:
 - Si cambia la arquitectura, incluye la tarea de la regla de ArchUnit y su validación rompiéndola.
 - Si toca la API, añade una tarea de capa `docs` tras la última de REST: actualizar `docs/api/openapi.yaml` y validarlo con `npx @redocly/cli lint docs/api/openapi.yaml`.
 - **Si la issue toca back y web** (etiquetas `lado:back` y `lado:web`, o `equipo`), el plan se implementará en equipo con `implement-plan-team`:
-  - La primera tarea es **T0 · Contrato** (`Lado: ambos`): servicio de aplicación, commands, vistas, errores y fragmento de OpenAPI, según `.claude/skills/implement-plan-team/assets/contract-template.md`. Las demás dependen de T0.
-  - Cada tarea indica `**Lado:** back | web | ambos`. Las de `back` y `web` no deben depender entre sí (solo del contrato), para poder hacerse en paralelo; las de `ambos` (integración, test de extremo a extremo) van al final.
+  - La primera tarea es **T0 · Contract** (`Side: both`): servicio de aplicación, commands, vistas, errores y fragmento de OpenAPI, según `.claude/skills/implement-plan-team/assets/contract-template.md`. Las demás dependen de T0.
+  - Cada tarea indica `**Side:** back | web | both`. Las de `back` y `web` no deben depender entre sí (solo del contrato), para poder hacerse en paralelo; las de `both` (integración, test de extremo a extremo) van al final.
   - Recomienda `/implement-plan-team <número>` en lugar de `/implement-plan`.
 
 ### 5. Criterios de aceptación
@@ -57,7 +57,7 @@ Cada tarea debe poder hacerse en **5-10 minutos**:
 - Rellena [template.md](assets/template.md) respetando sus secciones y quita los comentarios `<!-- -->`.
 - Guárdalo en `docs/plans/AAAA-MM-DD-<slug>.md` (slug en inglés, kebab-case).
 - Cabecera: issue con número y URL, fase y rama base.
-- Plan en español; nombres de archivos, clases y código en inglés.
+- Plan en inglés (es documentación, ver `CLAUDE.md`), igual que los nombres de archivos, clases y código. El resumen al usuario, en español.
 
 ### 7. Publicarlo en la issue
 
@@ -77,4 +77,4 @@ Si responde que no está configurado o falla, continúa y menciónalo en el resu
 
 ### 9. Presentarlo
 
-Resume objetivo, tareas con estimación, ruta del archivo, URL del comentario, si se avisó por Telegram y las preguntas abiertas. Pregunta si quiere ajustar algo o implementarlo con `/implement-plan <número>` (o `/implement-plan-team <número>` si el plan tiene T0 · Contrato). No empieces a implementar sin su confirmación.
+Resume objetivo, tareas con estimación, ruta del archivo, URL del comentario, si se avisó por Telegram y las preguntas abiertas. Pregunta si quiere ajustar algo o implementarlo con `/implement-plan <número>` (o `/implement-plan-team <número>` si el plan tiene T0 · Contract). No empieces a implementar sin su confirmación.
