@@ -42,6 +42,10 @@ Cada tarea debe poder hacerse en **5-10 minutos**:
 - Todo comportamiento nuevo lleva su test JUnit en la misma tarea (TDD, ver `src/test/CLAUDE.md`).
 - Si cambia la arquitectura, incluye la tarea de la regla de ArchUnit y su validación rompiéndola.
 - Si toca la API, añade una tarea de capa `docs` tras la última de REST: actualizar `docs/api/openapi.yaml` y validarlo con `npx @redocly/cli lint docs/api/openapi.yaml`.
+- **Si la issue toca back y web** (etiquetas `lado:back` y `lado:web`, o `equipo`), el plan se implementará en equipo con `implement-plan-team`:
+  - La primera tarea es **T0 · Contrato** (`Lado: ambos`): servicio de aplicación, commands, vistas, errores y fragmento de OpenAPI, según `.claude/skills/implement-plan-team/assets/contract-template.md`. Las demás dependen de T0.
+  - Cada tarea indica `**Lado:** back | web | ambos`. Las de `back` y `web` no deben depender entre sí (solo del contrato), para poder hacerse en paralelo; las de `ambos` (integración, test de extremo a extremo) van al final.
+  - Recomienda `/implement-plan-team <número>` en lugar de `/implement-plan`.
 
 ### 5. Criterios de aceptación
 
@@ -73,4 +77,4 @@ Si responde que no está configurado o falla, continúa y menciónalo en el resu
 
 ### 9. Presentarlo
 
-Resume objetivo, tareas con estimación, ruta del archivo, URL del comentario, si se avisó por Telegram y las preguntas abiertas. Pregunta si quiere ajustar algo o implementarlo con `/implement-plan <número>`. No empieces a implementar sin su confirmación.
+Resume objetivo, tareas con estimación, ruta del archivo, URL del comentario, si se avisó por Telegram y las preguntas abiertas. Pregunta si quiere ajustar algo o implementarlo con `/implement-plan <número>` (o `/implement-plan-team <número>` si el plan tiene T0 · Contrato). No empieces a implementar sin su confirmación.

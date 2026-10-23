@@ -8,5 +8,6 @@
 | 0004 | Arquitectura en capas de la fase 1 | Pendiente (issue de la fase 1) |
 | [0005](0005-thymeleaf.md) | Interfaz web con Thymeleaf | Aceptada |
 | 0006 | Arquitectura hexagonal de la fase 2 | Pendiente (issue de la fase 2) |
+| [0007](0007-equipo-back-web-contrato-primero.md) | Equipo back/web con el contrato primero | Aceptada |
 
 Formato: contexto, decisión, alternativas y consecuencias.

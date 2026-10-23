@@ -54,6 +54,7 @@ ArchUnit no ve las anotaciones de Lombok (retención `SOURCE`): lo comprueba `no
 2. `/plan-feature <n>` genera el plan en `docs/plans/` y lo publica en la issue. No se implementa sin plan aprobado.
 3. `/implement-plan <n>` lo implementa en un worktree con TDD, un commit por tarea, y abre la PR contra la rama de la fase (`Monolithic` o `Hexagonal`), nunca contra `master`.
 4. Commits con `/commit` (Conventional Commits en español).
+5. **Back + web en la misma issue** (etiqueta `equipo`): `/implement-plan-team <n>`. Primero se acuerda el **contrato** (`docs/contracts/<slug>.md`: servicio, commands y vistas de `application`, errores y fragmento de OpenAPI) entre los agentes `backend-dev` y `web-dev`; se congela en un commit y cada uno implementa su lado en paralelo en su worktree. Nadie cambia el contrato por su cuenta (ADR 0007).
 
 ## Documentación (índice; léela solo cuando la tarea lo necesite)
 
@@ -62,6 +63,7 @@ ArchUnit no ve las anotaciones de Lombok (retención `SOURCE`): lo comprueba `no
 - `docs/adr/`: decisiones (ramas por fase, Lombok/Immutables, Thymeleaf, Telegram…).
 - `docs/dominio/glosario.md`: lenguaje ubicuo y reglas de negocio.
 - `docs/api/openapi.yaml`: contrato REST (cuando exista). Cualquier cambio en la API lo actualiza.
+- `docs/contracts/`: contratos back ↔ web acordados por funcionalidad.
 
 ## Restricciones
 

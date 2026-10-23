@@ -30,12 +30,39 @@ flowchart LR
 | Skill de fase 2 | `.claude/skills/hexagonal-adapter/` | 9.2 | Plantillas de puerto, adaptador y test de adaptador. |
 | Subagente | `.claude/agents/revisor-ddd.md` | 10.2 | Revisión de DDD y arquitectura, sin poder editar, con Sonnet. |
 | Subagente | `.claude/agents/buscador-referencias.md` | 10.1, 10.3 | Búsquedas amplias con Haiku para no llenar el contexto principal. |
+| Teammates | `.claude/agents/backend-dev.md`, `.claude/agents/web-dev.md` | 10.2, 13.2 | Un agente por lado (back / web), con herramientas y paquetes limitados; revisan y negocian el contrato. |
+| Skill de equipo | `.claude/skills/implement-plan-team/` | 13.1, 13.2 | Issue back + web: contrato primero (`docs/contracts/`), implementación en paralelo en worktrees, integración y una PR (ADR 0007). |
 | Hook `PreToolUse` | `.claude/hooks/block-backlog-json.mjs` | 12 | Bloquea la lectura de la semilla del backlog: la verdad son las issues. |
 | Hooks `Notification` / `Stop` | `.claude/hooks/notify-telegram.mjs` | 12.1 | Aviso push al móvil cuando Claude espera permiso o termina. |
 | Scripts deterministas | `scripts/seed-issues.mjs`, `scripts/notify.mjs` | 9.2.2, 14 | Crear el backlog; enviar notificaciones. |
 | CI/CD | `.github/workflows/ci.yml` | 14 | Lo determinista (build, tests, ArchUnit, reglas del dominio) sin IA. |
 | CI/CD con IA | `.github/workflows/claude.yml`, `claude-code-review.yml` | 14 | `@claude` en issues/PR y revisión automática de cada PR. |
 | Equipos de agentes | `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | 13.2 | Habilitado para tareas de investigación o revisión en paralelo. |
+
+## Funcionalidades back + web en equipo (capítulo 13)
+
+```mermaid
+sequenceDiagram
+    participant L as Lead (implement-plan-team)
+    participant B as backend-dev
+    participant W as web-dev
+    L->>L: T0 · borrador de docs/contracts/slug.md + tipos sin lógica
+    L->>B: revisa el contrato
+    L->>W: revisa el contrato
+    B-->>W: propuestas / acuerdo
+    W-->>B: propuestas / acuerdo
+    L->>L: commit "acuerda el contrato" (congelado)
+    par en paralelo, cada uno en su worktree
+        B->>B: domain → application → persistence → REST (TDD)
+    and
+        W->>W: controladores y plantillas Thymeleaf contra el servicio simulado (TDD)
+    end
+    B-->>L: rama -back lista
+    W-->>L: rama -web lista
+    L->>L: merge back + web, tareas "ambos", revisor-ddd, mvnw verify, PR
+```
+
+Un cambio de contrato durante la implementación se pide al lead, se acuerda con el otro lado y se registra en la sección "Cambios" del contrato.
 
 ## Estrategia de modelos y modos (capítulos 4 y 5)
 
