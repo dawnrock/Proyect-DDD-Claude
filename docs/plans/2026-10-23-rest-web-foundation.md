@@ -93,7 +93,7 @@ Con esto, los contratos de la #5 en adelante ya parten de unos errores y unos ti
   - [x] Hay un test en verde que demuestra el tipo de DTO elegido (ida y vuelta JSON).
   - [x] El ADR 0003 recoge el resultado y la regla para los DTOs de la #5 en adelante.
 
-### [ ] T4 — OpenAPI inicial y lint en CI (~10 min)
+### [x] T4 — OpenAPI inicial y lint en CI (~10 min)
 
 - **Lado:** back
 - **Capa:** docs · CI
@@ -107,8 +107,8 @@ Con esto, los contratos de la #5 en adelante ya parten de unos errores y unos ti
   2. `redocly.yaml` con la configuración `recommended`, desactivando solo las reglas que exigen operaciones (el documento aún no tiene rutas) y justificándolo en un comentario.
   3. Paso nuevo en `ci.yml`: `npx @redocly/cli lint docs/api/openapi.yaml`.
 - **Criterios de aceptación:**
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` pasa en local y en el paso de lint del CI de la PR.
-  - [ ] Las respuestas de error documentadas coinciden con las que devuelve `RestExceptionHandler` (mismos códigos y `title`).
+  - [x] `npx @redocly/cli lint docs/api/openapi.yaml` pasa en local y en el paso de lint del CI de la PR.
+  - [x] Las respuestas de error documentadas coinciden con las que devuelve `RestExceptionHandler` (mismos códigos y `title`).
 
 ### [ ] T5 — Thymeleaf y plantilla base (~10 min)
 

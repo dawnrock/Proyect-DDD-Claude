@@ -29,6 +29,9 @@ jobs:
       - name: Reglas del dominio (Lombok / Immutables / dependencias)
         run: node .claude/skills/ddd-building-block/scripts/check-domain.mjs
 
+      - name: Contrato OpenAPI (Redocly)
+        run: npx --yes @redocly/cli@2.71.0 lint docs/api/openapi.yaml
+
       - name: Build y tests (JUnit + ArchUnit)
         run: ./mvnw -B verify
 
