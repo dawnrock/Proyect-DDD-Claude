@@ -1,10 +1,18 @@
 package com.pronoide.ddd.application;
 
+import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.pronoide.ddd.domain.model.AccountHolder;
+import com.pronoide.ddd.domain.model.AccountNumber;
+import com.pronoide.ddd.domain.model.CheckingAccount;
+import com.pronoide.ddd.domain.model.CustomerSegment;
+import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
+import com.pronoide.ddd.domain.model.MonetaryAmount;
+import com.pronoide.ddd.domain.model.Transaction;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -27,7 +35,16 @@ public class CheckingAccountService {
      * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el depósito no está en euros
      */
     public AccountSummary openAccount(OpenAccountCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        AccountNumber accountNumber = new AccountNumber(command.accountNumber());
+        repository.findByAccountNumber(accountNumber).ifPresent(existing -> {
+            throw new DuplicateAccountNumberException(accountNumber);
+        });
+
+        AccountHolder holder = AccountHolder.register(command.holderName(), CustomerSegment.valueOf(command.segment()));
+        MonetaryAmount initialDeposit =
+                new MonetaryAmount(command.initialDeposit(), Currency.getInstance(command.currency()));
+        CheckingAccount account = CheckingAccount.open(accountNumber, holder, initialDeposit);
+        return toSummary(repository.save(account));
     }
 
     /**
@@ -36,11 +53,46 @@ public class CheckingAccountService {
      * @throws AccountNotFoundException si no existe ninguna cuenta con ese id
      */
     public AccountDetails findAccount(UUID id) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        return repository.findById(id)
+                .map(CheckingAccountService::toDetails)
+                .orElseThrow(() -> new AccountNotFoundException(id));
     }
 
     /** Todas las cuentas, ordenadas por número de cuenta. */
     public List<AccountSummary> listAccounts() {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        return repository.findAll().stream().map(CheckingAccountService::toSummary).toList();
+    }
+
+    private static AccountDetails toDetails(CheckingAccount account) {
+        return AccountDetails.builder()
+                .id(account.id())
+                .accountNumber(account.accountNumber().value())
+                .holderName(account.primaryHolder().fullName())
+                .segment(account.primaryHolder().segment().name())
+                .balance(account.currentBalance().amount())
+                .currency(account.currentBalance().currency().getCurrencyCode())
+                .transactions(account.transactions().stream().map(CheckingAccountService::toTransaction).toList())
+                .build();
+    }
+
+    private static TransactionSummary toTransaction(Transaction transaction) {
+        return TransactionSummary.builder()
+                .id(transaction.id())
+                .type(transaction.type().name())
+                .amount(transaction.amount().amount())
+                .currency(transaction.amount().currency().getCurrencyCode())
+                .occurredOn(transaction.occurredOn())
+                .status(transaction.status().name())
+                .build();
+    }
+
+    private static AccountSummary toSummary(CheckingAccount account) {
+        return AccountSummary.builder()
+                .id(account.id())
+                .accountNumber(account.accountNumber().value())
+                .holderName(account.primaryHolder().fullName())
+                .balance(account.currentBalance().amount())
+                .currency(account.currentBalance().currency().getCurrencyCode())
+                .build();
     }
 }

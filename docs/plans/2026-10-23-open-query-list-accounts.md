@@ -68,7 +68,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   - [x] `./mvnw verify` compiles and passes against the contract types.
   - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
 
-### [ ] T1 — Duplicate account number as a domain rule (~5 min)
+### [x] T1 — Duplicate account number as a domain rule (~5 min)
 
 - **Side:** back
 - **Layer:** domain
@@ -77,9 +77,9 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
 - **What to do:**
   1. Test: the exception is a `DomainException` and its Spanish message includes the normalized account number.
 - **Acceptance criteria:**
-  - [ ] Test green. `check-domain.mjs` without errors.
+  - [x] Test green. `check-domain.mjs` without errors.
 
-### [ ] T2 — `OpenAccountCommand` validation (~10 min)
+### [x] T2 — `OpenAccountCommand` validation (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -90,9 +90,9 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   2. `@Value.Default` `currency` = `EUR`.
   3. Parameterized tests of the invalid cases (`IllegalArgumentException`) and a valid one.
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest=OpenAccountCommandTests` green.
+  - [x] `./mvnw test -Dtest=OpenAccountCommandTests` green.
 
-### [ ] T3 — "Open account" use case (~10 min)
+### [x] T3 — "Open account" use case (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -102,9 +102,9 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   1. `openAccount`: builds `AccountNumber`, `AccountHolder.register(...)` and `MonetaryAmount`; checks `findByAccountNumber`; calls `CheckingAccount.open`; calls `save`; returns `AccountSummary`.
   2. Tests (`@Nested` "Abrir cuenta"): a valid deposit is saved and returns the summary; a deposit below the minimum is rejected and not saved; another currency is rejected; an account number already in use (even with spaces or lowercase) is rejected with `DuplicateAccountNumberException`.
 - **Acceptance criteria:**
-  - [ ] Tests green. The service has no business rules besides the uniqueness check.
+  - [x] Tests green. The service has no business rules besides the uniqueness check.
 
-### [ ] T4 — "Query" and "list" use cases (~10 min)
+### [x] T4 — "Query" and "list" use cases (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -115,9 +115,9 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   2. `listAccounts`: returns the summaries sorted by account number.
   3. Tests: existing account → details with the initial deposit transaction; unknown account → `AccountNotFoundException`; empty list; several accounts sorted.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
-### [ ] T5 — `POST /api/accounts` (~10 min)
+### [x] T5 — `POST /api/accounts` (~10 min)
 
 - **Side:** back
 - **Layer:** presentation
@@ -127,9 +127,9 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   1. The controller maps the request to `OpenAccountCommand` and responds 201 with `Location: /api/accounts/{id}`.
   2. `@WebMvcTest` tests with the mocked service: 201 with body and `Location`; 400 with `errors` if the holder is missing; 422 if the service throws `InsufficientInitialDepositException`.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
-### [ ] T6 — `GET /api/accounts` and `GET /api/accounts/{id}` (~10 min)
+### [x] T6 — `GET /api/accounts` and `GET /api/accounts/{id}` (~10 min)
 
 - **Side:** back
 - **Layer:** presentation
@@ -138,7 +138,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
 - **What to do:**
   1. Tests: list → 200 with an array; detail → 200 with its transactions; unknown id → 404 `Recurso inexistente`; non-UUID id → 400.
 - **Acceptance criteria:**
-  - [ ] Tests green. Responses match the OpenAPI fragment schemas.
+  - [x] Tests green. Responses match the OpenAPI fragment schemas.
 
 ### [ ] T7 — Account list at `/` (~10 min)
 
