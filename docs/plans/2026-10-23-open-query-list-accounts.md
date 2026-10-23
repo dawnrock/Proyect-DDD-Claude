@@ -104,7 +104,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
 - **Acceptance criteria:**
   - [x] Tests green. The service has no business rules besides the uniqueness check.
 
-### [ ] T4 — "Query" and "list" use cases (~10 min)
+### [x] T4 — "Query" and "list" use cases (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -115,7 +115,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   2. `listAccounts`: returns the summaries sorted by account number.
   3. Tests: existing account → details with the initial deposit transaction; unknown account → `AccountNotFoundException`; empty list; several accounts sorted.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
 ### [ ] T5 — `POST /api/accounts` (~10 min)
 

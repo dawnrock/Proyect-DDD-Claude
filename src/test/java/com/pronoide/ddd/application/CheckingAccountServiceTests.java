@@ -2,8 +2,10 @@ package com.pronoide.ddd.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.tuple;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -96,6 +98,67 @@ class CheckingAccountServiceTests {
             AccountSummary summary = service.openAccount(command(IBAN).segment("HIGH_NET_WORTH").build());
 
             assertThat(repository.findById(summary.id()).orElseThrow().primaryHolder().isHighNetWorth()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("Consultar cuenta")
+    class FindAccount {
+
+        @Test
+        @DisplayName("Una cuenta existente se devuelve con el depósito inicial entre sus movimientos")
+        void una_cuenta_existente_se_devuelve_con_el_deposito_inicial_entre_sus_movimientos() {
+            AccountSummary opened = service.openAccount(command(IBAN).segment("HIGH_NET_WORTH").build());
+
+            AccountDetails details = service.findAccount(opened.id());
+
+            assertThat(details.id()).isEqualTo(opened.id());
+            assertThat(details.accountNumber()).isEqualTo(IBAN);
+            assertThat(details.holderName()).isEqualTo("Ada Lovelace");
+            assertThat(details.segment()).isEqualTo("HIGH_NET_WORTH");
+            assertThat(details.balance()).isEqualByComparingTo("100.00");
+            assertThat(details.currency()).isEqualTo("EUR");
+            assertThat(details.transactions()).singleElement().satisfies(transaction -> {
+                assertThat(transaction.type()).isEqualTo("DEPOSIT");
+                assertThat(transaction.amount()).isEqualByComparingTo("100.00");
+                assertThat(transaction.currency()).isEqualTo("EUR");
+                assertThat(transaction.status()).isEqualTo("APPROVED");
+                assertThat(transaction.occurredOn()).isNotNull();
+            });
+        }
+
+        @Test
+        @DisplayName("Una cuenta desconocida lanza AccountNotFoundException")
+        void una_cuenta_desconocida_lanza_account_not_found_exception() {
+            UUID unknown = UUID.randomUUID();
+
+            assertThatExceptionOfType(AccountNotFoundException.class)
+                    .isThrownBy(() -> service.findAccount(unknown))
+                    .withMessageContaining(unknown.toString());
+        }
+    }
+
+    @Nested
+    @DisplayName("Listar cuentas")
+    class ListAccounts {
+
+        @Test
+        @DisplayName("Sin cuentas devuelve una lista vacía")
+        void sin_cuentas_devuelve_una_lista_vacia() {
+            assertThat(service.listAccounts()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Varias cuentas se devuelven ordenadas por número de cuenta")
+        void varias_cuentas_se_devuelven_ordenadas_por_numero_de_cuenta() {
+            service.openAccount(command(OTHER_IBAN).holderName("Grace Hopper").build());
+            service.openAccount(command(IBAN).build());
+
+            assertThat(service.listAccounts())
+                    .extracting(AccountSummary::accountNumber, AccountSummary::holderName)
+                    .containsExactly(
+                            tuple(OTHER_IBAN, "Grace Hopper"),
+                            tuple(IBAN, "Ada Lovelace"));
         }
     }
 }
