@@ -179,7 +179,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
 - **Acceptance criteria:**
   - [x] Tests green. No form error ends in a 500 page.
 
-### [ ] T10 — End-to-end integration (~10 min)
+### [x] T10 — End-to-end integration (~10 min)
 
 - **Side:** both
 - **Layer:** tests
@@ -189,7 +189,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   1. With the real service: `POST /api/accounts` → 201; `GET /api/accounts/{id}` → 200; `GET /` → the HTML contains the account number.
   2. Manual check: `curl -i -X POST localhost:8080/api/accounts ...` → 201; in the browser an account is opened and appears in the list.
 - **Acceptance criteria:**
-  - [ ] Test green. `curl` → 201. Browser check done.
+  - [x] Test green. `curl` → 201. Browser check done.
 
 ### [ ] T11 — Documentation (~10 min)
 
