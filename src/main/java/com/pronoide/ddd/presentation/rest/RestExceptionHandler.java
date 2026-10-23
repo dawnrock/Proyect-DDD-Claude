@@ -18,11 +18,14 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.pronoide.ddd.application.NotFoundException;
 import com.pronoide.ddd.domain.model.DomainException;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Único punto de traducción de errores a HTTP para la API REST, con el formato {@link ProblemDetail}
  * (RFC 9457). Ver "Traducción de errores" en {@code docs/arquitectura/fase-1-capas.md}:
  * reglas de negocio → 422, recurso inexistente → 404, argumentos inválidos y validación → 400.
  */
+@Slf4j
 @RestControllerAdvice(annotations = RestController.class)
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -40,10 +43,27 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return problem(HttpStatus.NOT_FOUND, NOT_FOUND_TITLE, exception.getMessage());
     }
 
-    /** Argumentos que el dominio rechaza (importe no positivo, IBAN mal formado): no son reglas de negocio. */
+    /**
+     * Argumentos que el dominio rechaza (importe no positivo, IBAN mal formado): no son reglas de negocio.
+     * Es una red de seguridad: la presentación debería validarlos antes. Se registra en el log porque una
+     * {@code IllegalArgumentException} también puede venir de un error de programación.
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     ProblemDetail handleInvalidArgument(IllegalArgumentException exception) {
+        log.warn("Argumento no válido rechazado con 400", exception);
         return problem(HttpStatus.BAD_REQUEST, BAD_REQUEST_TITLE, exception.getMessage());
+    }
+
+    /** Los 400 que resuelve Spring (JSON mal formado, parámetros ausentes o de tipo incorrecto) usan el título del contrato. */
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(Exception exception, Object body, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request) {
+        ResponseEntity<Object> response = super.handleExceptionInternal(exception, body, headers, status, request);
+        if (response != null && response.getBody() instanceof ProblemDetail problem
+                && status.value() == HttpStatus.BAD_REQUEST.value()) {
+            problem.setTitle(BAD_REQUEST_TITLE);
+        }
+        return response;
     }
 
     @Override

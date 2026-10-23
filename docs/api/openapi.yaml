@@ -6,8 +6,9 @@ info:
     API REST de la fase 1 (monolito en capas). Contrato escrito a mano: cada funcionalidad añade
     aquí sus operaciones (ver `docs/contracts/`).
 
-    Todos los errores usan el formato `ProblemDetail` (RFC 9457) y se traducen en un único punto
-    (`RestExceptionHandler`):
+    Los errores de las operaciones de esta API usan el formato `ProblemDetail` (RFC 9457) y se
+    traducen en un único punto (`RestExceptionHandler`). Una ruta que no existe (`/api/...` sin
+    operación) la responde Spring Boot con su JSON de error estándar, no con `ProblemDetail`.
 
     | Código | Cuándo | `title` |
     | ------ | ------ | ------- |

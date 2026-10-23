@@ -5,7 +5,7 @@
 - **Fase:** 1 · Monolito en capas
 - **Rama base:** `Monolithic`
 - **Fecha:** 2026-10-23
-- **Estado:** en curso
+- **Estado:** completado
 - **Estimación total:** ~65 min (7 tareas)
 
 ## Objetivo
@@ -148,28 +148,46 @@ Con esto, los contratos de la #5 en adelante ya parten de unos errores y unos ti
 - **Criterios de aceptación:**
   - [x] Los enlaces relativos apuntan a archivos que existen.
 
+### [x] T8 — Correcciones de la revisión de revisor-ddd (~10 min)
+
+- **Lado:** back
+- **Capa:** presentation · docs
+- **Archivos:** `RestExceptionHandler.java`, `RestExceptionHandlerTests.java`, `support/FailingTestController.java`, `docs/api/openapi.yaml`
+- **Depende de:** T7
+- **Qué hacer:**
+  1. `IllegalArgumentException` → 400 se registra con `log.warn` (puede venir de un bug).
+  2. Los 400 que resuelve Spring (JSON mal formado, parámetros) usan el título del contrato "Petición no válida" (`handleExceptionInternal`).
+  3. `openapi.yaml`: precisar que una ruta `/api` inexistente la responde Spring Boot con su JSON estándar, no con `ProblemDetail`.
+  4. El controlador de prueba solo usa excepciones (como exige D4), no agregados ni objetos de valor del dominio.
+- **Criterios de aceptación:**
+  - [x] Test de JSON mal formado: rojo con el título "Bad Request" y verde tras el cambio.
+  - [x] `./mvnw verify` en verde y lint de OpenAPI sin errores.
+
 ## Criterios de aceptación globales
 
 **Específicos:**
 
-- [ ] Tests `@WebMvcTest` del `@RestControllerAdvice` con un controlador de prueba: 422, 404 y 400 con `ProblemDetail`.
-- [ ] `npx @redocly/cli lint docs/api/openapi.yaml` sin errores (local y CI).
-- [ ] Una ruta inexistente de la web muestra la página 404 propia.
-- [ ] ADR 0003 actualizado con el resultado de Jackson 3.
+- [x] Tests `@WebMvcTest` del `@RestControllerAdvice` con un controlador de prueba: 422, 404 y 400 con `ProblemDetail`.
+- [x] `npx @redocly/cli lint docs/api/openapi.yaml` sin errores (local y CI).
+- [x] Una ruta inexistente de la web muestra la página 404 propia.
+- [x] ADR 0003 actualizado con el resultado de Jackson 3.
 
 **Fijos:**
 
-- [ ] Todas las tareas y sus criterios están marcados como cumplidos.
-- [ ] `./mvnw verify` termina en `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` arranca y `GET /actuator/health` responde `{"status":"UP"}`.
-- [ ] Se respeta la arquitectura de la fase: `presentation` solo depende de `application` y de las excepciones de dominio (D4). La regla de ArchUnit llega en la #12.
-- [ ] El dominio no depende de Spring, `jakarta` ni `org.immutables`, y no usa `@Data`, `@Setter`, `@Builder` ni `@AllArgsConstructor` (`check-domain.mjs` sin errores).
-- [ ] Los tests nuevos siguen `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` en español).
-- [ ] Solo se añade la dependencia prevista: Thymeleaf (ADR 0005).
-- [ ] Si se toca la API: `docs/api/openapi.yaml` refleja las respuestas de error y el lint pasa.
-- [ ] El término nuevo "Recurso inexistente" está en `docs/dominio/glosario.md`.
+- [x] Todas las tareas y sus criterios están marcados como cumplidos.
+- [x] `./mvnw verify` termina en `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` arranca y `GET /actuator/health` responde `{"status":"UP"}`.
+- [x] Se respeta la arquitectura de la fase: `presentation` solo depende de `application` y de las excepciones de dominio (D4). La regla de ArchUnit llega en la #12.
+- [x] El dominio no depende de Spring, `jakarta` ni `org.immutables`, y no usa `@Data`, `@Setter`, `@Builder` ni `@AllArgsConstructor` (`check-domain.mjs` sin errores).
+- [x] Los tests nuevos siguen `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` en español).
+- [x] Solo se añade la dependencia prevista: Thymeleaf (ADR 0005).
+- [x] Si se toca la API: `docs/api/openapi.yaml` refleja las respuestas de error y el lint pasa.
+- [x] El término nuevo "Recurso inexistente" está en `docs/dominio/glosario.md`.
 
 ## Riesgos y preguntas abiertas
+
+- **Resueltos:** Immutables funciona con Jackson 3 (T3); Spring Boot 4 sí tiene `spring-boot-starter-thymeleaf-test` (T5).
+- **Para #5:** los commands deben validar antes de llamar al dominio; el 400 por `IllegalArgumentException` es solo la red de seguridad.
 
 - **Immutables con Jackson 3 (T3):** el resultado puede obligar a usar `record` en los DTOs REST. Cualquiera de las dos salidas es válida y queda decidida antes del contrato de la #5.
 - **Spring Boot 4 puede separar el soporte de test de Thymeleaf** en un artefacto `-test`, como hace con `webmvc`. Se comprueba en T5.

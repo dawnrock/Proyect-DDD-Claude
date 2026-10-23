@@ -7,20 +7,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pronoide.ddd.application.NotFoundException;
-import com.pronoide.ddd.domain.model.AccountNumber;
-import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
-import com.pronoide.ddd.domain.model.MonetaryAmount;
+import com.pronoide.ddd.domain.model.DomainException;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 
-/** Controlador solo para tests: lanza cada tipo de error para comprobar su traducción a HTTP. */
+/**
+ * Controlador solo para tests: lanza cada tipo de error para comprobar su traducción a HTTP. Como la
+ * presentación, solo conoce las excepciones del dominio (D4), no sus agregados ni objetos de valor.
+ */
 @RestController
 @RequestMapping("/test/errors")
 public class FailingTestController {
 
     public record SampleRequest(@NotBlank String holderName, @Positive int amount) {
+    }
+
+    static class SampleBusinessRuleException extends DomainException {
+        SampleBusinessRuleException() {
+            super("Regla de prueba incumplida");
+        }
     }
 
     static class SampleNotFoundException extends NotFoundException {
@@ -31,7 +38,7 @@ public class FailingTestController {
 
     @GetMapping("/business-rule")
     public void businessRule() {
-        throw new InsufficientInitialDepositException(MonetaryAmount.euros("10.00"), MonetaryAmount.euros("50.00"));
+        throw new SampleBusinessRuleException();
     }
 
     @GetMapping("/not-found")
@@ -41,7 +48,7 @@ public class FailingTestController {
 
     @GetMapping("/invalid-argument")
     public void invalidArgument() {
-        new AccountNumber("ES00");
+        throw new IllegalArgumentException("El argumento de prueba no es válido");
     }
 
     @PostMapping("/validation")

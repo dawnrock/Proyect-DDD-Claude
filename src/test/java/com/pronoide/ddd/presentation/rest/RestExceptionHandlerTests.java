@@ -35,7 +35,7 @@ class RestExceptionHandlerTests {
                     .andExpect(jsonPath("$.status").value(422))
                     .andExpect(jsonPath("$.title").value("Regla de negocio incumplida"))
                     .andExpect(jsonPath("$.detail").value(
-                            "El depósito inicial de 10.00 EUR no alcanza el mínimo exigido de 50.00 EUR"));
+                            "Regla de prueba incumplida"));
         }
     }
 
@@ -65,7 +65,7 @@ class RestExceptionHandlerTests {
                     .andExpect(status().isBadRequest())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                     .andExpect(jsonPath("$.title").value("Petición no válida"))
-                    .andExpect(jsonPath("$.detail").value("El número de cuenta ES00 no es un IBAN español válido"));
+                    .andExpect(jsonPath("$.detail").value("El argumento de prueba no es válido"));
         }
 
         @Test
@@ -79,6 +79,17 @@ class RestExceptionHandlerTests {
                     .andExpect(jsonPath("$.title").value("Petición no válida"))
                     .andExpect(jsonPath("$.errors.holderName").exists())
                     .andExpect(jsonPath("$.errors.amount").exists());
+        }
+
+        @Test
+        @DisplayName("Un cuerpo JSON mal formado se traduce en un 400 con el título del contrato")
+        void un_cuerpo_json_mal_formado_se_traduce_en_un_400_con_el_titulo_del_contrato() throws Exception {
+            mvc.perform(post("/test/errors/validation")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"holderName\": "))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                    .andExpect(jsonPath("$.title").value("Petición no válida"));
         }
     }
 }
