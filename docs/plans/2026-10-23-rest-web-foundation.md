@@ -121,9 +121,9 @@ Con esto, los contratos de la #5 en adelante ya parten de unos errores y unos ti
   2. Fragmentos de plantilla (`head`, `header`, `footer`) con el nombre de la aplicación y un CSS mínimo propio, sin frameworks de frontend ni el *layout dialect* (con los fragmentos nativos de Thymeleaf basta).
 - **Criterios de aceptación:**
   - [x] `./mvnw verify` en verde con la nueva dependencia.
-  - [ ] Los fragmentos se usan desde la plantilla de T6, que prueba que se resuelven.
+  - [x] Los fragmentos se usan desde la plantilla de T6, que prueba que se resuelven.
 
-### [ ] T6 — Página 404 propia (~10 min)
+### [x] T6 — Página 404 propia (~10 min)
 
 - **Lado:** web
 - **Capa:** presentation
@@ -133,8 +133,8 @@ Con esto, los contratos de la #5 en adelante ya parten de unos errores y unos ti
   1. **Rojo:** en `DddLabApplicationTests` (con `webEnvironment = RANDOM_PORT`), una petición `GET /no-existe` con `Accept: text/html` espera un 404 y el texto "Página no encontrada". Se mantiene el `contextLoads`.
   2. **Verde:** `templates/error/404.html` con los fragmentos de T5 y un enlace a la página de inicio.
 - **Criterios de aceptación:**
-  - [ ] El test pasa. Una ruta inexistente vista en el navegador muestra la página propia.
-  - [ ] Una petición a una ruta inexistente de `/api/...` sin `Accept: text/html` sigue respondiendo en JSON.
+  - [x] El test pasa. Una ruta inexistente vista en el navegador muestra la página propia.
+  - [x] Una petición a una ruta inexistente de `/api/...` sin `Accept: text/html` sigue respondiendo en JSON.
 
 ### [ ] T7 — Documentación (~5 min)
 
