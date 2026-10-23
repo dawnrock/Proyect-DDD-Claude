@@ -93,7 +93,7 @@
   </g>
   <g font-size="10.5" fill="#374151" text-anchor="middle">
     <text x="708" y="207">AccountRepository</text>
-    <text x="729" y="291">EventPublisher</text>
+    <text x="721" y="291">EventPublisher</text>
     <text x="708" y="377">IncomeVerifier</text>
   </g>
 
