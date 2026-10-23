@@ -136,7 +136,7 @@ Con esto, los contratos de la #5 en adelante ya parten de unos errores y unos ti
   - [x] El test pasa. Una ruta inexistente vista en el navegador muestra la página propia.
   - [x] Una petición a una ruta inexistente de `/api/...` sin `Accept: text/html` sigue respondiendo en JSON.
 
-### [ ] T7 — Documentación (~5 min)
+### [x] T7 — Documentación (~5 min)
 
 - **Lado:** ambos
 - **Capa:** docs
@@ -146,7 +146,7 @@ Con esto, los contratos de la #5 en adelante ya parten de unos errores y unos ti
   1. Glosario: añadir "Recurso inexistente" (`NotFoundException`, error de aplicación → 404).
   2. `fase-1-capas.md`: enlazar la sección "Traducción de errores" con `RestExceptionHandler` y `openapi.yaml`, y anotar la decisión de T3 sobre los DTOs.
 - **Criterios de aceptación:**
-  - [ ] Los enlaces relativos apuntan a archivos que existen.
+  - [x] Los enlaces relativos apuntan a archivos que existen.
 
 ## Criterios de aceptación globales
 
