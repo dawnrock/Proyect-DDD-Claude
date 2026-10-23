@@ -1,7 +1,7 @@
 # Contract: open, query and list accounts
 
 - **Issue:** [#5](https://github.com/dawnrock/Proyect-DDD-Claude/issues/5) · **Plan:** `docs/plans/2026-10-23-open-query-list-accounts.md`
-- **Status:** agreed
+- **Status:** frozen at `9bd7290`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed with clarifications, merged by the lead)
 
 ## Application service
