@@ -2,6 +2,7 @@ package com.pronoide.ddd;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.net.CookieManager;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -106,6 +107,86 @@ class DddLabApplicationTests {
 			String form = "accountNumber=%s&holderName=Grace+Hopper&segment=RETAIL&initialDeposit=75.00&currency=%s"
 					.formatted(URLEncoder.encode(accountNumber, StandardCharsets.UTF_8), currency);
 			return post("/accounts/new", "application/x-www-form-urlencoded", form);
+		}
+	}
+
+	@Nested
+	@DisplayName("Ingresos y retiradas con el servicio real (#6)")
+	class Movements {
+
+		/** Con cookies: el mensaje flash tras la redirección viaja en la sesión. */
+		private final HttpClient browser = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
+
+		@Test
+		@DisplayName("Por la API, un ingreso se aprueba y una retirada sin saldo se registra como rechazada y se ve en el detalle web")
+		void por_la_api_un_ingreso_se_aprueba_y_una_retirada_sin_saldo_se_registra_como_rechazada() throws Exception {
+			String account = openAccount("ES0000000000000000000601");
+
+			HttpResponse<String> deposit = post(account + "/deposits", "application/json", "{\"amount\": 50.00}");
+			HttpResponse<String> withdrawal = post(account + "/withdrawals", "application/json", "{\"amount\": 500.00}");
+
+			assertThat(deposit.statusCode()).isEqualTo(201);
+			assertThat(deposit.body()).contains("\"status\":\"APPROVED\"");
+			assertThat(withdrawal.statusCode()).isEqualTo(201);
+			assertThat(withdrawal.body()).contains("\"status\":\"REJECTED\"");
+			assertThat(get(account, "application/json").body()).contains("\"balance\":150.00");
+			assertThat(get(webPath(account), "text/html").body()).contains("Rechazado").contains("150.00");
+		}
+
+		@Test
+		@DisplayName("Desde la web, un ingreso y una retirada rechazada redirigen al detalle con su mensaje")
+		void desde_la_web_un_ingreso_y_una_retirada_rechazada_redirigen_al_detalle_con_su_mensaje() throws Exception {
+			String detail = webPath(openAccount("ES0000000000000000000602"));
+
+			HttpResponse<String> deposit = submit(detail + "/deposits", "amount=25.00&currency=EUR");
+			assertThat(deposit.statusCode()).isEqualTo(302);
+			assertThat(deposit.headers().firstValue("Location")).hasValueSatisfying(
+					location -> assertThat(location).endsWith(detail).doesNotContain(";jsessionid"));
+			assertThat(browse(detail)).contains("Ingreso de 25.00 EUR aprobado");
+
+			assertThat(submit(detail + "/withdrawals", "amount=1000.00&currency=EUR").statusCode()).isEqualTo(302);
+			assertThat(browse(detail)).contains("rechazada").contains("125.00");
+		}
+
+		@Test
+		@DisplayName("Una cuenta inexistente es la página 404 en la web y un ProblemDetail 404 en la API")
+		void una_cuenta_inexistente_es_la_pagina_404_en_la_web_y_un_problem_detail_404_en_la_api() throws Exception {
+			String unknown = "/api/accounts/" + java.util.UUID.randomUUID();
+
+			HttpResponse<String> web = get(webPath(unknown), "text/html");
+			HttpResponse<String> api = post(unknown + "/deposits", "application/json", "{\"amount\": 10.00}");
+
+			assertThat(web.statusCode()).isEqualTo(404);
+			assertThat(web.body()).contains("Página no encontrada");
+			assertThat(api.statusCode()).isEqualTo(404);
+			assertThat(api.headers().firstValue("Content-Type")).hasValueSatisfying(
+					type -> assertThat(type).contains("problem+json"));
+			assertThat(api.body()).contains("Recurso inexistente");
+		}
+
+		/** Abre una cuenta minorista con 100,00 € y devuelve su ruta de la API ({@code /api/accounts/{id}}). */
+		private String openAccount(String accountNumber) throws Exception {
+			HttpResponse<String> created = post("/api/accounts", "application/json", """
+					{"accountNumber": "%s", "holderName": "Grace Hopper", "segment": "RETAIL", "initialDeposit": 100.00}"""
+					.formatted(accountNumber));
+			assertThat(created.statusCode()).isEqualTo(201);
+			return created.headers().firstValue("Location").orElseThrow();
+		}
+
+		private String webPath(String apiPath) {
+			return apiPath.replaceFirst("^/api", "");
+		}
+
+		private HttpResponse<String> submit(String path, String form) throws Exception {
+			return browser.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
+					.header("Content-Type", "application/x-www-form-urlencoded")
+					.POST(HttpRequest.BodyPublishers.ofString(form))
+					.build(), HttpResponse.BodyHandlers.ofString());
+		}
+
+		private String browse(String path) throws Exception {
+			return browser.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path)).GET().build(),
+					HttpResponse.BodyHandlers.ofString()).body();
 		}
 	}
 

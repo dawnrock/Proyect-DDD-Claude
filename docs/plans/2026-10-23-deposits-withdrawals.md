@@ -177,7 +177,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
 - **Acceptance criteria:**
   - [x] Tests green. A rejected withdrawal is shown as such.
 
-### [ ] T10 — End-to-end integration (~10 min)
+### [x] T10 — End-to-end integration (~10 min)
 
 - **Side:** both
 - **Layer:** tests
@@ -187,7 +187,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   1. With the real service: open an account; deposit via API → 201 `APPROVED`; withdraw more than the balance (retail) → 201 `REJECTED`; `GET /accounts/{id}` shows both transactions and the rejected one as rejected; web deposit and withdrawal redirect to the detail with their flash.
   2. Manual check with `curl` and in the browser.
 - **Acceptance criteria:**
-  - [ ] Test green. `curl` and browser checks done.
+  - [x] Test green. `curl` and browser checks done.
 
 ### [ ] T11 — Documentation (~10 min)
 
