@@ -65,7 +65,7 @@ Dejar el build preparado para usar Lombok e Immutables según la tabla "dónde s
   - [x] `./mvnw verify` en verde: Lombok sigue funcionando con los dos procesadores declarados.
   - [x] `org.immutables:value` no aparece en `./mvnw dependency:tree` (solo `value-annotations`, con scope `provided`).
 
-### [ ] T3 — Estilo común `@ApplicationValue` y test de Immutables (~15 min)
+### [x] T3 — Estilo común `@ApplicationValue` y test de Immutables (~15 min)
 
 - **Capa:** application
 - **Archivos:** `src/main/java/com/pronoide/ddd/application/ApplicationValue.java`, `src/test/java/com/pronoide/ddd/build/ImmutablesSetupTests.java`
@@ -74,8 +74,8 @@ Dejar el build preparado para usar Lombok e Immutables según la tabla "dónde s
   1. **Rojo:** escribir `ImmutablesSetupTests` con una interfaz de ejemplo `@ApplicationValue @Value.Immutable interface SampleCommandDef { String holderName(); BigDecimal amount(); }` y tests que usan el `SampleCommand` generado: el builder construye la instancia, dos instancias con los mismos valores son iguales, y falta un atributo obligatorio → `IllegalStateException`.
   2. Crear la meta-anotación `ApplicationValue` (`@Target({PACKAGE, TYPE})`, `@Retention(CLASS)`) con `@Value.Style(typeAbstract = "*Def", typeImmutable = "*", visibility = PUBLIC, defaults = @Value.Immutable(copy = false))`, documentando en su Javadoc que no se usa en `domain..`.
 - **Criterios de aceptación:**
-  - [ ] `./mvnw test -Dtest=ImmutablesSetupTests` pasa (con `@Nested` o tests separados para builder, igualdad y atributo obligatorio).
-  - [ ] `DomainIsolationTests` pasa y `node .claude/skills/ddd-building-block/scripts/check-domain.mjs` no da errores.
+  - [x] `./mvnw test -Dtest=ImmutablesSetupTests` pasa (con `@Nested` o tests separados para builder, igualdad y atributo obligatorio).
+  - [x] `DomainIsolationTests` pasa y `node .claude/skills/ddd-building-block/scripts/check-domain.mjs` no da errores.
 
 ### [ ] T4 — Documentar versiones y configuración en el ADR 0003 (~5 min)
 
