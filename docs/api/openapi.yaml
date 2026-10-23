@@ -1,0 +1,102 @@
+openapi: 3.1.0
+info:
+  title: Proyect-DDD-Claude · API de cuentas corrientes
+  version: 0.1.0
+  description: |
+    API REST de la fase 1 (monolito en capas). Contrato escrito a mano: cada funcionalidad añade
+    aquí sus operaciones (ver `docs/contracts/`).
+
+    Los errores de las operaciones de esta API usan el formato `ProblemDetail` (RFC 9457) y se
+    traducen en un único punto (`RestExceptionHandler`). Una ruta que no existe (`/api/...` sin
+    operación) la responde Spring Boot con su JSON de error estándar, no con `ProblemDetail`.
+
+    | Código | Cuándo | `title` |
+    | ------ | ------ | ------- |
+    | 400 | Petición no válida (formato, validación o argumento que el dominio rechaza) | Petición no válida |
+    | 404 | El recurso pedido no existe | Recurso inexistente |
+    | 422 | Se incumple una regla de negocio del dominio | Regla de negocio incumplida |
+  license:
+    name: Proyecto de práctica
+    identifier: MIT
+servers:
+  - url: http://localhost:8080
+    description: Desarrollo local
+paths: {}
+components:
+  schemas:
+    ProblemDetail:
+      type: object
+      description: Error en formato RFC 9457.
+      required:
+        - status
+        - title
+      properties:
+        type:
+          type: string
+          format: uri
+          default: about:blank
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+    ValidationProblemDetail:
+      description: Error 400. Si viene de la validación del cuerpo, `errors` trae un mensaje por campo no válido.
+      allOf:
+        - $ref: '#/components/schemas/ProblemDetail'
+        - type: object
+          properties:
+            errors:
+              type: object
+              additionalProperties:
+                type: string
+  responses:
+    BadRequest:
+      description: Petición no válida.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ValidationProblemDetail'
+          examples:
+            argumentoInvalido:
+              summary: Argumento que el dominio rechaza
+              value:
+                type: about:blank
+                title: Petición no válida
+                status: 400
+                detail: El número de cuenta ES00 no es un IBAN español válido
+            validacion:
+              summary: Cuerpo que no pasa la validación
+              value:
+                type: about:blank
+                title: Petición no válida
+                status: 400
+                detail: La petición tiene 1 campo(s) no válido(s)
+                errors:
+                  holderName: must not be blank
+    NotFound:
+      description: El recurso pedido no existe.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: Recurso inexistente
+            status: 404
+            detail: No existe la cuenta 9f1c…
+    UnprocessableContent:
+      description: Se incumple una regla de negocio.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: Regla de negocio incumplida
+            status: 422
+            detail: El depósito inicial de 10.00 EUR no alcanza el mínimo exigido de 50.00 EUR

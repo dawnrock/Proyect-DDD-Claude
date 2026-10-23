@@ -69,7 +69,13 @@ sequenceDiagram
 | Reglas de negocio (importe positivo, divisa, descubierto…) | `domain.model` |
 | Traducir errores a HTTP o a mensajes de pantalla | `presentation` (un único punto por canal) |
 
-**Traducción de errores.** Solo las subclases de `DomainException` son reglas de negocio (422). Los argumentos inválidos que el dominio rechaza con `IllegalArgumentException` (importe no positivo, IBAN mal formado) **no** son `DomainException`: la presentación los valida antes de llamar al caso de uso, y si aun así llegan, se traducen a 400 como error de validación. `AccountNotFoundException` (aplicación) se traduce a 404. El mapeo se implementa en la #8.
+**Traducción de errores.** Solo las subclases de `DomainException` son reglas de negocio (422). Los argumentos inválidos que el dominio rechaza con `IllegalArgumentException` (importe no positivo, IBAN mal formado) **no** son `DomainException`: la presentación los valida antes de llamar al caso de uso, y si aun así llegan, se traducen a 400 como error de validación. `AccountNotFoundException` (aplicación, subclase de `NotFoundException`) se traduce a 404.
+
+Implementado en la #8:
+
+- API REST: [`RestExceptionHandler`](../../src/main/java/com/pronoide/ddd/presentation/rest/RestExceptionHandler.java), único `@RestControllerAdvice`, devuelve `ProblemDetail` (RFC 9457). Las respuestas están documentadas en [`openapi.yaml`](../api/openapi.yaml) (`BadRequest`, `NotFound`, `UnprocessableContent`) y el CI las valida con Redocly.
+- Web: [página 404 propia](../../src/main/resources/templates/error/404.html) sobre los [fragmentos de la plantilla base](../../src/main/resources/templates/fragments/layout.html). Las rutas de la API siguen respondiendo en JSON.
+- **DTOs REST:** pueden ser de Immutables con Jackson 3 (`@JsonSerialize`/`@JsonDeserialize` de `tools.jackson.databind.annotation`); ver el [ADR 0003](../adr/0003-lombok-immutables.md).
 
 ## Issues de la fase
 

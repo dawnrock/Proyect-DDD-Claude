@@ -1,0 +1,43 @@
+:root {
+    --text: #111827;
+    --muted: #4b5563;
+    --border: #d1d5db;
+    --surface: #ffffff;
+    --background: #f3f4f6;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+    color: var(--text);
+    background: var(--background);
+}
+
+.app-header,
+.app-footer {
+    padding: 0.75rem 1.5rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.app-footer {
+    border-top: 1px solid var(--border);
+    border-bottom: none;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.app-brand {
+    color: var(--text);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+main {
+    max-width: 960px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
