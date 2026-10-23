@@ -6,7 +6,7 @@
 - **Base branch:** `Monolithic`
 - **Date:** 2026-10-23
 - **Approved:** by the user on 2026-10-23
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~125 min (12 tasks: T0 + 6 back + 3 web + 2 both)
 
 ## Goal
@@ -189,7 +189,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
 - **Acceptance criteria:**
   - [x] Test green. `curl` and browser checks done.
 
-### [ ] T11 — Documentation (~10 min)
+### [x] T11 — Documentation (~10 min)
 
 - **Side:** both
 - **Layer:** docs
@@ -220,24 +220,24 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
 
 **Specific:**
 
-- [ ] Contract agreed and frozen in `docs/contracts/deposits-withdrawals.md`.
-- [ ] Parameterized withdrawal tests for retail and high-net-worth customers at the overdraft limit (domain and service).
-- [ ] Non-positive amount → 400 in REST and a field error on the web; another currency → domain error (422 in REST, message on the web). *(Corrected from the issue: see Context.)*
-- [ ] A rejected withdrawal returns 201 with `REJECTED` in REST and is shown as rejected on the web.
+- [x] Contract agreed and frozen in `docs/contracts/deposits-withdrawals.md`.
+- [x] Parameterized withdrawal tests for retail and high-net-worth customers at the overdraft limit (domain and service).
+- [x] Non-positive amount → 400 in REST and a field error on the web; another currency → domain error (422 in REST, message on the web). *(Corrected from the issue: see Context.)*
+- [x] A rejected withdrawal returns 201 with `REJECTED` in REST and is shown as rejected on the web.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The layered architecture is respected (D4, D5), verified by ArchUnit where rules exist and by `revisor-ddd`.
-- [ ] The domain does not depend on Spring, `jakarta` or `org.immutables`, and does not use `@Data`, `@Setter`, `@Builder` or `@AllArgsConstructor` (`check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones.
-- [ ] `docs/api/openapi.yaml` reflects the changes and the Redocly lint has no errors.
-- [ ] Any new business term is in `docs/dominio/glosario.md`.
-- [ ] Documentation written or changed by this plan is in English (additions to documents still in Spanish excepted, see Context).
-- [ ] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The layered architecture is respected (D4, D5), verified by ArchUnit where rules exist and by `revisor-ddd`.
+- [x] The domain does not depend on Spring, `jakarta` or `org.immutables`, and does not use `@Data`, `@Setter`, `@Builder` or `@AllArgsConstructor` (`check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones.
+- [x] `docs/api/openapi.yaml` reflects the changes and the Redocly lint has no errors.
+- [x] Any new business term is in `docs/dominio/glosario.md`.
+- [x] Documentation written or changed by this plan is in English (additions to documents still in Spanish excepted, see Context).
+- [x] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
 
 ## Risks and open questions
 
