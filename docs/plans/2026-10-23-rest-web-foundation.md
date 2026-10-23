@@ -63,7 +63,7 @@ Con esto, los contratos de la #5 en adelante ya parten de unos errores y unos ti
 - **Criterios de aceptación:**
   - [x] El test pasa y `./mvnw verify` está en verde.
 
-### [ ] T2 — Recurso inexistente → 404 y argumentos inválidos → 400 (~10 min)
+### [x] T2 — Recurso inexistente → 404 y argumentos inválidos → 400 (~10 min)
 
 - **Lado:** back
 - **Capa:** application · presentation
@@ -76,8 +76,8 @@ Con esto, los contratos de la #5 en adelante ya parten de unos errores y unos ti
      - un cuerpo con `@Valid` incumplido → 400 con los campos que fallan.
   2. **Verde:** `NotFoundException` abstracta en `application` (con su mensaje) y los handlers correspondientes. La validación ya la cubre `ResponseEntityExceptionHandler`.
 - **Criterios de aceptación:**
-  - [ ] Los tres casos devuelven el código y un `ProblemDetail` con `title` y `detail`.
-  - [ ] Ningún error de los cubiertos acaba en 500.
+  - [x] Los tres casos devuelven el código y un `ProblemDetail` con `title` y `detail`.
+  - [x] Ningún error de los cubiertos acaba en 500.
 
 ### [ ] T3 — Comprobar Immutables con Jackson 3 (~10 min)
 
