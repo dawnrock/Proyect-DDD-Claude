@@ -2,7 +2,7 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores. **Se actualiza en cada PR que cierra una issue** (lo exigen `implement-plan`, `implement-plan-team`, la plantilla de los planes y el CI).
 
-- **Última actualización:** 2026-10-23 · PR #37 (tras fusionar #36)
+- **Última actualización:** 2026-10-23 · PR #38 (documentación en inglés)
 - **Rama activa:** `Monolithic` (fase 1). `master` congelada. `Hexagonal` aún no existe.
 
 ## Dónde estamos
@@ -63,3 +63,4 @@ Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sec
 | 2026-10-23 | #35 | #4 | Repositorio en memoria |
 | 2026-10-23 | #36 | #8 | Base REST + web: errores a HTTP, OpenAPI, Thymeleaf y página 404 |
 | 2026-10-23 | #37 | — | Estado del proyecto entre sesiones, exigido en cada PR |
+| 2026-10-23 | #38 | — | Documentación en inglés; plan de la #5 aprobado |
