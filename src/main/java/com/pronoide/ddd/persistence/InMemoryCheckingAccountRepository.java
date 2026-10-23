@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Repository;
 
+import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 
 /**
@@ -23,8 +24,20 @@ public class InMemoryCheckingAccountRepository {
 
     private final Map<UUID, CheckingAccount> accounts = new ConcurrentHashMap<>();
 
-    public CheckingAccount save(CheckingAccount account) {
+    /**
+     * Guarda la cuenta, o la sustituye si ya existe una con su id.
+     *
+     * @throws IllegalStateException si otra cuenta ya usa su número de cuenta (equivale a un índice
+     *     único en una base de datos)
+     */
+    public synchronized CheckingAccount save(CheckingAccount account) {
         Objects.requireNonNull(account, "La cuenta a guardar es obligatoria");
+        findByAccountNumber(account.accountNumber())
+                .filter(existing -> !existing.id().equals(account.id()))
+                .ifPresent(existing -> {
+                    throw new IllegalStateException(
+                            "Ya existe otra cuenta con el número %s".formatted(account.accountNumber()));
+                });
         accounts.put(account.id(), account);
         return account;
     }
@@ -32,5 +45,12 @@ public class InMemoryCheckingAccountRepository {
     public Optional<CheckingAccount> findById(UUID id) {
         Objects.requireNonNull(id, "El id de la cuenta es obligatorio");
         return Optional.ofNullable(accounts.get(id));
+    }
+
+    public Optional<CheckingAccount> findByAccountNumber(AccountNumber accountNumber) {
+        Objects.requireNonNull(accountNumber, "El número de cuenta es obligatorio");
+        return accounts.values().stream()
+                .filter(account -> account.accountNumber().equals(accountNumber))
+                .findFirst();
     }
 }

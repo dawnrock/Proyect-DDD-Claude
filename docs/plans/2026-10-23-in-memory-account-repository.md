@@ -45,7 +45,7 @@ Que la aplicación pueda guardar y recuperar cuentas corrientes en la capa `pers
   - [x] `./mvnw test -Dtest=InMemoryCheckingAccountRepositoryTests` pasa (guardar y recuperar, inexistente → vacío, guardar dos veces → una sola cuenta).
   - [x] `./mvnw verify` en verde.
 
-### [ ] T2 — Buscar por número de cuenta y número único (~10 min)
+### [x] T2 — Buscar por número de cuenta y número único (~10 min)
 
 - **Capa:** persistence
 - **Archivos:** los mismos que T1
@@ -54,8 +54,8 @@ Que la aplicación pueda guardar y recuperar cuentas corrientes en la capa `pers
   1. **Rojo:** tests de `findByAccountNumber(AccountNumber)`: encuentra la cuenta y la normalización del IBAN no afecta (`"ES91 2100…"` y `"ES912100…"` son el mismo número); número inexistente → `Optional.empty()`; guardar **otra** cuenta con un número ya usado lanza `IllegalStateException` con un mensaje en español. Es el equivalente a un índice único en una base de datos.
   2. **Verde:** búsqueda por `accountNumber()` y comprobación de unicidad en `save`.
 - **Criterios de aceptación:**
-  - [ ] Los tests nuevos pasan junto con los de T1.
-  - [ ] Guardar de nuevo la misma cuenta (mismo id y número) no se considera duplicado.
+  - [x] Los tests nuevos pasan junto con los de T1.
+  - [x] Guardar de nuevo la misma cuenta (mismo id y número) no se considera duplicado.
 
 ### [ ] T3 — Listar todas las cuentas en orden estable (~5 min)
 
