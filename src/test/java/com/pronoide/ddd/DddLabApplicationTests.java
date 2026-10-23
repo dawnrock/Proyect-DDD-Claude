@@ -3,11 +3,14 @@ package com.pronoide.ddd;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -44,10 +47,80 @@ class DddLabApplicationTests {
 		assertThat(response.headers().firstValue("Content-Type")).hasValueSatisfying(type -> assertThat(type).contains("json"));
 	}
 
+	@Nested
+	@DisplayName("Abrir, consultar y listar cuentas con el servicio real (#5)")
+	class Accounts {
+
+		@Test
+		@DisplayName("Una cuenta abierta por la API se consulta por su id y aparece en el listado web")
+		void una_cuenta_abierta_por_la_api_se_consulta_por_su_id_y_aparece_en_el_listado_web() throws Exception {
+			HttpResponse<String> created = post("/api/accounts", "application/json", """
+					{"accountNumber": "es91 2100 0418 4502 0005 1332", "holderName": "Ada Lovelace",
+					 "segment": "RETAIL", "initialDeposit": 100.00}""");
+
+			assertThat(created.statusCode()).isEqualTo(201);
+			assertThat(created.body()).contains("\"accountNumber\":\"ES9121000418450200051332\"");
+			String location = created.headers().firstValue("Location").orElseThrow();
+
+			HttpResponse<String> details = get(location, "application/json");
+			assertThat(details.statusCode()).isEqualTo(200);
+			assertThat(details.body()).contains("\"type\":\"DEPOSIT\"").contains("\"status\":\"APPROVED\"");
+
+			assertThat(get("/", "text/html").body()).contains("ES9121000418450200051332").contains("Ada Lovelace");
+		}
+
+		@Test
+		@DisplayName("Una cuenta abierta desde el formulario web redirige al listado y aparece en él")
+		void una_cuenta_abierta_desde_el_formulario_web_redirige_al_listado_y_aparece_en_el() throws Exception {
+			HttpResponse<String> response = submitForm("ES7620770024003102575766", "EUR");
+
+			assertThat(response.statusCode()).isEqualTo(302);
+			assertThat(response.headers().firstValue("Location"))
+					.as("sin ;jsessionid en la URL, que Spring no reconoce y acaba en 404")
+					.hasValueSatisfying(location -> assertThat(location).doesNotContain(";jsessionid"));
+			assertThat(get("/", "text/html").body()).contains("ES7620770024003102575766");
+		}
+
+		@Test
+		@DisplayName("Un número de cuenta ya usado vuelve al formulario con el mensaje del dominio")
+		void un_numero_de_cuenta_ya_usado_vuelve_al_formulario_con_el_mensaje_del_dominio() throws Exception {
+			submitForm("ES6000491500051234567892", "EUR");
+
+			HttpResponse<String> duplicate = submitForm("es60 0049 1500 0512 3456 7892", "EUR");
+
+			assertThat(duplicate.statusCode()).isEqualTo(200);
+			assertThat(duplicate.body()).contains("Ya existe una cuenta con el").contains("ES6000491500051234567892");
+		}
+
+		@Test
+		@DisplayName("Un depósito en otra divisa vuelve al formulario con el mensaje del dominio")
+		void un_deposito_en_otra_divisa_vuelve_al_formulario_con_el_mensaje_del_dominio() throws Exception {
+			HttpResponse<String> response = submitForm("ES1000492352082414205416", "USD");
+
+			assertThat(response.statusCode()).isEqualTo(200);
+			assertThat(response.body()).contains("EUR").contains("USD").contains("ha recibido");
+			assertThat(get("/", "text/html").body()).doesNotContain("ES1000492352082414205416");
+		}
+
+		private HttpResponse<String> submitForm(String accountNumber, String currency) throws Exception {
+			String form = "accountNumber=%s&holderName=Grace+Hopper&segment=RETAIL&initialDeposit=75.00&currency=%s"
+					.formatted(URLEncoder.encode(accountNumber, StandardCharsets.UTF_8), currency);
+			return post("/accounts/new", "application/x-www-form-urlencoded", form);
+		}
+	}
+
 	private HttpResponse<String> get(String path, String accept) throws Exception {
 		HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
 				.header("Accept", accept)
 				.GET()
+				.build();
+		return http.send(request, HttpResponse.BodyHandlers.ofString());
+	}
+
+	private HttpResponse<String> post(String path, String contentType, String body) throws Exception {
+		HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
+				.header("Content-Type", contentType)
+				.POST(HttpRequest.BodyPublishers.ofString(body))
 				.build();
 		return http.send(request, HttpResponse.BodyHandlers.ofString());
 	}

@@ -2,8 +2,5 @@ extends:
   - recommended
 
 rules:
-  # Las respuestas de error se definen antes de que las usen las operaciones (llegan con #5, #6 y #7).
-  # Cuando haya operaciones que las referencien, quitar esta excepción.
-  no-unused-components: off
   # Proyecto de práctica: la aplicación solo se ejecuta en local.
   no-server-example.com: off

@@ -21,9 +21,156 @@ info:
 servers:
   - url: http://localhost:8080
     description: Desarrollo local
-paths: {}
+# Practice project, run locally only: the API has no authentication.
+security: []
+tags:
+  - name: accounts
+    description: Checking accounts (#5).
+paths:
+  /api/accounts:
+    get:
+      tags: [accounts]
+      operationId: listAccounts
+      summary: List accounts, sorted by account number
+      responses:
+        '200':
+          description: All accounts (empty array if there are none).
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountSummary'
+    post:
+      tags: [accounts]
+      operationId: openAccount
+      summary: Open a checking account with its initial deposit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenAccountRequest'
+      responses:
+        '201':
+          description: Account opened.
+          headers:
+            Location:
+              description: URL of the new account (`/api/accounts/{id}`).
+              schema:
+                type: string
+                format: uri-reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+  /api/accounts/{id}:
+    get:
+      tags: [accounts]
+      operationId: findAccount
+      summary: Account details, with its transactions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Account details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDetails'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
 components:
   schemas:
+    OpenAccountRequest:
+      type: object
+      required: [accountNumber, holderName, segment, initialDeposit]
+      properties:
+        accountNumber:
+          type: string
+          description: Spanish IBAN (`ES` + 22 digits); spaces and lowercase are accepted and normalized.
+          pattern: '^ *[Ee][Ss]( *\d){22} *$'
+          example: ES91 2100 0418 4502 0005 1332
+        holderName:
+          type: string
+          minLength: 1
+          example: Ada Lovelace
+        segment:
+          type: string
+          enum: [RETAIL, HIGH_NET_WORTH]
+        initialDeposit:
+          type: number
+          exclusiveMinimum: 0
+          description: Must reach the minimum initial deposit (50.00 EUR) or the request fails with 422.
+          example: 100.00
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          default: EUR
+          description: ISO 4217 code. A currency other than EUR fails with 422.
+    AccountSummary:
+      type: object
+      required: [id, accountNumber, holderName, balance, currency]
+      properties:
+        id:
+          type: string
+          format: uuid
+        accountNumber:
+          type: string
+          description: Normalized IBAN.
+          example: ES9121000418450200051332
+        holderName:
+          type: string
+        balance:
+          type: number
+          example: 100.00
+        currency:
+          type: string
+          example: EUR
+    AccountDetails:
+      allOf:
+        - $ref: '#/components/schemas/AccountSummary'
+        - type: object
+          required: [segment, transactions]
+          properties:
+            segment:
+              type: string
+              enum: [RETAIL, HIGH_NET_WORTH]
+            transactions:
+              type: array
+              items:
+                $ref: '#/components/schemas/Transaction'
+    Transaction:
+      type: object
+      required: [id, type, amount, currency, occurredOn, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [DEPOSIT, WITHDRAWAL]
+        amount:
+          type: number
+        currency:
+          type: string
+        occurredOn:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
     ProblemDetail:
       type: object
       description: Error en formato RFC 9457.

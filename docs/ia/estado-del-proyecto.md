@@ -2,19 +2,19 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores. **Se actualiza en cada PR que cierra una issue** (lo exigen `implement-plan`, `implement-plan-team`, la plantilla de los planes y el CI).
 
-- **Última actualización:** 2026-10-23 · PR #38 (documentación en inglés)
+- **Última actualización:** 2026-10-23 · PR #39 (abrir, consultar y listar cuentas)
 - **Rama activa:** `Monolithic` (fase 1). `master` congelada. `Hexagonal` aún no existe.
 
 ## Dónde estamos
 
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
-| 1 · Monolito en capas | #2 Lombok/Immutables · #3 glosario, capas y ADR 0004 · #4 repositorio en memoria · #8 base REST + web | #5 plan aprobado (`docs/plans/2026-10-23-open-query-list-accounts.md`, entra con la PR de la #5) · #31 flujo en equipo (el plan de la #5 ya sale con `T0 · Contrato` y `Lado`; falta decidir si se cierra ya o con la PR de la #5) | #5 → #6 → #7 (en equipo) → #11 → #12 → #13 |
+| 1 · Monolito en capas | #2 Lombok/Immutables · #3 glosario, capas y ADR 0004 · #4 repositorio en memoria · #8 base REST + web · #5 abrir, consultar y listar cuentas (primera issue en equipo) | #31 flujo en equipo (probado con la #5; falta que el usuario decida si se cierra) | #6 → #7 (en equipo) → #11 → #12 → #13 |
 | 2 · Hexagonal | — | — | #14 → #23 (se empieza al cerrar #13, creando `Hexagonal` desde `Monolithic`) |
 
 ## Siguiente paso
 
-1. `/implement-plan-team 5` (plan aprobado por el usuario el 2026-10-23). El plan se escribió en español antes de la convención de idioma: se traduce al inglés al commitearlo, y el contrato de `docs/contracts/` ya se redacta en inglés.
+1. `/plan-feature 6` (ingresos y retiradas, en equipo): incluye la página web de detalle de la cuenta, que la #5 dejó fuera.
 
 Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sección "Issues de la fase".
 
@@ -24,7 +24,7 @@ Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sec
 - **Las fusiones las decide el usuario.** No se fusiona ninguna PR sin su "sí".
 - **`CLAUDE.md` y la configuración de `.claude/`** solo se cambian con su visto bueno explícito, nunca a petición de un agente.
 - **Los diagramas se le enseñan antes de commitearlos.** Estilo de los diagramas: escala de grises, sin colores.
-- El usuario puede seguir la sesión desde el móvil (Remote Control) y recibe avisos por Telegram.
+- El usuario puede seguir la sesión desde el móvil (Remote Control). **Los avisos por Telegram están desactivados por el usuario hasta nuevo aviso** (2026-10-23): no se ejecuta `scripts/notify.mjs` aunque una skill lo pida.
 - Idioma: conversación, commits, `@DisplayName` y mensajes de error del dominio en español; código y **documentación en inglés** (desde la PR de convención de idioma, 2026-10-23). Los documentos existentes en español se traducirán en una issue aparte.
 
 ## Decisiones ya tomadas que afectan a lo que viene
@@ -32,17 +32,22 @@ Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sec
 - **Contrato web ↔ back** (ADR 0007, enfoque A): servicio, commands y vistas de `application`, más un fragmento de OpenAPI. La web no consume la API REST.
 - **DTOs REST:** pueden ser de Immutables con `@JsonSerialize`/`@JsonDeserialize` de `tools.jackson.databind.annotation` (ADR 0003).
 - **Errores:** `DomainException` → 422, `NotFoundException` → 404, `IllegalArgumentException` y validación → 400 (`RestExceptionHandler`). `AccountNotFoundException` (#5) hereda de `NotFoundException`.
-- **Número de cuenta único:** el repositorio lanza `IllegalStateException`. El caso de uso "abrir cuenta" (#5) debe comprobarlo antes con `findByAccountNumber` y lanzar una excepción de dominio.
+- **Número de cuenta único (R16):** `CheckingAccountService.openAccount` lo comprueba con `findByAccountNumber` y lanza `DuplicateAccountNumberException` (422). El `IllegalStateException` del repositorio queda solo para la carrera entre dos altas simultáneas (500, limitación aceptada).
 - **Los commands validan antes de llamar al dominio.** El 400 por `IllegalArgumentException` es solo una red de seguridad.
+- **Validación compartida:** la petición REST (`record` con Bean Validation) y el formulario web aplican las mismas restricciones (contrato de la #5), y la web devuelve al formulario el rechazo del command en lugar de un 500.
+- **Sesión web solo por cookie** (`server.servlet.session.tracking-modes=cookie`): con seguimiento por URL, la redirección tras un Post/Redirect/Get iba a `/;jsessionid=…` y Spring respondía 404.
+- **Segmentos y otros enumerados del dominio** viajan como `String` en commands y vistas (D4); un test comprueba que `OpenAccountCommandDef.SEGMENTS` coincide con `CustomerSegment`.
 
 ## Pendientes sueltos
 
 - Traducir al inglés la documentación existente (`docs/`, `README`), que sigue en español (issue aparte).
+- Las adiciones de la #5 a documentos que siguen en español (glosario, `fase-1-capas.md`, este estado) se escribieron en español para no mezclar idiomas; se traducen con el resto.
+- Telegram: si se quiere silenciar también el hook `Notification`, quitar las variables `TELEGRAM_*` de `.claude/settings.local.json` o añadir un interruptor a `scripts/notify.mjs`.
+- Worktrees y ramas de los teammates de la #5 (`feat/open-query-list-accounts-back` y `-web`, y sus carpetas en `.claude/worktrees/agent-*`): se conservan hasta que el usuario decida borrarlos.
 
 - Renombrar los sinónimos heredados "transacción" y "reintegro" a "movimiento" y "retirada" (mensaje de `Transaction.requirePending` y nombres de tests) en la primera issue que toque esas clases.
 - Test que falta: "el nombre del titular es obligatorio" (`AccountHolder`).
 - Sugerencia pendiente de decisión del usuario: mencionar en la sección de la fase 1 de `CLAUDE.md` que `presentation` puede conocer las excepciones de dominio (regla D4).
-- Quitar `no-unused-components: off` de `redocly.yaml` cuando haya operaciones que usen las respuestas de error (#5).
 
 ## Entorno
 
@@ -64,3 +69,4 @@ Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sec
 | 2026-10-23 | #36 | #8 | Base REST + web: errores a HTTP, OpenAPI, Thymeleaf y página 404 |
 | 2026-10-23 | #37 | — | Estado del proyecto entre sesiones, exigido en cada PR |
 | 2026-10-23 | #38 | — | Documentación en inglés; plan de la #5 aprobado |
+| 2026-10-23 | #39 | #5 | Abrir, consultar y listar cuentas (REST + web), primera issue en equipo |

@@ -77,6 +77,14 @@ Implementado en la #8:
 - Web: [página 404 propia](../../src/main/resources/templates/error/404.html) sobre los [fragmentos de la plantilla base](../../src/main/resources/templates/fragments/layout.html). Las rutas de la API siguen respondiendo en JSON.
 - **DTOs REST:** pueden ser de Immutables con Jackson 3 (`@JsonSerialize`/`@JsonDeserialize` de `tools.jackson.databind.annotation`); ver el [ADR 0003](../adr/0003-lombok-immutables.md).
 
+Implementado en la #5 (contrato: [`open-query-list-accounts.md`](../contracts/open-query-list-accounts.md)):
+
+- `application`: [`CheckingAccountService`](../../src/main/java/com/pronoide/ddd/application/CheckingAccountService.java) (abrir, consultar y listar), `OpenAccountCommand`, las vistas `AccountSummary`, `AccountDetails` y `TransactionSummary`, y `AccountNotFoundException`.
+- `domain.model`: `DuplicateAccountNumberException` (R16), lanzada por el servicio tras consultar el repositorio.
+- `presentation.rest`: `AccountController` (`/api/accounts`), con la petición como `record` con Bean Validation y las respuestas como DTOs de Immutables.
+- `presentation.web`: listado en `/` y alta en `/accounts/new` (Post/Redirect/Get con mensaje flash). La sesión se sigue solo por cookie (`server.servlet.session.tracking-modes=cookie`): con seguimiento por URL, la redirección iba a `/;jsessionid=…` y Spring respondía 404.
+- La petición REST y el formulario aplican la misma validación, para que lo que aceptan nunca provoque un `IllegalArgumentException` del dominio.
+
 ## Issues de la fase
 
 | Orden | Issue | Capas | Clases que introduce |
