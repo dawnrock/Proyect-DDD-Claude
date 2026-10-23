@@ -2,21 +2,20 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores. **Se actualiza en cada PR que cierra una issue** (lo exigen `implement-plan`, `implement-plan-team`, la plantilla de los planes y el CI).
 
-- **Última actualización:** 2026-10-23 · PR de este documento (tras abrir #36)
+- **Última actualización:** 2026-10-23 · PR #37 (tras fusionar #36)
 - **Rama activa:** `Monolithic` (fase 1). `master` congelada. `Hexagonal` aún no existe.
 
 ## Dónde estamos
 
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
-| 1 · Monolito en capas | #2 Lombok/Immutables · #3 glosario, capas y ADR 0004 · #4 repositorio en memoria | #8 base REST + web: **PR #36 abierta, pendiente de fusionar** · #31 flujo en equipo (falta planificar #5 con `T0 · Contrato`) | #5 → #6 → #7 (en equipo) → #11 → #12 → #13 |
+| 1 · Monolito en capas | #2 Lombok/Immutables · #3 glosario, capas y ADR 0004 · #4 repositorio en memoria · #8 base REST + web | #31 flujo en equipo (falta planificar #5 con `T0 · Contrato`) | #5 → #6 → #7 (en equipo) → #11 → #12 → #13 |
 | 2 · Hexagonal | — | — | #14 → #23 (se empieza al cerrar #13, creando `Hexagonal` desde `Monolithic`) |
 
 ## Siguiente paso
 
-1. Fusionar la PR #36 (si el usuario lo aprueba) y limpiar su worktree.
-2. `/plan-feature 5`: es la primera issue en equipo, así que el plan debe salir con `T0 · Contrato` y `Lado` en cada tarea. Al comprobarlo, cerrar #31.
-3. `/implement-plan-team 5`.
+1. `/plan-feature 5`: es la primera issue en equipo, así que el plan debe salir con `T0 · Contrato` y `Lado` en cada tarea. Al comprobarlo, cerrar #31.
+2. `/implement-plan-team 5`.
 
 Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sección "Issues de la fase".
 
@@ -61,4 +60,5 @@ Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sec
 | 2026-10-23 | #32 | #31 (parcial) | Flujo de equipo back/web y backlog reorganizado |
 | 2026-10-23 | #33, #34 | #3 | Glosario, capas, ADR 0004 y diagrama hexagonal |
 | 2026-10-23 | #35 | #4 | Repositorio en memoria |
-| 2026-10-23 | #36 (abierta) | #8 | Base REST + web |
+| 2026-10-23 | #36 | #8 | Base REST + web: errores a HTTP, OpenAPI, Thymeleaf y página 404 |
+| 2026-10-23 | #37 | — | Estado del proyecto entre sesiones, exigido en cada PR |
