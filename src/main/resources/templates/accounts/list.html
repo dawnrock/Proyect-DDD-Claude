@@ -17,7 +17,7 @@
         </thead>
         <tbody>
         <tr th:each="account : ${accounts}">
-            <td th:text="${account.accountNumber()}">ES00</td>
+            <td><a th:href="@{/accounts/{id}(id=${account.id()})}" th:text="${account.accountNumber()}">ES00</a></td>
             <td th:text="${account.holderName()}">Titular</td>
             <td class="num" th:text="${account.balance() + ' ' + account.currency()}">0.00 EUR</td>
         </tr>
