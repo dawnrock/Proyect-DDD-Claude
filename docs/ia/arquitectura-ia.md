@@ -35,6 +35,7 @@ flowchart LR
 | Hook `PreToolUse` | `.claude/hooks/block-backlog-json.mjs` | 12 | Bloquea la lectura de la semilla del backlog: la verdad son las issues. |
 | Hooks `Notification` / `Stop` | `.claude/hooks/notify-telegram.mjs` | 12.1 | Aviso push al móvil cuando Claude espera permiso o termina. |
 | Scripts deterministas | `scripts/seed-issues.mjs`, `scripts/notify.mjs` | 9.2.2, 14 | Crear el backlog; enviar notificaciones. |
+| Memoria entre sesiones | `docs/ia/estado-del-proyecto.md` + `scripts/check-project-status.mjs` | 6.2, 12, 14 | Punto de entrada de cada sesión (lo cita `CLAUDE.md`). Lo actualizan `implement-plan` / `implement-plan-team`, lo exige la plantilla del plan, lo revisa `revisor-ddd` y el CI falla si una PR que cierra una issue no lo toca. |
 | CI/CD | `.github/workflows/ci.yml` | 14 | Lo determinista (build, tests, ArchUnit, reglas del dominio) sin IA. |
 | CI/CD con IA | `.github/workflows/claude.yml`, `claude-code-review.yml` | 14 | `@claude` en issues/PR y revisión automática de cada PR. |
 | Equipos de agentes | `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | 13.2 | Habilitado para tareas de investigación o revisión en paralelo. |

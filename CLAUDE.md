@@ -56,6 +56,10 @@ ArchUnit no ve las anotaciones de Lombok (retención `SOURCE`): lo comprueba `no
 4. Commits con `/commit` (Conventional Commits en español).
 5. **Back + web en la misma issue** (etiqueta `equipo`): `/implement-plan-team <n>`. Primero se acuerda el **contrato** (`docs/contracts/<slug>.md`: servicio, commands y vistas de `application`, errores y fragmento de OpenAPI) entre los agentes `backend-dev` y `web-dev`; se congela en un commit y cada uno implementa su lado en paralelo en su worktree. Nadie cambia el contrato por su cuenta (ADR 0007).
 
+## Estado del proyecto
+
+**Al empezar cada sesión, lee `docs/ia/estado-del-proyecto.md`**: punto exacto del trabajo, siguiente paso, acuerdos con el usuario y pendientes. Toda PR que cierra una issue lo actualiza (el CI lo comprueba).
+
 ## Documentación (índice; léela solo cuando la tarea lo necesite)
 
 - `docs/ia/arquitectura-ia.md`: qué pieza de Claude Code hace qué en este repo.

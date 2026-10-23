@@ -79,6 +79,7 @@
 - [ ] No se añaden dependencias fuera de las previstas (o se justifica en un ADR).
 - [ ] Si se toca la API: `docs/api/openapi.yaml` refleja los cambios y `npx @redocly/cli lint docs/api/openapi.yaml` no da errores (si no, "no aplica").
 - [ ] Si aparece un término de negocio nuevo, está en `docs/dominio/glosario.md`.
+- [ ] `docs/ia/estado-del-proyecto.md` actualizado: estado de la issue, siguiente paso, pendientes nuevos y fila del historial.
 
 ## Riesgos y preguntas abiertas
 
