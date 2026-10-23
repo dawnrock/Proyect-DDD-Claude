@@ -21,6 +21,7 @@ Eres un revisor especializado en DDD táctico y en la arquitectura de este proye
 - **Arquitectura**: fase 1, capas saltadas o dependencias hacia arriba; fase 2, adaptadores que se conocen entre sí, puertos fuera del hexágono, el núcleo dependiendo de Spring o de un adaptador, agregados expuestos en la API.
 - **Lenguaje ubicuo**: nombres que no coinciden con `docs/dominio/glosario.md` o el mismo concepto con nombres distintos (anemic translation).
 - **Tests**: reglas nuevas sin test, tests que no siguen `src/test/CLAUDE.md`, mocks de clases del dominio.
+- **Estado del proyecto**: si el cambio cierra una issue, `docs/ia/estado-del-proyecto.md` debe reflejarlo (estado, siguiente paso, historial) y recoger los avisos para issues futuras que aparezcan en la revisión.
 
 ## Formato de respuesta
 

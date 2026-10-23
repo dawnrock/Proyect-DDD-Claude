@@ -65,7 +65,12 @@ Si un test no se puede poner en verde sin salirte del plan o un criterio no se p
 
 1. Comprueba cada criterio global: `./mvnw verify`; arranque con `./mvnw spring-boot:run` en segundo plano + `curl -s localhost:8080/actuator/health` (detén el proceso al acabar); `check-domain.mjs`; `git diff origin/<rama-base>... -- pom.xml` para las dependencias; OpenAPI si aplica.
 2. Márcalos. Si alguno falla, trátalo como en el paso 5.
-3. `**Estado:**` → `completado` y commit `docs: completa el plan <slug>`.
+3. **Actualiza `docs/ia/estado-del-proyecto.md`** (obligatorio: el CI falla si una PR con `Closes #n` no lo toca):
+   - La issue pasa a "Hecho" o a "En curso" con su PR.
+   - Revisa el "Siguiente paso".
+   - Añade a "Decisiones" o a "Pendientes sueltos" lo que haya surgido (avisos de la revisión para issues futuras, desviaciones).
+   - Añade una fila al "Historial" y cambia la fecha de "Última actualización".
+4. `**Estado:**` → `completado` y commit `docs: completa el plan <slug>` (incluye el estado del proyecto).
 
 ### 7. Crear la PR
 

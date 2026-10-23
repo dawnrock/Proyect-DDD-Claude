@@ -45,7 +45,7 @@ Si un teammate necesita cambiar el contrato, **para su tarea**, envía la propue
 1. Cuando los dos terminen, en el worktree de integración: `git merge --no-ff <tipo>/<slug>-back` y después `<tipo>/<slug>-web`. Resuelve conflictos (solo deberían aparecer en el plan: conserva las tareas marcadas de ambos lados).
 2. Haz las tareas `Lado: ambos` (por ejemplo, un test de extremo a extremo con el servicio real en lugar del stub).
 3. Pide una revisión a `revisor-ddd` sobre `git diff origin/<rama-base>...HEAD` y corrige lo relevante.
-4. Criterios globales, `**Estado:** completado`, PR única contra la rama de la fase con `Closes #<número>` y aviso por Telegram, como en `implement-plan` (pasos 6-8). En el cuerpo de la PR resume: contrato acordado (y renegociaciones), tareas por lado y commits de cada uno.
+4. Criterios globales, actualización de `docs/ia/estado-del-proyecto.md` (obligatoria, ver paso 6.3 de `implement-plan`), `**Estado:** completado`, PR única contra la rama de la fase con `Closes #<número>` y aviso por Telegram, como en `implement-plan` (pasos 6-8). En el cuerpo de la PR resume: contrato acordado (y renegociaciones), tareas por lado y commits de cada uno.
 5. Cierra el equipo. No borres los worktrees ni las ramas `-back`/`-web`: lo decide el usuario tras la revisión.
 
 ## 5. Informar
