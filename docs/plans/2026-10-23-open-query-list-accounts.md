@@ -140,7 +140,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
 - **Acceptance criteria:**
   - [x] Tests green. Responses match the OpenAPI fragment schemas.
 
-### [ ] T7 — Account list at `/` (~10 min)
+### [x] T7 — Account list at `/` (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -151,9 +151,9 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   2. With no accounts, shows an empty-state message.
   3. `@WebMvcTest` tests with `@MockitoBean`: with and without accounts.
 - **Acceptance criteria:**
-  - [ ] Tests green. The view uses no domain types.
+  - [x] Tests green. The view uses no domain types.
 
-### [ ] T8 — Sign-up form: happy path (~10 min)
+### [x] T8 — Sign-up form: happy path (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -164,9 +164,9 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   2. `POST /accounts/new` with valid data calls `openAccount` and redirects to `/` with a success flash message.
   3. Tests: the form is shown; a valid sign-up redirects and calls the service with the expected command.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
-### [ ] T9 — Sign-up form: errors (~10 min)
+### [x] T9 — Sign-up form: errors (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -177,7 +177,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   2. A `DomainException` from the service: the form comes back with its message and keeps the entered data.
   3. Tests: blank holder; malformed IBAN (`@Pattern`); insufficient deposit; duplicate account number.
 - **Acceptance criteria:**
-  - [ ] Tests green. No form error ends in a 500 page.
+  - [x] Tests green. No form error ends in a 500 page.
 
 ### [ ] T10 — End-to-end integration (~10 min)
 
