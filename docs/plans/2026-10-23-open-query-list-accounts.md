@@ -92,7 +92,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
 - **Acceptance criteria:**
   - [x] `./mvnw test -Dtest=OpenAccountCommandTests` green.
 
-### [ ] T3 — "Open account" use case (~10 min)
+### [x] T3 — "Open account" use case (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -102,7 +102,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   1. `openAccount`: builds `AccountNumber`, `AccountHolder.register(...)` and `MonetaryAmount`; checks `findByAccountNumber`; calls `CheckingAccount.open`; calls `save`; returns `AccountSummary`.
   2. Tests (`@Nested` "Abrir cuenta"): a valid deposit is saved and returns the summary; a deposit below the minimum is rejected and not saved; another currency is rejected; an account number already in use (even with spaces or lowercase) is rejected with `DuplicateAccountNumberException`.
 - **Acceptance criteria:**
-  - [ ] Tests green. The service has no business rules besides the uniqueness check.
+  - [x] Tests green. The service has no business rules besides the uniqueness check.
 
 ### [ ] T4 — "Query" and "list" use cases (~10 min)
 
