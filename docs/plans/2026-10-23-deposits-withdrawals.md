@@ -77,7 +77,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   - [x] Parameterized tests green (characterization: validated by temporarily breaking the limit in `isAllowed`).
   - [x] No "reintegro" or "transacción" left in `src/`. `check-domain.mjs` without errors.
 
-### [ ] T2 — `DepositCommand` and `WithdrawCommand` validation (~10 min)
+### [x] T2 — `DepositCommand` and `WithdrawCommand` validation (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -87,7 +87,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   1. `@Value.Check`: positive amount; valid ISO currency (same check as `OpenAccountCommand`); `currency` defaults to `EUR`.
   2. Parameterized tests of the invalid cases for both commands.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
 ### [ ] T3 — "Deposit" use case (~10 min)
 
