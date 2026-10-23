@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Cuentas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <h1>Cuentas</h1>
+    <p th:if="${message}" class="flash flash-success" th:text="${message}"></p>
+    <p><a class="button" th:href="@{/accounts/new}">Abrir cuenta</a></p>
+    <table th:if="${!accounts.isEmpty()}">
+        <thead>
+        <tr>
+            <th>Número de cuenta</th>
+            <th>Titular</th>
+            <th class="num">Saldo</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="account : ${accounts}">
+            <td th:text="${account.accountNumber()}">ES00</td>
+            <td th:text="${account.holderName()}">Titular</td>
+            <td class="num" th:text="${account.balance() + ' ' + account.currency()}">0.00 EUR</td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${accounts.isEmpty()}" class="empty">Todavía no hay cuentas. Abre la primera.</p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

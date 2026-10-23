@@ -140,7 +140,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
 - **Acceptance criteria:**
   - [ ] Tests green. Responses match the OpenAPI fragment schemas.
 
-### [ ] T7 — Account list at `/` (~10 min)
+### [x] T7 — Account list at `/` (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -151,7 +151,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   2. With no accounts, shows an empty-state message.
   3. `@WebMvcTest` tests with `@MockitoBean`: with and without accounts.
 - **Acceptance criteria:**
-  - [ ] Tests green. The view uses no domain types.
+  - [x] Tests green. The view uses no domain types.
 
 ### [ ] T8 — Sign-up form: happy path (~10 min)
 
