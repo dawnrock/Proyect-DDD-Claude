@@ -26,10 +26,24 @@
 
 ## Tareas
 
-<!-- Cada tarea: 5-10 min, una capa, 1-2 archivos + test, deja ./mvnw verify en verde. De dentro hacia fuera. -->
+<!-- Cada tarea: 5-10 min, una capa, 1-2 archivos + test, deja ./mvnw verify en verde. De dentro hacia fuera.
+     Si la issue toca back y web: empieza por "T0 — Contrato" (Lado: ambos, ver implement-plan-team/assets/contract-template.md),
+     añade **Lado:** a cada tarea y haz que las de back y web dependan solo de T0. -->
+
+### [ ] T0 — Contrato (~10 min) <!-- solo si toca back y web; si no, bórrala -->
+
+- **Lado:** ambos
+- **Capa:** application · docs
+- **Archivos:** `docs/contracts/<slug>.md`, tipos del contrato en `application`, fragmento de `docs/api/openapi.yaml`
+- **Depende de:** —
+- **Qué hacer:**
+  1. Redactar el contrato y crear los tipos sin lógica; backend-dev y web-dev lo revisan y acuerdan.
+- **Criterios de aceptación:**
+  - [ ] Contrato acordado y congelado en un commit; `./mvnw verify` compila contra él.
 
 ### [ ] T1 — <título> (~5 min)
 
+- **Lado:** back | web | ambos <!-- solo si el plan tiene T0 · Contrato -->
 - **Capa:** domain | application | persistence | presentation | adapter.in | adapter.out | config | tests | docs | build
 - **Archivos:** `src/...`
 - **Depende de:** —
