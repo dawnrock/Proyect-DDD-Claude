@@ -199,5 +199,24 @@ class AccountWebControllerTests {
                     .andExpect(view().name("accounts/new"))
                     .andExpect(content().string(containsString(error.getMessage())));
         }
+
+        @Test
+        @DisplayName("Una divisa bien formada pero inexistente vuelve al formulario con el error y sin llamar al servicio")
+        void una_divisa_bien_formada_pero_inexistente_vuelve_al_formulario_con_el_error_y_sin_llamar_al_servicio()
+                throws Exception {
+            mvc.perform(post("/accounts/new")
+                            .param("accountNumber", "ES1234567890123456789012")
+                            .param("holderName", "Ana Lopez")
+                            .param("segment", "RETAIL")
+                            .param("initialDeposit", "100.00")
+                            .param("currency", "XYZ"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/new"))
+                    .andExpect(model().attributeHasErrors("form"))
+                    .andExpect(content().string(containsString("XYZ no es un c")))
+                    .andExpect(content().string(containsString("Ana Lopez")));
+
+            verifyNoInteractions(service);
+        }
     }
 }

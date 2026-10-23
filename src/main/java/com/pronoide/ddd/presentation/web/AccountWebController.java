@@ -45,9 +45,10 @@ public class AccountWebController {
     @PostMapping("/accounts/new")
     public String openAccount(@Valid @ModelAttribute("form") OpenAccountForm form, BindingResult result,
                               Model model, RedirectAttributes redirect) {
-        if (!result.hasErrors()) {
+        OpenAccountCommand command = result.hasErrors() ? null : toCommand(form, result);
+        if (command != null) {
             try {
-                AccountSummary account = service.openAccount(toCommand(form));
+                AccountSummary account = service.openAccount(command);
                 redirect.addFlashAttribute("message",
                         "Cuenta %s abierta correctamente".formatted(account.accountNumber()));
                 return "redirect:/";
@@ -59,14 +60,23 @@ public class AccountWebController {
         return FORM_VIEW;
     }
 
-    private OpenAccountCommand toCommand(OpenAccountForm form) {
-        return OpenAccountCommand.builder()
-                .accountNumber(form.getAccountNumber())
-                .holderName(form.getHolderName())
-                .segment(form.getSegment())
-                .initialDeposit(form.getInitialDeposit())
-                .currency(form.getCurrency())
-                .build();
+    /**
+     * Construye el command, o deja el error en el formulario y devuelve {@code null} si lo rechaza (por ejemplo,
+     * una divisa con formato válido pero que no existe): es la red de seguridad de la validación del formulario.
+     */
+    private OpenAccountCommand toCommand(OpenAccountForm form, BindingResult result) {
+        try {
+            return OpenAccountCommand.builder()
+                    .accountNumber(form.getAccountNumber())
+                    .holderName(form.getHolderName())
+                    .segment(form.getSegment())
+                    .initialDeposit(form.getInitialDeposit())
+                    .currency(form.getCurrency())
+                    .build();
+        } catch (IllegalArgumentException e) {
+            result.reject("invalid", e.getMessage());
+            return null;
+        }
     }
 
     private void addFormOptions(Model model) {

@@ -4,12 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import com.pronoide.ddd.domain.model.CustomerSegment;
 
 class OpenAccountCommandTests {
 
@@ -91,5 +94,13 @@ class OpenAccountCommandTests {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().currency(currency).build())
                 .withMessage("La divisa %s no es un código ISO 4217 válido".formatted(currency));
+    }
+
+    @Test
+    @DisplayName("Los segmentos que acepta la orden son exactamente los del dominio")
+    void los_segmentos_que_acepta_la_orden_son_exactamente_los_del_dominio() {
+        assertThat(OpenAccountCommandDef.SEGMENTS)
+                .containsExactlyInAnyOrderElementsOf(
+                        Arrays.stream(CustomerSegment.values()).map(Enum::name).toList());
     }
 }

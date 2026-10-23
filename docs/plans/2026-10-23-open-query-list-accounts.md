@@ -207,6 +207,19 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors or unused-component warnings.
   - [ ] Glossary and status updated.
 
+### [x] T12 — Review fixes (~10 min)
+
+- **Side:** both
+- **Layer:** presentation · tests
+- **Files:** `presentation/web/AccountWebController.java`, `presentation/web/AccountWebControllerTests.java`, `application/OpenAccountCommandTests.java`
+- **Depends on:** T10 (added after the `revisor-ddd` review; no blocking findings)
+- **What to do:**
+  1. A well-formed but non-existent currency (`XYZ`) passes the form's `@Pattern` and the command rejects it with `IllegalArgumentException`: the web ended in a 500. The controller now catches it only while building the command and shows the message on the form.
+  2. Test that the segments accepted by `OpenAccountCommand` are exactly `CustomerSegment`'s, so the duplicated list cannot drift.
+- **Acceptance criteria:**
+  - [x] Web test with `currency=XYZ`: red without the fix (exception), green with it; the service is not called.
+  - [x] Segment sync test green. `./mvnw verify` green (109 tests).
+
 ## Global acceptance criteria
 
 **Specific:**
