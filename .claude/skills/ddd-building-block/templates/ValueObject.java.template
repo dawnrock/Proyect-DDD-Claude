@@ -1,0 +1,27 @@
+package {{package}};
+
+import java.util.Objects;
+
+/**
+ * {{Descripción en español del concepto del lenguaje ubicuo}}.
+ */
+public record {{Name}}({{Type}} {{field}}) {
+
+    public {{Name}} {
+        Objects.requireNonNull({{field}}, "{{El campo}} es obligatorio");
+        // Valida aquí las reglas del valor y normalízalo si hace falta.
+        // if (...) throw new IllegalArgumentException("...: " + {{field}});
+    }
+
+    public static {{Name}} of({{Type}} {{field}}) {
+        return new {{Name}}({{field}});
+    }
+
+    // Las operaciones devuelven siempre una instancia nueva:
+    // public {{Name}} with...(...) { return new {{Name}}(...); }
+
+    @Override
+    public String toString() {
+        return String.valueOf({{field}});
+    }
+}

@@ -1,0 +1,25 @@
+package com.pronoide.ddd.adapter.in.rest;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.pronoide.ddd.application.{{InputPort}};
+
+import lombok.RequiredArgsConstructor;
+
+/**
+ * Adaptador de entrada REST: traduce las peticiones HTTP a llamadas al puerto {@link {{InputPort}}}.
+ * Los errores del dominio se traducen a HTTP en un único punto (RestExceptionHandler).
+ */
+@RestController
+@RequestMapping("/api/{{resource}}")
+@RequiredArgsConstructor
+class {{Resource}}Controller {
+
+    private final {{InputPort}} {{inputPort}};
+
+    @GetMapping("/{id}")
+    ResponseEntity<{{Response}}> {{get}}(@PathVariable String id) {
+        return ResponseEntity.ok({{Response}}.from({{inputPort}}.{{query}}(id)));
+    }
+}

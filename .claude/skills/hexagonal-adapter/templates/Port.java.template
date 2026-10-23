@@ -1,0 +1,10 @@
+package {{package}}; // application (entrada) | domain.model (salida)
+
+/**
+ * Puerto de {{entrada|salida}}: {{qué ofrece la aplicación | qué necesita la aplicación del exterior}}.
+ * Lo {{usa|implementa}} el adaptador {{NombreAdaptador}}.
+ */
+public interface {{PortName}} {
+
+    {{ReturnType}} {{operation}}({{ParamType}} {{param}});
+}

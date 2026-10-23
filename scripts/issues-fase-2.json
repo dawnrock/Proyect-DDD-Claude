@@ -1,0 +1,69 @@
+{
+  "milestone": {
+    "title": "Fase 2 · Arquitectura hexagonal",
+    "description": "Convertir el monolito en capas a puertos y adaptadores (Lab 27 del curso) sin cambiar el comportamiento, añadiendo eventos de dominio, factoría con puertos y adaptadores simulados. Rama: Hexagonal (se crea desde Monolithic al cerrar la fase 1). Termina con la etiqueta v2-hexagonal."
+  },
+  "phaseLabel": "fase:2-hexagonal",
+  "issues": [
+    {
+      "title": "Reorganizar los paquetes según la arquitectura hexagonal",
+      "type": "refactor",
+      "layers": ["domain", "application", "adapter", "config"],
+      "body": "## Objetivo\n\nQue la estructura de paquetes cuente qué es el hexágono, qué son los puertos y qué son los adaptadores (Lab 27.4). **Refactor: el comportamiento no cambia.**\n\n## Alcance\n\n- ADR `docs/adr/0006-arquitectura-hexagonal.md`.\n- Mover con `git mv` (conserva el historial): `presentation.rest` → `adapter.in.rest`, `presentation.web` → `adapter.in.web`, `persistence` → `adapter.out.persistence`; `MoneyTransferService` queda en `domain.service`.\n- Actualizar `docs/arquitectura/fase-2-hexagonal.md` con la tabla \"clase → papel en la arquitectura\".\n\n## Criterios de aceptación\n\n- [ ] Primera tarea: fijar el comportamiento (todas las pruebas de la fase 1 pasan antes y después).\n- [ ] `git log --follow` conserva el historial de las clases movidas.\n- [ ] `./mvnw verify` en verde (la regla de capas se sustituye en la issue de ArchUnit; hasta entonces se ajusta a los nuevos paquetes)."
+    },
+    {
+      "title": "Puerto de salida CheckingAccountRepository y adaptador en memoria",
+      "type": "refactor",
+      "layers": ["domain", "adapter"],
+      "body": "## Objetivo\n\nInvertir la dependencia con la persistencia: el dominio declara lo que necesita y la infraestructura lo implementa.\n\n## Alcance\n\n- Interfaz `domain.model.CheckingAccountRepository` (puerto de salida).\n- `adapter.out.persistence.InMemoryCheckingAccountRepository` (package-private) la implementa; sigue siendo simulada.\n- Test de contrato del puerto reutilizable para cualquier implementación futura.\n\n## Criterios de aceptación\n\n- [ ] La capa de aplicación depende solo de la interfaz.\n- [ ] Ninguna clase fuera de `adapter.out.persistence` y `config` conoce el adaptador.\n- [ ] `./mvnw verify` en verde."
+    },
+    {
+      "title": "Puertos de entrada CheckingAccountCommands y CheckingAccountQueries",
+      "type": "refactor",
+      "layers": ["application", "adapter"],
+      "body": "## Objetivo\n\nQue los adaptadores de entrada dependan de lo que la aplicación **ofrece** (sus casos de uso), no de la clase que lo implementa (Lab 27.7).\n\n## Alcance\n\n- Interfaces `application.CheckingAccountCommands` (abrir, ingresar, retirar, transferir) y `application.CheckingAccountQueries` (listar, detalle), con commands/queries/vistas de Immutables.\n- `CheckingAccountApplicationService` las implementa.\n- Los controladores REST y web dependen solo de los puertos.\n\n## Criterios de aceptación\n\n- [ ] Ningún adaptador de entrada importa `CheckingAccountApplicationService`.\n- [ ] Los tests `@WebMvcTest` simulan los puertos con Mockito (`@MockitoBean`).\n- [ ] `./mvnw verify` en verde."
+    },
+    {
+      "title": "Eventos de dominio: publicación y consumidores",
+      "type": "feature",
+      "layers": ["domain", "application", "adapter"],
+      "body": "## Objetivo\n\nModelar lo que ocurre en la cuenta como eventos de dominio y publicarlos sin acoplar el dominio a Spring (Lab 23).\n\n## Alcance\n\n- Contrato `DomainEvent` y eventos `CheckingAccountOpened`, `MoneyDeposited`, `MoneyWithdrawn`, `WithdrawalRejected` (`record`).\n- El agregado registra sus eventos; el servicio de aplicación los publica tras guardar.\n- Puerto de salida `DomainEventPublisher` y adaptador `adapter.out.event.SpringDomainEventPublisher`.\n- Consumidores en `application.listener`: auditoría y notificación al cliente (simulada, con `@Slf4j`).\n\n## Criterios de aceptación\n\n- [ ] Tests del agregado: cada operación registra el evento esperado.\n- [ ] Test de integración: un depósito llega al consumidor de auditoría.\n- [ ] El dominio sigue sin depender de Spring (`DomainIsolationTests`)."
+    },
+    {
+      "title": "Factoría de cuentas con puertos de numeración y verificación de ingresos",
+      "type": "feature",
+      "layers": ["domain", "adapter", "config"],
+      "body": "## Objetivo\n\nEncapsular la apertura de cuentas en una factoría que necesita colaboradores externos (Lab 25).\n\n## Alcance\n\n- `domain.model.CheckingAccountFactory` con los puertos `AccountNumberSequence` e `IncomeVerifier`.\n- Adaptadores simulados: `adapter.out.persistence.InMemoryAccountNumberSequence` (genera IBAN válidos) y `adapter.out.taxagency.FakeTaxAgencyIncomeVerifier`.\n- Regla: solo los titulares con ingresos verificados por encima de un umbral se dan de alta como alto patrimonio.\n- La apertura deja de hacerse con `CheckingAccount.open` desde fuera del dominio.\n\n## Criterios de aceptación\n\n- [ ] Tests de la factoría con stubs de los dos puertos.\n- [ ] Builder de test actualizado para crear cuentas sin la factoría.\n- [ ] `./mvnw verify` en verde."
+    },
+    {
+      "title": "Adaptador de entrada de línea de comandos",
+      "type": "feature",
+      "layers": ["adapter"],
+      "body": "## Objetivo\n\nDemostrar que el hexágono se usa igual desde varios adaptadores: el runner de datos de demostración pasa a ser un adaptador CLI (Lab 27.7.3).\n\n## Alcance\n\n- `adapter.in.cli.DomainModelRunner` que usa solo los puertos de entrada.\n- Se activa con el perfil `demo` y deja trazas legibles de cada caso de uso.\n\n## Criterios de aceptación\n\n- [ ] Con el perfil `demo` se ejecutan las mismas operaciones que en la fase 1.\n- [ ] El runner no importa nada de `adapter.out` ni el servicio de aplicación."
+    },
+    {
+      "title": "Cablear puertos y adaptadores en config sin Spring en el núcleo",
+      "type": "refactor",
+      "layers": ["config", "domain", "application"],
+      "body": "## Objetivo\n\nQue el hexágono no necesite anotaciones de Spring: la configuración construye el núcleo y le entrega sus adaptadores.\n\n## Alcance\n\n- `config.DomainConfiguration` con `@Bean` para la factoría, el servicio de dominio y el servicio de aplicación.\n- Quitar `@Service`/`@Component` de las clases del hexágono (la transacción, si hace falta, se aplica desde `config` o el adaptador).\n\n## Criterios de aceptación\n\n- [ ] Ninguna clase de `domain..` ni de `application` (salvo listeners, si se justifica) importa `org.springframework`.\n- [ ] La aplicación arranca y `GET /actuator/health` responde `UP`."
+    },
+    {
+      "title": "Tests de los adaptadores sin el hexágono",
+      "type": "test",
+      "layers": ["adapter"],
+      "body": "## Objetivo\n\nProbar cada adaptador de forma aislada, como permite la arquitectura hexagonal (Lab 27.9.4).\n\n## Alcance\n\n- REST y web: `@WebMvcTest` con los puertos simulados (Mockito), incluida la traducción de errores a HTTP.\n- Persistencia: test de contrato del puerto contra el adaptador en memoria.\n- Eventos: test del adaptador de Spring con un listener de prueba.\n\n## Criterios de aceptación\n\n- [ ] Ningún test de adaptador de entrada levanta el contexto completo.\n- [ ] Cobertura de los caminos de error de cada endpoint (404, 422, 400)."
+    },
+    {
+      "title": "Reglas de ArchUnit para la arquitectura hexagonal",
+      "type": "test",
+      "layers": ["config"],
+      "body": "## Objetivo\n\nVerificar automáticamente que todas las dependencias apuntan hacia el hexágono (Lab 27.10).\n\n## Alcance\n\n- `HexagonalArchitectureTests` sustituye a `LayeredArchitectureTests` (onion/hexagonal con `onionArchitecture()` o reglas equivalentes).\n- Reglas: los adaptadores no se conocen entre sí; los puertos son interfaces y viven en `domain.model` (salida) o `application` (entrada); solo `adapter..` y `config` dependen de Spring web/data; `domain..` no depende de `org.immutables`.\n\n## Criterios de aceptación\n\n- [ ] Cada regla validada rompiéndola temporalmente (se indica en la PR).\n- [ ] `./mvnw verify` en verde."
+    },
+    {
+      "title": "Cerrar la fase 2: comparativa capas vs hexagonal y etiqueta v2-hexagonal",
+      "type": "docs",
+      "layers": ["docs"],
+      "body": "## Objetivo\n\nDocumentar la segunda fotografía y compararla con la primera.\n\n## Alcance\n\n- `docs/arquitectura/comparativa-capas-hexagonal.md`: diagramas de ambas fases, qué cambió en cada paquete, coste y beneficios (tests aislados, adaptadores intercambiables), con enlaces a los diffs `v1-monolito...v2-hexagonal`.\n- Actualizar `README.md` y `docs/ia/arquitectura-ia.md` con el uso de la IA en la fase.\n- Etiqueta `v2-hexagonal` sobre `Hexagonal`.\n\n## Criterios de aceptación\n\n- [ ] Todas las issues del milestone cerradas.\n- [ ] Las ramas `Monolithic` y `Hexagonal` y `master` coexisten sin cambios cruzados.\n- [ ] `./mvnw verify` en verde en `Hexagonal`."
+    }
+  ]
+}
