@@ -79,7 +79,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
 - **Acceptance criteria:**
   - [x] Test green. `check-domain.mjs` without errors.
 
-### [ ] T2 — `OpenAccountCommand` validation (~10 min)
+### [x] T2 — `OpenAccountCommand` validation (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -90,7 +90,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   2. `@Value.Default` `currency` = `EUR`.
   3. Parameterized tests of the invalid cases (`IllegalArgumentException`) and a valid one.
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest=OpenAccountCommandTests` green.
+  - [x] `./mvnw test -Dtest=OpenAccountCommandTests` green.
 
 ### [ ] T3 — "Open account" use case (~10 min)
 
