@@ -153,7 +153,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
 - **Acceptance criteria:**
   - [x] Tests green. The view uses no domain types.
 
-### [ ] T8 — Sign-up form: happy path (~10 min)
+### [x] T8 — Sign-up form: happy path (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -164,7 +164,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   2. `POST /accounts/new` with valid data calls `openAccount` and redirects to `/` with a success flash message.
   3. Tests: the form is shown; a valid sign-up redirects and calls the service with the expected command.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
 ### [ ] T9 — Sign-up form: errors (~10 min)
 
