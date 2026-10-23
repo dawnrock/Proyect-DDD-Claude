@@ -1,6 +1,5 @@
 # Fase 2 · Arquitectura hexagonal (rama `Hexagonal`)
 
-> Diseño objetivo basado en el Lab 27 del curso de DDD. Se completa al cerrar la fase.
 
 ![Arquitectura hexagonal: el dominio en el centro, la aplicación alrededor con sus puertos, los adaptadores de entrada a la izquierda (REST, web, CLI) y los de salida a la derecha (persistencia, eventos, agencia tributaria); config conecta puertos y adaptadores](img/hexagonal.svg)
 
