@@ -68,7 +68,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
   - [x] `./mvnw verify` compiles and passes against the contract types.
   - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
 
-### [ ] T1 — Duplicate account number as a domain rule (~5 min)
+### [x] T1 — Duplicate account number as a domain rule (~5 min)
 
 - **Side:** back
 - **Layer:** domain
@@ -77,7 +77,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
 - **What to do:**
   1. Test: the exception is a `DomainException` and its Spanish message includes the normalized account number.
 - **Acceptance criteria:**
-  - [ ] Test green. `check-domain.mjs` without errors.
+  - [x] Test green. `check-domain.mjs` without errors.
 
 ### [ ] T2 — `OpenAccountCommand` validation (~10 min)
 
