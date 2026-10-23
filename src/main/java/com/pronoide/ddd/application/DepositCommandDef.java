@@ -6,7 +6,8 @@ import java.util.UUID;
 import org.immutables.value.Value;
 
 /**
- * Orden de ingresar un importe en una cuenta. Valida sus campos antes de llegar al dominio (pendiente: T2).
+ * Orden de ingresar un importe en una cuenta. Valida sus campos al construirse ({@code IllegalArgumentException}), antes de llegar al dominio:
+ * importe positivo después de redondear a los decimales de la divisa y divisa ISO 4217 válida.
  *
  * <p>{@code currency} es un código ISO 4217 ({@code EUR} por defecto).
  */
@@ -21,5 +22,10 @@ public interface DepositCommandDef {
     @Value.Default
     default String currency() {
         return "EUR";
+    }
+
+    @Value.Check
+    default void validate() {
+        CommandValidation.requireValidMovement(amount(), currency());
     }
 }

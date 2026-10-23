@@ -1,7 +1,6 @@
 package com.pronoide.ddd.application;
 
 import java.math.BigDecimal;
-import java.util.Currency;
 import java.util.Set;
 
 import org.immutables.value.Value;
@@ -46,16 +45,8 @@ public interface OpenAccountCommandDef {
         if (initialDeposit().signum() <= 0) {
             throw new IllegalArgumentException("El depósito inicial debe ser positivo");
         }
-        if (!isIsoCurrency(currency())) {
+        if (!CommandValidation.isIsoCurrency(currency())) {
             throw new IllegalArgumentException("La divisa %s no es un código ISO 4217 válido".formatted(currency()));
-        }
-    }
-
-    private static boolean isIsoCurrency(String code) {
-        try {
-            return code.equals(Currency.getInstance(code).getCurrencyCode());
-        } catch (IllegalArgumentException e) {
-            return false;
         }
     }
 }

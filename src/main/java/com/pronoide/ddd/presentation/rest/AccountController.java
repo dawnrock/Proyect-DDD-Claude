@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,8 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountSummary;
 import com.pronoide.ddd.application.CheckingAccountService;
+import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
 import com.pronoide.ddd.application.TransactionSummary;
+import com.pronoide.ddd.application.WithdrawCommand;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +59,26 @@ public class AccountController {
     @GetMapping("/{id}")
     public AccountDetailsResponse findAccount(@PathVariable UUID id) {
         return toResponse(service.findAccount(id));
+    }
+
+    @PostMapping("/{id}/deposits")
+    public ResponseEntity<TransactionResponse> deposit(
+            @PathVariable UUID id, @Valid @RequestBody MovementRequest request) {
+        DepositCommand.Builder command = DepositCommand.builder().accountId(id).amount(request.amount());
+        if (request.currency() != null) {
+            command.currency(request.currency());
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(service.deposit(command.build())));
+    }
+
+    @PostMapping("/{id}/withdrawals")
+    public ResponseEntity<TransactionResponse> withdraw(
+            @PathVariable UUID id, @Valid @RequestBody MovementRequest request) {
+        WithdrawCommand.Builder command = WithdrawCommand.builder().accountId(id).amount(request.amount());
+        if (request.currency() != null) {
+            command.currency(request.currency());
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(service.withdraw(command.build())));
     }
 
     private static AccountSummaryResponse toResponse(AccountSummary summary) {

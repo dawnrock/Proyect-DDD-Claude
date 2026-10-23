@@ -64,7 +64,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   - [x] `./mvnw verify` compiles and passes against the contract types.
   - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
 
-### [ ] T1 — Overdraft-limit withdrawal tests and legacy synonyms (~10 min)
+### [x] T1 — Overdraft-limit withdrawal tests and legacy synonyms (~10 min)
 
 - **Side:** back
 - **Layer:** domain
@@ -74,10 +74,10 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   1. `@ParameterizedTest` + `@CsvSource` for withdrawals at the overdraft limit: retail (balance exactly 0 approved, 0.01 below rejected) and high net worth (exactly -1,000.00 approved, -1,000.01 rejected), checking status and balance.
   2. Rename `un_reintegro_con_saldo_suficiente_se_aprueba` → `una_retirada_...` and `una_transaccion_ya_resuelta_...` → `un_movimiento_ya_resuelto_...` (with their `@DisplayName`), and the `Transaction.requirePending` message "La transacción…" → "El movimiento…".
 - **Acceptance criteria:**
-  - [ ] Parameterized tests green (characterization: validated by temporarily breaking the limit in `isAllowed`).
-  - [ ] No "reintegro" or "transacción" left in `src/`. `check-domain.mjs` without errors.
+  - [x] Parameterized tests green (characterization: validated by temporarily breaking the limit in `isAllowed`).
+  - [x] No "reintegro" or "transacción" left in `src/`. `check-domain.mjs` without errors.
 
-### [ ] T2 — `DepositCommand` and `WithdrawCommand` validation (~10 min)
+### [x] T2 — `DepositCommand` and `WithdrawCommand` validation (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -87,9 +87,9 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   1. `@Value.Check`: positive amount; valid ISO currency (same check as `OpenAccountCommand`); `currency` defaults to `EUR`.
   2. Parameterized tests of the invalid cases for both commands.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
-### [ ] T3 — "Deposit" use case (~10 min)
+### [x] T3 — "Deposit" use case (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -99,9 +99,9 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   1. `deposit`: load the account (or `AccountNotFoundException`), `account.deposit(...)`, `save`, return the `TransactionSummary`.
   2. Tests (`@Nested` "Ingresar"): approved deposit updates the balance and appears among the transactions; unknown account → `AccountNotFoundException`; another currency → `CurrencyMismatchException` and the balance does not change.
 - **Acceptance criteria:**
-  - [ ] Tests green. No business rules in the service.
+  - [x] Tests green. No business rules in the service.
 
-### [ ] T4 — "Withdraw" use case (~10 min)
+### [x] T4 — "Withdraw" use case (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -111,9 +111,9 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   1. `withdraw`: load, `account.tryWithdraw(...)`, `save`, return the `TransactionSummary` (approved or rejected).
   2. Tests (`@Nested` "Retirar"): parameterized retail / high net worth cases around the overdraft limit returning `APPROVED` or `REJECTED`; a rejected withdrawal leaves the balance unchanged and is still recorded; unknown account → `AccountNotFoundException`.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
-### [ ] T5 — `POST /api/accounts/{id}/deposits` (~10 min)
+### [x] T5 — `POST /api/accounts/{id}/deposits` (~10 min)
 
 - **Side:** back
 - **Layer:** presentation
@@ -123,9 +123,9 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   1. Map the request to `DepositCommand`, respond `201` with the transaction.
   2. `@WebMvcTest` tests with the mocked service: 201; 400 with `errors` for amount 0 or negative; 404 unknown account; 422 `CurrencyMismatchException`.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
-### [ ] T6 — `POST /api/accounts/{id}/withdrawals` (~10 min)
+### [x] T6 — `POST /api/accounts/{id}/withdrawals` (~10 min)
 
 - **Side:** back
 - **Layer:** presentation
@@ -135,7 +135,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
   1. Same as T5 with `WithdrawCommand`.
   2. Tests: 201 with `APPROVED`; 201 with `REJECTED` (not an error); 400; 404; 422.
 - **Acceptance criteria:**
-  - [ ] Tests green. Responses match the OpenAPI fragment.
+  - [x] Tests green. Responses match the OpenAPI fragment.
 
 ### [x] T7 — Account detail page (~10 min)
 
