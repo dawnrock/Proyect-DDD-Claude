@@ -37,3 +37,14 @@ Envía un mensaje push a Telegram. Lo usan `plan-feature`, `implement-plan` y el
 ```bash
 node scripts/notify.mjs "Prueba desde Proyect-DDD-Claude"
 ```
+
+## clean-merged-worktrees.mjs
+
+Limpia los worktrees que dejan los teammates de `implement-plan-team` (`.claude/worktrees/agent-*`) cuando ya no sirven: su rama está fusionada en `origin/Monolithic` u `origin/Hexagonal` y no tienen cambios sin commitear. Borra también esas ramas locales y las ramas `worktree-agent-*` huérfanas.
+
+```bash
+node scripts/clean-merged-worktrees.mjs --dry-run   # lista lo que borraría
+node scripts/clean-merged-worktrees.mjs             # borra
+```
+
+Se ejecuta solo tras cada `gh pr merge` con el hook `PostToolUse` de `.claude/settings.json` (`--hook`). Nunca toca el checkout principal, el worktree desde el que se ejecuta, los worktrees de sesiones (fuera de `agent-*`), los bloqueados ni los que tienen trabajo sin commitear. Solo reconoce fusiones con commit de merge, las que usa este repositorio. Si OneDrive bloquea una carpeta, la borra a mano y ejecuta `git worktree prune`.
