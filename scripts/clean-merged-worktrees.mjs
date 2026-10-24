@@ -1,7 +1,10 @@
 #!/usr/bin/env node
-// Borra los worktrees de los teammates (.claude/worktrees/agent-*) cuya rama ya está fusionada en la
-// rama de una fase (origin/Monolithic u origin/Hexagonal) y que no tienen cambios sin commitear, junto
-// con sus ramas locales y las ramas worktree-agent-* que quedan huérfanas.
+// Borra lo que ya no sirve tras fusionar una PR en la rama de una fase (origin/Monolithic u
+// origin/Hexagonal):
+//   1. Los worktrees de los teammates (.claude/worktrees/agent-*) cuya rama está fusionada y que no tienen
+//      cambios sin commitear.
+//   2. Todas las ramas locales fusionadas que no estén en uso en ningún worktree (las de los teammates y
+//      las demás: feat/*, docs/*, chore/*...). Borrar una rama fusionada no pierde ningún commit.
 //
 // Uso:
 //   node scripts/clean-merged-worktrees.mjs --dry-run   # solo lista lo que borraría
@@ -10,12 +13,15 @@
 //
 // Nunca toca: el checkout principal, el worktree desde el que se ejecuta, los worktrees de sesiones
 // (fuera de agent-*), los bloqueados ni los que tienen cambios sin commitear o ficheros sin seguimiento.
+// Nunca borra: las ramas de fase y master, las que están en uso en algún worktree, ni las claude/*, que
+// crea la app de Claude para sus sesiones y puede volver a usar al reanudar una.
 // Solo reconoce fusiones con commit de merge (las que usa este repositorio), no squash ni rebase.
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, realpathSync, rmSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 
 const BASE_BRANCHES = ['Monolithic', 'Hexagonal'];
+const PROTECTED = new Set([...BASE_BRANCHES, 'master', 'main']);
 const args = new Set(process.argv.slice(2));
 const dryRun = args.has('--dry-run') || args.has('-n');
 const hook = args.has('--hook');
@@ -82,11 +88,13 @@ function clean() {
     if (wt.branch) removedBranches.add(wt.branch);
   }
 
-  // Ramas de los worktrees borrados y ramas worktree-agent-* que ya no usa ningún worktree.
+  // Ramas locales: las de los worktrees borrados y cualquier otra que ya no use ningún worktree. En modo
+  // prueba los worktrees siguen ahí, así que sus ramas cuentan como libres.
   const checkedOut = new Set(worktrees().map((w) => w.branch).filter(Boolean));
-  const orphans = git(['branch', '--list', 'worktree-agent-*', '--format=%(refname:short)']).split(/\r?\n/).filter(Boolean);
-  for (const branch of new Set([...removedBranches, ...orphans])) {
-    if (!dryRun && checkedOut.has(branch)) continue;
+  const local = git(['branch', '--format=%(refname:short)']).split(/\r?\n/).filter(Boolean);
+  for (const branch of local) {
+    if (PROTECTED.has(branch) || branch.startsWith('claude/')) continue;
+    if (checkedOut.has(branch) && !(dryRun && removedBranches.has(branch))) continue;
     const base = mergedInto(branch, bases);
     if (!base) { report.push(`- rama ${branch}: sin fusionar, se conserva`); continue; }
     if (dryRun) { report.push(`- rama ${branch} (fusionada en ${base}): se borraría`); continue; }
@@ -95,7 +103,7 @@ function clean() {
     report.push(`- rama ${branch}: ${deleted.ok ? 'borrada' : `NO borrada (${deleted.out})`}`);
   }
 
-  return report.length ? report : ['No hay worktrees de teammates fusionados que limpiar.'];
+  return report.length ? report : ['No hay worktrees ni ramas fusionados que limpiar.'];
 }
 
 if (hook) {

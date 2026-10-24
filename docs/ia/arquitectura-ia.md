@@ -34,7 +34,7 @@ flowchart LR
 | Skill de equipo | `.claude/skills/implement-plan-team/` | 13.1, 13.2 | Issue back + web: contrato primero (`docs/contracts/`), implementación en paralelo en worktrees, integración y una PR (ADR 0007). |
 | Hook `PreToolUse` | `.claude/hooks/block-backlog-json.mjs` | 12 | Bloquea la lectura de la semilla del backlog: la verdad son las issues. |
 | Hooks `Notification` / `Stop` | `.claude/hooks/notify-telegram.mjs` | 12.1 | Aviso push al móvil cuando Claude espera permiso o termina. |
-| Hook `PostToolUse` (Bash) | `scripts/clean-merged-worktrees.mjs --hook` | 12 | Tras un `gh pr merge`, borra los worktrees de los teammates (`.claude/worktrees/agent-*`) ya fusionados y sin cambios, y sus ramas. |
+| Hook `PostToolUse` (Bash) | `scripts/clean-merged-worktrees.mjs --hook` | 12 | Tras un `gh pr merge`, borra los worktrees de los teammates (`.claude/worktrees/agent-*`) ya fusionados y sin cambios, y todas las ramas locales fusionadas que no estén en uso (salvo las de fase, `master` y `claude/*`). |
 | Scripts deterministas | `scripts/seed-issues.mjs`, `scripts/notify.mjs` | 9.2.2, 14 | Crear el backlog; enviar notificaciones. |
 | Memoria entre sesiones | `docs/ia/estado-del-proyecto.md` + `scripts/check-project-status.mjs` | 6.2, 12, 14 | Punto de entrada de cada sesión (lo cita `CLAUDE.md`). Lo actualizan `implement-plan` / `implement-plan-team`, lo exige la plantilla del plan, lo revisa `revisor-ddd` y el CI falla si una PR que cierra una issue no lo toca. |
 | CI/CD | `.github/workflows/ci.yml` | 14 | Lo determinista (build, tests, ArchUnit, reglas del dominio) sin IA. |
