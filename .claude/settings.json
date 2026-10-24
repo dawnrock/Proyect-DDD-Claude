@@ -36,6 +36,18 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/clean-merged-worktrees.mjs\" --hook",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "hooks": [
