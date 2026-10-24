@@ -85,6 +85,13 @@ Implementado en la #5 (contrato: [`open-query-list-accounts.md`](../contracts/op
 - `presentation.web`: listado en `/` y alta en `/accounts/new` (Post/Redirect/Get con mensaje flash). La sesión se sigue solo por cookie (`server.servlet.session.tracking-modes=cookie`): con seguimiento por URL, la redirección iba a `/;jsessionid=…` y Spring respondía 404.
 - La petición REST y el formulario aplican la misma validación, para que lo que aceptan nunca provoque un `IllegalArgumentException` del dominio.
 
+Implementado en la #6 (contrato: [`deposits-withdrawals.md`](../contracts/deposits-withdrawals.md)):
+
+- `application`: `CheckingAccountService.deposit` y `withdraw`, con `DepositCommand` y `WithdrawCommand`; devuelven el movimiento (`TransactionSummary`). Una retirada no permitida se devuelve como `REJECTED`, no como excepción.
+- `presentation.rest`: `POST /api/accounts/{id}/deposits` y `/withdrawals` (201 con el movimiento, también si se rechaza).
+- `presentation.web`: detalle de la cuenta en `/accounts/{id}` con sus movimientos y los formularios de ingreso y retirada. Un `@ControllerAdvice` acotado al paquete `presentation.web` (`basePackageClasses`) pinta la página 404 para `NotFoundException`; no se acota por `@Controller` porque `@RestController` también la lleva y capturaría los errores de la API.
+- Un importe no positivo es un 400 o un error de campo (R3), no un error de dominio; solo la divisa distinta es 422.
+
 ## Issues de la fase
 
 | Orden | Issue | Capas | Clases que introduce |

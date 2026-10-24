@@ -2,19 +2,19 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores. **Se actualiza en cada PR que cierra una issue** (lo exigen `implement-plan`, `implement-plan-team`, la plantilla de los planes y el CI).
 
-- **Última actualización:** 2026-10-23 · PR #39 (abrir, consultar y listar cuentas)
+- **Última actualización:** 2026-10-24 · PR #41 (ingresos y retiradas)
 - **Rama activa:** `Monolithic` (fase 1). `master` congelada. `Hexagonal` aún no existe.
 
 ## Dónde estamos
 
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
-| 1 · Monolito en capas | #2 Lombok/Immutables · #3 glosario, capas y ADR 0004 · #4 repositorio en memoria · #8 base REST + web · #5 abrir, consultar y listar cuentas (primera issue en equipo) | #31 flujo en equipo (probado con la #5; falta que el usuario decida si se cierra) | #6 → #7 (en equipo) → #11 → #12 → #13 |
+| 1 · Monolito en capas | #2 Lombok/Immutables · #3 glosario, capas y ADR 0004 · #4 repositorio en memoria · #8 base REST + web · #5 abrir, consultar y listar cuentas · #31 flujo en equipo (cerrada tras la #5) · #6 ingresos y retiradas con detalle de la cuenta | — | #7 (en equipo) → #11 → #12 → #13 |
 | 2 · Hexagonal | — | — | #14 → #23 (se empieza al cerrar #13, creando `Hexagonal` desde `Monolithic`) |
 
 ## Siguiente paso
 
-1. `/plan-feature 6` (ingresos y retiradas, en equipo): incluye la página web de detalle de la cuenta, que la #5 dejó fuera.
+1. `/plan-feature 7` (transferencias, en equipo): introduce `MoneyTransferService` en `domain.service`.
 
 Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sección "Issues de la fase".
 
@@ -37,15 +37,18 @@ Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sec
 - **Validación compartida:** la petición REST (`record` con Bean Validation) y el formulario web aplican las mismas restricciones (contrato de la #5), y la web devuelve al formulario el rechazo del command en lugar de un 500.
 - **Sesión web solo por cookie** (`server.servlet.session.tracking-modes=cookie`): con seguimiento por URL, la redirección tras un Post/Redirect/Get iba a `/;jsessionid=…` y Spring respondía 404.
 - **Segmentos y otros enumerados del dominio** viajan como `String` en commands y vistas (D4); un test comprueba que `OpenAccountCommandDef.SEGMENTS` coincide con `CustomerSegment`.
+- **Retirada rechazada:** no es un error. El servicio devuelve el movimiento con `REJECTED` (REST 201) y la web lo muestra como aviso, con un texto válido para los dos segmentos.
+- **Importe no positivo = 400 / error de campo** (R3), no error de dominio; el command también rechaza un importe que redondea a cero en su divisa (`0.001` EUR). Decidido por el usuario el 2026-10-23 al planificar la #6.
+- **404 en la web:** `@ControllerAdvice` acotado con `basePackageClasses` a `presentation.web`. No acotarlo por `@Controller`: `@RestController` también la lleva y capturaría los errores de la API.
 
 ## Pendientes sueltos
 
 - Traducir al inglés la documentación existente (`docs/`, `README`), que sigue en español (issue aparte).
 - Las adiciones de la #5 a documentos que siguen en español (glosario, `fase-1-capas.md`, este estado) se escribieron en español para no mezclar idiomas; se traducen con el resto.
-- Telegram: si se quiere silenciar también el hook `Notification`, quitar las variables `TELEGRAM_*` de `.claude/settings.local.json` o añadir un interruptor a `scripts/notify.mjs`.
-- Worktrees y ramas de los teammates de la #5 (`feat/open-query-list-accounts-back` y `-web`, y sus carpetas en `.claude/worktrees/agent-*`): se conservan hasta que el usuario decida borrarlos.
+- Telegram: los avisos locales se silencian con `TELEGRAM_DISABLED=1` (PR #40), activado en `~/.claude/settings.json` del usuario. El aviso de CI fallida sigue activo (usa los secretos de GitHub).
+- Worktrees y ramas de los teammates de la #5 y la #6 (`feat/open-query-list-accounts-*`, `feat/deposits-withdrawals-*` y sus carpetas en `.claude/worktrees/agent-*`): se conservan hasta que el usuario decida borrarlos.
 
-- Renombrar los sinónimos heredados "transacción" y "reintegro" a "movimiento" y "retirada" (mensaje de `Transaction.requirePending` y nombres de tests) en la primera issue que toque esas clases.
+- **Aviso latente (revisión de la #6):** `CheckingAccount.tryWithdraw` registra el movimiento antes de evaluar `isAllowed`; en una cuenta que no fuera en EUR, un cliente de alto patrimonio provocaría `CurrencyMismatchException` (el límite está en EUR) con el movimiento `PENDING` ya registrado. Hoy no ocurre porque no se puede abrir una cuenta que no sea en EUR (el depósito mínimo también está en EUR). Arreglarlo evaluando antes de registrar cuando se admitan otras divisas.
 - Test que falta: "el nombre del titular es obligatorio" (`AccountHolder`).
 - Sugerencia pendiente de decisión del usuario: mencionar en la sección de la fase 1 de `CLAUDE.md` que `presentation` puede conocer las excepciones de dominio (regla D4).
 
@@ -70,3 +73,5 @@ Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sec
 | 2026-10-23 | #37 | — | Estado del proyecto entre sesiones, exigido en cada PR |
 | 2026-10-23 | #38 | — | Documentación en inglés; plan de la #5 aprobado |
 | 2026-10-23 | #39 | #5 | Abrir, consultar y listar cuentas (REST + web), primera issue en equipo |
+| 2026-10-23 | #40 | — | Interruptor `TELEGRAM_DISABLED` para silenciar los avisos |
+| 2026-10-24 | #41 | #6 | Ingresos y retiradas con detalle de la cuenta (REST + web); cierra el pendiente de sinónimos heredados |

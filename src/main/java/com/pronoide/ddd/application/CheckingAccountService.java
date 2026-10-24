@@ -1,5 +1,6 @@
 package com.pronoide.ddd.application;
 
+import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +19,7 @@ import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Casos de uso de las cuentas corrientes: abrir, consultar y listar. Carga y guarda el agregado; las
+ * Casos de uso de las cuentas corrientes: abrir, consultar, listar, ingresar y retirar. Carga y guarda el agregado; las
  * reglas de negocio siguen en {@code CheckingAccount}. Contrato: {@code docs/contracts/open-query-list-accounts.md}.
  */
 @Service
@@ -61,6 +62,41 @@ public class CheckingAccountService {
     /** Todas las cuentas, ordenadas por número de cuenta. */
     public List<AccountSummary> listAccounts() {
         return repository.findAll().stream().map(CheckingAccountService::toSummary).toList();
+    }
+
+    /**
+     * Ingresa un importe en la cuenta y la guarda. Contrato: {@code docs/contracts/deposits-withdrawals.md}.
+     *
+     * @throws AccountNotFoundException si no existe ninguna cuenta con ese id
+     * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el importe no está en la divisa de la cuenta
+     */
+    public TransactionSummary deposit(DepositCommand command) {
+        CheckingAccount account = load(command.accountId());
+        Transaction transaction = account.deposit(toAmount(command.amount(), command.currency()));
+        repository.save(account);
+        return toTransaction(transaction);
+    }
+
+    /**
+     * Intenta retirar un importe de la cuenta y la guarda. Una retirada que dejaría la cuenta por debajo de lo
+     * permitido no es un error: se devuelve el movimiento con estado {@code REJECTED} y el saldo no cambia.
+     *
+     * @throws AccountNotFoundException si no existe ninguna cuenta con ese id
+     * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el importe no está en la divisa de la cuenta
+     */
+    public TransactionSummary withdraw(WithdrawCommand command) {
+        CheckingAccount account = load(command.accountId());
+        Transaction transaction = account.tryWithdraw(toAmount(command.amount(), command.currency()));
+        repository.save(account);
+        return toTransaction(transaction);
+    }
+
+    private CheckingAccount load(UUID id) {
+        return repository.findById(id).orElseThrow(() -> new AccountNotFoundException(id));
+    }
+
+    private static MonetaryAmount toAmount(BigDecimal amount, String currency) {
+        return new MonetaryAmount(amount, Currency.getInstance(currency));
     }
 
     private static AccountDetails toDetails(CheckingAccount account) {
