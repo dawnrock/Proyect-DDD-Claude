@@ -14,12 +14,13 @@ import com.pronoide.ddd.domain.model.CustomerSegment;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.Transaction;
+import com.pronoide.ddd.domain.service.MoneyTransferService;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
 
 import lombok.RequiredArgsConstructor;
 
 /**
- * Casos de uso de las cuentas corrientes: abrir, consultar, listar, ingresar y retirar. Carga y guarda el agregado; las
+ * Casos de uso de las cuentas corrientes: abrir, consultar, listar, ingresar, retirar y transferir. Carga y guarda el agregado; las
  * reglas de negocio siguen en {@code CheckingAccount}. Contrato: {@code docs/contracts/open-query-list-accounts.md}.
  */
 @Service
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class CheckingAccountService {
 
     private final InMemoryCheckingAccountRepository repository;
+    private final MoneyTransferService transferService = new MoneyTransferService();
 
     /**
      * Abre una cuenta con su depósito inicial y la guarda.
@@ -89,6 +91,34 @@ public class CheckingAccountService {
         Transaction transaction = account.tryWithdraw(toAmount(command.amount(), command.currency()));
         repository.save(account);
         return toTransaction(transaction);
+    }
+
+    /**
+     * Transfiere un importe de la cuenta de origen a la de destino y guarda las dos. Una transferencia que la cuenta de
+     * origen no permite no es un error: se devuelve con estado {@code REJECTED} y ningún saldo cambia. Contrato:
+     * {@code docs/contracts/money-transfers.md}.
+     *
+     * @throws AccountNotFoundException si no existe la cuenta de origen o la de destino
+     * @throws com.pronoide.ddd.domain.model.SameAccountTransferException si origen y destino son la misma cuenta
+     * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el importe no está en la divisa de las cuentas
+     */
+    public TransferSummary transfer(TransferCommand command) {
+        CheckingAccount source = load(command.sourceAccountId());
+        CheckingAccount target = load(command.targetAccountId());
+        Transaction withdrawal =
+                transferService.transfer(source, target, toAmount(command.amount(), command.currency()));
+        repository.save(source);
+        repository.save(target);
+        return TransferSummary.builder()
+                .sourceAccountId(source.id())
+                .sourceAccountNumber(source.accountNumber().value())
+                .targetAccountId(target.id())
+                .targetAccountNumber(target.accountNumber().value())
+                .amount(withdrawal.amount().amount())
+                .currency(withdrawal.amount().currency().getCurrencyCode())
+                .occurredOn(withdrawal.occurredOn())
+                .status(withdrawal.status().name())
+                .build();
     }
 
     private CheckingAccount load(UUID id) {

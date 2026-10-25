@@ -19,6 +19,8 @@ import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
 import com.pronoide.ddd.application.TransactionSummary;
+import com.pronoide.ddd.application.TransferCommand;
+import com.pronoide.ddd.application.TransferSummary;
 import com.pronoide.ddd.application.WithdrawCommand;
 import com.pronoide.ddd.domain.model.DomainException;
 
@@ -46,8 +48,6 @@ public class AccountWebController {
 
     @GetMapping("/accounts/{id}")
     public String detail(@PathVariable UUID id, Model model) {
-        model.addAttribute("depositForm", new MovementForm());
-        model.addAttribute("withdrawalForm", new MovementForm());
         return renderDetail(id, model);
     }
 
@@ -73,7 +73,6 @@ public class AccountWebController {
                 }
             }
         }
-        model.addAttribute("withdrawalForm", new MovementForm());
         return renderDetail(id, model);
     }
 
@@ -105,12 +104,60 @@ public class AccountWebController {
                 }
             }
         }
-        model.addAttribute("depositForm", new MovementForm());
         return renderDetail(id, model);
     }
 
+    @PostMapping("/accounts/{id}/transfers")
+    public String transfer(@PathVariable UUID id, @Valid @ModelAttribute("transferForm") TransferForm form,
+                           BindingResult result, Model model, RedirectAttributes redirect) {
+        if (!result.hasErrors()) {
+            TransferCommand command = null;
+            try {
+                TransferCommand.Builder builder = TransferCommand.builder()
+                        .sourceAccountId(id).targetAccountId(form.getTargetAccountId()).amount(form.getAmount());
+                if (form.getCurrency() != null) {
+                    builder.currency(form.getCurrency());
+                }
+                command = builder.build();
+            } catch (IllegalArgumentException e) {
+                result.reject("invalid", e.getMessage());
+            }
+            if (command != null) {
+                try {
+                    TransferSummary transfer = service.transfer(command);
+                    String amount = "%s %s".formatted(transfer.amount(), transfer.currency());
+                    if ("REJECTED".equals(transfer.status())) {
+                        redirect.addFlashAttribute("rejection",
+                                ("Transferencia de %s a %s rechazada: el saldo resultante no está permitido "
+                                        + "para la cuenta de origen").formatted(amount, transfer.targetAccountNumber()));
+                    } else {
+                        redirect.addFlashAttribute("message", "Transferencia de %s a %s aprobada"
+                                .formatted(amount, transfer.targetAccountNumber()));
+                    }
+                    return redirectToDetail(id);
+                } catch (DomainException e) {
+                    result.reject("domain", e.getMessage());
+                }
+            }
+        }
+        return renderDetail(id, model);
+    }
+
+    /** Pinta el detalle; los formularios que no vienen del envío actual se crean vacíos. */
     private String renderDetail(UUID id, Model model) {
+        if (!model.containsAttribute("depositForm")) {
+            model.addAttribute("depositForm", new MovementForm());
+        }
+        if (!model.containsAttribute("withdrawalForm")) {
+            model.addAttribute("withdrawalForm", new MovementForm());
+        }
+        if (!model.containsAttribute("transferForm")) {
+            model.addAttribute("transferForm", new TransferForm());
+        }
         model.addAttribute("account", service.findAccount(id));
+        model.addAttribute("targetAccounts", service.listAccounts().stream()
+                .filter(other -> !other.id().equals(id))
+                .toList());
         model.addAttribute("currencies", CURRENCIES);
         return DETAIL_VIEW;
     }

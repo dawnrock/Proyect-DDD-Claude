@@ -92,6 +92,14 @@ Implementado en la #6 (contrato: [`deposits-withdrawals.md`](../contracts/deposi
 - `presentation.web`: detalle de la cuenta en `/accounts/{id}` con sus movimientos y los formularios de ingreso y retirada. Un `@ControllerAdvice` acotado al paquete `presentation.web` (`basePackageClasses`) pinta la página 404 para `NotFoundException`; no se acota por `@Controller` porque `@RestController` también la lleva y capturaría los errores de la API.
 - Un importe no positivo es un 400 o un error de campo (R3), no un error de dominio; solo la divisa distinta es 422.
 
+Implementado en la #7 (contrato: [`money-transfers.md`](../contracts/money-transfers.md)):
+
+- `domain.service`: [`MoneyTransferService`](../../src/main/java/com/pronoide/ddd/domain/service/MoneyTransferService.java), primer servicio de dominio, Java puro y sin estado (R17-R19). `CheckingAccountService` lo crea con `new`, sin bean de Spring, para que el dominio no dependa del framework (D1).
+- `domain.model`: `SameAccountTransferException` (R17).
+- `application`: `CheckingAccountService.transfer` con `TransferCommand` y la vista `TransferSummary`; carga las dos cuentas, delega en el servicio de dominio y **guarda las dos**.
+- `presentation.rest`: `TransferController` (`POST /api/transfers`, 201 también si se rechaza).
+- `presentation.web`: formulario de transferencia en el detalle de la cuenta, con la cuenta destino elegida entre las demás (`listAccounts()`); la presentación no conoce `domain.service` (D4).
+
 ## Issues de la fase
 
 | Orden | Issue | Capas | Clases que introduce |

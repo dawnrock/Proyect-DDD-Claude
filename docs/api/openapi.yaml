@@ -26,6 +26,8 @@ security: []
 tags:
   - name: accounts
     description: Checking accounts (#5).
+  - name: transfers
+    description: Transfers between accounts (#7).
 paths:
   /api/accounts:
     get:
@@ -146,6 +148,38 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/UnprocessableContent'
+  /api/transfers:
+    post:
+      tags: [transfers]
+      operationId: transfer
+      summary: Transfer an amount from a source account to a target account (#7)
+      description: |
+        Withdraws the amount from the source account and, **only if the withdrawal is approved**,
+        deposits it in the target account. A transfer that the source account's overdraft rules do
+        not allow is **not an error**: the source records a `REJECTED` withdrawal, nothing reaches
+        the target, no balance changes, and the response is still `201`.
+
+        An unknown source or target account is a 404. Transferring to the same account, or an amount
+        in a currency other than the accounts', is a 422.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '201':
+          description: Transfer processed, `APPROVED` or `REJECTED`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transfer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
 components:
   parameters:
     AccountId:
@@ -170,6 +204,54 @@ components:
           pattern: '^[A-Z]{3}$'
           default: EUR
           description: ISO 4217 code. A currency other than the account's fails with 422.
+    TransferRequest:
+      type: object
+      required: [sourceAccountId, targetAccountId, amount]
+      properties:
+        sourceAccountId:
+          type: string
+          format: uuid
+        targetAccountId:
+          type: string
+          format: uuid
+          description: Must be a different account from `sourceAccountId` (422 otherwise).
+        amount:
+          type: number
+          exclusiveMinimum: 0
+          example: 25.00
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          default: EUR
+          description: ISO 4217 code. A currency other than the accounts' fails with 422.
+    Transfer:
+      type: object
+      required: [sourceAccountId, sourceAccountNumber, targetAccountId, targetAccountNumber, amount, currency, occurredOn, status]
+      properties:
+        sourceAccountId:
+          type: string
+          format: uuid
+        sourceAccountNumber:
+          type: string
+          example: ES9121000418450200051332
+        targetAccountId:
+          type: string
+          format: uuid
+        targetAccountNumber:
+          type: string
+          example: ES7921000813610123456789
+        amount:
+          type: number
+          description: Amount of the withdrawal in the source, rounded to the currency's digits.
+        currency:
+          type: string
+        occurredOn:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [APPROVED, REJECTED]
+          description: Status of the withdrawal in the source account.
     OpenAccountRequest:
       type: object
       required: [accountNumber, holderName, segment, initialDeposit]

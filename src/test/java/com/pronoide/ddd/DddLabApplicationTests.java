@@ -114,9 +114,6 @@ class DddLabApplicationTests {
 	@DisplayName("Ingresos y retiradas con el servicio real (#6)")
 	class Movements {
 
-		/** Con cookies: el mensaje flash tras la redirección viaja en la sesión. */
-		private final HttpClient browser = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
-
 		@Test
 		@DisplayName("Por la API, un ingreso se aprueba y una retirada sin saldo se registra como rechazada y se ve en el detalle web")
 		void por_la_api_un_ingreso_se_aprueba_y_una_retirada_sin_saldo_se_registra_como_rechazada() throws Exception {
@@ -163,31 +160,97 @@ class DddLabApplicationTests {
 					type -> assertThat(type).contains("problem+json"));
 			assertThat(api.body()).contains("Recurso inexistente");
 		}
+	}
 
-		/** Abre una cuenta minorista con 100,00 € y devuelve su ruta de la API ({@code /api/accounts/{id}}). */
-		private String openAccount(String accountNumber) throws Exception {
-			HttpResponse<String> created = post("/api/accounts", "application/json", """
-					{"accountNumber": "%s", "holderName": "Grace Hopper", "segment": "RETAIL", "initialDeposit": 100.00}"""
-					.formatted(accountNumber));
-			assertThat(created.statusCode()).isEqualTo(201);
-			return created.headers().firstValue("Location").orElseThrow();
+	@Nested
+	@DisplayName("Transferencias con el servicio real (#7)")
+	class Transfers {
+
+		@Test
+		@DisplayName("Por la API, una transferencia aprobada mueve el saldo y una rechazada no llega al destino")
+		void por_la_api_una_transferencia_aprobada_mueve_el_saldo_y_una_rechazada_no_llega_al_destino() throws Exception {
+			String source = openAccount("ES0000000000000000000701");
+			String target = openAccount("ES0000000000000000000702");
+
+			HttpResponse<String> approved = transfer(source, target, "40.00");
+			HttpResponse<String> rejected = transfer(source, target, "500.00");
+
+			assertThat(approved.statusCode()).isEqualTo(201);
+			assertThat(approved.body()).contains("\"status\":\"APPROVED\"")
+					.contains("\"targetAccountNumber\":\"ES0000000000000000000702\"");
+			assertThat(rejected.statusCode()).isEqualTo(201);
+			assertThat(rejected.body()).contains("\"status\":\"REJECTED\"");
+			assertThat(get(source, "application/json").body()).contains("\"balance\":60.00");
+			assertThat(get(target, "application/json").body()).contains("\"balance\":140.00");
 		}
 
-		private String webPath(String apiPath) {
-			return apiPath.replaceFirst("^/api", "");
+		@Test
+		@DisplayName("Por la API, una transferencia a la misma cuenta es una regla de negocio incumplida")
+		void por_la_api_una_transferencia_a_la_misma_cuenta_es_una_regla_de_negocio_incumplida() throws Exception {
+			String account = openAccount("ES0000000000000000000703");
+
+			HttpResponse<String> response = transfer(account, account, "10.00");
+
+			assertThat(response.statusCode()).isEqualTo(422);
+			assertThat(response.body()).contains("Regla de negocio incumplida").contains("misma cuenta");
+			assertThat(get(account, "application/json").body()).contains("\"balance\":100.00");
 		}
 
-		private HttpResponse<String> submit(String path, String form) throws Exception {
-			return browser.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
-					.header("Content-Type", "application/x-www-form-urlencoded")
-					.POST(HttpRequest.BodyPublishers.ofString(form))
-					.build(), HttpResponse.BodyHandlers.ofString());
+		@Test
+		@DisplayName("Desde la web, una transferencia redirige al detalle con su mensaje y el destino recibe el ingreso")
+		void desde_la_web_una_transferencia_redirige_al_detalle_con_su_mensaje_y_el_destino_recibe_el_ingreso()
+				throws Exception {
+			String source = webPath(openAccount("ES0000000000000000000704"));
+			String target = webPath(openAccount("ES0000000000000000000705"));
+
+			HttpResponse<String> response = submit(source + "/transfers",
+					"targetAccountId=%s&amount=25.00&currency=EUR".formatted(idOf(target)));
+
+			assertThat(response.statusCode()).isEqualTo(302);
+			assertThat(response.headers().firstValue("Location")).hasValueSatisfying(
+					location -> assertThat(location).endsWith(source).doesNotContain(";jsessionid"));
+			assertThat(browse(source)).contains("Transferencia de 25.00 EUR a ES0000000000000000000705 aprobada")
+					.contains("75.00");
+			assertThat(browse(target)).contains("125.00");
 		}
 
-		private String browse(String path) throws Exception {
-			return browser.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path)).GET().build(),
-					HttpResponse.BodyHandlers.ofString()).body();
+		private HttpResponse<String> transfer(String source, String target, String amount) throws Exception {
+			return post("/api/transfers", "application/json", """
+					{"sourceAccountId": "%s", "targetAccountId": "%s", "amount": %s}"""
+					.formatted(idOf(source), idOf(target), amount));
 		}
+
+		private String idOf(String path) {
+			return path.substring(path.lastIndexOf('/') + 1);
+		}
+	}
+
+	/** Con cookies: el mensaje flash tras la redirección viaja en la sesión. */
+	private final HttpClient browser = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
+
+	/** Abre una cuenta minorista con 100,00 € y devuelve su ruta de la API ({@code /api/accounts/{id}}). */
+	private String openAccount(String accountNumber) throws Exception {
+		HttpResponse<String> created = post("/api/accounts", "application/json", """
+				{"accountNumber": "%s", "holderName": "Grace Hopper", "segment": "RETAIL", "initialDeposit": 100.00}"""
+				.formatted(accountNumber));
+		assertThat(created.statusCode()).isEqualTo(201);
+		return created.headers().firstValue("Location").orElseThrow();
+	}
+
+	private String webPath(String apiPath) {
+		return apiPath.replaceFirst("^/api", "");
+	}
+
+	private HttpResponse<String> submit(String path, String form) throws Exception {
+		return browser.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
+				.header("Content-Type", "application/x-www-form-urlencoded")
+				.POST(HttpRequest.BodyPublishers.ofString(form))
+				.build(), HttpResponse.BodyHandlers.ofString());
+	}
+
+	private String browse(String path) throws Exception {
+		return browser.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path)).GET().build(),
+				HttpResponse.BodyHandlers.ofString()).body();
 	}
 
 	private HttpResponse<String> get(String path, String accept) throws Exception {
