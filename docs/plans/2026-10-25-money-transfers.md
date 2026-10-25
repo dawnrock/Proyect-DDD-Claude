@@ -80,7 +80,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
 - **Acceptance criteria:**
   - [x] Tests green. `check-domain.mjs` without errors; `DomainIsolationTests` covers the new package.
 
-### [ ] T2 — `MoneyTransferService`: rejected transfer and same account (~10 min)
+### [x] T2 — `MoneyTransferService`: rejected transfer and same account (~10 min)
 
 - **Side:** back
 - **Layer:** domain
@@ -90,7 +90,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. R18: rejected withdrawal → no deposit; target has no new movement and both balances are unchanged (retail beyond its balance, and high net worth beyond -1,000.00, parameterized).
   2. R17: same account (same id) → `SameAccountTransferException` and no movement recorded.
 - **Acceptance criteria:**
-  - [ ] Tests green (R18 test validated by temporarily depositing regardless of the outcome).
+  - [x] Tests green (R18 test validated by temporarily depositing regardless of the outcome).
 
 ### [ ] T3 — `MoneyTransferService`: currency guard (~5 min)
 

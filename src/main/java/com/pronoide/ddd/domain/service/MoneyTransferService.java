@@ -2,6 +2,7 @@ package com.pronoide.ddd.domain.service;
 
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
+import com.pronoide.ddd.domain.model.SameAccountTransferException;
 import com.pronoide.ddd.domain.model.Transaction;
 
 /**
@@ -16,6 +17,9 @@ public class MoneyTransferService {
      * @return la retirada registrada en el origen; su estado es el resultado de la transferencia
      */
     public Transaction transfer(CheckingAccount source, CheckingAccount target, MonetaryAmount amount) {
+        if (source.equals(target)) {
+            throw new SameAccountTransferException(source.accountNumber());
+        }
         Transaction withdrawal = source.tryWithdraw(amount);
         if (withdrawal.isApproved()) {
             target.deposit(amount);
