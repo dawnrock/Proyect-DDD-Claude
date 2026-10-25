@@ -150,9 +150,12 @@ class InMemoryCheckingAccountRepositoryTests {
         @Test
         @DisplayName("Las cuentas se listan ordenadas por número de cuenta")
         void las_cuentas_se_listan_ordenadas_por_numero_de_cuenta() {
-            CheckingAccount tercera = repository.save(TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open());
-            CheckingAccount primera = repository.save(TestAccounts.anAccount().accountNumber("ES1000492352082414205416").open());
-            CheckingAccount segunda = repository.save(TestAccounts.anAccount().accountNumber("ES7620770024003102575766").open());
+            CheckingAccount tercera =
+                    repository.save(TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open());
+            CheckingAccount primera =
+                    repository.save(TestAccounts.anAccount().accountNumber("ES1000492352082414205416").open());
+            CheckingAccount segunda =
+                    repository.save(TestAccounts.anAccount().accountNumber("ES7620770024003102575766").open());
 
             assertThat(repository.findAll()).containsExactly(primera, segunda, tercera);
         }
