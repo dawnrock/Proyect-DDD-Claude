@@ -116,6 +116,7 @@ Implementado en la #12 (`LayeredArchitectureTests`, cada regla validada rompién
 | `la_web_y_rest_no_se_conocen` (`slices()`) | D5, en los dos sentidos |
 | `el_dominio_no_tiene_setters_publicos` | El dominio cambia de estado solo con métodos de negocio |
 | `los_controladores_no_acceden_al_repositorio` | Clases con `@Controller` o `@RestController` (meta-anotación) sin `persistence`; se solapa con la regla de capas, pero su mensaje es más claro |
+| `toda_clase_pertenece_a_una_capa` | Fuera de las cuatro capas solo está `DddLabApplication`: la regla de capas ignora los paquetes que no son capas, así que un paquete nuevo (`config`…) tendría que añadirse antes como capa |
 
 ## Issues de la fase
 

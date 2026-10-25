@@ -42,7 +42,7 @@ class LayeredArchitectureTests {
     @ArchTest
     static final ArchRule el_dominio_solo_depende_del_jdk = classes()
             .that().resideInAPackage("..domain..")
-            .should().onlyDependOnClassesThat().resideInAnyPackage("java..", "..domain..");
+            .should().onlyDependOnClassesThat().resideInAnyPackage("java..", "com.pronoide.ddd.domain..");
 
     /**
      * D4: la presentación trabaja con commands y vistas; del dominio solo conoce {@code DomainException} y sus
@@ -71,4 +71,13 @@ class LayeredArchitectureTests {
     static final ArchRule los_controladores_no_acceden_al_repositorio = noClasses()
             .that().areMetaAnnotatedWith(Controller.class)
             .should().dependOnClassesThat().resideInAPackage("..persistence..");
+
+    /**
+     * Toda clase pertenece a una capa: la regla de capas solo mira dependencias entre capas, así que un paquete nuevo
+     * fuera de ellas (por ejemplo {@code config}) quedaría sin vigilar. La única excepción es la clase de arranque.
+     */
+    @ArchTest
+    static final ArchRule toda_clase_pertenece_a_una_capa = classes()
+            .that().resideOutsideOfPackages("..presentation..", "..application..", "..domain..", "..persistence..")
+            .should().haveFullyQualifiedName(DddLabApplication.class.getName());
 }
