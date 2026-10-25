@@ -139,7 +139,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
 - **Acceptance criteria:**
   - [x] Tests green. Responses match the OpenAPI fragment.
 
-### [ ] T7 — Transfer form on the detail page (~10 min)
+### [x] T7 — Transfer form on the detail page (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -149,9 +149,9 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. `transferForm` attribute and the list of target accounts (`listAccounts()` without the current one, shown as number + holder); hint "No hay otras cuentas a las que transferir" when it is empty.
   2. `@WebMvcTest` tests: the select excludes the current account; the hint appears with a single account.
 - **Acceptance criteria:**
-  - [ ] Tests green. The view uses no domain types.
+  - [x] Tests green. The view uses no domain types.
 
-### [ ] T8 — Transfer submission (~10 min)
+### [x] T8 — Transfer submission (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -161,9 +161,9 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. `POST /accounts/{id}/transfers` → redirect to the detail with an approved flash or a **rejected** flash (different style, text valid for both segments, as in #6).
   2. Tests: approved flash; rejected flash.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
-### [ ] T9 — Transfer form errors (~10 min)
+### [x] T9 — Transfer form errors (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -173,7 +173,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. Field errors (no target, amount ≤ 0) and command rejection (`0.001`, `XYZ`) → detail page again with the entered values; `DomainException` (same account from a crafted request, currency) → message on the detail page; unknown target → custom 404 page.
   2. Tests for each case; the other two forms show no errors.
 - **Acceptance criteria:**
-  - [ ] Tests green. No form error ends in a 500 page.
+  - [x] Tests green (the command-rejection case `0.001` / `XYZ` is `@Disabled` until T4 and is verified in T10). No form error ends in a 500 page.
 
 ### [ ] T10 — End-to-end integration (~10 min)
 
