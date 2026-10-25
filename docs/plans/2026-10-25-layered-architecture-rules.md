@@ -78,7 +78,7 @@ No production code changes: the current code already follows D1-D5 (checked whil
 - **Acceptance criteria:**
   - [x] Rule green; red in both temporary cases.
 
-### [ ] T4 — D5: web and REST do not know each other (~5 min)
+### [x] T4 — D5: web and REST do not know each other (~5 min)
 
 - **Layer:** tests
 - **Files:** `LayeredArchitectureTests.java`
@@ -87,7 +87,7 @@ No production code changes: the current code already follows D1-D5 (checked whil
   1. `la_web_y_rest_no_se_conocen` (both directions).
   2. Break it: a temporary reference to `TransferRequest` from `AccountWebController` → red; revert.
 - **Acceptance criteria:**
-  - [ ] Rule green; red with the temporary dependency.
+  - [x] Rule green; red with the temporary dependency.
 
 ### [ ] T5 — No public setters in the domain; controllers do not access the repository (~10 min)
 

@@ -6,6 +6,7 @@ import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPac
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
+import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
@@ -49,4 +50,10 @@ class LayeredArchitectureTests {
     static final ArchRule la_presentacion_solo_conoce_las_excepciones_del_dominio = noClasses()
             .that().resideInAPackage("..presentation..")
             .should().dependOnClassesThat(resideInAPackage("..domain..").and(not(assignableTo(DomainException.class))));
+
+    /** D5: la web y la API REST son dos canales independientes; ninguno conoce al otro. */
+    @ArchTest
+    static final ArchRule la_web_y_rest_no_se_conocen = slices()
+            .matching("..presentation.(*)..")
+            .should().notDependOnEachOther();
 }
