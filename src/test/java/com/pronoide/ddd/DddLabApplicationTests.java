@@ -201,8 +201,8 @@ class DddLabApplicationTests {
 			String source = openAccount("ES0000000000000000000701");
 			String target = openAccount("ES0000000000000000000702");
 
-			HttpResponse<String> approved = transfer(source, target, "40.00");
-			HttpResponse<String> rejected = transfer(source, target, "500.00");
+			HttpResponse<String> approved = transfer(source, "ES0000000000000000000702", "40.00");
+			HttpResponse<String> rejected = transfer(source, "ES0000000000000000000702", "500.00");
 
 			assertThat(approved.statusCode()).isEqualTo(201);
 			assertThat(approved.body()).contains("\"status\":\"APPROVED\"")
@@ -218,7 +218,7 @@ class DddLabApplicationTests {
 		void por_la_api_una_transferencia_a_la_misma_cuenta_es_una_regla_de_negocio_incumplida() throws Exception {
 			String account = openAccount("ES0000000000000000000703");
 
-			HttpResponse<String> response = transfer(account, account, "10.00");
+			HttpResponse<String> response = transfer(account, "ES0000000000000000000703", "10.00");
 
 			assertThat(response.statusCode()).isEqualTo(422);
 			assertThat(response.body()).contains("Regla de negocio incumplida").contains("misma cuenta");
@@ -243,10 +243,10 @@ class DddLabApplicationTests {
 			assertThat(browse(target)).contains("125,00 €");
 		}
 
-		private HttpResponse<String> transfer(String source, String target, String amount) throws Exception {
+		private HttpResponse<String> transfer(String source, String targetIban, String amount) throws Exception {
 			return post("/api/transfers", "application/json", """
-					{"sourceAccountId": "%s", "targetAccountId": "%s", "amount": %s}"""
-					.formatted(idOf(source), idOf(target), amount));
+					{"sourceAccountId": "%s", "targetAccountNumber": "%s", "amount": %s}"""
+					.formatted(idOf(source), targetIban, amount));
 		}
 
 		private String idOf(String path) {

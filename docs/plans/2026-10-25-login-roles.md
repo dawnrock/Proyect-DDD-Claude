@@ -165,7 +165,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [x] Tests green; responses match the OpenAPI fragment.
 
-### [ ] B7 — API transfer by IBAN (~5 min)
+### [x] B7 — API transfer by IBAN (~5 min)
 
 - **Side:** back
 - **Layer:** presentation
@@ -174,7 +174,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **What to do:**
   1. `targetAccountNumber` (pattern like `AccountNumber`) replaces `targetAccountId`; tests updated (400 for a malformed IBAN).
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
 ### [ ] W1 — Login page and web security rules (~10 min)
 
