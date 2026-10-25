@@ -118,6 +118,7 @@ a.row:hover .row-title { text-decoration: underline; }
 .actions summary::-webkit-details-marker { display: none; }
 .actions details[open] summary { color: var(--background); background: var(--text); }
 .action-panel { margin: 0.75rem 0 0; padding: 1.25rem; background: var(--surface); border-radius: var(--radius); }
+.panel { padding: 1.25rem; background: var(--surface); border-radius: var(--radius); }
 
 /* Formularios */
 .field { margin-bottom: 1rem; }

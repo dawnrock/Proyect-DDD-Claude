@@ -113,7 +113,7 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
 - **Acceptance criteria:**
   - [x] Tests green; rejected flashes keep their text valid for both segments.
 
-### [ ] T7 — New account form (~5 min)
+### [x] T7 — New account form (~5 min)
 
 - **Layer:** presentation
 - **Files:** `templates/accounts/new.html`
@@ -121,7 +121,7 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
 - **What to do:**
   1. Same dark field style, primary pill "Abrir cuenta", secondary "Cancelar" link back to the list. Fields, labels and errors unchanged.
 - **Acceptance criteria:**
-  - [ ] Existing sign-up tests green; page checked in the browser, including a validation error.
+  - [x] Existing sign-up tests green; page checked in the browser, including a validation error.
 
 ### [ ] T8 — Browser check and documentation (~10 min)
 
