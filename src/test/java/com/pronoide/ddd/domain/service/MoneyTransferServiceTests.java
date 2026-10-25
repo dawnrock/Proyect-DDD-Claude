@@ -12,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import com.pronoide.ddd.domain.model.AccountHolder;
-import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.domain.model.CustomerSegment;
@@ -21,6 +19,7 @@ import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
 import com.pronoide.ddd.domain.model.Transaction;
 import com.pronoide.ddd.domain.model.TransactionType;
+import com.pronoide.ddd.support.TestAccounts;
 
 class MoneyTransferServiceTests {
 
@@ -29,11 +28,6 @@ class MoneyTransferServiceTests {
 
     private final MoneyTransferService service = new MoneyTransferService();
 
-    private static CheckingAccount account(String iban, CustomerSegment segment, String initialDeposit) {
-        return CheckingAccount.open(new AccountNumber(iban), AccountHolder.register("Titular", segment),
-                MonetaryAmount.euros(initialDeposit));
-    }
-
     @Nested
     @DisplayName("Transferencia aprobada")
     class ApprovedTransfer {
@@ -41,8 +35,8 @@ class MoneyTransferServiceTests {
         @Test
         @DisplayName("Una transferencia aprobada resta el importe del origen y lo suma al destino")
         void una_transferencia_aprobada_mueve_el_importe_entre_las_cuentas() {
-            CheckingAccount source = account(SOURCE_IBAN, CustomerSegment.RETAIL, "500.00");
-            CheckingAccount target = account(TARGET_IBAN, CustomerSegment.RETAIL, "100.00");
+            CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
+            CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
 
             service.transfer(source, target, MonetaryAmount.euros("200.00"));
 
@@ -53,8 +47,8 @@ class MoneyTransferServiceTests {
         @Test
         @DisplayName("Una transferencia aprobada registra una retirada en el origen y un ingreso en el destino")
         void una_transferencia_aprobada_registra_retirada_e_ingreso() {
-            CheckingAccount source = account(SOURCE_IBAN, CustomerSegment.RETAIL, "500.00");
-            CheckingAccount target = account(TARGET_IBAN, CustomerSegment.RETAIL, "100.00");
+            CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
+            CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
 
             service.transfer(source, target, MonetaryAmount.euros("200.00"));
 
@@ -71,8 +65,8 @@ class MoneyTransferServiceTests {
         @Test
         @DisplayName("La transferencia devuelve la retirada aprobada del origen")
         void la_transferencia_devuelve_la_retirada_aprobada_del_origen() {
-            CheckingAccount source = account(SOURCE_IBAN, CustomerSegment.RETAIL, "500.00");
-            CheckingAccount target = account(TARGET_IBAN, CustomerSegment.RETAIL, "100.00");
+            CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
+            CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
 
             Transaction result = service.transfer(source, target, MonetaryAmount.euros("200.00"));
 
@@ -91,8 +85,8 @@ class MoneyTransferServiceTests {
         @CsvSource({"RETAIL, 501.00", "HIGH_NET_WORTH, 1501.00"})
         @DisplayName("Si la retirada se rechaza no se ingresa nada en el destino y los saldos no cambian")
         void si_la_retirada_se_rechaza_no_se_ingresa_nada_en_el_destino(CustomerSegment segment, String amount) {
-            CheckingAccount source = account(SOURCE_IBAN, segment, "500.00");
-            CheckingAccount target = account(TARGET_IBAN, CustomerSegment.RETAIL, "100.00");
+            CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).segment(segment).initialDeposit("500.00").open();
+            CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
 
             Transaction result = service.transfer(source, target, MonetaryAmount.euros(amount));
 
@@ -112,8 +106,8 @@ class MoneyTransferServiceTests {
         @Test
         @DisplayName("Un importe en otra divisa se rechaza sin registrar ningún movimiento en las cuentas")
         void un_importe_en_otra_divisa_se_rechaza_sin_registrar_movimientos() {
-            CheckingAccount source = account(SOURCE_IBAN, CustomerSegment.RETAIL, "500.00");
-            CheckingAccount target = account(TARGET_IBAN, CustomerSegment.RETAIL, "100.00");
+            CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
+            CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
             MonetaryAmount dollars = new MonetaryAmount(new BigDecimal("10.00"), Currency.getInstance("USD"));
 
             assertThatExceptionOfType(CurrencyMismatchException.class)
@@ -133,7 +127,7 @@ class MoneyTransferServiceTests {
         @Test
         @DisplayName("Transferir a la misma cuenta se rechaza sin registrar ningún movimiento")
         void transferir_a_la_misma_cuenta_se_rechaza_sin_registrar_movimientos() {
-            CheckingAccount account = account(SOURCE_IBAN, CustomerSegment.RETAIL, "500.00");
+            CheckingAccount account = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
 
             assertThatExceptionOfType(SameAccountTransferException.class)
                     .isThrownBy(() -> service.transfer(account, account, MonetaryAmount.euros("100.00")))

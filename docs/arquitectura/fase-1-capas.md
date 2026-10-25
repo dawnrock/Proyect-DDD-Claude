@@ -100,6 +100,12 @@ Implementado en la #7 (contrato: [`money-transfers.md`](../contracts/money-trans
 - `presentation.rest`: `TransferController` (`POST /api/transfers`, 201 también si se rechaza).
 - `presentation.web`: formulario de transferencia en el detalle de la cuenta, con la cuenta destino elegida entre las demás (`listAccounts()`); la presentación no conoce `domain.service` (D4).
 
+Implementado en la #11:
+
+- `application`: [`DemoDataLoader`](../../src/main/java/com/pronoide/ddd/application/DemoDataLoader.java), un `ApplicationRunner` con `@Profile("demo")` que abre tres cuentas (dos minoristas y una de alto patrimonio) con `CheckingAccountService.openAccount`, nunca con el repositorio, así que los datos cumplen las mismas reglas que los reales.
+- `pom.xml`: la propiedad `spring-boot.run.profiles=demo` hace que `./mvnw spring-boot:run` arranque con esos datos; `-Dspring-boot.run.profiles=default` lo evita. Los tests no activan el perfil (`DemoProfileTests` lo activa a propósito).
+- Tests: el builder `TestAccounts` (`@Builder` de Lombok, paquete de test `support`) abre cuentas con `CheckingAccount.open` y valores por defecto; sustituye los helpers repetidos de los tests de la cuenta, del repositorio y del servicio de transferencias. Se usa como `TestAccounts.anAccount()…open()`, sin import estático: javac resuelve los import estáticos antes de que Lombok genere el método.
+
 ## Issues de la fase
 
 | Orden | Issue | Capas | Clases que introduce |
