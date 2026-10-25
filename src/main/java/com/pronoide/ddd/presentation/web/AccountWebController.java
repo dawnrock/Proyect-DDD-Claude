@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,14 +19,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.pronoide.ddd.application.AccountSummary;
+import com.pronoide.ddd.application.Caller;
 import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
+import com.pronoide.ddd.application.TargetAccountNotFoundException;
 import com.pronoide.ddd.application.TransactionSummary;
 import com.pronoide.ddd.application.TransferCommand;
 import com.pronoide.ddd.application.TransferSummary;
 import com.pronoide.ddd.application.WithdrawCommand;
 import com.pronoide.ddd.domain.model.DomainException;
+import com.pronoide.ddd.presentation.CurrentCaller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,8 +50,13 @@ public class AccountWebController {
     private final WebFormat fmt;
 
     @GetMapping("/")
-    public String list(Model model) {
-        List<AccountSummary> accounts = service.listAccounts();
+    public String list(Authentication authentication, Model model) {
+        Caller caller = CurrentCaller.from(authentication);
+        List<AccountSummary> accounts = service.listAccounts(caller);
+        if (!caller.admin() && accounts.size() == 1) {
+            return redirectToDetail(accounts.get(0).id());
+        }
+        model.addAttribute("admin", caller.admin());
         model.addAttribute("accounts", accounts);
         model.addAttribute("totals", totalsByCurrency(accounts));
         return "accounts/list";
@@ -60,13 +69,13 @@ public class AccountWebController {
     }
 
     @GetMapping("/accounts/{id}")
-    public String detail(@PathVariable UUID id, Model model) {
-        return renderDetail(id, model);
+    public String detail(@PathVariable UUID id, Authentication authentication, Model model) {
+        return renderDetail(id, CurrentCaller.from(authentication), model);
     }
 
     @PostMapping("/accounts/{id}/deposits")
     public String deposit(@PathVariable UUID id, @Valid @ModelAttribute("depositForm") MovementForm form,
-                          BindingResult result, Model model, RedirectAttributes redirect) {
+                          BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication) {
         if (!result.hasErrors()) {
             DepositCommand command = null;
             try {
@@ -77,7 +86,7 @@ public class AccountWebController {
             }
             if (command != null) {
                 try {
-                    TransactionSummary deposit = service.deposit(command);
+                    TransactionSummary deposit = service.deposit(CurrentCaller.from(authentication), command);
                     redirect.addFlashAttribute("message",
                             "Ingreso de %s aprobado".formatted(fmt.money(deposit.amount(), deposit.currency())));
                     return redirectToDetail(id);
@@ -86,12 +95,12 @@ public class AccountWebController {
                 }
             }
         }
-        return renderDetail(id, model);
+        return renderDetail(id, CurrentCaller.from(authentication), model);
     }
 
     @PostMapping("/accounts/{id}/withdrawals")
     public String withdraw(@PathVariable UUID id, @Valid @ModelAttribute("withdrawalForm") MovementForm form,
-                           BindingResult result, Model model, RedirectAttributes redirect) {
+                           BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication) {
         if (!result.hasErrors()) {
             WithdrawCommand command = null;
             try {
@@ -102,7 +111,7 @@ public class AccountWebController {
             }
             if (command != null) {
                 try {
-                    TransactionSummary withdrawal = service.withdraw(command);
+                    TransactionSummary withdrawal = service.withdraw(CurrentCaller.from(authentication), command);
                     String amount = fmt.money(withdrawal.amount(), withdrawal.currency());
                     if ("REJECTED".equals(withdrawal.status())) {
                         redirect.addFlashAttribute("rejection",
@@ -117,17 +126,18 @@ public class AccountWebController {
                 }
             }
         }
-        return renderDetail(id, model);
+        return renderDetail(id, CurrentCaller.from(authentication), model);
     }
 
     @PostMapping("/accounts/{id}/transfers")
     public String transfer(@PathVariable UUID id, @Valid @ModelAttribute("transferForm") TransferForm form,
-                           BindingResult result, Model model, RedirectAttributes redirect) {
+                           BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication) {
         if (!result.hasErrors()) {
             TransferCommand command = null;
             try {
                 TransferCommand.Builder builder = TransferCommand.builder()
-                        .sourceAccountId(id).targetAccountId(form.getTargetAccountId()).amount(form.getAmount());
+                        .sourceAccountId(id).targetAccountNumber(form.getTargetAccountNumber())
+                        .amount(form.getAmount());
                 if (form.getCurrency() != null) {
                     builder.currency(form.getCurrency());
                 }
@@ -137,7 +147,7 @@ public class AccountWebController {
             }
             if (command != null) {
                 try {
-                    TransferSummary transfer = service.transfer(command);
+                    TransferSummary transfer = service.transfer(CurrentCaller.from(authentication), command);
                     String amount = fmt.money(transfer.amount(), transfer.currency());
                     String target = fmt.maskedIban(transfer.targetAccountNumber());
                     if ("REJECTED".equals(transfer.status())) {
@@ -149,16 +159,20 @@ public class AccountWebController {
                                 .formatted(amount, target));
                     }
                     return redirectToDetail(id);
-                } catch (DomainException e) {
+                } catch (TargetAccountNotFoundException e) {
+                    // El IBAN de destino lo ha escrito el usuario: se avisa en el formulario, no con la página 404.
+                    // Va antes que cualquier NotFoundException: una cuenta de origen inexistente o ajena sí es 404.
+                    result.rejectValue("targetAccountNumber", "notFound", e.getMessage());
+                } catch (DomainException | IllegalArgumentException e) {
                     result.reject("domain", e.getMessage());
                 }
             }
         }
-        return renderDetail(id, model);
+        return renderDetail(id, CurrentCaller.from(authentication), model);
     }
 
     /** Pinta el detalle; los formularios que no vienen del envío actual se crean vacíos. */
-    private String renderDetail(UUID id, Model model) {
+    private String renderDetail(UUID id, Caller caller, Model model) {
         if (!model.containsAttribute("depositForm")) {
             model.addAttribute("depositForm", new MovementForm());
         }
@@ -168,12 +182,22 @@ public class AccountWebController {
         if (!model.containsAttribute("transferForm")) {
             model.addAttribute("transferForm", new TransferForm());
         }
-        model.addAttribute("account", service.findAccount(id));
-        model.addAttribute("targetAccounts", service.listAccounts().stream()
-                .filter(other -> !other.id().equals(id))
-                .toList());
+        // Primero la cuenta: una ajena es un 404 sin consultar nada más
+        model.addAttribute("account", service.findAccount(caller, id));
+        model.addAttribute("backLabel", backLabel(caller));
         model.addAttribute("currencies", CURRENCIES);
         return DETAIL_VIEW;
+    }
+
+    /**
+     * Texto del enlace de vuelta al inicio: «Cuentas» para el administrador, «Mis cuentas» para un usuario con varias
+     * cuentas y ninguno con una sola (su inicio es este mismo detalle).
+     */
+    private String backLabel(Caller caller) {
+        if (caller.admin()) {
+            return "Cuentas";
+        }
+        return service.listAccounts(caller).size() > 1 ? "Mis cuentas" : null;
     }
 
     private static String redirectToDetail(UUID id) {
@@ -189,15 +213,15 @@ public class AccountWebController {
 
     @PostMapping("/accounts/new")
     public String openAccount(@Valid @ModelAttribute("form") OpenAccountForm form, BindingResult result,
-                              Model model, RedirectAttributes redirect) {
+                              Model model, RedirectAttributes redirect, Authentication authentication) {
         OpenAccountCommand command = result.hasErrors() ? null : toCommand(form, result);
         if (command != null) {
             try {
-                AccountSummary account = service.openAccount(command);
+                AccountSummary account = service.openAccount(CurrentCaller.from(authentication), command);
                 redirect.addFlashAttribute("message",
                         "Cuenta %s abierta correctamente".formatted(account.accountNumber()));
                 return "redirect:/";
-            } catch (DomainException e) {
+            } catch (DomainException | IllegalArgumentException e) {
                 result.reject("domain", e.getMessage());
             }
         }
@@ -217,6 +241,7 @@ public class AccountWebController {
                     .segment(form.getSegment())
                     .initialDeposit(form.getInitialDeposit())
                     .currency(form.getCurrency())
+                    .ownerUsername(form.getOwnerUsername())
                     .build();
         } catch (IllegalArgumentException e) {
             result.reject("invalid", e.getMessage());
