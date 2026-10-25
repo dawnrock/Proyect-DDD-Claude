@@ -55,7 +55,7 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
 - **Acceptance criteria:**
   - [x] Tests green (red first: class missing). No domain imports.
 
-### [ ] T2 — Dark theme base and layout (~10 min)
+### [x] T2 — Dark theme base and layout (~10 min)
 
 - **Layer:** presentation
 - **Files:** `static/css/app.css`, `templates/fragments/layout.html`, `templates/error/404.html`
@@ -64,7 +64,7 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
   1. Rewrite `app.css` around CSS variables (background, surface, hairline, text, muted, positive, negative), system font, `color-scheme: dark`, generous spacing, pill buttons, list rows, form fields on dark surfaces, flash messages, responsive at phone width.
   2. Minimal header (brand only) and footer; 404 page with the same style.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green (the 404 tests still pass); page checked in the browser.
+  - [x] `./mvnw verify` green (the 404 tests still pass); page checked in the browser.
 
 ### [ ] T3 — Account list (~10 min)
 

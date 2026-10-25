@@ -4,9 +4,12 @@
 <body>
 <header th:replace="~{fragments/layout :: header}"></header>
 <main>
-    <h1>Página no encontrada</h1>
-    <p>La página que buscas no existe o ya no está disponible.</p>
-    <p><a th:href="@{/}">Volver al inicio</a></p>
+    <div class="hero">
+        <p class="hero-label">Error 404</p>
+        <h1 class="hero-amount">Página no encontrada</h1>
+        <p class="hero-sub">La página que buscas no existe o ya no está disponible.</p>
+    </div>
+    <a class="button" th:href="@{/}">Volver al inicio</a>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
