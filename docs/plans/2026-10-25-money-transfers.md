@@ -47,7 +47,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
 
 ## Tasks
 
-### [ ] T0 — Contract (~15 min)
+### [x] T0 — Contract (~15 min)
 
 - **Side:** both
 - **Layer:** application · docs
@@ -64,9 +64,9 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   2. Create the types without logic: `TransferCommandDef`, `TransferSummaryDef`, `SameAccountTransferException` (so presentation can translate it) and `transfer` with an `UnsupportedOperationException("pendiente: backend-dev")` body.
   3. Write the OpenAPI fragment (`/api/transfers`, `TransferRequest` and `Transfer` schemas), reusing `BadRequest`, `NotFound` and `UnprocessableContent`.
 - **Acceptance criteria:**
-  - [ ] Contract agreed by both teammates and frozen in a `docs(contract): ...` commit, with its hash noted.
-  - [ ] `./mvnw verify` compiles and passes against the contract types.
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
+  - [x] Contract agreed by both teammates and frozen in a `docs(contract): ...` commit, with its hash noted.
+  - [x] `./mvnw verify` compiles and passes against the contract types.
+  - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
 
 ### [ ] T1 — `MoneyTransferService`: approved transfer (~10 min)
 

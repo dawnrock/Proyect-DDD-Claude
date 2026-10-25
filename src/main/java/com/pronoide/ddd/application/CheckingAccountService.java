@@ -91,6 +91,19 @@ public class CheckingAccountService {
         return toTransaction(transaction);
     }
 
+    /**
+     * Transfiere un importe de la cuenta de origen a la de destino y guarda las dos. Una transferencia que la cuenta de
+     * origen no permite no es un error: se devuelve con estado {@code REJECTED} y ningún saldo cambia. Contrato:
+     * {@code docs/contracts/money-transfers.md}.
+     *
+     * @throws AccountNotFoundException si no existe la cuenta de origen o la de destino
+     * @throws com.pronoide.ddd.domain.model.SameAccountTransferException si origen y destino son la misma cuenta
+     * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el importe no está en la divisa de las cuentas
+     */
+    public TransferSummary transfer(TransferCommand command) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
     private CheckingAccount load(UUID id) {
         return repository.findById(id).orElseThrow(() -> new AccountNotFoundException(id));
     }
