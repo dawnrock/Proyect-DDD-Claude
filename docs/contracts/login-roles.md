@@ -1,7 +1,7 @@
 # Contract: login with admin and user roles
 
 - **Issue:** [#50](https://github.com/dawnrock/Proyect-DDD-Claude/issues/50) · **Plan:** `docs/plans/2026-10-25-login-roles.md` · **ADR:** `docs/adr/0008-spring-security.md`
-- **Status:** agreed
+- **Status:** frozen at `cc7bc4d`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both asked for minor changes, merged by the lead; the teammates cannot message each other)
 
 Builds on the frozen contracts of #5, #6 and #7 (`open-query-list-accounts.md`, `deposits-withdrawals.md`, `money-transfers.md`).
