@@ -16,6 +16,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.pronoide.ddd.application.NotFoundException;
+import com.pronoide.ddd.application.OperationNotAllowedException;
 import com.pronoide.ddd.domain.model.DomainException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,12 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DomainException.class)
     ProblemDetail handleBusinessRule(DomainException exception) {
         return problem(HttpStatus.UNPROCESSABLE_CONTENT, BUSINESS_RULE_TITLE, exception.getMessage());
+    }
+
+    /** Operación reservada a administradores (red de seguridad tras la regla de URL de {@link ApiSecurityConfig}). */
+    @ExceptionHandler(OperationNotAllowedException.class)
+    ProblemDetail handleNotAllowed(OperationNotAllowedException exception) {
+        return problem(HttpStatus.FORBIDDEN, ApiSecurityConfig.FORBIDDEN_TITLE, exception.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)

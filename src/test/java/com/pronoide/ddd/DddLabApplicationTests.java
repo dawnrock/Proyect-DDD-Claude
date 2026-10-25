@@ -21,8 +21,30 @@ import org.springframework.context.ApplicationContext;
 
 import com.pronoide.ddd.application.DemoDataLoader;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+/**
+ * Usuarios de test (#50): admin, ada, grace y alan, todos con la contraseña "demo" (mismo hash que el perfil demo).
+ * alan solo lo usa "Login y roles", para tener un usuario con una sola cuenta.
+ */
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = {
+		"app.security.users[0].username=admin",
+		"app.security.users[0].password-hash=" + DddLabApplicationTests.DEMO_HASH,
+		"app.security.users[0].role=ADMIN",
+		"app.security.users[1].username=ada",
+		"app.security.users[1].password-hash=" + DddLabApplicationTests.DEMO_HASH,
+		"app.security.users[1].role=USER",
+		"app.security.users[2].username=grace",
+		"app.security.users[2].password-hash=" + DddLabApplicationTests.DEMO_HASH,
+		"app.security.users[2].role=USER",
+		"app.security.users[3].username=alan",
+		"app.security.users[3].password-hash=" + DddLabApplicationTests.DEMO_HASH,
+		"app.security.users[3].role=USER"})
 class DddLabApplicationTests {
+
+	/** Hash BCrypt de "demo". */
+	static final String DEMO_HASH = "$2a$10$XbpS91y/CFr.Zvx6Xxi7RuLFFUMRM9adecz2G7FO4YClrsKKCdKWW";
+
+	/** Contraseña de los usuarios de test. */
+	static final String PASSWORD = "demo";
 
 	@LocalServerPort
 	private int port;
@@ -45,7 +67,7 @@ class DddLabApplicationTests {
 	@Test
 	@DisplayName("Una página inexistente muestra la página 404 propia de la web")
 	void una_pagina_inexistente_muestra_la_pagina_404_propia_de_la_web() throws Exception {
-		HttpResponse<String> response = get("/no-existe", "text/html");
+		HttpResponse<String> response = page("/no-existe");
 
 		assertThat(response.statusCode()).isEqualTo(404);
 		assertThat(response.headers().firstValue("Content-Type")).hasValueSatisfying(type -> assertThat(type).startsWith("text/html"));
@@ -70,7 +92,7 @@ class DddLabApplicationTests {
 		void una_cuenta_abierta_por_la_api_se_consulta_por_su_id_y_aparece_en_el_listado_web() throws Exception {
 			HttpResponse<String> created = post("/api/accounts", "application/json", """
 					{"accountNumber": "es91 2100 0418 4502 0005 1332", "holderName": "Ada Lovelace",
-					 "segment": "RETAIL", "initialDeposit": 100.00}""");
+					 "segment": "RETAIL", "initialDeposit": 100.00, "ownerUsername": "ada"}""");
 
 			assertThat(created.statusCode()).isEqualTo(201);
 			assertThat(created.body()).contains("\"accountNumber\":\"ES9121000418450200051332\"");
@@ -80,7 +102,7 @@ class DddLabApplicationTests {
 			assertThat(details.statusCode()).isEqualTo(200);
 			assertThat(details.body()).contains("\"type\":\"DEPOSIT\"").contains("\"status\":\"APPROVED\"");
 
-			assertThat(get("/", "text/html").body()).contains("ES9121000418450200051332").contains("Ada Lovelace");
+			assertThat(browse("/")).contains("ES9121000418450200051332").contains("Ada Lovelace");
 		}
 
 		@Test
@@ -92,7 +114,7 @@ class DddLabApplicationTests {
 			assertThat(response.headers().firstValue("Location"))
 					.as("sin ;jsessionid en la URL, que Spring no reconoce y acaba en 404")
 					.hasValueSatisfying(location -> assertThat(location).doesNotContain(";jsessionid"));
-			assertThat(get("/", "text/html").body()).contains("ES7620770024003102575766");
+			assertThat(browse("/")).contains("ES7620770024003102575766");
 		}
 
 		@Test
@@ -113,13 +135,13 @@ class DddLabApplicationTests {
 
 			assertThat(response.statusCode()).isEqualTo(200);
 			assertThat(response.body()).contains("EUR").contains("USD").contains("ha recibido");
-			assertThat(get("/", "text/html").body()).doesNotContain("ES1000492352082414205416");
+			assertThat(browse("/")).doesNotContain("ES1000492352082414205416");
 		}
 
 		private HttpResponse<String> submitForm(String accountNumber, String currency) throws Exception {
-			String form = "accountNumber=%s&holderName=Grace+Hopper&segment=RETAIL&initialDeposit=75.00&currency=%s"
+			String form = "accountNumber=%s&holderName=Grace+Hopper&ownerUsername=grace&segment=RETAIL&initialDeposit=75.00&currency=%s"
 					.formatted(URLEncoder.encode(accountNumber, StandardCharsets.UTF_8), currency);
-			return post("/accounts/new", "application/x-www-form-urlencoded", form);
+			return submit("/accounts/new", form);
 		}
 	}
 
@@ -140,7 +162,7 @@ class DddLabApplicationTests {
 			assertThat(withdrawal.statusCode()).isEqualTo(201);
 			assertThat(withdrawal.body()).contains("\"status\":\"REJECTED\"");
 			assertThat(get(account, "application/json").body()).contains("\"balance\":150.00");
-			assertThat(get(webPath(account), "text/html").body()).contains("Rechazado").contains("150,00 €");
+			assertThat(browse(webPath(account))).contains("Rechazado").contains("150,00 €");
 		}
 
 		@Test
@@ -163,7 +185,7 @@ class DddLabApplicationTests {
 		void una_cuenta_inexistente_es_la_pagina_404_en_la_web_y_un_problem_detail_404_en_la_api() throws Exception {
 			String unknown = "/api/accounts/" + java.util.UUID.randomUUID();
 
-			HttpResponse<String> web = get(webPath(unknown), "text/html");
+			HttpResponse<String> web = page(webPath(unknown));
 			HttpResponse<String> api = post(unknown + "/deposits", "application/json", "{\"amount\": 10.00}");
 
 			assertThat(web.statusCode()).isEqualTo(404);
@@ -185,8 +207,8 @@ class DddLabApplicationTests {
 			String source = openAccount("ES0000000000000000000701");
 			String target = openAccount("ES0000000000000000000702");
 
-			HttpResponse<String> approved = transfer(source, target, "40.00");
-			HttpResponse<String> rejected = transfer(source, target, "500.00");
+			HttpResponse<String> approved = transfer(source, "ES0000000000000000000702", "40.00");
+			HttpResponse<String> rejected = transfer(source, "ES0000000000000000000702", "500.00");
 
 			assertThat(approved.statusCode()).isEqualTo(201);
 			assertThat(approved.body()).contains("\"status\":\"APPROVED\"")
@@ -202,7 +224,7 @@ class DddLabApplicationTests {
 		void por_la_api_una_transferencia_a_la_misma_cuenta_es_una_regla_de_negocio_incumplida() throws Exception {
 			String account = openAccount("ES0000000000000000000703");
 
-			HttpResponse<String> response = transfer(account, account, "10.00");
+			HttpResponse<String> response = transfer(account, "ES0000000000000000000703", "10.00");
 
 			assertThat(response.statusCode()).isEqualTo(422);
 			assertThat(response.body()).contains("Regla de negocio incumplida").contains("misma cuenta");
@@ -217,7 +239,7 @@ class DddLabApplicationTests {
 			String target = webPath(openAccount("ES0000000000000000000705"));
 
 			HttpResponse<String> response = submit(source + "/transfers",
-					"targetAccountId=%s&amount=25.00&currency=EUR".formatted(idOf(target)));
+					"targetAccountNumber=ES0000000000000000000705&amount=25.00&currency=EUR");
 
 			assertThat(response.statusCode()).isEqualTo(302);
 			assertThat(response.headers().firstValue("Location")).hasValueSatisfying(
@@ -227,15 +249,138 @@ class DddLabApplicationTests {
 			assertThat(browse(target)).contains("125,00 €");
 		}
 
-		private HttpResponse<String> transfer(String source, String target, String amount) throws Exception {
+		private HttpResponse<String> transfer(String source, String targetIban, String amount) throws Exception {
 			return post("/api/transfers", "application/json", """
-					{"sourceAccountId": "%s", "targetAccountId": "%s", "amount": %s}"""
-					.formatted(idOf(source), idOf(target), amount));
+					{"sourceAccountId": "%s", "targetAccountNumber": "%s", "amount": %s}"""
+					.formatted(idOf(source), targetIban, amount));
 		}
 
 		private String idOf(String path) {
 			return path.substring(path.lastIndexOf('/') + 1);
 		}
+	}
+
+	@Nested
+	@DisplayName("Login y roles con el servicio real (#50)")
+	class LoginAndRoles {
+
+		@Test
+		@DisplayName("Sin sesión, la web lleva al login y la API responde 401 con un ProblemDetail")
+		void sin_sesion_la_web_lleva_al_login_y_la_api_responde_401() throws Exception {
+			HttpResponse<String> web = anonymous("/");
+			HttpResponse<String> api = http.send(HttpRequest.newBuilder(URI.create(url("/api/accounts")))
+					.header("Accept", "application/json").GET().build(), HttpResponse.BodyHandlers.ofString());
+
+			assertThat(web.statusCode()).isEqualTo(302);
+			assertThat(web.headers().firstValue("Location")).hasValueSatisfying(
+					location -> assertThat(location).endsWith("/login"));
+			assertThat(api.statusCode()).isEqualTo(401);
+			assertThat(api.body()).contains("No autenticado");
+		}
+
+		@Test
+		@DisplayName("Un usuario con una sola cuenta entra directamente en ella y una cuenta ajena es un 404")
+		void un_usuario_con_una_sola_cuenta_entra_en_ella_y_una_ajena_es_un_404() throws Exception {
+			String alans = idOf(openAccountFor("ES0000000000000000005001", "alan"));
+			String others = idOf(openAccountFor("ES0000000000000000005002", "grace"));
+			HttpClient alan = loginAs("alan");
+
+			HttpResponse<String> home = send(alan, "/");
+			HttpResponse<String> foreign = send(alan, "/accounts/" + others);
+
+			assertThat(home.statusCode()).isEqualTo(302);
+			assertThat(home.headers().firstValue("Location")).hasValueSatisfying(
+					location -> assertThat(location).endsWith("/accounts/" + alans));
+			assertThat(send(alan, "/accounts/" + alans).body()).contains("ES0000000000000000005001")
+					.doesNotContain("ES0000000000000000005002");
+			assertThat(foreign.statusCode()).isEqualTo(404);
+		}
+
+		@Test
+		@DisplayName("Por la API, un usuario no abre cuentas (403), no ve las ajenas (404) y transfiere por IBAN")
+		void por_la_api_un_usuario_no_abre_cuentas_no_ve_las_ajenas_y_transfiere_por_iban() throws Exception {
+			String graces = idOf(openAccountFor("ES0000000000000000005003", "grace"));
+			String adas = idOf(openAccountFor("ES0000000000000000005004", "ada"));
+
+			HttpResponse<String> open = api("grace", "POST", "/api/accounts", """
+					{"accountNumber": "ES0000000000000000005005", "holderName": "Grace Hopper", "segment": "RETAIL",
+					 "initialDeposit": 100.00, "ownerUsername": "grace"}""");
+			HttpResponse<String> foreign = api("grace", "GET", "/api/accounts/" + adas, null);
+			HttpResponse<String> transfer = api("grace", "POST", "/api/transfers", """
+					{"sourceAccountId": "%s", "targetAccountNumber": "ES00 0000 0000 0000 0000 5004", "amount": 30}"""
+					.formatted(graces));
+
+			assertThat(open.statusCode()).isEqualTo(403);
+			assertThat(open.body()).contains("Acceso denegado");
+			assertThat(foreign.statusCode()).isEqualTo(404);
+			assertThat(transfer.statusCode()).isEqualTo(201);
+			assertThat(transfer.body()).contains("\"status\":\"APPROVED\"");
+			assertThat(api("ada", "GET", "/api/accounts/" + adas, null).body()).contains("\"balance\":130.00");
+		}
+
+		@Test
+		@DisplayName("La consola H2 es solo para administradores y la salud pública no muestra detalles")
+		void la_consola_h2_es_solo_para_administradores_y_la_salud_publica_no_muestra_detalles() throws Exception {
+			HttpResponse<String> console = send(loginAs("ada"), "/h2-console/");
+			HttpResponse<String> health = get("/actuator/health", "application/json");
+
+			assertThat(console.statusCode()).isEqualTo(403);
+			assertThat(send(loginAs("admin"), "/h2-console/").statusCode()).isEqualTo(200);
+			assertThat(health.statusCode()).isEqualTo(200);
+			assertThat(health.body()).contains("\"status\":\"UP\"").doesNotContain("components", "diskSpace");
+		}
+
+		private String openAccountFor(String accountNumber, String owner) throws Exception {
+			HttpResponse<String> created = post("/api/accounts", "application/json", """
+					{"accountNumber": "%s", "holderName": "Titular", "segment": "RETAIL", "initialDeposit": 100.00,
+					 "ownerUsername": "%s"}""".formatted(accountNumber, owner));
+			assertThat(created.statusCode()).isEqualTo(201);
+			return created.headers().firstValue("Location").orElseThrow();
+		}
+
+		private String idOf(String path) {
+			return path.substring(path.lastIndexOf('/') + 1);
+		}
+
+		/** Inicia sesión por el formulario (token CSRF incluido) en un navegador nuevo, con sus propias cookies. */
+		private HttpClient loginAs(String username) throws Exception {
+			HttpClient client = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
+			java.util.regex.Matcher csrf = java.util.regex.Pattern.compile("name=\"_csrf\" value=\"([^\"]+)\"")
+					.matcher(send(client, "/login").body());
+			assertThat(csrf.find()).isTrue();
+			HttpResponse<String> login = client.send(HttpRequest.newBuilder(URI.create(url("/login")))
+					.header("Content-Type", "application/x-www-form-urlencoded")
+					.POST(HttpRequest.BodyPublishers.ofString("username=%s&password=%s&_csrf=%s"
+							.formatted(username, PASSWORD, csrf.group(1))))
+					.build(), HttpResponse.BodyHandlers.ofString());
+			assertThat(login.headers().firstValue("Location")).hasValueSatisfying(
+					location -> assertThat(location).doesNotContain("error"));
+			return client;
+		}
+
+		private HttpResponse<String> send(HttpClient client, String path) throws Exception {
+			return client.send(HttpRequest.newBuilder(URI.create(url(path))).header("Accept", "text/html").GET().build(),
+					HttpResponse.BodyHandlers.ofString());
+		}
+
+		private HttpResponse<String> anonymous(String path) throws Exception {
+			return send(HttpClient.newHttpClient(), path);
+		}
+
+		private HttpResponse<String> api(String username, String method, String path, String json) throws Exception {
+			String credentials = java.util.Base64.getEncoder()
+					.encodeToString((username + ":" + PASSWORD).getBytes(StandardCharsets.UTF_8));
+			HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(url(path)))
+					.header("Authorization", "Basic " + credentials)
+					.header("Accept", "application/json");
+			request = json == null ? request.GET() : request.header("Content-Type", "application/json")
+					.method(method, HttpRequest.BodyPublishers.ofString(json));
+			return http.send(request.build(), HttpResponse.BodyHandlers.ofString());
+		}
+	}
+
+	private String url(String path) {
+		return "http://localhost:" + port + path;
 	}
 
 	/** Con cookies: el mensaje flash tras la redirección viaja en la sesión. */
@@ -244,7 +389,8 @@ class DddLabApplicationTests {
 	/** Abre una cuenta minorista con 100,00 € y devuelve su ruta de la API ({@code /api/accounts/{id}}). */
 	private String openAccount(String accountNumber) throws Exception {
 		HttpResponse<String> created = post("/api/accounts", "application/json", """
-				{"accountNumber": "%s", "holderName": "Grace Hopper", "segment": "RETAIL", "initialDeposit": 100.00}"""
+				{"accountNumber": "%s", "holderName": "Grace Hopper", "segment": "RETAIL", "initialDeposit": 100.00,
+				 "ownerUsername": "ada"}"""
 				.formatted(accountNumber));
 		assertThat(created.statusCode()).isEqualTo(201);
 		return created.headers().firstValue("Location").orElseThrow();
@@ -254,20 +400,67 @@ class DddLabApplicationTests {
 		return apiPath.replaceFirst("^/api", "");
 	}
 
-	private HttpResponse<String> submit(String path, String form) throws Exception {
+	private boolean loggedIn;
+
+	/** Entra como administrador una sola vez por test: GET /login para leer el token CSRF y POST /login con cookies. */
+	private void ensureLoggedIn() throws Exception {
+		if (loggedIn) {
+			return;
+		}
+		HttpResponse<String> login = browser.send(
+				HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/login"))
+						.header("Content-Type", "application/x-www-form-urlencoded")
+						.POST(HttpRequest.BodyPublishers.ofString("username=admin&password=%s&_csrf=%s"
+								.formatted(PASSWORD, csrfToken())))
+						.build(), HttpResponse.BodyHandlers.ofString());
+		assertThat(login.statusCode()).isEqualTo(302);
+		assertThat(login.headers().firstValue("Location"))
+				.hasValueSatisfying(location -> assertThat(location).doesNotContain("error"));
+		loggedIn = true;
+	}
+
+	/** Token CSRF: la página de login lo lleva siempre, también con la sesión iniciada. */
+	private String csrfToken() throws Exception {
+		java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("name=\"_csrf\" value=\"([^\"]+)\"")
+				.matcher(rawBrowse("/login").body());
+		assertThat(matcher.find()).as("la página de login lleva un token CSRF").isTrue();
+		return matcher.group(1);
+	}
+
+	private HttpResponse<String> rawBrowse(String path) throws Exception {
 		return browser.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
-				.header("Content-Type", "application/x-www-form-urlencoded")
-				.POST(HttpRequest.BodyPublishers.ofString(form))
+				.header("Accept", "text/html")
+				.GET()
 				.build(), HttpResponse.BodyHandlers.ofString());
 	}
 
+	/** Envía un formulario web como el administrador con sesión, añadiendo el token CSRF. */
+	private HttpResponse<String> submit(String path, String form) throws Exception {
+		ensureLoggedIn();
+		return browser.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
+				.header("Content-Type", "application/x-www-form-urlencoded")
+				.POST(HttpRequest.BodyPublishers.ofString(form + "&_csrf=" + csrfToken()))
+				.build(), HttpResponse.BodyHandlers.ofString());
+	}
+
+	/** Pide una página web como el administrador con sesión. */
+	private HttpResponse<String> page(String path) throws Exception {
+		ensureLoggedIn();
+		return rawBrowse(path);
+	}
+
 	private String browse(String path) throws Exception {
-		return browser.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path)).GET().build(),
-				HttpResponse.BodyHandlers.ofString()).body();
+		return page(path).body();
+	}
+
+	/** Cabecera HTTP Basic del administrador, que la API exige (#50); la web no la usa. */
+	private static HttpRequest.Builder withApiCredentials(HttpRequest.Builder request, String path) {
+		return path.startsWith("/api") ? request.header("Authorization", "Basic " + java.util.Base64.getEncoder()
+				.encodeToString(("admin:" + PASSWORD).getBytes(StandardCharsets.UTF_8))) : request;
 	}
 
 	private HttpResponse<String> get(String path, String accept) throws Exception {
-		HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
+		HttpRequest request = withApiCredentials(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path)), path)
 				.header("Accept", accept)
 				.GET()
 				.build();
@@ -275,7 +468,7 @@ class DddLabApplicationTests {
 	}
 
 	private HttpResponse<String> post(String path, String contentType, String body) throws Exception {
-		HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
+		HttpRequest request = withApiCredentials(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path)), path)
 				.header("Content-Type", contentType)
 				.POST(HttpRequest.BodyPublishers.ofString(body))
 				.build();

@@ -11,6 +11,10 @@
 <body>
 <header th:fragment="header" class="app-header">
     <a class="app-brand" th:href="@{/}">Cuentas corrientes</a>
+    <form class="app-user" th:if="${currentUser != null}" th:action="@{/logout}" method="post">
+        <span class="app-username" th:text="${currentUser}">usuario</span>
+        <button class="link-button" type="submit">Cerrar sesión</button>
+    </form>
 </header>
 <footer th:fragment="footer" class="app-footer">
     Proyect-DDD-Claude · fase 1 · monolito en capas

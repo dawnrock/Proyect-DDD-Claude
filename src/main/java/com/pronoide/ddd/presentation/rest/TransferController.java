@@ -2,6 +2,7 @@ package com.pronoide.ddd.presentation.rest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.application.TransferCommand;
 import com.pronoide.ddd.application.TransferSummary;
+import com.pronoide.ddd.presentation.CurrentCaller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,22 +29,22 @@ public class TransferController {
     private final CheckingAccountService service;
 
     @PostMapping
-    public ResponseEntity<TransferResponse> transfer(@Valid @RequestBody TransferRequest request) {
+    public ResponseEntity<TransferResponse> transfer(
+            Authentication authentication, @Valid @RequestBody TransferRequest request) {
         TransferCommand.Builder command = TransferCommand.builder()
                 .sourceAccountId(request.sourceAccountId())
-                .targetAccountId(request.targetAccountId())
+                .targetAccountNumber(request.targetAccountNumber())
                 .amount(request.amount());
         if (request.currency() != null) {
             command.currency(request.currency());
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(service.transfer(command.build())));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(service.transfer(CurrentCaller.from(authentication), command.build())));
     }
 
     private static TransferResponse toResponse(TransferSummary transfer) {
         return TransferResponse.builder()
                 .sourceAccountId(transfer.sourceAccountId())
                 .sourceAccountNumber(transfer.sourceAccountNumber())
-                .targetAccountId(transfer.targetAccountId())
                 .targetAccountNumber(transfer.targetAccountNumber())
                 .amount(transfer.amount())
                 .currency(transfer.currency())

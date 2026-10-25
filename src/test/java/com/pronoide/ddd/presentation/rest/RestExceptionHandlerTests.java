@@ -11,12 +11,15 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.pronoide.ddd.presentation.SecuritySupport;
 import com.pronoide.ddd.presentation.rest.support.FailingTestController;
 
 @WebMvcTest(FailingTestController.class)
+@Import({ApiSecurityConfig.class, SecuritySupport.class})
 class RestExceptionHandlerTests {
 
     @Autowired
@@ -51,6 +54,22 @@ class RestExceptionHandlerTests {
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                     .andExpect(jsonPath("$.title").value("Recurso inexistente"))
                     .andExpect(jsonPath("$.detail").value("No existe el recurso de prueba 42"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Operaciones no permitidas")
+    class Forbidden {
+
+        @Test
+        @DisplayName("Una operación reservada a administradores se traduce en un 403 Acceso denegado")
+        void una_operacion_reservada_a_administradores_se_traduce_en_un_403() throws Exception {
+            mvc.perform(get("/test/errors/forbidden"))
+                    .andExpect(status().isForbidden())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                    .andExpect(jsonPath("$.status").value(403))
+                    .andExpect(jsonPath("$.title").value("Acceso denegado"))
+                    .andExpect(jsonPath("$.detail").value("Solo un administrador puede abrir cuentas"));
         }
     }
 

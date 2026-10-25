@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,7 @@ import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
 import com.pronoide.ddd.application.TransactionSummary;
 import com.pronoide.ddd.application.WithdrawCommand;
+import com.pronoide.ddd.presentation.CurrentCaller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,48 +39,50 @@ public class AccountController {
     private final CheckingAccountService service;
 
     @PostMapping
-    public ResponseEntity<AccountSummaryResponse> openAccount(@Valid @RequestBody OpenAccountRequest request) {
+    public ResponseEntity<AccountSummaryResponse> openAccount(
+            Authentication authentication, @Valid @RequestBody OpenAccountRequest request) {
         OpenAccountCommand.Builder command = OpenAccountCommand.builder()
                 .accountNumber(request.accountNumber())
                 .holderName(request.holderName())
                 .segment(request.segment())
-                .initialDeposit(request.initialDeposit());
+                .initialDeposit(request.initialDeposit())
+                .ownerUsername(request.ownerUsername());
         if (request.currency() != null) {
             command.currency(request.currency());
         }
 
-        AccountSummaryResponse body = toResponse(service.openAccount(command.build()));
+        AccountSummaryResponse body = toResponse(service.openAccount(CurrentCaller.from(authentication), command.build()));
         return ResponseEntity.created(URI.create("/api/accounts/" + body.id())).body(body);
     }
 
     @GetMapping
-    public List<AccountSummaryResponse> listAccounts() {
-        return service.listAccounts().stream().map(AccountController::toResponse).toList();
+    public List<AccountSummaryResponse> listAccounts(Authentication authentication) {
+        return service.listAccounts(CurrentCaller.from(authentication)).stream().map(AccountController::toResponse).toList();
     }
 
     @GetMapping("/{id}")
-    public AccountDetailsResponse findAccount(@PathVariable UUID id) {
-        return toResponse(service.findAccount(id));
+    public AccountDetailsResponse findAccount(Authentication authentication, @PathVariable UUID id) {
+        return toResponse(service.findAccount(CurrentCaller.from(authentication), id));
     }
 
     @PostMapping("/{id}/deposits")
     public ResponseEntity<TransactionResponse> deposit(
-            @PathVariable UUID id, @Valid @RequestBody MovementRequest request) {
+            Authentication authentication, @PathVariable UUID id, @Valid @RequestBody MovementRequest request) {
         DepositCommand.Builder command = DepositCommand.builder().accountId(id).amount(request.amount());
         if (request.currency() != null) {
             command.currency(request.currency());
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(service.deposit(command.build())));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(service.deposit(CurrentCaller.from(authentication), command.build())));
     }
 
     @PostMapping("/{id}/withdrawals")
     public ResponseEntity<TransactionResponse> withdraw(
-            @PathVariable UUID id, @Valid @RequestBody MovementRequest request) {
+            Authentication authentication, @PathVariable UUID id, @Valid @RequestBody MovementRequest request) {
         WithdrawCommand.Builder command = WithdrawCommand.builder().accountId(id).amount(request.amount());
         if (request.currency() != null) {
             command.currency(request.currency());
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(service.withdraw(command.build())));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(service.withdraw(CurrentCaller.from(authentication), command.build())));
     }
 
     private static AccountSummaryResponse toResponse(AccountSummary summary) {

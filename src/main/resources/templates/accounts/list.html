@@ -5,8 +5,8 @@
 <header th:replace="~{fragments/layout :: header}"></header>
 <main>
     <div class="page-head">
-        <h1>Cuentas</h1>
-        <a class="pill pill-primary" th:href="@{/accounts/new}">+ Abrir cuenta</a>
+        <h1 th:text="${admin} ? 'Cuentas' : 'Mis cuentas'">Cuentas</h1>
+        <a class="pill pill-primary" th:if="${admin}" th:href="@{/accounts/new}">+ Abrir cuenta</a>
     </div>
     <p th:if="${message}" class="flash flash-success" role="status" th:text="${message}"></p>
 
@@ -28,7 +28,8 @@
             </a>
         </li>
     </ul>
-    <p th:if="${accounts.isEmpty()}" class="empty">Todavía no hay cuentas. Abre la primera.</p>
+    <p th:if="${accounts.isEmpty() and admin}" class="empty">Todavía no hay cuentas. Abre la primera.</p>
+    <p th:if="${accounts.isEmpty() and !admin}" class="empty">Todavía no tienes cuentas.</p>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

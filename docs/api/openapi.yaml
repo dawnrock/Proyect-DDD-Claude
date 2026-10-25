@@ -13,7 +13,9 @@ info:
     | Código | Cuándo | `title` |
     | ------ | ------ | ------- |
     | 400 | Petición no válida (formato, validación o argumento que el dominio rechaza) | Petición no válida |
-    | 404 | El recurso pedido no existe | Recurso inexistente |
+    | 401 | Falta autenticarse (HTTP Basic) o las credenciales no son válidas | No autenticado |
+    | 403 | Autenticado, pero sin el rol necesario (solo un administrador abre cuentas) | Acceso denegado |
+    | 404 | El recurso pedido no existe, o es una cuenta de otro cliente (no se revela que existe) | Recurso inexistente |
     | 422 | Se incumple una regla de negocio del dominio | Regla de negocio incumplida |
   license:
     name: Proyecto de práctica
@@ -21,8 +23,9 @@ info:
 servers:
   - url: http://localhost:8080
     description: Desarrollo local
-# Practice project, run locally only: the API has no authentication.
-security: []
+# Every operation needs HTTP Basic credentials (#50). An admin sees every account; a user only their own.
+security:
+  - basicAuth: []
 tags:
   - name: accounts
     description: Checking accounts (#5).
@@ -34,7 +37,10 @@ paths:
       tags: [accounts]
       operationId: listAccounts
       summary: List accounts, sorted by account number
+      description: Every account for an admin; only the caller's own accounts for a user.
       responses:
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '200':
           description: All accounts (empty array if there are none).
           content:
@@ -46,7 +52,8 @@ paths:
     post:
       tags: [accounts]
       operationId: openAccount
-      summary: Open a checking account with its initial deposit
+      summary: Open a checking account with its initial deposit (admin only)
+      description: The account belongs to `ownerUsername`, who will see and operate it. Only an admin opens accounts (403 otherwise).
       requestBody:
         required: true
         content:
@@ -54,6 +61,8 @@ paths:
             schema:
               $ref: '#/components/schemas/OpenAccountRequest'
       responses:
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '201':
           description: Account opened.
           headers:
@@ -68,6 +77,8 @@ paths:
                 $ref: '#/components/schemas/AccountSummary'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '422':
           $ref: '#/components/responses/UnprocessableContent'
   /api/accounts/{id}:
@@ -83,6 +94,8 @@ paths:
             type: string
             format: uuid
       responses:
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '200':
           description: Account details.
           content:
@@ -107,6 +120,8 @@ paths:
             schema:
               $ref: '#/components/schemas/MovementRequest'
       responses:
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '201':
           description: Deposit recorded (always `APPROVED`).
           content:
@@ -136,6 +151,8 @@ paths:
             schema:
               $ref: '#/components/schemas/MovementRequest'
       responses:
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '201':
           description: Withdrawal recorded, `APPROVED` or `REJECTED`.
           content:
@@ -168,6 +185,8 @@ paths:
             schema:
               $ref: '#/components/schemas/TransferRequest'
       responses:
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '201':
           description: Transfer processed, `APPROVED` or `REJECTED`.
           content:
@@ -206,15 +225,17 @@ components:
           description: ISO 4217 code. A currency other than the account's fails with 422.
     TransferRequest:
       type: object
-      required: [sourceAccountId, targetAccountId, amount]
+      required: [sourceAccountId, targetAccountNumber, amount]
       properties:
         sourceAccountId:
           type: string
           format: uuid
-        targetAccountId:
+          description: Must be one of the caller's accounts (404 otherwise), unless the caller is an admin.
+        targetAccountNumber:
           type: string
-          format: uuid
-          description: Must be a different account from `sourceAccountId` (422 otherwise).
+          description: Spanish IBAN of any existing account (404 if none); spaces and lowercase are accepted. Must be a different account from the source (422 otherwise). Replaces `targetAccountId` (#50).
+          pattern: '^ *[Ee][Ss]( *\d){22} *$'
+          example: ES79 2100 0813 6101 2345 6789
         amount:
           type: number
           exclusiveMinimum: 0
@@ -226,7 +247,7 @@ components:
           description: ISO 4217 code. A currency other than the accounts' fails with 422.
     Transfer:
       type: object
-      required: [sourceAccountId, sourceAccountNumber, targetAccountId, targetAccountNumber, amount, currency, occurredOn, status]
+      required: [sourceAccountId, sourceAccountNumber, targetAccountNumber, amount, currency, occurredOn, status]
       properties:
         sourceAccountId:
           type: string
@@ -234,9 +255,6 @@ components:
         sourceAccountNumber:
           type: string
           example: ES9121000418450200051332
-        targetAccountId:
-          type: string
-          format: uuid
         targetAccountNumber:
           type: string
           example: ES7921000813610123456789
@@ -254,8 +272,13 @@ components:
           description: Status of the withdrawal in the source account.
     OpenAccountRequest:
       type: object
-      required: [accountNumber, holderName, segment, initialDeposit]
+      required: [accountNumber, holderName, segment, initialDeposit, ownerUsername]
       properties:
+        ownerUsername:
+          type: string
+          description: User (customer) who owns the account and will see and operate it.
+          pattern: '^[a-z0-9._-]{3,30}$'
+          example: ada
         accountNumber:
           type: string
           description: Spanish IBAN (`ES` + 22 digits); spaces and lowercase are accepted and normalized.
@@ -360,7 +383,34 @@ components:
               type: object
               additionalProperties:
                 type: string
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: Username and password of a configured user (demo profile users are in the README).
   responses:
+    Unauthorized:
+      description: No autenticado.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: No autenticado
+            status: 401
+            detail: Hace falta autenticarse para usar la API
+    Forbidden:
+      description: Acceso denegado.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: Acceso denegado
+            status: 403
+            detail: Solo un administrador puede abrir cuentas
     BadRequest:
       description: Petición no válida.
       content:

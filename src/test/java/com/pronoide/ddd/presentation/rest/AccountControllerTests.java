@@ -1,6 +1,7 @@
 package com.pronoide.ddd.presentation.rest;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -26,13 +27,19 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.pronoide.ddd.presentation.SecuritySupport;
 import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountNotFoundException;
 import com.pronoide.ddd.application.AccountSummary;
+import com.pronoide.ddd.application.Caller;
+import com.pronoide.ddd.application.ForbiddenOperationException;
 import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
@@ -44,14 +51,16 @@ import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 
+@WithMockUser(username = "admin", roles = "ADMIN")
 @WebMvcTest(AccountController.class)
+@Import({ApiSecurityConfig.class, SecuritySupport.class})
 class AccountControllerTests {
 
     private static final UUID ID = UUID.fromString("11111111-2222-3333-4444-555555555555");
     private static final String IBAN = "ES9121000418450200051332";
     private static final String VALID_BODY = """
             {"accountNumber": "es91 2100 0418 4502 0005 1332", "holderName": "Ada Lovelace",
-             "segment": "RETAIL", "initialDeposit": 100.00}""";
+             "segment": "RETAIL", "initialDeposit": 100.00, "ownerUsername": "ada"}""";
 
     @Autowired
     private MockMvc mvc;
@@ -71,7 +80,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Una petición válida responde 201 con Location y el resumen de la cuenta")
         void una_peticion_valida_responde_201_con_location_y_el_resumen_de_la_cuenta() throws Exception {
-            given(service.openAccount(any())).willReturn(summary());
+            given(service.openAccount(any(Caller.class), any())).willReturn(summary());
 
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
                     .andExpect(status().isCreated())
@@ -86,13 +95,13 @@ class AccountControllerTests {
         @Test
         @DisplayName("La petición se convierte en un command con EUR por defecto")
         void la_peticion_se_convierte_en_un_command_con_eur_por_defecto() throws Exception {
-            given(service.openAccount(any())).willReturn(summary());
+            given(service.openAccount(any(Caller.class), any())).willReturn(summary());
 
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
                     .andExpect(status().isCreated());
 
             ArgumentCaptor<OpenAccountCommand> captor = ArgumentCaptor.forClass(OpenAccountCommand.class);
-            verify(service).openAccount(captor.capture());
+            verify(service).openAccount(any(Caller.class), captor.capture());
             OpenAccountCommand command = captor.getValue();
             assertThat(command.accountNumber()).isEqualTo("es91 2100 0418 4502 0005 1332");
             assertThat(command.holderName()).isEqualTo("Ada Lovelace");
@@ -104,15 +113,15 @@ class AccountControllerTests {
         @Test
         @DisplayName("Una divisa indicada llega al command")
         void una_divisa_indicada_llega_al_command() throws Exception {
-            given(service.openAccount(any())).willReturn(summary());
+            given(service.openAccount(any(Caller.class), any())).willReturn(summary());
 
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
                     {"accountNumber": "ES9121000418450200051332", "holderName": "Ada Lovelace",
-                     "segment": "HIGH_NET_WORTH", "initialDeposit": 100, "currency": "USD"}"""))
+                     "segment": "HIGH_NET_WORTH", "initialDeposit": 100, "currency": "USD", "ownerUsername": "ada"}"""))
                     .andExpect(status().isCreated());
 
             ArgumentCaptor<OpenAccountCommand> captor = ArgumentCaptor.forClass(OpenAccountCommand.class);
-            verify(service).openAccount(captor.capture());
+            verify(service).openAccount(any(Caller.class), captor.capture());
             assertThat(captor.getValue().currency()).isEqualTo("USD");
             assertThat(captor.getValue().segment()).isEqualTo("HIGH_NET_WORTH");
         }
@@ -135,13 +144,14 @@ class AccountControllerTests {
         void todos_los_campos_mal_formados_aparecen_en_el_mapa_de_errores() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
                     {"accountNumber": "ES12", "holderName": " ", "segment": "VIP",
-                     "initialDeposit": -5, "currency": "eur"}"""))
+                     "initialDeposit": -5, "currency": "eur", "ownerUsername": "Ada L"}"""))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.accountNumber").exists())
                     .andExpect(jsonPath("$.errors.holderName").exists())
                     .andExpect(jsonPath("$.errors.segment").exists())
                     .andExpect(jsonPath("$.errors.initialDeposit").exists())
-                    .andExpect(jsonPath("$.errors.currency").exists());
+                    .andExpect(jsonPath("$.errors.currency").exists())
+                    .andExpect(jsonPath("$.errors.ownerUsername").exists());
 
             verifyNoInteractions(service);
         }
@@ -155,13 +165,14 @@ class AccountControllerTests {
                     .andExpect(jsonPath("$.errors.holderName").exists())
                     .andExpect(jsonPath("$.errors.segment").exists())
                     .andExpect(jsonPath("$.errors.initialDeposit").exists())
+                    .andExpect(jsonPath("$.errors.ownerUsername").exists())
                     .andExpect(jsonPath("$.errors.currency").doesNotExist());
         }
 
         @Test
         @DisplayName("Un depósito insuficiente responde 422 con el mensaje del dominio")
         void un_deposito_insuficiente_responde_422_con_el_mensaje_del_dominio() throws Exception {
-            given(service.openAccount(any())).willThrow(new InsufficientInitialDepositException(
+            given(service.openAccount(any(Caller.class), any())).willThrow(new InsufficientInitialDepositException(
                     MonetaryAmount.euros("10.00"), MonetaryAmount.euros("50.00")));
 
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
@@ -174,7 +185,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Un número de cuenta duplicado responde 422")
         void un_numero_de_cuenta_duplicado_responde_422() throws Exception {
-            given(service.openAccount(any())).willThrow(new DuplicateAccountNumberException(new AccountNumber(IBAN)));
+            given(service.openAccount(any(Caller.class), any())).willThrow(new DuplicateAccountNumberException(new AccountNumber(IBAN)));
 
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
                     .andExpect(status().isUnprocessableContent())
@@ -186,9 +197,91 @@ class AccountControllerTests {
         void una_divisa_bien_formada_pero_desconocida_responde_400() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
                     {"accountNumber": "ES9121000418450200051332", "holderName": "Ada Lovelace",
-                     "segment": "RETAIL", "initialDeposit": 100, "currency": "XYZ"}"""))
+                     "segment": "RETAIL", "initialDeposit": 100, "currency": "XYZ", "ownerUsername": "ada"}"""))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.title").value("Petición no válida"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Seguridad (#50)")
+    class Security {
+
+        private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
+        private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+
+        @Test
+        @DisplayName("Sin credenciales cualquier operación responde 401 No autenticado y no llama al servicio")
+        @WithAnonymousUser
+        void sin_credenciales_cualquier_operacion_responde_401_no_autenticado() throws Exception {
+            mvc.perform(get("/api/accounts"))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                    .andExpect(jsonPath("$.status").value(401))
+                    .andExpect(jsonPath("$.title").value("No autenticado"));
+            mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
+                    .andExpect(status().isUnauthorized());
+
+            verifyNoInteractions(service);
+        }
+
+        @Test
+        @DisplayName("Un usuario que abre una cuenta recibe 403 Acceso denegado y no llama al servicio")
+        @WithMockUser(username = "ada", roles = "USER")
+        void un_usuario_que_abre_una_cuenta_recibe_403_acceso_denegado() throws Exception {
+            mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
+                    .andExpect(status().isForbidden())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                    .andExpect(jsonPath("$.status").value(403))
+                    .andExpect(jsonPath("$.title").value("Acceso denegado"));
+
+            verifyNoInteractions(service);
+        }
+
+        @Test
+        @DisplayName("Si el servicio lanza ForbiddenOperationException la respuesta es 403 Acceso denegado")
+        void si_el_servicio_lanza_forbidden_operation_exception_la_respuesta_es_403() throws Exception {
+            given(service.openAccount(any(Caller.class), any())).willThrow(new ForbiddenOperationException("abrir cuentas"));
+
+            mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
+                    .andExpect(status().isForbidden())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                    .andExpect(jsonPath("$.title").value("Acceso denegado"));
+        }
+
+        @Test
+        @DisplayName("Un usuario consulta una cuenta ajena: el servicio la trata como inexistente y responde 404")
+        @WithMockUser(username = "ada", roles = "USER")
+        void un_usuario_consulta_una_cuenta_ajena_responde_404() throws Exception {
+            given(service.findAccount(ADA, ID)).willThrow(new AccountNotFoundException(ID));
+
+            mvc.perform(get("/api/accounts/{id}", ID))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.title").value("Recurso inexistente"));
+        }
+
+        @Test
+        @DisplayName("El controlador pasa al servicio el Caller construido con la autenticación")
+        @WithMockUser(username = "ada", roles = "USER")
+        void el_controlador_pasa_al_servicio_el_caller_de_la_autenticacion() throws Exception {
+            given(service.listAccounts(ADA)).willReturn(List.of(summary()));
+
+            mvc.perform(get("/api/accounts"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.length()").value(1));
+        }
+
+        @Test
+        @DisplayName("Un administrador abre la cuenta y el command lleva el usuario propietario")
+        void un_administrador_abre_la_cuenta_y_el_command_lleva_el_usuario_propietario() throws Exception {
+            given(service.openAccount(eq(ADMIN), any())).willReturn(summary());
+
+            mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
+                    .andExpect(status().isCreated());
+
+            ArgumentCaptor<OpenAccountCommand> captor = ArgumentCaptor.forClass(OpenAccountCommand.class);
+            verify(service).openAccount(eq(ADMIN), captor.capture());
+            assertThat(captor.getValue().ownerUsername()).isEqualTo("ada");
         }
     }
 
@@ -199,7 +292,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Responde 200 con un array de resúmenes")
         void responde_200_con_un_array_de_resumenes() throws Exception {
-            given(service.listAccounts()).willReturn(List.of(summary()));
+            given(service.listAccounts(any(Caller.class))).willReturn(List.of(summary()));
 
             mvc.perform(get("/api/accounts"))
                     .andExpect(status().isOk())
@@ -212,7 +305,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Sin cuentas responde 200 con un array vacío")
         void sin_cuentas_responde_200_con_un_array_vacio() throws Exception {
-            given(service.listAccounts()).willReturn(List.of());
+            given(service.listAccounts(any(Caller.class))).willReturn(List.of());
 
             mvc.perform(get("/api/accounts"))
                     .andExpect(status().isOk())
@@ -228,7 +321,7 @@ class AccountControllerTests {
         @DisplayName("Responde 200 con el detalle y sus movimientos")
         void responde_200_con_el_detalle_y_sus_movimientos() throws Exception {
             UUID transactionId = UUID.fromString("66666666-7777-8888-9999-000000000000");
-            given(service.findAccount(ID)).willReturn(AccountDetails.builder()
+            given(service.findAccount(any(Caller.class), eq(ID))).willReturn(AccountDetails.builder()
                     .id(ID).accountNumber(IBAN).holderName("Ada Lovelace").segment("RETAIL")
                     .balance(new BigDecimal("100.00")).currency("EUR")
                     .addTransactions(TransactionSummary.builder().id(transactionId).type("DEPOSIT")
@@ -252,7 +345,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Un id desconocido responde 404 Recurso inexistente")
         void un_id_desconocido_responde_404_recurso_inexistente() throws Exception {
-            given(service.findAccount(ID)).willThrow(new AccountNotFoundException(ID));
+            given(service.findAccount(any(Caller.class), eq(ID))).willThrow(new AccountNotFoundException(ID));
 
             mvc.perform(get("/api/accounts/{id}", ID))
                     .andExpect(status().isNotFound())
@@ -287,7 +380,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Una petición válida responde 201 con el movimiento y sin Location")
         void una_peticion_valida_responde_201_con_el_movimiento_y_sin_location() throws Exception {
-            given(service.deposit(any())).willReturn(approvedDeposit());
+            given(service.deposit(any(Caller.class), any())).willReturn(approvedDeposit());
 
             mvc.perform(post("/api/accounts/{id}/deposits", ID).contentType(MediaType.APPLICATION_JSON).content(BODY))
                     .andExpect(status().isCreated())
@@ -299,7 +392,7 @@ class AccountControllerTests {
                     .andExpect(jsonPath("$.status").value("APPROVED"));
 
             ArgumentCaptor<DepositCommand> captor = ArgumentCaptor.forClass(DepositCommand.class);
-            verify(service).deposit(captor.capture());
+            verify(service).deposit(any(Caller.class), captor.capture());
             assertThat(captor.getValue().accountId()).isEqualTo(ID);
             assertThat(captor.getValue().amount()).isEqualByComparingTo("25.50");
             assertThat(captor.getValue().currency()).isEqualTo("EUR");
@@ -308,14 +401,14 @@ class AccountControllerTests {
         @Test
         @DisplayName("Sin divisa se usa EUR")
         void sin_divisa_se_usa_eur() throws Exception {
-            given(service.deposit(any())).willReturn(approvedDeposit());
+            given(service.deposit(any(Caller.class), any())).willReturn(approvedDeposit());
 
             mvc.perform(post("/api/accounts/{id}/deposits", ID).contentType(MediaType.APPLICATION_JSON)
                     .content("{\"amount\": 25.50}"))
                     .andExpect(status().isCreated());
 
             ArgumentCaptor<DepositCommand> captor = ArgumentCaptor.forClass(DepositCommand.class);
-            verify(service).deposit(captor.capture());
+            verify(service).deposit(any(Caller.class), captor.capture());
             assertThat(captor.getValue().currency()).isEqualTo("EUR");
         }
 
@@ -347,7 +440,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Una cuenta desconocida responde 404 Recurso inexistente")
         void una_cuenta_desconocida_responde_404_recurso_inexistente() throws Exception {
-            given(service.deposit(any())).willThrow(new AccountNotFoundException(ID));
+            given(service.deposit(any(Caller.class), any())).willThrow(new AccountNotFoundException(ID));
 
             mvc.perform(post("/api/accounts/{id}/deposits", ID).contentType(MediaType.APPLICATION_JSON).content(BODY))
                     .andExpect(status().isNotFound())
@@ -357,7 +450,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Una divisa distinta a la de la cuenta responde 422 Regla de negocio incumplida")
         void una_divisa_distinta_a_la_de_la_cuenta_responde_422() throws Exception {
-            given(service.deposit(any())).willThrow(
+            given(service.deposit(any(Caller.class), any())).willThrow(
                     new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD")));
 
             mvc.perform(post("/api/accounts/{id}/deposits", ID).contentType(MediaType.APPLICATION_JSON)
@@ -391,7 +484,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Una retirada aprobada responde 201 con el movimiento APPROVED y sin Location")
         void una_retirada_aprobada_responde_201_con_el_movimiento_approved_y_sin_location() throws Exception {
-            given(service.withdraw(any())).willReturn(withdrawal("APPROVED"));
+            given(service.withdraw(any(Caller.class), any())).willReturn(withdrawal("APPROVED"));
 
             mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
                     .content(BODY))
@@ -402,7 +495,7 @@ class AccountControllerTests {
                     .andExpect(jsonPath("$.status").value("APPROVED"));
 
             ArgumentCaptor<WithdrawCommand> captor = ArgumentCaptor.forClass(WithdrawCommand.class);
-            verify(service).withdraw(captor.capture());
+            verify(service).withdraw(any(Caller.class), captor.capture());
             assertThat(captor.getValue().accountId()).isEqualTo(ID);
             assertThat(captor.getValue().amount()).isEqualByComparingTo("25.50");
             assertThat(captor.getValue().currency()).isEqualTo("EUR");
@@ -411,7 +504,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Una retirada rechazada no es un error: responde 201 con el movimiento REJECTED")
         void una_retirada_rechazada_responde_201_con_el_movimiento_rejected() throws Exception {
-            given(service.withdraw(any())).willReturn(withdrawal("REJECTED"));
+            given(service.withdraw(any(Caller.class), any())).willReturn(withdrawal("REJECTED"));
 
             mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
                     .content(BODY))
@@ -435,7 +528,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Una cuenta desconocida responde 404 Recurso inexistente")
         void una_cuenta_desconocida_responde_404_recurso_inexistente() throws Exception {
-            given(service.withdraw(any())).willThrow(new AccountNotFoundException(ID));
+            given(service.withdraw(any(Caller.class), any())).willThrow(new AccountNotFoundException(ID));
 
             mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
                     .content(BODY))
@@ -446,7 +539,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Una divisa distinta a la de la cuenta responde 422 Regla de negocio incumplida")
         void una_divisa_distinta_a_la_de_la_cuenta_responde_422() throws Exception {
-            given(service.withdraw(any())).willThrow(
+            given(service.withdraw(any(Caller.class), any())).willThrow(
                     new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD")));
 
             mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
