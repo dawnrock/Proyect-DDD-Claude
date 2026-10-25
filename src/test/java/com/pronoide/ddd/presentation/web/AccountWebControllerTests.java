@@ -37,6 +37,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import com.pronoide.ddd.presentation.SecuritySupport;
 import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountNotFoundException;
 import com.pronoide.ddd.application.AccountSummary;
@@ -55,7 +56,7 @@ import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
 
 @WebMvcTest(AccountWebController.class)
-@Import(WebFormat.class)
+@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class})
 class AccountWebControllerTests {
 
     @Autowired

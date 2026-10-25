@@ -11,12 +11,15 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.pronoide.ddd.presentation.SecuritySupport;
 import com.pronoide.ddd.presentation.rest.support.FailingTestController;
 
 @WebMvcTest(FailingTestController.class)
+@Import({ApiSecurityConfig.class, SecuritySupport.class})
 class RestExceptionHandlerTests {
 
     @Autowired

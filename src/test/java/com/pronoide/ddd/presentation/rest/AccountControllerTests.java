@@ -26,10 +26,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.pronoide.ddd.presentation.SecuritySupport;
 import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountNotFoundException;
 import com.pronoide.ddd.application.AccountSummary;
@@ -45,6 +47,7 @@ import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 
 @WebMvcTest(AccountController.class)
+@Import({ApiSecurityConfig.class, SecuritySupport.class})
 class AccountControllerTests {
 
     private static final UUID ID = UUID.fromString("11111111-2222-3333-4444-555555555555");

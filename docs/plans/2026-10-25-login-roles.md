@@ -81,7 +81,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [x] Contract agreed and frozen in a `docs(contract): ...` commit; `./mvnw verify` green; Redocly lint without errors.
 
-### [ ] T1 — Security foundation (~10 min)
+### [x] T1 — Security foundation (~10 min)
 
 - **Side:** both (lead, before splitting the work)
 - **Layer:** build · presentation
@@ -93,7 +93,7 @@ Make the application realistic: today anyone sees every account on the home page
   3. Both chains created **permitting everything** (and CSRF off for `/api/**`), so behaviour does not change yet; demo users in `application-demo.properties`.
   4. `@WebMvcTest` classes import their chain + `SecuritySupport`, run with `@WithMockUser(roles = "ADMIN")`, and web form POSTs add `.with(csrf())`.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green with the dependency in place; `CurrentCaller` unit test (admin and user).
+  - [x] `./mvnw verify` green with the dependency in place; `CurrentCaller` unit test (admin and user).
 
 ### [ ] B1 — Ownership repository (~5 min)
 

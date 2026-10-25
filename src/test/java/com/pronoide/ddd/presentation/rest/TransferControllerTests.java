@@ -22,10 +22,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.pronoide.ddd.presentation.SecuritySupport;
 import com.pronoide.ddd.application.AccountNotFoundException;
 import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.application.TransferCommand;
@@ -35,6 +37,7 @@ import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
 
 @WebMvcTest(TransferController.class)
+@Import({ApiSecurityConfig.class, SecuritySupport.class})
 @DisplayName("POST /api/transfers")
 class TransferControllerTests {
 
