@@ -26,7 +26,7 @@ Las flechas indican **quién depende de quién**: siempre hacia abajo. `domain` 
 
 ## Dependencias
 
-Esta tabla es la especificación de `LayeredArchitectureTests` (#12). Cada fila es una regla de ArchUnit.
+Esta tabla es la especificación de [`LayeredArchitectureTests`](../../src/test/java/com/pronoide/ddd/LayeredArchitectureTests.java) (#12). Cada fila es una regla de ArchUnit.
 
 | # | Origen | Puede depender de | No puede depender de |
 | - | ------ | ----------------- | -------------------- |
@@ -105,6 +105,18 @@ Implementado en la #11:
 - `application`: [`DemoDataLoader`](../../src/main/java/com/pronoide/ddd/application/DemoDataLoader.java), un `ApplicationRunner` con `@Profile("demo")` que abre tres cuentas (dos minoristas y una de alto patrimonio) con `CheckingAccountService.openAccount`, nunca con el repositorio, así que los datos cumplen las mismas reglas que los reales.
 - `pom.xml`: la propiedad `spring-boot.run.profiles=demo` hace que `./mvnw spring-boot:run` arranque con esos datos; `-Dspring-boot.run.profiles=default` lo evita. Los tests no activan el perfil (`DemoProfileTests` lo activa a propósito).
 - Tests: el builder `TestAccounts` (`@Builder` de Lombok, paquete de test `support`) abre cuentas con `CheckingAccount.open` y valores por defecto; sustituye los helpers repetidos de los tests de la cuenta, del repositorio y del servicio de transferencias. Se usa como `TestAccounts.anAccount()…open()`, sin import estático: javac resuelve los import estáticos antes de que Lombok genere el método.
+
+Implementado en la #12 (`LayeredArchitectureTests`, cada regla validada rompiéndola temporalmente):
+
+| Regla | Cubre |
+| ----- | ----- |
+| `las_capas_solo_dependen_hacia_abajo` (`layeredArchitecture()`) | D2, D3: `presentation` no la usa nadie, `application` solo `presentation`, `persistence` solo `application` |
+| `el_dominio_solo_depende_del_jdk` | D1 (incluye Spring, `jakarta` y `org.immutables`) |
+| `la_presentacion_solo_conoce_las_excepciones_del_dominio` | D4 (de `domain`, solo `DomainException` y sus subclases; tampoco `domain.service`) |
+| `la_web_y_rest_no_se_conocen` (`slices()`) | D5, en los dos sentidos |
+| `el_dominio_no_tiene_setters_publicos` | El dominio cambia de estado solo con métodos de negocio |
+| `los_controladores_no_acceden_al_repositorio` | Clases con `@Controller` o `@RestController` (meta-anotación) sin `persistence`; se solapa con la regla de capas, pero su mensaje es más claro |
+| `toda_clase_pertenece_a_una_capa` | Fuera de las cuatro capas solo está `DddLabApplication`: la regla de capas ignora los paquetes que no son capas, así que un paquete nuevo (`config`…) tendría que añadirse antes como capa |
 
 ## Issues de la fase
 
