@@ -102,7 +102,7 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
 - **Acceptance criteria:**
   - [x] Tests green; every existing form-error test still passes.
 
-### [ ] T6 — Flash messages in the new format (~10 min)
+### [x] T6 — Flash messages in the new format (~10 min)
 
 - **Layer:** presentation
 - **Files:** `AccountWebController.java`, `AccountWebControllerTests.java`, `src/test/java/com/pronoide/ddd/DddLabApplicationTests.java`
@@ -111,7 +111,7 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
   1. Build the deposit, withdrawal and transfer flash texts with `WebFormat.money` ("Ingreso de 25,00 € aprobado", "Transferencia de 25,00 € a ES79 •••• 6789 aprobada").
   2. Update the controller and end-to-end tests that check those texts and balances (`150,00 €`, `125,00 €`, `75,00 €`).
 - **Acceptance criteria:**
-  - [ ] Tests green; rejected flashes keep their text valid for both segments.
+  - [x] Tests green; rejected flashes keep their text valid for both segments.
 
 ### [ ] T7 — New account form (~5 min)
 

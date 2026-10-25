@@ -43,6 +43,8 @@ public class AccountWebController {
 
     private final CheckingAccountService service;
 
+    private final WebFormat fmt;
+
     @GetMapping("/")
     public String list(Model model) {
         List<AccountSummary> accounts = service.listAccounts();
@@ -77,7 +79,7 @@ public class AccountWebController {
                 try {
                     TransactionSummary deposit = service.deposit(command);
                     redirect.addFlashAttribute("message",
-                            "Ingreso de %s %s aprobado".formatted(deposit.amount(), deposit.currency()));
+                            "Ingreso de %s aprobado".formatted(fmt.money(deposit.amount(), deposit.currency())));
                     return redirectToDetail(id);
                 } catch (DomainException e) {
                     result.reject("domain", e.getMessage());
@@ -101,7 +103,7 @@ public class AccountWebController {
             if (command != null) {
                 try {
                     TransactionSummary withdrawal = service.withdraw(command);
-                    String amount = "%s %s".formatted(withdrawal.amount(), withdrawal.currency());
+                    String amount = fmt.money(withdrawal.amount(), withdrawal.currency());
                     if ("REJECTED".equals(withdrawal.status())) {
                         redirect.addFlashAttribute("rejection",
                                 "Retirada de %s rechazada: el saldo resultante no está permitido para esta cuenta"
@@ -136,14 +138,15 @@ public class AccountWebController {
             if (command != null) {
                 try {
                     TransferSummary transfer = service.transfer(command);
-                    String amount = "%s %s".formatted(transfer.amount(), transfer.currency());
+                    String amount = fmt.money(transfer.amount(), transfer.currency());
+                    String target = fmt.maskedIban(transfer.targetAccountNumber());
                     if ("REJECTED".equals(transfer.status())) {
                         redirect.addFlashAttribute("rejection",
                                 ("Transferencia de %s a %s rechazada: el saldo resultante no está permitido "
-                                        + "para la cuenta de origen").formatted(amount, transfer.targetAccountNumber()));
+                                        + "para la cuenta de origen").formatted(amount, target));
                     } else {
                         redirect.addFlashAttribute("message", "Transferencia de %s a %s aprobada"
-                                .formatted(amount, transfer.targetAccountNumber()));
+                                .formatted(amount, target));
                     }
                     return redirectToDetail(id);
                 } catch (DomainException e) {

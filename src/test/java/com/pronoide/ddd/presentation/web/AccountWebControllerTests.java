@@ -252,7 +252,7 @@ class AccountWebControllerTests {
             mvc.perform(ingresoDe("50.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
-                    .andExpect(flash().attribute("message", "Ingreso de 50.00 EUR aprobado"));
+                    .andExpect(flash().attribute("message", "Ingreso de 50,00 € aprobado"));
 
             verify(service).deposit(DepositCommand.builder()
                     .accountId(ACCOUNT_ID)
@@ -363,7 +363,7 @@ class AccountWebControllerTests {
             mvc.perform(retiradaDe("30.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
-                    .andExpect(flash().attribute("message", "Retirada de 30.00 EUR aprobada"))
+                    .andExpect(flash().attribute("message", "Retirada de 30,00 € aprobada"))
                     .andExpect(flash().attributeCount(1));
 
             verify(service).withdraw(WithdrawCommand.builder()
@@ -383,7 +383,7 @@ class AccountWebControllerTests {
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
                     .andExpect(flash().attribute("rejection",
-                            "Retirada de 500.00 EUR rechazada: el saldo resultante no está permitido para esta cuenta"))
+                            "Retirada de 500,00 € rechazada: el saldo resultante no está permitido para esta cuenta"))
                     .andExpect(flash().attributeCount(1));
         }
 
@@ -542,7 +542,7 @@ class AccountWebControllerTests {
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
                     .andExpect(flash().attribute("message",
-                            "Transferencia de 25.00 EUR a ES9876543210987654321098 aprobada"))
+                            "Transferencia de 25,00 € a ES98 •••• 1098 aprobada"))
                     .andExpect(flash().attributeCount(1));
 
             verify(service).transfer(TransferCommand.builder()
@@ -562,7 +562,7 @@ class AccountWebControllerTests {
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
                     .andExpect(flash().attribute("rejection",
-                            "Transferencia de 900.00 EUR a ES9876543210987654321098 rechazada: "
+                            "Transferencia de 900,00 € a ES98 •••• 1098 rechazada: "
                                     + "el saldo resultante no está permitido para la cuenta de origen"))
                     .andExpect(flash().attributeCount(1));
         }
