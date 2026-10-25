@@ -103,7 +103,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
 - **Acceptance criteria:**
   - [x] Test green; no movement recorded in either account.
 
-### [ ] T4 — `TransferCommand` validation (~5 min)
+### [x] T4 — `TransferCommand` validation (~5 min)
 
 - **Side:** back
 - **Layer:** application
@@ -113,7 +113,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. `@Value.Check` with `CommandValidation.requireValidMovement`; `currency` defaults to `EUR`.
   2. Parameterized tests of the invalid cases (0, negative, `0.001` EUR, `XYZ`).
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
 ### [ ] T5 — "Transfer" use case (~10 min)
 
