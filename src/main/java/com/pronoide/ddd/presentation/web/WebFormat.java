@@ -27,7 +27,10 @@ public class WebFormat {
         return amount.signum() < 0 ? MINUS + formatted : formatted;
     }
 
-    /** Importe de un movimiento: {@code +25,00 €} si suma al saldo, {@code −25,00 €} si resta. */
+    /**
+     * Importe de un movimiento: {@code +25,00 €} si suma al saldo, {@code −25,00 €} si resta. Quien llama decide si
+     * suma ({@code credit}); la plantilla lo deduce del tipo (solo hay ingresos y retiradas) y no lo usa con rechazados.
+     */
     public String signedMoney(BigDecimal amount, String currency, boolean credit) {
         return (credit ? "+" : MINUS) + money(amount.abs(), currency);
     }

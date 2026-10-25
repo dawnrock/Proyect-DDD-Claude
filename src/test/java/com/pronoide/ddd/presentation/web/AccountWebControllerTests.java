@@ -81,6 +81,7 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("Saldo total")))
                     .andExpect(content().string(containsString("5.150,00 €")))
                     .andExpect(content().string(containsString("ES12 •••• 9012")))
+                    .andExpect(content().string(containsString("title=\"ES1234567890123456789012\"")))
                     .andExpect(content().string(containsString(">AP<")))
                     .andExpect(content().string(containsString("Ana Pérez")))
                     .andExpect(content().string(containsString("150,00 €")))
@@ -179,6 +180,8 @@ class AccountWebControllerTests {
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("row-rejected")))
+                    .andExpect(content().string(containsString(">500,00 €<")))
+                    .andExpect(content().string(not(containsString("−500,00 €"))))
                     .andExpect(content().string(containsString("Rechazado")));
         }
 
@@ -394,6 +397,7 @@ class AccountWebControllerTests {
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID).flashAttr("rejection", "Retirada de 500.00 EUR rechazada"))
                     .andExpect(content().string(containsString("flash flash-warning")))
+                    .andExpect(content().string(containsString("role=\"alert\"")))
                     .andExpect(content().string(containsString("Retirada de 500.00 EUR rechazada")));
         }
 

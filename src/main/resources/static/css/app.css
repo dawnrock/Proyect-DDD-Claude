@@ -132,7 +132,7 @@ a.row:hover .row-title { text-decoration: underline; }
     border-radius: 10px;
     font: inherit;
 }
-.field input:focus, .field select:focus { outline: none; border-color: var(--muted); }
+.field input:focus-visible, .field select:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 .field-error { color: var(--negative); font-size: 0.85rem; margin: 0.35rem 0 0; }
 .form-actions { display: flex; align-items: center; gap: 1rem; }
 .form-actions a { color: var(--muted); text-decoration: none; }

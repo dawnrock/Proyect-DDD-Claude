@@ -7,7 +7,7 @@
     <a class="back" th:href="@{/}">← Cuentas</a>
     <h1>Abrir cuenta</h1>
     <form class="panel" th:action="@{/accounts/new}" th:object="${form}" method="post" novalidate>
-        <p class="flash flash-error" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+        <p class="flash flash-error" role="alert" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
 
         <div class="field">
             <label for="accountNumber">Número de cuenta</label>

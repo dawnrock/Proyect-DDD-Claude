@@ -8,7 +8,7 @@
         <h1>Cuentas</h1>
         <a class="pill pill-primary" th:href="@{/accounts/new}">+ Abrir cuenta</a>
     </div>
-    <p th:if="${message}" class="flash flash-success" th:text="${message}"></p>
+    <p th:if="${message}" class="flash flash-success" role="status" th:text="${message}"></p>
 
     <div class="hero" th:unless="${accounts.isEmpty()}">
         <p class="hero-label">Saldo total</p>

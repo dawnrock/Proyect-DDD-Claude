@@ -5,8 +5,8 @@
 <header th:replace="~{fragments/layout :: header}"></header>
 <main>
     <a class="back" th:href="@{/}">← Cuentas</a>
-    <p th:if="${message}" class="flash flash-success" th:text="${message}"></p>
-    <p th:if="${rejection}" class="flash flash-warning" th:text="${rejection}"></p>
+    <p th:if="${message}" class="flash flash-success" role="status" th:text="${message}"></p>
+    <p th:if="${rejection}" class="flash flash-warning" role="alert" th:text="${rejection}"></p>
 
     <div class="hero">
         <h1 class="hero-label"><span th:text="${account.holderName()}">Titular</span> · <span class="nowrap" th:text="${account.accountNumber()}">ES00</span></h1>
@@ -18,7 +18,7 @@
         <details id="deposit-action" th:object="${depositForm}" th:open="${#fields.hasAnyErrors()}">
             <summary>↓ Ingresar</summary>
             <form class="action-panel" th:action="@{/accounts/{id}/deposits(id=${account.id()})}" th:object="${depositForm}" method="post" novalidate>
-            <p class="flash flash-error" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+            <p class="flash flash-error" role="alert" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
             <div class="field">
                 <label for="deposit-amount">Importe</label>
                 <input type="number" id="deposit-amount" step="0.01" inputmode="decimal" th:field="*{amount}">
@@ -38,7 +38,7 @@
         <details id="withdrawal-action" th:object="${withdrawalForm}" th:open="${#fields.hasAnyErrors()}">
             <summary>↑ Retirar</summary>
             <form class="action-panel" th:action="@{/accounts/{id}/withdrawals(id=${account.id()})}" th:object="${withdrawalForm}" method="post" novalidate>
-            <p class="flash flash-error" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+            <p class="flash flash-error" role="alert" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
             <div class="field">
                 <label for="withdrawal-amount">Importe</label>
                 <input type="number" id="withdrawal-amount" step="0.01" inputmode="decimal" th:field="*{amount}">
@@ -59,7 +59,7 @@
             <summary>⇄ Transferir</summary>
             <p th:if="${targetAccounts.isEmpty()}" class="action-panel empty">No hay otras cuentas a las que transferir</p>
             <form th:unless="${targetAccounts.isEmpty()}" class="action-panel" th:action="@{/accounts/{id}/transfers(id=${account.id()})}" th:object="${transferForm}" method="post" novalidate>
-            <p class="flash flash-error" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+            <p class="flash flash-error" role="alert" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
             <div class="field">
                 <label for="transfer-target">Cuenta de destino</label>
                 <select id="transfer-target" th:field="*{targetAccountId}">
@@ -87,13 +87,15 @@
 
     <h2>Movimientos</h2>
     <ul class="list" th:if="${!account.transactions().isEmpty()}">
+        <!--/* Un ingreso suma (+) y una retirada resta (−); un movimiento rechazado no cambió el saldo y va sin signo.
+             Supone que solo hay DEPOSIT y WITHDRAWAL: un tipo nuevo exigiría revisar el signo. */-->
         <li class="row" th:each="t : ${account.transactions()}" th:classappend="${t.status() == 'REJECTED'} ? 'row-rejected'">
             <span class="row-main">
                 <span class="row-title" th:text="${t.type() == 'DEPOSIT' ? 'Ingreso' : (t.type() == 'WITHDRAWAL' ? 'Retirada' : t.type())}">Ingreso</span>
                 <span class="row-sub"><span th:text="${#temporals.format(t.occurredOn(), 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</span><span class="status" th:if="${t.status() == 'REJECTED'}"> · Rechazado</span><span class="status" th:if="${t.status() == 'PENDING'}"> · Pendiente</span></span>
             </span>
             <span class="row-amount" th:classappend="${t.type() == 'DEPOSIT' and t.status() == 'APPROVED'} ? 'positive'"
-                  th:text="${@fmt.signedMoney(t.amount(), t.currency(), t.type() == 'DEPOSIT')}">+0,00 €</span>
+                  th:text="${t.status() == 'REJECTED' ? @fmt.money(t.amount(), t.currency()) : @fmt.signedMoney(t.amount(), t.currency(), t.type() == 'DEPOSIT')}">+0,00 €</span>
         </li>
     </ul>
     <p th:if="${account.transactions().isEmpty()}" class="empty">Todavía no hay movimientos.</p>
