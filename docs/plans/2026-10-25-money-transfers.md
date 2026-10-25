@@ -163,7 +163,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
 - **Acceptance criteria:**
   - [x] Tests green.
 
-### [ ] T9 — Transfer form errors (~10 min)
+### [x] T9 — Transfer form errors (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -173,7 +173,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. Field errors (no target, amount ≤ 0) and command rejection (`0.001`, `XYZ`) → detail page again with the entered values; `DomainException` (same account from a crafted request, currency) → message on the detail page; unknown target → custom 404 page.
   2. Tests for each case; the other two forms show no errors.
 - **Acceptance criteria:**
-  - [ ] Tests green. No form error ends in a 500 page.
+  - [x] Tests green (the command-rejection case `0.001` / `XYZ` is `@Disabled` until T4 and is verified in T10). No form error ends in a 500 page.
 
 ### [ ] T10 — End-to-end integration (~10 min)
 

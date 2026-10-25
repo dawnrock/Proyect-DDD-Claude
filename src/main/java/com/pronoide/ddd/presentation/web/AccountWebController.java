@@ -111,22 +111,34 @@ public class AccountWebController {
     public String transfer(@PathVariable UUID id, @Valid @ModelAttribute("transferForm") TransferForm form,
                            BindingResult result, Model model, RedirectAttributes redirect) {
         if (!result.hasErrors()) {
-            TransferCommand.Builder builder = TransferCommand.builder()
-                    .sourceAccountId(id).targetAccountId(form.getTargetAccountId()).amount(form.getAmount());
-            if (form.getCurrency() != null) {
-                builder.currency(form.getCurrency());
+            TransferCommand command = null;
+            try {
+                TransferCommand.Builder builder = TransferCommand.builder()
+                        .sourceAccountId(id).targetAccountId(form.getTargetAccountId()).amount(form.getAmount());
+                if (form.getCurrency() != null) {
+                    builder.currency(form.getCurrency());
+                }
+                command = builder.build();
+            } catch (IllegalArgumentException e) {
+                result.reject("invalid", e.getMessage());
             }
-            TransferSummary transfer = service.transfer(builder.build());
-            String amount = "%s %s".formatted(transfer.amount(), transfer.currency());
-            if ("REJECTED".equals(transfer.status())) {
-                redirect.addFlashAttribute("rejection",
-                        "Transferencia de %s a %s rechazada: el saldo resultante no está permitido para la cuenta de origen"
+            if (command != null) {
+                try {
+                    TransferSummary transfer = service.transfer(command);
+                    String amount = "%s %s".formatted(transfer.amount(), transfer.currency());
+                    if ("REJECTED".equals(transfer.status())) {
+                        redirect.addFlashAttribute("rejection",
+                                ("Transferencia de %s a %s rechazada: el saldo resultante no está permitido "
+                                        + "para la cuenta de origen").formatted(amount, transfer.targetAccountNumber()));
+                    } else {
+                        redirect.addFlashAttribute("message", "Transferencia de %s a %s aprobada"
                                 .formatted(amount, transfer.targetAccountNumber()));
-            } else {
-                redirect.addFlashAttribute("message",
-                        "Transferencia de %s a %s aprobada".formatted(amount, transfer.targetAccountNumber()));
+                    }
+                    return redirectToDetail(id);
+                } catch (DomainException e) {
+                    result.reject("domain", e.getMessage());
+                }
             }
-            return redirectToDetail(id);
         }
         return renderDetail(id, model);
     }

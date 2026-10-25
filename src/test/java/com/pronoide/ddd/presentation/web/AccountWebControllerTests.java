@@ -23,6 +23,8 @@ import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,6 +52,7 @@ import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
+import com.pronoide.ddd.domain.model.SameAccountTransferException;
 
 @WebMvcTest(AccountWebController.class)
 class AccountWebControllerTests {
@@ -558,6 +561,114 @@ class AccountWebControllerTests {
                     .targetAccountId(OTHER_ID)
                     .amount(new BigDecimal("25.00"))
                     .build());
+        }
+    }
+
+    @Nested
+    @DisplayName("Errores de transferencia")
+    class ErroresDeTransferencia {
+
+        private MockHttpServletRequestBuilder transferenciaDe(String target, String amount, String currency) {
+            return post("/accounts/" + ACCOUNT_ID + "/transfers")
+                    .param("targetAccountId", target)
+                    .param("amount", amount)
+                    .param("currency", currency);
+        }
+
+        @BeforeEach
+        void cuentas() {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.listAccounts()).thenReturn(List.of(
+                    summary(ACCOUNT_ID, "ES1234567890123456789012", "Ana Pérez"),
+                    summary(OTHER_ID, "ES9876543210987654321098", "Luis Gil")));
+        }
+
+        @Test
+        @DisplayName("Sin cuenta de destino vuelve al detalle con el error del campo y sin llamar al servicio")
+        void sin_cuenta_de_destino_vuelve_al_detalle_con_el_error_del_campo_y_sin_llamar_al_servicio()
+                throws Exception {
+            mvc.perform(transferenciaDe("", "25.00", "EUR"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"))
+                    .andExpect(model().attributeHasFieldErrors("transferForm", "targetAccountId"))
+                    .andExpect(model().attributeHasNoErrors("depositForm"))
+                    .andExpect(model().attributeHasNoErrors("withdrawalForm"))
+                    .andExpect(content().string(containsString("Elige la cuenta de destino")));
+
+            verify(service, never()).transfer(any());
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"0", "-5.00"})
+        @DisplayName("Un importe no positivo vuelve al detalle con el error del campo y sin llamar al servicio")
+        void un_importe_no_positivo_vuelve_al_detalle_con_el_error_del_campo_y_sin_llamar_al_servicio(String amount)
+                throws Exception {
+            mvc.perform(transferenciaDe(OTHER_ID.toString(), amount, "EUR"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"))
+                    .andExpect(model().attributeHasFieldErrors("transferForm", "amount"))
+                    .andExpect(model().attributeHasNoErrors("depositForm"))
+                    .andExpect(model().attributeHasNoErrors("withdrawalForm"))
+                    .andExpect(content().string(containsString("El importe debe ser positivo")))
+                    .andExpect(content().string(containsString("value=\"" + OTHER_ID + "\" selected=\"selected\"")));
+
+            verify(service, never()).transfer(any());
+        }
+
+        @Test
+        @DisplayName("Transferir a la misma cuenta vuelve al detalle con el mensaje del dominio")
+        void transferir_a_la_misma_cuenta_vuelve_al_detalle_con_el_mensaje_del_dominio() throws Exception {
+            var error = new SameAccountTransferException(new AccountNumber("ES1234567890123456789012"));
+            when(service.transfer(any())).thenThrow(error);
+
+            mvc.perform(transferenciaDe(ACCOUNT_ID.toString(), "25.00", "EUR"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"))
+                    .andExpect(model().attributeHasErrors("transferForm"))
+                    .andExpect(model().attributeHasNoErrors("depositForm"))
+                    .andExpect(content().string(containsString(error.getMessage())));
+        }
+
+        @Test
+        @DisplayName("Otra divisa vuelve al detalle con el mensaje del dominio y conserva el importe")
+        void otra_divisa_vuelve_al_detalle_con_el_mensaje_del_dominio_y_conserva_el_importe() throws Exception {
+            var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD"));
+            when(service.transfer(any())).thenThrow(error);
+
+            mvc.perform(transferenciaDe(OTHER_ID.toString(), "20.25", "USD"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"))
+                    .andExpect(model().attributeHasErrors("transferForm"))
+                    .andExpect(model().attributeHasNoErrors("withdrawalForm"))
+                    .andExpect(content().string(containsString(error.getMessage())))
+                    .andExpect(content().string(containsString("20.25")));
+        }
+
+        @Test
+        @DisplayName("Una cuenta de destino desconocida devuelve la página 404")
+        void una_cuenta_de_destino_desconocida_devuelve_la_pagina_404() throws Exception {
+            when(service.transfer(any())).thenThrow(new AccountNotFoundException(OTHER_ID));
+
+            mvc.perform(transferenciaDe(OTHER_ID.toString(), "25.00", "EUR"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(view().name("error/404"));
+        }
+
+        @Disabled("Pendiente de T4/T10: el command aún no valida; se prueba con el servicio real en la integración")
+        @ParameterizedTest
+        @CsvSource({"0.001, EUR, El importe debe ser positivo", "10.00, XYZ, XYZ no es un c"})
+        @DisplayName("Un importe que redondea a cero o una divisa inexistente vuelven al detalle con el error del command")
+        void un_importe_que_redondea_a_cero_o_una_divisa_inexistente_vuelven_al_detalle_con_el_error_del_command(
+                String amount, String currency, String message) throws Exception {
+            mvc.perform(transferenciaDe(OTHER_ID.toString(), amount, currency))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"))
+                    .andExpect(model().attributeHasErrors("transferForm"))
+                    .andExpect(model().attributeHasNoErrors("depositForm"))
+                    .andExpect(content().string(containsString(message)))
+                    .andExpect(content().string(containsString(amount)));
+
+            verify(service, never()).transfer(any());
         }
     }
 
