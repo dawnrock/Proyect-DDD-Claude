@@ -6,8 +6,8 @@
 - **Base branch:** `Monolithic`
 - **Date:** 2026-10-25
 - **Approved:** by the user on 2026-10-25
-- **Status:** in progress
-- **Total estimate:** ~115 min (12 tasks: T0 + 6 back + 3 web + 2 both)
+- **Status:** done
+- **Total estimate:** ~125 min (13 tasks: T0 + 6 back + 3 web + 3 both)
 
 ## Goal
 
@@ -101,7 +101,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
 - **What to do:**
   1. R19: amount in a currency other than the target's → `CurrencyMismatchException` **before** withdrawing. Since accounts can only be opened in EUR, the test uses an amount in USD (source and target in EUR) and checks that neither account records a movement.
 - **Acceptance criteria:**
-  - [x] Test green; no movement recorded in either account.
+  - [x] Test green; no movement recorded in either account. *(It could not be made red: `tryWithdraw` already throws `CurrencyMismatchException` before registering anything, so the target guard is only observable with non-EUR accounts, which cannot be opened yet. The guard stays, as the contract says.)*
 
 ### [x] T4 — `TransferCommand` validation (~5 min)
 
@@ -187,7 +187,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
 - **Acceptance criteria:**
   - [x] Test green. `curl` and browser checks done.
 
-### [ ] T11 — Documentation (~10 min)
+### [x] T11 — Documentation (~10 min)
 
 - **Side:** both
 - **Layer:** docs
@@ -199,31 +199,43 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   3. `fase-1-capas.md`: `domain.service` "Implementado en la #7" and, optionally, the transfer sequence diagram (shown to the user before committing, greyscale).
   4. Project status: #7 done, next step `/plan-feature 11`, history row.
 - **Acceptance criteria:**
-  - [ ] Lint without errors. Glossary and status updated.
+  - [x] Lint without errors (the single warning already exists on `Monolithic`). Glossary and status updated. The optional sequence diagram was not added.
+
+### [x] T12 — Integration and review fixes (~10 min)
+
+- **Side:** both
+- **Layer:** presentation · tests
+- **Files:** `templates/accounts/detail.html`, `presentation/web/AccountWebControllerTests.java`
+- **Depends on:** T10 (added during integration and after the `revisor-ddd` review)
+- **What to do:**
+  1. The browser check showed the raw markup `< th:href="@{/}">Volver al listado` at the bottom of the detail page: the `<a` was lost when the transfer form was added. Fixed, with a web test for the link.
+  2. `revisor-ddd`: no blocking code findings. Its points on concurrency (two `save` calls without a transaction), the `new MoneyTransferService()` and the `"REJECTED"` literal in the web follow decisions of this plan and the contract; they are recorded in the glossary and the project status for phase 2.
+- **Acceptance criteria:**
+  - [x] Link test red with the broken template, green after the fix.
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] Contract agreed and frozen in `docs/contracts/money-transfers.md`.
-- [ ] Domain service tests without Spring: approved transfer, rejected by balance and to the same account (plus the currency guard).
-- [ ] Use case test: both accounts are saved with their new balances.
-- [ ] A rejected transfer returns 201 with `REJECTED` in REST, is shown as rejected on the web, and leaves the target untouched.
-- [ ] `check-domain.mjs` without errors.
+- [x] Contract agreed and frozen in `docs/contracts/money-transfers.md`.
+- [x] Domain service tests without Spring: approved transfer, rejected by balance and to the same account (plus the currency guard).
+- [x] Use case test: both accounts are saved with their new balances.
+- [x] A rejected transfer returns 201 with `REJECTED` in REST, is shown as rejected on the web, and leaves the target untouched.
+- [x] `check-domain.mjs` without errors.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The layered architecture is respected (D1-D5; presentation does not use `domain.service`), verified by ArchUnit where rules exist and by `revisor-ddd` (the full rules arrive with #12).
-- [ ] The domain does not depend on Spring, `jakarta` or `org.immutables`, and does not use `@Data`, `@Setter`, `@Builder` or `@AllArgsConstructor` (`check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones.
-- [ ] `docs/api/openapi.yaml` reflects the changes and the Redocly lint has no errors.
-- [ ] Any new business term is in `docs/dominio/glosario.md`.
-- [ ] Documentation written or changed by this plan is in English (additions to documents still in Spanish excepted, see Context).
-- [ ] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The layered architecture is respected (D1-D5; presentation does not use `domain.service`), verified by ArchUnit where rules exist and by `revisor-ddd` (the full rules arrive with #12).
+- [x] The domain does not depend on Spring, `jakarta` or `org.immutables`, and does not use `@Data`, `@Setter`, `@Builder` or `@AllArgsConstructor` (`check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones.
+- [x] `docs/api/openapi.yaml` reflects the changes and the Redocly lint has no errors.
+- [x] Any new business term is in `docs/dominio/glosario.md`.
+- [x] Documentation written or changed by this plan is in English (additions to documents still in Spanish excepted, see Context).
+- [x] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
 
 ## Risks and open questions
 
