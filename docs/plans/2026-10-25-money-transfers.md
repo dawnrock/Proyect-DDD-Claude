@@ -68,7 +68,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   - [x] `./mvnw verify` compiles and passes against the contract types.
   - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
 
-### [ ] T1 — `MoneyTransferService`: approved transfer (~10 min)
+### [x] T1 — `MoneyTransferService`: approved transfer (~10 min)
 
 - **Side:** back
 - **Layer:** domain
@@ -78,7 +78,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. With the `ddd-building-block` skill: stateless class, `Transaction transfer(source, target, amount)`; `tryWithdraw` on the source and, if approved, `deposit` on the target.
   2. Plain JUnit tests (no Spring): approved transfer moves the amount (source −, target +), records a `WITHDRAWAL` and a `DEPOSIT`, and returns the approved withdrawal.
 - **Acceptance criteria:**
-  - [ ] Tests green. `check-domain.mjs` without errors; `DomainIsolationTests` covers the new package.
+  - [x] Tests green. `check-domain.mjs` without errors; `DomainIsolationTests` covers the new package.
 
 ### [ ] T2 — `MoneyTransferService`: rejected transfer and same account (~10 min)
 
