@@ -2,19 +2,19 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores. **Se actualiza en cada PR que cierra una issue** (lo exigen `implement-plan`, `implement-plan-team`, la plantilla de los planes y el CI).
 
-- **Última actualización:** 2026-10-25 · PR de la #7 (transferencias entre cuentas)
+- **Última actualización:** 2026-10-25 · PR #43 (transferencias entre cuentas)
 - **Rama activa:** `Monolithic` (fase 1). `master` congelada. `Hexagonal` aún no existe.
 
 ## Dónde estamos
 
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
-| 1 · Monolito en capas | #2 Lombok/Immutables · #3 glosario, capas y ADR 0004 · #4 repositorio en memoria · #8 base REST + web · #5 abrir, consultar y listar cuentas · #31 flujo en equipo (cerrada tras la #5) · #6 ingresos y retiradas con detalle de la cuenta | #7 transferencias entre cuentas (PR abierta, pendiente de revisión y fusión) | #11 → #12 → #13 |
+| 1 · Monolito en capas | #2 Lombok/Immutables · #3 glosario, capas y ADR 0004 · #4 repositorio en memoria · #8 base REST + web · #5 abrir, consultar y listar cuentas · #31 flujo en equipo (cerrada tras la #5) · #6 ingresos y retiradas con detalle de la cuenta | #7 transferencias entre cuentas (PR #43, pendiente de revisión y fusión) | #11 → #12 → #13 |
 | 2 · Hexagonal | — | — | #14 → #23 (se empieza al cerrar #13, creando `Hexagonal` desde `Monolithic`) |
 
 ## Siguiente paso
 
-1. Revisar y fusionar la PR de la #7 (lo decide el usuario).
+1. Revisar y fusionar la PR #43 (#7) (lo decide el usuario).
 2. `/plan-feature 11` (datos de demostración).
 
 Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sección "Issues de la fase".
@@ -79,4 +79,4 @@ Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sec
 | 2026-10-23 | #39 | #5 | Abrir, consultar y listar cuentas (REST + web), primera issue en equipo |
 | 2026-10-23 | #40 | — | Interruptor `TELEGRAM_DISABLED` para silenciar los avisos |
 | 2026-10-24 | #41 | #6 | Ingresos y retiradas con detalle de la cuenta (REST + web); cierra el pendiente de sinónimos heredados |
-| 2026-10-25 | (esta PR) | #7 | Transferencias entre cuentas (REST + web): primer servicio de dominio `MoneyTransferService` (R17-R19) |
+| 2026-10-25 | #43 | #7 | Transferencias entre cuentas (REST + web): primer servicio de dominio `MoneyTransferService` (R17-R19) |
