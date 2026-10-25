@@ -127,7 +127,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
 - **Acceptance criteria:**
   - [x] Tests green; `save` is called for both accounts. No business rules in the application service.
 
-### [ ] T6 — `POST /api/transfers` (~10 min)
+### [x] T6 — `POST /api/transfers` (~10 min)
 
 - **Side:** back
 - **Layer:** presentation
@@ -137,7 +137,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. Map the request to `TransferCommand`, respond `201` with the transfer.
   2. `@WebMvcTest` tests with the mocked service: 201 `APPROVED`; 201 `REJECTED`; 400 with `errors` (missing ids, amount 0); 404; 422 for `SameAccountTransferException` and `CurrencyMismatchException`.
 - **Acceptance criteria:**
-  - [ ] Tests green. Responses match the OpenAPI fragment.
+  - [x] Tests green. Responses match the OpenAPI fragment.
 
 ### [ ] T7 — Transfer form on the detail page (~10 min)
 
