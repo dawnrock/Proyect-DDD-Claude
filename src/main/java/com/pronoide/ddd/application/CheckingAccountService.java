@@ -113,8 +113,15 @@ public class CheckingAccountService {
      * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el importe no está en la divisa de las cuentas
      */
     public TransferSummary transfer(TransferCommand command) {
+        if (command.targetAccountId() == null) {
+            throw new IllegalArgumentException("Indica la cuenta de destino por su id");
+        }
         CheckingAccount source = load(command.sourceAccountId());
         CheckingAccount target = load(command.targetAccountId());
+        return move(source, target, command);
+    }
+
+    private TransferSummary move(CheckingAccount source, CheckingAccount target, TransferCommand command) {
         Transaction withdrawal =
                 transferService.transfer(source, target, toAmount(command.amount(), command.currency()));
         repository.save(source);
@@ -170,12 +177,18 @@ public class CheckingAccountService {
 
     /** @throws AccountNotFoundException si la cuenta no existe o no es de quien lo pide (y no es administrador) */
     public TransactionSummary deposit(Caller caller, DepositCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        CheckingAccount account = loadFor(caller, command.accountId());
+        Transaction transaction = account.deposit(toAmount(command.amount(), command.currency()));
+        repository.save(account);
+        return toTransaction(transaction);
     }
 
     /** @throws AccountNotFoundException si la cuenta no existe o no es de quien lo pide (y no es administrador) */
     public TransactionSummary withdraw(Caller caller, WithdrawCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        CheckingAccount account = loadFor(caller, command.accountId());
+        Transaction transaction = account.tryWithdraw(toAmount(command.amount(), command.currency()));
+        repository.save(account);
+        return toTransaction(transaction);
     }
 
     /**
@@ -187,7 +200,14 @@ public class CheckingAccountService {
      * @throws IllegalArgumentException si el command solo trae {@code targetAccountId} (vía antigua)
      */
     public TransferSummary transfer(Caller caller, TransferCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        if (command.targetAccountNumber() == null) {
+            throw new IllegalArgumentException("Indica la cuenta de destino por su número");
+        }
+        CheckingAccount source = loadFor(caller, command.sourceAccountId());
+        AccountNumber targetNumber = new AccountNumber(command.targetAccountNumber());
+        CheckingAccount target = repository.findByAccountNumber(targetNumber)
+                .orElseThrow(() -> new TargetAccountNotFoundException(targetNumber.value()));
+        return move(source, target, command);
     }
 
     /** Carga la cuenta; una ajena (o sin propietario, para un usuario) se trata como inexistente. */

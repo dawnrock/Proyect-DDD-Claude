@@ -129,7 +129,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [x] Tests green, including "a foreign account is not found" (validated by temporarily skipping the check).
 
-### [ ] B4 — Operating only owned accounts; transfer target by IBAN (~10 min)
+### [x] B4 — Operating only owned accounts; transfer target by IBAN (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -139,7 +139,7 @@ Make the application realistic: today anyone sees every account on the home page
   1. `deposit` / `withdraw` / `transfer` with `Caller`: the (source) account must be owned unless admin → otherwise `AccountNotFoundException`.
   2. Transfer target resolved by `targetAccountNumber` (any existing account; unknown → `AccountNotFoundException`).
 - **Acceptance criteria:**
-  - [ ] Tests green: own account OK, foreign 404, transfer to another customer's IBAN OK, unknown IBAN 404.
+  - [x] Tests green: own account OK, foreign 404, transfer to another customer's IBAN OK, unknown IBAN 404.
 
 ### [ ] B5 — Demo data with owners (~5 min)
 

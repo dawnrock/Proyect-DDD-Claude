@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -173,7 +174,155 @@ class CheckingAccountServiceOwnershipTests {
         @DisplayName("Una cuenta inexistente no se encuentra, ni para un administrador")
         void una_cuenta_inexistente_no_se_encuentra() {
             assertThatExceptionOfType(AccountNotFoundException.class)
-                    .isThrownBy(() -> service.findAccount(ADMIN, java.util.UUID.randomUUID()));
+                    .isThrownBy(() -> service.findAccount(ADMIN, UUID.randomUUID()));
+        }
+    }
+
+    @Nested
+    @DisplayName("Operar solo las cuentas propias")
+    class Operate {
+
+        private AccountSummary adas;
+        private AccountSummary graces;
+        private AccountSummary orphan;
+
+        @BeforeEach
+        void openAccounts() {
+            adas = service.openAccount(ADMIN, command(ADA_IBAN, "ada").build());
+            graces = service.openAccount(ADMIN, command(GRACE_IBAN, "grace").build());
+            orphan = service.openAccount(command("ES6000491500051234567892", "").build());
+        }
+
+        private DepositCommand deposit(AccountSummary account) {
+            return DepositCommand.builder().accountId(account.id()).amount(new BigDecimal("100")).build();
+        }
+
+        private WithdrawCommand withdraw(AccountSummary account) {
+            return WithdrawCommand.builder().accountId(account.id()).amount(new BigDecimal("100")).build();
+        }
+
+        private TransferCommand transfer(AccountSummary source, String targetNumber) {
+            return TransferCommand.builder()
+                    .sourceAccountId(source.id())
+                    .targetAccountNumber(targetNumber)
+                    .amount(new BigDecimal("100"))
+                    .build();
+        }
+
+        private BigDecimal balanceOf(AccountSummary account) {
+            return service.findAccount(ADMIN, account.id()).balance();
+        }
+
+        @Test
+        @DisplayName("Un usuario ingresa en su cuenta")
+        void un_usuario_ingresa_en_su_cuenta() {
+            assertThat(service.deposit(ADA, deposit(adas)).status()).isEqualTo("APPROVED");
+            assertThat(balanceOf(adas)).isEqualByComparingTo("600.00");
+        }
+
+        @Test
+        @DisplayName("Un usuario retira de su cuenta")
+        void un_usuario_retira_de_su_cuenta() {
+            assertThat(service.withdraw(ADA, withdraw(adas)).status()).isEqualTo("APPROVED");
+            assertThat(balanceOf(adas)).isEqualByComparingTo("400.00");
+        }
+
+        @Test
+        @DisplayName("Un administrador opera en cualquier cuenta, también sin propietario")
+        void un_administrador_opera_en_cualquier_cuenta() {
+            service.deposit(ADMIN, deposit(graces));
+            service.withdraw(ADMIN, withdraw(orphan));
+
+            assertThat(balanceOf(graces)).isEqualByComparingTo("600.00");
+            assertThat(balanceOf(orphan)).isEqualByComparingTo("400.00");
+        }
+
+        @Test
+        @DisplayName("Ingresar en una cuenta ajena lanza AccountNotFoundException y no cambia el saldo")
+        void ingresar_en_una_cuenta_ajena_lanza_account_not_found_exception() {
+            assertThatExceptionOfType(AccountNotFoundException.class)
+                    .isThrownBy(() -> service.deposit(ADA, deposit(graces)));
+            assertThat(balanceOf(graces)).isEqualByComparingTo("500.00");
+        }
+
+        @Test
+        @DisplayName("Retirar de una cuenta ajena o sin propietario lanza AccountNotFoundException")
+        void retirar_de_una_cuenta_ajena_lanza_account_not_found_exception() {
+            assertThatExceptionOfType(AccountNotFoundException.class)
+                    .isThrownBy(() -> service.withdraw(ADA, withdraw(graces)));
+            assertThatExceptionOfType(AccountNotFoundException.class)
+                    .isThrownBy(() -> service.withdraw(ADA, withdraw(orphan)));
+            assertThat(balanceOf(graces)).isEqualByComparingTo("500.00");
+            assertThat(balanceOf(orphan)).isEqualByComparingTo("500.00");
+        }
+
+        @Test
+        @DisplayName("Un usuario transfiere de su cuenta al IBAN de otro cliente, escrito con espacios y minúsculas")
+        void un_usuario_transfiere_al_iban_de_otro_cliente() {
+            TransferSummary summary = service.transfer(ADA, transfer(adas, "es79 2100 0813 6101 2345 6789"));
+
+            assertThat(summary.status()).isEqualTo("APPROVED");
+            assertThat(summary.targetAccountNumber()).isEqualTo(GRACE_IBAN);
+            assertThat(balanceOf(adas)).isEqualByComparingTo("400.00");
+            assertThat(balanceOf(graces)).isEqualByComparingTo("600.00");
+        }
+
+        @Test
+        @DisplayName("Un administrador transfiere desde cualquier cuenta")
+        void un_administrador_transfiere_desde_cualquier_cuenta() {
+            assertThat(service.transfer(ADMIN, transfer(graces, ADA_IBAN)).status()).isEqualTo("APPROVED");
+        }
+
+        @Test
+        @DisplayName("Transferir desde una cuenta ajena lanza AccountNotFoundException y no mueve dinero")
+        void transferir_desde_una_cuenta_ajena_lanza_account_not_found_exception() {
+            assertThatExceptionOfType(AccountNotFoundException.class)
+                    .isThrownBy(() -> service.transfer(ADA, transfer(graces, ADA_IBAN)));
+            assertThat(balanceOf(adas)).isEqualByComparingTo("500.00");
+            assertThat(balanceOf(graces)).isEqualByComparingTo("500.00");
+        }
+
+        @Test
+        @DisplayName("Transferir a un IBAN inexistente lanza TargetAccountNotFoundException y no mueve dinero")
+        void transferir_a_un_iban_inexistente_lanza_target_account_not_found_exception() {
+            assertThatExceptionOfType(TargetAccountNotFoundException.class)
+                    .isThrownBy(() -> service.transfer(ADA, transfer(adas, "ES1000000000000000000001")))
+                    .withMessageContaining("ES1000000000000000000001");
+            assertThat(balanceOf(adas)).isEqualByComparingTo("500.00");
+        }
+
+        @Test
+        @DisplayName("Con origen ajeno y destino inexistente gana el origen: AccountNotFoundException")
+        void con_origen_ajeno_y_destino_inexistente_gana_el_origen() {
+            assertThatExceptionOfType(AccountNotFoundException.class)
+                    .isThrownBy(() -> service.transfer(ADA, transfer(graces, "ES1000000000000000000001")))
+                    .isNotInstanceOf(TargetAccountNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("Transferir a la propia cuenta sigue siendo una regla del dominio")
+        void transferir_a_la_propia_cuenta_sigue_siendo_una_regla_del_dominio() {
+            assertThatExceptionOfType(com.pronoide.ddd.domain.model.SameAccountTransferException.class)
+                    .isThrownBy(() -> service.transfer(ADA, transfer(adas, ADA_IBAN)));
+        }
+
+        @Test
+        @DisplayName("Una transferencia con Caller que solo trae el id de destino lanza IllegalArgumentException")
+        void una_transferencia_con_caller_que_solo_trae_el_id_de_destino_lanza_illegal_argument_exception() {
+            TransferCommand byId = TransferCommand.builder()
+                    .sourceAccountId(adas.id())
+                    .targetAccountId(graces.id())
+                    .amount(new BigDecimal("10"))
+                    .build();
+
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> service.transfer(ADA, byId));
+        }
+
+        @Test
+        @DisplayName("La vía antigua de transferir exige el id de destino")
+        void la_via_antigua_de_transferir_exige_el_id_de_destino() {
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> service.transfer(transfer(adas, GRACE_IBAN)));
         }
     }
 }
