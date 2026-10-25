@@ -56,7 +56,7 @@ No production code changes: the current code already follows D1-D5 (checked whil
 - **Acceptance criteria:**
   - [x] Rule green on the current code; red with the temporary dependency.
 
-### [ ] T2 — D1: the domain only depends on the JDK (~5 min)
+### [x] T2 — D1: the domain only depends on the JDK (~5 min)
 
 - **Layer:** tests
 - **Files:** `LayeredArchitectureTests.java`
@@ -65,7 +65,7 @@ No production code changes: the current code already follows D1-D5 (checked whil
   1. `el_dominio_solo_depende_del_jdk`.
   2. Break it: a temporary `org.springframework.util.Assert` call (or an `org.immutables` annotation) in a domain class → red; revert.
 - **Acceptance criteria:**
-  - [ ] Rule green; red with the temporary dependency. `check-domain.mjs` still without errors.
+  - [x] Rule green; red with the temporary dependency. `check-domain.mjs` still without errors.
 
 ### [ ] T3 — D4: presentation only knows the domain's exceptions (~10 min)
 

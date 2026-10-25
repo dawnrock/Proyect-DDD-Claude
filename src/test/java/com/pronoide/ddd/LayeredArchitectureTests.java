@@ -1,5 +1,6 @@
 package com.pronoide.ddd;
 
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 
 import com.tngtech.archunit.core.importer.ImportOption;
@@ -27,4 +28,10 @@ class LayeredArchitectureTests {
             .whereLayer("Application").mayOnlyBeAccessedByLayers("Presentation")
             .whereLayer("Persistence").mayOnlyBeAccessedByLayers("Application")
             .whereLayer("Domain").mayOnlyBeAccessedByLayers("Application", "Persistence", "Presentation");
+
+    /** D1: el dominio solo conoce el JDK (ni Spring, ni {@code jakarta}, ni {@code org.immutables}). */
+    @ArchTest
+    static final ArchRule el_dominio_solo_depende_del_jdk = classes()
+            .that().resideInAPackage("..domain..")
+            .should().onlyDependOnClassesThat().resideInAnyPackage("java..", "..domain..");
 }
