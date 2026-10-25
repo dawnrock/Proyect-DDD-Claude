@@ -137,6 +137,10 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <!-- spring-boot:run arranca con los datos de demostración (#11); -Dspring-boot.run.profiles=default lo evita -->
+                    <profiles>
+                        <profile>demo</profile>
+                    </profiles>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
