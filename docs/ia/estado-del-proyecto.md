@@ -2,19 +2,19 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores. **Se actualiza en cada PR que cierra una issue** (lo exigen `implement-plan`, `implement-plan-team`, la plantilla de los planes y el CI).
 
-- **Última actualización:** 2026-10-25 · PR de la #12 (reglas de ArchUnit de las capas)
+- **Última actualización:** 2026-10-25 · PR #47 (reglas de ArchUnit de las capas)
 - **Rama activa:** `Monolithic` (fase 1). `master` congelada. `Hexagonal` aún no existe.
 
 ## Dónde estamos
 
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
-| 1 · Monolito en capas | #2 Lombok/Immutables · #3 glosario, capas y ADR 0004 · #4 repositorio en memoria · #8 base REST + web · #5 abrir, consultar y listar cuentas · #31 flujo en equipo (cerrada tras la #5) · #6 ingresos y retiradas con detalle de la cuenta · #7 transferencias entre cuentas (PR #43) · regla deny redundante de los hooks (PR #44, sin issue) · #11 datos de demostración (PR #45) | #12 reglas de ArchUnit de las capas (PR abierta, pendiente de revisión y fusión) | #13 |
+| 1 · Monolito en capas | #2 Lombok/Immutables · #3 glosario, capas y ADR 0004 · #4 repositorio en memoria · #8 base REST + web · #5 abrir, consultar y listar cuentas · #31 flujo en equipo (cerrada tras la #5) · #6 ingresos y retiradas con detalle de la cuenta · #7 transferencias entre cuentas (PR #43) · regla deny redundante de los hooks (PR #44, sin issue) · #11 datos de demostración (PR #45) | #12 reglas de ArchUnit de las capas (PR #47, pendiente de revisión y fusión) | #13 |
 | 2 · Hexagonal | — | — | #14 → #23 (se empieza al cerrar #13, creando `Hexagonal` desde `Monolithic`) |
 
 ## Siguiente paso
 
-1. Revisar y fusionar la PR de la #12 (lo decide el usuario).
+1. Revisar y fusionar la PR #47 (#12) (lo decide el usuario).
 2. `/plan-feature 13` (cerrar la fase 1: documentación final y etiqueta `v1-monolito`).
 
 Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sección "Issues de la fase".
@@ -84,4 +84,4 @@ Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sec
 | 2026-10-25 | #44 | — | Quita la regla deny `Write(./.claude/hooks/**)`, que nunca se aplicaba |
 | 2026-10-25 | #45 | #11 | Datos de demostración con el perfil `demo` y builder de cuentas de test `TestAccounts` |
 | 2026-10-25 | #46 | — | Quita del estado el pendiente resuelto de las ramas de los teammates |
-| 2026-10-25 | (esta PR) | #12 | `LayeredArchitectureTests`: D1-D5 de la fase 1, sin setters públicos en el dominio y controladores sin repositorio |
+| 2026-10-25 | #47 | #12 | `LayeredArchitectureTests`: D1-D5 de la fase 1, sin setters públicos en el dominio y controladores sin repositorio |
