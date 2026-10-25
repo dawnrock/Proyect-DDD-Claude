@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import com.pronoide.ddd.support.TestAccounts;
+
 class CheckingAccountTests {
 
     private static final AccountNumber IBAN = new AccountNumber("ES91 2100 0418 4502 0005 1332");
@@ -26,7 +28,7 @@ class CheckingAccountTests {
     @Test
     @DisplayName("Al abrir la cuenta, el depósito inicial queda registrado como movimiento aprobado")
     void al_abrir_la_cuenta_el_deposito_inicial_queda_registrado() {
-        CheckingAccount cuenta = cuentaDe(CustomerSegment.RETAIL, "500.00");
+        CheckingAccount cuenta = TestAccounts.anAccount().segment(CustomerSegment.RETAIL).initialDeposit("500.00").open();
 
         assertThat(cuenta.currentBalance()).isEqualTo(MonetaryAmount.euros("500.00"));
         assertThat(cuenta.transactions()).hasSize(1);
@@ -37,7 +39,7 @@ class CheckingAccountTests {
     @Test
     @DisplayName("Una retirada con saldo suficiente se aprueba y actualiza el saldo")
     void una_retirada_con_saldo_suficiente_se_aprueba() {
-        CheckingAccount cuenta = cuentaDe(CustomerSegment.RETAIL, "500.00");
+        CheckingAccount cuenta = TestAccounts.anAccount().segment(CustomerSegment.RETAIL).initialDeposit("500.00").open();
         Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("200.00"));
         
         assertThat(retirada.isApproved()).isTrue();
@@ -48,7 +50,7 @@ class CheckingAccountTests {
     @Test
     @DisplayName("Un cliente minorista no puede dejar la cuenta en descubierto")
     void un_cliente_minorista_no_puede_dejar_la_cuenta_en_descubierto() {
-        CheckingAccount cuenta = cuentaDe(CustomerSegment.RETAIL, "500.00");
+        CheckingAccount cuenta = TestAccounts.anAccount().segment(CustomerSegment.RETAIL).initialDeposit("500.00").open();
         Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("600.00"));
 
         assertThat(retirada.isRejected()).isTrue();
@@ -59,7 +61,7 @@ class CheckingAccountTests {
     @Test
     @DisplayName("Un cliente de alto patrimonio puede dejar la cuenta en descubierto")
     void un_cliente_de_alto_patrimonio_puede_dejar_la_cuenta_en_descubierto() {
-        CheckingAccount cuenta = cuentaDe(CustomerSegment.HIGH_NET_WORTH, "500.00");
+        CheckingAccount cuenta = TestAccounts.anAccount().segment(CustomerSegment.HIGH_NET_WORTH).initialDeposit("500.00").open();
         Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("900.00"));
 
         assertThat(retirada.isApproved()).isTrue();
@@ -69,7 +71,7 @@ class CheckingAccountTests {
     @Test
     @DisplayName("Ningún cliente puede superar el límite de descubierto")
     void ningun_cliente_puede_superar_el_limite_de_descubierto() {
-        CheckingAccount cuenta = cuentaDe(CustomerSegment.HIGH_NET_WORTH, "500.00");
+        CheckingAccount cuenta = TestAccounts.anAccount().segment(CustomerSegment.HIGH_NET_WORTH).initialDeposit("500.00").open();
         Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("1600.00"));
         assertThat(retirada.isRejected()).isTrue();
         assertThat(cuenta.currentBalance()).isEqualTo(MonetaryAmount.euros("500.00"));
@@ -85,7 +87,7 @@ class CheckingAccountTests {
     })
     void las_retiradas_en_el_limite_del_descubierto_dependen_del_segmento(
             CustomerSegment segmento, String importe, TransactionStatus estado, String saldoFinal) {
-        CheckingAccount cuenta = cuentaDe(segmento, "500.00");
+        CheckingAccount cuenta = TestAccounts.anAccount().segment(segmento).initialDeposit("500.00").open();
 
         Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros(importe));
 
@@ -96,7 +98,7 @@ class CheckingAccountTests {
     @Test
     @DisplayName("Los importes de las operaciones deben ser positivos")
     void los_importes_de_las_operaciones_deben_ser_positivos() {
-        CheckingAccount cuenta = cuentaDe(CustomerSegment.RETAIL, "500.00");
+        CheckingAccount cuenta = TestAccounts.anAccount().segment(CustomerSegment.RETAIL).initialDeposit("500.00").open();
 
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> cuenta.deposit(MonetaryAmount.euros("0.00")));
@@ -110,7 +112,7 @@ class CheckingAccountTests {
     @Test
     @DisplayName("La cuenta sólo opera en la divisa con la que se abrió")
     void la_cuenta_solo_opera_en_la_divisa_con_la_que_se_abrio() {
-        CheckingAccount cuenta = cuentaDe(CustomerSegment.RETAIL, "500.00");
+        CheckingAccount cuenta = TestAccounts.anAccount().segment(CustomerSegment.RETAIL).initialDeposit("500.00").open();
         MonetaryAmount dolares = new MonetaryAmount(new BigDecimal("100.00"), Currency.getInstance("USD"));
         assertThatExceptionOfType(CurrencyMismatchException.class)
                 .isThrownBy(() -> cuenta.deposit(dolares));
@@ -119,7 +121,7 @@ class CheckingAccountTests {
     @Test
     @DisplayName("Los movimientos no pueden manipularse desde fuera del agregado")
     void los_movimientos_no_pueden_manipularse_desde_fuera_del_agregado() {
-        CheckingAccount cuenta = cuentaDe(CustomerSegment.RETAIL, "500.00");
+        CheckingAccount cuenta = TestAccounts.anAccount().segment(CustomerSegment.RETAIL).initialDeposit("500.00").open();
 
         assertThatExceptionOfType(UnsupportedOperationException.class)
                 .isThrownBy(() -> cuenta.transactions().clear());
@@ -129,7 +131,7 @@ class CheckingAccountTests {
     @Test
     @DisplayName("Un movimiento ya resuelto no puede volver a resolverse")
     void un_movimiento_ya_resuelto_no_puede_volver_a_resolverse() {
-        CheckingAccount cuenta = cuentaDe(CustomerSegment.RETAIL, "500.00");
+        CheckingAccount cuenta = TestAccounts.anAccount().segment(CustomerSegment.RETAIL).initialDeposit("500.00").open();
 
         Transaction deposito = cuenta.transactions().get(0);
 
@@ -138,8 +140,4 @@ class CheckingAccountTests {
                 .withMessageContaining("APPROVED");
     }
 
-    private CheckingAccount cuentaDe(CustomerSegment segmento, String depositoInicial) {
-        AccountHolder titular = AccountHolder.register("Ada Lovelace", segmento);
-        return CheckingAccount.open(IBAN, titular, MonetaryAmount.euros(depositoInicial));
-    }
 }

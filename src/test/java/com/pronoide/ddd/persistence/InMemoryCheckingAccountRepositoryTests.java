@@ -11,11 +11,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.pronoide.ddd.domain.model.AccountHolder;
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
-import com.pronoide.ddd.domain.model.CustomerSegment;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
+import com.pronoide.ddd.support.TestAccounts;
 
 class InMemoryCheckingAccountRepositoryTests {
 
@@ -28,7 +27,7 @@ class InMemoryCheckingAccountRepositoryTests {
         @Test
         @DisplayName("Una cuenta guardada se recupera por su id")
         void una_cuenta_guardada_se_recupera_por_su_id() {
-            CheckingAccount cuenta = cuentaCon("ES9121000418450200051332");
+            CheckingAccount cuenta = TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open();
 
             repository.save(cuenta);
 
@@ -44,7 +43,7 @@ class InMemoryCheckingAccountRepositoryTests {
         @Test
         @DisplayName("Guardar dos veces la misma cuenta no la duplica")
         void guardar_dos_veces_la_misma_cuenta_no_la_duplica() {
-            CheckingAccount cuenta = cuentaCon("ES9121000418450200051332");
+            CheckingAccount cuenta = TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open();
 
             repository.save(cuenta);
             repository.save(cuenta);
@@ -55,7 +54,7 @@ class InMemoryCheckingAccountRepositoryTests {
         @Test
         @DisplayName("El repositorio guarda la propia cuenta, no una copia")
         void el_repositorio_guarda_la_propia_cuenta_no_una_copia() {
-            CheckingAccount cuenta = cuentaCon("ES9121000418450200051332");
+            CheckingAccount cuenta = TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open();
             repository.save(cuenta);
 
             cuenta.deposit(MonetaryAmount.euros("25.00"));
@@ -101,7 +100,7 @@ class InMemoryCheckingAccountRepositoryTests {
         @Test
         @DisplayName("Una cuenta guardada se recupera por su número aunque se escriba con espacios")
         void una_cuenta_guardada_se_recupera_por_su_numero_aunque_se_escriba_con_espacios() {
-            CheckingAccount cuenta = cuentaCon("ES9121000418450200051332");
+            CheckingAccount cuenta = TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open();
             repository.save(cuenta);
 
             assertThat(repository.findByAccountNumber(new AccountNumber("ES91 2100 0418 4502 0005 1332")))
@@ -111,7 +110,7 @@ class InMemoryCheckingAccountRepositoryTests {
         @Test
         @DisplayName("Buscar un número de cuenta inexistente no devuelve nada")
         void buscar_un_numero_de_cuenta_inexistente_no_devuelve_nada() {
-            repository.save(cuentaCon("ES9121000418450200051332"));
+            repository.save(TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open());
 
             assertThat(repository.findByAccountNumber(new AccountNumber("ES7620770024003102575766"))).isEmpty();
         }
@@ -119,8 +118,8 @@ class InMemoryCheckingAccountRepositoryTests {
         @Test
         @DisplayName("No se puede guardar otra cuenta con un número ya usado")
         void no_se_puede_guardar_otra_cuenta_con_un_numero_ya_usado() {
-            repository.save(cuentaCon("ES9121000418450200051332"));
-            CheckingAccount otra = cuentaCon("ES9121000418450200051332");
+            repository.save(TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open());
+            CheckingAccount otra = TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open();
 
             assertThatExceptionOfType(IllegalStateException.class)
                     .isThrownBy(() -> repository.save(otra))
@@ -131,7 +130,7 @@ class InMemoryCheckingAccountRepositoryTests {
         @Test
         @DisplayName("Volver a guardar la misma cuenta no se considera un número duplicado")
         void volver_a_guardar_la_misma_cuenta_no_se_considera_un_numero_duplicado() {
-            CheckingAccount cuenta = cuentaCon("ES9121000418450200051332");
+            CheckingAccount cuenta = TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open();
             repository.save(cuenta);
 
             assertThatNoException().isThrownBy(() -> repository.save(cuenta));
@@ -151,9 +150,9 @@ class InMemoryCheckingAccountRepositoryTests {
         @Test
         @DisplayName("Las cuentas se listan ordenadas por número de cuenta")
         void las_cuentas_se_listan_ordenadas_por_numero_de_cuenta() {
-            CheckingAccount tercera = repository.save(cuentaCon("ES9121000418450200051332"));
-            CheckingAccount primera = repository.save(cuentaCon("ES1000492352082414205416"));
-            CheckingAccount segunda = repository.save(cuentaCon("ES7620770024003102575766"));
+            CheckingAccount tercera = repository.save(TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open());
+            CheckingAccount primera = repository.save(TestAccounts.anAccount().accountNumber("ES1000492352082414205416").open());
+            CheckingAccount segunda = repository.save(TestAccounts.anAccount().accountNumber("ES7620770024003102575766").open());
 
             assertThat(repository.findAll()).containsExactly(primera, segunda, tercera);
         }
@@ -161,7 +160,7 @@ class InMemoryCheckingAccountRepositoryTests {
         @Test
         @DisplayName("La lista de cuentas no puede modificarse desde fuera del repositorio")
         void la_lista_de_cuentas_no_puede_modificarse_desde_fuera_del_repositorio() {
-            repository.save(cuentaCon("ES9121000418450200051332"));
+            repository.save(TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open());
 
             assertThatExceptionOfType(UnsupportedOperationException.class)
                     .isThrownBy(() -> repository.findAll().clear());
@@ -169,8 +168,4 @@ class InMemoryCheckingAccountRepositoryTests {
         }
     }
 
-    static CheckingAccount cuentaCon(String iban) {
-        AccountHolder titular = AccountHolder.register("Ada Lovelace", CustomerSegment.RETAIL);
-        return CheckingAccount.open(new AccountNumber(iban), titular, MonetaryAmount.euros("100.00"));
-    }
 }
