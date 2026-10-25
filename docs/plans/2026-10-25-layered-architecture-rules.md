@@ -45,7 +45,7 @@ No production code changes: the current code already follows D1-D5 (checked whil
 
 ## Tasks
 
-### [ ] T1 — Layered architecture rule (~10 min)
+### [x] T1 — Layered architecture rule (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/pronoide/ddd/LayeredArchitectureTests.java`
@@ -54,7 +54,7 @@ No production code changes: the current code already follows D1-D5 (checked whil
   1. Create the class and `las_capas_solo_dependen_hacia_abajo` with `layeredArchitecture()` as in the table.
   2. Break it: a temporary field of type `CheckingAccountService` in `InMemoryCheckingAccountRepository` (persistence → application) → red; revert → green.
 - **Acceptance criteria:**
-  - [ ] Rule green on the current code; red with the temporary dependency.
+  - [x] Rule green on the current code; red with the temporary dependency.
 
 ### [ ] T2 — D1: the domain only depends on the JDK (~5 min)
 
