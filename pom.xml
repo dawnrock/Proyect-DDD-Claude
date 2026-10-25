@@ -29,6 +29,8 @@
     <properties>
         <java.version>21</java.version>
         <immutables.version>2.12.3</immutables.version>
+        <!-- spring-boot:run arranca con los datos de demostración (#11); -Dspring-boot.run.profiles=default lo evita -->
+        <spring-boot.run.profiles>demo</spring-boot.run.profiles>
     </properties>
     <dependencies>
         <dependency>
@@ -137,10 +139,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <!-- spring-boot:run arranca con los datos de demostración (#11); -Dspring-boot.run.profiles=default lo evita -->
-                    <profiles>
-                        <profile>demo</profile>
-                    </profiles>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
