@@ -30,4 +30,9 @@ public class TransferForm {
 
     @Pattern(regexp = "[A-Z]{3}", message = "La divisa debe ser un código de tres letras mayúsculas")
     private String currency = "EUR";
+
+    /** Una divisa vacía cuenta como ausente: se aplica el euro por defecto. */
+    public void setCurrency(String currency) {
+        this.currency = (currency == null || currency.isBlank()) ? "EUR" : currency;
+    }
 }

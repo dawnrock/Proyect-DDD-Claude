@@ -19,6 +19,8 @@ import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
 import com.pronoide.ddd.application.TransactionSummary;
+import com.pronoide.ddd.application.TransferCommand;
+import com.pronoide.ddd.application.TransferSummary;
 import com.pronoide.ddd.application.WithdrawCommand;
 import com.pronoide.ddd.domain.model.DomainException;
 
@@ -101,6 +103,30 @@ public class AccountWebController {
                     result.reject("domain", e.getMessage());
                 }
             }
+        }
+        return renderDetail(id, model);
+    }
+
+    @PostMapping("/accounts/{id}/transfers")
+    public String transfer(@PathVariable UUID id, @Valid @ModelAttribute("transferForm") TransferForm form,
+                           BindingResult result, Model model, RedirectAttributes redirect) {
+        if (!result.hasErrors()) {
+            TransferCommand.Builder builder = TransferCommand.builder()
+                    .sourceAccountId(id).targetAccountId(form.getTargetAccountId()).amount(form.getAmount());
+            if (form.getCurrency() != null) {
+                builder.currency(form.getCurrency());
+            }
+            TransferSummary transfer = service.transfer(builder.build());
+            String amount = "%s %s".formatted(transfer.amount(), transfer.currency());
+            if ("REJECTED".equals(transfer.status())) {
+                redirect.addFlashAttribute("rejection",
+                        "Transferencia de %s a %s rechazada: el saldo resultante no está permitido para la cuenta de origen"
+                                .formatted(amount, transfer.targetAccountNumber()));
+            } else {
+                redirect.addFlashAttribute("message",
+                        "Transferencia de %s a %s aprobada".formatted(amount, transfer.targetAccountNumber()));
+            }
+            return redirectToDetail(id);
         }
         return renderDetail(id, model);
     }

@@ -151,7 +151,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
 - **Acceptance criteria:**
   - [x] Tests green. The view uses no domain types.
 
-### [ ] T8 — Transfer submission (~10 min)
+### [x] T8 — Transfer submission (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -161,7 +161,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. `POST /accounts/{id}/transfers` → redirect to the detail with an approved flash or a **rejected** flash (different style, text valid for both segments, as in #6).
   2. Tests: approved flash; rejected flash.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
 ### [ ] T9 — Transfer form errors (~10 min)
 

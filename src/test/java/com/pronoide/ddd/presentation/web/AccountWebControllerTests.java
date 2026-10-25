@@ -39,6 +39,8 @@ import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountNotFoundException;
 import com.pronoide.ddd.application.AccountSummary;
 import com.pronoide.ddd.application.DepositCommand;
+import com.pronoide.ddd.application.TransferCommand;
+import com.pronoide.ddd.application.TransferSummary;
 import com.pronoide.ddd.application.WithdrawCommand;
 import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.application.TransactionSummary;
@@ -478,6 +480,84 @@ class AccountWebControllerTests {
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("No hay otras cuentas a las que transferir")))
                     .andExpect(content().string(not(containsString("name=\"targetAccountId\""))));
+        }
+    }
+
+    private static TransferSummary transfer(String amount, String status) {
+        return TransferSummary.builder()
+                .sourceAccountId(ACCOUNT_ID)
+                .sourceAccountNumber("ES1234567890123456789012")
+                .targetAccountId(OTHER_ID)
+                .targetAccountNumber("ES9876543210987654321098")
+                .amount(new BigDecimal(amount))
+                .currency("EUR")
+                .occurredOn(Instant.parse("2026-10-25T10:15:00Z"))
+                .status(status)
+                .build();
+    }
+
+    @Nested
+    @DisplayName("Envío de transferencias")
+    class EnvioDeTransferencias {
+
+        private MockHttpServletRequestBuilder transferenciaDe(String target, String amount, String currency) {
+            return post("/accounts/" + ACCOUNT_ID + "/transfers")
+                    .param("targetAccountId", target)
+                    .param("amount", amount)
+                    .param("currency", currency);
+        }
+
+        @Test
+        @DisplayName("Una transferencia aprobada llama al servicio con el comando esperado y redirige con un mensaje")
+        void una_transferencia_aprobada_llama_al_servicio_con_el_comando_esperado_y_redirige_con_un_mensaje()
+                throws Exception {
+            when(service.transfer(any())).thenReturn(transfer("25.00", "APPROVED"));
+
+            mvc.perform(transferenciaDe(OTHER_ID.toString(), "25.00", "EUR"))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
+                    .andExpect(flash().attribute("message",
+                            "Transferencia de 25.00 EUR a ES9876543210987654321098 aprobada"))
+                    .andExpect(flash().attributeCount(1));
+
+            verify(service).transfer(TransferCommand.builder()
+                    .sourceAccountId(ACCOUNT_ID)
+                    .targetAccountId(OTHER_ID)
+                    .amount(new BigDecimal("25.00"))
+                    .currency("EUR")
+                    .build());
+        }
+
+        @Test
+        @DisplayName("Una transferencia rechazada redirige con un aviso de rechazo distinto del de éxito")
+        void una_transferencia_rechazada_redirige_con_un_aviso_de_rechazo_distinto_del_de_exito() throws Exception {
+            when(service.transfer(any())).thenReturn(transfer("900.00", "REJECTED"));
+
+            mvc.perform(transferenciaDe(OTHER_ID.toString(), "900.00", "EUR"))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
+                    .andExpect(flash().attribute("rejection",
+                            "Transferencia de 900.00 EUR a ES9876543210987654321098 rechazada: "
+                                    + "el saldo resultante no está permitido para la cuenta de origen"))
+                    .andExpect(flash().attributeCount(1));
+        }
+
+        @Test
+        @DisplayName("Una divisa vacía se trata como el euro por defecto")
+        void una_divisa_vacia_se_trata_como_el_euro_por_defecto() throws Exception {
+            when(service.transfer(any())).thenReturn(transfer("25.00", "APPROVED"));
+
+            mvc.perform(post("/accounts/" + ACCOUNT_ID + "/transfers")
+                            .param("targetAccountId", OTHER_ID.toString())
+                            .param("amount", "25.00")
+                            .param("currency", ""))
+                    .andExpect(status().is3xxRedirection());
+
+            verify(service).transfer(TransferCommand.builder()
+                    .sourceAccountId(ACCOUNT_ID)
+                    .targetAccountId(OTHER_ID)
+                    .amount(new BigDecimal("25.00"))
+                    .build());
         }
     }
 
