@@ -1,7 +1,7 @@
 # Contract: transfers between accounts
 
 - **Issue:** [#7](https://github.com/dawnrock/Proyect-DDD-Claude/issues/7) · **Plan:** `docs/plans/2026-10-25-money-transfers.md`
-- **Status:** agreed
+- **Status:** frozen at `0bdd261`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed with minor changes; the teammates could not message each other, so the lead merged both reviews)
 
 Builds on the frozen contracts of #5 (`open-query-list-accounts.md`) and #6 (`deposits-withdrawals.md`): `CheckingAccountService`, `AccountDetails`, `AccountSummary`, `AccountNotFoundException`, the web 404 advice and the shared presentation validation are reused as they are.
