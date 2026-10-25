@@ -66,7 +66,7 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
 - **Acceptance criteria:**
   - [x] `./mvnw verify` green (the 404 tests still pass); page checked in the browser.
 
-### [ ] T3 — Account list (~10 min)
+### [x] T3 — Account list (~10 min)
 
 - **Layer:** presentation
 - **Files:** `templates/accounts/list.html`, `AccountWebController.java`, `AccountWebControllerTests.java`
@@ -76,7 +76,7 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
   2. Template: "Saldo total" hero; one row per account with initials, holder, masked IBAN and formatted balance, the whole row linking to the detail; "Abrir cuenta" pill; empty state.
   3. Tests: total shown formatted; rows show masked IBAN, initials and `1.000,00 €`; each row links to its detail.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
 ### [ ] T4 — Account detail: balance and movements (~10 min)
 

@@ -32,6 +32,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -54,6 +55,7 @@ import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
 
 @WebMvcTest(AccountWebController.class)
+@Import(WebFormat.class)
 class AccountWebControllerTests {
 
     @Autowired
@@ -67,22 +69,33 @@ class AccountWebControllerTests {
     class Listado {
 
         @Test
-        @DisplayName("Con cuentas, el listado muestra número, titular y saldo con su divisa")
-        void con_cuentas_el_listado_muestra_numero_titular_y_saldo_con_su_divisa() throws Exception {
-            when(service.listAccounts()).thenReturn(List.of(AccountSummary.builder()
-                    .id(UUID.randomUUID())
-                    .accountNumber("ES1234567890123456789012")
-                    .holderName("Ana Pérez")
-                    .balance(new BigDecimal("150.00"))
-                    .currency("EUR")
-                    .build()));
+        @DisplayName("Con cuentas, el listado muestra el saldo total y cada cuenta con iniciales, IBAN abreviado y saldo")
+        void con_cuentas_el_listado_muestra_el_saldo_total_y_cada_cuenta() throws Exception {
+            UUID id = UUID.randomUUID();
+            when(service.listAccounts()).thenReturn(List.of(
+                    summary(id, "ES1234567890123456789012", "Ana Pérez", "150.00"),
+                    summary(UUID.randomUUID(), "ES7921000813610123456789", "Grace Hopper", "5000.00")));
 
             mvc.perform(get("/"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("ES1234567890123456789012")))
+                    .andExpect(content().string(containsString("Saldo total")))
+                    .andExpect(content().string(containsString("5.150,00 €")))
+                    .andExpect(content().string(containsString("ES12 •••• 9012")))
+                    .andExpect(content().string(containsString(">AP<")))
                     .andExpect(content().string(containsString("Ana Pérez")))
-                    .andExpect(content().string(containsString("150.00 EUR")))
+                    .andExpect(content().string(containsString("150,00 €")))
+                    .andExpect(content().string(containsString("href=\"/accounts/" + id + "\"")))
                     .andExpect(content().string(containsString("/accounts/new")));
+        }
+
+        private static AccountSummary summary(UUID id, String accountNumber, String holder, String balance) {
+            return AccountSummary.builder()
+                    .id(id)
+                    .accountNumber(accountNumber)
+                    .holderName(holder)
+                    .balance(new BigDecimal(balance))
+                    .currency("EUR")
+                    .build();
         }
 
         @Test

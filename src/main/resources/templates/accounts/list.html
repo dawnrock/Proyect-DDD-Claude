@@ -4,25 +4,30 @@
 <body>
 <header th:replace="~{fragments/layout :: header}"></header>
 <main>
-    <h1>Cuentas</h1>
+    <div class="page-head">
+        <h1>Cuentas</h1>
+        <a class="pill pill-primary" th:href="@{/accounts/new}">+ Abrir cuenta</a>
+    </div>
     <p th:if="${message}" class="flash flash-success" th:text="${message}"></p>
-    <p><a class="button" th:href="@{/accounts/new}">Abrir cuenta</a></p>
-    <table th:if="${!accounts.isEmpty()}">
-        <thead>
-        <tr>
-            <th>Número de cuenta</th>
-            <th>Titular</th>
-            <th class="num">Saldo</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="account : ${accounts}">
-            <td><a th:href="@{/accounts/{id}(id=${account.id()})}" th:text="${account.accountNumber()}">ES00</a></td>
-            <td th:text="${account.holderName()}">Titular</td>
-            <td class="num" th:text="${account.balance() + ' ' + account.currency()}">0.00 EUR</td>
-        </tr>
-        </tbody>
-    </table>
+
+    <div class="hero" th:unless="${accounts.isEmpty()}">
+        <p class="hero-label">Saldo total</p>
+        <p class="hero-amount" th:each="total : ${totals}" th:text="${@fmt.money(total.value, total.key)}">0,00 €</p>
+    </div>
+
+    <ul class="list" th:unless="${accounts.isEmpty()}">
+        <li th:each="account : ${accounts}">
+            <a class="row" th:href="@{/accounts/{id}(id=${account.id()})}">
+                <span class="avatar" aria-hidden="true" th:text="${@fmt.initials(account.holderName())}">AP</span>
+                <span class="row-main">
+                    <span class="row-title" th:text="${account.holderName()}">Titular</span>
+                    <span class="row-sub" th:text="${@fmt.maskedIban(account.accountNumber())}"
+                          th:title="${account.accountNumber()}">ES00 •••• 0000</span>
+                </span>
+                <span class="row-amount" th:text="${@fmt.money(account.balance(), account.currency())}">0,00 €</span>
+            </a>
+        </li>
+    </ul>
     <p th:if="${accounts.isEmpty()}" class="empty">Todavía no hay cuentas. Abre la primera.</p>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>

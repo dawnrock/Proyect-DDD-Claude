@@ -85,6 +85,7 @@ p { margin: 0 0 1rem; }
 a.row:hover .row-title { text-decoration: underline; }
 .avatar { flex: none; width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--surface-raised); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 600; }
 .row-main { flex: 1; min-width: 0; }
+.row-title, .row-sub { display: block; }
 .row-title { margin: 0; }
 .row-sub { margin: 0; color: var(--muted); font-size: 0.8rem; }
 .row-amount { margin: 0; text-align: right; white-space: nowrap; }

@@ -1,9 +1,12 @@
 package com.pronoide.ddd.presentation.web;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -42,8 +45,16 @@ public class AccountWebController {
 
     @GetMapping("/")
     public String list(Model model) {
-        model.addAttribute("accounts", service.listAccounts());
+        List<AccountSummary> accounts = service.listAccounts();
+        model.addAttribute("accounts", accounts);
+        model.addAttribute("totals", totalsByCurrency(accounts));
         return "accounts/list";
+    }
+
+    /** Saldo total de las cuentas, sumado por divisa (no se mezclan divisas). */
+    private static Map<String, BigDecimal> totalsByCurrency(List<AccountSummary> accounts) {
+        return accounts.stream().collect(Collectors.groupingBy(AccountSummary::currency, TreeMap::new,
+                Collectors.reducing(BigDecimal.ZERO, AccountSummary::balance, BigDecimal::add)));
     }
 
     @GetMapping("/accounts/{id}")
