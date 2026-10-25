@@ -103,4 +103,77 @@ class CheckingAccountServiceOwnershipTests {
             assertThat(owners.ownerOf(summary.id())).isEmpty();
         }
     }
+
+    @Nested
+    @DisplayName("Listar y consultar solo las cuentas propias")
+    class ListAndFind {
+
+        private AccountSummary adas;
+        private AccountSummary graces;
+        private AccountSummary orphan;
+
+        @BeforeEach
+        void openAccounts() {
+            adas = service.openAccount(ADMIN, command(ADA_IBAN, "ada").build());
+            graces = service.openAccount(ADMIN, command(GRACE_IBAN, "grace").build());
+            orphan = service.openAccount(command("ES6000491500051234567892", "").build());
+        }
+
+        @Test
+        @DisplayName("Un administrador lista todas las cuentas, también las que no tienen propietario")
+        void un_administrador_lista_todas_las_cuentas() {
+            assertThat(service.listAccounts(ADMIN)).extracting(AccountSummary::id)
+                    .containsExactlyInAnyOrder(adas.id(), graces.id(), orphan.id());
+        }
+
+        @Test
+        @DisplayName("Un usuario lista solo sus cuentas, ordenadas por número de cuenta")
+        void un_usuario_lista_solo_sus_cuentas() {
+            AccountSummary second = service.openAccount(ADMIN, command("ES1000000000000000000001", "ada").build());
+
+            assertThat(service.listAccounts(ADA)).extracting(AccountSummary::accountNumber)
+                    .containsExactly(second.accountNumber(), ADA_IBAN);
+        }
+
+        @Test
+        @DisplayName("Un usuario sin cuentas obtiene una lista vacía")
+        void un_usuario_sin_cuentas_obtiene_una_lista_vacia() {
+            assertThat(service.listAccounts(Caller.builder().username("alan").admin(false).build())).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Un administrador consulta cualquier cuenta")
+        void un_administrador_consulta_cualquier_cuenta() {
+            assertThat(service.findAccount(ADMIN, graces.id()).accountNumber()).isEqualTo(GRACE_IBAN);
+            assertThat(service.findAccount(ADMIN, orphan.id()).id()).isEqualTo(orphan.id());
+        }
+
+        @Test
+        @DisplayName("Un usuario consulta su cuenta")
+        void un_usuario_consulta_su_cuenta() {
+            assertThat(service.findAccount(ADA, adas.id()).accountNumber()).isEqualTo(ADA_IBAN);
+        }
+
+        @Test
+        @DisplayName("Una cuenta ajena no se encuentra: AccountNotFoundException")
+        void una_cuenta_ajena_no_se_encuentra() {
+            assertThatExceptionOfType(AccountNotFoundException.class)
+                    .isThrownBy(() -> service.findAccount(ADA, graces.id()))
+                    .withMessageContaining(graces.id().toString());
+        }
+
+        @Test
+        @DisplayName("Una cuenta sin propietario no se encuentra para un usuario")
+        void una_cuenta_sin_propietario_no_se_encuentra_para_un_usuario() {
+            assertThatExceptionOfType(AccountNotFoundException.class)
+                    .isThrownBy(() -> service.findAccount(ADA, orphan.id()));
+        }
+
+        @Test
+        @DisplayName("Una cuenta inexistente no se encuentra, ni para un administrador")
+        void una_cuenta_inexistente_no_se_encuentra() {
+            assertThatExceptionOfType(AccountNotFoundException.class)
+                    .isThrownBy(() -> service.findAccount(ADMIN, java.util.UUID.randomUUID()));
+        }
+    }
 }

@@ -157,12 +157,15 @@ public class CheckingAccountService {
 
     /** Todas las cuentas para un administrador; las suyas para un usuario. Ordenadas por número de cuenta. */
     public List<AccountSummary> listAccounts(Caller caller) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        return repository.findAll().stream()
+                .filter(account -> canAccess(caller, account.id()))
+                .map(CheckingAccountService::toSummary)
+                .toList();
     }
 
     /** @throws AccountNotFoundException si no existe o no es de quien lo pide (y no es administrador) */
     public AccountDetails findAccount(Caller caller, UUID id) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        return toDetails(loadFor(caller, id));
     }
 
     /** @throws AccountNotFoundException si la cuenta no existe o no es de quien lo pide (y no es administrador) */
@@ -185,6 +188,19 @@ public class CheckingAccountService {
      */
     public TransferSummary transfer(Caller caller, TransferCommand command) {
         throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
+    /** Carga la cuenta; una ajena (o sin propietario, para un usuario) se trata como inexistente. */
+    private CheckingAccount loadFor(Caller caller, UUID id) {
+        CheckingAccount account = load(id);
+        if (!canAccess(caller, id)) {
+            throw new AccountNotFoundException(id);
+        }
+        return account;
+    }
+
+    private boolean canAccess(Caller caller, UUID accountId) {
+        return caller.admin() || ownership.ownerOf(accountId).filter(caller.username()::equals).isPresent();
     }
 
     private CheckingAccount load(UUID id) {

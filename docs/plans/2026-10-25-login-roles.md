@@ -118,7 +118,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [x] Tests green: admin opens with owner; user is rejected; invalid username rejected by the command.
 
-### [ ] B3 — Listing and finding only owned accounts (~10 min)
+### [x] B3 — Listing and finding only owned accounts (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -127,7 +127,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **What to do:**
   1. `listAccounts(Caller)`: admin → all; user → owned. `findAccount(Caller, id)`: foreign → `AccountNotFoundException`.
 - **Acceptance criteria:**
-  - [ ] Tests green, including "a foreign account is not found" (validated by temporarily skipping the check).
+  - [x] Tests green, including "a foreign account is not found" (validated by temporarily skipping the check).
 
 ### [ ] B4 — Operating only owned accounts; transfer target by IBAN (~10 min)
 
