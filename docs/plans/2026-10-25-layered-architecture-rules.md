@@ -6,8 +6,8 @@
 - **Base branch:** `Monolithic`
 - **Date:** 2026-10-25
 - **Approved:** by the user on 2026-10-25
-- **Status:** in progress
-- **Total estimate:** ~45 min (6 tasks)
+- **Status:** done
+- **Total estimate:** ~55 min (7 tasks)
 
 ## Goal
 
@@ -111,27 +111,39 @@ No production code changes: the current code already follows D1-D5 (checked whil
 - **Acceptance criteria:**
   - [x] Documents updated; additions to documents still in Spanish stay in Spanish until they are translated.
 
+### [x] T7 — Review fixes (~10 min)
+
+- **Layer:** tests
+- **Files:** `LayeredArchitectureTests.java`, `docs/arquitectura/fase-1-capas.md`
+- **Depends on:** T2, T1 (added after the `revisor-ddd` review; no blocking findings)
+- **What to do:**
+  1. D1 used `..domain..` as the allowed target, which would also accept third-party packages with a `domain` segment (`org.springframework.data.domain`). Now `com.pronoide.ddd.domain..`. The Spring sabotage from T2 is still red.
+  2. New rule `toda_clase_pertenece_a_una_capa`: outside the four layers only `DddLabApplication` may exist, because `consideringOnlyDependenciesInLayers()` ignores any other package. Validated with a temporary `com.pronoide.ddd.config.Sabotaje` class (red), then removed.
+  3. Not applied (minor, no coverage gained today): a class directly in `presentation` would sit outside the D5 slices; `@ControllerAdvice` classes are not meta-annotated with `@Controller` (the layered rule already covers them); import grouping.
+- **Acceptance criteria:**
+  - [x] Both changes green on the current code; red with their temporary breakages. `./mvnw verify`: 241 tests.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] `LayeredArchitectureTests` has the layered rule plus D1, D4, D5, no public setters and controllers without repository access; all green on the current code.
-- [ ] Every rule was validated by breaking it temporarily (listed in the PR).
-- [ ] No production code changed.
+- [x] `LayeredArchitectureTests` has the layered rule plus D1, D4, D5, no public setters, controllers without repository access and every class in a layer; all green on the current code.
+- [x] Every rule was validated by breaking it temporarily (listed in the PR).
+- [x] No production code changed.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The layered architecture is respected, now verified by ArchUnit (`LayeredArchitectureTests`) and by `revisor-ddd`.
-- [ ] The domain does not depend on Spring, `jakarta` or `org.immutables`, and does not use `@Data`, `@Setter`, `@Builder` or `@AllArgsConstructor` (`check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` names in Spanish; ArchUnit rules are `@ArchTest` fields, as in `DomainIsolationTests`).
-- [ ] No dependencies added beyond the planned ones (ArchUnit is already there).
-- [ ] If the API changes: OpenAPI — **n/a** (no API change).
-- [ ] Any new business term is in `docs/dominio/glosario.md` — n/a (no business terms).
-- [ ] Documentation written or changed by this plan is in English (additions to documents still in Spanish excepted).
-- [ ] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The layered architecture is respected, now verified by ArchUnit (`LayeredArchitectureTests`) and by `revisor-ddd`.
+- [x] The domain does not depend on Spring, `jakarta` or `org.immutables`, and does not use `@Data`, `@Setter`, `@Builder` or `@AllArgsConstructor` (`check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` names in Spanish; ArchUnit rules are `@ArchTest` fields, as in `DomainIsolationTests`).
+- [x] No dependencies added beyond the planned ones (ArchUnit is already there).
+- [x] If the API changes: OpenAPI — **n/a** (no API change).
+- [x] Any new business term is in `docs/dominio/glosario.md` — n/a (no business terms).
+- [x] Documentation written or changed by this plan is in English (additions to documents still in Spanish excepted).
+- [x] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
 
 ## Risks and open questions
 
