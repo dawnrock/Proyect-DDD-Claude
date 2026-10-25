@@ -37,12 +37,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import com.pronoide.ddd.presentation.SecuritySupport;
 import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountNotFoundException;
 import com.pronoide.ddd.application.AccountSummary;
+import com.pronoide.ddd.application.Caller;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.TransferCommand;
 import com.pronoide.ddd.application.TransferSummary;
@@ -81,7 +83,7 @@ class AccountWebControllerTests {
         @DisplayName("Con cuentas, el listado muestra el saldo total y cada cuenta con iniciales, IBAN abreviado y saldo")
         void con_cuentas_el_listado_muestra_el_saldo_total_y_cada_cuenta() throws Exception {
             UUID id = UUID.randomUUID();
-            when(service.listAccounts()).thenReturn(List.of(
+            when(service.listAccounts(any(Caller.class))).thenReturn(List.of(
                     summary(id, "ES1234567890123456789012", "Ana Pérez", "150.00"),
                     summary(UUID.randomUUID(), "ES7921000813610123456789", "Grace Hopper", "5000.00")));
 
@@ -111,12 +113,138 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Sin cuentas, el listado muestra el mensaje de estado vacío")
         void sin_cuentas_el_listado_muestra_el_mensaje_de_estado_vacio() throws Exception {
-            when(service.listAccounts()).thenReturn(List.of());
+            when(service.listAccounts(any(Caller.class))).thenReturn(List.of());
 
             mvc.perform(get("/"))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("Todavía no hay cuentas")))
                     .andExpect(content().string(containsString("Abrir cuenta")));
+        }
+    }
+
+    private static AccountSummary ownAccount(UUID id, String number, String holder) {
+        return AccountSummary.builder()
+                .id(id)
+                .accountNumber(number)
+                .holderName(holder)
+                .balance(new BigDecimal("150.00"))
+                .currency("EUR")
+                .build();
+    }
+
+    @Nested
+    @DisplayName("Cabecera con el usuario")
+    class Cabecera {
+
+        @Test
+        @DisplayName("Toda página con sesión muestra el usuario y un botón Cerrar sesión que envía un POST con CSRF")
+        void toda_pagina_con_sesion_muestra_el_usuario_y_un_boton_cerrar_sesion_con_csrf() throws Exception {
+            when(service.listAccounts(any(Caller.class))).thenReturn(List.of());
+
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("admin")))
+                    .andExpect(content().string(containsString("action=\"/logout\"")))
+                    .andExpect(content().string(containsString("method=\"post\"")))
+                    .andExpect(content().string(containsString("name=\"_csrf\"")))
+                    .andExpect(content().string(containsString("Cerrar sesión")));
+        }
+
+        @Test
+        @DisplayName("La página 404 también lleva la cabecera con el usuario")
+        void la_pagina_404_tambien_lleva_la_cabecera_con_el_usuario() throws Exception {
+            when(service.findAccount(any(UUID.class)))
+                    .thenThrow(new AccountNotFoundException(UUID.randomUUID()));
+
+            mvc.perform(get("/accounts/" + UUID.randomUUID()))
+                    .andExpect(status().isNotFound())
+                    .andExpect(content().string(containsString("Cerrar sesión")));
+        }
+
+        @Test
+        @DisplayName("La página de login, anónima, no muestra el botón Cerrar sesión")
+        @WithAnonymousUser
+        void la_pagina_de_login_anonima_no_muestra_el_boton_cerrar_sesion() throws Exception {
+            mvc.perform(get("/error/403"))
+                    .andExpect(content().string(not(containsString("Cerrar sesión"))));
+        }
+    }
+
+    @Nested
+    @DisplayName("Inicio según el rol")
+    class InicioSegunElRol {
+
+        private static final UUID ADA_ONE = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        private static final UUID ADA_TWO = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+
+        @Test
+        @DisplayName("El administrador ve «Cuentas» con el botón de abrir cuenta y pide el listado como administrador")
+        void el_administrador_ve_cuentas_con_el_boton_de_abrir_cuenta() throws Exception {
+            when(service.listAccounts(any(Caller.class))).thenReturn(List.of(
+                    ownAccount(ADA_ONE, "ES1234567890123456789012", "Ada Lovelace")));
+
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("<h1>Cuentas</h1>")))
+                    .andExpect(content().string(containsString("+ Abrir cuenta")))
+                    .andExpect(content().string(not(containsString("Mis cuentas"))));
+
+            verify(service).listAccounts(Caller.builder().username("admin").admin(true).build());
+        }
+
+        @Test
+        @WithMockUser(username = "ada", roles = "USER")
+        @DisplayName("Un usuario con varias cuentas ve «Mis cuentas» sin abrir cuenta")
+        void un_usuario_con_varias_cuentas_ve_mis_cuentas_sin_abrir_cuenta() throws Exception {
+            when(service.listAccounts(any(Caller.class))).thenReturn(List.of(
+                    ownAccount(ADA_ONE, "ES1234567890123456789012", "Ada Lovelace"),
+                    ownAccount(ADA_TWO, "ES9876543210987654321098", "Ada Lovelace")));
+
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("<h1>Mis cuentas</h1>")))
+                    .andExpect(content().string(containsString("Saldo total")))
+                    .andExpect(content().string(containsString("300,00 €")))
+                    .andExpect(content().string(not(containsString("Abrir cuenta"))))
+                    .andExpect(content().string(not(containsString("/accounts/new"))));
+
+            verify(service).listAccounts(Caller.builder().username("ada").admin(false).build());
+        }
+
+        @Test
+        @WithMockUser(username = "ada", roles = "USER")
+        @DisplayName("Un usuario con una sola cuenta es redirigido a su detalle")
+        void un_usuario_con_una_sola_cuenta_es_redirigido_a_su_detalle() throws Exception {
+            when(service.listAccounts(any(Caller.class))).thenReturn(List.of(
+                    ownAccount(ADA_ONE, "ES1234567890123456789012", "Ada Lovelace")));
+
+            mvc.perform(get("/"))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/accounts/" + ADA_ONE));
+        }
+
+        @Test
+        @WithMockUser(username = "ada", roles = "USER")
+        @DisplayName("Un usuario sin cuentas ve «Mis cuentas» con el mensaje de estado vacío y sin abrir cuenta")
+        void un_usuario_sin_cuentas_ve_mis_cuentas_con_el_mensaje_de_estado_vacio() throws Exception {
+            when(service.listAccounts(any(Caller.class))).thenReturn(List.of());
+
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("<h1>Mis cuentas</h1>")))
+                    .andExpect(content().string(containsString("Todavía no tienes cuentas")))
+                    .andExpect(content().string(not(containsString("Abrir cuenta"))));
+        }
+
+        @Test
+        @DisplayName("Un administrador con una sola cuenta sigue viendo el listado")
+        void un_administrador_con_una_sola_cuenta_sigue_viendo_el_listado() throws Exception {
+            when(service.listAccounts(any(Caller.class))).thenReturn(List.of(
+                    ownAccount(ADA_ONE, "ES1234567890123456789012", "Ada Lovelace")));
+
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/list"));
         }
     }
 
@@ -218,7 +346,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Cada fila del listado enlaza con el detalle de su cuenta")
         void cada_fila_del_listado_enlaza_con_el_detalle_de_su_cuenta() throws Exception {
-            when(service.listAccounts()).thenReturn(List.of(AccountSummary.builder()
+            when(service.listAccounts(any(Caller.class))).thenReturn(List.of(AccountSummary.builder()
                     .id(ACCOUNT_ID)
                     .accountNumber("ES1234567890123456789012")
                     .holderName("Ana Pérez")

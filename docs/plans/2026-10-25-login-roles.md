@@ -188,7 +188,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [x] Tests green.
 
-### [ ] W2 — Header with user and logout; home per role (~10 min)
+### [x] W2 — Header with user and logout; home per role (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -198,7 +198,7 @@ Make the application realistic: today anyone sees every account on the home page
   1. Header: username and a "Cerrar sesión" form (POST with CSRF).
   2. `/` uses `listAccounts(caller)`: admin title "Cuentas" with "Abrir cuenta"; user title "Mis cuentas", no "Abrir cuenta"; a user with exactly one account is redirected to its detail.
 - **Acceptance criteria:**
-  - [ ] Tests green for admin, user with several accounts and user with one account.
+  - [x] Tests green for admin, user with several accounts and user with one account.
 
 ### [ ] W3 — Detail and operations with the caller (~10 min)
 

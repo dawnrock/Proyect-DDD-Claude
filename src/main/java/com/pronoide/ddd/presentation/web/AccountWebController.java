@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.pronoide.ddd.application.AccountSummary;
+import com.pronoide.ddd.application.Caller;
 import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
@@ -26,6 +28,7 @@ import com.pronoide.ddd.application.TransferCommand;
 import com.pronoide.ddd.application.TransferSummary;
 import com.pronoide.ddd.application.WithdrawCommand;
 import com.pronoide.ddd.domain.model.DomainException;
+import com.pronoide.ddd.presentation.CurrentCaller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,8 +49,13 @@ public class AccountWebController {
     private final WebFormat fmt;
 
     @GetMapping("/")
-    public String list(Model model) {
-        List<AccountSummary> accounts = service.listAccounts();
+    public String list(Authentication authentication, Model model) {
+        Caller caller = CurrentCaller.from(authentication);
+        List<AccountSummary> accounts = service.listAccounts(caller);
+        if (!caller.admin() && accounts.size() == 1) {
+            return redirectToDetail(accounts.get(0).id());
+        }
+        model.addAttribute("admin", caller.admin());
         model.addAttribute("accounts", accounts);
         model.addAttribute("totals", totalsByCurrency(accounts));
         return "accounts/list";
