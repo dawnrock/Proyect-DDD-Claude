@@ -140,7 +140,7 @@ class DddLabApplicationTests {
 			assertThat(withdrawal.statusCode()).isEqualTo(201);
 			assertThat(withdrawal.body()).contains("\"status\":\"REJECTED\"");
 			assertThat(get(account, "application/json").body()).contains("\"balance\":150.00");
-			assertThat(get(webPath(account), "text/html").body()).contains("Rechazado").contains("150.00");
+			assertThat(get(webPath(account), "text/html").body()).contains("Rechazado").contains("150,00 €");
 		}
 
 		@Test
@@ -152,10 +152,10 @@ class DddLabApplicationTests {
 			assertThat(deposit.statusCode()).isEqualTo(302);
 			assertThat(deposit.headers().firstValue("Location")).hasValueSatisfying(
 					location -> assertThat(location).endsWith(detail).doesNotContain(";jsessionid"));
-			assertThat(browse(detail)).contains("Ingreso de 25.00 EUR aprobado");
+			assertThat(browse(detail)).contains("Ingreso de 25,00 € aprobado");
 
 			assertThat(submit(detail + "/withdrawals", "amount=1000.00&currency=EUR").statusCode()).isEqualTo(302);
-			assertThat(browse(detail)).contains("rechazada").contains("125.00");
+			assertThat(browse(detail)).contains("rechazada").contains("125,00 €");
 		}
 
 		@Test
@@ -222,9 +222,9 @@ class DddLabApplicationTests {
 			assertThat(response.statusCode()).isEqualTo(302);
 			assertThat(response.headers().firstValue("Location")).hasValueSatisfying(
 					location -> assertThat(location).endsWith(source).doesNotContain(";jsessionid"));
-			assertThat(browse(source)).contains("Transferencia de 25.00 EUR a ES0000000000000000000705 aprobada")
-					.contains("75.00");
-			assertThat(browse(target)).contains("125.00");
+			assertThat(browse(source)).contains("Transferencia de 25,00 € a ES00 •••• 0705 aprobada")
+					.contains("75,00 €");
+			assertThat(browse(target)).contains("125,00 €");
 		}
 
 		private HttpResponse<String> transfer(String source, String target, String amount) throws Exception {

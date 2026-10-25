@@ -118,6 +118,13 @@ Implementado en la #12 (`LayeredArchitectureTests`, cada regla validada rompién
 | `los_controladores_no_acceden_al_repositorio` | Clases con `@Controller` o `@RestController` (meta-anotación) sin `persistence`; se solapa con la regla de capas, pero su mensaje es más claro |
 | `toda_clase_pertenece_a_una_capa` | Fuera de las cuatro capas solo está `DddLabApplication`: la regla de capas ignora los paquetes que no son capas, así que un paquete nuevo (`config`…) tendría que añadirse antes como capa |
 
+Implementado en la #48 (rediseño de la web, solo `presentation.web` y plantillas):
+
+- Tema oscuro y minimalista en `static/css/app.css` (variables CSS, sin dependencias ni JavaScript): saldo protagonista, listas de filas en lugar de tablas, acciones como pastillas.
+- [`WebFormat`](../../src/main/java/com/pronoide/ddd/presentation/web/WebFormat.java) (`@Component("fmt")`, usable como `${@fmt.money(...)}`): importes en formato español con separador de miles siempre (`1.000,00 €`; `es-ES` de Java no agrupa las cifras de 4 dígitos), importes con signo, IBAN abreviado e iniciales. Solo recibe valores de las vistas, nunca tipos del dominio (D4).
+- Ingresar, retirar y transferir son `<details>` con el formulario dentro: se abre al pulsar la pastilla, y tras un POST solo se abre el que vuelve con errores (`th:object` en el `<details>` y `th:open="${#fields.hasAnyErrors()}"`).
+- El listado no muestra el segmento: `AccountSummary` no lo tiene y añadirlo cambiaría `application`.
+
 ## Issues de la fase
 
 | Orden | Issue | Capas | Clases que introduce |

@@ -1,9 +1,12 @@
 package com.pronoide.ddd.presentation.web;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -40,10 +43,20 @@ public class AccountWebController {
 
     private final CheckingAccountService service;
 
+    private final WebFormat fmt;
+
     @GetMapping("/")
     public String list(Model model) {
-        model.addAttribute("accounts", service.listAccounts());
+        List<AccountSummary> accounts = service.listAccounts();
+        model.addAttribute("accounts", accounts);
+        model.addAttribute("totals", totalsByCurrency(accounts));
         return "accounts/list";
+    }
+
+    /** Saldo total de las cuentas, sumado por divisa (no se mezclan divisas). */
+    private static Map<String, BigDecimal> totalsByCurrency(List<AccountSummary> accounts) {
+        return accounts.stream().collect(Collectors.groupingBy(AccountSummary::currency, TreeMap::new,
+                Collectors.reducing(BigDecimal.ZERO, AccountSummary::balance, BigDecimal::add)));
     }
 
     @GetMapping("/accounts/{id}")
@@ -66,7 +79,7 @@ public class AccountWebController {
                 try {
                     TransactionSummary deposit = service.deposit(command);
                     redirect.addFlashAttribute("message",
-                            "Ingreso de %s %s aprobado".formatted(deposit.amount(), deposit.currency()));
+                            "Ingreso de %s aprobado".formatted(fmt.money(deposit.amount(), deposit.currency())));
                     return redirectToDetail(id);
                 } catch (DomainException e) {
                     result.reject("domain", e.getMessage());
@@ -90,7 +103,7 @@ public class AccountWebController {
             if (command != null) {
                 try {
                     TransactionSummary withdrawal = service.withdraw(command);
-                    String amount = "%s %s".formatted(withdrawal.amount(), withdrawal.currency());
+                    String amount = fmt.money(withdrawal.amount(), withdrawal.currency());
                     if ("REJECTED".equals(withdrawal.status())) {
                         redirect.addFlashAttribute("rejection",
                                 "Retirada de %s rechazada: el saldo resultante no está permitido para esta cuenta"
@@ -125,14 +138,15 @@ public class AccountWebController {
             if (command != null) {
                 try {
                     TransferSummary transfer = service.transfer(command);
-                    String amount = "%s %s".formatted(transfer.amount(), transfer.currency());
+                    String amount = fmt.money(transfer.amount(), transfer.currency());
+                    String target = fmt.maskedIban(transfer.targetAccountNumber());
                     if ("REJECTED".equals(transfer.status())) {
                         redirect.addFlashAttribute("rejection",
                                 ("Transferencia de %s a %s rechazada: el saldo resultante no está permitido "
-                                        + "para la cuenta de origen").formatted(amount, transfer.targetAccountNumber()));
+                                        + "para la cuenta de origen").formatted(amount, target));
                     } else {
                         redirect.addFlashAttribute("message", "Transferencia de %s a %s aprobada"
-                                .formatted(amount, transfer.targetAccountNumber()));
+                                .formatted(amount, target));
                     }
                     return redirectToDetail(id);
                 } catch (DomainException e) {

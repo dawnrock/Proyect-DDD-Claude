@@ -32,6 +32,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -54,6 +55,7 @@ import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
 
 @WebMvcTest(AccountWebController.class)
+@Import(WebFormat.class)
 class AccountWebControllerTests {
 
     @Autowired
@@ -67,22 +69,34 @@ class AccountWebControllerTests {
     class Listado {
 
         @Test
-        @DisplayName("Con cuentas, el listado muestra número, titular y saldo con su divisa")
-        void con_cuentas_el_listado_muestra_numero_titular_y_saldo_con_su_divisa() throws Exception {
-            when(service.listAccounts()).thenReturn(List.of(AccountSummary.builder()
-                    .id(UUID.randomUUID())
-                    .accountNumber("ES1234567890123456789012")
-                    .holderName("Ana Pérez")
-                    .balance(new BigDecimal("150.00"))
-                    .currency("EUR")
-                    .build()));
+        @DisplayName("Con cuentas, el listado muestra el saldo total y cada cuenta con iniciales, IBAN abreviado y saldo")
+        void con_cuentas_el_listado_muestra_el_saldo_total_y_cada_cuenta() throws Exception {
+            UUID id = UUID.randomUUID();
+            when(service.listAccounts()).thenReturn(List.of(
+                    summary(id, "ES1234567890123456789012", "Ana Pérez", "150.00"),
+                    summary(UUID.randomUUID(), "ES7921000813610123456789", "Grace Hopper", "5000.00")));
 
             mvc.perform(get("/"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("ES1234567890123456789012")))
+                    .andExpect(content().string(containsString("Saldo total")))
+                    .andExpect(content().string(containsString("5.150,00 €")))
+                    .andExpect(content().string(containsString("ES12 •••• 9012")))
+                    .andExpect(content().string(containsString("title=\"ES1234567890123456789012\"")))
+                    .andExpect(content().string(containsString(">AP<")))
                     .andExpect(content().string(containsString("Ana Pérez")))
-                    .andExpect(content().string(containsString("150.00 EUR")))
+                    .andExpect(content().string(containsString("150,00 €")))
+                    .andExpect(content().string(containsString("href=\"/accounts/" + id + "\"")))
                     .andExpect(content().string(containsString("/accounts/new")));
+        }
+
+        private static AccountSummary summary(UUID id, String accountNumber, String holder, String balance) {
+            return AccountSummary.builder()
+                    .id(id)
+                    .accountNumber(accountNumber)
+                    .holderName(holder)
+                    .balance(new BigDecimal(balance))
+                    .currency("EUR")
+                    .build();
         }
 
         @Test
@@ -139,11 +153,11 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("ES1234567890123456789012")))
                     .andExpect(content().string(containsString("Ana Pérez")))
                     .andExpect(content().string(containsString("Alto patrimonio")))
-                    .andExpect(content().string(containsString("150.00 EUR")))
+                    .andExpect(content().string(containsString("150,00 €")))
                     .andExpect(content().string(containsString("Ingreso")))
                     .andExpect(content().string(containsString("Retirada")))
-                    .andExpect(content().string(containsString("100.00 EUR")))
-                    .andExpect(content().string(containsString("Aprobado")))
+                    .andExpect(content().string(containsString("+100,00 €")))
+                    .andExpect(content().string(containsString("−30,00 €")))
                     .andExpect(content().string(containsString("/2026")));
         }
 
@@ -154,7 +168,7 @@ class AccountWebControllerTests {
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("<a href=\"/\">Volver al listado</a>")));
+                    .andExpect(content().string(containsString("<a class=\"back\" href=\"/\">← Cuentas</a>")));
         }
 
         @Test
@@ -166,6 +180,8 @@ class AccountWebControllerTests {
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("row-rejected")))
+                    .andExpect(content().string(containsString(">500,00 €<")))
+                    .andExpect(content().string(not(containsString("−500,00 €"))))
                     .andExpect(content().string(containsString("Rechazado")));
         }
 
@@ -239,7 +255,7 @@ class AccountWebControllerTests {
             mvc.perform(ingresoDe("50.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
-                    .andExpect(flash().attribute("message", "Ingreso de 50.00 EUR aprobado"));
+                    .andExpect(flash().attribute("message", "Ingreso de 50,00 € aprobado"));
 
             verify(service).deposit(DepositCommand.builder()
                     .accountId(ACCOUNT_ID)
@@ -350,7 +366,7 @@ class AccountWebControllerTests {
             mvc.perform(retiradaDe("30.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
-                    .andExpect(flash().attribute("message", "Retirada de 30.00 EUR aprobada"))
+                    .andExpect(flash().attribute("message", "Retirada de 30,00 € aprobada"))
                     .andExpect(flash().attributeCount(1));
 
             verify(service).withdraw(WithdrawCommand.builder()
@@ -370,7 +386,7 @@ class AccountWebControllerTests {
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
                     .andExpect(flash().attribute("rejection",
-                            "Retirada de 500.00 EUR rechazada: el saldo resultante no está permitido para esta cuenta"))
+                            "Retirada de 500,00 € rechazada: el saldo resultante no está permitido para esta cuenta"))
                     .andExpect(flash().attributeCount(1));
         }
 
@@ -381,6 +397,7 @@ class AccountWebControllerTests {
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID).flashAttr("rejection", "Retirada de 500.00 EUR rechazada"))
                     .andExpect(content().string(containsString("flash flash-warning")))
+                    .andExpect(content().string(containsString("role=\"alert\"")))
                     .andExpect(content().string(containsString("Retirada de 500.00 EUR rechazada")));
         }
 
@@ -529,7 +546,7 @@ class AccountWebControllerTests {
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
                     .andExpect(flash().attribute("message",
-                            "Transferencia de 25.00 EUR a ES9876543210987654321098 aprobada"))
+                            "Transferencia de 25,00 € a ES98 •••• 1098 aprobada"))
                     .andExpect(flash().attributeCount(1));
 
             verify(service).transfer(TransferCommand.builder()
@@ -549,7 +566,7 @@ class AccountWebControllerTests {
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
                     .andExpect(flash().attribute("rejection",
-                            "Transferencia de 900.00 EUR a ES9876543210987654321098 rechazada: "
+                            "Transferencia de 900,00 € a ES98 •••• 1098 rechazada: "
                                     + "el saldo resultante no está permitido para la cuenta de origen"))
                     .andExpect(flash().attributeCount(1));
         }
@@ -677,6 +694,49 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString(amount)));
 
             verify(service, never()).transfer(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("Acciones del detalle")
+    class Acciones {
+
+        @BeforeEach
+        void cuentas() {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.listAccounts()).thenReturn(List.of(
+                    summary(ACCOUNT_ID, "ES1234567890123456789012", "Ana Pérez"),
+                    summary(OTHER_ID, "ES9876543210987654321098", "Luis Gil")));
+        }
+
+        @Test
+        @DisplayName("Al abrir el detalle, ingresar, retirar y transferir son pastillas con el formulario cerrado")
+        void al_abrir_el_detalle_las_acciones_estan_cerradas() throws Exception {
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("<details id=\"deposit-action\">")))
+                    .andExpect(content().string(containsString("<details id=\"withdrawal-action\">")))
+                    .andExpect(content().string(containsString("<details id=\"transfer-action\">")))
+                    .andExpect(content().string(not(containsString("open=\"open\""))));
+        }
+
+        @Test
+        @DisplayName("Un error en el ingreso vuelve al detalle con solo el formulario de ingreso abierto")
+        void un_error_en_el_ingreso_abre_solo_ese_formulario() throws Exception {
+            mvc.perform(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "0").param("currency", "EUR"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("<details id=\"deposit-action\" open=\"open\">")))
+                    .andExpect(content().string(containsString("<details id=\"withdrawal-action\">")))
+                    .andExpect(content().string(containsString("<details id=\"transfer-action\">")));
+        }
+
+        @Test
+        @DisplayName("Un error en la transferencia vuelve al detalle con solo el formulario de transferencia abierto")
+        void un_error_en_la_transferencia_abre_solo_ese_formulario() throws Exception {
+            mvc.perform(post("/accounts/" + ACCOUNT_ID + "/transfers").param("amount", "10.00").param("currency", "EUR"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("<details id=\"transfer-action\" open=\"open\">")))
+                    .andExpect(content().string(containsString("<details id=\"deposit-action\">")));
         }
     }
 
