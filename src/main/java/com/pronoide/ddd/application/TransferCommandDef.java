@@ -26,4 +26,9 @@ public interface TransferCommandDef {
     default String currency() {
         return "EUR";
     }
+
+    @Value.Check
+    default void validate() {
+        CommandValidation.requireValidMovement(amount(), currency());
+    }
 }

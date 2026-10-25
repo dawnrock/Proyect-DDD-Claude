@@ -68,7 +68,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   - [x] `./mvnw verify` compiles and passes against the contract types.
   - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
 
-### [ ] T1 — `MoneyTransferService`: approved transfer (~10 min)
+### [x] T1 — `MoneyTransferService`: approved transfer (~10 min)
 
 - **Side:** back
 - **Layer:** domain
@@ -78,9 +78,9 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. With the `ddd-building-block` skill: stateless class, `Transaction transfer(source, target, amount)`; `tryWithdraw` on the source and, if approved, `deposit` on the target.
   2. Plain JUnit tests (no Spring): approved transfer moves the amount (source −, target +), records a `WITHDRAWAL` and a `DEPOSIT`, and returns the approved withdrawal.
 - **Acceptance criteria:**
-  - [ ] Tests green. `check-domain.mjs` without errors; `DomainIsolationTests` covers the new package.
+  - [x] Tests green. `check-domain.mjs` without errors; `DomainIsolationTests` covers the new package.
 
-### [ ] T2 — `MoneyTransferService`: rejected transfer and same account (~10 min)
+### [x] T2 — `MoneyTransferService`: rejected transfer and same account (~10 min)
 
 - **Side:** back
 - **Layer:** domain
@@ -90,9 +90,9 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. R18: rejected withdrawal → no deposit; target has no new movement and both balances are unchanged (retail beyond its balance, and high net worth beyond -1,000.00, parameterized).
   2. R17: same account (same id) → `SameAccountTransferException` and no movement recorded.
 - **Acceptance criteria:**
-  - [ ] Tests green (R18 test validated by temporarily depositing regardless of the outcome).
+  - [x] Tests green (R18 test validated by temporarily depositing regardless of the outcome).
 
-### [ ] T3 — `MoneyTransferService`: currency guard (~5 min)
+### [x] T3 — `MoneyTransferService`: currency guard (~5 min)
 
 - **Side:** back
 - **Layer:** domain
@@ -101,9 +101,9 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
 - **What to do:**
   1. R19: amount in a currency other than the target's → `CurrencyMismatchException` **before** withdrawing. Since accounts can only be opened in EUR, the test uses an amount in USD (source and target in EUR) and checks that neither account records a movement.
 - **Acceptance criteria:**
-  - [ ] Test green; no movement recorded in either account.
+  - [x] Test green; no movement recorded in either account.
 
-### [ ] T4 — `TransferCommand` validation (~5 min)
+### [x] T4 — `TransferCommand` validation (~5 min)
 
 - **Side:** back
 - **Layer:** application
@@ -113,9 +113,9 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. `@Value.Check` with `CommandValidation.requireValidMovement`; `currency` defaults to `EUR`.
   2. Parameterized tests of the invalid cases (0, negative, `0.001` EUR, `XYZ`).
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
-### [ ] T5 — "Transfer" use case (~10 min)
+### [x] T5 — "Transfer" use case (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -125,9 +125,9 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. `transfer`: load source and target (or `AccountNotFoundException`), delegate to `MoneyTransferService`, **save both**, return the `TransferSummary`.
   2. Tests (`@Nested` "Transferir", repository spied or in memory): approved → both accounts saved with their new balances; rejected → `REJECTED` and balances unchanged; unknown source / unknown target → `AccountNotFoundException`; same account → `SameAccountTransferException`.
 - **Acceptance criteria:**
-  - [ ] Tests green; `save` is called for both accounts. No business rules in the application service.
+  - [x] Tests green; `save` is called for both accounts. No business rules in the application service.
 
-### [ ] T6 — `POST /api/transfers` (~10 min)
+### [x] T6 — `POST /api/transfers` (~10 min)
 
 - **Side:** back
 - **Layer:** presentation
@@ -137,7 +137,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. Map the request to `TransferCommand`, respond `201` with the transfer.
   2. `@WebMvcTest` tests with the mocked service: 201 `APPROVED`; 201 `REJECTED`; 400 with `errors` (missing ids, amount 0); 404; 422 for `SameAccountTransferException` and `CurrencyMismatchException`.
 - **Acceptance criteria:**
-  - [ ] Tests green. Responses match the OpenAPI fragment.
+  - [x] Tests green. Responses match the OpenAPI fragment.
 
 ### [ ] T7 — Transfer form on the detail page (~10 min)
 

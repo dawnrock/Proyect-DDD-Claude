@@ -27,6 +27,53 @@ class MovementCommandsTests {
         return currency == null ? builder.build() : builder.currency(currency).build();
     }
 
+    private static TransferCommand transfer(String amount, String currency) {
+        TransferCommand.Builder builder = TransferCommand.builder()
+                .sourceAccountId(ACCOUNT_ID)
+                .targetAccountId(UUID.randomUUID())
+                .amount(new BigDecimal(amount));
+        return currency == null ? builder.build() : builder.currency(currency).build();
+    }
+
+    @Test
+    @DisplayName("Una transferencia válida se construye y usa EUR por defecto")
+    void una_transferencia_valida_se_construye_y_usa_eur_por_defecto() {
+        TransferCommand command = transfer("25.50", null);
+
+        assertThat(command.sourceAccountId()).isEqualTo(ACCOUNT_ID);
+        assertThat(command.amount()).isEqualByComparingTo("25.50");
+        assertThat(command.currency()).isEqualTo("EUR");
+    }
+
+    @Test
+    @DisplayName("Una transferencia con origen y destino iguales se construye: es una regla del dominio")
+    void una_transferencia_con_origen_y_destino_iguales_se_construye() {
+        TransferCommand command = TransferCommand.builder()
+                .sourceAccountId(ACCOUNT_ID)
+                .targetAccountId(ACCOUNT_ID)
+                .amount(new BigDecimal("10"))
+                .build();
+
+        assertThat(command.targetAccountId()).isEqualTo(command.sourceAccountId());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0", "-1", "0.001"})
+    @DisplayName("El importe de una transferencia debe ser positivo después de redondear")
+    void el_importe_de_una_transferencia_debe_ser_positivo_despues_de_redondear(String amount) {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> transfer(amount, null))
+                .withMessage("El importe debe ser positivo");
+    }
+
+    @Test
+    @DisplayName("La divisa de una transferencia debe ser un código ISO 4217 válido")
+    void la_divisa_de_una_transferencia_debe_ser_un_codigo_iso_4217_valido() {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> transfer("10", "XYZ"))
+                .withMessage("La divisa XYZ no es un código ISO 4217 válido");
+    }
+
     @Test
     @DisplayName("Un ingreso válido se construye y usa EUR por defecto")
     void un_ingreso_valido_se_construye_y_usa_eur_por_defecto() {
