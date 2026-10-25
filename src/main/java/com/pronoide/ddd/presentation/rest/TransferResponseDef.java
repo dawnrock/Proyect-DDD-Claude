@@ -20,7 +20,6 @@ public interface TransferResponseDef {
 
     String sourceAccountNumber();
 
-    UUID targetAccountId();
 
     String targetAccountNumber();
 

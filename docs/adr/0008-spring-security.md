@@ -28,4 +28,6 @@ Add `spring-boot-starter-security` (and `spring-security-test` in test scope):
 - No `thymeleaf-extras-springsecurity`: the web header gets the username from a `@ControllerAdvice`, so no further dependency is needed.
 - End-to-end tests log in (cookie session) or send Basic credentials.
 - The API now requires credentials (401 without them, 403 without the role), documented in `openapi.yaml` with a `basicAuth` scheme.
+- Hardening done after the review: the H2 console is admin-only (same-origin frames, no CSRF on its own forms) and the public `/actuator/health` shows only the status.
+- **Accepted risks** (local practice project): a user can learn whether an IBAN exists by trying a transfer (404 vs 201), which is inherent to transferring to any account; there is no limit on login attempts.
 - In phase 2 the chains become part of the `adapter.in.web` / `adapter.in.rest` adapters and `Caller` travels through the input ports.

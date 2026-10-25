@@ -247,7 +247,7 @@ components:
           description: ISO 4217 code. A currency other than the accounts' fails with 422.
     Transfer:
       type: object
-      required: [sourceAccountId, sourceAccountNumber, targetAccountId, targetAccountNumber, amount, currency, occurredOn, status]
+      required: [sourceAccountId, sourceAccountNumber, targetAccountNumber, amount, currency, occurredOn, status]
       properties:
         sourceAccountId:
           type: string
@@ -255,9 +255,6 @@ components:
         sourceAccountNumber:
           type: string
           example: ES9121000418450200051332
-        targetAccountId:
-          type: string
-          format: uuid
         targetAccountNumber:
           type: string
           example: ES7921000813610123456789

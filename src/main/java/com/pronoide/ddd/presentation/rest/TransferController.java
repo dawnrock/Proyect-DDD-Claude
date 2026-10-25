@@ -45,7 +45,6 @@ public class TransferController {
         return TransferResponse.builder()
                 .sourceAccountId(transfer.sourceAccountId())
                 .sourceAccountNumber(transfer.sourceAccountNumber())
-                .targetAccountId(transfer.targetAccountId())
                 .targetAccountNumber(transfer.targetAccountNumber())
                 .amount(transfer.amount())
                 .currency(transfer.currency())

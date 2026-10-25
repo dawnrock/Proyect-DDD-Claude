@@ -23,7 +23,11 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/login", "/css/**", "/actuator/health", "/error", "/error/**").permitAll()
                         .requestMatchers("/accounts/new").hasRole("ADMIN")
+                        // Consola H2: solo administradores; usa marcos del mismo origen y sus propios formularios sin CSRF
+                        .requestMatchers("/h2-console/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .formLogin(login -> login
                         .loginPage("/login")
                         .defaultSuccessUrl("/", true)

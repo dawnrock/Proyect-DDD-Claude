@@ -88,7 +88,7 @@ class TransferControllerTests {
                 .andExpect(header().doesNotExist("Location"))
                 .andExpect(jsonPath("$.sourceAccountId").value(SOURCE_ID.toString()))
                 .andExpect(jsonPath("$.sourceAccountNumber").value("ES9121000418450200051332"))
-                .andExpect(jsonPath("$.targetAccountId").value(TARGET_ID.toString()))
+                .andExpect(jsonPath("$.targetAccountId").doesNotExist())
                 .andExpect(jsonPath("$.targetAccountNumber").value("ES7921000813610123456789"))
                 .andExpect(jsonPath("$.amount").value(25.00))
                 .andExpect(jsonPath("$.currency").value("EUR"))

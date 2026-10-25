@@ -104,3 +104,4 @@ Tests: `@WebMvcTest` classes import their chain and `SecuritySupport`; existing 
   - `AccessDeniedException` renamed `OperationNotAllowedException` so it does not clash with Spring Security's (backend-dev); both handlers translate `ForbiddenOperationException` to 403.
   - Transition behaviour of the old methods, accounts without owner (admin only) and `ownerUsername` required by the service with a Spanish message (backend-dev, web-dev).
   - Header username via a web `@ControllerAdvice` without Thymeleaf extras; web chain is the fallback; `SecuritySupport` starts without users and validates usernames (web-dev, backend-dev).
+- 2026-10-25, after the `revisor-ddd` review (lead, E3): the `Transfer` response no longer includes `targetAccountId` (internal id of another customer's account); `targetAccountNumber` stays. The H2 console becomes admin-only and the public health check shows only the status.

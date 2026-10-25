@@ -318,6 +318,18 @@ class DddLabApplicationTests {
 			assertThat(api("ada", "GET", "/api/accounts/" + adas, null).body()).contains("\"balance\":130.00");
 		}
 
+		@Test
+		@DisplayName("La consola H2 es solo para administradores y la salud pública no muestra detalles")
+		void la_consola_h2_es_solo_para_administradores_y_la_salud_publica_no_muestra_detalles() throws Exception {
+			HttpResponse<String> console = send(loginAs("ada"), "/h2-console/");
+			HttpResponse<String> health = get("/actuator/health", "application/json");
+
+			assertThat(console.statusCode()).isEqualTo(403);
+			assertThat(send(loginAs("admin"), "/h2-console/").statusCode()).isEqualTo(200);
+			assertThat(health.statusCode()).isEqualTo(200);
+			assertThat(health.body()).contains("\"status\":\"UP\"").doesNotContain("components", "diskSpace");
+		}
+
 		private String openAccountFor(String accountNumber, String owner) throws Exception {
 			HttpResponse<String> created = post("/api/accounts", "application/json", """
 					{"accountNumber": "%s", "holderName": "Titular", "segment": "RETAIL", "initialDeposit": 100.00,
