@@ -2,20 +2,20 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores. **Se actualiza en cada PR que cierra una issue** (lo exigen `implement-plan`, `implement-plan-team`, la plantilla de los planes y el CI).
 
-- **Última actualización:** 2026-10-25 · PR #45 (datos de demostración)
+- **Última actualización:** 2026-10-25 · PR de la #12 (reglas de ArchUnit de las capas)
 - **Rama activa:** `Monolithic` (fase 1). `master` congelada. `Hexagonal` aún no existe.
 
 ## Dónde estamos
 
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
-| 1 · Monolito en capas | #2 Lombok/Immutables · #3 glosario, capas y ADR 0004 · #4 repositorio en memoria · #8 base REST + web · #5 abrir, consultar y listar cuentas · #31 flujo en equipo (cerrada tras la #5) · #6 ingresos y retiradas con detalle de la cuenta · #7 transferencias entre cuentas (PR #43) · regla deny redundante de los hooks (PR #44, sin issue) | #11 datos de demostración (PR #45, pendiente de revisión y fusión) | #12 → #13 |
+| 1 · Monolito en capas | #2 Lombok/Immutables · #3 glosario, capas y ADR 0004 · #4 repositorio en memoria · #8 base REST + web · #5 abrir, consultar y listar cuentas · #31 flujo en equipo (cerrada tras la #5) · #6 ingresos y retiradas con detalle de la cuenta · #7 transferencias entre cuentas (PR #43) · regla deny redundante de los hooks (PR #44, sin issue) · #11 datos de demostración (PR #45) | #12 reglas de ArchUnit de las capas (PR abierta, pendiente de revisión y fusión) | #13 |
 | 2 · Hexagonal | — | — | #14 → #23 (se empieza al cerrar #13, creando `Hexagonal` desde `Monolithic`) |
 
 ## Siguiente paso
 
-1. Revisar y fusionar la PR #45 (#11) (lo decide el usuario).
-2. `/plan-feature 12` (reglas de ArchUnit de la arquitectura en capas, D1-D5).
+1. Revisar y fusionar la PR de la #12 (lo decide el usuario).
+2. `/plan-feature 13` (cerrar la fase 1: documentación final y etiqueta `v1-monolito`).
 
 Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sección "Issues de la fase".
 
@@ -49,6 +49,7 @@ Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sec
 - Las adiciones de la #5 a documentos que siguen en español (glosario, `fase-1-capas.md`, este estado) se escribieron en español para no mezclar idiomas; se traducen con el resto.
 - Telegram: los avisos locales se silencian con `TELEGRAM_DISABLED=1` (PR #40), activado en `~/.claude/settings.json` del usuario. El aviso de CI fallida sigue activo (usa los secretos de GitHub).
 - **Datos de demostración (#11):** `./mvnw spring-boot:run` arranca con el perfil `demo` (propiedad `spring-boot.run.profiles` del `pom.xml`) y tres cuentas abiertas con los casos de uso; `-Dspring-boot.run.profiles=default` arranca sin datos. Proponer al usuario mencionarlo en la sección de comandos de `CLAUDE.md` (requiere su visto bueno).
+- `DomainIsolationTests` prohíbe un paquete `com.pronoide.ddd.bootstrap..` que no existe (resto de una versión anterior). Inofensivo; quitarlo cuando se toque esa clase. Hoy lo cubre `el_dominio_solo_depende_del_jdk` (#12).
 - **`implement-plan-team` y los worktrees aislados (#7):** el worktree que crea el `Agent` con `isolation: worktree` parte de `Monolithic`, no de la rama de integración, y se borra solo si el agente termina sin cambios. Lo que funcionó: que el teammate haga primero `git merge --ff-only <rama-integración>`. Un hook de la sesión impide al lead escribir en otro worktree, así que el lead integra en su propio worktree. Conviene reflejarlo en la skill (requiere el visto bueno del usuario, porque toca `.claude/`).
 - **Avisos de la revisión de la #7 para la fase 2:** guardar las dos cuentas de una transferencia en una transacción (hoy son dos `save` sin bloqueo; documentado en el glosario); valorar un `approved()` o un enumerado de `application` en lugar de comparar el literal `"REJECTED"` en la web; registrar `MoneyTransferService` como bean en `config`.
 
@@ -82,3 +83,5 @@ Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sec
 | 2026-10-25 | #43 | #7 | Transferencias entre cuentas (REST + web): primer servicio de dominio `MoneyTransferService` (R17-R19) |
 | 2026-10-25 | #44 | — | Quita la regla deny `Write(./.claude/hooks/**)`, que nunca se aplicaba |
 | 2026-10-25 | #45 | #11 | Datos de demostración con el perfil `demo` y builder de cuentas de test `TestAccounts` |
+| 2026-10-25 | #46 | — | Quita del estado el pendiente resuelto de las ramas de los teammates |
+| 2026-10-25 | (esta PR) | #12 | `LayeredArchitectureTests`: D1-D5 de la fase 1, sin setters públicos en el dominio y controladores sin repositorio |

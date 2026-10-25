@@ -100,7 +100,7 @@ No production code changes: the current code already follows D1-D5 (checked whil
 - **Acceptance criteria:**
   - [x] Both rules green; each red with its temporary change.
 
-### [ ] T6 — Documentation (~5 min)
+### [x] T6 — Documentation (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/fase-1-capas.md`, `docs/ia/estado-del-proyecto.md`
@@ -109,7 +109,7 @@ No production code changes: the current code already follows D1-D5 (checked whil
   1. `fase-1-capas.md`: "Implementado en la #12" (each D-row → its rule name; the two extra rules).
   2. Project status: #12 done, next step `/plan-feature 13`, pending item about the stale `bootstrap` package in `DomainIsolationTests`, history row.
 - **Acceptance criteria:**
-  - [ ] Documents updated; additions to documents still in Spanish stay in Spanish until they are translated.
+  - [x] Documents updated; additions to documents still in Spanish stay in Spanish until they are translated.
 
 ## Global acceptance criteria
 
