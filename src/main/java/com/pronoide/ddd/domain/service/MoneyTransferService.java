@@ -1,6 +1,9 @@
 package com.pronoide.ddd.domain.service;
 
+import java.util.Currency;
+
 import com.pronoide.ddd.domain.model.CheckingAccount;
+import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
 import com.pronoide.ddd.domain.model.Transaction;
@@ -19,6 +22,10 @@ public class MoneyTransferService {
     public Transaction transfer(CheckingAccount source, CheckingAccount target, MonetaryAmount amount) {
         if (source.equals(target)) {
             throw new SameAccountTransferException(source.accountNumber());
+        }
+        Currency targetCurrency = target.currentBalance().currency();
+        if (!amount.currency().equals(targetCurrency)) {
+            throw new CurrencyMismatchException(targetCurrency, amount.currency());
         }
         Transaction withdrawal = source.tryWithdraw(amount);
         if (withdrawal.isApproved()) {

@@ -3,6 +3,9 @@ package com.pronoide.ddd.domain.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.math.BigDecimal;
+import java.util.Currency;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,6 +15,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import com.pronoide.ddd.domain.model.AccountHolder;
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
+import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.domain.model.CustomerSegment;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
@@ -98,6 +102,27 @@ class MoneyTransferServiceTests {
             assertThat(target.currentBalance()).isEqualTo(MonetaryAmount.euros("100.00"));
             assertThat(target.transactions()).hasSize(1);
             assertThat(source.transactions()).hasSize(2);
+        }
+    }
+
+    @Nested
+    @DisplayName("Divisa de la transferencia (R19)")
+    class TransferCurrency {
+
+        @Test
+        @DisplayName("Un importe en otra divisa se rechaza sin registrar ningún movimiento en las cuentas")
+        void un_importe_en_otra_divisa_se_rechaza_sin_registrar_movimientos() {
+            CheckingAccount source = account(SOURCE_IBAN, CustomerSegment.RETAIL, "500.00");
+            CheckingAccount target = account(TARGET_IBAN, CustomerSegment.RETAIL, "100.00");
+            MonetaryAmount dollars = new MonetaryAmount(new BigDecimal("10.00"), Currency.getInstance("USD"));
+
+            assertThatExceptionOfType(CurrencyMismatchException.class)
+                    .isThrownBy(() -> service.transfer(source, target, dollars));
+
+            assertThat(source.transactions()).hasSize(1);
+            assertThat(target.transactions()).hasSize(1);
+            assertThat(source.currentBalance()).isEqualTo(MonetaryAmount.euros("500.00"));
+            assertThat(target.currentBalance()).isEqualTo(MonetaryAmount.euros("100.00"));
         }
     }
 

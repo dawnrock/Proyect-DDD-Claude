@@ -92,7 +92,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
 - **Acceptance criteria:**
   - [x] Tests green (R18 test validated by temporarily depositing regardless of the outcome).
 
-### [ ] T3 — `MoneyTransferService`: currency guard (~5 min)
+### [x] T3 — `MoneyTransferService`: currency guard (~5 min)
 
 - **Side:** back
 - **Layer:** domain
@@ -101,7 +101,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
 - **What to do:**
   1. R19: amount in a currency other than the target's → `CurrencyMismatchException` **before** withdrawing. Since accounts can only be opened in EUR, the test uses an amount in USD (source and target in EUR) and checks that neither account records a movement.
 - **Acceptance criteria:**
-  - [ ] Test green; no movement recorded in either account.
+  - [x] Test green; no movement recorded in either account.
 
 ### [ ] T4 — `TransferCommand` validation (~5 min)
 
