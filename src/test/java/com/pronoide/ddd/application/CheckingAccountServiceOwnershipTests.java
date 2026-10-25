@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
+import com.pronoide.ddd.support.TestAccounts;
 
 /**
  * Reglas de propiedad de las cuentas (#50): un administrador accede a todo; un usuario solo a sus cuentas, y una ajena
@@ -45,6 +46,16 @@ class CheckingAccountServiceOwnershipTests {
                 .segment("RETAIL")
                 .initialDeposit(new BigDecimal("500"))
                 .ownerUsername(owner);
+    }
+
+    /** Cuenta guardada directamente en el repositorio, sin propietario registrado: solo la ve un administrador. */
+    private AccountSummary openWithoutOwner(String accountNumber) {
+        UUID id = accounts.save(TestAccounts.anAccount().accountNumber(accountNumber).initialDeposit("500.00").open())
+                .id();
+        return service.listAccounts(ADMIN).stream()
+                .filter(account -> account.id().equals(id))
+                .findFirst()
+                .orElseThrow();
     }
 
     @Nested
@@ -87,22 +98,6 @@ class CheckingAccountServiceOwnershipTests {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> command(ADA_IBAN, "Ada Lovelace").build());
         }
-
-        @Test
-        @DisplayName("La vía antigua sin Caller registra el propietario cuando el command lo trae")
-        void la_via_antigua_registra_el_propietario_cuando_el_command_lo_trae() {
-            AccountSummary summary = service.openAccount(command(ADA_IBAN, "ada").build());
-
-            assertThat(owners.ownerOf(summary.id())).contains("ada");
-        }
-
-        @Test
-        @DisplayName("La vía antigua sin propietario abre la cuenta sin propietario")
-        void la_via_antigua_sin_propietario_abre_la_cuenta_sin_propietario() {
-            AccountSummary summary = service.openAccount(command(ADA_IBAN, "").build());
-
-            assertThat(owners.ownerOf(summary.id())).isEmpty();
-        }
     }
 
     @Nested
@@ -117,7 +112,7 @@ class CheckingAccountServiceOwnershipTests {
         void openAccounts() {
             adas = service.openAccount(ADMIN, command(ADA_IBAN, "ada").build());
             graces = service.openAccount(ADMIN, command(GRACE_IBAN, "grace").build());
-            orphan = service.openAccount(command("ES6000491500051234567892", "").build());
+            orphan = openWithoutOwner("ES6000491500051234567892");
         }
 
         @Test
@@ -190,7 +185,7 @@ class CheckingAccountServiceOwnershipTests {
         void openAccounts() {
             adas = service.openAccount(ADMIN, command(ADA_IBAN, "ada").build());
             graces = service.openAccount(ADMIN, command(GRACE_IBAN, "grace").build());
-            orphan = service.openAccount(command("ES6000491500051234567892", "").build());
+            orphan = openWithoutOwner("ES6000491500051234567892");
         }
 
         private DepositCommand deposit(AccountSummary account) {
@@ -304,25 +299,6 @@ class CheckingAccountServiceOwnershipTests {
         void transferir_a_la_propia_cuenta_sigue_siendo_una_regla_del_dominio() {
             assertThatExceptionOfType(com.pronoide.ddd.domain.model.SameAccountTransferException.class)
                     .isThrownBy(() -> service.transfer(ADA, transfer(adas, ADA_IBAN)));
-        }
-
-        @Test
-        @DisplayName("Una transferencia con Caller que solo trae el id de destino lanza IllegalArgumentException")
-        void una_transferencia_con_caller_que_solo_trae_el_id_de_destino_lanza_illegal_argument_exception() {
-            TransferCommand byId = TransferCommand.builder()
-                    .sourceAccountId(adas.id())
-                    .targetAccountId(graces.id())
-                    .amount(new BigDecimal("10"))
-                    .build();
-
-            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> service.transfer(ADA, byId));
-        }
-
-        @Test
-        @DisplayName("La vía antigua de transferir exige el id de destino")
-        void la_via_antigua_de_transferir_exige_el_id_de_destino() {
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> service.transfer(transfer(adas, GRACE_IBAN)));
         }
     }
 }

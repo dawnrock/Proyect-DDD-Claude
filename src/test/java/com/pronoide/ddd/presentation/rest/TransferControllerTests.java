@@ -99,7 +99,6 @@ class TransferControllerTests {
         verify(service).transfer(any(Caller.class), captor.capture());
         assertThat(captor.getValue().sourceAccountId()).isEqualTo(SOURCE_ID);
         assertThat(captor.getValue().targetAccountNumber()).isEqualTo(TARGET_IBAN);
-        assertThat(captor.getValue().targetAccountId()).isNull();
         assertThat(captor.getValue().amount()).isEqualByComparingTo("25.00");
         assertThat(captor.getValue().currency()).isEqualTo("EUR");
     }

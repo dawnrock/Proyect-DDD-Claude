@@ -36,7 +36,7 @@ public interface OpenAccountCommandDef {
 
     /**
      * Usuario (cliente) propietario de la cuenta: solo él y los administradores podrán verla y operarla. Vacío por
-     * defecto mientras dura la transición de la #50; {@code openAccount(Caller, ...)} lo exige.
+     * defecto en el command; {@code openAccount(Caller, ...)} lo exige.
      */
     @Value.Default
     default String ownerUsername() {

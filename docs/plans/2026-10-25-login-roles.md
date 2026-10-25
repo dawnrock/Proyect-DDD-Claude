@@ -235,7 +235,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [x] Tests green (valid owner; invalid username field error).
 
-### [ ] E1 — Integration: remove old methods, end-to-end tests (~15 min)
+### [x] E1 — Integration: remove old methods, end-to-end tests (~15 min)
 
 - **Side:** both
 - **Layer:** application · tests
@@ -246,7 +246,7 @@ Make the application realistic: today anyone sees every account on the home page
   2. End-to-end with the real service: anonymous `/` → `/login`; login as admin (form + cookie, CSRF token read from the page) sees all accounts; user `ada` lands on her account and gets 404 on grace's; API with Basic: admin 200, user 403 on `POST /api/accounts`, 401 without credentials; transfer by IBAN between customers.
   3. Manual check in the browser (admin and user, desktop and mobile) and with `curl -u`.
 - **Acceptance criteria:**
-  - [ ] Tests green; browser and `curl` checks done.
+  - [x] Tests green; browser and `curl` checks done.
 
 ### [ ] E2 — Documentation (~10 min)
 

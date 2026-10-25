@@ -2,6 +2,7 @@ package com.pronoide.ddd.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -30,7 +31,7 @@ class MovementCommandsTests {
     private static TransferCommand transfer(String amount, String currency) {
         TransferCommand.Builder builder = TransferCommand.builder()
                 .sourceAccountId(ACCOUNT_ID)
-                .targetAccountId(UUID.randomUUID())
+                .targetAccountNumber("ES7921000813610123456789")
                 .amount(new BigDecimal(amount));
         return currency == null ? builder.build() : builder.currency(currency).build();
     }
@@ -50,11 +51,11 @@ class MovementCommandsTests {
     void una_transferencia_con_origen_y_destino_iguales_se_construye() {
         TransferCommand command = TransferCommand.builder()
                 .sourceAccountId(ACCOUNT_ID)
-                .targetAccountId(ACCOUNT_ID)
+                .targetAccountNumber("ES9121000418450200051332")
                 .amount(new BigDecimal("10"))
                 .build();
 
-        assertThat(command.targetAccountId()).isEqualTo(command.sourceAccountId());
+        assertThat(command.targetAccountNumber()).isEqualTo("ES9121000418450200051332");
     }
 
     @ParameterizedTest
@@ -137,7 +138,6 @@ class MovementCommandsTests {
                 .build();
 
         assertThat(command.targetAccountNumber()).isEqualTo("es91 2100 0418 4502 0005 1332");
-        assertThat(command.targetAccountId()).isNull();
     }
 
     @ParameterizedTest
@@ -152,16 +152,11 @@ class MovementCommandsTests {
     }
 
     @Test
-    @DisplayName("Una transferencia sin destino, o con los dos destinos, se rechaza")
-    void una_transferencia_sin_destino_o_con_los_dos_se_rechaza() {
-        assertThatIllegalArgumentException().isThrownBy(() -> TransferCommand.builder()
-                .sourceAccountId(ACCOUNT_ID).amount(new BigDecimal("10")).build());
-        assertThatIllegalArgumentException().isThrownBy(() -> TransferCommand.builder()
-                .sourceAccountId(ACCOUNT_ID)
-                .targetAccountId(UUID.randomUUID())
-                .targetAccountNumber("ES9121000418450200051332")
-                .amount(new BigDecimal("10"))
-                .build());
+    @DisplayName("Una transferencia sin cuenta de destino no se puede construir")
+    void una_transferencia_sin_cuenta_de_destino_no_se_puede_construir() {
+        assertThatIllegalStateException().isThrownBy(() -> TransferCommand.builder()
+                .sourceAccountId(ACCOUNT_ID).amount(new BigDecimal("10")).build())
+                .withMessageContaining("targetAccountNumber");
     }
 
     @ParameterizedTest
