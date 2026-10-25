@@ -95,7 +95,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [x] `./mvnw verify` green with the dependency in place; `CurrentCaller` unit test (admin and user).
 
-### [ ] B1 — Ownership repository (~5 min)
+### [x] B1 — Ownership repository (~5 min)
 
 - **Side:** back
 - **Layer:** persistence
@@ -104,7 +104,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **What to do:**
   1. `assign(UUID accountId, String username)`, `ownerOf(UUID)`, `accountsOf(String)`; one owner per account.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
 ### [ ] B2 — Opening accounts: admin only, with owner (~10 min)
 
