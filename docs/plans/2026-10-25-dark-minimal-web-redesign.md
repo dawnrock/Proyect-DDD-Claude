@@ -44,7 +44,7 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
 
 ## Tasks
 
-### [ ] T1 — `WebFormat` helper (~10 min)
+### [x] T1 — `WebFormat` helper (~10 min)
 
 - **Layer:** presentation
 - **Files:** `presentation/web/WebFormat.java`, `presentation/web/WebFormatTests.java`
@@ -53,7 +53,7 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
   1. Plain JUnit tests first: `money` (`1000.00 EUR` → `1.000,00 €`; `5.5 USD` → `5,50 US$`, whatever the JDK's es-ES gives, asserted from the same `NumberFormat`), `signedMoney` (`+`/`−`), `maskedIban`, `initials` (one word, two words, extra spaces).
   2. Implement with the JDK only.
 - **Acceptance criteria:**
-  - [ ] Tests green (red first: class missing). No domain imports.
+  - [x] Tests green (red first: class missing). No domain imports.
 
 ### [ ] T2 — Dark theme base and layout (~10 min)
 
