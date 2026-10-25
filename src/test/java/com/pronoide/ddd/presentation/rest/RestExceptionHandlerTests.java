@@ -58,6 +58,22 @@ class RestExceptionHandlerTests {
     }
 
     @Nested
+    @DisplayName("Operaciones no permitidas")
+    class Forbidden {
+
+        @Test
+        @DisplayName("Una operación reservada a administradores se traduce en un 403 Acceso denegado")
+        void una_operacion_reservada_a_administradores_se_traduce_en_un_403() throws Exception {
+            mvc.perform(get("/test/errors/forbidden"))
+                    .andExpect(status().isForbidden())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                    .andExpect(jsonPath("$.status").value(403))
+                    .andExpect(jsonPath("$.title").value("Acceso denegado"))
+                    .andExpect(jsonPath("$.detail").value("Solo un administrador puede abrir cuentas"));
+        }
+    }
+
+    @Nested
     @DisplayName("Peticiones no válidas")
     class BadRequest {
 

@@ -34,5 +34,10 @@ public record OpenAccountRequest(
         BigDecimal initialDeposit,
 
         @Pattern(regexp = "[A-Z]{3}", message = "La divisa debe ser un código ISO 4217 de tres letras mayúsculas")
-        String currency) {
+        String currency,
+
+        @NotBlank(message = "El usuario propietario es obligatorio")
+        @Pattern(regexp = "[a-z0-9._-]{3,30}",
+                message = "El usuario debe tener de 3 a 30 minúsculas, dígitos, puntos o guiones")
+        String ownerUsername) {
 }

@@ -152,7 +152,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [x] Test green: each demo account has its owner.
 
-### [ ] B6 — API security rules and 401/403 (~10 min)
+### [x] B6 — API security rules and 401/403 (~10 min)
 
 - **Side:** back
 - **Layer:** presentation
@@ -163,7 +163,7 @@ Make the application realistic: today anyone sees every account on the home page
   2. Controllers pass `CurrentCaller.from(authentication)` to the new service methods; `OpenAccountRequest.ownerUsername`.
   3. Tests: anonymous 401; user on `POST /api/accounts` 403; user on a foreign account 404 (mocked service throws); admin as before.
 - **Acceptance criteria:**
-  - [ ] Tests green; responses match the OpenAPI fragment.
+  - [x] Tests green; responses match the OpenAPI fragment.
 
 ### [ ] B7 — API transfer by IBAN (~5 min)
 

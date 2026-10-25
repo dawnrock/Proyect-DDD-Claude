@@ -86,7 +86,7 @@ class DddLabApplicationTests {
 		void una_cuenta_abierta_por_la_api_se_consulta_por_su_id_y_aparece_en_el_listado_web() throws Exception {
 			HttpResponse<String> created = post("/api/accounts", "application/json", """
 					{"accountNumber": "es91 2100 0418 4502 0005 1332", "holderName": "Ada Lovelace",
-					 "segment": "RETAIL", "initialDeposit": 100.00}""");
+					 "segment": "RETAIL", "initialDeposit": 100.00, "ownerUsername": "ada"}""");
 
 			assertThat(created.statusCode()).isEqualTo(201);
 			assertThat(created.body()).contains("\"accountNumber\":\"ES9121000418450200051332\"");
@@ -260,7 +260,8 @@ class DddLabApplicationTests {
 	/** Abre una cuenta minorista con 100,00 € y devuelve su ruta de la API ({@code /api/accounts/{id}}). */
 	private String openAccount(String accountNumber) throws Exception {
 		HttpResponse<String> created = post("/api/accounts", "application/json", """
-				{"accountNumber": "%s", "holderName": "Grace Hopper", "segment": "RETAIL", "initialDeposit": 100.00}"""
+				{"accountNumber": "%s", "holderName": "Grace Hopper", "segment": "RETAIL", "initialDeposit": 100.00,
+				 "ownerUsername": "ada"}"""
 				.formatted(accountNumber));
 		assertThat(created.statusCode()).isEqualTo(201);
 		return created.headers().firstValue("Location").orElseThrow();
@@ -282,8 +283,14 @@ class DddLabApplicationTests {
 				HttpResponse.BodyHandlers.ofString()).body();
 	}
 
+	/** Cabecera HTTP Basic del administrador, que la API exige (#50); la web no la usa. */
+	private static HttpRequest.Builder withApiCredentials(HttpRequest.Builder request, String path) {
+		return path.startsWith("/api") ? request.header("Authorization", "Basic " + java.util.Base64.getEncoder()
+				.encodeToString(("admin:" + PASSWORD).getBytes(StandardCharsets.UTF_8))) : request;
+	}
+
 	private HttpResponse<String> get(String path, String accept) throws Exception {
-		HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
+		HttpRequest request = withApiCredentials(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path)), path)
 				.header("Accept", accept)
 				.GET()
 				.build();
@@ -291,7 +298,7 @@ class DddLabApplicationTests {
 	}
 
 	private HttpResponse<String> post(String path, String contentType, String body) throws Exception {
-		HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
+		HttpRequest request = withApiCredentials(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path)), path)
 				.header("Content-Type", contentType)
 				.POST(HttpRequest.BodyPublishers.ofString(body))
 				.build();

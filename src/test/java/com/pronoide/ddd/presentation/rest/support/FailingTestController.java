@@ -46,6 +46,11 @@ public class FailingTestController {
         throw new SampleNotFoundException();
     }
 
+    @GetMapping("/forbidden")
+    public void forbidden() {
+        throw new com.pronoide.ddd.application.ForbiddenOperationException("abrir cuentas");
+    }
+
     @GetMapping("/invalid-argument")
     public void invalidArgument() {
         throw new IllegalArgumentException("El argumento de prueba no es válido");

@@ -24,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -36,6 +38,7 @@ import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
 
+@WithMockUser(username = "admin", roles = "ADMIN")
 @WebMvcTest(TransferController.class)
 @Import({ApiSecurityConfig.class, SecuritySupport.class})
 @DisplayName("POST /api/transfers")
@@ -59,6 +62,17 @@ class TransferControllerTests {
                 .targetAccountId(TARGET_ID).targetAccountNumber("ES7921000813610123456789")
                 .amount(new BigDecimal("25.00")).currency("EUR")
                 .occurredOn(Instant.parse("2026-10-25T10:15:30Z")).status(status).build();
+    }
+
+    @Test
+    @WithAnonymousUser
+    @DisplayName("Sin credenciales responde 401 No autenticado y no llama al servicio")
+    void sin_credenciales_responde_401_no_autenticado_y_no_llama_al_servicio() throws Exception {
+        mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(BODY))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.title").value("No autenticado"));
+
+        verifyNoInteractions(service);
     }
 
     @Test
