@@ -123,7 +123,7 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
 - **Acceptance criteria:**
   - [x] Existing sign-up tests green; page checked in the browser, including a validation error.
 
-### [ ] T8 — Browser check and documentation (~10 min)
+### [x] T8 — Browser check and documentation (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/fase-1-capas.md`, `docs/ia/estado-del-proyecto.md`
@@ -133,7 +133,7 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
   2. `fase-1-capas.md`: "Implementado en la #48" (dark theme, `WebFormat`, forms in `<details>`).
   3. Project status: #48 done, next step `/plan-feature 13`, history row.
 - **Acceptance criteria:**
-  - [ ] Browser checks done at both widths; documents updated.
+  - [x] Browser checks done at both widths; documents updated.
 
 ## Global acceptance criteria
 
