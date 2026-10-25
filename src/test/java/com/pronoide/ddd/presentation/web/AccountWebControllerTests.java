@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -654,7 +653,6 @@ class AccountWebControllerTests {
                     .andExpect(view().name("error/404"));
         }
 
-        @Disabled("Pendiente de T4/T10: el command aún no valida; se prueba con el servicio real en la integración")
         @ParameterizedTest
         @CsvSource({"0.001, EUR, El importe debe ser positivo", "10.00, XYZ, XYZ no es un c"})
         @DisplayName("Un importe que redondea a cero o una divisa inexistente vuelven al detalle con el error del command")

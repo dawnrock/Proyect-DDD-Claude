@@ -175,7 +175,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
 - **Acceptance criteria:**
   - [x] Tests green (the command-rejection case `0.001` / `XYZ` is `@Disabled` until T4 and is verified in T10). No form error ends in a 500 page.
 
-### [ ] T10 — End-to-end integration (~10 min)
+### [x] T10 — End-to-end integration (~10 min)
 
 - **Side:** both
 - **Layer:** tests
@@ -185,7 +185,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. With the real service: open two accounts; transfer via API → 201 `APPROVED` and both balances updated in `GET /api/accounts/{id}`; transfer more than the balance (retail) → 201 `REJECTED` and nothing in the target; same account → 422; the web transfer redirects to the detail with its flash and the target's detail shows the deposit.
   2. Manual check with `curl` and in the browser.
 - **Acceptance criteria:**
-  - [ ] Test green. `curl` and browser checks done.
+  - [x] Test green. `curl` and browser checks done.
 
 ### [ ] T11 — Documentation (~10 min)
 
