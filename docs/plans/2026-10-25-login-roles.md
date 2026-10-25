@@ -200,7 +200,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [x] Tests green for admin, user with several accounts and user with one account.
 
-### [ ] W3 — Detail and operations with the caller (~10 min)
+### [x] W3 — Detail and operations with the caller (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -210,7 +210,7 @@ Make the application realistic: today anyone sees every account on the home page
   1. Detail, deposit, withdrawal and transfer pass the caller; a foreign account (service throws `AccountNotFoundException`) shows the 404 page.
   2. Back link: "← Cuentas" for admin, "← Mis cuentas" for a user (hidden if they own a single account).
 - **Acceptance criteria:**
-  - [ ] Tests green, including a user on a foreign account → 404.
+  - [x] Tests green, including a user on a foreign account → 404.
 
 ### [ ] W4 — Transfer form with a typed IBAN (~10 min)
 

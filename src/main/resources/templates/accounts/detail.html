@@ -4,7 +4,7 @@
 <body>
 <header th:replace="~{fragments/layout :: header}"></header>
 <main>
-    <a class="back" th:href="@{/}">← Cuentas</a>
+    <a class="back" th:if="${backLabel != null}" th:href="@{/}" th:text="'← ' + ${backLabel}">← Cuentas</a>
     <p th:if="${message}" class="flash flash-success" role="status" th:text="${message}"></p>
     <p th:if="${rejection}" class="flash flash-warning" role="alert" th:text="${rejection}"></p>
 

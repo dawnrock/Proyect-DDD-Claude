@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -45,6 +46,7 @@ import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountNotFoundException;
 import com.pronoide.ddd.application.AccountSummary;
 import com.pronoide.ddd.application.Caller;
+import com.pronoide.ddd.application.ForbiddenOperationException;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.TransferCommand;
 import com.pronoide.ddd.application.TransferSummary;
@@ -122,6 +124,89 @@ class AccountWebControllerTests {
         }
     }
 
+    private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+
+    private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
+
+    @Nested
+    @DisplayName("Detalle y operaciones con el usuario")
+    class DetalleConUsuario {
+
+        private static final UUID FOREIGN_ID = UUID.fromString("99999999-9999-9999-9999-999999999999");
+
+        @Test
+        @WithMockUser(username = "ada", roles = "USER")
+        @DisplayName("Un usuario consulta el detalle de su cuenta: el servicio recibe a ada como usuario")
+        void un_usuario_consulta_el_detalle_de_su_cuenta() throws Exception {
+            when(service.findAccount(ADA, ACCOUNT_ID)).thenReturn(details());
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"));
+        }
+
+        @Test
+        @WithMockUser(username = "ada", roles = "USER")
+        @DisplayName("Un usuario que pide una cuenta ajena recibe la página 404")
+        void un_usuario_que_pide_una_cuenta_ajena_recibe_la_pagina_404() throws Exception {
+            when(service.findAccount(ADA, FOREIGN_ID)).thenThrow(new AccountNotFoundException(FOREIGN_ID));
+
+            mvc.perform(get("/accounts/" + FOREIGN_ID))
+                    .andExpect(status().isNotFound())
+                    .andExpect(view().name("error/404"))
+                    .andExpect(content().string(containsString("Página no encontrada")))
+                    .andExpect(content().string(containsString("ada")));
+        }
+
+        @Test
+        @WithMockUser(username = "ada", roles = "USER")
+        @DisplayName("Un usuario que ingresa en una cuenta ajena recibe la página 404")
+        void un_usuario_que_ingresa_en_una_cuenta_ajena_recibe_la_pagina_404() throws Exception {
+            when(service.deposit(eq(ADA), any())).thenThrow(new AccountNotFoundException(FOREIGN_ID));
+
+            mvc.perform(post("/accounts/" + FOREIGN_ID + "/deposits").param("amount", "10.00").param("currency", "EUR"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(view().name("error/404"));
+        }
+
+        @Test
+        @WithMockUser(username = "ada", roles = "USER")
+        @DisplayName("Un usuario con varias cuentas ve el enlace «← Mis cuentas»")
+        void un_usuario_con_varias_cuentas_ve_el_enlace_mis_cuentas() throws Exception {
+            when(service.findAccount(ADA, ACCOUNT_ID)).thenReturn(details());
+            when(service.listAccounts(ADA)).thenReturn(List.of(
+                    ownAccount(ACCOUNT_ID, "ES1234567890123456789012", "Ada Lovelace"),
+                    ownAccount(UUID.randomUUID(), "ES9876543210987654321098", "Ada Lovelace")));
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(content().string(containsString("<a class=\"back\" href=\"/\">← Mis cuentas</a>")));
+        }
+
+        @Test
+        @WithMockUser(username = "ada", roles = "USER")
+        @DisplayName("Un usuario con una sola cuenta no ve enlace de vuelta")
+        void un_usuario_con_una_sola_cuenta_no_ve_enlace_de_vuelta() throws Exception {
+            when(service.findAccount(ADA, ACCOUNT_ID)).thenReturn(details());
+            when(service.listAccounts(ADA)).thenReturn(List.of(
+                    ownAccount(ACCOUNT_ID, "ES1234567890123456789012", "Ada Lovelace")));
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(not(containsString("class=\"back\""))));
+        }
+
+        @Test
+        @DisplayName("Una operación que el servicio prohíbe por el rol (403) se muestra con la página 403")
+        void una_operacion_prohibida_por_el_rol_se_muestra_con_la_pagina_403() throws Exception {
+            when(service.deposit(any(Caller.class), any())).thenThrow(new ForbiddenOperationException("abrir cuentas"));
+
+            mvc.perform(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "10.00").param("currency", "EUR"))
+                    .andExpect(status().isForbidden())
+                    .andExpect(view().name("error/403"))
+                    .andExpect(content().string(containsString("Acceso denegado")));
+        }
+    }
+
     private static AccountSummary ownAccount(UUID id, String number, String holder) {
         return AccountSummary.builder()
                 .id(id)
@@ -153,7 +238,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("La página 404 también lleva la cabecera con el usuario")
         void la_pagina_404_tambien_lleva_la_cabecera_con_el_usuario() throws Exception {
-            when(service.findAccount(any(UUID.class)))
+            when(service.findAccount(any(Caller.class), any(UUID.class)))
                     .thenThrow(new AccountNotFoundException(UUID.randomUUID()));
 
             mvc.perform(get("/accounts/" + UUID.randomUUID()))
@@ -280,7 +365,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("El detalle muestra los datos de la cuenta, el segmento en español y sus movimientos")
         void el_detalle_muestra_los_datos_de_la_cuenta_el_segmento_en_espanol_y_sus_movimientos() throws Exception {
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details(
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details(
                     transaction("DEPOSIT", "100.00", "APPROVED"),
                     transaction("WITHDRAWAL", "30.00", "APPROVED")));
 
@@ -301,7 +386,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("El detalle enlaza de vuelta al listado")
         void el_detalle_enlaza_de_vuelta_al_listado() throws Exception {
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
@@ -311,7 +396,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Una retirada rechazada se muestra marcada como rechazada")
         void una_retirada_rechazada_se_muestra_marcada_como_rechazada() throws Exception {
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details(
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details(
                     transaction("WITHDRAWAL", "500.00", "REJECTED")));
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
@@ -325,7 +410,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Una cuenta sin movimientos muestra el mensaje de estado vacío")
         void una_cuenta_sin_movimientos_muestra_el_mensaje_de_estado_vacio() throws Exception {
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
@@ -335,7 +420,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Una cuenta desconocida devuelve la página 404 con estado 404")
         void una_cuenta_desconocida_devuelve_la_pagina_404_con_estado_404() throws Exception {
-            when(service.findAccount(ACCOUNT_ID)).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isNotFound())
@@ -373,7 +458,7 @@ class AccountWebControllerTests {
         @DisplayName("El detalle ofrece el formulario de ingreso con euro, dólar y libra, y el euro por defecto")
         void el_detalle_ofrece_el_formulario_de_ingreso_con_euro_dolar_y_libra_y_el_euro_por_defecto()
                 throws Exception {
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(content().string(containsString("/accounts/" + ACCOUNT_ID + "/deposits")))
@@ -387,14 +472,14 @@ class AccountWebControllerTests {
         @DisplayName("Un ingreso válido llama al servicio con el comando esperado y redirige al detalle con un mensaje")
         void un_ingreso_valido_llama_al_servicio_con_el_comando_esperado_y_redirige_al_detalle_con_un_mensaje()
                 throws Exception {
-            when(service.deposit(any())).thenReturn(transaction("DEPOSIT", "50.00", "APPROVED"));
+            when(service.deposit(any(Caller.class), any())).thenReturn(transaction("DEPOSIT", "50.00", "APPROVED"));
 
             mvc.perform(ingresoDe("50.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
                     .andExpect(flash().attribute("message", "Ingreso de 50,00 € aprobado"));
 
-            verify(service).deposit(DepositCommand.builder()
+            verify(service).deposit(ADMIN, DepositCommand.builder()
                     .accountId(ACCOUNT_ID)
                     .amount(new BigDecimal("50.00"))
                     .currency("EUR")
@@ -406,7 +491,7 @@ class AccountWebControllerTests {
         @DisplayName("Un importe no positivo vuelve al detalle con el error del campo y sin llamar al servicio")
         void un_importe_no_positivo_vuelve_al_detalle_con_el_error_del_campo_y_sin_llamar_al_servicio(String amount)
                 throws Exception {
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(ingresoDe(amount, "EUR"))
                     .andExpect(status().isOk())
@@ -416,27 +501,27 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("El importe debe ser positivo")))
                     .andExpect(content().string(containsString("ES1234567890123456789012")));
 
-            verify(service, never()).deposit(any());
+            verify(service, never()).deposit(any(Caller.class), any());
         }
 
         @Test
         @DisplayName("Un importe ausente vuelve al detalle con el error del campo")
         void un_importe_ausente_vuelve_al_detalle_con_el_error_del_campo() throws Exception {
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(post("/accounts/" + ACCOUNT_ID + "/deposits").param("currency", "EUR"))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("El importe es obligatorio")));
 
-            verify(service, never()).deposit(any());
+            verify(service, never()).deposit(any(Caller.class), any());
         }
 
         @Test
         @DisplayName("Otra divisa vuelve al detalle con el mensaje del dominio y conserva el importe")
         void otra_divisa_vuelve_al_detalle_con_el_mensaje_del_dominio_y_conserva_el_importe() throws Exception {
             var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD"));
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
-            when(service.deposit(any())).thenThrow(error);
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+            when(service.deposit(any(Caller.class), any())).thenThrow(error);
 
             mvc.perform(ingresoDe("75.50", "USD"))
                     .andExpect(status().isOk())
@@ -452,7 +537,7 @@ class AccountWebControllerTests {
         @DisplayName("Un importe que redondea a cero o una divisa inexistente vuelven al detalle con el error del command")
         void un_importe_que_redondea_a_cero_o_una_divisa_inexistente_vuelven_al_detalle_con_el_error_del_command(
                 String amount, String currency, String message) throws Exception {
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(ingresoDe(amount, currency))
                     .andExpect(status().isOk())
@@ -462,13 +547,13 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString(message)))
                     .andExpect(content().string(containsString(amount)));
 
-            verify(service, never()).deposit(any());
+            verify(service, never()).deposit(any(Caller.class), any());
         }
 
         @Test
         @DisplayName("Un ingreso en una cuenta desconocida devuelve la página 404")
         void un_ingreso_en_una_cuenta_desconocida_devuelve_la_pagina_404() throws Exception {
-            when(service.deposit(any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
+            when(service.deposit(any(Caller.class), any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
 
             mvc.perform(ingresoDe("10.00", "EUR"))
                     .andExpect(status().isNotFound())
@@ -489,7 +574,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("El detalle ofrece el formulario de retirada")
         void el_detalle_ofrece_el_formulario_de_retirada() throws Exception {
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(content().string(containsString("/accounts/" + ACCOUNT_ID + "/withdrawals")));
@@ -498,7 +583,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Una retirada aprobada redirige al detalle con un mensaje de éxito")
         void una_retirada_aprobada_redirige_al_detalle_con_un_mensaje_de_exito() throws Exception {
-            when(service.withdraw(any())).thenReturn(transaction("WITHDRAWAL", "30.00", "APPROVED"));
+            when(service.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "30.00", "APPROVED"));
 
             mvc.perform(retiradaDe("30.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
@@ -506,7 +591,7 @@ class AccountWebControllerTests {
                     .andExpect(flash().attribute("message", "Retirada de 30,00 € aprobada"))
                     .andExpect(flash().attributeCount(1));
 
-            verify(service).withdraw(WithdrawCommand.builder()
+            verify(service).withdraw(ADMIN, WithdrawCommand.builder()
                     .accountId(ACCOUNT_ID)
                     .amount(new BigDecimal("30.00"))
                     .currency("EUR")
@@ -517,7 +602,7 @@ class AccountWebControllerTests {
         @DisplayName("Una retirada rechazada redirige al detalle con un aviso de rechazo distinto del de éxito")
         void una_retirada_rechazada_redirige_al_detalle_con_un_aviso_de_rechazo_distinto_del_de_exito()
                 throws Exception {
-            when(service.withdraw(any())).thenReturn(transaction("WITHDRAWAL", "500.00", "REJECTED"));
+            when(service.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "500.00", "REJECTED"));
 
             mvc.perform(retiradaDe("500.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
@@ -530,7 +615,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("El aviso de rechazo se pinta con el estilo de advertencia y no con el de éxito")
         void el_aviso_de_rechazo_se_pinta_con_el_estilo_de_advertencia_y_no_con_el_de_exito() throws Exception {
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID).flashAttr("rejection", "Retirada de 500.00 EUR rechazada"))
                     .andExpect(content().string(containsString("flash flash-warning")))
@@ -542,7 +627,7 @@ class AccountWebControllerTests {
         @DisplayName("Un importe no positivo vuelve al detalle con el error del campo y sin llamar al servicio")
         void un_importe_no_positivo_vuelve_al_detalle_con_el_error_del_campo_y_sin_llamar_al_servicio()
                 throws Exception {
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(retiradaDe("-1", "EUR"))
                     .andExpect(status().isOk())
@@ -551,15 +636,15 @@ class AccountWebControllerTests {
                     .andExpect(model().attributeHasNoErrors("depositForm"))
                     .andExpect(content().string(containsString("El importe debe ser positivo")));
 
-            verify(service, never()).withdraw(any());
+            verify(service, never()).withdraw(any(Caller.class), any());
         }
 
         @Test
         @DisplayName("Otra divisa vuelve al detalle con el mensaje del dominio y conserva el importe")
         void otra_divisa_vuelve_al_detalle_con_el_mensaje_del_dominio_y_conserva_el_importe() throws Exception {
             var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("GBP"));
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
-            when(service.withdraw(any())).thenThrow(error);
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+            when(service.withdraw(any(Caller.class), any())).thenThrow(error);
 
             mvc.perform(retiradaDe("20.25", "GBP"))
                     .andExpect(status().isOk())
@@ -575,7 +660,7 @@ class AccountWebControllerTests {
         @DisplayName("Un importe que redondea a cero o una divisa inexistente vuelven al detalle con el error del command")
         void un_importe_que_redondea_a_cero_o_una_divisa_inexistente_vuelven_al_detalle_con_el_error_del_command(
                 String amount, String currency, String message) throws Exception {
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(retiradaDe(amount, currency))
                     .andExpect(status().isOk())
@@ -585,13 +670,13 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString(message)))
                     .andExpect(content().string(containsString(amount)));
 
-            verify(service, never()).withdraw(any());
+            verify(service, never()).withdraw(any(Caller.class), any());
         }
 
         @Test
         @DisplayName("Una retirada en una cuenta desconocida devuelve la página 404")
         void una_retirada_en_una_cuenta_desconocida_devuelve_la_pagina_404() throws Exception {
-            when(service.withdraw(any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
+            when(service.withdraw(any(Caller.class), any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
 
             mvc.perform(retiradaDe("10.00", "EUR"))
                     .andExpect(status().isNotFound())
@@ -619,8 +704,8 @@ class AccountWebControllerTests {
         @DisplayName("El select de destino lista las otras cuentas como número y titular, sin la cuenta actual")
         void el_select_de_destino_lista_las_otras_cuentas_como_numero_y_titular_sin_la_cuenta_actual()
                 throws Exception {
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
-            when(service.listAccounts()).thenReturn(List.of(
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+            when(service.listAccounts(any(Caller.class))).thenReturn(List.of(
                     summary(ACCOUNT_ID, "ES1234567890123456789012", "Ana Pérez"),
                     summary(OTHER_ID, "ES9876543210987654321098", "Luis Gil")));
 
@@ -638,8 +723,8 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Con una sola cuenta se muestra el aviso en lugar del formulario")
         void con_una_sola_cuenta_se_muestra_el_aviso_en_lugar_del_formulario() throws Exception {
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
-            when(service.listAccounts()).thenReturn(List.of(
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+            when(service.listAccounts(any(Caller.class))).thenReturn(List.of(
                     summary(ACCOUNT_ID, "ES1234567890123456789012", "Ana Pérez")));
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
@@ -677,7 +762,7 @@ class AccountWebControllerTests {
         @DisplayName("Una transferencia aprobada llama al servicio con el comando esperado y redirige con un mensaje")
         void una_transferencia_aprobada_llama_al_servicio_con_el_comando_esperado_y_redirige_con_un_mensaje()
                 throws Exception {
-            when(service.transfer(any())).thenReturn(transfer("25.00", "APPROVED"));
+            when(service.transfer(any(Caller.class), any())).thenReturn(transfer("25.00", "APPROVED"));
 
             mvc.perform(transferenciaDe(OTHER_ID.toString(), "25.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
@@ -686,7 +771,7 @@ class AccountWebControllerTests {
                             "Transferencia de 25,00 € a ES98 •••• 1098 aprobada"))
                     .andExpect(flash().attributeCount(1));
 
-            verify(service).transfer(TransferCommand.builder()
+            verify(service).transfer(ADMIN, TransferCommand.builder()
                     .sourceAccountId(ACCOUNT_ID)
                     .targetAccountId(OTHER_ID)
                     .amount(new BigDecimal("25.00"))
@@ -697,7 +782,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Una transferencia rechazada redirige con un aviso de rechazo distinto del de éxito")
         void una_transferencia_rechazada_redirige_con_un_aviso_de_rechazo_distinto_del_de_exito() throws Exception {
-            when(service.transfer(any())).thenReturn(transfer("900.00", "REJECTED"));
+            when(service.transfer(any(Caller.class), any())).thenReturn(transfer("900.00", "REJECTED"));
 
             mvc.perform(transferenciaDe(OTHER_ID.toString(), "900.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
@@ -711,7 +796,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Una divisa vacía se trata como el euro por defecto")
         void una_divisa_vacia_se_trata_como_el_euro_por_defecto() throws Exception {
-            when(service.transfer(any())).thenReturn(transfer("25.00", "APPROVED"));
+            when(service.transfer(any(Caller.class), any())).thenReturn(transfer("25.00", "APPROVED"));
 
             mvc.perform(post("/accounts/" + ACCOUNT_ID + "/transfers")
                             .param("targetAccountId", OTHER_ID.toString())
@@ -719,7 +804,7 @@ class AccountWebControllerTests {
                             .param("currency", ""))
                     .andExpect(status().is3xxRedirection());
 
-            verify(service).transfer(TransferCommand.builder()
+            verify(service).transfer(ADMIN, TransferCommand.builder()
                     .sourceAccountId(ACCOUNT_ID)
                     .targetAccountId(OTHER_ID)
                     .amount(new BigDecimal("25.00"))
@@ -740,8 +825,8 @@ class AccountWebControllerTests {
 
         @BeforeEach
         void cuentas() {
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
-            when(service.listAccounts()).thenReturn(List.of(
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+            when(service.listAccounts(any(Caller.class))).thenReturn(List.of(
                     summary(ACCOUNT_ID, "ES1234567890123456789012", "Ana Pérez"),
                     summary(OTHER_ID, "ES9876543210987654321098", "Luis Gil")));
         }
@@ -758,7 +843,7 @@ class AccountWebControllerTests {
                     .andExpect(model().attributeHasNoErrors("withdrawalForm"))
                     .andExpect(content().string(containsString("Elige la cuenta de destino")));
 
-            verify(service, never()).transfer(any());
+            verify(service, never()).transfer(any(Caller.class), any());
         }
 
         @ParameterizedTest
@@ -775,14 +860,14 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("El importe debe ser positivo")))
                     .andExpect(content().string(containsString("value=\"" + OTHER_ID + "\" selected=\"selected\"")));
 
-            verify(service, never()).transfer(any());
+            verify(service, never()).transfer(any(Caller.class), any());
         }
 
         @Test
         @DisplayName("Transferir a la misma cuenta vuelve al detalle con el mensaje del dominio")
         void transferir_a_la_misma_cuenta_vuelve_al_detalle_con_el_mensaje_del_dominio() throws Exception {
             var error = new SameAccountTransferException(new AccountNumber("ES1234567890123456789012"));
-            when(service.transfer(any())).thenThrow(error);
+            when(service.transfer(any(Caller.class), any())).thenThrow(error);
 
             mvc.perform(transferenciaDe(ACCOUNT_ID.toString(), "25.00", "EUR"))
                     .andExpect(status().isOk())
@@ -796,7 +881,7 @@ class AccountWebControllerTests {
         @DisplayName("Otra divisa vuelve al detalle con el mensaje del dominio y conserva el importe")
         void otra_divisa_vuelve_al_detalle_con_el_mensaje_del_dominio_y_conserva_el_importe() throws Exception {
             var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD"));
-            when(service.transfer(any())).thenThrow(error);
+            when(service.transfer(any(Caller.class), any())).thenThrow(error);
 
             mvc.perform(transferenciaDe(OTHER_ID.toString(), "20.25", "USD"))
                     .andExpect(status().isOk())
@@ -810,7 +895,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Una cuenta de destino desconocida devuelve la página 404")
         void una_cuenta_de_destino_desconocida_devuelve_la_pagina_404() throws Exception {
-            when(service.transfer(any())).thenThrow(new AccountNotFoundException(OTHER_ID));
+            when(service.transfer(any(Caller.class), any())).thenThrow(new AccountNotFoundException(OTHER_ID));
 
             mvc.perform(transferenciaDe(OTHER_ID.toString(), "25.00", "EUR"))
                     .andExpect(status().isNotFound())
@@ -830,7 +915,7 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString(message)))
                     .andExpect(content().string(containsString(amount)));
 
-            verify(service, never()).transfer(any());
+            verify(service, never()).transfer(any(Caller.class), any());
         }
     }
 
@@ -840,8 +925,8 @@ class AccountWebControllerTests {
 
         @BeforeEach
         void cuentas() {
-            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
-            when(service.listAccounts()).thenReturn(List.of(
+            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+            when(service.listAccounts(any(Caller.class))).thenReturn(List.of(
                     summary(ACCOUNT_ID, "ES1234567890123456789012", "Ana Pérez"),
                     summary(OTHER_ID, "ES9876543210987654321098", "Luis Gil")));
         }
