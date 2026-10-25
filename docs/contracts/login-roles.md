@@ -42,7 +42,7 @@ Ownership is stored outside the aggregate, in `persistence.InMemoryAccountOwners
 | Type (`*Def`) | Field | Type | Rules |
 | ------------- | ----- | ---- | ----- |
 | `CallerDef` (new) | `username` | `String` | |
-| | `admin` | `boolean` | `Caller.system()`: internal admin for processes without a user (demo data) |
+| | `admin` | `boolean` | `CallerDef.system()` (Immutables does not copy static methods to `Caller`): internal admin for processes without a user (demo data) |
 | `OpenAccountCommandDef` | `ownerUsername` (new) | `String` | `[a-z0-9._-]{3,30}`; defaults to empty during the transition, **required** by `openAccount(Caller, …)` (`IllegalArgumentException` → 400 / field error) |
 | `TransferCommandDef` | `targetAccountNumber` (new) | `@Nullable String` | `ES` + 22 digits after removing spaces and upper-casing; otherwise `IllegalArgumentException` when the command is built (Spanish message). `TransferRequest` and `TransferForm` validate first with `@Pattern("^ *[Ee][Ss]( *\d){22} *$")`, like `OpenAccountRequest` and the OpenAPI |
 | | `targetAccountId` | `@Nullable UUID` | **transitional**, removed in E1; exactly one of the two must be present |

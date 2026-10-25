@@ -125,6 +125,13 @@ Implementado en la #48 (rediseño de la web, solo `presentation.web` y plantilla
 - Ingresar, retirar y transferir son `<details>` con el formulario dentro: se abre al pulsar la pastilla, y tras un POST solo se abre el que vuelve con errores (`th:object` en el `<details>` y `th:open="${#fields.hasAnyErrors()}"`).
 - El listado no muestra el segmento: `AccountSummary` no lo tiene y añadirlo cambiaría `application`.
 
+Implementado en la #50 (login con roles; contrato [`login-roles.md`](../contracts/login-roles.md), [ADR 0008](../adr/0008-spring-security.md)):
+
+- **Autenticación en `presentation`:** Spring Security con dos cadenas, una por canal para que back y web no compartan archivo. [`ApiSecurityConfig`](../../src/main/java/com/pronoide/ddd/presentation/rest/ApiSecurityConfig.java) (`/api/**`, HTTP Basic, sin sesión ni CSRF, 401/403 como `ProblemDetail`) y [`WebSecurityConfig`](../../src/main/java/com/pronoide/ddd/presentation/web/WebSecurityConfig.java) (cadena de reserva, login con formulario, CSRF, página 403). Lo común (`SecuritySupport`, `CurrentCaller`) vive en la raíz de `presentation`, fuera de los *slices* de D5, para que web y REST lo usen sin conocerse.
+- **Roles en las URL (Spring), propiedad en `application`:** solo `ADMIN` abre cuentas; quién puede tocar qué cuenta lo decide `CheckingAccountService` con el `Caller` que recibe cada caso de uso, igual para los dos canales y probado sin Spring. Una cuenta ajena es un 404, no un 403, para no revelar que existe.
+- **La identidad no llega a `domain`:** el propietario de una cuenta es un nombre de usuario guardado en `persistence` (`InMemoryAccountOwnershipRepository`), fuera del agregado.
+- Las transferencias indican el destino por IBAN escrito, para que un cliente no vea la lista de cuentas de los demás.
+
 ## Issues de la fase
 
 | Orden | Issue | Capas | Clases que introduce |

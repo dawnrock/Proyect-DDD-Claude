@@ -248,7 +248,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [x] Tests green; browser and `curl` checks done.
 
-### [ ] E2 — Documentation (~10 min)
+### [x] E2 — Documentation (~10 min)
 
 - **Side:** both
 - **Layer:** docs
@@ -261,7 +261,7 @@ Make the application realistic: today anyone sees every account on the home page
   4. README: how to log in with the demo users and how to set the admin without `demo`.
   5. Project status: #50 done, next step `/plan-feature 13`, history row.
 - **Acceptance criteria:**
-  - [ ] Lint without errors; documents updated.
+  - [x] Lint without errors; documents updated.
 
 ## Global acceptance criteria
 

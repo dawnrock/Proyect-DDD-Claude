@@ -26,6 +26,8 @@ En Windows, `mvnw.cmd`. Requiere Java 21.
 
 `spring-boot:run` arranca con el perfil `demo`, que abre tres cuentas de demostración (dos minoristas y una de alto patrimonio) con los casos de uso. Para arrancar sin datos: `./mvnw spring-boot:run -Dspring-boot.run.profiles=default`. Los tests y `java -jar` no cargan los datos de demostración.
 
+**Login (#50).** Hay que entrar con un usuario. Con el perfil `demo`: `admin` (ve todas las cuentas y abre cuentas) y `ada`, `grace` y `alan` (cada uno solo ve su cuenta), todos con la contraseña `demo` (datos de una práctica en local: en `application-demo.properties` solo está su hash BCrypt). La API usa HTTP Basic: `curl -u admin:demo http://localhost:8080/api/accounts`. Sin el perfil `demo` no hay usuarios; se puede crear un administrador con las variables de entorno `APP_ADMIN_USERNAME` y `APP_ADMIN_PASSWORD`.
+
 ## Flujo de trabajo con Claude Code
 
 ```text
