@@ -89,7 +89,7 @@ No production code changes: the current code already follows D1-D5 (checked whil
 - **Acceptance criteria:**
   - [x] Rule green; red with the temporary dependency.
 
-### [ ] T5 — No public setters in the domain; controllers do not access the repository (~10 min)
+### [x] T5 — No public setters in the domain; controllers do not access the repository (~10 min)
 
 - **Layer:** tests
 - **Files:** `LayeredArchitectureTests.java`
@@ -98,7 +98,7 @@ No production code changes: the current code already follows D1-D5 (checked whil
   1. `el_dominio_no_tiene_setters_publicos` and `los_controladores_no_acceden_al_repositorio`.
   2. Break each: a temporary `public void setCurrentBalance(...)` in `CheckingAccount` → red; a temporary `InMemoryCheckingAccountRepository` field in `TransferController` → red (the layered rule from T1 also fails; that is expected); revert.
 - **Acceptance criteria:**
-  - [ ] Both rules green; each red with its temporary change.
+  - [x] Both rules green; each red with its temporary change.
 
 ### [ ] T6 — Documentation (~5 min)
 

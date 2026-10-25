@@ -5,6 +5,7 @@ import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
@@ -12,6 +13,7 @@ import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
+import org.springframework.stereotype.Controller;
 
 import com.pronoide.ddd.domain.model.DomainException;
 
@@ -56,4 +58,17 @@ class LayeredArchitectureTests {
     static final ArchRule la_web_y_rest_no_se_conocen = slices()
             .matching("..presentation.(*)..")
             .should().notDependOnEachOther();
+
+    /** El dominio solo cambia de estado con métodos de negocio: no tiene {@code set*} públicos. */
+    @ArchTest
+    static final ArchRule el_dominio_no_tiene_setters_publicos = noMethods()
+            .that().areDeclaredInClassesThat().resideInAPackage("..domain..")
+            .and().arePublic()
+            .should().haveNameMatching("set[A-Z].*");
+
+    /** Los controladores (web y REST) usan los casos de uso, nunca el repositorio. */
+    @ArchTest
+    static final ArchRule los_controladores_no_acceden_al_repositorio = noClasses()
+            .that().areMetaAnnotatedWith(Controller.class)
+            .should().dependOnClassesThat().resideInAPackage("..persistence..");
 }
