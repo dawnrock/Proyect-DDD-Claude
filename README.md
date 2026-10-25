@@ -24,6 +24,8 @@ Tecnologías: Java 21, Spring Boot 4.1, JUnit 5, ArchUnit, Lombok, Immutables, T
 
 En Windows, `mvnw.cmd`. Requiere Java 21.
 
+`spring-boot:run` arranca con el perfil `demo`, que abre tres cuentas de demostración (dos minoristas y una de alto patrimonio) con los casos de uso. Para arrancar sin datos: `./mvnw spring-boot:run -Dspring-boot.run.profiles=default`. Los tests y `java -jar` no cargan los datos de demostración.
+
 ## Flujo de trabajo con Claude Code
 
 ```text
