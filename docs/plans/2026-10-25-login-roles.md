@@ -176,7 +176,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [ ] Tests green.
 
-### [ ] W1 — Login page and web security rules (~10 min)
+### [x] W1 — Login page and web security rules (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -186,7 +186,7 @@ Make the application realistic: today anyone sees every account on the home page
   1. Chain: form login at `/login` (custom page, dark style), logout `POST /logout` → `/login?logout`, CSRF on, `/css/**` and `/login` public, `/accounts/new` → `ADMIN`, everything else authenticated; access denied → 403 page.
   2. Tests: anonymous `GET /` → redirect to `/login`; login page renders with CSRF token and error message on `?error`; user on `/accounts/new` → 403.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
 ### [ ] W2 — Header with user and logout; home per role (~10 min)
 

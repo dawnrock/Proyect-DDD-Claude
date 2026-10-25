@@ -61,7 +61,7 @@ class DddLabApplicationTests {
 	@Test
 	@DisplayName("Una página inexistente muestra la página 404 propia de la web")
 	void una_pagina_inexistente_muestra_la_pagina_404_propia_de_la_web() throws Exception {
-		HttpResponse<String> response = get("/no-existe", "text/html");
+		HttpResponse<String> response = page("/no-existe");
 
 		assertThat(response.statusCode()).isEqualTo(404);
 		assertThat(response.headers().firstValue("Content-Type")).hasValueSatisfying(type -> assertThat(type).startsWith("text/html"));
@@ -96,7 +96,7 @@ class DddLabApplicationTests {
 			assertThat(details.statusCode()).isEqualTo(200);
 			assertThat(details.body()).contains("\"type\":\"DEPOSIT\"").contains("\"status\":\"APPROVED\"");
 
-			assertThat(get("/", "text/html").body()).contains("ES9121000418450200051332").contains("Ada Lovelace");
+			assertThat(browse("/")).contains("ES9121000418450200051332").contains("Ada Lovelace");
 		}
 
 		@Test
@@ -108,7 +108,7 @@ class DddLabApplicationTests {
 			assertThat(response.headers().firstValue("Location"))
 					.as("sin ;jsessionid en la URL, que Spring no reconoce y acaba en 404")
 					.hasValueSatisfying(location -> assertThat(location).doesNotContain(";jsessionid"));
-			assertThat(get("/", "text/html").body()).contains("ES7620770024003102575766");
+			assertThat(browse("/")).contains("ES7620770024003102575766");
 		}
 
 		@Test
@@ -129,13 +129,13 @@ class DddLabApplicationTests {
 
 			assertThat(response.statusCode()).isEqualTo(200);
 			assertThat(response.body()).contains("EUR").contains("USD").contains("ha recibido");
-			assertThat(get("/", "text/html").body()).doesNotContain("ES1000492352082414205416");
+			assertThat(browse("/")).doesNotContain("ES1000492352082414205416");
 		}
 
 		private HttpResponse<String> submitForm(String accountNumber, String currency) throws Exception {
 			String form = "accountNumber=%s&holderName=Grace+Hopper&segment=RETAIL&initialDeposit=75.00&currency=%s"
 					.formatted(URLEncoder.encode(accountNumber, StandardCharsets.UTF_8), currency);
-			return post("/accounts/new", "application/x-www-form-urlencoded", form);
+			return submit("/accounts/new", form);
 		}
 	}
 
@@ -156,7 +156,7 @@ class DddLabApplicationTests {
 			assertThat(withdrawal.statusCode()).isEqualTo(201);
 			assertThat(withdrawal.body()).contains("\"status\":\"REJECTED\"");
 			assertThat(get(account, "application/json").body()).contains("\"balance\":150.00");
-			assertThat(get(webPath(account), "text/html").body()).contains("Rechazado").contains("150,00 €");
+			assertThat(browse(webPath(account))).contains("Rechazado").contains("150,00 €");
 		}
 
 		@Test
@@ -179,7 +179,7 @@ class DddLabApplicationTests {
 		void una_cuenta_inexistente_es_la_pagina_404_en_la_web_y_un_problem_detail_404_en_la_api() throws Exception {
 			String unknown = "/api/accounts/" + java.util.UUID.randomUUID();
 
-			HttpResponse<String> web = get(webPath(unknown), "text/html");
+			HttpResponse<String> web = page(webPath(unknown));
 			HttpResponse<String> api = post(unknown + "/deposits", "application/json", "{\"amount\": 10.00}");
 
 			assertThat(web.statusCode()).isEqualTo(404);
@@ -270,16 +270,57 @@ class DddLabApplicationTests {
 		return apiPath.replaceFirst("^/api", "");
 	}
 
-	private HttpResponse<String> submit(String path, String form) throws Exception {
+	private boolean loggedIn;
+
+	/** Entra como administrador una sola vez por test: GET /login para leer el token CSRF y POST /login con cookies. */
+	private void ensureLoggedIn() throws Exception {
+		if (loggedIn) {
+			return;
+		}
+		HttpResponse<String> login = browser.send(
+				HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/login"))
+						.header("Content-Type", "application/x-www-form-urlencoded")
+						.POST(HttpRequest.BodyPublishers.ofString("username=admin&password=%s&_csrf=%s"
+								.formatted(PASSWORD, csrfToken())))
+						.build(), HttpResponse.BodyHandlers.ofString());
+		assertThat(login.statusCode()).isEqualTo(302);
+		assertThat(login.headers().firstValue("Location"))
+				.hasValueSatisfying(location -> assertThat(location).doesNotContain("error"));
+		loggedIn = true;
+	}
+
+	/** Token CSRF: la página de login lo lleva siempre, también con la sesión iniciada. */
+	private String csrfToken() throws Exception {
+		java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("name=\"_csrf\" value=\"([^\"]+)\"")
+				.matcher(rawBrowse("/login").body());
+		assertThat(matcher.find()).as("la página de login lleva un token CSRF").isTrue();
+		return matcher.group(1);
+	}
+
+	private HttpResponse<String> rawBrowse(String path) throws Exception {
 		return browser.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
-				.header("Content-Type", "application/x-www-form-urlencoded")
-				.POST(HttpRequest.BodyPublishers.ofString(form))
+				.header("Accept", "text/html")
+				.GET()
 				.build(), HttpResponse.BodyHandlers.ofString());
 	}
 
+	/** Envía un formulario web como el administrador con sesión, añadiendo el token CSRF. */
+	private HttpResponse<String> submit(String path, String form) throws Exception {
+		ensureLoggedIn();
+		return browser.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
+				.header("Content-Type", "application/x-www-form-urlencoded")
+				.POST(HttpRequest.BodyPublishers.ofString(form + "&_csrf=" + csrfToken()))
+				.build(), HttpResponse.BodyHandlers.ofString());
+	}
+
+	/** Pide una página web como el administrador con sesión. */
+	private HttpResponse<String> page(String path) throws Exception {
+		ensureLoggedIn();
+		return rawBrowse(path);
+	}
+
 	private String browse(String path) throws Exception {
-		return browser.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + path)).GET().build(),
-				HttpResponse.BodyHandlers.ofString()).body();
+		return page(path).body();
 	}
 
 	private HttpResponse<String> get(String path, String accept) throws Exception {
