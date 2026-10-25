@@ -14,12 +14,13 @@ import com.pronoide.ddd.domain.model.CustomerSegment;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.Transaction;
+import com.pronoide.ddd.domain.service.MoneyTransferService;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
 
 import lombok.RequiredArgsConstructor;
 
 /**
- * Casos de uso de las cuentas corrientes: abrir, consultar, listar, ingresar y retirar. Carga y guarda el agregado; las
+ * Casos de uso de las cuentas corrientes: abrir, consultar, listar, ingresar, retirar y transferir. Carga y guarda el agregado; las
  * reglas de negocio siguen en {@code CheckingAccount}. Contrato: {@code docs/contracts/open-query-list-accounts.md}.
  */
 @Service
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class CheckingAccountService {
 
     private final InMemoryCheckingAccountRepository repository;
+    private final MoneyTransferService transferService = new MoneyTransferService();
 
     /**
      * Abre una cuenta con su depósito inicial y la guarda.
@@ -101,7 +103,22 @@ public class CheckingAccountService {
      * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el importe no está en la divisa de las cuentas
      */
     public TransferSummary transfer(TransferCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        CheckingAccount source = load(command.sourceAccountId());
+        CheckingAccount target = load(command.targetAccountId());
+        Transaction withdrawal =
+                transferService.transfer(source, target, toAmount(command.amount(), command.currency()));
+        repository.save(source);
+        repository.save(target);
+        return TransferSummary.builder()
+                .sourceAccountId(source.id())
+                .sourceAccountNumber(source.accountNumber().value())
+                .targetAccountId(target.id())
+                .targetAccountNumber(target.accountNumber().value())
+                .amount(withdrawal.amount().amount())
+                .currency(withdrawal.amount().currency().getCurrencyCode())
+                .occurredOn(withdrawal.occurredOn())
+                .status(withdrawal.status().name())
+                .build();
     }
 
     private CheckingAccount load(UUID id) {

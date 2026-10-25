@@ -115,7 +115,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
 - **Acceptance criteria:**
   - [x] Tests green.
 
-### [ ] T5 — "Transfer" use case (~10 min)
+### [x] T5 — "Transfer" use case (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -125,7 +125,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. `transfer`: load source and target (or `AccountNotFoundException`), delegate to `MoneyTransferService`, **save both**, return the `TransferSummary`.
   2. Tests (`@Nested` "Transferir", repository spied or in memory): approved → both accounts saved with their new balances; rejected → `REJECTED` and balances unchanged; unknown source / unknown target → `AccountNotFoundException`; same account → `SameAccountTransferException`.
 - **Acceptance criteria:**
-  - [ ] Tests green; `save` is called for both accounts. No business rules in the application service.
+  - [x] Tests green; `save` is called for both accounts. No business rules in the application service.
 
 ### [ ] T6 — `POST /api/transfers` (~10 min)
 

@@ -3,6 +3,12 @@ package com.pronoide.ddd.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -15,9 +21,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import com.pronoide.ddd.domain.model.AccountNumber;
+import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
+import com.pronoide.ddd.domain.model.SameAccountTransferException;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
 
 /** Casos de uso con el repositorio en memoria real: es concreto y no hace falta simularlo. */
@@ -31,7 +39,7 @@ class CheckingAccountServiceTests {
 
     @BeforeEach
     void setUp() {
-        repository = new InMemoryCheckingAccountRepository();
+        repository = spy(new InMemoryCheckingAccountRepository());
         service = new CheckingAccountService(repository);
     }
 
@@ -278,6 +286,113 @@ class CheckingAccountServiceTests {
             AccountDetails details = service.findAccount(id);
             assertThat(details.balance()).isEqualByComparingTo("100.00");
             assertThat(details.transactions()).hasSize(1);
+        }
+    }
+
+    @Nested
+    @DisplayName("Transferir")
+    class Transfer {
+
+        private UUID sourceId;
+        private UUID targetId;
+
+        @BeforeEach
+        void openAccounts() {
+            sourceId = service.openAccount(command(IBAN).initialDeposit(new BigDecimal("500")).build()).id();
+            targetId = service.openAccount(command(OTHER_IBAN).initialDeposit(new BigDecimal("100")).build()).id();
+            clearInvocations(repository);
+        }
+
+        private TransferCommand transfer(UUID source, UUID target, String amount) {
+            return TransferCommand.builder()
+                    .sourceAccountId(source)
+                    .targetAccountId(target)
+                    .amount(new BigDecimal(amount))
+                    .build();
+        }
+
+        @Test
+        @DisplayName("Una transferencia aprobada actualiza los saldos de las dos cuentas y guarda ambas")
+        void una_transferencia_aprobada_actualiza_los_saldos_y_guarda_ambas_cuentas() {
+            TransferSummary summary = service.transfer(transfer(sourceId, targetId, "200"));
+
+            assertThat(summary.status()).isEqualTo("APPROVED");
+            assertThat(summary.sourceAccountId()).isEqualTo(sourceId);
+            assertThat(summary.sourceAccountNumber()).isEqualTo(IBAN);
+            assertThat(summary.targetAccountId()).isEqualTo(targetId);
+            assertThat(summary.targetAccountNumber()).isEqualTo(OTHER_IBAN);
+            assertThat(summary.amount()).isEqualByComparingTo("200.00");
+            assertThat(summary.amount().scale()).isEqualTo(2);
+            assertThat(summary.currency()).isEqualTo("EUR");
+            assertThat(summary.occurredOn()).isNotNull();
+            assertThat(service.findAccount(sourceId).balance()).isEqualByComparingTo("300.00");
+            assertThat(service.findAccount(targetId).balance()).isEqualByComparingTo("300.00");
+            verify(repository, times(2)).save(any(CheckingAccount.class));
+            CheckingAccount source = repository.findById(sourceId).orElseThrow();
+            CheckingAccount target = repository.findById(targetId).orElseThrow();
+            verify(repository).save(source);
+            verify(repository).save(target);
+        }
+
+        @Test
+        @DisplayName("Una transferencia rechazada se devuelve como REJECTED y no cambia ningún saldo")
+        void una_transferencia_rechazada_se_devuelve_como_rejected_y_no_cambia_los_saldos() {
+            TransferSummary summary = service.transfer(transfer(sourceId, targetId, "600"));
+
+            assertThat(summary.status()).isEqualTo("REJECTED");
+            assertThat(service.findAccount(sourceId).balance()).isEqualByComparingTo("500.00");
+            assertThat(service.findAccount(sourceId).transactions()).hasSize(2);
+            assertThat(service.findAccount(targetId).balance()).isEqualByComparingTo("100.00");
+            assertThat(service.findAccount(targetId).transactions()).hasSize(1);
+            verify(repository, times(2)).save(any(CheckingAccount.class));
+        }
+
+        @Test
+        @DisplayName("Una cuenta de origen desconocida lanza AccountNotFoundException y no guarda nada")
+        void una_cuenta_de_origen_desconocida_lanza_account_not_found_exception() {
+            UUID unknown = UUID.randomUUID();
+
+            assertThatExceptionOfType(AccountNotFoundException.class)
+                    .isThrownBy(() -> service.transfer(transfer(unknown, targetId, "10")))
+                    .withMessageContaining(unknown.toString());
+            verify(repository, never()).save(any(CheckingAccount.class));
+        }
+
+        @Test
+        @DisplayName("Una cuenta de destino desconocida lanza AccountNotFoundException y no mueve dinero")
+        void una_cuenta_de_destino_desconocida_lanza_account_not_found_exception() {
+            UUID unknown = UUID.randomUUID();
+
+            assertThatExceptionOfType(AccountNotFoundException.class)
+                    .isThrownBy(() -> service.transfer(transfer(sourceId, unknown, "10")))
+                    .withMessageContaining(unknown.toString());
+            assertThat(service.findAccount(sourceId).balance()).isEqualByComparingTo("500.00");
+            assertThat(service.findAccount(sourceId).transactions()).hasSize(1);
+            verify(repository, never()).save(any(CheckingAccount.class));
+        }
+
+        @Test
+        @DisplayName("Transferir a la misma cuenta lanza SameAccountTransferException y no registra movimientos")
+        void transferir_a_la_misma_cuenta_lanza_same_account_transfer_exception() {
+            assertThatExceptionOfType(SameAccountTransferException.class)
+                    .isThrownBy(() -> service.transfer(transfer(sourceId, sourceId, "10")));
+            assertThat(service.findAccount(sourceId).transactions()).hasSize(1);
+            verify(repository, never()).save(any(CheckingAccount.class));
+        }
+
+        @Test
+        @DisplayName("Una transferencia en otra divisa lanza CurrencyMismatchException y no cambia los saldos")
+        void una_transferencia_en_otra_divisa_lanza_currency_mismatch_exception() {
+            TransferCommand dollars = TransferCommand.builder()
+                    .sourceAccountId(sourceId)
+                    .targetAccountId(targetId)
+                    .amount(BigDecimal.TEN)
+                    .currency("USD")
+                    .build();
+
+            assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> service.transfer(dollars));
+            assertThat(service.findAccount(sourceId).balance()).isEqualByComparingTo("500.00");
+            assertThat(service.findAccount(targetId).balance()).isEqualByComparingTo("100.00");
         }
     }
 }
