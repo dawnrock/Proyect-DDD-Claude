@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 
+import com.pronoide.ddd.application.OpenAccountCommandDef;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -27,6 +29,12 @@ public class OpenAccountForm {
 
     @NotBlank(message = "El titular es obligatorio")
     private String holderName;
+
+    /** Usuario (cliente) que verá y operará la cuenta; mismo formato que el command (contrato login-roles). */
+    @NotBlank(message = "El usuario del titular es obligatorio")
+    @Pattern(regexp = OpenAccountCommandDef.USERNAME_PATTERN,
+            message = "El usuario del titular debe tener de 3 a 30 minúsculas, dígitos, puntos o guiones")
+    private String ownerUsername;
 
     @NotBlank(message = "El segmento es obligatorio")
     @Pattern(regexp = "RETAIL|HIGH_NET_WORTH", message = "El segmento debe ser Minorista o Alto patrimonio")

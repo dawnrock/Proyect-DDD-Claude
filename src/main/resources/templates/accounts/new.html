@@ -22,6 +22,12 @@
         </div>
 
         <div class="field">
+            <label for="ownerUsername">Usuario del titular</label>
+            <input type="text" id="ownerUsername" autocomplete="off" autocapitalize="none" spellcheck="false" th:field="*{ownerUsername}">
+            <p class="field-error" th:if="${#fields.hasErrors('ownerUsername')}" th:errors="*{ownerUsername}"></p>
+        </div>
+
+        <div class="field">
             <label for="segment">Segmento</label>
             <select id="segment" th:field="*{segment}">
                 <option value="">Selecciona un segmento</option>

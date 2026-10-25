@@ -1030,7 +1030,7 @@ class AccountWebControllerTests {
         @DisplayName("Un alta válida llama al servicio con el comando esperado y redirige al listado con un mensaje")
         void un_alta_valida_llama_al_servicio_con_el_comando_esperado_y_redirige_al_listado_con_un_mensaje()
                 throws Exception {
-            when(service.openAccount(any())).thenReturn(AccountSummary.builder()
+            when(service.openAccount(any(Caller.class), any())).thenReturn(AccountSummary.builder()
                     .id(UUID.randomUUID())
                     .accountNumber("ES1234567890123456789012")
                     .holderName("Ana Pérez")
@@ -1041,6 +1041,7 @@ class AccountWebControllerTests {
             mvc.perform(post("/accounts/new")
                             .param("accountNumber", "es12 3456 7890 1234 5678 9012")
                             .param("holderName", "Ana Pérez")
+                            .param("ownerUsername", "ana")
                             .param("segment", "RETAIL")
                             .param("initialDeposit", "100.00")
                             .param("currency", "EUR"))
@@ -1048,13 +1049,22 @@ class AccountWebControllerTests {
                     .andExpect(redirectedUrl("/"))
                     .andExpect(flash().attributeExists("message"));
 
-            verify(service).openAccount(OpenAccountCommand.builder()
+            verify(service).openAccount(ADMIN, OpenAccountCommand.builder()
                     .accountNumber("es12 3456 7890 1234 5678 9012")
                     .holderName("Ana Pérez")
                     .segment("RETAIL")
                     .initialDeposit(new BigDecimal("100.00"))
                     .currency("EUR")
+                    .ownerUsername("ana")
                     .build());
+        }
+
+        @Test
+        @DisplayName("El formulario pide el usuario del titular")
+        void el_formulario_pide_el_usuario_del_titular() throws Exception {
+            mvc.perform(get("/accounts/new"))
+                    .andExpect(content().string(containsString("Usuario del titular")))
+                    .andExpect(content().string(containsString("name=\"ownerUsername\"")));
         }
     }
 
@@ -1063,8 +1073,50 @@ class AccountWebControllerTests {
     class ErroresDelAlta {
 
         private MockHttpServletRequestBuilder altaCon(String accountNumber, String holderName, String deposit) {
+            return altaDe(accountNumber, holderName, deposit, "ana");
+        }
+
+        @Test
+        @DisplayName("Un usuario del titular ausente vuelve al formulario con el error del campo y sin llamar al servicio")
+        void un_usuario_del_titular_ausente_vuelve_al_formulario_con_el_error_del_campo() throws Exception {
+            mvc.perform(altaDe("ES1234567890123456789012", "Ana Lopez", "100.00", ""))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/new"))
+                    .andExpect(model().attributeHasFieldErrors("form", "ownerUsername"))
+                    .andExpect(content().string(containsString("El usuario del titular es obligatorio")));
+
+            verifyNoInteractions(service);
+        }
+
+        @Test
+        @DisplayName("Un usuario del titular con formato inválido vuelve al formulario y conserva lo escrito")
+        void un_usuario_del_titular_con_formato_invalido_vuelve_al_formulario() throws Exception {
+            mvc.perform(altaDe("ES1234567890123456789012", "Ana Lopez", "100.00", "Ana Lopez"))
+                    .andExpect(status().isOk())
+                    .andExpect(model().attributeHasFieldErrors("form", "ownerUsername"))
+                    .andExpect(content().string(containsString("minúsculas, dígitos, puntos o guiones")))
+                    .andExpect(content().string(containsString("Ana Lopez")));
+
+            verifyNoInteractions(service);
+        }
+
+        @Test
+        @DisplayName("Un error de formato que solo detecta el servicio vuelve al formulario con su mensaje")
+        void un_error_de_formato_que_solo_detecta_el_servicio_vuelve_al_formulario() throws Exception {
+            when(service.openAccount(any(Caller.class), any())).thenThrow(new IllegalArgumentException("Dato inválido"));
+
+            mvc.perform(altaCon("ES1234567890123456789012", "Ana Lopez", "100.00"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/new"))
+                    .andExpect(model().attributeHasErrors("form"))
+                    .andExpect(content().string(containsString("Dato inválido")));
+        }
+
+        private MockHttpServletRequestBuilder altaDe(String accountNumber, String holderName, String deposit,
+                                                     String owner) {
             return post("/accounts/new")
                     .param("accountNumber", accountNumber)
+                    .param("ownerUsername", owner)
                     .param("holderName", holderName)
                     .param("segment", "RETAIL")
                     .param("initialDeposit", deposit)
@@ -1103,7 +1155,7 @@ class AccountWebControllerTests {
                 throws Exception {
             var error = new InsufficientInitialDepositException(
                     MonetaryAmount.euros("10.00"), MonetaryAmount.euros("50.00"));
-            when(service.openAccount(any())).thenThrow(error);
+            when(service.openAccount(any(Caller.class), any())).thenThrow(error);
 
             mvc.perform(altaCon("ES1234567890123456789012", "Ana Lopez", "10.00"))
                     .andExpect(status().isOk())
@@ -1119,7 +1171,7 @@ class AccountWebControllerTests {
         @DisplayName("Un número de cuenta duplicado vuelve al formulario con el mensaje del dominio")
         void un_numero_de_cuenta_duplicado_vuelve_al_formulario_con_el_mensaje_del_dominio() throws Exception {
             var error = new DuplicateAccountNumberException(new AccountNumber("ES1234567890123456789012"));
-            when(service.openAccount(any())).thenThrow(error);
+            when(service.openAccount(any(Caller.class), any())).thenThrow(error);
 
             mvc.perform(altaCon("ES1234567890123456789012", "Ana Lopez", "100.00"))
                     .andExpect(status().isOk())
@@ -1133,6 +1185,7 @@ class AccountWebControllerTests {
                 throws Exception {
             mvc.perform(post("/accounts/new")
                             .param("accountNumber", "ES1234567890123456789012")
+                            .param("ownerUsername", "ana")
                             .param("holderName", "Ana Lopez")
                             .param("segment", "RETAIL")
                             .param("initialDeposit", "100.00")

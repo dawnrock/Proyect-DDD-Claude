@@ -224,7 +224,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [x] Tests green; the detail page contains no other customer's account numbers.
 
-### [ ] W5 — Open account with owner (admin) (~5 min)
+### [x] W5 — Open account with owner (admin) (~5 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -233,7 +233,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **What to do:**
   1. "Usuario del titular" field (same rule as the command); `openAccount(caller, command)`.
 - **Acceptance criteria:**
-  - [ ] Tests green (valid owner; invalid username field error).
+  - [x] Tests green (valid owner; invalid username field error).
 
 ### [ ] E1 — Integration: remove old methods, end-to-end tests (~15 min)
 

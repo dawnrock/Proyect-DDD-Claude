@@ -213,15 +213,15 @@ public class AccountWebController {
 
     @PostMapping("/accounts/new")
     public String openAccount(@Valid @ModelAttribute("form") OpenAccountForm form, BindingResult result,
-                              Model model, RedirectAttributes redirect) {
+                              Model model, RedirectAttributes redirect, Authentication authentication) {
         OpenAccountCommand command = result.hasErrors() ? null : toCommand(form, result);
         if (command != null) {
             try {
-                AccountSummary account = service.openAccount(command);
+                AccountSummary account = service.openAccount(CurrentCaller.from(authentication), command);
                 redirect.addFlashAttribute("message",
                         "Cuenta %s abierta correctamente".formatted(account.accountNumber()));
                 return "redirect:/";
-            } catch (DomainException e) {
+            } catch (DomainException | IllegalArgumentException e) {
                 result.reject("domain", e.getMessage());
             }
         }
@@ -241,6 +241,7 @@ public class AccountWebController {
                     .segment(form.getSegment())
                     .initialDeposit(form.getInitialDeposit())
                     .currency(form.getCurrency())
+                    .ownerUsername(form.getOwnerUsername())
                     .build();
         } catch (IllegalArgumentException e) {
             result.reject("invalid", e.getMessage());
