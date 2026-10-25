@@ -6,8 +6,8 @@
 - **Base branch:** `Monolithic`
 - **Date:** 2026-10-25
 - **Approved:** by the user on 2026-10-25
-- **Status:** in progress
-- **Total estimate:** ~150 min (16 tasks: T0 and T1 both, 7 back, 5 web, 2 both at the end)
+- **Status:** done
+- **Total estimate:** ~160 min (17 tasks: T0 and T1 both, 7 back, 5 web, 3 both at the end)
 
 ## Goal
 
@@ -263,30 +263,45 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [x] Lint without errors; documents updated.
 
+### [x] E3 — Review fixes (~10 min)
+
+- **Side:** both
+- **Layer:** presentation · config · docs
+- **Files:** `WebSecurityConfig.java`, `application.properties`, `TransferResponseDef.java`, `TransferController.java`, `openapi.yaml`, `DddLabApplicationTests.java`, `TransferControllerTests.java`, ADR 0008, contract
+- **Depends on:** E1 (added after the `revisor-ddd` review; no blocking findings, no path to another customer's account)
+- **What to do:**
+  1. H2 console admin-only (it was reachable by any logged-in user): `/h2-console/**` → `ADMIN`, same-origin frames, no CSRF on its own forms.
+  2. Public `/actuator/health` no longer shows details (`show-details=when-authorized`).
+  3. The API `Transfer` response no longer exposes `targetAccountId` (internal id of another customer's account); OpenAPI updated.
+  4. Accepted risks written in ADR 0008: IBAN existence can be probed with a transfer; no login rate limiting.
+  5. Not applied (minor): moving `USERNAME_PATTERN` out of `OpenAccountCommandDef`, removing `InMemoryAccountOwnershipRepository.accountsOf` (test-only), ProblemDetail JSON via `ObjectMapper`, checking owner usernames against existing users (documented as pending).
+- **Acceptance criteria:**
+  - [x] New assertions red first (user on the H2 console got 200; `targetAccountId` present), then green. `./mvnw verify`: 355 tests.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] Contract agreed and frozen in `docs/contracts/login-roles.md`; ADR 0008 written.
-- [ ] Without a session every page redirects to the login and the API answers 401.
-- [ ] Admin sees every account and opens accounts; a user cannot (403).
-- [ ] A user only sees and operates their accounts; a foreign account is a 404 on the web and in the API.
-- [ ] User transfers go to a typed IBAN; no page lists other customers' accounts to a user.
-- [ ] Ownership rules are tested in `application` without Spring.
+- [x] Contract agreed and frozen in `docs/contracts/login-roles.md`; ADR 0008 written.
+- [x] Without a session every page redirects to the login and the API answers 401.
+- [x] Admin sees every account and opens accounts; a user cannot (403).
+- [x] A user only sees and operates their accounts; a foreign account is a 404 on the web and in the API.
+- [x] User transfers go to a typed IBAN; no page lists other customers' accounts to a user.
+- [x] Ownership rules are tested in `application` without Spring.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}` (health stays public).
-- [ ] The layered architecture is respected (`LayeredArchitectureTests`: security in `presentation`, ownership in `application`/`persistence`, nothing in `domain`), and reviewed by `revisor-ddd`.
-- [ ] The domain does not depend on Spring, `jakarta` or `org.immutables`, and does not use `@Data`, `@Setter`, `@Builder` or `@AllArgsConstructor` (`check-domain.mjs` without errors) — the domain does not change.
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] Dependencies added only as justified in ADR 0008 (`spring-boot-starter-security`, `spring-security-test`).
-- [ ] `docs/api/openapi.yaml` reflects the changes (security scheme, 401/403, `ownerUsername`, `targetAccountNumber`) and the Redocly lint has no errors.
-- [ ] Any new term is in `docs/dominio/glosario.md`.
-- [ ] Documentation written or changed by this plan is in English (additions to documents still in Spanish excepted).
-- [ ] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}` (health stays public).
+- [x] The layered architecture is respected (`LayeredArchitectureTests`: security in `presentation`, ownership in `application`/`persistence`, nothing in `domain`), and reviewed by `revisor-ddd`.
+- [x] The domain does not depend on Spring, `jakarta` or `org.immutables`, and does not use `@Data`, `@Setter`, `@Builder` or `@AllArgsConstructor` (`check-domain.mjs` without errors) — the domain does not change.
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] Dependencies added only as justified in ADR 0008 (`spring-boot-starter-security`, `spring-security-test`).
+- [x] `docs/api/openapi.yaml` reflects the changes (security scheme, 401/403, `ownerUsername`, `targetAccountNumber`) and the Redocly lint has no errors.
+- [x] Any new term is in `docs/dominio/glosario.md`.
+- [x] Documentation written or changed by this plan is in English (additions to documents still in Spanish excepted).
+- [x] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
 
 ## Risks and open questions
 
