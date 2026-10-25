@@ -46,8 +46,6 @@ public class AccountWebController {
 
     @GetMapping("/accounts/{id}")
     public String detail(@PathVariable UUID id, Model model) {
-        model.addAttribute("depositForm", new MovementForm());
-        model.addAttribute("withdrawalForm", new MovementForm());
         return renderDetail(id, model);
     }
 
@@ -73,7 +71,6 @@ public class AccountWebController {
                 }
             }
         }
-        model.addAttribute("withdrawalForm", new MovementForm());
         return renderDetail(id, model);
     }
 
@@ -105,12 +102,24 @@ public class AccountWebController {
                 }
             }
         }
-        model.addAttribute("depositForm", new MovementForm());
         return renderDetail(id, model);
     }
 
+    /** Pinta el detalle; los formularios que no vienen del envío actual se crean vacíos. */
     private String renderDetail(UUID id, Model model) {
+        if (!model.containsAttribute("depositForm")) {
+            model.addAttribute("depositForm", new MovementForm());
+        }
+        if (!model.containsAttribute("withdrawalForm")) {
+            model.addAttribute("withdrawalForm", new MovementForm());
+        }
+        if (!model.containsAttribute("transferForm")) {
+            model.addAttribute("transferForm", new TransferForm());
+        }
         model.addAttribute("account", service.findAccount(id));
+        model.addAttribute("targetAccounts", service.listAccounts().stream()
+                .filter(other -> !other.id().equals(id))
+                .toList());
         model.addAttribute("currencies", CURRENCIES);
         return DETAIL_VIEW;
     }

@@ -80,7 +80,34 @@
         </form>
     </div>
 
-    <p><a th:href="@{/}">Volver al listado</a></p>
+    <h2>Transferir</h2>
+    <p th:if="${targetAccounts.isEmpty()}" class="empty">No hay otras cuentas a las que transferir</p>
+    <form th:unless="${targetAccounts.isEmpty()}" th:action="@{/accounts/{id}/transfers(id=${account.id()})}" th:object="${transferForm}" method="post" novalidate>
+        <p class="flash flash-error" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+        <div class="field">
+            <label for="transfer-target">Cuenta de destino</label>
+            <select id="transfer-target" th:field="*{targetAccountId}">
+                <option value="">Elige una cuenta</option>
+                <option th:each="a : ${targetAccounts}" th:value="${a.id()}" th:text="${a.accountNumber() + ' · ' + a.holderName()}">ES00 · Titular</option>
+            </select>
+            <p class="field-error" th:if="${#fields.hasErrors('targetAccountId')}" th:errors="*{targetAccountId}"></p>
+        </div>
+        <div class="field">
+            <label for="transfer-amount">Importe</label>
+            <input type="number" id="transfer-amount" step="0.01" th:field="*{amount}">
+            <p class="field-error" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
+        </div>
+        <div class="field">
+            <label for="transfer-currency">Divisa</label>
+            <select id="transfer-currency" th:field="*{currency}">
+                <option th:each="c : ${currencies}" th:value="${c}" th:text="${c}">EUR</option>
+            </select>
+            <p class="field-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
+        </div>
+        <button class="button" type="submit">Transferir</button>
+    </form>
+
+    <p>< th:href="@{/}">Volver al listado</a></p>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

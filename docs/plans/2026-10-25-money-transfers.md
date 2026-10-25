@@ -139,7 +139,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
 - **Acceptance criteria:**
   - [ ] Tests green. Responses match the OpenAPI fragment.
 
-### [ ] T7 — Transfer form on the detail page (~10 min)
+### [x] T7 — Transfer form on the detail page (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -149,7 +149,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
   1. `transferForm` attribute and the list of target accounts (`listAccounts()` without the current one, shown as number + holder); hint "No hay otras cuentas a las que transferir" when it is empty.
   2. `@WebMvcTest` tests: the select excludes the current account; the hint appears with a single account.
 - **Acceptance criteria:**
-  - [ ] Tests green. The view uses no domain types.
+  - [x] Tests green. The view uses no domain types.
 
 ### [ ] T8 — Transfer submission (~10 min)
 

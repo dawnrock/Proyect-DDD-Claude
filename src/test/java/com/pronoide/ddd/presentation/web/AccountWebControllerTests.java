@@ -2,6 +2,7 @@ package com.pronoide.ddd.presentation.web;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -427,6 +428,56 @@ class AccountWebControllerTests {
             mvc.perform(retiradaDe("10.00", "EUR"))
                     .andExpect(status().isNotFound())
                     .andExpect(view().name("error/404"));
+        }
+    }
+
+    private static final UUID OTHER_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
+
+    private static AccountSummary summary(UUID id, String number, String holder) {
+        return AccountSummary.builder()
+                .id(id)
+                .accountNumber(number)
+                .holderName(holder)
+                .balance(new BigDecimal("150.00"))
+                .currency("EUR")
+                .build();
+    }
+
+    @Nested
+    @DisplayName("Formulario de transferencia")
+    class FormularioDeTransferencia {
+
+        @Test
+        @DisplayName("El select de destino lista las otras cuentas como número y titular, sin la cuenta actual")
+        void el_select_de_destino_lista_las_otras_cuentas_como_numero_y_titular_sin_la_cuenta_actual()
+                throws Exception {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.listAccounts()).thenReturn(List.of(
+                    summary(ACCOUNT_ID, "ES1234567890123456789012", "Ana Pérez"),
+                    summary(OTHER_ID, "ES9876543210987654321098", "Luis Gil")));
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(model().attributeExists("transferForm"))
+                    .andExpect(content().string(containsString("/accounts/" + ACCOUNT_ID + "/transfers")))
+                    .andExpect(content().string(containsString("name=\"targetAccountId\"")))
+                    .andExpect(content().string(containsString("value=\"" + OTHER_ID + "\"")))
+                    .andExpect(content().string(containsString("ES9876543210987654321098 · Luis Gil")))
+                    .andExpect(content().string(not(containsString("value=\"" + ACCOUNT_ID + "\""))))
+                    .andExpect(content().string(not(containsString("No hay otras cuentas a las que transferir"))));
+        }
+
+        @Test
+        @DisplayName("Con una sola cuenta se muestra el aviso en lugar del formulario")
+        void con_una_sola_cuenta_se_muestra_el_aviso_en_lugar_del_formulario() throws Exception {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.listAccounts()).thenReturn(List.of(
+                    summary(ACCOUNT_ID, "ES1234567890123456789012", "Ana Pérez")));
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("No hay otras cuentas a las que transferir")))
+                    .andExpect(content().string(not(containsString("name=\"targetAccountId\""))));
         }
     }
 
