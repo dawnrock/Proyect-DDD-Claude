@@ -6,8 +6,8 @@
 - **Base branch:** `Monolithic`
 - **Date:** 2026-10-25
 - **Approved:** by the user on 2026-10-25
-- **Status:** in progress
-- **Total estimate:** ~75 min (8 tasks)
+- **Status:** done
+- **Total estimate:** ~85 min (9 tasks)
 
 ## Goal
 
@@ -135,28 +135,42 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
 - **Acceptance criteria:**
   - [x] Browser checks done at both widths; documents updated.
 
+### [x] T9 — Review fixes (~10 min)
+
+- **Layer:** presentation
+- **Files:** `templates/accounts/{detail,list,new}.html`, `static/css/app.css`, `WebFormat.java`, `AccountWebControllerTests.java`
+- **Depends on:** T8 (added after the `revisor-ddd` review; no blocking findings)
+- **What to do:**
+  1. A rejected movement is shown without a sign (`500,00 €`, struck through): it never changed the balance.
+  2. The sign rule (deposit `+`, withdrawal `−`) is documented as an assumption that only `DEPOSIT` and `WITHDRAWAL` exist.
+  3. Accessibility: `role="status"` on success flashes and `role="alert"` on rejections and form errors; visible keyboard focus on inputs and selects.
+  4. The list test also checks the full IBAN in the row `title`.
+  5. Not applied: a `PENDING` test (pending movements never leave the aggregate, contract of #6), "Saldo total" in the glossary (display only, not a business term), focus styles on muted links (the browser default is visible), a fallback for unknown currencies (they come from `application`).
+- **Acceptance criteria:**
+  - [x] New assertions red first (rejected without sign, `role="alert"`), then green. `./mvnw verify`: 256 tests.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] The four screens (list, detail, sign-up, 404) use the dark theme.
-- [ ] A form error re-renders the detail with that form open and its message; a rejected withdrawal or transfer is still shown as rejected.
-- [ ] Amounts in Spanish format (`1.000,00 €`) on every screen and flash message.
-- [ ] No changes in `application`, `domain`, `persistence` or the REST API.
+- [x] The four screens (list, detail, sign-up, 404) use the dark theme.
+- [x] A form error re-renders the detail with that form open and its message; a rejected withdrawal or transfer is still shown as rejected.
+- [x] Amounts in Spanish format (`1.000,00 €`) on every screen and flash message.
+- [x] No changes in `application`, `domain`, `persistence` or the REST API.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The layered architecture is respected (`LayeredArchitectureTests`; `WebFormat` uses no domain types), and reviewed by `revisor-ddd`.
-- [ ] The domain does not depend on Spring, `jakarta` or `org.immutables`, and does not use `@Data`, `@Setter`, `@Builder` or `@AllArgsConstructor` (`check-domain.mjs` without errors) — unchanged.
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added (JDK formatting, plain CSS).
-- [ ] If the API changes: OpenAPI — **n/a** (no API change).
-- [ ] Any new business term is in `docs/dominio/glosario.md` — n/a (UI only).
-- [ ] Documentation written or changed by this plan is in English (additions to documents still in Spanish excepted).
-- [ ] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The layered architecture is respected (`LayeredArchitectureTests`; `WebFormat` uses no domain types), and reviewed by `revisor-ddd`.
+- [x] The domain does not depend on Spring, `jakarta` or `org.immutables`, and does not use `@Data`, `@Setter`, `@Builder` or `@AllArgsConstructor` (`check-domain.mjs` without errors) — unchanged.
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added (JDK formatting, plain CSS).
+- [x] If the API changes: OpenAPI — **n/a** (no API change).
+- [x] Any new business term is in `docs/dominio/glosario.md` — n/a (UI only).
+- [x] Documentation written or changed by this plan is in English (additions to documents still in Spanish excepted).
+- [x] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
 
 ## Risks and open questions
 
