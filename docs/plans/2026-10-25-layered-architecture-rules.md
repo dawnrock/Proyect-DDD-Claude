@@ -67,7 +67,7 @@ No production code changes: the current code already follows D1-D5 (checked whil
 - **Acceptance criteria:**
   - [x] Rule green; red with the temporary dependency. `check-domain.mjs` still without errors.
 
-### [ ] T3 — D4: presentation only knows the domain's exceptions (~10 min)
+### [x] T3 — D4: presentation only knows the domain's exceptions (~10 min)
 
 - **Layer:** tests
 - **Files:** `LayeredArchitectureTests.java`
@@ -76,7 +76,7 @@ No production code changes: the current code already follows D1-D5 (checked whil
   1. `la_presentacion_solo_conoce_las_excepciones_del_dominio`.
   2. Break it twice: a temporary `MonetaryAmount` in `AccountController` → red; a temporary `MoneyTransferService` in `AccountWebController` → red; revert. `DomainException` and its subclasses stay allowed (the existing `catch (DomainException …)` keeps it green).
 - **Acceptance criteria:**
-  - [ ] Rule green; red in both temporary cases.
+  - [x] Rule green; red in both temporary cases.
 
 ### [ ] T4 — D5: web and REST do not know each other (~5 min)
 

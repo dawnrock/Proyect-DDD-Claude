@@ -1,12 +1,18 @@
 package com.pronoide.ddd;
 
+import static com.tngtech.archunit.base.DescribedPredicate.not;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
+
+import com.pronoide.ddd.domain.model.DomainException;
 
 /**
  * Arquitectura en capas de la fase 1: cada regla es una fila de la tabla de dependencias (D1-D5) de
@@ -34,4 +40,13 @@ class LayeredArchitectureTests {
     static final ArchRule el_dominio_solo_depende_del_jdk = classes()
             .that().resideInAPackage("..domain..")
             .should().onlyDependOnClassesThat().resideInAnyPackage("java..", "..domain..");
+
+    /**
+     * D4: la presentación trabaja con commands y vistas; del dominio solo conoce {@code DomainException} y sus
+     * subclases, para traducirlas a HTTP o a mensajes. Tampoco conoce {@code domain.service}.
+     */
+    @ArchTest
+    static final ArchRule la_presentacion_solo_conoce_las_excepciones_del_dominio = noClasses()
+            .that().resideInAPackage("..presentation..")
+            .should().dependOnClassesThat(resideInAPackage("..domain..").and(not(assignableTo(DomainException.class))));
 }
