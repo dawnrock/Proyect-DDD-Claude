@@ -121,6 +121,54 @@ public class CheckingAccountService {
                 .build();
     }
 
+    // Casos de uso con quien los pide (contrato docs/contracts/login-roles.md, #50). Un administrador accede a todas
+    // las cuentas; un usuario solo a las suyas, y una ajena se trata como inexistente (AccountNotFoundException, 404).
+    // Una cuenta sin propietario registrado solo la ve un administrador. Sustituyen a los de arriba, que se eliminan
+    // al integrar la #50; mientras tanto, openAccount(command) registra el propietario si viene, y transfer(command)
+    // exige targetAccountId (IllegalArgumentException si falta).
+
+    /**
+     * Abre una cuenta para {@code command.ownerUsername()}. Solo un administrador.
+     *
+     * @throws ForbiddenOperationException si quien lo pide no es administrador
+     * @throws IllegalArgumentException si el command no indica el usuario propietario (mensaje en español)
+     */
+    public AccountSummary openAccount(Caller caller, OpenAccountCommand command) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
+    /** Todas las cuentas para un administrador; las suyas para un usuario. Ordenadas por número de cuenta. */
+    public List<AccountSummary> listAccounts(Caller caller) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
+    /** @throws AccountNotFoundException si no existe o no es de quien lo pide (y no es administrador) */
+    public AccountDetails findAccount(Caller caller, UUID id) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
+    /** @throws AccountNotFoundException si la cuenta no existe o no es de quien lo pide (y no es administrador) */
+    public TransactionSummary deposit(Caller caller, DepositCommand command) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
+    /** @throws AccountNotFoundException si la cuenta no existe o no es de quien lo pide (y no es administrador) */
+    public TransactionSummary withdraw(Caller caller, WithdrawCommand command) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
+    /**
+     * Transfiere desde una cuenta de quien lo pide a cualquier cuenta existente, indicada por su número
+     * ({@code command.targetAccountNumber()}, que se normaliza como {@code AccountNumber} antes de buscarla).
+     *
+     * @throws AccountNotFoundException si el origen no existe o no es de quien lo pide
+     * @throws TargetAccountNotFoundException si no existe ninguna cuenta con el número de destino
+     * @throws IllegalArgumentException si el command solo trae {@code targetAccountId} (vía antigua)
+     */
+    public TransferSummary transfer(Caller caller, TransferCommand command) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
     private CheckingAccount load(UUID id) {
         return repository.findById(id).orElseThrow(() -> new AccountNotFoundException(id));
     }

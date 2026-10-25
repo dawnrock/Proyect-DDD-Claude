@@ -18,6 +18,9 @@ public interface OpenAccountCommandDef {
 
     Set<String> SEGMENTS = Set.of("RETAIL", "HIGH_NET_WORTH");
 
+    /** Formato de un nombre de usuario: 3-30 minúsculas, dígitos, punto, guion o guion bajo. */
+    String USERNAME_PATTERN = "[a-z0-9._-]{3,30}";
+
     String accountNumber();
 
     String holderName();
@@ -29,6 +32,15 @@ public interface OpenAccountCommandDef {
     @Value.Default
     default String currency() {
         return "EUR";
+    }
+
+    /**
+     * Usuario (cliente) propietario de la cuenta: solo él y los administradores podrán verla y operarla. Vacío por
+     * defecto mientras dura la transición de la #50; {@code openAccount(Caller, ...)} lo exige.
+     */
+    @Value.Default
+    default String ownerUsername() {
+        return "";
     }
 
     @Value.Check
@@ -44,6 +56,10 @@ public interface OpenAccountCommandDef {
         }
         if (initialDeposit().signum() <= 0) {
             throw new IllegalArgumentException("El depósito inicial debe ser positivo");
+        }
+        if (!ownerUsername().isEmpty() && !ownerUsername().matches(USERNAME_PATTERN)) {
+            throw new IllegalArgumentException(
+                    "El usuario del titular debe tener de 3 a 30 minúsculas, dígitos, puntos o guiones");
         }
         if (!CommandValidation.isIsoCurrency(currency())) {
             throw new IllegalArgumentException("La divisa %s no es un código ISO 4217 válido".formatted(currency()));

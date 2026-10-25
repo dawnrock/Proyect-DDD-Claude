@@ -63,7 +63,7 @@ Make the application realistic: today anyone sees every account on the home page
 
 ## Tasks
 
-### [ ] T0 — Contract (~15 min)
+### [x] T0 — Contract (~15 min)
 
 - **Side:** both
 - **Layer:** application · docs
@@ -79,7 +79,7 @@ Make the application realistic: today anyone sees every account on the home page
   2. Types without logic: `CallerDef`, the six `Caller` methods with `UnsupportedOperationException("pendiente: backend-dev")`, `ForbiddenOperationException`; command fields added (old methods keep working).
   3. ADR 0008 (Spring Security: why, alternatives — hand-made session filter, no auth —, consequences for tests and layers).
 - **Acceptance criteria:**
-  - [ ] Contract agreed and frozen in a `docs(contract): ...` commit; `./mvnw verify` green; Redocly lint without errors.
+  - [x] Contract agreed and frozen in a `docs(contract): ...` commit; `./mvnw verify` green; Redocly lint without errors.
 
 ### [ ] T1 — Security foundation (~10 min)
 
