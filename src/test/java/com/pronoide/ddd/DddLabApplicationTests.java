@@ -239,7 +239,7 @@ class DddLabApplicationTests {
 			String target = webPath(openAccount("ES0000000000000000000705"));
 
 			HttpResponse<String> response = submit(source + "/transfers",
-					"targetAccountId=%s&amount=25.00&currency=EUR".formatted(idOf(target)));
+					"targetAccountNumber=ES0000000000000000000705&amount=25.00&currency=EUR");
 
 			assertThat(response.statusCode()).isEqualTo(302);
 			assertThat(response.headers().firstValue("Location")).hasValueSatisfying(

@@ -23,6 +23,7 @@ import com.pronoide.ddd.application.Caller;
 import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
+import com.pronoide.ddd.application.TargetAccountNotFoundException;
 import com.pronoide.ddd.application.TransactionSummary;
 import com.pronoide.ddd.application.TransferCommand;
 import com.pronoide.ddd.application.TransferSummary;
@@ -135,7 +136,8 @@ public class AccountWebController {
             TransferCommand command = null;
             try {
                 TransferCommand.Builder builder = TransferCommand.builder()
-                        .sourceAccountId(id).targetAccountId(form.getTargetAccountId()).amount(form.getAmount());
+                        .sourceAccountId(id).targetAccountNumber(form.getTargetAccountNumber())
+                        .amount(form.getAmount());
                 if (form.getCurrency() != null) {
                     builder.currency(form.getCurrency());
                 }
@@ -157,7 +159,11 @@ public class AccountWebController {
                                 .formatted(amount, target));
                     }
                     return redirectToDetail(id);
-                } catch (DomainException e) {
+                } catch (TargetAccountNotFoundException e) {
+                    // El IBAN de destino lo ha escrito el usuario: se avisa en el formulario, no con la página 404.
+                    // Va antes que cualquier NotFoundException: una cuenta de origen inexistente o ajena sí es 404.
+                    result.rejectValue("targetAccountNumber", "notFound", e.getMessage());
+                } catch (DomainException | IllegalArgumentException e) {
                     result.reject("domain", e.getMessage());
                 }
             }
@@ -178,21 +184,20 @@ public class AccountWebController {
         }
         // Primero la cuenta: una ajena es un 404 sin consultar nada más
         model.addAttribute("account", service.findAccount(caller, id));
-        List<AccountSummary> visible = service.listAccounts(caller);
-        model.addAttribute("targetAccounts", visible.stream()
-                .filter(other -> !other.id().equals(id))
-                .toList());
-        model.addAttribute("backLabel", backLabel(caller, visible));
+        model.addAttribute("backLabel", backLabel(caller));
         model.addAttribute("currencies", CURRENCIES);
         return DETAIL_VIEW;
     }
 
-    /** Texto del enlace de vuelta al inicio: «Cuentas» para el administrador, «Mis cuentas» para un usuario con varias, ninguno con una. */
-    private static String backLabel(Caller caller, List<AccountSummary> visible) {
+    /**
+     * Texto del enlace de vuelta al inicio: «Cuentas» para el administrador, «Mis cuentas» para un usuario con varias
+     * cuentas y ninguno con una sola (su inicio es este mismo detalle).
+     */
+    private String backLabel(Caller caller) {
         if (caller.admin()) {
             return "Cuentas";
         }
-        return visible.size() > 1 ? "Mis cuentas" : null;
+        return service.listAccounts(caller).size() > 1 ? "Mis cuentas" : null;
     }
 
     private static String redirectToDetail(UUID id) {

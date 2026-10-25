@@ -57,16 +57,12 @@
 
         <details id="transfer-action" th:object="${transferForm}" th:open="${#fields.hasAnyErrors()}">
             <summary>⇄ Transferir</summary>
-            <p th:if="${targetAccounts.isEmpty()}" class="action-panel empty">No hay otras cuentas a las que transferir</p>
-            <form th:unless="${targetAccounts.isEmpty()}" class="action-panel" th:action="@{/accounts/{id}/transfers(id=${account.id()})}" th:object="${transferForm}" method="post" novalidate>
+            <form class="action-panel" th:action="@{/accounts/{id}/transfers(id=${account.id()})}" th:object="${transferForm}" method="post" novalidate>
             <p class="flash flash-error" role="alert" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
             <div class="field">
-                <label for="transfer-target">Cuenta de destino</label>
-                <select id="transfer-target" th:field="*{targetAccountId}">
-                    <option value="">Elige una cuenta</option>
-                    <option th:each="a : ${targetAccounts}" th:value="${a.id()}" th:text="${a.accountNumber() + ' · ' + a.holderName()}">ES00 · Titular</option>
-                </select>
-                <p class="field-error" th:if="${#fields.hasErrors('targetAccountId')}" th:errors="*{targetAccountId}"></p>
+                <label for="transfer-target">IBAN de destino</label>
+                <input type="text" id="transfer-target" autocomplete="off" spellcheck="false" placeholder="ES00 0000 0000 0000 0000 0000" th:field="*{targetAccountNumber}">
+                <p class="field-error" th:if="${#fields.hasErrors('targetAccountNumber')}" th:errors="*{targetAccountNumber}"></p>
             </div>
             <div class="field">
                 <label for="transfer-amount">Importe</label>

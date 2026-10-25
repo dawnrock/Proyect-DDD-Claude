@@ -48,6 +48,7 @@ import com.pronoide.ddd.application.AccountSummary;
 import com.pronoide.ddd.application.Caller;
 import com.pronoide.ddd.application.ForbiddenOperationException;
 import com.pronoide.ddd.application.DepositCommand;
+import com.pronoide.ddd.application.TargetAccountNotFoundException;
 import com.pronoide.ddd.application.TransferCommand;
 import com.pronoide.ddd.application.TransferSummary;
 import com.pronoide.ddd.application.WithdrawCommand;
@@ -686,51 +687,45 @@ class AccountWebControllerTests {
 
     private static final UUID OTHER_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
-    private static AccountSummary summary(UUID id, String number, String holder) {
-        return AccountSummary.builder()
-                .id(id)
-                .accountNumber(number)
-                .holderName(holder)
-                .balance(new BigDecimal("150.00"))
-                .currency("EUR")
-                .build();
-    }
+    private static final String TARGET_IBAN = "ES9876543210987654321098";
 
     @Nested
     @DisplayName("Formulario de transferencia")
     class FormularioDeTransferencia {
 
         @Test
-        @DisplayName("El select de destino lista las otras cuentas como número y titular, sin la cuenta actual")
-        void el_select_de_destino_lista_las_otras_cuentas_como_numero_y_titular_sin_la_cuenta_actual()
-                throws Exception {
+        @DisplayName("El destino es un campo de texto para el IBAN y el detalle no lista cuentas de otros clientes")
+        void el_destino_es_un_campo_de_texto_para_el_iban_y_no_lista_cuentas_de_otros_clientes() throws Exception {
             when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
             when(service.listAccounts(any(Caller.class))).thenReturn(List.of(
-                    summary(ACCOUNT_ID, "ES1234567890123456789012", "Ana Pérez"),
-                    summary(OTHER_ID, "ES9876543210987654321098", "Luis Gil")));
+                    ownAccount(ACCOUNT_ID, "ES1234567890123456789012", "Ana Pérez"),
+                    ownAccount(OTHER_ID, TARGET_IBAN, "Luis Gil")));
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
                     .andExpect(model().attributeExists("transferForm"))
                     .andExpect(content().string(containsString("/accounts/" + ACCOUNT_ID + "/transfers")))
-                    .andExpect(content().string(containsString("name=\"targetAccountId\"")))
-                    .andExpect(content().string(containsString("value=\"" + OTHER_ID + "\"")))
-                    .andExpect(content().string(containsString("ES9876543210987654321098 · Luis Gil")))
-                    .andExpect(content().string(not(containsString("value=\"" + ACCOUNT_ID + "\""))))
+                    .andExpect(content().string(containsString("name=\"targetAccountNumber\"")))
+                    .andExpect(content().string(containsString("type=\"text\"")))
+                    .andExpect(content().string(not(containsString("name=\"targetAccountId\""))))
+                    .andExpect(content().string(not(containsString("<select id=\"transfer-target\""))))
+                    .andExpect(content().string(not(containsString(TARGET_IBAN))))
+                    .andExpect(content().string(not(containsString("Luis Gil"))))
                     .andExpect(content().string(not(containsString("No hay otras cuentas a las que transferir"))));
         }
 
         @Test
-        @DisplayName("Con una sola cuenta se muestra el aviso en lugar del formulario")
-        void con_una_sola_cuenta_se_muestra_el_aviso_en_lugar_del_formulario() throws Exception {
-            when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
-            when(service.listAccounts(any(Caller.class))).thenReturn(List.of(
-                    summary(ACCOUNT_ID, "ES1234567890123456789012", "Ana Pérez")));
+        @WithMockUser(username = "ada", roles = "USER")
+        @DisplayName("Un usuario con varias cuentas no ve el número de las demás en el detalle de una de ellas")
+        void un_usuario_con_varias_cuentas_no_ve_el_numero_de_las_demas_en_el_detalle() throws Exception {
+            when(service.findAccount(ADA, ACCOUNT_ID)).thenReturn(details());
+            when(service.listAccounts(ADA)).thenReturn(List.of(
+                    ownAccount(ACCOUNT_ID, "ES1234567890123456789012", "Ada Lovelace"),
+                    ownAccount(OTHER_ID, TARGET_IBAN, "Ada Lovelace")));
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("No hay otras cuentas a las que transferir")))
-                    .andExpect(content().string(not(containsString("name=\"targetAccountId\""))));
+                    .andExpect(content().string(not(containsString(TARGET_IBAN))));
         }
     }
 
@@ -739,7 +734,7 @@ class AccountWebControllerTests {
                 .sourceAccountId(ACCOUNT_ID)
                 .sourceAccountNumber("ES1234567890123456789012")
                 .targetAccountId(OTHER_ID)
-                .targetAccountNumber("ES9876543210987654321098")
+                .targetAccountNumber(TARGET_IBAN)
                 .amount(new BigDecimal(amount))
                 .currency("EUR")
                 .occurredOn(Instant.parse("2026-10-25T10:15:00Z"))
@@ -753,18 +748,18 @@ class AccountWebControllerTests {
 
         private MockHttpServletRequestBuilder transferenciaDe(String target, String amount, String currency) {
             return post("/accounts/" + ACCOUNT_ID + "/transfers")
-                    .param("targetAccountId", target)
+                    .param("targetAccountNumber", target)
                     .param("amount", amount)
                     .param("currency", currency);
         }
 
         @Test
-        @DisplayName("Una transferencia aprobada llama al servicio con el comando esperado y redirige con un mensaje")
-        void una_transferencia_aprobada_llama_al_servicio_con_el_comando_esperado_y_redirige_con_un_mensaje()
+        @DisplayName("Una transferencia a un IBAN escrito llama al servicio con el comando esperado y redirige con un mensaje")
+        void una_transferencia_a_un_iban_escrito_llama_al_servicio_con_el_comando_esperado()
                 throws Exception {
             when(service.transfer(any(Caller.class), any())).thenReturn(transfer("25.00", "APPROVED"));
 
-            mvc.perform(transferenciaDe(OTHER_ID.toString(), "25.00", "EUR"))
+            mvc.perform(transferenciaDe("es98 7654 3210 9876 5432 1098", "25.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
                     .andExpect(flash().attribute("message",
@@ -773,10 +768,23 @@ class AccountWebControllerTests {
 
             verify(service).transfer(ADMIN, TransferCommand.builder()
                     .sourceAccountId(ACCOUNT_ID)
-                    .targetAccountId(OTHER_ID)
+                    .targetAccountNumber("es98 7654 3210 9876 5432 1098")
                     .amount(new BigDecimal("25.00"))
                     .currency("EUR")
                     .build());
+        }
+
+        @Test
+        @WithMockUser(username = "ada", roles = "USER")
+        @DisplayName("Un usuario transfiere desde su cuenta: el servicio recibe a ada como usuario")
+        void un_usuario_transfiere_desde_su_cuenta() throws Exception {
+            when(service.transfer(eq(ADA), any())).thenReturn(transfer("25.00", "APPROVED"));
+
+            mvc.perform(transferenciaDe(TARGET_IBAN, "25.00", "EUR"))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID));
+
+            verify(service).transfer(eq(ADA), any());
         }
 
         @Test
@@ -784,7 +792,7 @@ class AccountWebControllerTests {
         void una_transferencia_rechazada_redirige_con_un_aviso_de_rechazo_distinto_del_de_exito() throws Exception {
             when(service.transfer(any(Caller.class), any())).thenReturn(transfer("900.00", "REJECTED"));
 
-            mvc.perform(transferenciaDe(OTHER_ID.toString(), "900.00", "EUR"))
+            mvc.perform(transferenciaDe(TARGET_IBAN, "900.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
                     .andExpect(flash().attribute("rejection",
@@ -799,14 +807,14 @@ class AccountWebControllerTests {
             when(service.transfer(any(Caller.class), any())).thenReturn(transfer("25.00", "APPROVED"));
 
             mvc.perform(post("/accounts/" + ACCOUNT_ID + "/transfers")
-                            .param("targetAccountId", OTHER_ID.toString())
+                            .param("targetAccountNumber", TARGET_IBAN)
                             .param("amount", "25.00")
                             .param("currency", ""))
                     .andExpect(status().is3xxRedirection());
 
             verify(service).transfer(ADMIN, TransferCommand.builder()
                     .sourceAccountId(ACCOUNT_ID)
-                    .targetAccountId(OTHER_ID)
+                    .targetAccountNumber(TARGET_IBAN)
                     .amount(new BigDecimal("25.00"))
                     .build());
         }
@@ -818,30 +826,42 @@ class AccountWebControllerTests {
 
         private MockHttpServletRequestBuilder transferenciaDe(String target, String amount, String currency) {
             return post("/accounts/" + ACCOUNT_ID + "/transfers")
-                    .param("targetAccountId", target)
+                    .param("targetAccountNumber", target)
                     .param("amount", amount)
                     .param("currency", currency);
         }
 
         @BeforeEach
-        void cuentas() {
+        void cuenta() {
             when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
-            when(service.listAccounts(any(Caller.class))).thenReturn(List.of(
-                    summary(ACCOUNT_ID, "ES1234567890123456789012", "Ana Pérez"),
-                    summary(OTHER_ID, "ES9876543210987654321098", "Luis Gil")));
         }
 
         @Test
-        @DisplayName("Sin cuenta de destino vuelve al detalle con el error del campo y sin llamar al servicio")
-        void sin_cuenta_de_destino_vuelve_al_detalle_con_el_error_del_campo_y_sin_llamar_al_servicio()
+        @DisplayName("Sin IBAN de destino vuelve al detalle con el error del campo y sin llamar al servicio")
+        void sin_iban_de_destino_vuelve_al_detalle_con_el_error_del_campo_y_sin_llamar_al_servicio()
                 throws Exception {
             mvc.perform(transferenciaDe("", "25.00", "EUR"))
                     .andExpect(status().isOk())
                     .andExpect(view().name("accounts/detail"))
-                    .andExpect(model().attributeHasFieldErrors("transferForm", "targetAccountId"))
+                    .andExpect(model().attributeHasFieldErrors("transferForm", "targetAccountNumber"))
                     .andExpect(model().attributeHasNoErrors("depositForm"))
                     .andExpect(model().attributeHasNoErrors("withdrawalForm"))
-                    .andExpect(content().string(containsString("Elige la cuenta de destino")));
+                    .andExpect(content().string(containsString("Escribe el número de cuenta de destino")));
+
+            verify(service, never()).transfer(any(Caller.class), any());
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"ES12-345", "ES12 3456", "FR7630006000011234567890189", "ES98765432109876543210981"})
+        @DisplayName("Un IBAN mal formado vuelve al detalle con el error del campo, conserva lo escrito y no llama al servicio")
+        void un_iban_mal_formado_vuelve_al_detalle_con_el_error_del_campo(String iban) throws Exception {
+            mvc.perform(transferenciaDe(iban, "25.00", "EUR"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"))
+                    .andExpect(model().attributeHasFieldErrors("transferForm", "targetAccountNumber"))
+                    .andExpect(content().string(containsString("ES seguido de 22 dígitos")))
+                    .andExpect(content().string(containsString("value=\"" + iban + "\"")))
+                    .andExpect(content().string(containsString("<details id=\"transfer-action\" open=\"open\">")));
 
             verify(service, never()).transfer(any(Caller.class), any());
         }
@@ -851,14 +871,14 @@ class AccountWebControllerTests {
         @DisplayName("Un importe no positivo vuelve al detalle con el error del campo y sin llamar al servicio")
         void un_importe_no_positivo_vuelve_al_detalle_con_el_error_del_campo_y_sin_llamar_al_servicio(String amount)
                 throws Exception {
-            mvc.perform(transferenciaDe(OTHER_ID.toString(), amount, "EUR"))
+            mvc.perform(transferenciaDe(TARGET_IBAN, amount, "EUR"))
                     .andExpect(status().isOk())
                     .andExpect(view().name("accounts/detail"))
                     .andExpect(model().attributeHasFieldErrors("transferForm", "amount"))
                     .andExpect(model().attributeHasNoErrors("depositForm"))
                     .andExpect(model().attributeHasNoErrors("withdrawalForm"))
                     .andExpect(content().string(containsString("El importe debe ser positivo")))
-                    .andExpect(content().string(containsString("value=\"" + OTHER_ID + "\" selected=\"selected\"")));
+                    .andExpect(content().string(containsString("value=\"" + TARGET_IBAN + "\"")));
 
             verify(service, never()).transfer(any(Caller.class), any());
         }
@@ -869,7 +889,7 @@ class AccountWebControllerTests {
             var error = new SameAccountTransferException(new AccountNumber("ES1234567890123456789012"));
             when(service.transfer(any(Caller.class), any())).thenThrow(error);
 
-            mvc.perform(transferenciaDe(ACCOUNT_ID.toString(), "25.00", "EUR"))
+            mvc.perform(transferenciaDe("ES1234567890123456789012", "25.00", "EUR"))
                     .andExpect(status().isOk())
                     .andExpect(view().name("accounts/detail"))
                     .andExpect(model().attributeHasErrors("transferForm"))
@@ -883,7 +903,7 @@ class AccountWebControllerTests {
             var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD"));
             when(service.transfer(any(Caller.class), any())).thenThrow(error);
 
-            mvc.perform(transferenciaDe(OTHER_ID.toString(), "20.25", "USD"))
+            mvc.perform(transferenciaDe(TARGET_IBAN, "20.25", "USD"))
                     .andExpect(status().isOk())
                     .andExpect(view().name("accounts/detail"))
                     .andExpect(model().attributeHasErrors("transferForm"))
@@ -893,13 +913,41 @@ class AccountWebControllerTests {
         }
 
         @Test
-        @DisplayName("Una cuenta de destino desconocida devuelve la página 404")
-        void una_cuenta_de_destino_desconocida_devuelve_la_pagina_404() throws Exception {
-            when(service.transfer(any(Caller.class), any())).thenThrow(new AccountNotFoundException(OTHER_ID));
+        @DisplayName("Un IBAN de destino que no existe se muestra en el formulario, no como página 404")
+        void un_iban_de_destino_que_no_existe_se_muestra_en_el_formulario_no_como_pagina_404() throws Exception {
+            var error = new TargetAccountNotFoundException(TARGET_IBAN);
+            when(service.transfer(any(Caller.class), any())).thenThrow(error);
 
-            mvc.perform(transferenciaDe(OTHER_ID.toString(), "25.00", "EUR"))
+            mvc.perform(transferenciaDe(TARGET_IBAN, "25.00", "EUR"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"))
+                    .andExpect(model().attributeHasFieldErrors("transferForm", "targetAccountNumber"))
+                    .andExpect(content().string(containsString(error.getMessage())))
+                    .andExpect(content().string(containsString("value=\"" + TARGET_IBAN + "\"")))
+                    .andExpect(content().string(containsString("<details id=\"transfer-action\" open=\"open\">")));
+        }
+
+        @Test
+        @DisplayName("Una cuenta de origen desconocida o ajena devuelve la página 404")
+        void una_cuenta_de_origen_desconocida_o_ajena_devuelve_la_pagina_404() throws Exception {
+            when(service.transfer(any(Caller.class), any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
+
+            mvc.perform(transferenciaDe(TARGET_IBAN, "25.00", "EUR"))
                     .andExpect(status().isNotFound())
                     .andExpect(view().name("error/404"));
+        }
+
+        @Test
+        @DisplayName("Un error de formato que solo detecta el servicio vuelve al formulario con su mensaje")
+        void un_error_de_formato_que_solo_detecta_el_servicio_vuelve_al_formulario_con_su_mensaje()
+                throws Exception {
+            when(service.transfer(any(Caller.class), any())).thenThrow(new IllegalArgumentException("Dato inválido"));
+
+            mvc.perform(transferenciaDe(TARGET_IBAN, "25.00", "EUR"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"))
+                    .andExpect(model().attributeHasErrors("transferForm"))
+                    .andExpect(content().string(containsString("Dato inválido")));
         }
 
         @ParameterizedTest
@@ -907,7 +955,7 @@ class AccountWebControllerTests {
         @DisplayName("Un importe que redondea a cero o una divisa inexistente vuelven al detalle con el error del command")
         void un_importe_que_redondea_a_cero_o_una_divisa_inexistente_vuelven_al_detalle_con_el_error_del_command(
                 String amount, String currency, String message) throws Exception {
-            mvc.perform(transferenciaDe(OTHER_ID.toString(), amount, currency))
+            mvc.perform(transferenciaDe(TARGET_IBAN, amount, currency))
                     .andExpect(status().isOk())
                     .andExpect(view().name("accounts/detail"))
                     .andExpect(model().attributeHasErrors("transferForm"))
@@ -926,9 +974,6 @@ class AccountWebControllerTests {
         @BeforeEach
         void cuentas() {
             when(service.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
-            when(service.listAccounts(any(Caller.class))).thenReturn(List.of(
-                    summary(ACCOUNT_ID, "ES1234567890123456789012", "Ana Pérez"),
-                    summary(OTHER_ID, "ES9876543210987654321098", "Luis Gil")));
         }
 
         @Test

@@ -212,7 +212,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [x] Tests green, including a user on a foreign account → 404.
 
-### [ ] W4 — Transfer form with a typed IBAN (~10 min)
+### [x] W4 — Transfer form with a typed IBAN (~10 min)
 
 - **Side:** web
 - **Layer:** presentation
@@ -222,7 +222,7 @@ Make the application realistic: today anyone sees every account on the home page
   1. Replace the target select with an IBAN text field (same validation message style; spaces allowed); the page no longer lists other accounts.
   2. Tests: approved transfer to a typed IBAN; malformed IBAN field error; unknown IBAN → message on the form (not a 404 page).
 - **Acceptance criteria:**
-  - [ ] Tests green; the detail page contains no other customer's account numbers.
+  - [x] Tests green; the detail page contains no other customer's account numbers.
 
 ### [ ] W5 — Open account with owner (admin) (~5 min)
 
