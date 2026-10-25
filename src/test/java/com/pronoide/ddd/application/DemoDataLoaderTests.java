@@ -12,7 +12,8 @@ import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
 
 class DemoDataLoaderTests {
 
-    private final CheckingAccountService service = new CheckingAccountService(new InMemoryCheckingAccountRepository());
+    private final CheckingAccountService service = new CheckingAccountService(new InMemoryCheckingAccountRepository(),
+            new com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository());
 
     @Test
     @DisplayName("Al arrancar abre tres cuentas de demostración con el caso de uso, una de ellas de alto patrimonio")

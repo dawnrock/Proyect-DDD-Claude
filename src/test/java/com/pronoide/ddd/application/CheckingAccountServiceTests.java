@@ -26,6 +26,7 @@ import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
+import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
 
 /** Casos de uso con el repositorio en memoria real: es concreto y no hace falta simularlo. */
@@ -40,7 +41,7 @@ class CheckingAccountServiceTests {
     @BeforeEach
     void setUp() {
         repository = spy(new InMemoryCheckingAccountRepository());
-        service = new CheckingAccountService(repository);
+        service = new CheckingAccountService(repository, new InMemoryAccountOwnershipRepository());
     }
 
     private static OpenAccountCommand.Builder command(String accountNumber) {

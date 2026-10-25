@@ -106,7 +106,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [x] Tests green.
 
-### [ ] B2 — Opening accounts: admin only, with owner (~10 min)
+### [x] B2 — Opening accounts: admin only, with owner (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -116,7 +116,7 @@ Make the application realistic: today anyone sees every account on the home page
   1. `openAccount(Caller, command)`: non-admin → `ForbiddenOperationException`; otherwise open as today and record `ownerUsername`.
   2. Command validation of `ownerUsername`.
 - **Acceptance criteria:**
-  - [ ] Tests green: admin opens with owner; user is rejected; invalid username rejected by the command.
+  - [x] Tests green: admin opens with owner; user is rejected; invalid username rejected by the command.
 
 ### [ ] B3 — Listing and finding only owned accounts (~10 min)
 

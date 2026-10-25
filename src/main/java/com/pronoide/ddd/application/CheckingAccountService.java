@@ -15,6 +15,7 @@ import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.Transaction;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
+import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class CheckingAccountService {
 
     private final InMemoryCheckingAccountRepository repository;
+    private final InMemoryAccountOwnershipRepository ownership;
     private final MoneyTransferService transferService = new MoneyTransferService();
 
     /**
@@ -38,6 +40,14 @@ public class CheckingAccountService {
      * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el depósito no está en euros
      */
     public AccountSummary openAccount(OpenAccountCommand command) {
+        AccountSummary summary = open(command);
+        if (!command.ownerUsername().isEmpty()) {
+            ownership.assign(summary.id(), command.ownerUsername());
+        }
+        return summary;
+    }
+
+    private AccountSummary open(OpenAccountCommand command) {
         AccountNumber accountNumber = new AccountNumber(command.accountNumber());
         repository.findByAccountNumber(accountNumber).ifPresent(existing -> {
             throw new DuplicateAccountNumberException(accountNumber);
@@ -134,7 +144,15 @@ public class CheckingAccountService {
      * @throws IllegalArgumentException si el command no indica el usuario propietario (mensaje en español)
      */
     public AccountSummary openAccount(Caller caller, OpenAccountCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        if (!caller.admin()) {
+            throw new ForbiddenOperationException("abrir cuentas");
+        }
+        if (command.ownerUsername().isEmpty()) {
+            throw new IllegalArgumentException("El usuario propietario de la cuenta es obligatorio");
+        }
+        AccountSummary summary = open(command);
+        ownership.assign(summary.id(), command.ownerUsername());
+        return summary;
     }
 
     /** Todas las cuentas para un administrador; las suyas para un usuario. Ordenadas por número de cuenta. */
