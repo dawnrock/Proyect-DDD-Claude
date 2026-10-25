@@ -141,7 +141,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [x] Tests green: own account OK, foreign 404, transfer to another customer's IBAN OK, unknown IBAN 404.
 
-### [ ] B5 — Demo data with owners (~5 min)
+### [x] B5 — Demo data with owners (~5 min)
 
 - **Side:** back
 - **Layer:** application
@@ -150,7 +150,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **What to do:**
   1. Open the demo accounts as a system admin `Caller`, owners `ada`, `grace`, `alan`.
 - **Acceptance criteria:**
-  - [ ] Test green: each demo account has its owner.
+  - [x] Test green: each demo account has its owner.
 
 ### [ ] B6 — API security rules and 401/403 (~10 min)
 

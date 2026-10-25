@@ -23,28 +23,29 @@ import lombok.extern.slf4j.Slf4j;
 public class DemoDataLoader implements ApplicationRunner {
 
     private static final List<OpenAccountCommand> DEMO_ACCOUNTS = List.of(
-            account("ES9121000418450200051332", "Ada Lovelace", "RETAIL", "1000.00"),
-            account("ES7921000813610123456789", "Grace Hopper", "HIGH_NET_WORTH", "5000.00"),
-            account("ES6000491500051234567892", "Alan Turing", "RETAIL", "250.00"));
+            account("ES9121000418450200051332", "Ada Lovelace", "RETAIL", "1000.00", "ada"),
+            account("ES7921000813610123456789", "Grace Hopper", "HIGH_NET_WORTH", "5000.00", "grace"),
+            account("ES6000491500051234567892", "Alan Turing", "RETAIL", "250.00", "alan"));
 
     private final CheckingAccountService service;
 
     @Override
     public void run(ApplicationArguments args) {
         DEMO_ACCOUNTS.forEach(command -> {
-            AccountSummary account = service.openAccount(command);
+            AccountSummary account = service.openAccount(CallerDef.system(), command);
             log.info("Cuenta de demostración abierta: {} de {} con {} {}", account.accountNumber(),
                     account.holderName(), account.balance(), account.currency());
         });
     }
 
     private static OpenAccountCommand account(String accountNumber, String holderName, String segment,
-                                              String initialDeposit) {
+                                              String initialDeposit, String owner) {
         return OpenAccountCommand.builder()
                 .accountNumber(accountNumber)
                 .holderName(holderName)
                 .segment(segment)
                 .initialDeposit(new BigDecimal(initialDeposit))
+                .ownerUsername(owner)
                 .build();
     }
 }
