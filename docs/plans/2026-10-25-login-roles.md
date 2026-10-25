@@ -95,7 +95,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **Acceptance criteria:**
   - [x] `./mvnw verify` green with the dependency in place; `CurrentCaller` unit test (admin and user).
 
-### [ ] B1 — Ownership repository (~5 min)
+### [x] B1 — Ownership repository (~5 min)
 
 - **Side:** back
 - **Layer:** persistence
@@ -104,9 +104,9 @@ Make the application realistic: today anyone sees every account on the home page
 - **What to do:**
   1. `assign(UUID accountId, String username)`, `ownerOf(UUID)`, `accountsOf(String)`; one owner per account.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
-### [ ] B2 — Opening accounts: admin only, with owner (~10 min)
+### [x] B2 — Opening accounts: admin only, with owner (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -116,9 +116,9 @@ Make the application realistic: today anyone sees every account on the home page
   1. `openAccount(Caller, command)`: non-admin → `ForbiddenOperationException`; otherwise open as today and record `ownerUsername`.
   2. Command validation of `ownerUsername`.
 - **Acceptance criteria:**
-  - [ ] Tests green: admin opens with owner; user is rejected; invalid username rejected by the command.
+  - [x] Tests green: admin opens with owner; user is rejected; invalid username rejected by the command.
 
-### [ ] B3 — Listing and finding only owned accounts (~10 min)
+### [x] B3 — Listing and finding only owned accounts (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -127,9 +127,9 @@ Make the application realistic: today anyone sees every account on the home page
 - **What to do:**
   1. `listAccounts(Caller)`: admin → all; user → owned. `findAccount(Caller, id)`: foreign → `AccountNotFoundException`.
 - **Acceptance criteria:**
-  - [ ] Tests green, including "a foreign account is not found" (validated by temporarily skipping the check).
+  - [x] Tests green, including "a foreign account is not found" (validated by temporarily skipping the check).
 
-### [ ] B4 — Operating only owned accounts; transfer target by IBAN (~10 min)
+### [x] B4 — Operating only owned accounts; transfer target by IBAN (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -139,9 +139,9 @@ Make the application realistic: today anyone sees every account on the home page
   1. `deposit` / `withdraw` / `transfer` with `Caller`: the (source) account must be owned unless admin → otherwise `AccountNotFoundException`.
   2. Transfer target resolved by `targetAccountNumber` (any existing account; unknown → `AccountNotFoundException`).
 - **Acceptance criteria:**
-  - [ ] Tests green: own account OK, foreign 404, transfer to another customer's IBAN OK, unknown IBAN 404.
+  - [x] Tests green: own account OK, foreign 404, transfer to another customer's IBAN OK, unknown IBAN 404.
 
-### [ ] B5 — Demo data with owners (~5 min)
+### [x] B5 — Demo data with owners (~5 min)
 
 - **Side:** back
 - **Layer:** application
@@ -150,9 +150,9 @@ Make the application realistic: today anyone sees every account on the home page
 - **What to do:**
   1. Open the demo accounts as a system admin `Caller`, owners `ada`, `grace`, `alan`.
 - **Acceptance criteria:**
-  - [ ] Test green: each demo account has its owner.
+  - [x] Test green: each demo account has its owner.
 
-### [ ] B6 — API security rules and 401/403 (~10 min)
+### [x] B6 — API security rules and 401/403 (~10 min)
 
 - **Side:** back
 - **Layer:** presentation
@@ -163,9 +163,9 @@ Make the application realistic: today anyone sees every account on the home page
   2. Controllers pass `CurrentCaller.from(authentication)` to the new service methods; `OpenAccountRequest.ownerUsername`.
   3. Tests: anonymous 401; user on `POST /api/accounts` 403; user on a foreign account 404 (mocked service throws); admin as before.
 - **Acceptance criteria:**
-  - [ ] Tests green; responses match the OpenAPI fragment.
+  - [x] Tests green; responses match the OpenAPI fragment.
 
-### [ ] B7 — API transfer by IBAN (~5 min)
+### [x] B7 — API transfer by IBAN (~5 min)
 
 - **Side:** back
 - **Layer:** presentation
@@ -174,7 +174,7 @@ Make the application realistic: today anyone sees every account on the home page
 - **What to do:**
   1. `targetAccountNumber` (pattern like `AccountNumber`) replaces `targetAccountId`; tests updated (400 for a malformed IBAN).
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
 ### [ ] W1 — Login page and web security rules (~10 min)
 

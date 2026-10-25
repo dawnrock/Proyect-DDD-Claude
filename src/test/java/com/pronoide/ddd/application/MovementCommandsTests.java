@@ -127,6 +127,43 @@ class MovementCommandsTests {
         assertThat(deposit("0.5", "JPY").currency()).isEqualTo("JPY");
     }
 
+    @Test
+    @DisplayName("Una transferencia por número de cuenta se construye con el destino tal como se escribió")
+    void una_transferencia_por_numero_de_cuenta_se_construye() {
+        TransferCommand command = TransferCommand.builder()
+                .sourceAccountId(ACCOUNT_ID)
+                .targetAccountNumber("es91 2100 0418 4502 0005 1332")
+                .amount(new BigDecimal("10"))
+                .build();
+
+        assertThat(command.targetAccountNumber()).isEqualTo("es91 2100 0418 4502 0005 1332");
+        assertThat(command.targetAccountId()).isNull();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "ES12", "XX9121000418450200051332", "ES91210004184502000513AB", "ES912100041845020005133"})
+    @DisplayName("Un número de cuenta de destino mal formado se rechaza al construir el command")
+    void un_numero_de_cuenta_de_destino_mal_formado_se_rechaza(String number) {
+        assertThatIllegalArgumentException().isThrownBy(() -> TransferCommand.builder()
+                .sourceAccountId(ACCOUNT_ID)
+                .targetAccountNumber(number)
+                .amount(new BigDecimal("10"))
+                .build());
+    }
+
+    @Test
+    @DisplayName("Una transferencia sin destino, o con los dos destinos, se rechaza")
+    void una_transferencia_sin_destino_o_con_los_dos_se_rechaza() {
+        assertThatIllegalArgumentException().isThrownBy(() -> TransferCommand.builder()
+                .sourceAccountId(ACCOUNT_ID).amount(new BigDecimal("10")).build());
+        assertThatIllegalArgumentException().isThrownBy(() -> TransferCommand.builder()
+                .sourceAccountId(ACCOUNT_ID)
+                .targetAccountId(UUID.randomUUID())
+                .targetAccountNumber("ES9121000418450200051332")
+                .amount(new BigDecimal("10"))
+                .build());
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"", "eur", "XYZ", "EU", "EURO"})
     @DisplayName("La divisa debe ser un código ISO 4217 válido")

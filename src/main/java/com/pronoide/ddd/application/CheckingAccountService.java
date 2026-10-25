@@ -15,6 +15,7 @@ import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.Transaction;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
+import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class CheckingAccountService {
 
     private final InMemoryCheckingAccountRepository repository;
+    private final InMemoryAccountOwnershipRepository ownership;
     private final MoneyTransferService transferService = new MoneyTransferService();
 
     /**
@@ -38,6 +40,14 @@ public class CheckingAccountService {
      * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el depósito no está en euros
      */
     public AccountSummary openAccount(OpenAccountCommand command) {
+        AccountSummary summary = open(command);
+        if (!command.ownerUsername().isEmpty()) {
+            ownership.assign(summary.id(), command.ownerUsername());
+        }
+        return summary;
+    }
+
+    private AccountSummary open(OpenAccountCommand command) {
         AccountNumber accountNumber = new AccountNumber(command.accountNumber());
         repository.findByAccountNumber(accountNumber).ifPresent(existing -> {
             throw new DuplicateAccountNumberException(accountNumber);
@@ -103,8 +113,15 @@ public class CheckingAccountService {
      * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el importe no está en la divisa de las cuentas
      */
     public TransferSummary transfer(TransferCommand command) {
+        if (command.targetAccountId() == null) {
+            throw new IllegalArgumentException("Indica la cuenta de destino por su id");
+        }
         CheckingAccount source = load(command.sourceAccountId());
         CheckingAccount target = load(command.targetAccountId());
+        return move(source, target, command);
+    }
+
+    private TransferSummary move(CheckingAccount source, CheckingAccount target, TransferCommand command) {
         Transaction withdrawal =
                 transferService.transfer(source, target, toAmount(command.amount(), command.currency()));
         repository.save(source);
@@ -134,27 +151,44 @@ public class CheckingAccountService {
      * @throws IllegalArgumentException si el command no indica el usuario propietario (mensaje en español)
      */
     public AccountSummary openAccount(Caller caller, OpenAccountCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        if (!caller.admin()) {
+            throw new ForbiddenOperationException("abrir cuentas");
+        }
+        if (command.ownerUsername().isEmpty()) {
+            throw new IllegalArgumentException("El usuario propietario de la cuenta es obligatorio");
+        }
+        AccountSummary summary = open(command);
+        ownership.assign(summary.id(), command.ownerUsername());
+        return summary;
     }
 
     /** Todas las cuentas para un administrador; las suyas para un usuario. Ordenadas por número de cuenta. */
     public List<AccountSummary> listAccounts(Caller caller) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        return repository.findAll().stream()
+                .filter(account -> canAccess(caller, account.id()))
+                .map(CheckingAccountService::toSummary)
+                .toList();
     }
 
     /** @throws AccountNotFoundException si no existe o no es de quien lo pide (y no es administrador) */
     public AccountDetails findAccount(Caller caller, UUID id) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        return toDetails(loadFor(caller, id));
     }
 
     /** @throws AccountNotFoundException si la cuenta no existe o no es de quien lo pide (y no es administrador) */
     public TransactionSummary deposit(Caller caller, DepositCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        CheckingAccount account = loadFor(caller, command.accountId());
+        Transaction transaction = account.deposit(toAmount(command.amount(), command.currency()));
+        repository.save(account);
+        return toTransaction(transaction);
     }
 
     /** @throws AccountNotFoundException si la cuenta no existe o no es de quien lo pide (y no es administrador) */
     public TransactionSummary withdraw(Caller caller, WithdrawCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        CheckingAccount account = loadFor(caller, command.accountId());
+        Transaction transaction = account.tryWithdraw(toAmount(command.amount(), command.currency()));
+        repository.save(account);
+        return toTransaction(transaction);
     }
 
     /**
@@ -166,7 +200,27 @@ public class CheckingAccountService {
      * @throws IllegalArgumentException si el command solo trae {@code targetAccountId} (vía antigua)
      */
     public TransferSummary transfer(Caller caller, TransferCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        if (command.targetAccountNumber() == null) {
+            throw new IllegalArgumentException("Indica la cuenta de destino por su número");
+        }
+        CheckingAccount source = loadFor(caller, command.sourceAccountId());
+        AccountNumber targetNumber = new AccountNumber(command.targetAccountNumber());
+        CheckingAccount target = repository.findByAccountNumber(targetNumber)
+                .orElseThrow(() -> new TargetAccountNotFoundException(targetNumber.value()));
+        return move(source, target, command);
+    }
+
+    /** Carga la cuenta; una ajena (o sin propietario, para un usuario) se trata como inexistente. */
+    private CheckingAccount loadFor(Caller caller, UUID id) {
+        CheckingAccount account = load(id);
+        if (!canAccess(caller, id)) {
+            throw new AccountNotFoundException(id);
+        }
+        return account;
+    }
+
+    private boolean canAccess(Caller caller, UUID accountId) {
+        return caller.admin() || ownership.ownerOf(accountId).filter(caller.username()::equals).isPresent();
     }
 
     private CheckingAccount load(UUID id) {
