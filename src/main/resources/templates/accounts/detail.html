@@ -4,43 +4,15 @@
 <body>
 <header th:replace="~{fragments/layout :: header}"></header>
 <main>
-    <h1>Cuenta <span th:text="${account.accountNumber()}">ES00</span></h1>
+    <a class="back" th:href="@{/}">← Cuentas</a>
     <p th:if="${message}" class="flash flash-success" th:text="${message}"></p>
     <p th:if="${rejection}" class="flash flash-warning" th:text="${rejection}"></p>
 
-    <dl class="summary">
-        <dt>Titular</dt>
-        <dd th:text="${account.holderName()}">Titular</dd>
-        <dt>Segmento</dt>
-        <dd th:text="${account.segment() == 'RETAIL' ? 'Minorista' : (account.segment() == 'HIGH_NET_WORTH' ? 'Alto patrimonio' : account.segment())}">Minorista</dd>
-        <dt>Saldo</dt>
-        <dd th:text="${account.balance() + ' ' + account.currency()}">0.00 EUR</dd>
-    </dl>
-
-    <h2>Movimientos</h2>
-    <table th:if="${!account.transactions().isEmpty()}">
-        <thead>
-        <tr>
-            <th>Fecha</th>
-            <th>Tipo</th>
-            <th class="num">Importe</th>
-            <th>Estado</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="t : ${account.transactions()}" th:classappend="${t.status() == 'REJECTED'} ? 'row-rejected'">
-            <td th:text="${#temporals.format(t.occurredOn(), 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</td>
-            <td th:text="${t.type() == 'DEPOSIT' ? 'Ingreso' : (t.type() == 'WITHDRAWAL' ? 'Retirada' : t.type())}">Ingreso</td>
-            <td class="num" th:text="${t.amount() + ' ' + t.currency()}">0.00 EUR</td>
-            <td>
-                <span th:if="${t.status() == 'APPROVED'}" class="badge badge-ok">Aprobado</span>
-                <span th:if="${t.status() == 'REJECTED'}" class="badge badge-rejected">Rechazado</span>
-                <span th:if="${t.status() == 'PENDING'}" class="badge">Pendiente</span>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-    <p th:if="${account.transactions().isEmpty()}" class="empty">Todavía no hay movimientos.</p>
+    <div class="hero">
+        <h1 class="hero-label"><span th:text="${account.holderName()}">Titular</span> · <span class="nowrap" th:text="${account.accountNumber()}">ES00</span></h1>
+        <p class="hero-amount" th:text="${@fmt.money(account.balance(), account.currency())}">0,00 €</p>
+        <p class="hero-sub" th:text="${account.segment() == 'RETAIL' ? 'Minorista' : (account.segment() == 'HIGH_NET_WORTH' ? 'Alto patrimonio' : account.segment())}">Minorista</p>
+    </div>
 
     <div class="movements">
         <form th:action="@{/accounts/{id}/deposits(id=${account.id()})}" th:object="${depositForm}" method="post" novalidate>
@@ -107,7 +79,18 @@
         <button class="button" type="submit">Transferir</button>
     </form>
 
-    <p><a th:href="@{/}">Volver al listado</a></p>
+    <h2>Movimientos</h2>
+    <ul class="list" th:if="${!account.transactions().isEmpty()}">
+        <li class="row" th:each="t : ${account.transactions()}" th:classappend="${t.status() == 'REJECTED'} ? 'row-rejected'">
+            <span class="row-main">
+                <span class="row-title" th:text="${t.type() == 'DEPOSIT' ? 'Ingreso' : (t.type() == 'WITHDRAWAL' ? 'Retirada' : t.type())}">Ingreso</span>
+                <span class="row-sub"><span th:text="${#temporals.format(t.occurredOn(), 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</span><span class="status" th:if="${t.status() == 'REJECTED'}"> · Rechazado</span><span class="status" th:if="${t.status() == 'PENDING'}"> · Pendiente</span></span>
+            </span>
+            <span class="row-amount" th:classappend="${t.type() == 'DEPOSIT' and t.status() == 'APPROVED'} ? 'positive'"
+                  th:text="${@fmt.signedMoney(t.amount(), t.currency(), t.type() == 'DEPOSIT')}">+0,00 €</span>
+        </li>
+    </ul>
+    <p th:if="${account.transactions().isEmpty()}" class="empty">Todavía no hay movimientos.</p>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

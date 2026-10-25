@@ -152,11 +152,11 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("ES1234567890123456789012")))
                     .andExpect(content().string(containsString("Ana Pérez")))
                     .andExpect(content().string(containsString("Alto patrimonio")))
-                    .andExpect(content().string(containsString("150.00 EUR")))
+                    .andExpect(content().string(containsString("150,00 €")))
                     .andExpect(content().string(containsString("Ingreso")))
                     .andExpect(content().string(containsString("Retirada")))
-                    .andExpect(content().string(containsString("100.00 EUR")))
-                    .andExpect(content().string(containsString("Aprobado")))
+                    .andExpect(content().string(containsString("+100,00 €")))
+                    .andExpect(content().string(containsString("−30,00 €")))
                     .andExpect(content().string(containsString("/2026")));
         }
 
@@ -167,7 +167,7 @@ class AccountWebControllerTests {
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("<a href=\"/\">Volver al listado</a>")));
+                    .andExpect(content().string(containsString("<a class=\"back\" href=\"/\">← Cuentas</a>")));
         }
 
         @Test

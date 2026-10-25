@@ -78,7 +78,7 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
 - **Acceptance criteria:**
   - [x] Tests green.
 
-### [ ] T4 — Account detail: balance and movements (~10 min)
+### [x] T4 — Account detail: balance and movements (~10 min)
 
 - **Layer:** presentation
 - **Files:** `templates/accounts/detail.html`, `AccountWebControllerTests.java`
@@ -86,9 +86,9 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
 - **What to do:**
   1. Hero: holder and full IBAN (muted), large balance, segment label in Spanish.
   2. Movements as rows: type in Spanish and date; amount signed (`+` deposit in the positive colour, `−` withdrawal); rejected rows struck through with "Rechazada" in the negative colour; empty state.
-  3. Update the detail tests to the new format (`150,00 €`, rejected marker).
+  3. Update the detail tests to the new format (`150,00 €`, rejected marker), and the end-to-end balance checks in `DddLabApplicationTests` (`150,00 €`, `125,00 €`, `75,00 €`), which read the detail page (moved here from T6).
 - **Acceptance criteria:**
-  - [ ] Tests green; rejected movements remain clearly marked.
+  - [x] Tests green; rejected movements remain clearly marked.
 
 ### [ ] T5 — Actions as pills with forms on demand (~10 min)
 
