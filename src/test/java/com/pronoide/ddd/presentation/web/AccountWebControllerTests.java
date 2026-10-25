@@ -148,6 +148,16 @@ class AccountWebControllerTests {
         }
 
         @Test
+        @DisplayName("El detalle enlaza de vuelta al listado")
+        void el_detalle_enlaza_de_vuelta_al_listado() throws Exception {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("<a href=\"/\">Volver al listado</a>")));
+        }
+
+        @Test
         @DisplayName("Una retirada rechazada se muestra marcada como rechazada")
         void una_retirada_rechazada_se_muestra_marcada_como_rechazada() throws Exception {
             when(service.findAccount(ACCOUNT_ID)).thenReturn(details(
