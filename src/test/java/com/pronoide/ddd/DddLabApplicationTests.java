@@ -13,9 +13,13 @@ import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.ApplicationContext;
+
+import com.pronoide.ddd.application.DemoDataLoader;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class DddLabApplicationTests {
@@ -25,8 +29,17 @@ class DddLabApplicationTests {
 
 	private final HttpClient http = HttpClient.newHttpClient();
 
+	@Autowired
+	private ApplicationContext context;
+
 	@Test
 	void contextLoads() {
+	}
+
+	@Test
+	@DisplayName("Sin el perfil demo no se cargan los datos de demostración")
+	void sin_el_perfil_demo_no_se_cargan_los_datos_de_demostracion() {
+		assertThat(context.getBeansOfType(DemoDataLoader.class)).isEmpty();
 	}
 
 	@Test

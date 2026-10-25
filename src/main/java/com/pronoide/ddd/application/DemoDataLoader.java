@@ -5,15 +5,20 @@ import java.util.List;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * Abre cuentas de demostración al arrancar, para poder probar la aplicación sin preparar datos. Usa el caso de uso
- * {@code openAccount}, nunca el repositorio, así que los datos cumplen las mismas reglas que los reales.
+ * {@code openAccount}, nunca el repositorio, así que los datos cumplen las mismas reglas que los reales. Solo se activa
+ * con el perfil {@code demo}, que {@code ./mvnw spring-boot:run} activa por defecto; los tests no lo cargan.
  */
 @Slf4j
+@Component
+@Profile("demo")
 @RequiredArgsConstructor
 public class DemoDataLoader implements ApplicationRunner {
 
