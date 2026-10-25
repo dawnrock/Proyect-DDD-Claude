@@ -113,12 +113,11 @@ a.row:hover .row-title { text-decoration: underline; }
 
 /* Acciones con su formulario a demanda */
 .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
-.actions details { display: contents; }
+.actions details[open] { order: 10; flex-basis: 100%; }
 .actions summary { list-style: none; }
 .actions summary::-webkit-details-marker { display: none; }
 .actions details[open] summary { color: var(--background); background: var(--text); }
-.action-panel { order: 10; flex-basis: 100%; padding: 1.25rem; background: var(--surface); border-radius: var(--radius); }
-.action-panel h2 { margin-top: 0; }
+.action-panel { margin: 0.75rem 0 0; padding: 1.25rem; background: var(--surface); border-radius: var(--radius); }
 
 /* Formularios */
 .field { margin-bottom: 1rem; }
@@ -142,19 +141,6 @@ a.row:hover .row-title { text-decoration: underline; }
 .flash-success { border-left-color: var(--positive); }
 .flash-error { border-left-color: var(--negative); }
 .flash-warning { border-left-color: var(--warning); }
-
-/* Restos del diseño anterior, en oscuro, mientras las páginas se migran */
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 0.6rem 0.5rem; text-align: left; border-bottom: 1px solid var(--hairline); }
-th { color: var(--muted); font-weight: 500; font-size: 0.85rem; }
-.num { text-align: right; }
-.summary dt { color: var(--muted); font-size: 0.85rem; }
-.summary dd { margin: 0 0 0.75rem; }
-.badge { display: inline-block; padding: 0.1rem 0.55rem; border-radius: 999px; background: var(--surface-raised); font-size: 0.8rem; }
-.badge-ok { color: var(--positive); }
-.badge-rejected { color: var(--negative); }
-.movements { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; }
-.movements form { padding: 1.25rem; background: var(--surface); border-radius: var(--radius); }
 
 @media (max-width: 480px) {
     .hero-amount { font-size: 1.9rem; }

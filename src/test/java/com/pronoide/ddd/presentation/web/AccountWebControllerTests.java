@@ -694,6 +694,49 @@ class AccountWebControllerTests {
     }
 
     @Nested
+    @DisplayName("Acciones del detalle")
+    class Acciones {
+
+        @BeforeEach
+        void cuentas() {
+            when(service.findAccount(ACCOUNT_ID)).thenReturn(details());
+            when(service.listAccounts()).thenReturn(List.of(
+                    summary(ACCOUNT_ID, "ES1234567890123456789012", "Ana Pérez"),
+                    summary(OTHER_ID, "ES9876543210987654321098", "Luis Gil")));
+        }
+
+        @Test
+        @DisplayName("Al abrir el detalle, ingresar, retirar y transferir son pastillas con el formulario cerrado")
+        void al_abrir_el_detalle_las_acciones_estan_cerradas() throws Exception {
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("<details id=\"deposit-action\">")))
+                    .andExpect(content().string(containsString("<details id=\"withdrawal-action\">")))
+                    .andExpect(content().string(containsString("<details id=\"transfer-action\">")))
+                    .andExpect(content().string(not(containsString("open=\"open\""))));
+        }
+
+        @Test
+        @DisplayName("Un error en el ingreso vuelve al detalle con solo el formulario de ingreso abierto")
+        void un_error_en_el_ingreso_abre_solo_ese_formulario() throws Exception {
+            mvc.perform(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "0").param("currency", "EUR"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("<details id=\"deposit-action\" open=\"open\">")))
+                    .andExpect(content().string(containsString("<details id=\"withdrawal-action\">")))
+                    .andExpect(content().string(containsString("<details id=\"transfer-action\">")));
+        }
+
+        @Test
+        @DisplayName("Un error en la transferencia vuelve al detalle con solo el formulario de transferencia abierto")
+        void un_error_en_la_transferencia_abre_solo_ese_formulario() throws Exception {
+            mvc.perform(post("/accounts/" + ACCOUNT_ID + "/transfers").param("amount", "10.00").param("currency", "EUR"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("<details id=\"transfer-action\" open=\"open\">")))
+                    .andExpect(content().string(containsString("<details id=\"deposit-action\">")));
+        }
+    }
+
+    @Nested
     @DisplayName("Alta de cuenta")
     class Alta {
 

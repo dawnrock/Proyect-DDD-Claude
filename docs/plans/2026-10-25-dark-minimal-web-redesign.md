@@ -90,7 +90,7 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
 - **Acceptance criteria:**
   - [x] Tests green; rejected movements remain clearly marked.
 
-### [ ] T5 — Actions as pills with forms on demand (~10 min)
+### [x] T5 — Actions as pills with forms on demand (~10 min)
 
 - **Layer:** presentation
 - **Files:** `templates/accounts/detail.html`, `AccountWebControllerTests.java`
@@ -100,7 +100,7 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
   2. A form with errors is rendered `open`; the others closed.
   3. Tests: on GET all three are closed; a field error in the transfer form opens only the transfer `<details>` (likewise for deposit).
 - **Acceptance criteria:**
-  - [ ] Tests green; every existing form-error test still passes.
+  - [x] Tests green; every existing form-error test still passes.
 
 ### [ ] T6 — Flash messages in the new format (~10 min)
 
