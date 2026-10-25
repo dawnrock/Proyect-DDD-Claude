@@ -21,8 +21,24 @@ import org.springframework.context.ApplicationContext;
 
 import com.pronoide.ddd.application.DemoDataLoader;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+/** Usuarios de test (#50): admin, ada y grace, todos con la contraseña "demo" (mismo hash que el perfil demo). */
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = {
+		"app.security.users[0].username=admin",
+		"app.security.users[0].password-hash=" + DddLabApplicationTests.DEMO_HASH,
+		"app.security.users[0].role=ADMIN",
+		"app.security.users[1].username=ada",
+		"app.security.users[1].password-hash=" + DddLabApplicationTests.DEMO_HASH,
+		"app.security.users[1].role=USER",
+		"app.security.users[2].username=grace",
+		"app.security.users[2].password-hash=" + DddLabApplicationTests.DEMO_HASH,
+		"app.security.users[2].role=USER"})
 class DddLabApplicationTests {
+
+	/** Hash BCrypt de "demo". */
+	static final String DEMO_HASH = "$2a$10$XbpS91y/CFr.Zvx6Xxi7RuLFFUMRM9adecz2G7FO4YClrsKKCdKWW";
+
+	/** Contraseña de los usuarios de test. */
+	static final String PASSWORD = "demo";
 
 	@LocalServerPort
 	private int port;
