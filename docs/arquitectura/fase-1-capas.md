@@ -118,6 +118,14 @@ Implementado en la #12 (`LayeredArchitectureTests`, cada regla validada rompién
 | `los_controladores_no_acceden_al_repositorio` | Clases con `@Controller` o `@RestController` (meta-anotación) sin `persistence`; se solapa con la regla de capas, pero su mensaje es más claro |
 | `toda_clase_pertenece_a_una_capa` | Fuera de las cuatro capas solo está `DddLabApplication`: la regla de capas ignora los paquetes que no son capas, así que un paquete nuevo (`config`…) tendría que añadirse antes como capa |
 
+Añadido en la #54 (reglas que solo estaban escritas en los ADR; cada una validada rompiéndola temporalmente):
+
+| Regla | Cubre |
+| ----- | ----- |
+| `la_aplicacion_no_depende_de_spring_security` | ADR 0008: la propiedad de las cuentas se decide con `Caller`, sin Spring Security en `application` |
+| `nadie_usa_la_seguridad_por_metodos` | ADR 0008: ninguna clase ni método lleva `@PreAuthorize`, `@PostAuthorize` ni `@Secured`, en ninguna capa |
+| `la_persistencia_no_tiene_interfaces` | ADR 0004: clases concretas, sin interfaces de puerto en `persistence` (solo fase 1) |
+
 Implementado en la #48 (rediseño de la web, solo `presentation.web` y plantillas):
 
 - Tema oscuro y minimalista en `static/css/app.css` (variables CSS, sin dependencias ni JavaScript): saldo protagonista, listas de filas en lugar de tablas, acciones como pastillas.

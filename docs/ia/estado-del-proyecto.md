@@ -2,21 +2,20 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores. **Se actualiza en cada PR que cierra una issue** (lo exigen `implement-plan`, `implement-plan-team`, la plantilla de los planes y el CI).
 
-- **Última actualización:** 2026-10-26 · PR #53 (ADR 0009, dominio sin Lombok) e issue #54
+- **Última actualización:** 2026-10-26 · PR #56 (#54, reglas de ArchUnit de los ADR)
 - **Rama activa:** `Monolithic` (fase 1). `master` congelada. `Hexagonal` aún no existe.
 
 ## Dónde estamos
 
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
-| 1 · Monolito en capas | #2 Lombok/Immutables · #3 glosario, capas y ADR 0004 · #4 repositorio en memoria · #8 base REST + web · #5 abrir, consultar y listar cuentas · #31 flujo en equipo (cerrada tras la #5) · #6 ingresos y retiradas con detalle de la cuenta · #7 transferencias entre cuentas (PR #43) · regla deny redundante de los hooks (PR #44, sin issue) · #11 datos de demostración (PR #45) · #12 reglas de ArchUnit de las capas (PR #47) · #48 rediseño oscuro de la web (PR #49) · #50 login con roles (PR #51) · análisis funcional y técnico + `check-domain` de `@EqualsAndHashCode` (PR #52, sin issue) | ADR 0009, dominio sin Lombok (PR #53, sin issue, pendiente de fusión) | #54 → #13 |
+| 1 · Monolito en capas | #2 Lombok/Immutables · #3 glosario, capas y ADR 0004 · #4 repositorio en memoria · #8 base REST + web · #5 abrir, consultar y listar cuentas · #31 flujo en equipo (cerrada tras la #5) · #6 ingresos y retiradas con detalle de la cuenta · #7 transferencias entre cuentas (PR #43) · regla deny redundante de los hooks (PR #44, sin issue) · #11 datos de demostración (PR #45) · #12 reglas de ArchUnit de las capas (PR #47) · #48 rediseño oscuro de la web (PR #49) · #50 login con roles (PR #51) · análisis funcional y técnico + `check-domain` de `@EqualsAndHashCode` (PR #52, sin issue) · ADR 0009, dominio sin Lombok (PR #53 y #55, sin issue) | #54 reglas de ArchUnit de los ADR 0004 y 0008 (PR #56, pendiente de revisión y fusión) | #13 |
 | 2 · Hexagonal | — | — | #14 → #23 (se empieza al cerrar #13, creando `Hexagonal` desde `Monolithic`) |
 
 ## Siguiente paso
 
-1. Revisar y fusionar la PR #53 (ADR 0009) (lo decide el usuario).
-2. `/plan-feature 54` (reglas de ArchUnit pendientes de los ADR 0004 y 0008 y limpieza de `DomainIsolationTests`).
-3. `/plan-feature 13` (cerrar la fase 1: documentación final y etiqueta `v1-monolito`).
+1. Revisar y fusionar la PR #56 (#54) (lo decide el usuario).
+2. `/plan-feature 13` (cerrar la fase 1: documentación final y etiqueta `v1-monolito`).
 
 Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sección "Issues de la fase".
 
@@ -52,7 +51,7 @@ Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sec
 - Las adiciones de la #5 a documentos que siguen en español (glosario, `fase-1-capas.md`, este estado) se escribieron en español para no mezclar idiomas; se traducen con el resto.
 - Telegram: los avisos locales se silencian con `TELEGRAM_DISABLED=1` (PR #40), activado en `~/.claude/settings.json` del usuario. El aviso de CI fallida sigue activo (usa los secretos de GitHub).
 - **Datos de demostración (#11):** `./mvnw spring-boot:run` arranca con el perfil `demo` (propiedad `spring-boot.run.profiles` del `pom.xml`) y tres cuentas abiertas con los casos de uso; `-Dspring-boot.run.profiles=default` arranca sin datos. Proponer al usuario mencionarlo en la sección de comandos de `CLAUDE.md` (requiere su visto bueno).
-- `DomainIsolationTests` prohíbe un paquete `com.pronoide.ddd.bootstrap..` que no existe (resto de una versión anterior). Inofensivo; se quita en la #54. Hoy lo cubre `el_dominio_solo_depende_del_jdk` (#12).
+- **Reglas del ADR 0008 para la fase 2 (#54):** `HexagonalArchitectureTests` debe heredar `la_aplicacion_no_depende_de_spring_security` y `nadie_usa_la_seguridad_por_metodos`. `la_persistencia_no_tiene_interfaces` no, porque la fase 2 introduce los puertos. `DomainIsolationTests` mantiene su regla de framework aunque en la fase 1 la cubra D1: es la que sobrevive a las dos fases.
 - **Web (#48):** el listado no muestra el segmento (falta en `AccountSummary`; sería una issue del lado back). Las transferencias aparecen como retirada e ingreso, sin etiqueta propia. El IBAN abreviado de los avisos puede partirse entre líneas en pantallas estrechas (se arreglaría con espacios de no separación en `WebFormat.maskedIban`). Los movimientos se listan del más antiguo al más reciente.
 - **Login (#50):** la consola H2 (`/h2-console`) es solo para administradores (marcos del mismo origen, sin CSRF en sus formularios) y `/actuator/health` público solo da el estado; un usuario puede saber si un IBAN existe intentando una transferencia (riesgo aceptado en el ADR 0008); no hay límite de intentos de login. Sin gestión de usuarios (alta, cambio de contraseña): son estáticos. Una cuenta puede asignarse a un usuario que aún no existe.
 - **Equipo (#50):** los teammates no pueden escribirse entre sí (sin `SendMessage`); el lead une sus revisiones del contrato. Los worktrees aislados siguen partiendo de `Monolithic`: el `git merge --ff-only` inicial funcionó.
@@ -93,3 +92,6 @@ Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sec
 | 2026-10-25 | #47 | #12 | `LayeredArchitectureTests`: D1-D5 de la fase 1, sin setters públicos en el dominio y controladores sin repositorio |
 | 2026-10-25 | #49 | #48 | Rediseño oscuro y minimalista de la web, `WebFormat` e importes en formato español |
 | 2026-10-25 | #51 | #50 | Login con roles admin y usuario (Spring Security, ADR 0008), propiedad de cuentas y transferencia por IBAN |
+| 2026-10-26 | #52 | — | Análisis funcional y técnico (`docs/analysis/`, en castellano como excepción) y `check-domain` de `@EqualsAndHashCode` |
+| 2026-10-26 | #53, #55 | — | ADR 0009: el dominio no usa Lombok; `check-domain` rechaza cualquier `lombok`; referencias a ArchUnit corregidas |
+| 2026-10-26 | #56 | #54 | Reglas de ArchUnit de los ADR 0004 y 0008 y `DomainIsolationTests` sin el paquete `bootstrap` |
