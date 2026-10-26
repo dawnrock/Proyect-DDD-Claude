@@ -1,5 +1,7 @@
 # Análisis técnico
 
+> **Excepción de idioma:** este documento está en castellano a petición del usuario, como excepción a la convención de escribir la documentación en inglés. No se traduce.
+
 > Fotografía de la rama `Monolithic` (fase 1, monolito en capas) después de la PR #51. Para cada tecnología: qué es, dónde se usa y **por qué** está en el proyecto. Las decisiones que tienen su propio registro enlazan a su ADR.
 
 ## 1. Resumen de tecnologías
@@ -99,7 +101,8 @@ El proyecto quiere practicar con las dos librerías **sin debilitar el dominio**
 | ----- | --------- | ------- |
 | `application`, `presentation` (servicios, controladores, `DemoDataLoader`) | `@RequiredArgsConstructor` | Inyección por constructor de los campos `final` sin escribir el constructor: dependencias inmutables y fáciles de probar. |
 | `DemoDataLoader`, `RestExceptionHandler` | `@Slf4j` | Campo de log sin código repetitivo. |
-| Objetos de formulario web (`OpenAccountForm`, `MovementForm`) | `@Getter` | Accesores para el enlace de datos de Thymeleaf. |
+| Objetos de formulario web (`OpenAccountForm`, `MovementForm`, `TransferForm`) | `@Getter`, `@Setter` y `@Accessors(fluent = false)` | Spring MVC y Thymeleaf enlazan los formularios con getters y setters al estilo JavaBean (`getAmount()`/`setAmount()`), así que aquí se desactivan los accesores fluidos del `lombok.config`. |
+| Tests (`support/TestAccounts`) | `@Builder` | Builder de datos de prueba (`TestAccounts.anAccount()...open()`), el único uso permitido de `@Builder`. |
 | `domain..` | solo se permiten `@Getter` y `@EqualsAndHashCode(onlyExplicitlyIncluded = true)` | Todo lo que crea setters o constructores públicos (`@Data`, `@Setter`, `@AllArgsConstructor`, `@Builder`, `@Value`) permitiría saltarse las factorías y las invariantes. Hoy el dominio no usa Lombok en ninguna clase: los accesores y los `equals` están escritos a mano. |
 
 Configuración (`lombok.config`): `lombok.accessors.fluent = true` da accesores al estilo record (`id()` en lugar de `getId()`), como pide la convención del proyecto; `addLombokGeneratedAnnotation` permite que las herramientas de cobertura ignoren el código generado. Lombok es `optional` y se excluye del JAR ejecutable porque solo hace falta al compilar.

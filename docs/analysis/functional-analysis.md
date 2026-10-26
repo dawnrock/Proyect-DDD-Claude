@@ -1,5 +1,7 @@
 # Análisis funcional
 
+> **Excepción de idioma:** este documento está en castellano a petición del usuario, como excepción a la convención de escribir la documentación en inglés. No se traduce.
+
 > Fotografía de la rama `Monolithic` (fase 1, monolito en capas) después de la PR #51 (login con roles). La fuente de verdad de los términos y las reglas es el [glosario](../dominio/glosario.md); este documento los agrupa por dominio y explica cómo encajan las piezas.
 
 ## 1. Propósito de la aplicación

@@ -41,3 +41,4 @@ En Windows, `mvnw.cmd`. Requiere Java 21.
 - [Arquitectura de IA](docs/ia/arquitectura-ia.md) · [Notificaciones Telegram](docs/ia/notificaciones.md)
 - [Fase 1 · capas](docs/arquitectura/fase-1-capas.md) · [Fase 2 · hexagonal](docs/arquitectura/fase-2-hexagonal.md)
 - [Glosario](docs/dominio/glosario.md) · [ADR](docs/adr/README.md) · [Planes](docs/plans/)
+- [Análisis funcional](docs/analysis/functional-analysis.md) · [Análisis técnico](docs/analysis/technical-analysis.md)
