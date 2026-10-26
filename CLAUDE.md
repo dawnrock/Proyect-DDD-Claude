@@ -44,7 +44,7 @@ En ambas fases el dominio no depende de Spring ni de `jakarta` y su estado es pr
 
 | Librería | Sí | No |
 | -------- | -- | -- |
-| Lombok | `@RequiredArgsConstructor` (inyección por constructor) y `@Slf4j` fuera del dominio. En el dominio solo `@Getter` (accesores fluidos vía `lombok.config`) y `@EqualsAndHashCode(onlyExplicitlyIncluded = true)` en entidades. `@Builder` solo en builders de test | `@Data`, `@Setter`, `@AllArgsConstructor`, `@Builder`, `@Value` en `domain..` (rompen invariantes) |
+| Lombok | `@RequiredArgsConstructor` (inyección por constructor) y `@Slf4j` fuera del dominio. `@Getter`/`@Setter` en formularios web. `@Builder` solo en builders de test | Cualquier anotación en `domain..` (ADR 0009): accesores y `equals`/`hashCode` por id se escriben a mano |
 | Immutables | Commands, queries y vistas de `application`; DTOs de los adaptadores | Cualquier clase de `domain..` (su código generado deja dependencias `org.immutables` en el bytecode) |
 
 ArchUnit no ve las anotaciones de Lombok (retención `SOURCE`): lo comprueba `node .claude/skills/ddd-building-block/scripts/check-domain.mjs`.

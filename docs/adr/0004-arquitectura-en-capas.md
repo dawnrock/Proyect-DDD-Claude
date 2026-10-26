@@ -25,7 +25,7 @@ Y propone, con cuidado, el **bypass entre capas (capítulo 18.1)**: permitir de 
 
 ## Alternativas
 
-- **Capas estrictas** (`application → domain → persistence`, sin saltos): obligaría al dominio a conocer la persistencia, rompiendo su aislamiento (`DomainIsolationTests`), o a añadir en el dominio métodos que solo reenvían al repositorio (layer cake). Descartada.
+- **Capas estrictas** (`application → domain → persistence`, sin saltos): obligaría al dominio a conocer la persistencia, rompiendo su aislamiento (regla D1 de `LayeredArchitectureTests`), o a añadir en el dominio métodos que solo reenvían al repositorio (layer cake). Descartada.
 - **Hexagonal desde el principio:** es el objetivo de la fase 2; empezar por ella eliminaría la comparación entre las dos fotografías. Descartada para esta fase.
 - **Interfaces de repositorio ya en la fase 1:** acercaría la fase 1 a la hexagonal y diluiría la diferencia que se quiere mostrar. Se introducen en la fase 2 (#15).
 

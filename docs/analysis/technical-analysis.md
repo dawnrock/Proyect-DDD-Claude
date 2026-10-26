@@ -103,7 +103,7 @@ El proyecto quiere practicar con las dos librerías **sin debilitar el dominio**
 | `DemoDataLoader`, `RestExceptionHandler` | `@Slf4j` | Campo de log sin código repetitivo. |
 | Objetos de formulario web (`OpenAccountForm`, `MovementForm`, `TransferForm`) | `@Getter`, `@Setter` y `@Accessors(fluent = false)` | Spring MVC y Thymeleaf enlazan los formularios con getters y setters al estilo JavaBean (`getAmount()`/`setAmount()`), así que aquí se desactivan los accesores fluidos del `lombok.config`. |
 | Tests (`support/TestAccounts`) | `@Builder` | Builder de datos de prueba (`TestAccounts.anAccount()...open()`), el único uso permitido de `@Builder`. |
-| `domain..` | solo se permiten `@Getter` y `@EqualsAndHashCode(onlyExplicitlyIncluded = true)` | Todo lo que crea setters o constructores públicos (`@Data`, `@Setter`, `@AllArgsConstructor`, `@Builder`, `@Value`) permitiría saltarse las factorías y las invariantes. Hoy el dominio no usa Lombok en ninguna clase: los accesores y los `equals` están escritos a mano. |
+| `domain..` | ninguna ([ADR 0009](../adr/0009-domain-without-lombok.md)) | Cada método generado lleva `@lombok.Generated`, que queda en el bytecode y rompe la regla D1; además, setters, constructores públicos o un `@Getter` sobre colecciones permitirían saltarse las factorías y las invariantes. Los accesores y los `equals` del dominio se escriben a mano. |
 
 Configuración (`lombok.config`): `lombok.accessors.fluent = true` da accesores al estilo record (`id()` en lugar de `getId()`), como pide la convención del proyecto; `addLombokGeneratedAnnotation` permite que las herramientas de cobertura ignoren el código generado. Lombok es `optional` y se excluye del JAR ejecutable porque solo hace falta al compilar.
 
@@ -140,7 +140,7 @@ ArchUnit lee el bytecode compilado y hace fallar el build cuando se incumple una
 
 `DomainIsolationTests`: el dominio no depende de Spring ni de `jakarta`, y todos los campos no estáticos del dominio son `private`.
 
-**Lo que ArchUnit no ve:** las anotaciones de Lombok tienen retención `SOURCE` y desaparecen antes del bytecode. Ese hueco lo cubre `node .claude/skills/ddd-building-block/scripts/check-domain.mjs`, que revisa el código fuente del dominio en busca de anotaciones de Lombok prohibidas, un `@EqualsAndHashCode` sin `onlyExplicitlyIncluded = true`, imports de `org.immutables`/Spring/`jakarta` y setters públicos. Se ejecuta en la CI.
+**Lo que ArchUnit no ve:** las anotaciones de Lombok tienen retención `SOURCE` y desaparecen antes del bytecode. Ese hueco lo cubre `node .claude/skills/ddd-building-block/scripts/check-domain.mjs`, que revisa el código fuente del dominio en busca de cualquier uso de Lombok, imports de `org.immutables`/Spring/`jakarta` y setters públicos. Se ejecuta en la CI.
 
 En la fase 2, `HexagonalArchitectureTests` sustituye las reglas de capas por reglas de puertos y adaptadores.
 

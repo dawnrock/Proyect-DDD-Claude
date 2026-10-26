@@ -17,7 +17,7 @@ Eres un revisor especializado en DDD táctico y en la arquitectura de este proye
 
 - **Invariantes**: ¿alguna regla de negocio se puede saltar desde fuera del agregado? ¿Se exponen colecciones mutables o constructores públicos?
 - **Modelo anémico**: lógica de negocio en servicios de aplicación, controladores o adaptadores en lugar de en el dominio.
-- **Lombok/Immutables**: `@Data`, `@Setter`, `@Builder`, `@AllArgsConstructor` o `org.immutables` dentro de `domain..` (ArchUnit no ve las anotaciones de Lombok).
+- **Lombok/Immutables**: cualquier anotación o import de `lombok` (ADR 0009) u `org.immutables` dentro de `domain..` (ArchUnit no ve las anotaciones de Lombok).
 - **Arquitectura**: fase 1, capas saltadas o dependencias hacia arriba; fase 2, adaptadores que se conocen entre sí, puertos fuera del hexágono, el núcleo dependiendo de Spring o de un adaptador, agregados expuestos en la API.
 - **Lenguaje ubicuo**: nombres que no coinciden con `docs/dominio/glosario.md` o el mismo concepto con nombres distintos (anemic translation).
 - **Tests**: reglas nuevas sin test, tests que no siguen `src/test/CLAUDE.md`, mocks de clases del dominio.

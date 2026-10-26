@@ -98,7 +98,7 @@ Implementado en la #7 (contrato: [`money-transfers.md`](../contracts/money-trans
 - `domain.model`: `SameAccountTransferException` (R17).
 - `application`: `CheckingAccountService.transfer` con `TransferCommand` y la vista `TransferSummary`; carga las dos cuentas, delega en el servicio de dominio y **guarda las dos**.
 - `presentation.rest`: `TransferController` (`POST /api/transfers`, 201 también si se rechaza).
-- `presentation.web`: formulario de transferencia en el detalle de la cuenta, con la cuenta destino elegida entre las demás (`listAccounts()`); la presentación no conoce `domain.service` (D4).
+- `presentation.web`: formulario de transferencia en el detalle de la cuenta, con la cuenta destino elegida entre las demás (`listAccounts()`); la presentación no conoce `domain.service` (D4). **Cambiado en la #50 (ADR 0008):** la cuenta destino se escribe como IBAN (`targetAccountNumber`), para que un cliente no vea las cuentas de los demás.
 
 Implementado en la #11:
 

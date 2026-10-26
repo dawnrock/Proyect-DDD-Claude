@@ -1,17 +1,17 @@
 # 0003 · Dónde se usan Lombok e Immutables
 
-- **Estado:** aceptada · 2026-10-23
+- **Estado:** aceptada · 2026-10-23 · la parte del dominio (`@Getter` y `@EqualsAndHashCode` permitidos en `domain..`) la sustituye el [ADR 0009](0009-domain-without-lombok.md): en el dominio no se usa Lombok
 
 ## Contexto
 
-Se quiere practicar con Lombok e Immutables, pero el dominio debe proteger sus invariantes y no depender de librerías (`DomainIsolationTests`).
+Se quiere practicar con Lombok e Immutables, pero el dominio debe proteger sus invariantes y no depender de librerías (hoy lo comprueba la regla D1 de `LayeredArchitectureTests`, "el dominio solo depende del JDK", desde la #12; `DomainIsolationTests` solo prohíbe Spring y `jakarta`).
 
 ## Decisión
 
 - **Lombok** fuera del dominio para inyección por constructor (`@RequiredArgsConstructor`) y logs (`@Slf4j`); en el dominio solo `@Getter` con accesores fluidos y `@EqualsAndHashCode(onlyExplicitlyIncluded = true)`. `@Builder` solo en builders de test.
 - **Immutables** para commands, queries y vistas de `application` y para DTOs de los adaptadores. **Nunca** en `domain..`.
 - Los objetos de valor del dominio siguen siendo `record` escritos a mano.
-- `scripts/check-domain.mjs` (skill `ddd-building-block`) y la CI comprueban lo que ArchUnit no ve (anotaciones de Lombok con retención `SOURCE`). En la fase 2, ArchUnit prohíbe además `org.immutables` en el dominio.
+- `scripts/check-domain.mjs` (skill `ddd-building-block`) y la CI comprueban lo que ArchUnit no ve (anotaciones de Lombok con retención `SOURCE`). ArchUnit prohíbe `org.immutables` en el dominio desde la fase 1 (regla D1, #12).
 
 ## Configuración
 
