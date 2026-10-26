@@ -22,6 +22,11 @@ const rules = [
   [/^\s*public\s+(?:final\s+)?void\s+set[A-Z]\w*\s*\(/, 'setter público en el dominio: usa un método de negocio'],
 ];
 
+// @EqualsAndHashCode está permitida solo con onlyExplicitlyIncluded = true (la igualdad de una entidad es su id).
+// Se busca en el archivo entero porque los argumentos pueden ocupar varias líneas; .Include y .Exclude no cuentan.
+const equalsAndHashCode = /@(?:lombok\.)?EqualsAndHashCode\b(?!\s*\.)(?:\s*\(([^)]*)\))?/g;
+const onlyExplicitlyIncluded = /\bonlyExplicitlyIncluded\s*=\s*true\b/;
+
 const files = [];
 (function walk(dir) {
   for (const name of readdirSync(dir)) {
@@ -33,11 +38,18 @@ const files = [];
 
 const errors = [];
 for (const file of files) {
-  readFileSync(file, 'utf8').split(/\r?\n/).forEach((line, i) => {
+  const source = readFileSync(file, 'utf8');
+  source.split(/\r?\n/).forEach((line, i) => {
     for (const [re, why] of rules) {
       if (re.test(line)) errors.push(`${relative('.', file)}:${i + 1}: ${why}`);
     }
   });
+  for (const match of source.matchAll(equalsAndHashCode)) {
+    if (!onlyExplicitlyIncluded.test(match[1] ?? '')) {
+      const line = source.slice(0, match.index).split('\n').length;
+      errors.push(`${relative('.', file)}:${line}: @EqualsAndHashCode en el dominio exige onlyExplicitlyIncluded = true`);
+    }
+  }
 }
 
 if (errors.length) {
