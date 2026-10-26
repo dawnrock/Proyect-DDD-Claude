@@ -23,7 +23,7 @@ lombok.anyConstructor.addConstructorProperties = false
 | `@Builder` | **No** | Solo en builders de datos de test |
 | `@Data`, `@Setter`, `@Value`, `@AllArgsConstructor`, `@NoArgsConstructor` | **No** | Evitar; usar Immutables o `record` |
 
-Motivo: un agregado solo cambia de estado mediante sus métodos de negocio; setters o constructores públicos permitirían saltarse las invariantes. ArchUnit no detecta estas anotaciones (retención `SOURCE`), por eso existe `scripts/check-domain.mjs`.
+Motivo: un agregado solo cambia de estado mediante sus métodos de negocio; setters o constructores públicos permitirían saltarse las invariantes. ArchUnit no detecta estas anotaciones (retención `SOURCE`), por eso existe `scripts/check-domain.mjs`. El script también rechaza un `@EqualsAndHashCode` sin `onlyExplicitlyIncluded = true` (aunque los argumentos ocupen varias líneas): sin él, la igualdad de una entidad compararía todos sus campos en lugar del id.
 
 ## Immutables
 
