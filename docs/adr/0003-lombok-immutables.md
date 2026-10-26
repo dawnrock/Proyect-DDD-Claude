@@ -1,6 +1,6 @@
 # 0003 · Dónde se usan Lombok e Immutables
 
-- **Estado:** aceptada · 2026-10-23
+- **Estado:** aceptada · 2026-10-23 · la parte del dominio (`@Getter` y `@EqualsAndHashCode` permitidos en `domain..`) la sustituye el [ADR 0009](0009-domain-without-lombok.md): en el dominio no se usa Lombok
 
 ## Contexto
 
