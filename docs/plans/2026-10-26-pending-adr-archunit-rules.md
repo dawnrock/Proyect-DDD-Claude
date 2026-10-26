@@ -42,7 +42,7 @@ Technical decisions:
 
 ## Tasks
 
-### [ ] T1 — Rule: application and method security without Spring Security (ADR 0008) (~10 min)
+### [x] T1 — Rule: application and method security without Spring Security (ADR 0008) (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/pronoide/ddd/LayeredArchitectureTests.java`
@@ -53,8 +53,8 @@ Technical decisions:
   3. Run `./mvnw test -Dtest=LayeredArchitectureTests`: green.
   4. Validate by breaking: temporarily import an `org.springframework.security` class in `CheckingAccountService` and put `@PreAuthorize("hasRole('ADMIN')")` on one method; each rule must fail with its own message. Revert.
 - **Acceptance criteria:**
-  - [ ] Both rules pass on the current code.
-  - [ ] Each rule failed when broken on purpose (noted in the commit).
+  - [x] Both rules pass on the current code.
+  - [x] Each rule failed when broken on purpose (noted in the commit).
 
 ### [ ] T2 — Rule: no port interfaces in persistence (ADR 0004) (~5 min)
 

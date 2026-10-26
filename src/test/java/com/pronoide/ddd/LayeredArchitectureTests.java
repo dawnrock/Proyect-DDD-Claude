@@ -13,6 +13,7 @@ import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
+import com.tngtech.archunit.lang.CompositeArchRule;
 import org.springframework.stereotype.Controller;
 
 import com.pronoide.ddd.domain.model.DomainException;
@@ -71,6 +72,32 @@ class LayeredArchitectureTests {
     static final ArchRule los_controladores_no_acceden_al_repositorio = noClasses()
             .that().areMetaAnnotatedWith(Controller.class)
             .should().dependOnClassesThat().resideInAPackage("..persistence..");
+
+    /**
+     * ADR 0008: la aplicación decide a qué cuentas accede cada usuario con un {@code Caller} sencillo, sin Spring
+     * Security, para que la regla se pruebe sin Spring y pase tal cual a la fase 2.
+     */
+    @ArchTest
+    static final ArchRule la_aplicacion_no_depende_de_spring_security = noClasses()
+            .that().resideInAPackage("..application..")
+            .should().dependOnClassesThat().resideInAPackage("org.springframework.security..");
+
+    private static final String PRE_AUTHORIZE = "org.springframework.security.access.prepost.PreAuthorize";
+    private static final String POST_AUTHORIZE = "org.springframework.security.access.prepost.PostAuthorize";
+    private static final String SECURED = "org.springframework.security.access.annotation.Secured";
+
+    /**
+     * ADR 0008: nadie usa la seguridad por métodos, en ninguna capa. Llevaría la comprobación del propietario al
+     * framework y se saltaría el {@code Caller}; Spring Security solo comprueba roles en las URL.
+     */
+    @ArchTest
+    static final ArchRule nadie_usa_la_seguridad_por_metodos = CompositeArchRule
+            .of(noMethods().should().beAnnotatedWith(PRE_AUTHORIZE)
+                    .orShould().beAnnotatedWith(POST_AUTHORIZE)
+                    .orShould().beAnnotatedWith(SECURED))
+            .and(noClasses().should().beAnnotatedWith(PRE_AUTHORIZE)
+                    .orShould().beAnnotatedWith(POST_AUTHORIZE)
+                    .orShould().beAnnotatedWith(SECURED));
 
     /**
      * Toda clase pertenece a una capa: la regla de capas solo mira dependencias entre capas, así que un paquete nuevo
