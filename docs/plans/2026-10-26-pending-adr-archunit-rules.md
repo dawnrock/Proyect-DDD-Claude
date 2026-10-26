@@ -5,7 +5,7 @@
 - **Phase:** 1 · Layered monolith
 - **Base branch:** `Monolithic`
 - **Date:** 2026-10-26
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~30 min (4 tasks)
 
 ## Goal
@@ -94,23 +94,23 @@ Technical decisions:
 
 **Specific:**
 
-- [ ] Three new ArchUnit rules, each validated by breaking it (stated in the PR).
-- [ ] `DomainIsolationTests` without `bootstrap`.
-- [ ] No production code changed (`git diff origin/Monolithic -- src/main` is empty).
+- [x] Three new ArchUnit rules, each validated by breaking it (stated in the PR).
+- [x] `DomainIsolationTests` without `bootstrap`.
+- [x] No production code changed (`git diff origin/Monolithic -- src/main` is empty).
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (layers: each layer only uses the one below), verified by ArchUnit.
-- [ ] The domain does not depend on Spring, `jakarta` or `org.immutables`, and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + Spanish names for the `@ArchTest` fields, as the existing rules).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: n/a (no API changes).
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a (no new terms).
-- [ ] Documentation written or changed by this plan is in English, except the rows added to `fase-1-capas.md`, which follow that document's current language (see Context).
-- [ ] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (layers: each layer only uses the one below), verified by ArchUnit.
+- [x] The domain does not depend on Spring, `jakarta` or `org.immutables`, and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + Spanish names for the `@ArchTest` fields, as the existing rules).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: n/a (no API changes).
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a (no new terms).
+- [x] Documentation written or changed by this plan is in English, except the rows added to `fase-1-capas.md`, which follow that document's current language (see Context).
+- [x] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
 
 ## Risks and open questions
 
