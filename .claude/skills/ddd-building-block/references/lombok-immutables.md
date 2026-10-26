@@ -13,17 +13,17 @@ lombok.anyConstructor.addConstructorProperties = false
 
 `accessors.fluent = true` genera `id()` en lugar de `getId()`, igual que los accesores escritos a mano y los `record`.
 
-| Anotación | Dominio (`domain..`) | Resto |
-| --------- | -------------------- | ----- |
-| `@Getter` | Sí, sobre campos concretos | Sí |
-| `@EqualsAndHashCode(onlyExplicitlyIncluded = true)` + `@EqualsAndHashCode.Include` en el id | Sí, en entidades | Sí |
-| `@ToString` | Sí, excluyendo colecciones | Sí |
-| `@RequiredArgsConstructor` | No (los agregados usan factorías) | Sí: inyección por constructor en servicios, controladores y adaptadores |
-| `@Slf4j` | No (el dominio no registra logs) | Sí |
-| `@Builder` | **No** | Solo en builders de datos de test |
-| `@Data`, `@Setter`, `@Value`, `@AllArgsConstructor`, `@NoArgsConstructor` | **No** | Evitar; usar Immutables o `record` |
+**En el dominio (`domain..`) no se usa Lombok, en ninguna forma** ([ADR 0009](../../../../docs/adr/0009-domain-without-lombok.md)). Las entidades y los agregados escriben a mano sus accesores al estilo record (`id()`, `currentBalance()`) y su `equals`/`hashCode` por id (ver `templates/Entity.java.template`); los objetos de valor son `record`.
 
-Motivo: un agregado solo cambia de estado mediante sus métodos de negocio; setters o constructores públicos permitirían saltarse las invariantes. ArchUnit no detecta estas anotaciones (retención `SOURCE`), por eso existe `scripts/check-domain.mjs`. El script también rechaza un `@EqualsAndHashCode` sin `onlyExplicitlyIncluded = true` (aunque los argumentos ocupen varias líneas): sin él, la igualdad de una entidad compararía todos sus campos en lugar del id.
+| Anotación | Fuera del dominio |
+| --------- | ----------------- |
+| `@RequiredArgsConstructor` | Sí: inyección por constructor en servicios, controladores y adaptadores |
+| `@Slf4j` | Sí |
+| `@Getter`, `@Setter` + `@Accessors(fluent = false)` | En formularios web, que Spring MVC enlaza con getters y setters JavaBean |
+| `@Builder` | Solo en builders de datos de test |
+| `@Data`, `@Value`, `@AllArgsConstructor`, `@NoArgsConstructor` | Evitar; usar Immutables o `record` |
+
+Motivos: con `lombok.addLombokGeneratedAnnotation = true` cada método generado lleva `@lombok.Generated`, que queda en el bytecode y rompe la regla D1 de ArchUnit ("el dominio solo depende del JDK"); y un `@Getter` sobre un agregado podría exponer colecciones internas. `scripts/check-domain.mjs` rechaza cualquier `import lombok…` o `@lombok.…` en el dominio.
 
 ## Immutables
 

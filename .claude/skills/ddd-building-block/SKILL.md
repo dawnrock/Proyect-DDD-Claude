@@ -11,7 +11,7 @@ Crea o modifica el bloque de dominio pedido: $ARGUMENTS
 
 1. **Clasifica el bloque.** Antes de escribir nada, lee `references/reglas-ddd.md` y decide si es un objeto de valor, una entidad, un agregado, un evento, una factoría o un servicio de dominio. Si la petición no encaja claramente (por ejemplo, algo con identidad que se pide como VO), explícalo y propón la clasificación correcta.
 2. **Lenguaje ubicuo.** Busca el término en `docs/dominio/glosario.md`. Usa ese nombre en inglés en el código y añade el término al glosario si es nuevo.
-3. **Lombok e Immutables.** Si vas a usar anotaciones, lee `references/lombok-immutables.md`: en el dominio solo se permiten `@Getter` y `@EqualsAndHashCode(onlyExplicitlyIncluded = true)` (y ninguna anotación de Immutables).
+3. **Lombok e Immutables.** En el dominio no se usa ninguno de los dos (ADR 0009 y ADR 0003): accesores, `equals` y `hashCode` se escriben a mano. Detalles en `references/lombok-immutables.md`.
 4. **Genera el código** partiendo de la plantilla que corresponda en `templates/`:
    - Objeto de valor → `templates/ValueObject.java.template` (un `record` con validación en el constructor compacto).
    - Entidad o raíz de agregado → `templates/Entity.java.template` (constructor privado + factoría estática, igualdad por id).
@@ -23,4 +23,4 @@ Crea o modifica el bloque de dominio pedido: $ARGUMENTS
    node .claude/skills/ddd-building-block/scripts/check-domain.mjs
    ./mvnw verify
    ```
-   El script comprueba que el dominio no importa Spring/`jakarta`/`org.immutables`, no usa anotaciones de Lombok prohibidas y no tiene setters públicos. **No des la tarea por terminada si alguno de los dos falla.**
+   El script comprueba que el dominio no importa Spring/`jakarta`/`org.immutables`, no usa Lombok y no tiene setters públicos. **No des la tarea por terminada si alguno de los dos falla.**
