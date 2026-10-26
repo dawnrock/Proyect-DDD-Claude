@@ -78,7 +78,7 @@ Technical decisions:
 - **Acceptance criteria:**
   - [x] `DomainIsolationTests` no longer mentions `bootstrap` and passes.
 
-### [ ] T4 — Document the new rules and update the project status (~10 min)
+### [x] T4 — Document the new rules and update the project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/fase-1-capas.md`, `docs/ia/estado-del-proyecto.md`
@@ -87,8 +87,8 @@ Technical decisions:
   1. In `fase-1-capas.md`, after the table of #12, add the three new rules (two from T1, one from T2) with the ADR each one enforces, marked as implemented in #54.
   2. In `estado-del-proyecto.md`: #54 done, next step `/plan-feature 13`, remove the "bootstrap" pending item, history row; note that phase 2 must carry the ADR 0008 rules into `HexagonalArchitectureTests`.
 - **Acceptance criteria:**
-  - [ ] The rules table lists every `@ArchTest` of `LayeredArchitectureTests`.
-  - [ ] `node scripts/check-project-status.mjs` accepts the PR's file list.
+  - [x] The rules table lists every `@ArchTest` of `LayeredArchitectureTests`.
+  - [x] `node scripts/check-project-status.mjs` accepts the PR's file list.
 
 ## Global acceptance criteria
 
