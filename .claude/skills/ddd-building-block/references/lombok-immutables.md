@@ -46,6 +46,6 @@ Motivos: con `lombok.addLombokGeneratedAnnotation = true` cada método generado 
   }
   // uso: OpenAccountCommand.builder().holderName("Ada").segment(RETAIL).initialDeposit(...).build()
   ```
-- **Nunca en `domain..`**: el código generado lleva anotaciones `org.immutables` con retención de clase y rompería `DomainIsolationTests`.
+- **Nunca en `domain..`**: el código generado lleva anotaciones `org.immutables` con retención de clase y rompería la regla D1 de `LayeredArchitectureTests` ("el dominio solo depende del JDK").
 - No mezcles Lombok e Immutables en la misma clase.
 - Jackson 3 (Spring Boot 4): verifica la serialización antes de usar Immutables en DTOs REST; si da problemas, usa `record` en los DTOs (ver ADR 0003).
