@@ -74,7 +74,7 @@
 - [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
 - [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
 - [ ] The phase architecture is respected (layers: each layer only uses the one below / hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain does not depend on Spring, `jakarta` or `org.immutables`, and does not use `@Data`, `@Setter`, `@Builder` or `@AllArgsConstructor` (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
 - [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
 - [ ] No dependencies added beyond the planned ones (or justified in an ADR).
 - [ ] If the API changes: `docs/api/openapi.yaml` reflects it and `npx @redocly/cli lint docs/api/openapi.yaml` has no errors (otherwise, "n/a").
