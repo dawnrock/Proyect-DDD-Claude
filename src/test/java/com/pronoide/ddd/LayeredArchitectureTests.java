@@ -100,6 +100,15 @@ class LayeredArchitectureTests {
                     .orShould().beAnnotatedWith(SECURED));
 
     /**
+     * ADR 0004: en la fase 1 la aplicación usa clases concretas de persistencia, sin interfaces de puerto. Es lo que
+     * diferencia esta fotografía de la hexagonal, donde el puerto se declara en {@code domain.model}.
+     */
+    @ArchTest
+    static final ArchRule la_persistencia_no_tiene_interfaces = noClasses()
+            .that().resideInAPackage("..persistence..")
+            .should().beInterfaces();
+
+    /**
      * Toda clase pertenece a una capa: la regla de capas solo mira dependencias entre capas, así que un paquete nuevo
      * fuera de ellas (por ejemplo {@code config}) quedaría sin vigilar. La única excepción es la clase de arranque.
      */

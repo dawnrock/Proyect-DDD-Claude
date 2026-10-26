@@ -56,7 +56,7 @@ Technical decisions:
   - [x] Both rules pass on the current code.
   - [x] Each rule failed when broken on purpose (noted in the commit).
 
-### [ ] T2 — Rule: no port interfaces in persistence (ADR 0004) (~5 min)
+### [x] T2 — Rule: no port interfaces in persistence (ADR 0004) (~5 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/pronoide/ddd/LayeredArchitectureTests.java`
@@ -65,7 +65,7 @@ Technical decisions:
   1. Add `la_persistencia_no_tiene_interfaces`: `noClasses().that().resideInAPackage("..persistence..").should().beInterfaces()`, with Javadoc citing ADR 0004 and stating that it is a phase 1 rule (phase 2 declares the port in `domain.model`).
   2. Validate by breaking: add a temporary `interface CheckingAccountRepository` in `persistence`; the rule must fail. Remove it (and its compiled class from `target/`).
 - **Acceptance criteria:**
-  - [ ] The rule passes on the current code and failed when broken on purpose.
+  - [x] The rule passes on the current code and failed when broken on purpose.
 
 ### [ ] T3 — Remove the non-existent bootstrap package from DomainIsolationTests (~5 min)
 
