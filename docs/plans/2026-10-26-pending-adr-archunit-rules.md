@@ -67,7 +67,7 @@ Technical decisions:
 - **Acceptance criteria:**
   - [x] The rule passes on the current code and failed when broken on purpose.
 
-### [ ] T3 — Remove the non-existent bootstrap package from DomainIsolationTests (~5 min)
+### [x] T3 — Remove the non-existent bootstrap package from DomainIsolationTests (~5 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/pronoide/ddd/DomainIsolationTests.java`
@@ -76,7 +76,7 @@ Technical decisions:
   1. Remove `"com.pronoide.ddd.bootstrap.."` from `el_dominio_no_depende_del_framework`; keep Spring and `jakarta`, and the private-state rule.
   2. Run `./mvnw test -Dtest=DomainIsolationTests`: green.
 - **Acceptance criteria:**
-  - [ ] `DomainIsolationTests` no longer mentions `bootstrap` and passes.
+  - [x] `DomainIsolationTests` no longer mentions `bootstrap` and passes.
 
 ### [ ] T4 — Document the new rules and update the project status (~10 min)
 

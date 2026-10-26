@@ -15,9 +15,8 @@ class DomainIsolationTests {
     static final ArchRule el_dominio_no_depende_del_framework = noClasses()
             .that().resideInAPackage("..domain..")
             .should().dependOnClassesThat()
-            .resideInAnyPackage("org.springframework..", 
-                                "jakarta..", 
-                                "com.pronoide.ddd.bootstrap..");
+            .resideInAnyPackage("org.springframework..",
+                                "jakarta..");
     
     @ArchTest
     static final ArchRule el_estado_del_dominio_esta_encapsulado = fields()
