@@ -10,29 +10,32 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
+import com.pronoide.ddd.application.AccountOwnershipRepository;
+
 /**
- * Propietario de cada cuenta (id de cuenta a nombre de usuario), en memoria. Guarda la relación fuera del agregado: el
- * dominio no conoce a los usuarios. Una cuenta tiene un único propietario. Contrato:
+ * Adaptador de salida en memoria (simulado) del puerto {@link AccountOwnershipRepository}: id de cuenta a nombre de
+ * usuario. Guarda la relación fuera del agregado: el dominio no conoce a los usuarios. Contrato:
  * {@code docs/contracts/login-roles.md}.
  */
 @Repository
-public class InMemoryAccountOwnershipRepository {
+class InMemoryAccountOwnershipRepository implements AccountOwnershipRepository {
 
     private final Map<UUID, String> owners = new ConcurrentHashMap<>();
 
-    /** Asigna la cuenta a un usuario, sustituyendo al propietario anterior si lo hubiera. */
+    @Override
     public void assign(UUID accountId, String username) {
         Objects.requireNonNull(accountId, "El id de la cuenta es obligatorio");
         Objects.requireNonNull(username, "El usuario propietario es obligatorio");
         owners.put(accountId, username);
     }
 
+    @Override
     public Optional<String> ownerOf(UUID accountId) {
         Objects.requireNonNull(accountId, "El id de la cuenta es obligatorio");
         return Optional.ofNullable(owners.get(accountId));
     }
 
-    /** Ids de las cuentas de un usuario. */
+    @Override
     public Set<UUID> accountsOf(String username) {
         Objects.requireNonNull(username, "El usuario es obligatorio");
         return owners.entrySet().stream()

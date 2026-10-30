@@ -10,13 +10,12 @@ import org.springframework.stereotype.Service;
 import com.pronoide.ddd.domain.model.AccountHolder;
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
+import com.pronoide.ddd.domain.model.CheckingAccountRepository;
 import com.pronoide.ddd.domain.model.CustomerSegment;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.Transaction;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
-import com.pronoide.ddd.adapter.out.persistence.InMemoryAccountOwnershipRepository;
-import com.pronoide.ddd.adapter.out.persistence.InMemoryCheckingAccountRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,13 +28,16 @@ import lombok.RequiredArgsConstructor;
  * administrador accede a todas las cuentas y es el único que abre cuentas; un usuario solo a las suyas. Una cuenta
  * ajena, o sin propietario registrado, se trata para un usuario como inexistente ({@link AccountNotFoundException},
  * 404) para no revelar que existe.
+ *
+ * <p>Solo conoce los puertos de salida ({@link CheckingAccountRepository} y {@link AccountOwnershipRepository});
+ * Spring le inyecta sus adaptadores.
  */
 @Service
 @RequiredArgsConstructor
 public class CheckingAccountService {
 
-    private final InMemoryCheckingAccountRepository repository;
-    private final InMemoryAccountOwnershipRepository ownership;
+    private final CheckingAccountRepository repository;
+    private final AccountOwnershipRepository ownership;
     private final MoneyTransferService transferService = new MoneyTransferService();
 
     /**

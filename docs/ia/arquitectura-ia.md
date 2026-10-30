@@ -109,7 +109,7 @@ Every functional issue went through `/plan-feature` → plan approved by the use
 **Adjustments made during the phase**
 
 - CI with Claude: the action had to be pinned, debugged and reverted before the review worked (#26-#28, #30).
-- Telegram: `notify.mjs` made compatible with Node 16 (#25) and a `TELEGRAM_DISABLED` switch to silence the notices (#40); they have been off since 2026-10-23.
+- Telegram: `notify.mjs` made compatible with Node 16 (#25) and a `TELEGRAM_DISABLED` switch to silence the notices (#40); they were off from 2026-10-23 until the user turned them back on (2026-10-30).
 - Permissions: removed the `deny` on `Write(./.claude/hooks/**)`, which never applied (#44).
 - Worktrees: `PostToolUse` hook that cleans merged teammate worktrees and branches (#42).
 - Memory between sessions: project status required by CI on every PR that closes an issue (#37), later split into a short status plus annexes to save tokens (#58), and written as it will be after the merge (#59).

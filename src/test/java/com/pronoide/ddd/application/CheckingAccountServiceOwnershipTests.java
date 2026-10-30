@@ -11,8 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.pronoide.ddd.adapter.out.persistence.InMemoryAccountOwnershipRepository;
-import com.pronoide.ddd.adapter.out.persistence.InMemoryCheckingAccountRepository;
+import com.pronoide.ddd.adapter.out.persistence.PersistenceTestAdapters;
+import com.pronoide.ddd.domain.model.CheckingAccountRepository;
 import com.pronoide.ddd.support.TestAccounts;
 
 /**
@@ -28,14 +28,14 @@ class CheckingAccountServiceOwnershipTests {
     private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
     private static final Caller GRACE = Caller.builder().username("grace").admin(false).build();
 
-    private InMemoryCheckingAccountRepository accounts;
-    private InMemoryAccountOwnershipRepository owners;
+    private CheckingAccountRepository accounts;
+    private AccountOwnershipRepository owners;
     private CheckingAccountService service;
 
     @BeforeEach
     void setUp() {
-        accounts = new InMemoryCheckingAccountRepository();
-        owners = new InMemoryAccountOwnershipRepository();
+        accounts = PersistenceTestAdapters.accounts();
+        owners = PersistenceTestAdapters.ownership();
         service = new CheckingAccountService(accounts, owners);
     }
 
