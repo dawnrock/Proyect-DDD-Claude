@@ -46,7 +46,7 @@ Make the package structure say what the hexagon is and what the adapters are (La
 - **Acceptance criteria:**
   - [x] The #13 plan has no unchecked task or criterion.
 
-### [ ] T2 — Pin the current behaviour (~5 min)
+### [x] T2 — Pin the current behaviour (~5 min)
 
 - **Layer:** tests
 - **Files:** — (this plan, to record the baseline)
@@ -55,7 +55,7 @@ Make the package structure say what the hexagon is and what the adapters are (La
   1. Run `./mvnw verify` on `Hexagonal` as it is and write down in this plan the number of tests run, failed and skipped. That suite (JUnit + ArchUnit + MockMvc) is the characterisation of the behaviour.
   2. Check the app: `GET /actuator/health` → `UP` and `curl -u admin:demo …/api/accounts` → 200.
 - **Acceptance criteria:**
-  - [ ] Baseline recorded: `Tests run: N, Failures: 0, Errors: 0`.
+  - [x] Baseline recorded: `Tests run: 358, Failures: 0, Errors: 0, Skipped: 0` (`LayeredArchitectureTests`: 10). Health `UP`, `GET /api/accounts` as `admin` → 200.
 
 ### [ ] T3 — ADR 0006: hexagonal architecture (~10 min)
 
