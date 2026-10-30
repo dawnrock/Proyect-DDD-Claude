@@ -9,13 +9,12 @@
 
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
-| 1 · Monolito en capas | #2-#8, #11, #12, #31, #48, #50, #54 (detalle en el [historial](historial.md)) | #57 Graphify para preguntas de dependencias y estado dividido (PR #58, pendiente de revisión y fusión) | #13 |
+| 1 · Monolito en capas | #2-#8, #11, #12, #31, #48, #50, #54, #57 (detalle en el [historial](historial.md)) | — | #13 |
 | 2 · Hexagonal | — | — | #14 → #23 (se empieza al cerrar #13, creando `Hexagonal` desde `Monolithic`) |
 
 ## Siguiente paso
 
-1. Revisar y fusionar la PR #58 (#57) (lo decide el usuario).
-2. `/plan-feature 13` (cerrar la fase 1: documentación final y etiqueta `v1-monolito`).
+`/plan-feature 13` (cerrar la fase 1: documentación final y etiqueta `v1-monolito`).
 
 Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sección "Issues de la fase".
 
