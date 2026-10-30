@@ -4,6 +4,8 @@
 
 ## Decisiones ya tomadas que afectan a lo que viene
 
+- **Fin de la fase 1 (#13):** `Monolithic` queda congelada en la etiqueta `v1-monolito`, como `master` (solo se toca por decisión expresa del usuario). `Hexagonal` se crea desde `Monolithic` y pasa a ser la rama por defecto del repositorio: las PR de la fase 2 van contra ella.
+
 - **Contrato web ↔ back** (ADR 0007, enfoque A): servicio, commands y vistas de `application`, más un fragmento de OpenAPI. La web no consume la API REST.
 - **DTOs REST:** pueden ser de Immutables con `@JsonSerialize`/`@JsonDeserialize` de `tools.jackson.databind.annotation` (ADR 0003).
 - **Errores:** `DomainException` → 422, `NotFoundException` → 404, `IllegalArgumentException` y validación → 400 (`RestExceptionHandler`). `AccountNotFoundException` (#5) hereda de `NotFoundException`.

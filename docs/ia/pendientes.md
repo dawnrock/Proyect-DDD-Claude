@@ -2,8 +2,8 @@
 
 > Anexo de [`estado-del-proyecto.md`](estado-del-proyecto.md). **No se lee al empezar cada sesión**: consúltalo al planificar una issue (puede haber avisos para ella) y al cerrar una PR (para añadir o quitar pendientes).
 
-- Traducir al inglés la documentación existente (`docs/`, `README`), que sigue en español (issue aparte).
-- Las adiciones de la #5 a documentos que siguen en español (glosario, `fase-1-capas.md`, el estado del proyecto) se escribieron en español para no mezclar idiomas; se traducen con el resto.
+- Traducir al inglés la documentación existente de `docs/` que sigue en español (issue aparte). `README.md`, `fase-1-capas.md` y `arquitectura-ia.md` ya se tradujeron en la #13.
+- Las adiciones de la #5 a documentos que siguen en español (glosario, el estado del proyecto) se escribieron en español para no mezclar idiomas; se traducen con el resto.
 - Telegram: los avisos locales se silencian con `TELEGRAM_DISABLED=1` (PR #40), activado en `~/.claude/settings.json` del usuario. El aviso de CI fallida sigue activo (usa los secretos de GitHub).
 - **Datos de demostración (#11):** `./mvnw spring-boot:run` arranca con el perfil `demo` (propiedad `spring-boot.run.profiles` del `pom.xml`) y tres cuentas abiertas con los casos de uso; `-Dspring-boot.run.profiles=default` arranca sin datos. Proponer al usuario mencionarlo en la sección de comandos de `CLAUDE.md` (requiere su visto bueno).
 - **Reglas del ADR 0008 para la fase 2 (#54):** `HexagonalArchitectureTests` debe heredar `la_aplicacion_no_depende_de_spring_security` y `nadie_usa_la_seguridad_por_metodos`. `la_persistencia_no_tiene_interfaces` no, porque la fase 2 introduce los puertos. `DomainIsolationTests` mantiene su regla de framework aunque en la fase 1 la cubra D1: es la que sobrevive a las dos fases.
