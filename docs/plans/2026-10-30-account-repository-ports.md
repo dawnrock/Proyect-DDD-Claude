@@ -142,6 +142,17 @@ Technical notes:
   - [x] `estado-del-proyecto.md` no longer says Telegram is disabled.
   - [x] The CI check of the project status passes.
 
+### [x] T9 — Review fixes (~5 min)
+
+- **Layer:** tests · docs
+- **Files:** `CheckingAccountRepositoryContract.java`, `docs/ia/pendientes.md`
+- **Depends on:** T8
+- **What to do:**
+  1. `revisor-ddd`: the contract compared accounts by reference (`containsSame`), a property of the in-memory adapter only. It now compares by id; reference identity stays in `InMemoryCheckingAccountRepositoryTests`.
+  2. Pending item for #20/#22: persistence rules in `HexagonalArchitectureTests` and an explicit wiring test.
+- **Acceptance criteria:**
+  - [x] No `containsSame` in the contract; `./mvnw verify` green.
+
 ## Global acceptance criteria
 
 **Specific:**

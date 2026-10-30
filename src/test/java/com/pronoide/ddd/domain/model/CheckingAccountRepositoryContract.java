@@ -16,7 +16,8 @@ import com.pronoide.ddd.support.TestAccounts;
 
 /**
  * Contrato del puerto {@link CheckingAccountRepository}: lo que cumple cualquier implementación. Cada adaptador lo
- * hereda con un test que crea un repositorio vacío y añade solo lo propio de su tecnología.
+ * hereda con un test que crea un repositorio vacío y añade solo lo propio de su tecnología. Compara las cuentas por
+ * id, no por referencia: una implementación real devuelve otra instancia.
  */
 public abstract class CheckingAccountRepositoryContract {
 
@@ -41,7 +42,7 @@ public abstract class CheckingAccountRepositoryContract {
 
             repository.save(cuenta);
 
-            assertThat(repository.findById(cuenta.id())).containsSame(cuenta);
+            assertThat(repository.findById(cuenta.id())).map(CheckingAccount::id).contains(cuenta.id());
         }
 
         @Test
@@ -58,7 +59,7 @@ public abstract class CheckingAccountRepositoryContract {
             repository.save(cuenta);
             repository.save(cuenta);
 
-            assertThat(repository.findAll()).containsExactly(cuenta);
+            assertThat(repository.findAll()).extracting(CheckingAccount::id).containsExactly(cuenta.id());
         }
     }
 
@@ -99,7 +100,7 @@ public abstract class CheckingAccountRepositoryContract {
             repository.save(cuenta);
 
             assertThat(repository.findByAccountNumber(new AccountNumber("ES91 2100 0418 4502 0005 1332")))
-                    .containsSame(cuenta);
+                    .map(CheckingAccount::id).contains(cuenta.id());
         }
 
         @Test
@@ -152,7 +153,8 @@ public abstract class CheckingAccountRepositoryContract {
             CheckingAccount segunda =
                     repository.save(TestAccounts.anAccount().accountNumber("ES7620770024003102575766").open());
 
-            assertThat(repository.findAll()).containsExactly(primera, segunda, tercera);
+            assertThat(repository.findAll()).extracting(CheckingAccount::id)
+                    .containsExactly(primera.id(), segunda.id(), tercera.id());
         }
 
         @Test
