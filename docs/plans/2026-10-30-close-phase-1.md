@@ -39,7 +39,7 @@ Facts gathered for the documentation:
 
 ## Tasks
 
-### [ ] T1 — `fase-1-capas.md`: translate and consolidate the design (~10 min)
+### [x] T1 — `fase-1-capas.md`: translate and consolidate the design (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/fase-1-capas.md`
@@ -50,10 +50,10 @@ Facts gathered for the documentation:
   3. Merge the #12 and #54 ArchUnit tables into one "ArchUnit rules" table (rule → what it covers → issue).
   4. If the Mermaid layer diagram changes (for example to show `presentation`'s shared security support), show it to the user before committing, in grayscale.
 - **Acceptance criteria:**
-  - [ ] The sections are in English and every rule in `LayeredArchitectureTests` appears in the table.
-  - [ ] Every relative link in the document resolves.
+  - [x] The sections are in English and every rule in `LayeredArchitectureTests` appears in the table.
+  - [x] Every relative link in the document resolves.
 
-### [ ] T2 — `fase-1-capas.md`: final state of the features (~10 min)
+### [x] T2 — `fase-1-capas.md`: final state of the features (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/fase-1-capas.md`
@@ -64,8 +64,8 @@ Facts gathered for the documentation:
   3. Collapse the "Implemented in #N" blocks into a feature → issue → PR → notable decisions table; keep only the decisions a phase 2 reader needs (Immutables DTOs with Jackson 3, `MoneyTransferService` created with `new`, cookie-only sessions, `@ControllerAdvice` scoped by package).
   4. Update "Issues of the phase" with every issue of the milestone and its PR (from `historial.md`).
 - **Acceptance criteria:**
-  - [ ] The endpoint and screen tables match `openapi.yaml` and the `@GetMapping`/`@PostMapping` mappings in `presentation.web`.
-  - [ ] The issues table lists all 17 issues of the milestone.
+  - [x] The endpoint and screen tables match `openapi.yaml` and the `@GetMapping`/`@PostMapping` mappings in `presentation.web`.
+  - [x] The issues table lists all 17 issues of the milestone.
 
 ### [ ] T3 — `README.md` in English with the final state (~5 min)
 
