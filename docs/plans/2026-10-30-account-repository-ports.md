@@ -59,7 +59,7 @@ Technical notes:
 - **Acceptance criteria:**
   - [x] `./mvnw verify` green; `DomainIsolationTests` and `check-domain.mjs` pass with the new interface.
 
-### [ ] T2 — Reusable contract test for `CheckingAccountRepository` (~10 min)
+### [x] T2 — Reusable contract test for `CheckingAccountRepository` (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/pronoide/ddd/domain/model/CheckingAccountRepositoryContract.java`, `src/test/java/com/pronoide/ddd/adapter/out/persistence/InMemoryCheckingAccountRepositoryTests.java`
@@ -68,7 +68,7 @@ Technical notes:
   1. Move the implementation-agnostic scenarios (find by id / number, no duplicates on re-save, unique number, nulls rejected, sorted and unmodifiable list) into an abstract `CheckingAccountRepositoryContract` with `protected abstract CheckingAccountRepository createRepository()`, keeping their `@Nested` groups, names and `@DisplayName`.
   2. `InMemoryCheckingAccountRepositoryTests extends CheckingAccountRepositoryContract` and keeps only "stores the account itself, not a copy".
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest='InMemoryCheckingAccountRepositoryTests*'` runs the same number of scenarios as before (14), all green.
+  - [x] `./mvnw test -Dtest='InMemoryCheckingAccountRepositoryTests*'` runs the same number of scenarios as before (14), all green.
 
 ### [ ] T3 — `AccountOwnershipRepository` port and its contract test (~10 min)
 
