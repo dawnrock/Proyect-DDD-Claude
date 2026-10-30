@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-10-30
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~60 min (8 tasks)
 
 ## Goal
@@ -48,7 +48,7 @@ Technical notes:
 
 ## Tasks
 
-### [ ] T1 — `CheckingAccountRepository` port (~5 min)
+### [x] T1 — `CheckingAccountRepository` port (~5 min)
 
 - **Layer:** domain · adapter.out
 - **Files:** `src/main/java/com/pronoide/ddd/domain/model/CheckingAccountRepository.java`, `src/main/java/com/pronoide/ddd/adapter/out/persistence/InMemoryCheckingAccountRepository.java`
@@ -57,7 +57,7 @@ Technical notes:
   1. Create the interface in `domain.model` with the four current methods and their Javadoc (unique account number, sorted unmodifiable list, mandatory arguments).
   2. `InMemoryCheckingAccountRepository implements CheckingAccountRepository` (`@Override` on each method; it stays public for now).
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green; `DomainIsolationTests` and `check-domain.mjs` pass with the new interface.
+  - [x] `./mvnw verify` green; `DomainIsolationTests` and `check-domain.mjs` pass with the new interface.
 
 ### [ ] T2 — Reusable contract test for `CheckingAccountRepository` (~10 min)
 
