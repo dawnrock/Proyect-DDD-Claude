@@ -26,7 +26,10 @@ import com.pronoide.ddd.domain.model.DomainException;
                 importOptions = ImportOption.DoNotIncludeTests.class)
 class LayeredArchitectureTests {
 
-    /** D2 y D3: nadie depende de {@code adapter.in}, ni de {@code application} desde abajo. */
+    /**
+     * D2 y D3: nadie depende de {@code adapter.in}, ni de {@code application} desde el dominio. Desde la #15 la
+     * persistencia sí conoce {@code application}: implementa su puerto de propiedad de las cuentas (ADR 0008).
+     */
     @ArchTest
     static final ArchRule las_capas_solo_dependen_hacia_abajo = layeredArchitecture()
             .consideringOnlyDependenciesInLayers()
@@ -35,7 +38,7 @@ class LayeredArchitectureTests {
             .layer("Domain").definedBy("..domain..")
             .layer("Persistence").definedBy("..adapter.out.persistence..")
             .whereLayer("Presentation").mayNotBeAccessedByAnyLayer()
-            .whereLayer("Application").mayOnlyBeAccessedByLayers("Presentation")
+            .whereLayer("Application").mayOnlyBeAccessedByLayers("Presentation", "Persistence")
             .whereLayer("Persistence").mayOnlyBeAccessedByLayers("Application")
             .whereLayer("Domain").mayOnlyBeAccessedByLayers("Application", "Persistence", "Presentation");
 

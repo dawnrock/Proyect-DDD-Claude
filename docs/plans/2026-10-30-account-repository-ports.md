@@ -70,7 +70,7 @@ Technical notes:
 - **Acceptance criteria:**
   - [x] `./mvnw test -Dtest='InMemoryCheckingAccountRepositoryTests*'` runs the same number of scenarios as before (14), all green.
 
-### [ ] T3 — `AccountOwnershipRepository` port and its contract test (~10 min)
+### [x] T3 — `AccountOwnershipRepository` port and its contract test (~10 min)
 
 - **Layer:** application · adapter.out · tests
 - **Files:** `src/main/java/com/pronoide/ddd/application/AccountOwnershipRepository.java`, `InMemoryAccountOwnershipRepository.java`, `src/test/java/com/pronoide/ddd/application/AccountOwnershipRepositoryContract.java`, `InMemoryAccountOwnershipRepositoryTests.java`
@@ -79,8 +79,9 @@ Technical notes:
   1. Interface in `application` with `assign`, `ownerOf`, `accountsOf` (Javadoc: one owner per account, ADR 0008, why it is not in `domain.model`).
   2. The in-memory adapter implements it.
   3. Move its four scenarios into the abstract `AccountOwnershipRepositoryContract`; the adapter's test extends it.
+  4. *(Added while implementing)* `LayeredArchitectureTests`: the `Application` layer may now be accessed by `Persistence`, because the adapter implements a port that lives in `application`.
 - **Acceptance criteria:**
-  - [ ] The four ownership scenarios run through the contract and pass.
+  - [x] The four ownership scenarios run through the contract and pass.
 
 ### [ ] T4 — Test helper typed as ports (~5 min)
 
