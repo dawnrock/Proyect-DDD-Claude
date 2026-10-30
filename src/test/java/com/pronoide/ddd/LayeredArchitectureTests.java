@@ -20,15 +20,17 @@ import com.pronoide.ddd.domain.model.DomainException;
 
 /**
  * Arquitectura en capas de la fase 1: cada regla es una fila de la tabla de dependencias (D1-D5) de
- * {@code docs/arquitectura/fase-1-capas.md}, más las que pide la #12.
+ * {@code docs/arquitectura/fase-1-capas.md}, más las que pide la #12. Provisional en la fase 2: se ajusta a los puertos
+ * a medida que llegan (#15) hasta que la sustituya {@code HexagonalArchitectureTests} (#22).
  */
 @AnalyzeClasses(packages = "com.pronoide.ddd",
                 importOptions = ImportOption.DoNotIncludeTests.class)
 class LayeredArchitectureTests {
 
     /**
-     * D2 y D3: nadie depende de {@code adapter.in}, ni de {@code application} desde el dominio. Desde la #15 la
-     * persistencia sí conoce {@code application}: implementa su puerto de propiedad de las cuentas (ADR 0008).
+     * D2 y D3: nadie depende de {@code adapter.in}, ni de {@code application} desde el dominio. Desde la #15 nadie
+     * depende de la persistencia (se usa por sus puertos), y la persistencia sí conoce {@code application}: implementa
+     * su puerto de propiedad de las cuentas (ADR 0008).
      */
     @ArchTest
     static final ArchRule las_capas_solo_dependen_hacia_abajo = layeredArchitecture()
@@ -39,7 +41,7 @@ class LayeredArchitectureTests {
             .layer("Persistence").definedBy("..adapter.out.persistence..")
             .whereLayer("Presentation").mayNotBeAccessedByAnyLayer()
             .whereLayer("Application").mayOnlyBeAccessedByLayers("Presentation", "Persistence")
-            .whereLayer("Persistence").mayOnlyBeAccessedByLayers("Application")
+            .whereLayer("Persistence").mayNotBeAccessedByAnyLayer()
             .whereLayer("Domain").mayOnlyBeAccessedByLayers("Application", "Persistence", "Presentation");
 
     /** D1: el dominio solo conoce el JDK (ni Spring, ni {@code jakarta}, ni {@code org.immutables}). */
@@ -103,8 +105,17 @@ class LayeredArchitectureTests {
                     .orShould().beAnnotatedWith(SECURED));
 
     /**
-     * ADR 0004: en la fase 1 la aplicación usa clases concretas de persistencia, sin interfaces de puerto. Es lo que
-     * diferencia esta fotografía de la hexagonal, donde el puerto se declara en {@code domain.model}.
+     * #15: los adaptadores de salida solo los conocen su propio paquete y {@code config}, que los cablea (#20). El resto
+     * usa los puertos {@code CheckingAccountRepository} y {@code AccountOwnershipRepository}.
+     */
+    @ArchTest
+    static final ArchRule solo_la_persistencia_y_config_conocen_los_adaptadores_de_salida = noClasses()
+            .that().resideOutsideOfPackages("..adapter.out.persistence..", "..config..")
+            .should().dependOnClassesThat().resideInAPackage("..adapter.out.persistence..");
+
+    /**
+     * ADR 0004: la persistencia no declara interfaces. En la fase 1 no había puertos; en la fase 2 (#15) los puertos se
+     * declaran en {@code domain.model} y {@code application}, y la persistencia solo los implementa.
      */
     @ArchTest
     static final ArchRule la_persistencia_no_tiene_interfaces = noClasses()

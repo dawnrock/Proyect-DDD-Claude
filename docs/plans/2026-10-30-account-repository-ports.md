@@ -115,7 +115,7 @@ Technical notes:
   - [x] `grep -rn "import .*adapter.out" src/main/java/com/pronoide/ddd/application` returns nothing (the port's Javadoc names the package).
   - [x] `DddLabApplicationTests` and `DemoProfileTests` pass (the context wires the ports).
 
-### [ ] T7 — Package-private adapters and ArchUnit rule (~10 min)
+### [x] T7 — Package-private adapters and ArchUnit rule (~10 min)
 
 - **Layer:** adapter.out · tests
 - **Files:** both `InMemory*Repository.java`, `src/test/java/com/pronoide/ddd/LayeredArchitectureTests.java`
@@ -125,8 +125,8 @@ Technical notes:
   2. In `LayeredArchitectureTests`: `whereLayer("Persistence").mayNotBeAccessedByAnyLayer()` and a new rule `solo_la_persistencia_y_config_conocen_los_adaptadores_de_salida` (`noClasses().that().resideOutsideOfPackages("..adapter.out.persistence..", "..config..").should().dependOnClassesThat().resideInAPackage("..adapter.out.persistence..")`). Update the Javadoc of `la_persistencia_no_tiene_interfaces` (the ports live outside the package, so it still holds) and of the class (provisional until #22).
   3. Validate by breaking it: temporarily import an adapter from `application`, check `./mvnw test -Dtest=LayeredArchitectureTests` fails on the new rule, revert. Mention it in the commit.
 - **Acceptance criteria:**
-  - [ ] The new rule fails when broken and passes after reverting.
-  - [ ] `./mvnw verify` green.
+  - [x] The new rule fails when broken and passes after reverting.
+  - [x] `./mvnw verify` green.
 
 ### [ ] T8 — Documentation and project status (~10 min)
 

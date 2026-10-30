@@ -23,7 +23,7 @@ import com.pronoide.ddd.domain.model.CheckingAccountRepository;
  * uso deben llamar siempre a {@code save} después de modificar una cuenta.
  */
 @Repository
-public class InMemoryCheckingAccountRepository implements CheckingAccountRepository {
+class InMemoryCheckingAccountRepository implements CheckingAccountRepository {
 
     private final Map<UUID, CheckingAccount> accounts = new ConcurrentHashMap<>();
 

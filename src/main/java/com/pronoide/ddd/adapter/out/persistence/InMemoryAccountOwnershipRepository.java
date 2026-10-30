@@ -18,7 +18,7 @@ import com.pronoide.ddd.application.AccountOwnershipRepository;
  * {@code docs/contracts/login-roles.md}.
  */
 @Repository
-public class InMemoryAccountOwnershipRepository implements AccountOwnershipRepository {
+class InMemoryAccountOwnershipRepository implements AccountOwnershipRepository {
 
     private final Map<UUID, String> owners = new ConcurrentHashMap<>();
 
