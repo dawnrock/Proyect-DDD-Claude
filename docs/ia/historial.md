@@ -25,4 +25,4 @@
 | 2026-10-26 | #52 | — | Análisis funcional y técnico (`docs/analysis/`, en castellano como excepción) y `check-domain` de `@EqualsAndHashCode` |
 | 2026-10-26 | #53, #55 | — | ADR 0009: el dominio no usa Lombok; `check-domain` rechaza cualquier `lombok`; referencias a ArchUnit corregidas |
 | 2026-10-26 | #56 | #54 | Reglas de ArchUnit de los ADR 0004 y 0008 y `DomainIsolationTests` sin el paquete `bootstrap` |
-| 2026-10-30 | (PR de la #57) | #57 | Graphify solo para preguntas de dependencias (ADR 0010) y estado del proyecto dividido en estado corto + anexos |
+| 2026-10-30 | #58 | #57 | Graphify solo para preguntas de dependencias (ADR 0010) y estado del proyecto dividido en estado corto + anexos |
