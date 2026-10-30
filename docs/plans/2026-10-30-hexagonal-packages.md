@@ -36,7 +36,7 @@ Make the package structure say what the hexagon is and what the adapters are (La
 
 ## Tasks
 
-### [ ] T1 — Close the #13 plan (~3 min)
+### [x] T1 — Close the #13 plan (~3 min)
 
 - **Layer:** docs
 - **Files:** `docs/plans/2026-10-30-close-phase-1.md`
@@ -44,7 +44,7 @@ Make the package structure say what the hexagon is and what the adapters are (La
 - **What to do:**
   1. Check T7 and T8 and their criteria, the global criteria that were waiting for them, and set `**Status:** done`. They were done after PR #60 was merged: tag `v1-monolito` on `10eb227`, `Hexagonal` created and set as default, milestone closed.
 - **Acceptance criteria:**
-  - [ ] The #13 plan has no unchecked task or criterion.
+  - [x] The #13 plan has no unchecked task or criterion.
 
 ### [ ] T2 — Pin the current behaviour (~5 min)
 

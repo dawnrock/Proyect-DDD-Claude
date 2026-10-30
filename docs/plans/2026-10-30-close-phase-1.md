@@ -5,7 +5,7 @@
 - **Phase:** 1 · Layered monolith
 - **Base branch:** `Monolithic`
 - **Date:** 2026-10-30
-- **Status:** awaiting merge (T7-T8 run after it)
+- **Status:** done
 - **Total estimate:** ~65 min (8 tasks: 6 in the PR + 2 after it is merged)
 
 ## Goal
@@ -112,7 +112,7 @@ Facts gathered for the documentation:
 - **Acceptance criteria:**
   - [x] `git diff --name-only origin/Monolithic...HEAD | node scripts/check-project-status.mjs -` (the CI check) passes.
 
-### [ ] T7 — Tag `v1-monolito` (~5 min, after the PR is merged)
+### [x] T7 — Tag `v1-monolito` (~5 min, after the PR is merged)
 
 - **Layer:** build
 - **Files:** —
@@ -120,10 +120,10 @@ Facts gathered for the documentation:
 - **What to do:**
   1. With the user's go-ahead: `git fetch`, check `./mvnw verify` on `origin/Monolithic`, then `git tag -a v1-monolito origin/Monolithic -m "Fase 1 · Monolito en capas"` and `git push origin v1-monolito`.
 - **Acceptance criteria:**
-  - [ ] `git ls-remote --tags origin v1-monolito` points to the merge commit of this PR.
-  - [ ] `./mvnw verify` ends in `BUILD SUCCESS` at that commit.
+  - [x] `git ls-remote --tags origin v1-monolito` points to the merge commit of this PR.
+  - [x] `./mvnw verify` ends in `BUILD SUCCESS` at that commit.
 
-### [ ] T8 — `Hexagonal` branch as the default (~5 min, after T7)
+### [x] T8 — `Hexagonal` branch as the default (~5 min, after T7)
 
 - **Layer:** build
 - **Files:** —
@@ -132,21 +132,21 @@ Facts gathered for the documentation:
   1. With the user's go-ahead: `git push origin origin/Monolithic:refs/heads/Hexagonal`, then `gh repo edit --default-branch Hexagonal`.
   2. Check that the CI runs on `Hexagonal` and that #13 and the milestone are closed (close the milestone if GitHub does not).
 - **Acceptance criteria:**
-  - [ ] `gh repo view --json defaultBranchRef` returns `Hexagonal`.
-  - [ ] `gh issue list --milestone "Fase 1 · Monolito en capas" --state open` is empty.
+  - [x] `gh repo view --json defaultBranchRef` returns `Hexagonal`.
+  - [x] `gh issue list --milestone "Fase 1 · Monolito en capas" --state open` is empty.
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] Every issue in the "Fase 1 · Monolito en capas" milestone is closed.
-- [ ] Tag `v1-monolito` published and `Hexagonal` branch created from `Monolithic` and set as the default branch.
-- [ ] `./mvnw verify` green on `Monolithic` at the tag.
+- [x] Every issue in the "Fase 1 · Monolito en capas" milestone is closed.
+- [x] Tag `v1-monolito` published and `Hexagonal` branch created from `Monolithic` and set as the default branch.
+- [x] `./mvnw verify` green on `Monolithic` at the tag.
 - [x] `README.md`, `fase-1-capas.md` and `arquitectura-ia.md` describe the final state of phase 1, in English.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
+- [x] All tasks and their criteria are checked.
 - [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
 - [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
 - [x] The phase architecture is respected (layers: each layer only uses the one below), verified by ArchUnit. Unchanged: no code changes.
