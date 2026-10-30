@@ -22,7 +22,7 @@ flowchart LR
 | ----- | ---- | -------------- | ------- |
 | Global context | `CLAUDE.md` | 6.2, 7.2 | Stack, commands, architecture per phase, conventions and restrictions. Short; the details are indexed in `docs/` without `@`. |
 | Folder context | `src/test/CLAUDE.md` | 7.2.3 | JUnit and ArchUnit conventions; only loaded when working on tests. |
-| Mandatory rules | `.claude/settings.json` (`permissions`) | 7.2.4 | `allow` for safe commands (`./mvnw`, read-only `git`); `deny` for `.env`, the token, the hooks and `git push --force`/`master`. |
+| Mandatory rules | `.claude/settings.json` (`permissions`) | 7.2.4 | `allow` for safe commands (`./mvnw`, read-only `git`); `deny` for `.env`, the token, editing the hooks (`Edit`) and `git push --force`/`master`. |
 | Command | `.claude/commands/commit.md` | 8.4 | Conventional Commits in Spanish; refuses to commit on `master`. |
 | Skill | `.claude/skills/plan-feature/` | 9, 9.2.3 | Issue → plan with 5-10 min tasks and criteria, following `assets/template.md`. |
 | Skill | `.claude/skills/implement-plan/` | 9, 13.1 | Plan → worktree → TDD → commits → PR against the phase branch. |
@@ -74,7 +74,7 @@ A contract change during implementation is requested from the lead, agreed with 
 
 ## Security
 
-- Hooks run with your permissions: the agent cannot edit them (`deny` on `.claude/hooks/**`).
+- Hooks run with your permissions: the agent cannot edit them (`deny` on `Edit(./.claude/hooks/**)`).
 - The Telegram token lives in `.claude/settings.local.json` (ignored by git) and the agent is not allowed to read it.
 - `master` is frozen: `deny` on `git push origin master`, and `/commit` refuses to commit on it.
 

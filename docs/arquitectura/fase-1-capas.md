@@ -109,7 +109,7 @@ Thymeleaf over the [base layout fragments](../../src/main/resources/templates/fr
 
 | Route | What it shows | Role |
 | ----- | ------------- | ---- |
-| `/login` | Login form | public |
+| `/login` | Login form; logging out returns here with `?logout` | public |
 | `/` | Account list | any (a customer only sees their own) |
 | `/accounts/new` (GET/POST) | Open an account (Post/Redirect/Get with a flash message) | `ADMIN` |
 | `/accounts/{id}` | Account details: balance, transactions and the deposit, withdrawal and transfer forms (`<details>`; only the one with errors reopens) | owner or `ADMIN` |
