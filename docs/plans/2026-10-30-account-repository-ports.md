@@ -128,7 +128,7 @@ Technical notes:
   - [x] The new rule fails when broken and passes after reverting.
   - [x] `./mvnw verify` green.
 
-### [ ] T8 — Documentation and project status (~10 min)
+### [x] T8 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/fase-2-hexagonal.md`, `docs/ia/estado-del-proyecto.md`, `docs/ia/decisiones.md`, `docs/ia/pendientes.md`, `docs/ia/historial.md`
@@ -139,8 +139,8 @@ Technical notes:
   3. `pendientes.md`: update the Telegram line accordingly (no longer silenced with `TELEGRAM_DISABLED=1`); remove the "application uses `adapter.out.persistence` until #15" provisional note from `decisiones.md` and add the decision about the ownership port in `application` and the `PersistenceTestAdapters` helper.
   4. `historial.md`: one row for the PR.
 - **Acceptance criteria:**
-  - [ ] `estado-del-proyecto.md` no longer says Telegram is disabled.
-  - [ ] The CI check of the project status passes.
+  - [x] `estado-del-proyecto.md` no longer says Telegram is disabled.
+  - [x] The CI check of the project status passes.
 
 ## Global acceptance criteria
 

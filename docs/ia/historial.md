@@ -28,3 +28,4 @@
 | 2026-10-30 | #58 | #57 | Graphify solo para preguntas de dependencias (ADR 0010) y estado del proyecto dividido en estado corto + anexos |
 | 2026-10-30 | #60 | #13 | Cierre de la fase 1: `README`, `fase-1-capas.md` y `arquitectura-ia.md` en inglés con el estado final, etiqueta `v1-monolito` y `Hexagonal` como rama por defecto |
 | 2026-10-30 | #61 | #14 | Paquetes hexagonales: `presentation` → `adapter.in`, `persistence` → `adapter.out.persistence` (`git mv`), ADR 0006 y tabla clase → papel; T7-T8 de la #13 marcadas |
+| 2026-10-30 | #PRNUM | #15 | Puertos de salida `CheckingAccountRepository` (`domain.model`) y `AccountOwnershipRepository` (`application`) con contratos de test; adaptadores en memoria package-private y regla de ArchUnit; Telegram reactivado en el estado del proyecto |
