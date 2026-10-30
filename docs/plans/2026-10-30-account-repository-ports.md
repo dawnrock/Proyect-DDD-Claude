@@ -97,23 +97,23 @@ Technical notes:
 
 - **Layer:** tests
 - **Files:** `CheckingAccountServiceTests.java`, `CheckingAccountServiceOwnershipTests.java`, `DemoDataLoaderTests.java`
-- **Depends on:** T4
+- **Depends on:** T4, T6
 - **What to do:**
   1. Replace fields and constructions of `InMemory*` with the port types and `PersistenceTestAdapters` (`spy(PersistenceTestAdapters.accounts())` in `CheckingAccountServiceTests`).
 - **Acceptance criteria:**
   - [ ] No test outside `adapter.out.persistence` imports an `InMemory*` class (`grep -rn "InMemory.*Repository" src/test` only matches that package).
   - [ ] `./mvnw verify` green.
 
-### [ ] T6 — `CheckingAccountService` depends on the ports (~5 min)
+### [x] T6 — `CheckingAccountService` depends on the ports (~5 min)
 
 - **Layer:** application
 - **Files:** `src/main/java/com/pronoide/ddd/application/CheckingAccountService.java`
-- **Depends on:** T1, T3, T5
+- **Depends on:** T1, T3 *(done before T5: the tests can only pass port-typed instances once the service accepts the ports)*
 - **What to do:**
   1. Fields typed as `CheckingAccountRepository` and `AccountOwnershipRepository`; remove the `adapter.out.persistence` imports. Spring injects the adapters by type.
 - **Acceptance criteria:**
-  - [ ] `grep -rn "adapter.out" src/main/java/com/pronoide/ddd/application` returns nothing.
-  - [ ] `DddLabApplicationTests` and `DemoProfileTests` pass (the context wires the ports).
+  - [x] `grep -rn "import .*adapter.out" src/main/java/com/pronoide/ddd/application` returns nothing (the port's Javadoc names the package).
+  - [x] `DddLabApplicationTests` and `DemoProfileTests` pass (the context wires the ports).
 
 ### [ ] T7 — Package-private adapters and ArchUnit rule (~10 min)
 
