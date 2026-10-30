@@ -2,7 +2,7 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores, y se mantiene **corto a propósito**: se carga en cada sesión. **Se actualiza en cada PR que cierra una issue** (lo comprueba el CI).
 
-- **Última actualización:** 2026-10-30 · PR #60 (#13, cierre de la fase 1)
+- **Última actualización:** 2026-10-30 · PR #61 (#14, paquetes hexagonales)
 - **Rama activa:** `Hexagonal` (fase 2), rama por defecto del repositorio. `Monolithic` congelada en la etiqueta `v1-monolito`; `master` congelada.
 
 ## Dónde estamos
@@ -10,11 +10,11 @@
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
 | 1 · Monolito en capas | Cerrada: #2-#8, #11-#13, #31, #48, #50, #54, #57 (detalle en el [historial](historial.md)) | — | — |
-| 2 · Hexagonal | — | — | #14 → #23 |
+| 2 · Hexagonal | #14 | — | #15 → #23 |
 
 ## Siguiente paso
 
-`/plan-feature 14` sobre `Hexagonal` (reorganizar los paquetes según la arquitectura hexagonal).
+`/plan-feature 15` sobre `Hexagonal` (puertos de salida del repositorio de cuentas y de la propiedad de las cuentas).
 
 Diseño objetivo de la fase 2: `docs/arquitectura/fase-2-hexagonal.md`; las issues, en el milestone "Fase 2 · Arquitectura hexagonal".
 

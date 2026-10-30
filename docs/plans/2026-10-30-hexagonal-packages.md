@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-10-30
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~50 min (6 tasks)
 
 ## Goal
@@ -113,24 +113,24 @@ Make the package structure say what the hexagon is and what the adapters are (La
 
 **Specific:**
 
-- [ ] Same tests as the baseline of T2, all green: the behaviour has not changed.
-- [ ] `git log --follow` keeps the history of the moved classes.
-- [ ] No class left in `com.pronoide.ddd.presentation` or `com.pronoide.ddd.persistence`.
-- [ ] `curl -u admin:demo http://localhost:8080/api/accounts` returns 200 and `/` renders the account list after login.
+- [x] Same tests as the baseline of T2, all green: the behaviour has not changed.
+- [x] `git log --follow` keeps the history of the moved classes.
+- [x] No class left in `com.pronoide.ddd.presentation` or `com.pronoide.ddd.persistence`.
+- [x] `curl -u admin:demo http://localhost:8080/api/accounts` returns 200 and `/` renders the account list after login.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit: partially until #15 and #22 (`application` still uses `adapter.out.persistence`; the layered rules are only adjusted to the new packages).
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md`: n/a (tests are moved, not added).
-- [ ] No dependencies added beyond the planned ones.
-- [ ] If the API changes: n/a (the API does not change).
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a (no new terms).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit: partially until #15 and #22 (`application` still uses `adapter.out.persistence`; the layered rules are only adjusted to the new packages).
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md`: n/a (tests are moved, not added).
+- [x] No dependencies added beyond the planned ones.
+- [x] If the API changes: n/a (the API does not change).
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a (no new terms).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
