@@ -5,8 +5,8 @@
 - **Phase:** 1 · Layered monolith
 - **Base branch:** `Monolithic`
 - **Date:** 2026-10-30
-- **Status:** in progress
-- **Total estimate:** ~85 min (10 tasks)
+- **Status:** done
+- **Total estimate:** ~95 min (11 tasks)
 
 ## Goal
 
@@ -132,7 +132,7 @@ Technical decisions:
 - **Acceptance criteria:**
   - [x] A new worktree created by the skill has `graphify-out/graph.json`.
 
-### [ ] T8 — Measurement with the graph (~10 min)
+### [x] T8 — Measurement with the graph (~10 min)
 
 - **Layer:** docs
 - **Files:** notes for the ADR (T9)
@@ -141,9 +141,9 @@ Technical decisions:
   1. Repeat the three T3 questions with the integration in place, in a new session.
   2. Compare tokens and completeness of the answers. Decide whether to add `docs/dominio/glosario.md` to the graph (only if the saving justifies its cost).
 - **Acceptance criteria:**
-  - [ ] Before/after table with the three questions.
+  - [x] Before/after table with the three questions.
 
-### [ ] T9 — ADR 0010 (~10 min)
+### [x] T9 — ADR 0010 (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0010-graphify-token-savings.md`, `docs/adr/README.md`
@@ -152,9 +152,9 @@ Technical decisions:
   1. Context, decision (development tool, code only, manual integration), alternatives (`graphify claude install`, no graph, MCP server), consequences, and the measurement from T3/T8. If there is no noticeable saving, say so and propose removing the integration.
   2. Add the row to the ADR index.
 - **Acceptance criteria:**
-  - [ ] ADR in English, linked in the index, with the measurement.
+  - [x] ADR in English, linked in the index, with the measurement.
 
-### [ ] T10 — Documentation and project status (~10 min)
+### [x] T10 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `CLAUDE.md`, `docs/ia/arquitectura-ia.md`, `docs/ia/estado-del-proyecto.md`
@@ -164,32 +164,52 @@ Technical decisions:
   2. `arquitectura-ia.md`: row for Graphify in the parts map (hook, agent, skills).
   3. `estado-del-proyecto.md`: #57 done, next step #13, pending items from the spike and the measurement, history row.
 - **Acceptance criteria:**
-  - [ ] `CLAUDE.md` has no section written automatically by Graphify.
-  - [ ] `node scripts/check-project-status.mjs` (CI check) passes.
+  - [x] `CLAUDE.md` has no section written automatically by Graphify.
+  - [x] `node scripts/check-project-status.mjs` (CI check) passes.
+
+### [x] T11 — Short project status (~10 min) · added during implementation
+
+- **Layer:** docs · claude
+- **Files:** `docs/ia/estado-del-proyecto.md`, `docs/ia/decisiones.md`, `docs/ia/pendientes.md`, `docs/ia/historial.md` (new), `implement-plan`, `plan-feature` (and its template), `revisor-ddd`, `scripts/check-project-status.mjs`, `CLAUDE.md`
+- **Depends on:** T8
+- **What to do:**
+  1. Keep in `estado-del-proyecto.md` only what every session needs (where we are, next step, working agreements) and move decisions, pending items and history to annexes read on demand.
+  2. Align the skills, the plan template, `revisor-ddd`, the CI message and `CLAUDE.md` with the new layout.
+- **Acceptance criteria:**
+  - [x] `estado-del-proyecto.md` goes from 13.3 KB to 2.9 KB and links its annexes.
+  - [x] The CI check still passes for a PR that closes an issue.
+
+## Deviations
+
+- **T8 measured in new sessions.** Subagent definitions and hooks are loaded when a session starts, so a measurement inside the working session never used the graph. T3 and T8 were repeated with `claude -p --agent` (the pre-#57 agent from git and no graph vs. the new agent with graph). Result: 112,755 → 149,604 tokens; only the dependency question saved (−27 %). Details in ADR 0010.
+- **Scope reduced after the measurement (decided by the user):** no `hook-guard` hook (T6 was reverted), and `buscador-referencias` and `plan-feature` use the graph only for dependency questions (`affected`, `path`). The glossary is not added to the graph.
+- **`scripts/graphify.mjs`** (not in the plan): portable launcher, because `graphify` is not on the PATH (`pip --user` on Windows) and is not installed in CI.
+- **T11 added (asked by the user):** the real per-session saving is the size of `estado-del-proyecto.md`, not code search.
+- Implemented on the session branch renamed to `feat/graphify-token-savings` in the existing worktree, instead of a new worktree.
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] `graphify-out/` is generated only from the code, is not committed and costs no tokens to build.
-- [ ] `buscador-referencias` and `plan-feature` query the graph before Grep/Glob, and still work without it.
-- [ ] The hook coexists with `block-backlog-json.mjs`.
-- [ ] Before/after measurement documented in ADR 0010.
-- [ ] Every change to `CLAUDE.md` and `.claude/` was approved by the user.
+- [x] `graphify-out/` is generated only from the code, is not committed and costs no tokens to build.
+- [x] `buscador-referencias` and `plan-feature` query the graph for dependency questions, and still work without it.
+- [x] ~~The hook coexists with `block-backlog-json.mjs`.~~ n/a: the hook was removed after the measurement.
+- [x] Before/after measurement documented in ADR 0010.
+- [x] Every change to `CLAUDE.md` and `.claude/` was approved by the user.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (layers: each layer only uses the one below), verified by ArchUnit. *(Not affected: no Java changes.)*
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md`. *(n/a: no Java tests.)*
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR). *(Graphify is a development tool, justified in ADR 0010; the `pom.xml` does not change.)*
-- [ ] If the API changes: `docs/api/openapi.yaml` reflects it. *(n/a)*
-- [ ] Any new business term is in `docs/dominio/glosario.md`. *(n/a)*
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (layers: each layer only uses the one below), verified by ArchUnit. *(Not affected: no Java changes.)*
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md`. *(n/a: no Java tests.)*
+- [x] No dependencies added beyond the planned ones (or justified in an ADR). *(Graphify is a development tool, justified in ADR 0010; the `pom.xml` does not change.)*
+- [x] If the API changes: `docs/api/openapi.yaml` reflects it. *(n/a)*
+- [x] Any new business term is in `docs/dominio/glosario.md`. *(n/a)*
+- [x] Documentation written or changed by this plan is in English.
+- [x] `docs/ia/estado-del-proyecto.md` updated (and split into annexes, T11).
 
 ## Risks and open questions
 
