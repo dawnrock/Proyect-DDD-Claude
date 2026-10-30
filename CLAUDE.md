@@ -19,6 +19,8 @@ Antes de tocar código, comprueba en qué rama estás (`git branch --show-curren
 ./mvnw test -Dtest=CheckingAccountTests              # una clase de test
 ./mvnw test -Dtest='CheckingAccountTests#nombre*'    # un método
 ./mvnw spring-boot:run             # arranca en :8080; GET /actuator/health → {"status":"UP"}
+node scripts/graphify.mjs update .                   # regenera el grafo del código (local, sin tokens)
+node scripts/graphify.mjs affected "<Clase>"         # quién depende de una clase (ADR 0010)
 ```
 
 - En Windows usa `mvnw.cmd`. Necesita Java 21 (`JAVA_HOME`).
@@ -59,7 +61,7 @@ ArchUnit no ve las anotaciones de Lombok (retención `SOURCE`): lo comprueba `no
 
 ## Estado del proyecto
 
-**Al empezar cada sesión, lee `docs/ia/estado-del-proyecto.md`**: punto exacto del trabajo, siguiente paso, acuerdos con el usuario y pendientes. Toda PR que cierra una issue lo actualiza (el CI lo comprueba).
+**Al empezar cada sesión, lee `docs/ia/estado-del-proyecto.md`**: punto exacto del trabajo, siguiente paso y acuerdos con el usuario. Es corto a propósito; sus anexos (`decisiones.md`, `pendientes.md`, `historial.md`) se leen solo cuando la tarea lo necesita. Toda PR que cierra una issue lo actualiza (el CI lo comprueba).
 
 ## Documentación (índice; léela solo cuando la tarea lo necesite)
 

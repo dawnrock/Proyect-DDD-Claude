@@ -23,7 +23,8 @@ export function checkProjectStatus(body, changedFiles) {
   return {
     ok: false,
     message: `La PR cierra ${closes.join(', ')} pero no actualiza ${STATUS_FILE}. ` +
-      'Actualiza el estado de la issue, el siguiente paso, los pendientes y el historial (paso 6.3 de implement-plan).',
+      'Actualiza el estado de la issue y el siguiente paso, y sus anexos (decisiones, pendientes, historial) ' +
+      '(paso 6.3 de implement-plan).',
   };
 }
 
