@@ -57,7 +57,7 @@ Make the package structure say what the hexagon is and what the adapters are (La
 - **Acceptance criteria:**
   - [x] Baseline recorded: `Tests run: 358, Failures: 0, Errors: 0, Skipped: 0` (`LayeredArchitectureTests`: 10). Health `UP`, `GET /api/accounts` as `admin` → 200.
 
-### [ ] T3 — ADR 0006: hexagonal architecture (~10 min)
+### [x] T3 — ADR 0006: hexagonal architecture (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0006-hexagonal-architecture.md`, `docs/adr/README.md`
@@ -67,7 +67,7 @@ Make the package structure say what the hexagon is and what the adapters are (La
   2. Record the transitional decisions of #14: the shared security support goes to the `adapter.in` root; `application` keeps using `adapter.out.persistence` until #15; `LayeredArchitectureTests` only adjusts its patterns until #22.
   3. Add it to the ADR index.
 - **Acceptance criteria:**
-  - [ ] The ADR exists, in English, and is listed in `docs/adr/README.md`.
+  - [x] The ADR exists, in English, and is listed in `docs/adr/README.md`.
 
 ### [ ] T4 — `persistence` → `adapter.out.persistence` (~10 min)
 
