@@ -1,83 +1,83 @@
-# Arquitectura de IA del proyecto
+# AI architecture of the project
 
-Cómo se aplica en este repositorio lo aprendido en el curso *Claude Code para desarrollo de software*. Adapta la arquitectura de [curso-claude](https://github.com/dawnrock/curso-claude) (Node/Express/Angular) a un proyecto Java 21 + Spring Boot con DDD.
+How this repository applies what was learned in the *Claude Code for software development* course. It adapts the architecture of [curso-claude](https://github.com/dawnrock/curso-claude) (Node/Express/Angular) to a Java 21 + Spring Boot project with DDD.
 
-## Mapa de piezas
+## Map of the pieces
 
 ```mermaid
 flowchart LR
-    I[Issue de GitHub<br/>milestone de fase] -->|/plan-feature N| P[docs/plans/*.md<br/>+ comentario en la issue]
-    P -->|/implement-plan N| W[git worktree<br/>TDD por tarea]
-    W -->|/commit| C[1 commit por tarea]
-    W -->|revisor-ddd| R[revisión DDD]
-    C --> PR[PR contra Monolithic / Hexagonal]
+    I[GitHub issue<br/>phase milestone] -->|/plan-feature N| P[docs/plans/*.md<br/>+ comment on the issue]
+    P -->|/implement-plan N| W[git worktree<br/>TDD per task]
+    W -->|/commit| C[1 commit per task]
+    W -->|revisor-ddd| R[DDD review]
+    C --> PR[PR against Monolithic / Hexagonal]
     PR --> CI[CI: check-domain + mvnw verify]
     PR --> CR[Claude Code Review]
     P -. notify.mjs .-> T[(Telegram)]
     PR -. notify.mjs .-> T
-    CI -. si falla .-> T
+    CI -. on failure .-> T
 ```
 
-| Pieza | Archivo | Capítulo del curso | Para qué |
-| ----- | ------- | ------------------ | -------- |
-| Contexto global | `CLAUDE.md` | 6.2, 7.2 | Stack, comandos, arquitectura por fase, convenciones y restricciones. Breve; el detalle está indexado en `docs/` sin `@`. |
-| Contexto por carpeta | `src/test/CLAUDE.md` | 7.2.3 | Convenciones de JUnit y ArchUnit; solo se carga al trabajar en los tests. |
-| Reglas obligatorias | `.claude/settings.json` (`permissions`) | 7.2.4 | `allow` para comandos seguros (`./mvnw`, `git` de lectura); `deny` para `.env`, el token, los hooks y `git push --force`/`master`. |
-| Comando | `.claude/commands/commit.md` | 8.4 | Conventional Commits en español; se niega a commitear en `master`. |
-| Skill | `.claude/skills/plan-feature/` | 9, 9.2.3 | Issue → plan con tareas de 5-10 min y criterios, según `assets/template.md`. |
-| Skill | `.claude/skills/implement-plan/` | 9, 13.1 | Plan → worktree → TDD → commits → PR contra la rama de la fase. |
-| Skill con material de apoyo | `.claude/skills/ddd-building-block/` | 9.2 | `references/` (reglas DDD, Lombok/Immutables), `templates/` (VO, entidad, test) y `scripts/check-domain.mjs`. |
-| Skill de fase 2 | `.claude/skills/hexagonal-adapter/` | 9.2 | Plantillas de puerto, adaptador y test de adaptador. |
-| Subagente | `.claude/agents/revisor-ddd.md` | 10.2 | Revisión de DDD y arquitectura, sin poder editar, con Sonnet. |
-| Subagente | `.claude/agents/buscador-referencias.md` | 10.1, 10.3 | Búsquedas amplias con Haiku para no llenar el contexto principal. |
-| Teammates | `.claude/agents/backend-dev.md`, `.claude/agents/web-dev.md` | 10.2, 13.2 | Un agente por lado (back / web), con herramientas y paquetes limitados; revisan y negocian el contrato. |
-| Skill de equipo | `.claude/skills/implement-plan-team/` | 13.1, 13.2 | Issue back + web: contrato primero (`docs/contracts/`), implementación en paralelo en worktrees, integración y una PR (ADR 0007). |
-| Hook `PreToolUse` | `.claude/hooks/block-backlog-json.mjs` | 12 | Bloquea la lectura de la semilla del backlog: la verdad son las issues. |
-| Hooks `Notification` / `Stop` | `.claude/hooks/notify-telegram.mjs` | 12.1 | Aviso push al móvil cuando Claude espera permiso o termina. |
-| Hook `PostToolUse` (Bash) | `scripts/clean-merged-worktrees.mjs --hook` | 12 | Tras un `gh pr merge`, borra los worktrees de los teammates (`.claude/worktrees/agent-*`) ya fusionados y sin cambios, y todas las ramas locales fusionadas que no estén en uso (salvo las de fase, `master` y `claude/*`). |
-| Scripts deterministas | `scripts/seed-issues.mjs`, `scripts/notify.mjs` | 9.2.2, 14 | Crear el backlog; enviar notificaciones. |
-| Memoria entre sesiones | `docs/ia/estado-del-proyecto.md` + anexos `decisiones.md`, `pendientes.md`, `historial.md` + `scripts/check-project-status.mjs` | 6.2, 12, 14 | Punto de entrada de cada sesión (lo cita `CLAUDE.md`), corto a propósito; los anexos se leen solo cuando hacen falta (ADR 0010). Lo actualizan `implement-plan` / `implement-plan-team`, lo exige la plantilla del plan, lo revisa `revisor-ddd` y el CI falla si una PR que cierra una issue no lo toca. |
-| Grafo del código | Graphify (`graphifyy`) + `scripts/graphify.mjs` + `.graphifyignore` | 10.3 | Grafo local del código Java (`graphify-out/`, sin tokens, uno por worktree). `buscador-referencias` y `plan-feature` lo usan solo para preguntas de dependencias (`affected`, `path`), donde ahorra tokens; sin hook (ADR 0010). |
-| CI/CD | `.github/workflows/ci.yml` | 14 | Lo determinista (build, tests, ArchUnit, reglas del dominio) sin IA. |
-| CI/CD con IA | `.github/workflows/claude.yml`, `claude-code-review.yml` | 14 | `@claude` en issues/PR y revisión automática de cada PR. |
-| Equipos de agentes | `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | 13.2 | Habilitado para tareas de investigación o revisión en paralelo. |
+| Piece | File | Course chapter | Purpose |
+| ----- | ---- | -------------- | ------- |
+| Global context | `CLAUDE.md` | 6.2, 7.2 | Stack, commands, architecture per phase, conventions and restrictions. Short; the details are indexed in `docs/` without `@`. |
+| Folder context | `src/test/CLAUDE.md` | 7.2.3 | JUnit and ArchUnit conventions; only loaded when working on tests. |
+| Mandatory rules | `.claude/settings.json` (`permissions`) | 7.2.4 | `allow` for safe commands (`./mvnw`, read-only `git`); `deny` for `.env`, the token, the hooks and `git push --force`/`master`. |
+| Command | `.claude/commands/commit.md` | 8.4 | Conventional Commits in Spanish; refuses to commit on `master`. |
+| Skill | `.claude/skills/plan-feature/` | 9, 9.2.3 | Issue → plan with 5-10 min tasks and criteria, following `assets/template.md`. |
+| Skill | `.claude/skills/implement-plan/` | 9, 13.1 | Plan → worktree → TDD → commits → PR against the phase branch. |
+| Skill with supporting material | `.claude/skills/ddd-building-block/` | 9.2 | `references/` (DDD rules, Lombok/Immutables), `templates/` (VO, entity, test) and `scripts/check-domain.mjs`. |
+| Phase 2 skill | `.claude/skills/hexagonal-adapter/` | 9.2 | Templates for port, adapter and adapter test. |
+| Subagent | `.claude/agents/revisor-ddd.md` | 10.2 | DDD and architecture review, without edit rights, with Sonnet. |
+| Subagent | `.claude/agents/buscador-referencias.md` | 10.1, 10.3 | Wide searches with Haiku so the main context does not fill up. |
+| Teammates | `.claude/agents/backend-dev.md`, `.claude/agents/web-dev.md` | 10.2, 13.2 | One agent per side (back / web), with limited tools and packages; they review and negotiate the contract. |
+| Team skill | `.claude/skills/implement-plan-team/` | 13.1, 13.2 | Back + web issue: contract first (`docs/contracts/`), parallel implementation in worktrees, integration and one PR (ADR 0007). |
+| `PreToolUse` hook | `.claude/hooks/block-backlog-json.mjs` | 12 | Blocks reading the backlog seed: the issues are the source of truth. |
+| `Notification` / `Stop` hooks | `.claude/hooks/notify-telegram.mjs` | 12.1 | Push notice to the phone when Claude waits for permission or finishes. |
+| `PostToolUse` hook (Bash) | `scripts/clean-merged-worktrees.mjs --hook` | 12 | After a `gh pr merge`, deletes the teammates' worktrees (`.claude/worktrees/agent-*`) that are merged and clean, and every merged local branch not in use (except the phase branches, `master` and `claude/*`). |
+| Deterministic scripts | `scripts/seed-issues.mjs`, `scripts/notify.mjs` | 9.2.2, 14 | Create the backlog; send notifications. |
+| Memory between sessions | `docs/ia/estado-del-proyecto.md` + annexes `decisiones.md`, `pendientes.md`, `historial.md` + `scripts/check-project-status.mjs` | 6.2, 12, 14 | Entry point of every session (cited by `CLAUDE.md`), short on purpose; the annexes are only read when needed (ADR 0010). Updated by `implement-plan` / `implement-plan-team`, required by the plan template, checked by `revisor-ddd`, and CI fails if a PR that closes an issue does not touch it. |
+| Code graph | Graphify (`graphifyy`) + `scripts/graphify.mjs` + `.graphifyignore` | 10.3 | Local graph of the Java code (`graphify-out/`, no tokens, one per worktree). `buscador-referencias` and `plan-feature` only use it for dependency questions (`affected`, `path`), where it saves tokens; no hook (ADR 0010). |
+| CI/CD | `.github/workflows/ci.yml` | 14 | The deterministic part (build, tests, ArchUnit, domain rules, project status, OpenAPI lint) without AI. |
+| CI/CD with AI | `.github/workflows/claude.yml`, `claude-code-review.yml` | 14 | `@claude` on issues/PRs and an automatic review of every PR. |
+| Agent teams | `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | 13.2 | Enabled for research or review tasks in parallel. |
 
-## Funcionalidades back + web en equipo (capítulo 13)
+## Back + web features as a team (chapter 13)
 
 ```mermaid
 sequenceDiagram
     participant L as Lead (implement-plan-team)
     participant B as backend-dev
     participant W as web-dev
-    L->>L: T0 · borrador de docs/contracts/slug.md + tipos sin lógica
-    L->>B: revisa el contrato
-    L->>W: revisa el contrato
-    B-->>W: propuestas / acuerdo
-    W-->>B: propuestas / acuerdo
-    L->>L: commit "acuerda el contrato" (congelado)
-    par en paralelo, cada uno en su worktree
+    L->>L: T0 · draft of docs/contracts/slug.md + types without logic
+    L->>B: reviews the contract
+    L->>W: reviews the contract
+    B-->>W: proposals / agreement
+    W-->>B: proposals / agreement
+    L->>L: commit "agrees the contract" (frozen)
+    par in parallel, each in its own worktree
         B->>B: domain → application → persistence → REST (TDD)
     and
-        W->>W: controladores y plantillas Thymeleaf contra el servicio simulado (TDD)
+        W->>W: controllers and Thymeleaf templates against the stubbed service (TDD)
     end
-    B-->>L: rama -back lista
-    W-->>L: rama -web lista
-    L->>L: merge back + web, tareas "ambos", revisor-ddd, mvnw verify, PR
+    B-->>L: -back branch ready
+    W-->>L: -web branch ready
+    L->>L: merge back + web, "both" tasks, revisor-ddd, mvnw verify, PR
 ```
 
-Un cambio de contrato durante la implementación se pide al lead, se acuerda con el otro lado y se registra en la sección "Cambios" del contrato.
+A contract change during implementation is requested from the lead, agreed with the other side and recorded in the contract's "Changes" section.
 
-## Estrategia de modelos y modos (capítulos 4 y 5)
+## Models and modes (chapters 4 and 5)
 
-- Planificar (`/plan-feature`) en **modo plan** con Opus (o `opusplan`); implementar (`/implement-plan`) con Sonnet en edición automática o modo auto.
-- `buscador-referencias` usa Haiku; `revisor-ddd`, Sonnet.
+- Plan (`/plan-feature`) in **plan mode** with Opus (or `opusplan`); implement (`/implement-plan`) with Sonnet in auto-edit or auto mode.
+- `buscador-referencias` uses Haiku; `revisor-ddd`, Sonnet.
 
-## Seguridad
+## Security
 
-- Los hooks se ejecutan con tus permisos: el agente no puede editarlos (`deny` sobre `.claude/hooks/**`).
-- El token de Telegram vive en `.claude/settings.local.json` (ignorado por git) y el agente tiene prohibido leerlo.
-- `master` está congelada: `deny` de `git push origin master` y `/commit` se niega a commitear en ella.
+- Hooks run with your permissions: the agent cannot edit them (`deny` on `.claude/hooks/**`).
+- The Telegram token lives in `.claude/settings.local.json` (ignored by git) and the agent is not allowed to read it.
+- `master` is frozen: `deny` on `git push origin master`, and `/commit` refuses to commit on it.
 
-## Registro de uso
+## Usage log
 
-Cada fase añade aquí, al cerrarse, qué planes y PRs se generaron con estas piezas y qué ajustes hubo que hacer.
+When each phase closes, it adds here which plans and PRs these pieces produced and which adjustments were needed.

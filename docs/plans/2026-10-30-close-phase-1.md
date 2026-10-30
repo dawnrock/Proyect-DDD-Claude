@@ -78,7 +78,7 @@ Facts gathered for the documentation:
 - **Acceptance criteria:**
   - [ ] The commands in "Run" still work (`./mvnw verify`, `./mvnw spring-boot:run`, `curl -u admin:demo …/api/accounts` returns 200).
 
-### [ ] T4 — `arquitectura-ia.md` in English (~10 min)
+### [x] T4 — `arquitectura-ia.md` in English (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/arquitectura-ia.md`
@@ -86,7 +86,7 @@ Facts gathered for the documentation:
 - **What to do:**
   1. Translate the document as it is (map, pieces table, team flow, models, security). The Mermaid diagrams keep their structure; only their labels are translated.
 - **Acceptance criteria:**
-  - [ ] The pieces table still lists every file in `.claude/agents`, `.claude/skills`, `.claude/hooks` and `.github/workflows`.
+  - [x] The pieces table still lists every file in `.claude/agents`, `.claude/skills`, `.claude/hooks` and `.github/workflows`.
 
 ### [ ] T5 — `arquitectura-ia.md`: usage log of phase 1 (~10 min)
 
