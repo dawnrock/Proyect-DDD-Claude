@@ -30,7 +30,7 @@ class LayeredArchitectureTests {
     @ArchTest
     static final ArchRule las_capas_solo_dependen_hacia_abajo = layeredArchitecture()
             .consideringOnlyDependenciesInLayers()
-            .layer("Presentation").definedBy("..presentation..")
+            .layer("Presentation").definedBy("..adapter.in..")
             .layer("Application").definedBy("..application..")
             .layer("Domain").definedBy("..domain..")
             .layer("Persistence").definedBy("..adapter.out.persistence..")
@@ -51,13 +51,13 @@ class LayeredArchitectureTests {
      */
     @ArchTest
     static final ArchRule la_presentacion_solo_conoce_las_excepciones_del_dominio = noClasses()
-            .that().resideInAPackage("..presentation..")
+            .that().resideInAPackage("..adapter.in..")
             .should().dependOnClassesThat(resideInAPackage("..domain..").and(not(assignableTo(DomainException.class))));
 
     /** D5: la web y la API REST son dos canales independientes; ninguno conoce al otro. */
     @ArchTest
     static final ArchRule la_web_y_rest_no_se_conocen = slices()
-            .matching("..presentation.(*)..")
+            .matching("..adapter.in.(*)..")
             .should().notDependOnEachOther();
 
     /** El dominio solo cambia de estado con métodos de negocio: no tiene {@code set*} públicos. */
@@ -114,6 +114,6 @@ class LayeredArchitectureTests {
      */
     @ArchTest
     static final ArchRule toda_clase_pertenece_a_una_capa = classes()
-            .that().resideOutsideOfPackages("..presentation..", "..application..", "..domain..", "..adapter.out.persistence..")
+            .that().resideOutsideOfPackages("..adapter.in..", "..application..", "..domain..", "..adapter.out.persistence..")
             .should().haveFullyQualifiedName(DddLabApplication.class.getName());
 }

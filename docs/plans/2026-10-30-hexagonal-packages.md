@@ -82,7 +82,7 @@ Make the package structure say what the hexagon is and what the adapters are (La
   - [x] `git log --follow --oneline -- src/main/java/com/pronoide/ddd/adapter/out/persistence/InMemoryCheckingAccountRepository.java` shows the commits from before the move.
   - [x] The adjusted layer rule still bites: import `adapter.out.persistence` from `domain`, see the red, revert.
 
-### [ ] T5 — `presentation` → `adapter.in` (~10 min)
+### [x] T5 — `presentation` → `adapter.in` (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `src/main/java/com/pronoide/ddd/presentation/**` → `adapter/in/**`, same in `src/test`; `LayeredArchitectureTests`
@@ -92,9 +92,9 @@ Make the package structure say what the hexagon is and what the adapters are (La
   2. In `LayeredArchitectureTests`: `Presentation` layer `..adapter.in..`, D4 and the controllers rule on `..adapter.in..`, slices `..adapter.in.(*)..`, and `toda_clase_pertenece_a_una_capa` with the new packages.
   3. Search `src/main/resources` (properties, templates) for any reference to the old packages.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green with the same number of tests as the baseline; no `com.pronoide.ddd.presentation` or `com.pronoide.ddd.persistence` left in `src/`.
-  - [ ] The REST/web slice rule still fails if `adapter.in.web` imports a class from `adapter.in.rest` (break it, see the red, revert).
-  - [ ] `git log --follow` keeps the history of `AccountController` and `AccountWebController`.
+  - [x] `./mvnw verify` green with the same number of tests as the baseline; no `com.pronoide.ddd.presentation` or `com.pronoide.ddd.persistence` left in `src/`.
+  - [x] The REST/web slice rule still fails if `adapter.in.web` imports a class from `adapter.in.rest` (break it, see the red, revert).
+  - [x] `git log --follow` keeps the history of `AccountController` and `AccountWebController`.
 
 ### [ ] T6 — `fase-2-hexagonal.md`: class → role table (~10 min)
 
