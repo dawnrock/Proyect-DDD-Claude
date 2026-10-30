@@ -96,7 +96,7 @@ Make the package structure say what the hexagon is and what the adapters are (La
   - [x] The REST/web slice rule still fails if `adapter.in.web` imports a class from `adapter.in.rest` (break it, see the red, revert).
   - [x] `git log --follow` keeps the history of `AccountController` and `AccountWebController`.
 
-### [ ] T6 — `fase-2-hexagonal.md`: class → role table (~10 min)
+### [x] T6 — `fase-2-hexagonal.md`: class → role table (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/fase-2-hexagonal.md`
@@ -106,8 +106,8 @@ Make the package structure say what the hexagon is and what the adapters are (La
   2. Add the table "class → package → role in the architecture" for every main class after #14 (input adapter, output adapter, application service, domain model, domain service, shared adapter support), with a column for the issue that will change its role (#15-#20).
   3. Point to ADR 0006.
 - **Acceptance criteria:**
-  - [ ] Every class under `src/main/java` appears in the table (grouped by package when there are many: DTOs, forms).
-  - [ ] The relative links resolve.
+  - [x] Every class under `src/main/java` appears in the table (grouped by package when there are many: DTOs, forms).
+  - [x] The relative links resolve.
 
 ## Global acceptance criteria
 
