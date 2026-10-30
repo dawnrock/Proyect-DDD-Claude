@@ -67,7 +67,7 @@ Facts gathered for the documentation:
   - [x] The endpoint and screen tables match `openapi.yaml` and the `@GetMapping`/`@PostMapping` mappings in `presentation.web`.
   - [x] The issues table lists all 17 issues of the milestone.
 
-### [ ] T3 — `README.md` in English with the final state (~5 min)
+### [x] T3 — `README.md` in English with the final state (~5 min)
 
 - **Layer:** docs
 - **Files:** `README.md`
@@ -76,7 +76,7 @@ Facts gathered for the documentation:
   1. Translate it. In the branches table: `Monolithic` frozen at tag `v1-monolito`, `Hexagonal` as the default and active branch.
   2. Keep "Run" and "Login" as they are (translated); add `/implement-plan-team` to the workflow block; drop the "(+ Telegram notice)" note, which is optional now.
 - **Acceptance criteria:**
-  - [ ] The commands in "Run" still work (`./mvnw verify`, `./mvnw spring-boot:run`, `curl -u admin:demo …/api/accounts` returns 200).
+  - [x] The commands in "Run" still work (`./mvnw verify`, `./mvnw spring-boot:run`, `curl -u admin:demo …/api/accounts` returns 200).
 
 ### [x] T4 — `arquitectura-ia.md` in English (~10 min)
 
