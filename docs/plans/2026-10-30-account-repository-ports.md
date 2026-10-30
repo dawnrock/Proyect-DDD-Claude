@@ -83,7 +83,7 @@ Technical notes:
 - **Acceptance criteria:**
   - [x] The four ownership scenarios run through the contract and pass.
 
-### [ ] T4 — Test helper typed as ports (~5 min)
+### [x] T4 — Test helper typed as ports (~5 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/pronoide/ddd/adapter/out/persistence/PersistenceTestAdapters.java`
@@ -91,7 +91,7 @@ Technical notes:
 - **What to do:**
   1. Public final class with `static CheckingAccountRepository accounts()` and `static AccountOwnershipRepository ownership()` returning new in-memory adapters. It is the only way other test packages reach the adapters once they are package-private.
 - **Acceptance criteria:**
-  - [ ] Compiles; return types are the ports, not the adapters.
+  - [x] Compiles; return types are the ports, not the adapters.
 
 ### [ ] T5 — Application tests use the ports (~10 min)
 
