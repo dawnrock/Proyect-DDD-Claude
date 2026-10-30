@@ -70,7 +70,7 @@ Technical decisions:
   - [x] `graph.json` has no node under `target/`, `.claude/worktrees/` or `docs/`.
   - [x] Rebuilding makes no LLM call (no backend configured or `GRAPHIFY_BACKEND=none`).
 
-### [ ] T3 — Baseline measurement without the graph (~10 min)
+### [x] T3 — Baseline measurement without the graph (~10 min)
 
 - **Layer:** docs
 - **Files:** notes for the ADR (T9)
@@ -82,7 +82,7 @@ Technical decisions:
      - Which `presentation` classes use `CheckingAccountService`?
   2. Write down the tokens of each run (the `Agent` result reports them) and whether the answer was complete.
 - **Acceptance criteria:**
-  - [ ] Three baseline figures recorded, with the exact questions.
+  - [x] Three baseline figures recorded, with the exact questions.
 
 ### [ ] T4 — `buscador-referencias` queries the graph first (~10 min)
 
