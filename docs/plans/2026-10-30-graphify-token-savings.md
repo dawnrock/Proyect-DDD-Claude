@@ -56,7 +56,7 @@ Technical decisions:
   - [x] `graphify --version` responds and `graphify-out/graph.json` exists.
   - [x] The content of the always-on hook and the `CLAUDE.md` section is recorded.
 
-### [ ] T2 — Exclusions and ignored output (~5 min)
+### [x] T2 — Exclusions and ignored output (~5 min)
 
 - **Layer:** build
 - **Files:** `.gitignore`, `.graphifyignore`, `.graphifyrc` (only if needed for `code-only`)
@@ -66,9 +66,9 @@ Technical decisions:
   2. Create `.graphifyignore` excluding `target/`, `.claude/worktrees/`, `docs/`, `scripts/` and `graphify-out/`; set code-only mode in `.graphifyrc` if Graphify supports it there.
   3. Rebuild the graph.
 - **Acceptance criteria:**
-  - [ ] `git status` does not show `graphify-out/`.
-  - [ ] `graph.json` has no node under `target/`, `.claude/worktrees/` or `docs/`.
-  - [ ] Rebuilding makes no LLM call (no backend configured or `GRAPHIFY_BACKEND=none`).
+  - [x] `git status` does not show `graphify-out/`.
+  - [x] `graph.json` has no node under `target/`, `.claude/worktrees/` or `docs/`.
+  - [x] Rebuilding makes no LLM call (no backend configured or `GRAPHIFY_BACKEND=none`).
 
 ### [ ] T3 — Baseline measurement without the graph (~10 min)
 

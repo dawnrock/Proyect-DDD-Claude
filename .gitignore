@@ -39,3 +39,6 @@ build/
 ### Claude Code ###
 .claude/worktrees/
 .claude/settings.local.json
+
+### Graphify (grafo local del código, ADR 0010) ###
+graphify-out/
