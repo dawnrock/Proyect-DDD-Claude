@@ -1,4 +1,4 @@
-package com.pronoide.ddd.persistence;
+package com.pronoide.ddd.adapter.out.persistence;
 
 import java.util.Comparator;
 import java.util.List;

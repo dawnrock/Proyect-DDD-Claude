@@ -1,4 +1,4 @@
-package com.pronoide.ddd.persistence;
+package com.pronoide.ddd.adapter.out.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

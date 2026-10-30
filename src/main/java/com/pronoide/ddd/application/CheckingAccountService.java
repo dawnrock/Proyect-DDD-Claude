@@ -15,8 +15,8 @@ import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.Transaction;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
-import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
-import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
+import com.pronoide.ddd.adapter.out.persistence.InMemoryAccountOwnershipRepository;
+import com.pronoide.ddd.adapter.out.persistence.InMemoryCheckingAccountRepository;
 
 import lombok.RequiredArgsConstructor;
 

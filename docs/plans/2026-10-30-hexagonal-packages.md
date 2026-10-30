@@ -69,7 +69,7 @@ Make the package structure say what the hexagon is and what the adapters are (La
 - **Acceptance criteria:**
   - [x] The ADR exists, in English, and is listed in `docs/adr/README.md`.
 
-### [ ] T4 — `persistence` → `adapter.out.persistence` (~10 min)
+### [x] T4 — `persistence` → `adapter.out.persistence` (~10 min)
 
 - **Layer:** adapter.out
 - **Files:** `src/main/java/com/pronoide/ddd/persistence/*` → `adapter/out/persistence/`, same in `src/test`; imports in `application` and its tests; `LayeredArchitectureTests`
@@ -78,9 +78,9 @@ Make the package structure say what the hexagon is and what the adapters are (La
   1. `git mv` both directories (main and test) and update `package` and `import`.
   2. In `LayeredArchitectureTests`, the `Persistence` layer and the other `persistence` patterns become `..adapter.out.persistence..`.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green with the same number of tests as the baseline.
-  - [ ] `git log --follow --oneline -- src/main/java/com/pronoide/ddd/adapter/out/persistence/InMemoryCheckingAccountRepository.java` shows the commits from before the move.
-  - [ ] The adjusted layer rule still bites: import `adapter.out.persistence` from `domain`, see the red, revert.
+  - [x] `./mvnw verify` green with the same number of tests as the baseline.
+  - [x] `git log --follow --oneline -- src/main/java/com/pronoide/ddd/adapter/out/persistence/InMemoryCheckingAccountRepository.java` shows the commits from before the move.
+  - [x] The adjusted layer rule still bites: import `adapter.out.persistence` from `domain`, see the red, revert.
 
 ### [ ] T5 — `presentation` → `adapter.in` (~10 min)
 

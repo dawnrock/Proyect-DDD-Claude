@@ -33,7 +33,7 @@ class LayeredArchitectureTests {
             .layer("Presentation").definedBy("..presentation..")
             .layer("Application").definedBy("..application..")
             .layer("Domain").definedBy("..domain..")
-            .layer("Persistence").definedBy("..persistence..")
+            .layer("Persistence").definedBy("..adapter.out.persistence..")
             .whereLayer("Presentation").mayNotBeAccessedByAnyLayer()
             .whereLayer("Application").mayOnlyBeAccessedByLayers("Presentation")
             .whereLayer("Persistence").mayOnlyBeAccessedByLayers("Application")
@@ -71,7 +71,7 @@ class LayeredArchitectureTests {
     @ArchTest
     static final ArchRule los_controladores_no_acceden_al_repositorio = noClasses()
             .that().areMetaAnnotatedWith(Controller.class)
-            .should().dependOnClassesThat().resideInAPackage("..persistence..");
+            .should().dependOnClassesThat().resideInAPackage("..adapter.out.persistence..");
 
     /**
      * ADR 0008: la aplicación decide a qué cuentas accede cada usuario con un {@code Caller} sencillo, sin Spring
@@ -105,7 +105,7 @@ class LayeredArchitectureTests {
      */
     @ArchTest
     static final ArchRule la_persistencia_no_tiene_interfaces = noClasses()
-            .that().resideInAPackage("..persistence..")
+            .that().resideInAPackage("..adapter.out.persistence..")
             .should().beInterfaces();
 
     /**
@@ -114,6 +114,6 @@ class LayeredArchitectureTests {
      */
     @ArchTest
     static final ArchRule toda_clase_pertenece_a_una_capa = classes()
-            .that().resideOutsideOfPackages("..presentation..", "..application..", "..domain..", "..persistence..")
+            .that().resideOutsideOfPackages("..presentation..", "..application..", "..domain..", "..adapter.out.persistence..")
             .should().haveFullyQualifiedName(DddLabApplication.class.getName());
 }

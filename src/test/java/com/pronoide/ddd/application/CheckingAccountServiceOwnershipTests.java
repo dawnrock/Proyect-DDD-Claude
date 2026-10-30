@@ -11,8 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
-import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
+import com.pronoide.ddd.adapter.out.persistence.InMemoryAccountOwnershipRepository;
+import com.pronoide.ddd.adapter.out.persistence.InMemoryCheckingAccountRepository;
 import com.pronoide.ddd.support.TestAccounts;
 
 /**
