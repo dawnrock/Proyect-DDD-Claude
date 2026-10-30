@@ -28,7 +28,7 @@ Issue indicada por el usuario: $ARGUMENTS
 - Relee `CLAUDE.md`: arquitectura de la fase, convenciones, tabla de Lombok/Immutables.
 - Para dudas sobre bloques tácticos (value object, entidad, agregado, evento, factoría, servicio), lee `.claude/skills/ddd-building-block/references/reglas-ddd.md`.
 - En la fase 2, para puertos y adaptadores lee `.claude/skills/hexagonal-adapter/SKILL.md`.
-- Si existe `graphify-out/graph.json` (ADR 0010), localiza con el grafo antes de leer archivos: `node scripts/graphify.mjs explain "<Clase>"`, `affected "<Clase>"` (quién depende) y `path "<A>" "<B>"`. Lee `graphify-out/GRAPH_REPORT.md` solo si necesitas una visión general de la arquitectura.
+- Para saber qué depende de una clase que cambia (alcance del cambio), si existe `graphify-out/graph.json` usa el grafo antes que Grep: `node scripts/graphify.mjs affected "<Clase>"` y `path "<A>" "<B>"` (ADR 0010). Para el resto de búsquedas, como siempre.
 - Localiza y lee los archivos afectados. Delega búsquedas amplias en el agente `buscador-referencias`.
 - Determina si el trabajo **toca la API REST** (rutas, cuerpos, códigos de estado, traducción de errores). Si es así, incluye la actualización de `docs/api/openapi.yaml`.
 

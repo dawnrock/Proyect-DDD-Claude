@@ -34,26 +34,6 @@
             "timeout": 5
           }
         ]
-      },
-      {
-        "matcher": "Bash|Grep",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/graphify.mjs\" hook-guard search",
-            "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "Read|Glob",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/graphify.mjs\" hook-guard read",
-            "timeout": 10
-          }
-        ]
       }
     ],
     "PostToolUse": [
