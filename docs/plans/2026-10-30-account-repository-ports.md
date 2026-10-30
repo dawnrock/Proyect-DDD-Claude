@@ -93,7 +93,7 @@ Technical notes:
 - **Acceptance criteria:**
   - [x] Compiles; return types are the ports, not the adapters.
 
-### [ ] T5 — Application tests use the ports (~10 min)
+### [x] T5 — Application tests use the ports (~10 min)
 
 - **Layer:** tests
 - **Files:** `CheckingAccountServiceTests.java`, `CheckingAccountServiceOwnershipTests.java`, `DemoDataLoaderTests.java`
@@ -101,8 +101,8 @@ Technical notes:
 - **What to do:**
   1. Replace fields and constructions of `InMemory*` with the port types and `PersistenceTestAdapters` (`spy(PersistenceTestAdapters.accounts())` in `CheckingAccountServiceTests`).
 - **Acceptance criteria:**
-  - [ ] No test outside `adapter.out.persistence` imports an `InMemory*` class (`grep -rn "InMemory.*Repository" src/test` only matches that package).
-  - [ ] `./mvnw verify` green.
+  - [x] No test outside `adapter.out.persistence` imports an `InMemory*` class (`grep -rn "InMemory.*Repository" src/test` only matches that package).
+  - [x] `./mvnw verify` green.
 
 ### [x] T6 — `CheckingAccountService` depends on the ports (~5 min)
 

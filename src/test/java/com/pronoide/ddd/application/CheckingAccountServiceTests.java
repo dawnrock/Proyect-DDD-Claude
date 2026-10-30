@@ -22,14 +22,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
+import com.pronoide.ddd.domain.model.CheckingAccountRepository;
 import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
-import com.pronoide.ddd.adapter.out.persistence.InMemoryAccountOwnershipRepository;
-import com.pronoide.ddd.adapter.out.persistence.InMemoryCheckingAccountRepository;
+import com.pronoide.ddd.adapter.out.persistence.PersistenceTestAdapters;
 
-/** Casos de uso con el repositorio en memoria real: es concreto y no hace falta simularlo. */
+/** Casos de uso con el adaptador en memoria real detrás de los puertos: no hace falta simularlo. */
 class CheckingAccountServiceTests {
 
     private static final String IBAN = "ES9121000418450200051332";
@@ -38,13 +38,13 @@ class CheckingAccountServiceTests {
     /** Los casos de uso se piden como administrador; la propiedad se prueba en CheckingAccountServiceOwnershipTests. */
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
 
-    private InMemoryCheckingAccountRepository repository;
+    private CheckingAccountRepository repository;
     private CheckingAccountService service;
 
     @BeforeEach
     void setUp() {
-        repository = spy(new InMemoryCheckingAccountRepository());
-        service = new CheckingAccountService(repository, new InMemoryAccountOwnershipRepository());
+        repository = spy(PersistenceTestAdapters.accounts());
+        service = new CheckingAccountService(repository, PersistenceTestAdapters.ownership());
     }
 
     private static OpenAccountCommand.Builder command(String accountNumber) {
