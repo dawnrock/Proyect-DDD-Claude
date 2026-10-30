@@ -88,7 +88,7 @@ Facts gathered for the documentation:
 - **Acceptance criteria:**
   - [x] The pieces table still lists every file in `.claude/agents`, `.claude/skills`, `.claude/hooks` and `.github/workflows`.
 
-### [ ] T5 — `arquitectura-ia.md`: usage log of phase 1 (~10 min)
+### [x] T5 — `arquitectura-ia.md`: usage log of phase 1 (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/arquitectura-ia.md`
@@ -97,7 +97,7 @@ Facts gathered for the documentation:
   1. Add "Usage log · Phase 1": a table of issue → plan (`docs/plans/`) → how it was implemented (`implement-plan` / `implement-plan-team` / by hand) → PR.
   2. Add "Adjustments made during the phase", one line each with its PR: Telegram toggle (#40), deny rule on hooks that never applied (#44), project status required by CI (#37) and split into status + annexes (#58), Lombok out of the domain (ADR 0009, #53/#55), Graphify only for dependency questions (ADR 0010, #58), status written as after the merge (#59).
 - **Acceptance criteria:**
-  - [ ] Every plan in `docs/plans/` appears in the table and every PR link resolves.
+  - [x] Every plan in `docs/plans/` appears in the table and every PR link resolves.
 
 ### [ ] T6 — Project status (~5 min)
 

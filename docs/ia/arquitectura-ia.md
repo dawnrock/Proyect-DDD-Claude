@@ -81,3 +81,38 @@ A contract change during implementation is requested from the lead, agreed with 
 ## Usage log
 
 When each phase closes, it adds here which plans and PRs these pieces produced and which adjustments were needed.
+
+### Phase 1 · Layered monolith (tag `v1-monolito`)
+
+Every functional issue went through `/plan-feature` → plan approved by the user → implementation → PR against `Monolithic` with the `revisor-ddd` review, CI and Claude Code Review. The four back + web issues used the team flow.
+
+| Issue | Plan | Implemented with | PR |
+| ----- | ---- | ---------------- | -- |
+| #2 | [configure-lombok-immutables](../plans/2026-10-23-configure-lombok-immutables.md) | `implement-plan` | #24 |
+| #3 | [document-glossary-layered-architecture](../plans/2026-10-23-document-glossary-layered-architecture.md) | `implement-plan` | #33, #34 |
+| #4 | [in-memory-account-repository](../plans/2026-10-23-in-memory-account-repository.md) | `implement-plan` | #35 |
+| #8 | [rest-web-foundation](../plans/2026-10-23-rest-web-foundation.md) | `implement-plan` | #36 |
+| #31 | [team-contract-first](../plans/2026-10-23-team-contract-first.md) | `implement-plan` (its last task, the first team issue, was #5) | #32, #39 |
+| #5 | [open-query-list-accounts](../plans/2026-10-23-open-query-list-accounts.md) | `implement-plan-team` | #39 |
+| #6 | [deposits-withdrawals](../plans/2026-10-23-deposits-withdrawals.md) | `implement-plan-team` | #41 |
+| #7 | [money-transfers](../plans/2026-10-25-money-transfers.md) | `implement-plan-team` | #43 |
+| #11 | [demo-data](../plans/2026-10-25-demo-data.md) | `implement-plan` | #45 |
+| #12 | [layered-architecture-rules](../plans/2026-10-25-layered-architecture-rules.md) | `implement-plan` | #47 |
+| #48 | [dark-minimal-web-redesign](../plans/2026-10-25-dark-minimal-web-redesign.md) | `implement-plan` | #49 |
+| #50 | [login-roles](../plans/2026-10-25-login-roles.md) | `implement-plan-team` | #51 |
+| #54 | [pending-adr-archunit-rules](../plans/2026-10-26-pending-adr-archunit-rules.md) | `implement-plan` | #56 |
+| #57 | [graphify-token-savings](../plans/2026-10-30-graphify-token-savings.md) | `implement-plan` | #58 |
+| #13 | [close-phase-1](../plans/2026-10-30-close-phase-1.md) | `implement-plan` | this PR |
+
+#9 and #10 (web-only issues) were folded into the team issues #5 and #6 when the backlog was reorganised (#32).
+
+**Adjustments made during the phase**
+
+- CI with Claude: the action had to be pinned, debugged and reverted before the review worked (#26-#28, #30).
+- Telegram: `notify.mjs` made compatible with Node 16 (#25) and a `TELEGRAM_DISABLED` switch to silence the notices (#40); they have been off since 2026-10-23.
+- Permissions: removed the `deny` on `Write(./.claude/hooks/**)`, which never applied (#44).
+- Worktrees: `PostToolUse` hook that cleans merged teammate worktrees and branches (#42).
+- Memory between sessions: project status required by CI on every PR that closes an issue (#37), later split into a short status plus annexes to save tokens (#58), and written as it will be after the merge (#59).
+- Language: documentation in English from #38; conversation, commits and domain messages stay in Spanish.
+- Domain without Lombok (ADR 0009, #53, #55): `check-domain.mjs` rejects any `lombok` import, because ArchUnit cannot see it.
+- Graphify only for dependency questions (ADR 0010, #58): measured on `buscador-referencias`, it saves tokens on dependency questions but not on general searches, and its reminder hooks were left out.
