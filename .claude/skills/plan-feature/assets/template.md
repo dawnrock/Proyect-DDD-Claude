@@ -80,7 +80,7 @@
 - [ ] If the API changes: `docs/api/openapi.yaml` reflects it and `npx @redocly/cli lint docs/api/openapi.yaml` has no errors (otherwise, "n/a").
 - [ ] Any new business term is in `docs/dominio/glosario.md`.
 - [ ] Documentation written or changed by this plan is in English.
-- [ ] `docs/ia/estado-del-proyecto.md` updated: issue status, next step, new pending items and history row.
+- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

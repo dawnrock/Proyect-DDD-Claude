@@ -11,5 +11,6 @@
 | [0007](0007-equipo-back-web-contrato-primero.md) | Equipo back/web con el contrato primero | Aceptada |
 | [0008](0008-spring-security.md) | Authentication and roles with Spring Security | Accepted |
 | [0009](0009-domain-without-lombok.md) | No Lombok in the domain | Accepted |
+| [0010](0010-graphify-token-savings.md) | Graphify for dependency questions only, and a short project status | Accepted |
 
 Formato: contexto, decisión, alternativas y consecuencias.

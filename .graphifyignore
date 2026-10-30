@@ -1,0 +1,10 @@
+# Graphify indexes only the Java code (ADR 0010). Same syntax as .gitignore.
+target/
+graphify-out/
+.claude/
+docs/
+scripts/
+.github/
+.mvn/
+mvnw
+mvnw.cmd

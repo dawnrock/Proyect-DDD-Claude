@@ -2,7 +2,7 @@
 name: plan-feature
 description: Planifica un desarrollo, un fix o un refactor descrito en una issue de GitHub antes de escribir código. Lee la issue por su número, analiza el código Java/Spring de la fase activa (capas o hexagonal), genera un plan con objetivo, tareas pequeñas (5-10 min) y criterios de aceptación siguiendo assets/template.md, lo guarda en docs/plans/, lo publica como comentario en la issue y avisa por Telegram. Úsala cuando se pida planificar, diseñar o desglosar una issue.
 argument-hint: <número de issue de GitHub>
-allowed-tools: Read, Grep, Glob, Write, AskUserQuestion, Bash(git status:*), Bash(git log:*), Bash(git diff:*), Bash(git branch:*), Bash(ls:*), Bash(gh issue view:*), Bash(gh issue comment:*), Bash(node scripts/notify.mjs:*)
+allowed-tools: Read, Grep, Glob, Write, AskUserQuestion, Bash(git status:*), Bash(git log:*), Bash(git diff:*), Bash(git branch:*), Bash(ls:*), Bash(gh issue view:*), Bash(gh issue comment:*), Bash(node scripts/notify.mjs:*), Bash(node scripts/graphify.mjs:*)
 ---
 
 Planifica el trabajo descrito en la issue. **No implementes nada**: el resultado de esta skill es solo el plan.
@@ -26,8 +26,10 @@ Issue indicada por el usuario: $ARGUMENTS
 ### 3. Analizar el código
 
 - Relee `CLAUDE.md`: arquitectura de la fase, convenciones, tabla de Lombok/Immutables.
+- Busca en `docs/ia/pendientes.md` avisos para esta issue o su área, y en `docs/ia/decisiones.md` las decisiones que la afecten.
 - Para dudas sobre bloques tácticos (value object, entidad, agregado, evento, factoría, servicio), lee `.claude/skills/ddd-building-block/references/reglas-ddd.md`.
 - En la fase 2, para puertos y adaptadores lee `.claude/skills/hexagonal-adapter/SKILL.md`.
+- Para saber qué depende de una clase que cambia (alcance del cambio), si existe `graphify-out/graph.json` usa el grafo antes que Grep: `node scripts/graphify.mjs affected "<Clase>"` y `path "<A>" "<B>"` (ADR 0010). Para el resto de búsquedas, como siempre.
 - Localiza y lee los archivos afectados. Delega búsquedas amplias en el agente `buscador-referencias`.
 - Determina si el trabajo **toca la API REST** (rutas, cuerpos, códigos de estado, traducción de errores). Si es así, incluye la actualización de `docs/api/openapi.yaml`.
 

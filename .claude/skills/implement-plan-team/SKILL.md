@@ -33,6 +33,7 @@ Crea el worktree de integración desde la rama base, como en `implement-plan` (p
    git worktree add -b <tipo>/<slug>-back .claude/worktrees/<slug>-back <commit-contrato>
    git worktree add -b <tipo>/<slug>-web  .claude/worktrees/<slug>-web  <commit-contrato>
    ```
+   En cada uno, genera el grafo del código: `node scripts/graphify.mjs update .` (local, sin tokens; ADR 0010). Si Graphify no está instalado, sigue sin él.
 2. Asigna a `backend-dev` las tareas `Side: back` (en `<slug>-back`) y a `web-dev` las `Side: web` (en `<slug>-web`), en la lista de tareas compartida del equipo. Las `Side: both` las haces tú en la integración.
 3. Cada teammate sigue TDD, un commit por tarea y marca sus tareas en **su** copia del plan. La web trabaja contra el servicio del contrato simulado con `@MockitoBean`.
 

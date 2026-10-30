@@ -33,6 +33,7 @@ Issue indicada por el usuario: $ARGUMENTS
 - `.claude/worktrees/` está en `.gitignore`; si no lo estuviera, avísalo en el informe.
 - Si el plan no está commiteado en la rama base, cópialo al worktree y haz un primer commit `docs: añade el plan <slug>`.
 - A partir de aquí **todo** se hace dentro del worktree. Comprueba que las rutas absolutas incluyen `.claude/worktrees/<slug>/` antes de editar.
+- Genera el grafo del código en el worktree: `node scripts/graphify.mjs update .` (local, sin tokens; ADR 0010). Si Graphify no está instalado, sigue sin él.
 - Cambia `**Status:**` del plan a `in progress`.
 
 ### 3. Implementar cada tarea con TDD estricto
@@ -65,11 +66,11 @@ Si un test no se puede poner en verde sin salirte del plan o un criterio no se p
 
 1. Comprueba cada criterio global: `./mvnw verify`; arranque con `./mvnw spring-boot:run` en segundo plano + `curl -s localhost:8080/actuator/health` (detén el proceso al acabar); `check-domain.mjs`; `git diff origin/<rama-base>... -- pom.xml` para las dependencias; OpenAPI si aplica.
 2. Márcalos. Si alguno falla, trátalo como en el paso 5.
-3. **Actualiza `docs/ia/estado-del-proyecto.md`** (obligatorio: el CI falla si una PR con `Closes #n` no lo toca):
-   - La issue pasa a "Hecho" o a "En curso" con su PR.
-   - Revisa el "Siguiente paso".
-   - Añade a "Decisiones" o a "Pendientes sueltos" lo que haya surgido (avisos de la revisión para issues futuras, desviaciones).
-   - Añade una fila al "Historial" y cambia la fecha de "Última actualización".
+3. **Actualiza el estado del proyecto** (obligatorio: el CI falla si una PR con `Closes #n` no toca `docs/ia/estado-del-proyecto.md`):
+   - `estado-del-proyecto.md`: la issue pasa a "Hecho" o a "En curso" con su PR, revisa el "Siguiente paso" y cambia la fecha de "Última actualización". Mantenlo corto: se lee en cada sesión, así que no le añadas detalle.
+   - `docs/ia/decisiones.md`: decisiones nuevas que afectan a issues futuras.
+   - `docs/ia/pendientes.md`: avisos de la revisión para issues futuras y desviaciones; quita los pendientes que la PR resuelve.
+   - `docs/ia/historial.md`: una fila con la fecha, la PR, la issue y el cambio.
 4. `**Status:**` → `done` y commit `docs: completa el plan <slug>` (incluye el estado del proyecto).
 
 ### 7. Crear la PR
