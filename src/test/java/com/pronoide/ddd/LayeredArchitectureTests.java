@@ -26,7 +26,7 @@ import com.pronoide.ddd.domain.model.DomainException;
                 importOptions = ImportOption.DoNotIncludeTests.class)
 class LayeredArchitectureTests {
 
-    /** D2 y D3: nadie depende de {@code presentation}, ni de {@code application} desde abajo. */
+    /** D2 y D3: nadie depende de {@code adapter.in}, ni de {@code application} desde abajo. */
     @ArchTest
     static final ArchRule las_capas_solo_dependen_hacia_abajo = layeredArchitecture()
             .consideringOnlyDependenciesInLayers()
