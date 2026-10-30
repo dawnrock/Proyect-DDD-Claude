@@ -42,7 +42,7 @@ Technical decisions:
 
 ## Tasks
 
-### [ ] T1 — Spike: install Graphify and inspect what it writes (~10 min)
+### [x] T1 — Spike: install Graphify and inspect what it writes (~10 min)
 
 - **Layer:** build
 - **Files:** none in the repository (notes go to the ADR draft in T9)
@@ -53,8 +53,8 @@ Technical decisions:
   3. In a scratch copy outside the repository, run `graphify claude install` and write down exactly what it adds to `CLAUDE.md` and `.claude/settings.json` (event, matcher, command, any script).
   4. Note whether `graphify hook install` (git hooks) works with worktrees, since `.git/hooks` is shared and `graphify-out/` is per worktree.
 - **Acceptance criteria:**
-  - [ ] `graphify --version` responds and `graphify-out/graph.json` exists.
-  - [ ] The content of the always-on hook and the `CLAUDE.md` section is recorded.
+  - [x] `graphify --version` responds and `graphify-out/graph.json` exists.
+  - [x] The content of the always-on hook and the `CLAUDE.md` section is recorded.
 
 ### [ ] T2 — Exclusions and ignored output (~5 min)
 
