@@ -84,7 +84,7 @@ Technical decisions:
 - **Acceptance criteria:**
   - [x] Three baseline figures recorded, with the exact questions.
 
-### [ ] T4 — `buscador-referencias` queries the graph first (~10 min)
+### [x] T4 — `buscador-referencias` queries the graph first (~10 min)
 
 - **Layer:** claude
 - **Files:** `.claude/agents/buscador-referencias.md`
@@ -94,10 +94,10 @@ Technical decisions:
   2. Instructions: if `graphify-out/graph.json` exists, answer with the graph first; use Grep/Glob only for what it does not cover (`docs/`, `.claude/`, `pom.xml`, text that is not a symbol) or when `graphify` exits with code 3 or 4. Keep the output format.
   3. Ask for the user's approval before saving.
 - **Acceptance criteria:**
-  - [ ] With the graph present, the agent answers the T3 questions using `graphify` and the same output format.
-  - [ ] Without `graphify-out/`, it still works with Grep/Glob.
+  - [x] With the graph present, the agent answers the T3 questions using `graphify` and the same output format.
+  - [x] Without `graphify-out/`, it still works with Grep/Glob.
 
-### [ ] T5 — `plan-feature` uses the graph (~5 min)
+### [x] T5 — `plan-feature` uses the graph (~5 min)
 
 - **Layer:** claude
 - **Files:** `.claude/skills/plan-feature/SKILL.md`
@@ -106,9 +106,9 @@ Technical decisions:
   1. In step 3, before delegating wide searches: read `graphify-out/GRAPH_REPORT.md` if it exists and use `graphify query`/`path` for dependencies. Add those commands to `allowed-tools`.
   2. Ask for the user's approval before saving.
 - **Acceptance criteria:**
-  - [ ] `allowed-tools` and step 3 mention the graph; the skill still works without it.
+  - [x] `allowed-tools` and step 3 mention the graph; the skill still works without it.
 
-### [ ] T6 — Always-on hook and permissions (~10 min)
+### [x] T6 — Always-on hook and permissions (~10 min)
 
 - **Layer:** claude
 - **Files:** `.claude/settings.json`
@@ -118,10 +118,10 @@ Technical decisions:
   2. Add to `allow`: `Bash(graphify query *)`, `Bash(graphify path *)`, `Bash(graphify explain *)`, `Bash(graphify update *)`.
   3. Ask for the user's approval before saving. If the hook needs a script under `.claude/hooks/`, the user copies it there.
 - **Acceptance criteria:**
-  - [ ] A Grep in a session with the graph shows the Graphify hook acting, and reading `scripts/issues-fase-1.json` is still blocked.
-  - [ ] `graphify query` runs without a permission prompt.
+  - [x] A Grep in a session with the graph shows the Graphify hook acting, and reading `scripts/issues-fase-1.json` is still blocked.
+  - [x] `graphify query` runs without a permission prompt.
 
-### [ ] T7 — Keep the graph fresh in each worktree (~5 min)
+### [x] T7 — Keep the graph fresh in each worktree (~5 min)
 
 - **Layer:** claude
 - **Files:** `.claude/skills/implement-plan/SKILL.md` (and `implement-plan-team` if it creates worktrees the same way)
@@ -130,7 +130,7 @@ Technical decisions:
   1. After creating the worktree, run `graphify update .` (local, no tokens). Use `graphify hook install` instead only if T1 showed it works with worktrees.
   2. Ask for the user's approval before saving.
 - **Acceptance criteria:**
-  - [ ] A new worktree created by the skill has `graphify-out/graph.json`.
+  - [x] A new worktree created by the skill has `graphify-out/graph.json`.
 
 ### [ ] T8 — Measurement with the graph (~10 min)
 

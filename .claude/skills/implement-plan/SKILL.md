@@ -33,6 +33,7 @@ Issue indicada por el usuario: $ARGUMENTS
 - `.claude/worktrees/` está en `.gitignore`; si no lo estuviera, avísalo en el informe.
 - Si el plan no está commiteado en la rama base, cópialo al worktree y haz un primer commit `docs: añade el plan <slug>`.
 - A partir de aquí **todo** se hace dentro del worktree. Comprueba que las rutas absolutas incluyen `.claude/worktrees/<slug>/` antes de editar.
+- Genera el grafo del código en el worktree: `node scripts/graphify.mjs update .` (local, sin tokens; ADR 0010). Si Graphify no está instalado, sigue sin él.
 - Cambia `**Status:**` del plan a `in progress`.
 
 ### 3. Implementar cada tarea con TDD estricto
