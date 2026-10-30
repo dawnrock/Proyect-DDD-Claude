@@ -2,21 +2,21 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores, y se mantiene **corto a propósito**: se carga en cada sesión. **Se actualiza en cada PR que cierra una issue** (lo comprueba el CI).
 
-- **Última actualización:** 2026-10-30 · PR #58 (#57, Graphify y estado dividido)
-- **Rama activa:** `Monolithic` (fase 1). `master` congelada. `Hexagonal` aún no existe.
+- **Última actualización:** 2026-10-30 · PR #60 (#13, cierre de la fase 1)
+- **Rama activa:** `Hexagonal` (fase 2), rama por defecto del repositorio. `Monolithic` congelada en la etiqueta `v1-monolito`; `master` congelada.
 
 ## Dónde estamos
 
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
-| 1 · Monolito en capas | #2-#8, #11, #12, #31, #48, #50, #54, #57 (detalle en el [historial](historial.md)) | — | #13 |
-| 2 · Hexagonal | — | — | #14 → #23 (se empieza al cerrar #13, creando `Hexagonal` desde `Monolithic`) |
+| 1 · Monolito en capas | Cerrada: #2-#8, #11-#13, #31, #48, #50, #54, #57 (detalle en el [historial](historial.md)) | — | — |
+| 2 · Hexagonal | — | — | #14 → #23 |
 
 ## Siguiente paso
 
-`/plan-feature 13` (cerrar la fase 1: documentación final y etiqueta `v1-monolito`).
+`/plan-feature 14` sobre `Hexagonal` (reorganizar los paquetes según la arquitectura hexagonal).
 
-Orden completo de la fase 1 y por qué: `docs/arquitectura/fase-1-capas.md`, sección "Issues de la fase".
+Diseño objetivo de la fase 2: `docs/arquitectura/fase-2-hexagonal.md`; las issues, en el milestone "Fase 2 · Arquitectura hexagonal".
 
 ## Acuerdos de trabajo con el usuario
 

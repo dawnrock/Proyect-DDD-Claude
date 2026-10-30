@@ -5,7 +5,7 @@
 - **Phase:** 1 · Layered monolith
 - **Base branch:** `Monolithic`
 - **Date:** 2026-10-30
-- **Status:** in progress
+- **Status:** awaiting merge (T7-T8 run after it)
 - **Total estimate:** ~65 min (8 tasks: 6 in the PR + 2 after it is merged)
 
 ## Goal
@@ -99,7 +99,7 @@ Facts gathered for the documentation:
 - **Acceptance criteria:**
   - [x] Every plan in `docs/plans/` appears in the table and every PR link resolves.
 
-### [ ] T6 — Project status (~5 min)
+### [x] T6 — Project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -110,7 +110,7 @@ Facts gathered for the documentation:
   3. `pendientes.md`: the translation item no longer covers `README.md`, `fase-1-capas.md` and `arquitectura-ia.md`.
   4. `historial.md`: one row for this PR.
 - **Acceptance criteria:**
-  - [ ] `git diff --name-only origin/Monolithic...HEAD | node scripts/check-project-status.mjs -` (the CI check) passes.
+  - [x] `git diff --name-only origin/Monolithic...HEAD | node scripts/check-project-status.mjs -` (the CI check) passes.
 
 ### [ ] T7 — Tag `v1-monolito` (~5 min, after the PR is merged)
 
@@ -142,21 +142,21 @@ Facts gathered for the documentation:
 - [ ] Every issue in the "Fase 1 · Monolito en capas" milestone is closed.
 - [ ] Tag `v1-monolito` published and `Hexagonal` branch created from `Monolithic` and set as the default branch.
 - [ ] `./mvnw verify` green on `Monolithic` at the tag.
-- [ ] `README.md`, `fase-1-capas.md` and `arquitectura-ia.md` describe the final state of phase 1, in English.
+- [x] `README.md`, `fase-1-capas.md` and `arquitectura-ia.md` describe the final state of phase 1, in English.
 
 **Fixed:**
 
 - [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (layers: each layer only uses the one below), verified by ArchUnit. Unchanged: no code changes.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md`: n/a (no new tests).
-- [ ] No dependencies added beyond the planned ones.
-- [ ] If the API changes: n/a (the API does not change).
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a (no new terms).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (layers: each layer only uses the one below), verified by ArchUnit. Unchanged: no code changes.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md`: n/a (no new tests).
+- [x] No dependencies added beyond the planned ones.
+- [x] If the API changes: n/a (the API does not change).
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a (no new terms).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

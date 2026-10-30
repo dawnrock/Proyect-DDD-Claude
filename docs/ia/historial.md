@@ -26,3 +26,4 @@
 | 2026-10-26 | #53, #55 | — | ADR 0009: el dominio no usa Lombok; `check-domain` rechaza cualquier `lombok`; referencias a ArchUnit corregidas |
 | 2026-10-26 | #56 | #54 | Reglas de ArchUnit de los ADR 0004 y 0008 y `DomainIsolationTests` sin el paquete `bootstrap` |
 | 2026-10-30 | #58 | #57 | Graphify solo para preguntas de dependencias (ADR 0010) y estado del proyecto dividido en estado corto + anexos |
+| 2026-10-30 | #60 | #13 | Cierre de la fase 1: `README`, `fase-1-capas.md` y `arquitectura-ia.md` en inglés con el estado final, etiqueta `v1-monolito` y `Hexagonal` como rama por defecto |
