@@ -26,14 +26,14 @@ import com.pronoide.ddd.domain.model.DomainException;
                 importOptions = ImportOption.DoNotIncludeTests.class)
 class LayeredArchitectureTests {
 
-    /** D2 y D3: nadie depende de {@code presentation}, ni de {@code application} desde abajo. */
+    /** D2 y D3: nadie depende de {@code adapter.in}, ni de {@code application} desde abajo. */
     @ArchTest
     static final ArchRule las_capas_solo_dependen_hacia_abajo = layeredArchitecture()
             .consideringOnlyDependenciesInLayers()
-            .layer("Presentation").definedBy("..presentation..")
+            .layer("Presentation").definedBy("..adapter.in..")
             .layer("Application").definedBy("..application..")
             .layer("Domain").definedBy("..domain..")
-            .layer("Persistence").definedBy("..persistence..")
+            .layer("Persistence").definedBy("..adapter.out.persistence..")
             .whereLayer("Presentation").mayNotBeAccessedByAnyLayer()
             .whereLayer("Application").mayOnlyBeAccessedByLayers("Presentation")
             .whereLayer("Persistence").mayOnlyBeAccessedByLayers("Application")
@@ -51,13 +51,13 @@ class LayeredArchitectureTests {
      */
     @ArchTest
     static final ArchRule la_presentacion_solo_conoce_las_excepciones_del_dominio = noClasses()
-            .that().resideInAPackage("..presentation..")
+            .that().resideInAPackage("..adapter.in..")
             .should().dependOnClassesThat(resideInAPackage("..domain..").and(not(assignableTo(DomainException.class))));
 
     /** D5: la web y la API REST son dos canales independientes; ninguno conoce al otro. */
     @ArchTest
     static final ArchRule la_web_y_rest_no_se_conocen = slices()
-            .matching("..presentation.(*)..")
+            .matching("..adapter.in.(*)..")
             .should().notDependOnEachOther();
 
     /** El dominio solo cambia de estado con métodos de negocio: no tiene {@code set*} públicos. */
@@ -71,7 +71,7 @@ class LayeredArchitectureTests {
     @ArchTest
     static final ArchRule los_controladores_no_acceden_al_repositorio = noClasses()
             .that().areMetaAnnotatedWith(Controller.class)
-            .should().dependOnClassesThat().resideInAPackage("..persistence..");
+            .should().dependOnClassesThat().resideInAPackage("..adapter.out.persistence..");
 
     /**
      * ADR 0008: la aplicación decide a qué cuentas accede cada usuario con un {@code Caller} sencillo, sin Spring
@@ -105,7 +105,7 @@ class LayeredArchitectureTests {
      */
     @ArchTest
     static final ArchRule la_persistencia_no_tiene_interfaces = noClasses()
-            .that().resideInAPackage("..persistence..")
+            .that().resideInAPackage("..adapter.out.persistence..")
             .should().beInterfaces();
 
     /**
@@ -114,6 +114,6 @@ class LayeredArchitectureTests {
      */
     @ArchTest
     static final ArchRule toda_clase_pertenece_a_una_capa = classes()
-            .that().resideOutsideOfPackages("..presentation..", "..application..", "..domain..", "..persistence..")
+            .that().resideOutsideOfPackages("..adapter.in..", "..application..", "..domain..", "..adapter.out.persistence..")
             .should().haveFullyQualifiedName(DddLabApplication.class.getName());
 }

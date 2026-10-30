@@ -5,6 +5,8 @@
 ## Decisiones ya tomadas que afectan a lo que viene
 
 - **Fin de la fase 1 (#13):** `Monolithic` queda congelada en la etiqueta `v1-monolito`, como `master` (solo se toca por decisión expresa del usuario). `Hexagonal` se crea desde `Monolithic` y pasa a ser la rama por defecto del repositorio: las PR de la fase 2 van contra ella.
+- **Paquetes de la fase 2 (#14, ADR 0006):** `presentation` → `adapter.in` (el soporte de seguridad común, en su raíz) y `persistence` → `adapter.out.persistence`. Provisional: `application` usa `adapter.out.persistence` hasta la #15 y `LayeredArchitectureTests` solo ajusta sus patrones hasta la #22.
+- **Issues de la fase 2 actualizadas (2026-10-30):** la #15 añade un puerto en `application` para la propiedad de las cuentas (`InMemoryAccountOwnershipRepository`); la #18 cambia el contrato de apertura (IBAN generado, segmento decidido por la factoría) y pasa a ser de equipo (back + web).
 
 - **Contrato web ↔ back** (ADR 0007, enfoque A): servicio, commands y vistas de `application`, más un fragmento de OpenAPI. La web no consume la API REST.
 - **DTOs REST:** pueden ser de Immutables con `@JsonSerialize`/`@JsonDeserialize` de `tools.jackson.databind.annotation` (ADR 0003).

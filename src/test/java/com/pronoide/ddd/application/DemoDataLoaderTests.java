@@ -9,8 +9,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.DefaultApplicationArguments;
 
-import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
-import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
+import com.pronoide.ddd.adapter.out.persistence.InMemoryAccountOwnershipRepository;
+import com.pronoide.ddd.adapter.out.persistence.InMemoryCheckingAccountRepository;
 
 class DemoDataLoaderTests {
 

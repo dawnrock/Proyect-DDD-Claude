@@ -1,38 +1,71 @@
-# Fase 2 · Arquitectura hexagonal (rama `Hexagonal`)
+# Phase 2 · Hexagonal architecture (`Hexagonal` branch)
 
-![Arquitectura hexagonal: el dominio en el centro, la aplicación alrededor con sus puertos, los adaptadores de entrada a la izquierda (REST, web, CLI) y los de salida a la derecha (persistencia, eventos, agencia tributaria); config conecta puertos y adaptadores](img/hexagonal.svg)
+![Hexagonal architecture: the domain in the centre, the application around it with its ports, input adapters on the left (REST, web, CLI) and output adapters on the right (persistence, events, tax agency); config connects ports and adapters](img/hexagonal.svg)
 
-El dominio ocupa el centro; la aplicación lo rodea y expone los puertos de entrada. Los adaptadores de la izquierda **usan** esos puertos y los de la derecha **implementan** los puertos de salida que declara el dominio: en los dos lados la dependencia apunta hacia dentro.
+The domain sits in the centre; the application surrounds it and exposes the input ports. Adapters on the left **use** those ports, and adapters on the right **implement** the output ports the domain declares: on both sides the dependency points inwards. Decided in [ADR 0006](../adr/0006-hexagonal-architecture.md).
 
-## Estructura de paquetes
+## Package structure
+
+Target at the end of the phase:
 
 ```
 com.pronoide.ddd
 ├── adapter
 │   ├── in
 │   │   ├── cli           DomainModelRunner
-│   │   ├── rest          API REST
+│   │   ├── rest          REST API
 │   │   └── web           Thymeleaf
 │   └── out
 │       ├── event         SpringDomainEventPublisher
 │       ├── persistence   InMemoryCheckingAccountRepository, InMemoryAccountNumberSequence
 │       └── taxagency     FakeTaxAgencyIncomeVerifier
-├── application           servicios de aplicación y puertos de entrada
-│   └── listener          consumidores de eventos de dominio
+├── application           application services and input ports
+│   └── listener          domain event consumers
 ├── config                DomainConfiguration
 └── domain
-    ├── model             modelo y puertos de salida
+    ├── model             model and output ports
     └── service           MoneyTransferService
 ```
 
-## Reglas
+## Rules
 
-| | Lado de entrada | Lado de salida |
+| | Input side | Output side |
 | - | - | - |
-| Puerto | `application` (lo que la aplicación ofrece) | `domain.model` (lo que necesita) |
-| Adaptador | usa el puerto | implementa el puerto |
+| Port | `application` (what the application offers) | `domain.model` (what it needs) |
+| Adapter | uses the port | implements the port |
 
-- Las dependencias apuntan siempre hacia el hexágono; los adaptadores no se conocen entre sí.
-- El núcleo no lleva anotaciones de Spring: `config` lo construye y le entrega sus adaptadores.
-- Todos los adaptadores de salida son simulados (en memoria / ficticios), lo que basta para demostrar la arquitectura.
-- Verificado por `HexagonalArchitectureTests` (ArchUnit).
+- Dependencies always point into the hexagon; adapters do not know each other.
+- The core carries no Spring annotations: `config` builds it and hands it its adapters.
+- Every output adapter is simulated (in memory / fake), which is enough to show the architecture.
+- Checked by `HexagonalArchitectureTests` (ArchUnit, #22). Until then, `LayeredArchitectureTests` with its patterns adjusted to the new packages (#14).
+
+## Class → role
+
+State after #14 (packages moved, no ports yet). The last column says which issue changes the class's role.
+
+| Class | Package | Role in the architecture | Changes in |
+| ----- | ------- | ------------------------ | ---------- |
+| `AccountController`, `TransferController` | `adapter.in.rest` | Input adapter (REST): HTTP ↔ commands and views | #16: depend on the input ports only |
+| `RestExceptionHandler` | `adapter.in.rest` | Input adapter: domain and application errors → `ProblemDetail` | — |
+| `OpenAccountRequest`, `MovementRequest`, `TransferRequest`, `*ResponseDef` | `adapter.in.rest` | REST DTOs (records with Bean Validation, Immutables responses) | #18: the open-account request changes |
+| `ApiSecurityConfig` | `adapter.in.rest` | Input adapter: security chain of `/api/**` (HTTP Basic) | — |
+| `AccountWebController`, `LoginController`, `AccessDeniedController` | `adapter.in.web` | Input adapter (web): screens and forms | #16: depend on the input ports only |
+| `MovementForm`, `OpenAccountForm`, `TransferForm` | `adapter.in.web` | Web forms | #18: the open-account form changes |
+| `WebExceptionHandler`, `WebModelAdvice`, `WebFormat` | `adapter.in.web` | Web support: 404 page, common model attributes, amount formatting | — |
+| `WebSecurityConfig` | `adapter.in.web` | Input adapter: fallback security chain (form login) | — |
+| `SecuritySupport`, `CurrentCaller`, `SecurityUsersProperties` | `adapter.in` | Support shared by the input adapters: authenticated user → `Caller` | — |
+| `InMemoryCheckingAccountRepository` | `adapter.out.persistence` | Output adapter (simulated persistence), still used as a concrete class | #15: implements `CheckingAccountRepository` |
+| `InMemoryAccountOwnershipRepository` | `adapter.out.persistence` | Output adapter: which user owns each account (ADR 0008) | #15: implements an ownership port in `application` |
+| `CheckingAccountService` | `application` | Application service: use cases and account ownership | #16: implements `CheckingAccountCommands`/`Queries`; #17 publishes events; #20 built in `config` |
+| `*CommandDef`, `*SummaryDef`, `AccountDetailsDef`, `CallerDef`, `ApplicationValue`, `CommandValidation` | `application` | Commands, views and `Caller` (Immutables) and their validation | #18: `OpenAccountCommand` changes |
+| `NotFoundException`, `AccountNotFoundException`, `TargetAccountNotFoundException`, `ForbiddenOperationException`, `OperationNotAllowedException` | `application` | Application errors | — |
+| `DemoDataLoader` | `application` | Demo data with the `demo` profile | #19: becomes the CLI input adapter `DomainModelRunner` |
+| `CheckingAccount` | `domain.model` | Aggregate root | #17: records domain events; #18: opened only through the factory |
+| `AccountHolder`, `Transaction` | `domain.model` | Entities | — |
+| `AccountNumber`, `MonetaryAmount` | `domain.model` | Value objects | — |
+| `CustomerSegment`, `TransactionStatus`, `TransactionType` | `domain.model` | Domain enumerations | #18: the segment is decided by the factory |
+| `DomainException` and its subclasses (`CurrencyMismatchException`, `DuplicateAccountNumberException`, `InsufficientInitialDepositException`, `SameAccountTransferException`) | `domain.model` | Business rule violations (422) | — |
+| `MoneyTransferService` | `domain.service` | Domain service (transfers, R17-R19) | #20: built in `config` |
+| `DddLabApplication` | root | Spring Boot entry point | — |
+
+Classes that arrive later: output ports `CheckingAccountRepository` (#15), `AccountNumberSequence` and `IncomeVerifier` (#18) and `DomainEventPublisher` (#17) in `domain.model`; input ports `CheckingAccountCommands` and `CheckingAccountQueries` (#16) in `application`; `CheckingAccountFactory` (#18); adapters `InMemoryAccountNumberSequence`, `FakeTaxAgencyIncomeVerifier` (#18), `SpringDomainEventPublisher` (#17) and `DomainModelRunner` (#19); listeners in `application.listener` (#17); `DomainConfiguration` (#20).

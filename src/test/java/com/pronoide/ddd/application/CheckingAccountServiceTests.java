@@ -26,8 +26,8 @@ import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
-import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
-import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
+import com.pronoide.ddd.adapter.out.persistence.InMemoryAccountOwnershipRepository;
+import com.pronoide.ddd.adapter.out.persistence.InMemoryCheckingAccountRepository;
 
 /** Casos de uso con el repositorio en memoria real: es concreto y no hace falta simularlo. */
 class CheckingAccountServiceTests {
