@@ -12,7 +12,7 @@
 | 2026-10-23 | #36 | #8 | Base REST + web: errores a HTTP, OpenAPI, Thymeleaf y página 404 |
 | 2026-10-23 | #37 | — | Estado del proyecto entre sesiones, exigido en cada PR |
 | 2026-10-23 | #38 | — | Documentación en inglés; plan de la #5 aprobado |
-| 2026-10-23 | #39 | #5 | Abrir, consultar y listar cuentas (REST + web), primera issue en equipo |
+| 2026-10-23 | #39 | #5 | Abrir, consultar y listar cuentas (REST + web), primera issue en equipo; cierra también la #31 (flujo en equipo) |
 | 2026-10-23 | #40 | — | Interruptor `TELEGRAM_DISABLED` para silenciar los avisos |
 | 2026-10-24 | #41 | #6 | Ingresos y retiradas con detalle de la cuenta (REST + web); cierra el pendiente de sinónimos heredados |
 | 2026-10-25 | #43 | #7 | Transferencias entre cuentas (REST + web): primer servicio de dominio `MoneyTransferService` (R17-R19) |
