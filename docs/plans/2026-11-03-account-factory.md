@@ -209,7 +209,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Acceptance criteria:**
   - [x] Nobody references the removed fields; `./mvnw verify` green.
 
-### [ ] T13 — End-to-end tests (~10 min)
+### [x] T13 — End-to-end tests (~10 min)
 
 - **Side:** both
 - **Layer:** tests
@@ -218,7 +218,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **What to do:**
   1. With the real service: REST and web open-account with a NIF return a generated IBAN; `87654321X` gives `HIGH_NET_WORTH`, an unknown NIF gives `RETAIL`. Update the existing end-to-end tests that typed an IBAN.
 - **Acceptance criteria:**
-  - [ ] End-to-end tests pass with the real factory and adapters.
+  - [x] End-to-end tests pass with the real factory and adapters.
 
 ### [ ] T14 — Documentation and project status (~10 min)
 

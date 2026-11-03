@@ -158,6 +158,33 @@ class DddLabApplicationTests {
 			assertThat(response.body()).contains("EUR").contains("USD").contains("ha recibido");
 		}
 
+		@Test
+		@DisplayName("Por la API, la factoría decide el segmento con los ingresos que verifica la agencia tributaria")
+		void por_la_api_la_factoria_decide_el_segmento_con_los_ingresos_verificados() throws Exception {
+			HttpResponse<String> highIncome = post("/api/accounts", "application/json", """
+					{"holderName": "Grace Hopper", "holderTaxId": "87654321X",
+					 "initialDeposit": 100.00, "ownerUsername": "grace"}""");
+			HttpResponse<String> unknown = post("/api/accounts", "application/json", """
+					{"holderName": "Sin Verificar", "holderTaxId": "99999999R",
+					 "initialDeposit": 100.00, "ownerUsername": "ada"}""");
+
+			assertThat(highIncome.statusCode()).isEqualTo(201);
+			assertThat(highIncome.body()).contains("\"segment\":\"HIGH_NET_WORTH\"");
+			assertThat(unknown.statusCode()).isEqualTo(201);
+			assertThat(unknown.body()).contains("\"segment\":\"RETAIL\"");
+			assertThat(ibanOf(highIncome.headers().firstValue("Location").orElseThrow()))
+					.isNotEqualTo(ibanOf(unknown.headers().firstValue("Location").orElseThrow()));
+		}
+
+		@Test
+		@DisplayName("Desde la web, el aviso del alta muestra el IBAN generado y el segmento calculado")
+		void desde_la_web_el_aviso_del_alta_muestra_el_iban_generado_y_el_segmento() throws Exception {
+			String form = "holderName=Grace+Hopper&holderTaxId=87654321X&ownerUsername=grace&initialDeposit=75.00&currency=EUR";
+			assertThat(submit("/accounts/new", form).statusCode()).isEqualTo(302);
+
+			assertThat(browse("/")).containsPattern("Cuenta ES\\d{22} abierta correctamente como Alto patrimonio");
+		}
+
 		private HttpResponse<String> submitForm(String currency) throws Exception {
 			String form = "holderName=Grace+Hopper&holderTaxId=12345678Z&ownerUsername=grace&initialDeposit=75.00&currency=%s"
 					.formatted(currency);
