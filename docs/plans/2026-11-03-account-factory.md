@@ -220,7 +220,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Acceptance criteria:**
   - [x] End-to-end tests pass with the real factory and adapters.
 
-### [ ] T14 — Documentation and project status (~10 min)
+### [x] T14 — Documentation and project status (~10 min)
 
 - **Side:** both
 - **Layer:** docs
@@ -231,7 +231,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
   2. `fase-2-hexagonal.md`: "State after #18", rows for the new classes.
   3. Project status: #18 done, next step `/plan-feature 19`; decisions (threshold, unknown NIF → retail, factory built by the service until #20, expand → contract); pending items.
 - **Acceptance criteria:**
-  - [ ] New terms in the glossary; the CI check of the project status passes.
+  - [x] New terms in the glossary; the CI check of the project status passes.
 
 ## Global acceptance criteria
 

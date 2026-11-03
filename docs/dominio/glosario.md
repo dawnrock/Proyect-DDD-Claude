@@ -21,7 +21,12 @@ Términos del dominio de cuentas corrientes. El código usa el nombre en inglés
 | Error de dominio | `DomainException` | Excepción de dominio (abstracta) | Base de los errores de negocio. Su mensaje, en español, se muestra tal cual al usuario. |
 | Depósito inicial insuficiente | `InsufficientInitialDepositException` | Excepción de dominio | La cuenta se intenta abrir por debajo del depósito mínimo (R1). |
 | Divisa distinta | `CurrencyMismatchException` | Excepción de dominio | Se combinan importes de divisas distintas o se opera en una divisa distinta a la de la cuenta (R4). |
-| Número de cuenta duplicado | `DuplicateAccountNumberException` | Excepción de dominio | Se intenta abrir una cuenta con un número que ya usa otra (R16). La lanza el caso de uso "abrir cuenta", que es quien consulta el repositorio. |
+| Número de cuenta duplicado | `DuplicateAccountNumberException` | Excepción de dominio | Se intenta abrir una cuenta con un número que ya usa otra (R16). La lanza el caso de uso "abrir cuenta", que es quien consulta el repositorio. Desde la #18 el número lo genera la numeración, así que es solo una red de seguridad ante un generador defectuoso. |
+| NIF | `TaxId` | Objeto de valor | Identificador fiscal del titular: 8 dígitos y una letra (no se comprueba la letra de control). Se normaliza sin espacios y en mayúsculas. Solo se usa para verificar los ingresos al abrir la cuenta; no se guarda (#18). |
+| Factoría de cuentas | `CheckingAccountFactory` | Factoría | Abre las cuentas: pide un número a la numeración, consulta los ingresos del titular a la verificación de ingresos, decide su segmento (R20) y llama a `CheckingAccount.open`, que ya no es accesible fuera de `domain.model` (#18). |
+| Numeración de cuentas | `AccountNumberSequence` | Puerto de salida | Genera el número (IBAN) de cada cuenta nueva. Lo implementa `InMemoryAccountNumberSequence` (simulado: IBAN españoles válidos y consecutivos del banco 2100, oficina 0418). |
+| Verificación de ingresos | `IncomeVerifier` | Puerto de salida | Devuelve los ingresos anuales verificados de un titular por su NIF, o nada si no los conoce. Lo implementa `FakeTaxAgencyIncomeVerifier` (agencia tributaria simulada con una tabla fija). |
+| Umbral de alto patrimonio | `HIGH_NET_WORTH_THRESHOLD` | Regla | 100.000,00 € de ingresos anuales verificados (R20). |
 | Transferencia a la misma cuenta | `SameAccountTransferException` | Excepción de dominio | Se intenta transferir de una cuenta a sí misma (R17). La lanza `MoneyTransferService` antes de registrar ningún movimiento. |
 
 ## Eventos de dominio (`domain.model`, #17)
@@ -71,10 +76,11 @@ Cada regla cita el test que la demuestra (`src/test/java/com/pronoide/ddd/domain
 | R13 | Un importe es inmutable: las operaciones devuelven instancias nuevas; no existe sin divisa | `MonetaryAmountTests#las_operaciones_devuelven_nuevas_instancias`, `MonetaryAmountTests#un_importe_no_puede_construirse_sin_divisa` |
 | R14 | El número de cuenta es un IBAN español: `ES` seguido de 22 dígitos, normalizado sin espacios y en mayúsculas. **No se valida el dígito de control.** | `AccountNumberTests#el_numero_de_cuenta_se_normaliza`, `AccountNumberTests#un_iban_con_formato_incorrecto_no_llega_a_construirse` |
 | R15 | Un titular conserva su identidad aunque cambien sus atributos, y dos titulares con los mismos datos son distintos | `AccountHolderTests#un_titular_mantiene_su_identidad_aunque_cambien_sus_atributos`, `AccountHolderTests#dos_titulares_con_los_mismos_datos_son_entidades_distintas` |
-| R16 | No se puede abrir una cuenta con un número que ya usa otra, aunque venga con espacios o en minúsculas | `CheckingAccountServiceTests#un_numero_de_cuenta_en_uso_se_rechaza_aunque_venga_con_espacios_o_en_minusculas`, `DuplicateAccountNumberExceptionTests#un_numero_de_cuenta_duplicado_es_una_regla_de_negocio_incumplida` |
+| R16 | No se puede abrir una cuenta con un número que ya usa otra. Desde la #18 el número se genera, y la comprobación es una red de seguridad | `CheckingAccountServiceTests#un_numero_generado_en_uso_se_rechaza`, `DuplicateAccountNumberExceptionTests#un_numero_de_cuenta_duplicado_es_una_regla_de_negocio_incumplida` |
 | R17 | No se puede transferir a la misma cuenta; se rechaza sin registrar movimientos | `MoneyTransferServiceTests#transferir_a_la_misma_cuenta_se_rechaza_sin_registrar_movimientos` |
 | R18 | Si la retirada en origen se rechaza, no se ingresa nada en destino y ningún saldo cambia | `MoneyTransferServiceTests#si_la_retirada_se_rechaza_no_se_ingresa_nada_en_el_destino` |
 | R19 | Una transferencia en una divisa distinta a la de las cuentas se rechaza antes de retirar, sin registrar movimientos | `MoneyTransferServiceTests#un_importe_en_otra_divisa_se_rechaza_sin_registrar_movimientos` (hoy la retirada en origen ya lo impide, porque todas las cuentas son en euros; la comprobación del destino protege el caso de cuentas en otra divisa) |
+| R20 | Un titular se da de alta como alto patrimonio solo si sus ingresos anuales verificados superan 100.000,00 €; con ingresos iguales o menores, o sin verificar, es minorista | `CheckingAccountFactoryTests#con_ingresos_por_encima_del_umbral_el_titular_es_de_alto_patrimonio`, `#con_ingresos_exactamente_en_el_umbral_el_titular_es_minorista`, `#si_los_ingresos_no_se_verifican_el_titular_es_minorista` |
 
 ### Reglas implementadas sin test
 
