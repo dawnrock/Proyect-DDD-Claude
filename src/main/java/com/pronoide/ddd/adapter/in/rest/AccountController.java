@@ -45,9 +45,8 @@ public class AccountController {
     public ResponseEntity<AccountSummaryResponse> openAccount(
             Authentication authentication, @Valid @RequestBody OpenAccountRequest request) {
         OpenAccountCommand.Builder command = OpenAccountCommand.builder()
-                .accountNumber(request.accountNumber())
                 .holderName(request.holderName())
-                .segment(request.segment())
+                .holderTaxId(request.holderTaxId())
                 .initialDeposit(request.initialDeposit())
                 .ownerUsername(request.ownerUsername());
         if (request.currency() != null) {
@@ -93,6 +92,7 @@ public class AccountController {
                 .id(summary.id())
                 .accountNumber(summary.accountNumber())
                 .holderName(summary.holderName())
+                .segment(summary.segment())
                 .balance(summary.balance())
                 .currency(summary.currency())
                 .build();

@@ -60,8 +60,8 @@ class AccountControllerTests {
     private static final UUID ID = UUID.fromString("11111111-2222-3333-4444-555555555555");
     private static final String IBAN = "ES9121000418450200051332";
     private static final String VALID_BODY = """
-            {"accountNumber": "es91 2100 0418 4502 0005 1332", "holderName": "Ada Lovelace",
-             "segment": "RETAIL", "initialDeposit": 100.00, "ownerUsername": "ada"}""";
+            {"holderName": "Ada Lovelace", "holderTaxId": "12345678Z",
+             "initialDeposit": 100.00, "ownerUsername": "ada"}""";
 
     @Autowired
     private MockMvc mvc;
@@ -73,7 +73,7 @@ class AccountControllerTests {
     private CheckingAccountQueries queries;
 
     private static AccountSummary summary() {
-        return AccountSummary.builder().id(ID).accountNumber(IBAN).holderName("Ada Lovelace")
+        return AccountSummary.builder().id(ID).accountNumber(IBAN).holderName("Ada Lovelace").segment("RETAIL")
                 .balance(new BigDecimal("100.00")).currency("EUR").build();
     }
 
@@ -92,8 +92,24 @@ class AccountControllerTests {
                     .andExpect(jsonPath("$.id").value(ID.toString()))
                     .andExpect(jsonPath("$.accountNumber").value(IBAN))
                     .andExpect(jsonPath("$.holderName").value("Ada Lovelace"))
+                    .andExpect(jsonPath("$.segment").value("RETAIL"))
                     .andExpect(jsonPath("$.balance").value(100.00))
                     .andExpect(jsonPath("$.currency").value("EUR"));
+        }
+
+        @Test
+        @DisplayName("La respuesta lleva el segmento que ha calculado la factoría")
+        void la_respuesta_lleva_el_segmento_calculado() throws Exception {
+            given(commands.openAccount(any(Caller.class), any())).willReturn(
+                    AccountSummary.builder().id(ID).accountNumber(IBAN).holderName("Grace Hopper")
+                            .segment("HIGH_NET_WORTH").balance(new BigDecimal("5000.00")).currency("EUR").build());
+
+            mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
+                    {"holderName": "Grace Hopper", "holderTaxId": "87654321X",
+                     "initialDeposit": 5000, "ownerUsername": "grace"}"""))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.accountNumber").value(IBAN))
+                    .andExpect(jsonPath("$.segment").value("HIGH_NET_WORTH"));
         }
 
         @Test
@@ -107,9 +123,8 @@ class AccountControllerTests {
             ArgumentCaptor<OpenAccountCommand> captor = ArgumentCaptor.forClass(OpenAccountCommand.class);
             verify(commands).openAccount(any(Caller.class), captor.capture());
             OpenAccountCommand command = captor.getValue();
-            assertThat(command.accountNumber()).isEqualTo("es91 2100 0418 4502 0005 1332");
             assertThat(command.holderName()).isEqualTo("Ada Lovelace");
-            assertThat(command.segment()).isEqualTo("RETAIL");
+            assertThat(command.holderTaxId()).isEqualTo("12345678Z");
             assertThat(command.initialDeposit()).isEqualByComparingTo("100.00");
             assertThat(command.currency()).isEqualTo("EUR");
         }
@@ -120,21 +135,21 @@ class AccountControllerTests {
             given(commands.openAccount(any(Caller.class), any())).willReturn(summary());
 
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
-                    {"accountNumber": "ES9121000418450200051332", "holderName": "Ada Lovelace",
-                     "segment": "HIGH_NET_WORTH", "initialDeposit": 100, "currency": "USD", "ownerUsername": "ada"}"""))
+                    {"holderName": "Ada Lovelace", "holderTaxId": " 12345678 z ",
+                     "initialDeposit": 100, "currency": "USD", "ownerUsername": "ada"}"""))
                     .andExpect(status().isCreated());
 
             ArgumentCaptor<OpenAccountCommand> captor = ArgumentCaptor.forClass(OpenAccountCommand.class);
             verify(commands).openAccount(any(Caller.class), captor.capture());
             assertThat(captor.getValue().currency()).isEqualTo("USD");
-            assertThat(captor.getValue().segment()).isEqualTo("HIGH_NET_WORTH");
+            assertThat(captor.getValue().holderTaxId()).isEqualTo(" 12345678 z ");
         }
 
         @Test
         @DisplayName("Sin titular responde 400 con el error del campo y no llama al servicio")
         void sin_titular_responde_400_con_el_error_del_campo_y_no_llama_al_servicio() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
-                    {"accountNumber": "ES9121000418450200051332", "segment": "RETAIL", "initialDeposit": 100}"""))
+                    {"holderTaxId": "12345678Z", "initialDeposit": 100, "ownerUsername": "ada"}"""))
                     .andExpect(status().isBadRequest())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                     .andExpect(jsonPath("$.title").value("Petición no válida"))
@@ -147,12 +162,11 @@ class AccountControllerTests {
         @DisplayName("Todos los campos mal formados aparecen en el mapa de errores")
         void todos_los_campos_mal_formados_aparecen_en_el_mapa_de_errores() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
-                    {"accountNumber": "ES12", "holderName": " ", "segment": "VIP",
+                    {"holderName": " ", "holderTaxId": "1234",
                      "initialDeposit": -5, "currency": "eur", "ownerUsername": "Ada L"}"""))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errors.accountNumber").exists())
                     .andExpect(jsonPath("$.errors.holderName").exists())
-                    .andExpect(jsonPath("$.errors.segment").exists())
+                    .andExpect(jsonPath("$.errors.holderTaxId").value("El NIF debe tener 8 dígitos y una letra"))
                     .andExpect(jsonPath("$.errors.initialDeposit").exists())
                     .andExpect(jsonPath("$.errors.currency").exists())
                     .andExpect(jsonPath("$.errors.ownerUsername").exists());
@@ -165,12 +179,25 @@ class AccountControllerTests {
         void un_cuerpo_vacio_responde_400_con_un_error_por_cada_campo_obligatorio() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("{}"))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errors.accountNumber").exists())
                     .andExpect(jsonPath("$.errors.holderName").exists())
-                    .andExpect(jsonPath("$.errors.segment").exists())
+                    .andExpect(jsonPath("$.errors.holderTaxId").exists())
                     .andExpect(jsonPath("$.errors.initialDeposit").exists())
                     .andExpect(jsonPath("$.errors.ownerUsername").exists())
+                    .andExpect(jsonPath("$.errors.accountNumber").doesNotExist())
+                    .andExpect(jsonPath("$.errors.segment").doesNotExist())
                     .andExpect(jsonPath("$.errors.currency").doesNotExist());
+        }
+
+        @Test
+        @DisplayName("El cuerpo antiguo con IBAN y segmento pero sin NIF responde 400 con el error del NIF")
+        void el_cuerpo_antiguo_sin_nif_responde_400() throws Exception {
+            mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
+                    {"accountNumber": "ES9121000418450200051332", "holderName": "Ada Lovelace",
+                     "segment": "RETAIL", "initialDeposit": 100, "ownerUsername": "ada"}"""))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.holderTaxId").value("El NIF es obligatorio"));
+
+            verifyNoInteractions(commands, queries);
         }
 
         @Test
@@ -200,8 +227,8 @@ class AccountControllerTests {
         @DisplayName("Una divisa bien formada pero desconocida que escapa a la validación responde 400")
         void una_divisa_bien_formada_pero_desconocida_responde_400() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
-                    {"accountNumber": "ES9121000418450200051332", "holderName": "Ada Lovelace",
-                     "segment": "RETAIL", "initialDeposit": 100, "currency": "XYZ", "ownerUsername": "ada"}"""))
+                    {"holderName": "Ada Lovelace", "holderTaxId": "12345678Z",
+                     "initialDeposit": 100, "currency": "XYZ", "ownerUsername": "ada"}"""))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.title").value("Petición no válida"));
         }

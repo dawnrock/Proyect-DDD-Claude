@@ -41,12 +41,11 @@ import com.pronoide.ddd.domain.model.MoneyWithdrawn;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
 import com.pronoide.ddd.domain.model.WithdrawalRejected;
 import com.pronoide.ddd.adapter.out.persistence.PersistenceTestAdapters;
+import com.pronoide.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 
 /** Casos de uso con el adaptador en memoria real detrás de los puertos: no hace falta simularlo. */
 class CheckingAccountServiceTests {
 
-    private static final String IBAN = "ES9121000418450200051332";
-    private static final String OTHER_IBAN = "ES7921000813610123456789";
 
     /** Los casos de uso se piden como administrador; la propiedad se prueba en CheckingAccountServiceOwnershipTests. */
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
@@ -59,7 +58,8 @@ class CheckingAccountServiceTests {
     void setUp() {
         repository = spy(PersistenceTestAdapters.accounts());
         publisher = mock(DomainEventPublisher.class);
-        service = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(), publisher);
+        service = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(), publisher,
+                PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier());
     }
 
     /** Eventos publicados en cada llamada a {@code publishAll}, en orden. */
@@ -70,13 +70,18 @@ class CheckingAccountServiceTests {
         return captor.getAllValues();
     }
 
-    private static OpenAccountCommand.Builder command(String accountNumber) {
+    /** Titular minorista por NIF (40.000 € verificados); el IBAN lo genera la factoría. */
+    private static OpenAccountCommand.Builder command() {
         return OpenAccountCommand.builder()
-                .accountNumber(accountNumber)
                 .holderName("Ada Lovelace")
-                .segment("RETAIL")
+                .holderTaxId("12345678Z")
                 .initialDeposit(new BigDecimal("100"))
                 .ownerUsername("ada");
+    }
+
+    /** Titular de alto patrimonio por NIF (250.000 € verificados). */
+    private static OpenAccountCommand.Builder highNetWorthCommand() {
+        return command().holderName("Grace Hopper").holderTaxId("87654321X");
     }
 
     @Test
@@ -86,15 +91,72 @@ class CheckingAccountServiceTests {
     }
 
     @Nested
-    @DisplayName("Abrir cuenta")
-    class OpenAccount {
+    @DisplayName("Abrir cuenta con la factoría")
+    class OpenAccountThroughFactory {
+
+        private OpenAccountCommand.Builder byTaxId(String taxId) {
+            return OpenAccountCommand.builder()
+                    .holderName("Grace Hopper")
+                    .holderTaxId(taxId)
+                    .initialDeposit(new BigDecimal("100"))
+                    .ownerUsername("grace");
+        }
+
+        @Test
+        @DisplayName("Con NIF la cuenta recibe un IBAN generado y el resumen lo devuelve")
+        void con_nif_la_cuenta_recibe_un_iban_generado() {
+            AccountSummary summary = service.openAccount(ADMIN, byTaxId("87654321X").build());
+
+            assertThat(summary.accountNumber()).startsWith("ES").hasSize(24);
+            assertThat(repository.findByAccountNumber(new AccountNumber(summary.accountNumber()))).isPresent();
+        }
+
+        @Test
+        @DisplayName("Con ingresos verificados por encima del umbral el resumen es de alto patrimonio")
+        void con_ingresos_altos_el_resumen_es_de_alto_patrimonio() {
+            AccountSummary summary = service.openAccount(ADMIN, byTaxId("87654321X").build());
+
+            assertThat(summary.segment()).isEqualTo("HIGH_NET_WORTH");
+        }
+
+        @Test
+        @DisplayName("Con ingresos bajos o un NIF desconocido el resumen es minorista")
+        void con_ingresos_bajos_o_nif_desconocido_el_resumen_es_minorista() {
+            assertThat(service.openAccount(ADMIN, byTaxId("12345678Z").build()).segment()).isEqualTo("RETAIL");
+            assertThat(service.openAccount(ADMIN, byTaxId("99999999R").build()).segment()).isEqualTo("RETAIL");
+        }
+
+        @Test
+        @DisplayName("Un número generado que ya está en uso se rechaza y no se guarda")
+        void un_numero_generado_en_uso_se_rechaza() {
+            String used = service.openAccount(ADMIN, command().build()).accountNumber();
+            CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
+                    publisher, () -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier());
+
+            assertThatExceptionOfType(DuplicateAccountNumberException.class)
+                    .isThrownBy(() -> faulty.openAccount(ADMIN, byTaxId("87654321X").build()))
+                    .withMessageContaining(used);
+            assertThat(repository.findAll()).hasSize(1);
+        }
+
+        @Test
+        @DisplayName("Con NIF se publican los eventos de apertura y se asigna el propietario")
+        void con_nif_se_publican_los_eventos_y_se_asigna_el_propietario() {
+            clearInvocations(publisher);
+
+            AccountSummary summary = service.openAccount(ADMIN, byTaxId("87654321X").build());
+
+            assertThat(publishedBatches()).singleElement().satisfies(events -> assertThat(events)
+                    .hasAtLeastOneElementOfType(CheckingAccountOpened.class));
+            assertThat(service.listAccounts(Caller.builder().username("grace").admin(false).build()))
+                    .extracting(AccountSummary::id).containsExactly(summary.id());
+        }
 
         @Test
         @DisplayName("Un depósito válido abre la cuenta, la guarda y devuelve su resumen")
         void un_deposito_valido_abre_la_cuenta_la_guarda_y_devuelve_su_resumen() {
-            AccountSummary summary = service.openAccount(ADMIN, command("es91 2100 0418 4502 0005 1332").build());
+            AccountSummary summary = service.openAccount(ADMIN, command().build());
 
-            assertThat(summary.accountNumber()).isEqualTo(IBAN);
             assertThat(summary.holderName()).isEqualTo("Ada Lovelace");
             assertThat(summary.balance()).isEqualByComparingTo("100.00");
             assertThat(summary.balance().scale()).isEqualTo(2);
@@ -103,19 +165,9 @@ class CheckingAccountServiceTests {
         }
 
         @Test
-        @DisplayName("Un depósito por debajo del mínimo se rechaza y no se guarda")
-        void un_deposito_por_debajo_del_minimo_se_rechaza_y_no_se_guarda() {
-            OpenAccountCommand tooLow = command(IBAN).initialDeposit(new BigDecimal("49.99")).build();
-
-            assertThatExceptionOfType(InsufficientInitialDepositException.class)
-                    .isThrownBy(() -> service.openAccount(ADMIN, tooLow));
-            assertThat(repository.findAll()).isEmpty();
-        }
-
-        @Test
         @DisplayName("Un depósito en otra divisa se rechaza y no se guarda")
         void un_deposito_en_otra_divisa_se_rechaza_y_no_se_guarda() {
-            OpenAccountCommand inDollars = command(IBAN).currency("USD").build();
+            OpenAccountCommand inDollars = command().currency("USD").build();
 
             assertThatExceptionOfType(CurrencyMismatchException.class)
                     .isThrownBy(() -> service.openAccount(ADMIN, inDollars));
@@ -123,25 +175,13 @@ class CheckingAccountServiceTests {
         }
 
         @Test
-        @DisplayName("Un número de cuenta en uso se rechaza aunque venga con espacios o en minúsculas")
-        void un_numero_de_cuenta_en_uso_se_rechaza_aunque_venga_con_espacios_o_en_minusculas() {
-            service.openAccount(ADMIN, command(IBAN).build());
-            OpenAccountCommand duplicate = command("es91 2100 0418 4502 0005 1332").holderName("Grace Hopper").build();
+        @DisplayName("Un depósito por debajo del mínimo se rechaza también con NIF")
+        void un_deposito_bajo_se_rechaza_tambien_con_nif() {
+            OpenAccountCommand tooLow = byTaxId("87654321X").initialDeposit(new BigDecimal("49.99")).build();
 
-            assertThatExceptionOfType(DuplicateAccountNumberException.class)
-                    .isThrownBy(() -> service.openAccount(ADMIN, duplicate))
-                    .withMessageContaining(IBAN);
-            assertThat(repository.findAll()).hasSize(1);
-            assertThat(repository.findByAccountNumber(new AccountNumber(IBAN)).orElseThrow().primaryHolder().fullName())
-                    .isEqualTo("Ada Lovelace");
-        }
-
-        @Test
-        @DisplayName("Un cliente de alto patrimonio abre su cuenta con su segmento")
-        void un_cliente_de_alto_patrimonio_abre_su_cuenta_con_su_segmento() {
-            AccountSummary summary = service.openAccount(ADMIN, command(IBAN).segment("HIGH_NET_WORTH").build());
-
-            assertThat(repository.findById(summary.id()).orElseThrow().primaryHolder().isHighNetWorth()).isTrue();
+            assertThatExceptionOfType(InsufficientInitialDepositException.class)
+                    .isThrownBy(() -> service.openAccount(ADMIN, tooLow));
+            assertThat(repository.findAll()).isEmpty();
         }
     }
 
@@ -152,13 +192,13 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Una cuenta existente se devuelve con el depósito inicial entre sus movimientos")
         void una_cuenta_existente_se_devuelve_con_el_deposito_inicial_entre_sus_movimientos() {
-            AccountSummary opened = service.openAccount(ADMIN, command(IBAN).segment("HIGH_NET_WORTH").build());
+            AccountSummary opened = service.openAccount(ADMIN, highNetWorthCommand().build());
 
             AccountDetails details = service.findAccount(ADMIN, opened.id());
 
             assertThat(details.id()).isEqualTo(opened.id());
-            assertThat(details.accountNumber()).isEqualTo(IBAN);
-            assertThat(details.holderName()).isEqualTo("Ada Lovelace");
+            assertThat(details.accountNumber()).isEqualTo(opened.accountNumber());
+            assertThat(details.holderName()).isEqualTo("Grace Hopper");
             assertThat(details.segment()).isEqualTo("HIGH_NET_WORTH");
             assertThat(details.balance()).isEqualByComparingTo("100.00");
             assertThat(details.currency()).isEqualTo("EUR");
@@ -193,16 +233,16 @@ class CheckingAccountServiceTests {
         }
 
         @Test
-        @DisplayName("Varias cuentas se devuelven ordenadas por número de cuenta")
+        @DisplayName("Varias cuentas se devuelven ordenadas por número de cuenta, con su segmento")
         void varias_cuentas_se_devuelven_ordenadas_por_numero_de_cuenta() {
-            service.openAccount(ADMIN, command(OTHER_IBAN).holderName("Grace Hopper").build());
-            service.openAccount(ADMIN, command(IBAN).build());
+            AccountSummary grace = service.openAccount(ADMIN, highNetWorthCommand().build());
+            AccountSummary ada = service.openAccount(ADMIN, command().build());
 
             assertThat(service.listAccounts(ADMIN))
-                    .extracting(AccountSummary::accountNumber, AccountSummary::holderName)
+                    .extracting(AccountSummary::accountNumber, AccountSummary::holderName, AccountSummary::segment)
                     .containsExactly(
-                            tuple(OTHER_IBAN, "Grace Hopper"),
-                            tuple(IBAN, "Ada Lovelace"));
+                            tuple(grace.accountNumber(), "Grace Hopper", "HIGH_NET_WORTH"),
+                            tuple(ada.accountNumber(), "Ada Lovelace", "RETAIL"));
         }
     }
 
@@ -213,7 +253,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Un ingreso aprobado actualiza el saldo y aparece entre los movimientos")
         void un_ingreso_aprobado_actualiza_el_saldo_y_aparece_entre_los_movimientos() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).build()).id();
+            UUID id = service.openAccount(ADMIN, command().build()).id();
 
             TransactionSummary transaction = service.deposit(ADMIN, 
                     DepositCommand.builder().accountId(id).amount(new BigDecimal("25.50")).build());
@@ -242,7 +282,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Un ingreso en otra divisa lanza CurrencyMismatchException y no cambia el saldo")
         void un_ingreso_en_otra_divisa_lanza_currency_mismatch_exception_y_no_cambia_el_saldo() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).build()).id();
+            UUID id = service.openAccount(ADMIN, command().build()).id();
             DepositCommand dollars =
                     DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).currency("USD").build();
 
@@ -268,7 +308,8 @@ class CheckingAccountServiceTests {
         })
         void las_retiradas_en_el_limite_del_descubierto_dependen_del_segmento(
                 String segment, String amount, String status, String finalBalance) {
-            UUID id = service.openAccount(ADMIN, command(IBAN).segment(segment).build()).id();
+            UUID id = service.openAccount(ADMIN,
+                    ("HIGH_NET_WORTH".equals(segment) ? highNetWorthCommand() : command()).build()).id();
 
             TransactionSummary transaction = service.withdraw(ADMIN, 
                     WithdrawCommand.builder().accountId(id).amount(new BigDecimal(amount)).build());
@@ -282,7 +323,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Una retirada rechazada no cambia el saldo pero queda registrada")
         void una_retirada_rechazada_no_cambia_el_saldo_pero_queda_registrada() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).build()).id();
+            UUID id = service.openAccount(ADMIN, command().build()).id();
 
             TransactionSummary transaction = service.withdraw(ADMIN, 
                     WithdrawCommand.builder().accountId(id).amount(new BigDecimal("500")).build());
@@ -311,7 +352,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Una retirada en otra divisa lanza CurrencyMismatchException y no cambia el saldo")
         void una_retirada_en_otra_divisa_lanza_currency_mismatch_exception_y_no_cambia_el_saldo() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).build()).id();
+            UUID id = service.openAccount(ADMIN, command().build()).id();
             WithdrawCommand dollars =
                     WithdrawCommand.builder().accountId(id).amount(BigDecimal.TEN).currency("USD").build();
 
@@ -330,7 +371,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Abrir una cuenta publica cuenta abierta y el ingreso inicial después de guardarla")
         void abrir_una_cuenta_publica_sus_eventos_despues_de_guardarla() {
-            service.openAccount(ADMIN, command(IBAN).build());
+            service.openAccount(ADMIN, command().build());
 
             InOrder order = inOrder(repository, publisher);
             order.verify(repository).save(any(CheckingAccount.class));
@@ -342,7 +383,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Un ingreso publica el evento de dinero ingresado después de guardar la cuenta")
         void un_ingreso_publica_su_evento_despues_de_guardar() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).build()).id();
+            UUID id = service.openAccount(ADMIN, command().build()).id();
             clearInvocations(repository, publisher);
 
             service.deposit(ADMIN, DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).build());
@@ -357,7 +398,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Una retirada rechazada publica el evento de retirada rechazada")
         void una_retirada_rechazada_publica_su_evento() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).build()).id();
+            UUID id = service.openAccount(ADMIN, command().build()).id();
             clearInvocations(publisher);
 
             service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("5000")).build());
@@ -369,7 +410,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Si guardar la cuenta falla, no se publica ningún evento")
         void si_guardar_la_cuenta_falla_no_se_publica_ningun_evento() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).build()).id();
+            UUID id = service.openAccount(ADMIN, command().build()).id();
             clearInvocations(publisher);
             doThrow(new IllegalStateException("fallo al guardar")).when(repository).save(any(CheckingAccount.class));
 
@@ -381,11 +422,13 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Un caso de uso que falla antes de guardar no publica nada")
         void un_caso_de_uso_que_falla_antes_de_guardar_no_publica_nada() {
-            service.openAccount(ADMIN, command(IBAN).build());
+            String used = service.openAccount(ADMIN, command().build()).accountNumber();
+            CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
+                    publisher, () -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier());
             clearInvocations(publisher);
 
             assertThatExceptionOfType(DuplicateAccountNumberException.class)
-                    .isThrownBy(() -> service.openAccount(ADMIN, command(IBAN).build()));
+                    .isThrownBy(() -> faulty.openAccount(ADMIN, command().build()));
             verify(publisher, never()).publishAll(any());
         }
     }
@@ -396,11 +439,17 @@ class CheckingAccountServiceTests {
 
         private UUID sourceId;
         private UUID targetId;
+        private String sourceNumber;
+        private String targetNumber;
 
         @BeforeEach
         void openAccounts() {
-            sourceId = service.openAccount(ADMIN, command(IBAN).initialDeposit(new BigDecimal("500")).build()).id();
-            targetId = service.openAccount(ADMIN, command(OTHER_IBAN).initialDeposit(new BigDecimal("100")).build()).id();
+            AccountSummary source = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("500")).build());
+            AccountSummary target = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("100")).build());
+            sourceId = source.id();
+            targetId = target.id();
+            sourceNumber = source.accountNumber();
+            targetNumber = target.accountNumber();
             clearInvocations(repository);
         }
 
@@ -417,7 +466,7 @@ class CheckingAccountServiceTests {
         void una_transferencia_aprobada_publica_sus_eventos_tras_guardar_ambas_cuentas() {
             clearInvocations(publisher);
 
-            service.transfer(ADMIN, transfer(sourceId, OTHER_IBAN, "200"));
+            service.transfer(ADMIN, transfer(sourceId, targetNumber, "200"));
 
             InOrder order = inOrder(repository, publisher);
             order.verify(repository, times(2)).save(any(CheckingAccount.class));
@@ -432,7 +481,7 @@ class CheckingAccountServiceTests {
         void una_transferencia_rechazada_solo_publica_la_retirada_rechazada() {
             clearInvocations(publisher);
 
-            service.transfer(ADMIN, transfer(sourceId, OTHER_IBAN, "5000"));
+            service.transfer(ADMIN, transfer(sourceId, targetNumber, "5000"));
 
             assertThat(publishedBatches()).flatMap(events -> events)
                     .extracting(DomainEvent::getClass, DomainEvent::accountId)
@@ -442,13 +491,13 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Una transferencia aprobada actualiza los saldos de las dos cuentas y guarda ambas")
         void una_transferencia_aprobada_actualiza_los_saldos_y_guarda_ambas_cuentas() {
-            TransferSummary summary = service.transfer(ADMIN, transfer(sourceId, OTHER_IBAN, "200"));
+            TransferSummary summary = service.transfer(ADMIN, transfer(sourceId, targetNumber, "200"));
 
             assertThat(summary.status()).isEqualTo("APPROVED");
             assertThat(summary.sourceAccountId()).isEqualTo(sourceId);
-            assertThat(summary.sourceAccountNumber()).isEqualTo(IBAN);
+            assertThat(summary.sourceAccountNumber()).isEqualTo(sourceNumber);
             assertThat(summary.targetAccountId()).isEqualTo(targetId);
-            assertThat(summary.targetAccountNumber()).isEqualTo(OTHER_IBAN);
+            assertThat(summary.targetAccountNumber()).isEqualTo(targetNumber);
             assertThat(summary.amount()).isEqualByComparingTo("200.00");
             assertThat(summary.amount().scale()).isEqualTo(2);
             assertThat(summary.currency()).isEqualTo("EUR");
@@ -465,7 +514,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Una transferencia rechazada se devuelve como REJECTED y no cambia ningún saldo")
         void una_transferencia_rechazada_se_devuelve_como_rejected_y_no_cambia_los_saldos() {
-            TransferSummary summary = service.transfer(ADMIN, transfer(sourceId, OTHER_IBAN, "600"));
+            TransferSummary summary = service.transfer(ADMIN, transfer(sourceId, targetNumber, "600"));
 
             assertThat(summary.status()).isEqualTo("REJECTED");
             assertThat(service.findAccount(ADMIN, sourceId).balance()).isEqualByComparingTo("500.00");
@@ -481,7 +530,7 @@ class CheckingAccountServiceTests {
             UUID unknown = UUID.randomUUID();
 
             assertThatExceptionOfType(AccountNotFoundException.class)
-                    .isThrownBy(() -> service.transfer(ADMIN, transfer(unknown, OTHER_IBAN, "10")))
+                    .isThrownBy(() -> service.transfer(ADMIN, transfer(unknown, targetNumber, "10")))
                     .withMessageContaining(unknown.toString());
             verify(repository, never()).save(any(CheckingAccount.class));
         }
@@ -501,7 +550,7 @@ class CheckingAccountServiceTests {
         @DisplayName("Transferir a la misma cuenta lanza SameAccountTransferException y no registra movimientos")
         void transferir_a_la_misma_cuenta_lanza_same_account_transfer_exception() {
             assertThatExceptionOfType(SameAccountTransferException.class)
-                    .isThrownBy(() -> service.transfer(ADMIN, transfer(sourceId, IBAN, "10")));
+                    .isThrownBy(() -> service.transfer(ADMIN, transfer(sourceId, sourceNumber, "10")));
             assertThat(service.findAccount(ADMIN, sourceId).transactions()).hasSize(1);
             verify(repository, never()).save(any(CheckingAccount.class));
         }
@@ -511,7 +560,7 @@ class CheckingAccountServiceTests {
         void una_transferencia_en_otra_divisa_lanza_currency_mismatch_exception() {
             TransferCommand dollars = TransferCommand.builder()
                     .sourceAccountId(sourceId)
-                    .targetAccountNumber(OTHER_IBAN)
+                    .targetAccountNumber(targetNumber)
                     .amount(BigDecimal.TEN)
                     .currency("USD")
                     .build();

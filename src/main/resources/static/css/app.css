@@ -153,3 +153,4 @@ a.row:hover .row-title { text-decoration: underline; }
     .hero-amount { font-size: 1.9rem; }
     .list { padding: 0 0.85rem; }
 }
+.hint { color: var(--muted); font-size: 0.85rem; margin: 0 0 1rem; }

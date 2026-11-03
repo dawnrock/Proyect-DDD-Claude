@@ -11,6 +11,8 @@ import java.net.http.HttpResponse;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -76,9 +78,8 @@ class DddLabApplicationTests {
 	void un_ingreso_llega_al_consumidor_de_auditoria(CapturedOutput output) {
 		Caller admin = Caller.builder().username("admin").admin(true).build();
 		UUID accountId = commands.openAccount(admin, OpenAccountCommand.builder()
-				.accountNumber("ES0000000000000000001701")
 				.holderName("Ada Lovelace")
-				.segment("RETAIL")
+				.holderTaxId("12345678Z")
 				.initialDeposit(new BigDecimal("100"))
 				.ownerUsername("ada")
 				.build()).id();
@@ -121,56 +122,72 @@ class DddLabApplicationTests {
 		@DisplayName("Una cuenta abierta por la API se consulta por su id y aparece en el listado web")
 		void una_cuenta_abierta_por_la_api_se_consulta_por_su_id_y_aparece_en_el_listado_web() throws Exception {
 			HttpResponse<String> created = post("/api/accounts", "application/json", """
-					{"accountNumber": "es91 2100 0418 4502 0005 1332", "holderName": "Ada Lovelace",
-					 "segment": "RETAIL", "initialDeposit": 100.00, "ownerUsername": "ada"}""");
+					{"holderName": "Ada Lovelace", "holderTaxId": "12345678Z",
+					 "initialDeposit": 100.00, "ownerUsername": "ada"}""");
 
 			assertThat(created.statusCode()).isEqualTo(201);
-			assertThat(created.body()).contains("\"accountNumber\":\"ES9121000418450200051332\"");
+			assertThat(created.body()).containsPattern("\"accountNumber\":\"ES\\d{22}\"").contains("\"segment\":\"RETAIL\"");
 			String location = created.headers().firstValue("Location").orElseThrow();
+			String iban = ibanOf(location);
 
 			HttpResponse<String> details = get(location, "application/json");
 			assertThat(details.statusCode()).isEqualTo(200);
 			assertThat(details.body()).contains("\"type\":\"DEPOSIT\"").contains("\"status\":\"APPROVED\"");
 
-			assertThat(browse("/")).contains("ES9121000418450200051332").contains("Ada Lovelace");
+			assertThat(browse("/")).contains(iban).contains("Ada Lovelace");
 		}
 
 		@Test
 		@DisplayName("Una cuenta abierta desde el formulario web redirige al listado y aparece en él")
 		void una_cuenta_abierta_desde_el_formulario_web_redirige_al_listado_y_aparece_en_el() throws Exception {
-			HttpResponse<String> response = submitForm("ES7620770024003102575766", "EUR");
+			HttpResponse<String> response = submitForm("EUR");
 
 			assertThat(response.statusCode()).isEqualTo(302);
 			assertThat(response.headers().firstValue("Location"))
 					.as("sin ;jsessionid en la URL, que Spring no reconoce y acaba en 404")
 					.hasValueSatisfying(location -> assertThat(location).doesNotContain(";jsessionid"));
-			assertThat(browse("/")).contains("ES7620770024003102575766");
-		}
-
-		@Test
-		@DisplayName("Un número de cuenta ya usado vuelve al formulario con el mensaje del dominio")
-		void un_numero_de_cuenta_ya_usado_vuelve_al_formulario_con_el_mensaje_del_dominio() throws Exception {
-			submitForm("ES6000491500051234567892", "EUR");
-
-			HttpResponse<String> duplicate = submitForm("es60 0049 1500 0512 3456 7892", "EUR");
-
-			assertThat(duplicate.statusCode()).isEqualTo(200);
-			assertThat(duplicate.body()).contains("Ya existe una cuenta con el").contains("ES6000491500051234567892");
+			assertThat(browse("/")).contains("Grace Hopper");
 		}
 
 		@Test
 		@DisplayName("Un depósito en otra divisa vuelve al formulario con el mensaje del dominio")
 		void un_deposito_en_otra_divisa_vuelve_al_formulario_con_el_mensaje_del_dominio() throws Exception {
-			HttpResponse<String> response = submitForm("ES1000492352082414205416", "USD");
+			HttpResponse<String> response = submitForm("USD");
 
 			assertThat(response.statusCode()).isEqualTo(200);
 			assertThat(response.body()).contains("EUR").contains("USD").contains("ha recibido");
-			assertThat(browse("/")).doesNotContain("ES1000492352082414205416");
 		}
 
-		private HttpResponse<String> submitForm(String accountNumber, String currency) throws Exception {
-			String form = "accountNumber=%s&holderName=Grace+Hopper&ownerUsername=grace&segment=RETAIL&initialDeposit=75.00&currency=%s"
-					.formatted(URLEncoder.encode(accountNumber, StandardCharsets.UTF_8), currency);
+		@Test
+		@DisplayName("Por la API, la factoría decide el segmento con los ingresos que verifica la agencia tributaria")
+		void por_la_api_la_factoria_decide_el_segmento_con_los_ingresos_verificados() throws Exception {
+			HttpResponse<String> highIncome = post("/api/accounts", "application/json", """
+					{"holderName": "Grace Hopper", "holderTaxId": "87654321X",
+					 "initialDeposit": 100.00, "ownerUsername": "grace"}""");
+			HttpResponse<String> unknown = post("/api/accounts", "application/json", """
+					{"holderName": "Sin Verificar", "holderTaxId": "99999999R",
+					 "initialDeposit": 100.00, "ownerUsername": "ada"}""");
+
+			assertThat(highIncome.statusCode()).isEqualTo(201);
+			assertThat(highIncome.body()).contains("\"segment\":\"HIGH_NET_WORTH\"");
+			assertThat(unknown.statusCode()).isEqualTo(201);
+			assertThat(unknown.body()).contains("\"segment\":\"RETAIL\"");
+			assertThat(ibanOf(highIncome.headers().firstValue("Location").orElseThrow()))
+					.isNotEqualTo(ibanOf(unknown.headers().firstValue("Location").orElseThrow()));
+		}
+
+		@Test
+		@DisplayName("Desde la web, el aviso del alta muestra el IBAN generado y el segmento calculado")
+		void desde_la_web_el_aviso_del_alta_muestra_el_iban_generado_y_el_segmento() throws Exception {
+			String form = "holderName=Grace+Hopper&holderTaxId=87654321X&ownerUsername=grace&initialDeposit=75.00&currency=EUR";
+			assertThat(submit("/accounts/new", form).statusCode()).isEqualTo(302);
+
+			assertThat(browse("/")).containsPattern("Cuenta ES\\d{22} abierta correctamente como Alto patrimonio");
+		}
+
+		private HttpResponse<String> submitForm(String currency) throws Exception {
+			String form = "holderName=Grace+Hopper&holderTaxId=12345678Z&ownerUsername=grace&initialDeposit=75.00&currency=%s"
+					.formatted(currency);
 			return submit("/accounts/new", form);
 		}
 	}
@@ -182,7 +199,7 @@ class DddLabApplicationTests {
 		@Test
 		@DisplayName("Por la API, un ingreso se aprueba y una retirada sin saldo se registra como rechazada y se ve en el detalle web")
 		void por_la_api_un_ingreso_se_aprueba_y_una_retirada_sin_saldo_se_registra_como_rechazada() throws Exception {
-			String account = openAccount("ES0000000000000000000601");
+			String account = openAccount();
 
 			HttpResponse<String> deposit = post(account + "/deposits", "application/json", "{\"amount\": 50.00}");
 			HttpResponse<String> withdrawal = post(account + "/withdrawals", "application/json", "{\"amount\": 500.00}");
@@ -198,7 +215,7 @@ class DddLabApplicationTests {
 		@Test
 		@DisplayName("Desde la web, un ingreso y una retirada rechazada redirigen al detalle con su mensaje")
 		void desde_la_web_un_ingreso_y_una_retirada_rechazada_redirigen_al_detalle_con_su_mensaje() throws Exception {
-			String detail = webPath(openAccount("ES0000000000000000000602"));
+			String detail = webPath(openAccount());
 
 			HttpResponse<String> deposit = submit(detail + "/deposits", "amount=25.00&currency=EUR");
 			assertThat(deposit.statusCode()).isEqualTo(302);
@@ -234,15 +251,16 @@ class DddLabApplicationTests {
 		@Test
 		@DisplayName("Por la API, una transferencia aprobada mueve el saldo y una rechazada no llega al destino")
 		void por_la_api_una_transferencia_aprobada_mueve_el_saldo_y_una_rechazada_no_llega_al_destino() throws Exception {
-			String source = openAccount("ES0000000000000000000701");
-			String target = openAccount("ES0000000000000000000702");
+			String source = openAccount();
+			String target = openAccount();
 
-			HttpResponse<String> approved = transfer(source, "ES0000000000000000000702", "40.00");
-			HttpResponse<String> rejected = transfer(source, "ES0000000000000000000702", "500.00");
+			String targetIban = ibanOf(target);
+			HttpResponse<String> approved = transfer(source, targetIban, "40.00");
+			HttpResponse<String> rejected = transfer(source, targetIban, "500.00");
 
 			assertThat(approved.statusCode()).isEqualTo(201);
 			assertThat(approved.body()).contains("\"status\":\"APPROVED\"")
-					.contains("\"targetAccountNumber\":\"ES0000000000000000000702\"");
+					.contains("\"targetAccountNumber\":\"" + targetIban + "\"");
 			assertThat(rejected.statusCode()).isEqualTo(201);
 			assertThat(rejected.body()).contains("\"status\":\"REJECTED\"");
 			assertThat(get(source, "application/json").body()).contains("\"balance\":60.00");
@@ -252,9 +270,9 @@ class DddLabApplicationTests {
 		@Test
 		@DisplayName("Por la API, una transferencia a la misma cuenta es una regla de negocio incumplida")
 		void por_la_api_una_transferencia_a_la_misma_cuenta_es_una_regla_de_negocio_incumplida() throws Exception {
-			String account = openAccount("ES0000000000000000000703");
+			String account = openAccount();
 
-			HttpResponse<String> response = transfer(account, "ES0000000000000000000703", "10.00");
+			HttpResponse<String> response = transfer(account, ibanOf(account), "10.00");
 
 			assertThat(response.statusCode()).isEqualTo(422);
 			assertThat(response.body()).contains("Regla de negocio incumplida").contains("misma cuenta");
@@ -265,16 +283,20 @@ class DddLabApplicationTests {
 		@DisplayName("Desde la web, una transferencia redirige al detalle con su mensaje y el destino recibe el ingreso")
 		void desde_la_web_una_transferencia_redirige_al_detalle_con_su_mensaje_y_el_destino_recibe_el_ingreso()
 				throws Exception {
-			String source = webPath(openAccount("ES0000000000000000000704"));
-			String target = webPath(openAccount("ES0000000000000000000705"));
+			String sourceApi = openAccount();
+			String targetApi = openAccount();
+			String source = webPath(sourceApi);
+			String target = webPath(targetApi);
+			String targetIban = ibanOf(targetApi);
 
 			HttpResponse<String> response = submit(source + "/transfers",
-					"targetAccountNumber=ES0000000000000000000705&amount=25.00&currency=EUR");
+					"targetAccountNumber=" + targetIban + "&amount=25.00&currency=EUR");
 
 			assertThat(response.statusCode()).isEqualTo(302);
 			assertThat(response.headers().firstValue("Location")).hasValueSatisfying(
 					location -> assertThat(location).endsWith(source).doesNotContain(";jsessionid"));
-			assertThat(browse(source)).contains("Transferencia de 25,00 € a ES00 •••• 0705 aprobada")
+			assertThat(browse(source)).contains("Transferencia de 25,00 € a "
+					+ targetIban.substring(0, 4) + " •••• " + targetIban.substring(20) + " aprobada")
 					.contains("75,00 €");
 			assertThat(browse(target)).contains("125,00 €");
 		}
@@ -311,8 +333,10 @@ class DddLabApplicationTests {
 		@Test
 		@DisplayName("Un usuario con una sola cuenta entra directamente en ella y una cuenta ajena es un 404")
 		void un_usuario_con_una_sola_cuenta_entra_en_ella_y_una_ajena_es_un_404() throws Exception {
-			String alans = idOf(openAccountFor("ES0000000000000000005001", "alan"));
-			String others = idOf(openAccountFor("ES0000000000000000005002", "grace"));
+			String alansPath = openAccountFor("alan");
+			String othersPath = openAccountFor("grace");
+			String alans = idOf(alansPath);
+			String others = idOf(othersPath);
 			HttpClient alan = loginAs("alan");
 
 			HttpResponse<String> home = send(alan, "/");
@@ -321,24 +345,25 @@ class DddLabApplicationTests {
 			assertThat(home.statusCode()).isEqualTo(302);
 			assertThat(home.headers().firstValue("Location")).hasValueSatisfying(
 					location -> assertThat(location).endsWith("/accounts/" + alans));
-			assertThat(send(alan, "/accounts/" + alans).body()).contains("ES0000000000000000005001")
-					.doesNotContain("ES0000000000000000005002");
+			assertThat(send(alan, "/accounts/" + alans).body()).contains(ibanOf(alansPath))
+					.doesNotContain(ibanOf(othersPath));
 			assertThat(foreign.statusCode()).isEqualTo(404);
 		}
 
 		@Test
 		@DisplayName("Por la API, un usuario no abre cuentas (403), no ve las ajenas (404) y transfiere por IBAN")
 		void por_la_api_un_usuario_no_abre_cuentas_no_ve_las_ajenas_y_transfiere_por_iban() throws Exception {
-			String graces = idOf(openAccountFor("ES0000000000000000005003", "grace"));
-			String adas = idOf(openAccountFor("ES0000000000000000005004", "ada"));
+			String graces = idOf(openAccountFor("grace"));
+			String adasPath = openAccountFor("ada");
+			String adas = idOf(adasPath);
 
 			HttpResponse<String> open = api("grace", "POST", "/api/accounts", """
-					{"accountNumber": "ES0000000000000000005005", "holderName": "Grace Hopper", "segment": "RETAIL",
+					{"holderName": "Grace Hopper", "holderTaxId": "12345678Z",
 					 "initialDeposit": 100.00, "ownerUsername": "grace"}""");
 			HttpResponse<String> foreign = api("grace", "GET", "/api/accounts/" + adas, null);
 			HttpResponse<String> transfer = api("grace", "POST", "/api/transfers", """
-					{"sourceAccountId": "%s", "targetAccountNumber": "ES00 0000 0000 0000 0000 5004", "amount": 30}"""
-					.formatted(graces));
+					{"sourceAccountId": "%s", "targetAccountNumber": "%s", "amount": 30}"""
+					.formatted(graces, ibanOf(adasPath)));
 
 			assertThat(open.statusCode()).isEqualTo(403);
 			assertThat(open.body()).contains("Acceso denegado");
@@ -360,10 +385,10 @@ class DddLabApplicationTests {
 			assertThat(health.body()).contains("\"status\":\"UP\"").doesNotContain("components", "diskSpace");
 		}
 
-		private String openAccountFor(String accountNumber, String owner) throws Exception {
+		private String openAccountFor(String owner) throws Exception {
 			HttpResponse<String> created = post("/api/accounts", "application/json", """
-					{"accountNumber": "%s", "holderName": "Titular", "segment": "RETAIL", "initialDeposit": 100.00,
-					 "ownerUsername": "%s"}""".formatted(accountNumber, owner));
+					{"holderName": "Titular", "holderTaxId": "12345678Z", "initialDeposit": 100.00,
+					 "ownerUsername": "%s"}""".formatted(owner));
 			assertThat(created.statusCode()).isEqualTo(201);
 			return created.headers().firstValue("Location").orElseThrow();
 		}
@@ -417,13 +442,19 @@ class DddLabApplicationTests {
 	private final HttpClient browser = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
 
 	/** Abre una cuenta minorista con 100,00 € y devuelve su ruta de la API ({@code /api/accounts/{id}}). */
-	private String openAccount(String accountNumber) throws Exception {
+	private String openAccount() throws Exception {
 		HttpResponse<String> created = post("/api/accounts", "application/json", """
-				{"accountNumber": "%s", "holderName": "Grace Hopper", "segment": "RETAIL", "initialDeposit": 100.00,
-				 "ownerUsername": "ada"}"""
-				.formatted(accountNumber));
+				{"holderName": "Grace Hopper", "holderTaxId": "12345678Z", "initialDeposit": 100.00,
+				 "ownerUsername": "ada"}""");
 		assertThat(created.statusCode()).isEqualTo(201);
 		return created.headers().firstValue("Location").orElseThrow();
+	}
+
+	/** El IBAN generado de una cuenta, leído de su detalle de la API ({@code /api/accounts/{id}}). */
+	private String ibanOf(String apiPath) throws Exception {
+		Matcher matcher = Pattern.compile("\"accountNumber\":\"(ES\\d{22})\"").matcher(get(apiPath, "application/json").body());
+		assertThat(matcher.find()).isTrue();
+		return matcher.group(1);
 	}
 
 	private String webPath(String apiPath) {

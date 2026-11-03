@@ -25,7 +25,11 @@ public class CheckingAccount {
         this.currentBalance = MonetaryAmount.zero(initialDeposit.currency());
     }
 
-    public static CheckingAccount open(AccountNumber accountNumber, 
+    /**
+     * Abre una cuenta. Solo lo usan {@link CheckingAccountFactory} y los tests del mismo paquete: fuera del dominio las
+     * cuentas se abren con la factoría, que da el número y decide el segmento.
+     */
+    static CheckingAccount open(AccountNumber accountNumber, 
                                        AccountHolder primaryHolder,
                                        MonetaryAmount initialDeposit) {
         Objects.requireNonNull(accountNumber, "El número de cuenta es obligatorio");

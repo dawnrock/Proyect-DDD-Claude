@@ -1,31 +1,30 @@
 package com.pronoide.ddd.application;
 
 import java.math.BigDecimal;
-import java.util.Set;
 
 import org.immutables.value.Value;
 
 /**
  * Orden de abrir una cuenta corriente. Valida sus campos al construirse ({@code IllegalArgumentException}),
- * antes de llegar al dominio.
+ * antes de llegar al dominio. Contrato: {@code docs/contracts/account-factory.md}.
  *
- * <p>{@code segment} es {@code RETAIL} o {@code HIGH_NET_WORTH}; {@code currency}, un código ISO 4217
- * ({@code EUR} por defecto).
+ * <p>El IBAN lo genera la factoría y el segmento lo decide a partir de los ingresos verificados del titular, que se
+ * identifica por su NIF ({@code holderTaxId}). {@code currency} es un código ISO 4217 ({@code EUR} por defecto).
  */
 @ApplicationValue
 @Value.Immutable
 public interface OpenAccountCommandDef {
 
-    Set<String> SEGMENTS = Set.of("RETAIL", "HIGH_NET_WORTH");
-
     /** Formato de un nombre de usuario: 3-30 minúsculas, dígitos, punto, guion o guion bajo. */
     String USERNAME_PATTERN = "[a-z0-9._-]{3,30}";
 
-    String accountNumber();
+    /** Formato de un NIF: 8 dígitos y una letra; se admiten espacios y minúsculas. No se comprueba la letra. */
+    String TAX_ID_PATTERN = "^ *\\d{8} *[A-Za-z] *$";
 
     String holderName();
 
-    String segment();
+    /** NIF del titular, para verificar sus ingresos; lo normaliza {@code TaxId}. */
+    String holderTaxId();
 
     BigDecimal initialDeposit();
 
@@ -45,14 +44,11 @@ public interface OpenAccountCommandDef {
 
     @Value.Check
     default void validate() {
-        if (accountNumber().isBlank()) {
-            throw new IllegalArgumentException("El número de cuenta es obligatorio");
+        if (!holderTaxId().matches(TAX_ID_PATTERN)) {
+            throw new IllegalArgumentException("El NIF debe tener 8 dígitos y una letra");
         }
         if (holderName().isBlank()) {
             throw new IllegalArgumentException("El nombre del titular es obligatorio");
-        }
-        if (!SEGMENTS.contains(segment())) {
-            throw new IllegalArgumentException("El segmento debe ser RETAIL o HIGH_NET_WORTH");
         }
         if (initialDeposit().signum() <= 0) {
             throw new IllegalArgumentException("El depósito inicial debe ser positivo");

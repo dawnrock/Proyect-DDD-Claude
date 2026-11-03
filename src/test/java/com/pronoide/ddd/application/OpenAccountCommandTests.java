@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,17 +11,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import com.pronoide.ddd.domain.model.CustomerSegment;
-
 class OpenAccountCommandTests {
-
-    private static final String IBAN = "ES9121000418450200051332";
 
     private static OpenAccountCommand.Builder validCommand() {
         return OpenAccountCommand.builder()
-                .accountNumber(IBAN)
                 .holderName("Ada Lovelace")
-                .segment("RETAIL")
+                .holderTaxId("12345678Z")
                 .initialDeposit(new BigDecimal("100.00"));
     }
 
@@ -31,18 +25,10 @@ class OpenAccountCommandTests {
     void una_orden_con_todos_los_campos_validos_se_construye_y_usa_eur_por_defecto() {
         OpenAccountCommand command = validCommand().build();
 
-        assertThat(command.accountNumber()).isEqualTo(IBAN);
         assertThat(command.holderName()).isEqualTo("Ada Lovelace");
-        assertThat(command.segment()).isEqualTo("RETAIL");
+        assertThat(command.holderTaxId()).isEqualTo("12345678Z");
         assertThat(command.initialDeposit()).isEqualByComparingTo("100.00");
         assertThat(command.currency()).isEqualTo("EUR");
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"RETAIL", "HIGH_NET_WORTH"})
-    @DisplayName("Los dos segmentos permitidos se aceptan")
-    void los_dos_segmentos_permitidos_se_aceptan(String segment) {
-        assertThat(validCommand().segment(segment).build().segment()).isEqualTo(segment);
     }
 
     @Test
@@ -53,29 +39,11 @@ class OpenAccountCommandTests {
 
     @ParameterizedTest
     @ValueSource(strings = {"", "   "})
-    @DisplayName("El número de cuenta no puede estar en blanco")
-    void el_numero_de_cuenta_no_puede_estar_en_blanco(String accountNumber) {
-        assertThatIllegalArgumentException()
-                .isThrownBy(() -> validCommand().accountNumber(accountNumber).build())
-                .withMessage("El número de cuenta es obligatorio");
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"", "   "})
     @DisplayName("El nombre del titular no puede estar en blanco")
     void el_nombre_del_titular_no_puede_estar_en_blanco(String holderName) {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().holderName(holderName).build())
                 .withMessage("El nombre del titular es obligatorio");
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"", "retail", "VIP", "HIGH NET WORTH"})
-    @DisplayName("El segmento solo puede ser RETAIL o HIGH_NET_WORTH")
-    void el_segmento_solo_puede_ser_retail_o_high_net_worth(String segment) {
-        assertThatIllegalArgumentException()
-                .isThrownBy(() -> validCommand().segment(segment).build())
-                .withMessage("El segmento debe ser RETAIL o HIGH_NET_WORTH");
     }
 
     @ParameterizedTest
@@ -96,11 +64,27 @@ class OpenAccountCommandTests {
                 .withMessage("La divisa %s no es un código ISO 4217 válido".formatted(currency));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"", "   "})
+    @DisplayName("El NIF del titular es obligatorio")
+    void el_nif_del_titular_es_obligatorio(String taxId) {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> validCommand().holderTaxId(taxId).build())
+                .withMessage("El NIF debe tener 8 dígitos y una letra");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"1234567Z", "123456789", "ABCDEFGHZ", "12345678-Z"})
+    @DisplayName("El NIF debe tener 8 dígitos y una letra")
+    void el_nif_debe_tener_8_digitos_y_una_letra(String taxId) {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> validCommand().holderTaxId(taxId).build())
+                .withMessage("El NIF debe tener 8 dígitos y una letra");
+    }
+
     @Test
-    @DisplayName("Los segmentos que acepta la orden son exactamente los del dominio")
-    void los_segmentos_que_acepta_la_orden_son_exactamente_los_del_dominio() {
-        assertThat(OpenAccountCommandDef.SEGMENTS)
-                .containsExactlyInAnyOrderElementsOf(
-                        Arrays.stream(CustomerSegment.values()).map(Enum::name).toList());
+    @DisplayName("El NIF admite espacios y minúsculas, que normaliza el dominio")
+    void el_nif_admite_espacios_y_minusculas() {
+        assertThat(validCommand().holderTaxId(" 12345678 z ").build().holderTaxId()).isEqualTo(" 12345678 z ");
     }
 }

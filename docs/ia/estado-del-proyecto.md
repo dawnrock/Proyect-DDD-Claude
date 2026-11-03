@@ -2,7 +2,7 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores, y se mantiene **corto a propósito**: se carga en cada sesión. **Se actualiza en cada PR que cierra una issue** (lo comprueba el CI).
 
-- **Última actualización:** 2026-11-03 · PR #64 (#17, eventos de dominio)
+- **Última actualización:** 2026-11-03 · PR #65 (#18, factoría de cuentas)
 - **Rama activa:** `Hexagonal` (fase 2), rama por defecto del repositorio. `Monolithic` congelada en la etiqueta `v1-monolito`; `master` congelada.
 
 ## Dónde estamos
@@ -10,11 +10,11 @@
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
 | 1 · Monolito en capas | Cerrada: #2-#8, #11-#13, #31, #48, #50, #54, #57 (detalle en el [historial](historial.md)) | — | — |
-| 2 · Hexagonal | #14-#17 | — | #18 → #23 |
+| 2 · Hexagonal | #14-#18 | — | #19 → #23 |
 
 ## Siguiente paso
 
-`/plan-feature 18` sobre `Hexagonal` (factoría de cuentas con puertos de numeración y verificación de ingresos). Es de **equipo** (back + web): el plan lleva T0 · Contract y se implementa con `/implement-plan-team 18`.
+`/plan-feature 19` sobre `Hexagonal` (adaptador de entrada de línea de comandos `DomainModelRunner`, que sustituye a `DemoDataLoader`).
 
 Diseño objetivo de la fase 2: `docs/arquitectura/fase-2-hexagonal.md`; las issues, en el milestone "Fase 2 · Arquitectura hexagonal".
 

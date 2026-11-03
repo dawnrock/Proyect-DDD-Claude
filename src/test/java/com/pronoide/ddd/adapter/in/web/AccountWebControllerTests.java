@@ -111,7 +111,7 @@ class AccountWebControllerTests {
             return AccountSummary.builder()
                     .id(id)
                     .accountNumber(accountNumber)
-                    .holderName(holder)
+                    .holderName(holder).segment("RETAIL")
                     .balance(new BigDecimal(balance))
                     .currency("EUR")
                     .build();
@@ -216,7 +216,7 @@ class AccountWebControllerTests {
         return AccountSummary.builder()
                 .id(id)
                 .accountNumber(number)
-                .holderName(holder)
+                .holderName(holder).segment("RETAIL")
                 .balance(new BigDecimal("150.00"))
                 .currency("EUR")
                 .build();
@@ -439,7 +439,7 @@ class AccountWebControllerTests {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(AccountSummary.builder()
                     .id(ACCOUNT_ID)
                     .accountNumber("ES1234567890123456789012")
-                    .holderName("Ana Pérez")
+                    .holderName("Ana Pérez").segment("RETAIL")
                     .balance(new BigDecimal("150.00"))
                     .currency("EUR")
                     .build()));
@@ -1015,52 +1015,88 @@ class AccountWebControllerTests {
     @DisplayName("Alta de cuenta")
     class Alta {
 
+        private AccountSummary abierta(String segment) {
+            return AccountSummary.builder()
+                    .id(UUID.randomUUID())
+                    .accountNumber("ES1234567890123456789012")
+                    .holderName("Ana Pérez").segment(segment)
+                    .balance(new BigDecimal("100.00"))
+                    .currency("EUR")
+                    .build();
+        }
+
+        private MockHttpServletRequestBuilder altaValida() {
+            return post("/accounts/new")
+                    .param("holderName", "Ana Pérez")
+                    .param("holderTaxId", "12345678z")
+                    .param("ownerUsername", "ana")
+                    .param("initialDeposit", "100.00")
+                    .param("currency", "EUR");
+        }
+
         @Test
-        @DisplayName("El formulario muestra los campos, el segmento en español y el euro por defecto")
-        void el_formulario_muestra_los_campos_el_segmento_en_espanol_y_el_euro_por_defecto() throws Exception {
+        @DisplayName("El formulario muestra el NIF, la nota del IBAN generado y el euro por defecto, sin IBAN ni segmento")
+        void el_formulario_muestra_el_nif_y_no_pide_iban_ni_segmento() throws Exception {
             mvc.perform(get("/accounts/new"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("name=\"accountNumber\"")))
                     .andExpect(content().string(containsString("name=\"holderName\"")))
+                    .andExpect(content().string(containsString("name=\"holderTaxId\"")))
                     .andExpect(content().string(containsString("name=\"initialDeposit\"")))
-                    .andExpect(content().string(containsString("value=\"RETAIL\"")))
-                    .andExpect(content().string(containsString("value=\"HIGH_NET_WORTH\"")))
-                    .andExpect(content().string(containsString("Minorista")))
-                    .andExpect(content().string(containsString("Alto patrimonio")))
+                    .andExpect(content().string(containsString("se genera automáticamente")))
+                    .andExpect(content().string(containsString("ingresos verificados")))
+                    .andExpect(content().string(not(containsString("name=\"accountNumber\""))))
+                    .andExpect(content().string(not(containsString("name=\"segment\""))))
+                    .andExpect(model().attributeDoesNotExist("segments"))
                     .andExpect(content().string(matchesPattern("(?s).*<option value=\"EUR\" selected=\"selected\".*")));
         }
 
         @Test
-        @DisplayName("Un alta válida llama al servicio con el comando esperado y redirige al listado con un mensaje")
-        void un_alta_valida_llama_al_servicio_con_el_comando_esperado_y_redirige_al_listado_con_un_mensaje()
-                throws Exception {
-            when(commands.openAccount(any(Caller.class), any())).thenReturn(AccountSummary.builder()
-                    .id(UUID.randomUUID())
-                    .accountNumber("ES1234567890123456789012")
-                    .holderName("Ana Pérez")
-                    .balance(new BigDecimal("100.00"))
-                    .currency("EUR")
-                    .build());
+        @DisplayName("Un alta válida envía el NIF sin IBAN ni segmento y redirige al listado")
+        void un_alta_valida_envia_el_nif_sin_iban_ni_segmento_y_redirige_al_listado() throws Exception {
+            when(commands.openAccount(any(Caller.class), any())).thenReturn(abierta("RETAIL"));
 
-            mvc.perform(post("/accounts/new")
-                            .param("accountNumber", "es12 3456 7890 1234 5678 9012")
-                            .param("holderName", "Ana Pérez")
-                            .param("ownerUsername", "ana")
-                            .param("segment", "RETAIL")
-                            .param("initialDeposit", "100.00")
-                            .param("currency", "EUR"))
+            mvc.perform(altaValida())
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/"))
                     .andExpect(flash().attributeExists("message"));
 
             verify(commands).openAccount(ADMIN, OpenAccountCommand.builder()
-                    .accountNumber("es12 3456 7890 1234 5678 9012")
                     .holderName("Ana Pérez")
-                    .segment("RETAIL")
+                    .holderTaxId("12345678z")
                     .initialDeposit(new BigDecimal("100.00"))
                     .currency("EUR")
                     .ownerUsername("ana")
                     .build());
+        }
+
+        @Test
+        @DisplayName("El mensaje muestra el IBAN generado completo y el segmento Minorista")
+        void el_mensaje_muestra_el_iban_generado_y_el_segmento_minorista() throws Exception {
+            when(commands.openAccount(any(Caller.class), any())).thenReturn(abierta("RETAIL"));
+
+            mvc.perform(altaValida())
+                    .andExpect(flash().attribute("message",
+                            "Cuenta ES1234567890123456789012 abierta correctamente como Minorista"));
+        }
+
+        @Test
+        @DisplayName("El mensaje muestra el segmento Alto patrimonio cuando la fábrica lo calcula")
+        void el_mensaje_muestra_el_segmento_alto_patrimonio() throws Exception {
+            when(commands.openAccount(any(Caller.class), any())).thenReturn(abierta("HIGH_NET_WORTH"));
+
+            mvc.perform(altaValida())
+                    .andExpect(flash().attribute("message",
+                            "Cuenta ES1234567890123456789012 abierta correctamente como Alto patrimonio"));
+        }
+
+        @Test
+        @DisplayName("Un segmento desconocido se muestra tal cual")
+        void un_segmento_desconocido_se_muestra_tal_cual() throws Exception {
+            when(commands.openAccount(any(Caller.class), any())).thenReturn(abierta("PRIVATE"));
+
+            mvc.perform(altaValida())
+                    .andExpect(flash().attribute("message",
+                            "Cuenta ES1234567890123456789012 abierta correctamente como PRIVATE"));
         }
 
         @Test
@@ -1076,14 +1112,14 @@ class AccountWebControllerTests {
     @DisplayName("Errores del alta de cuenta")
     class ErroresDelAlta {
 
-        private MockHttpServletRequestBuilder altaCon(String accountNumber, String holderName, String deposit) {
-            return altaDe(accountNumber, holderName, deposit, "ana");
+        private MockHttpServletRequestBuilder altaCon(String taxId, String holderName, String deposit) {
+            return altaDe(taxId, holderName, deposit, "ana");
         }
 
         @Test
         @DisplayName("Un usuario del titular ausente vuelve al formulario con el error del campo y sin llamar al servicio")
         void un_usuario_del_titular_ausente_vuelve_al_formulario_con_el_error_del_campo() throws Exception {
-            mvc.perform(altaDe("ES1234567890123456789012", "Ana Lopez", "100.00", ""))
+            mvc.perform(altaDe("12345678Z", "Ana Lopez", "100.00", ""))
                     .andExpect(status().isOk())
                     .andExpect(view().name("accounts/new"))
                     .andExpect(model().attributeHasFieldErrors("form", "ownerUsername"))
@@ -1095,7 +1131,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Un usuario del titular con formato inválido vuelve al formulario y conserva lo escrito")
         void un_usuario_del_titular_con_formato_invalido_vuelve_al_formulario() throws Exception {
-            mvc.perform(altaDe("ES1234567890123456789012", "Ana Lopez", "100.00", "Ana Lopez"))
+            mvc.perform(altaDe("12345678Z", "Ana Lopez", "100.00", "Ana Lopez"))
                     .andExpect(status().isOk())
                     .andExpect(model().attributeHasFieldErrors("form", "ownerUsername"))
                     .andExpect(content().string(containsString("minúsculas, dígitos, puntos o guiones")))
@@ -1109,20 +1145,19 @@ class AccountWebControllerTests {
         void un_error_de_formato_que_solo_detecta_el_servicio_vuelve_al_formulario() throws Exception {
             when(commands.openAccount(any(Caller.class), any())).thenThrow(new IllegalArgumentException("Dato inválido"));
 
-            mvc.perform(altaCon("ES1234567890123456789012", "Ana Lopez", "100.00"))
+            mvc.perform(altaCon("12345678Z", "Ana Lopez", "100.00"))
                     .andExpect(status().isOk())
                     .andExpect(view().name("accounts/new"))
                     .andExpect(model().attributeHasErrors("form"))
                     .andExpect(content().string(containsString("Dato inválido")));
         }
 
-        private MockHttpServletRequestBuilder altaDe(String accountNumber, String holderName, String deposit,
+        private MockHttpServletRequestBuilder altaDe(String taxId, String holderName, String deposit,
                                                      String owner) {
             return post("/accounts/new")
-                    .param("accountNumber", accountNumber)
+                    .param("holderTaxId", taxId)
                     .param("ownerUsername", owner)
                     .param("holderName", holderName)
-                    .param("segment", "RETAIL")
                     .param("initialDeposit", deposit)
                     .param("currency", "EUR");
         }
@@ -1141,13 +1176,14 @@ class AccountWebControllerTests {
         }
 
         @Test
-        @DisplayName("Un IBAN mal formado vuelve al formulario con el error del campo y conserva los datos")
-        void un_iban_mal_formado_vuelve_al_formulario_con_el_error_del_campo_y_conserva_los_datos()
+        @DisplayName("Un NIF mal formado vuelve al formulario con el error del campo y conserva los datos")
+        void un_nif_mal_formado_vuelve_al_formulario_con_el_error_del_campo_y_conserva_los_datos()
                 throws Exception {
-            mvc.perform(altaCon("ES12-345", "Ana Lopez", "100.00"))
+            mvc.perform(altaCon("1234-Z", "Ana Lopez", "100.00"))
                     .andExpect(status().isOk())
-                    .andExpect(model().attributeHasFieldErrors("form", "accountNumber"))
-                    .andExpect(content().string(containsString("ES12-345")))
+                    .andExpect(model().attributeHasFieldErrors("form", "holderTaxId"))
+                    .andExpect(content().string(containsString("El NIF debe tener 8 dígitos y una letra")))
+                    .andExpect(content().string(containsString("1234-Z")))
                     .andExpect(content().string(containsString("Ana Lopez")));
 
             verifyNoInteractions(commands, queries);
@@ -1161,23 +1197,23 @@ class AccountWebControllerTests {
                     MonetaryAmount.euros("10.00"), MonetaryAmount.euros("50.00"));
             when(commands.openAccount(any(Caller.class), any())).thenThrow(error);
 
-            mvc.perform(altaCon("ES1234567890123456789012", "Ana Lopez", "10.00"))
+            mvc.perform(altaCon("12345678Z", "Ana Lopez", "10.00"))
                     .andExpect(status().isOk())
                     .andExpect(view().name("accounts/new"))
                     .andExpect(model().attributeHasErrors("form"))
                     .andExpect(content().string(containsString(
                             "no alcanza el mínimo exigido")))
-                    .andExpect(content().string(containsString("ES1234567890123456789012")))
+                    .andExpect(content().string(containsString("12345678Z")))
                     .andExpect(content().string(containsString("Ana Lopez")));
         }
 
         @Test
-        @DisplayName("Un número de cuenta duplicado vuelve al formulario con el mensaje del dominio")
+        @DisplayName("Un número de cuenta generado y duplicado vuelve al formulario con el mensaje del dominio")
         void un_numero_de_cuenta_duplicado_vuelve_al_formulario_con_el_mensaje_del_dominio() throws Exception {
             var error = new DuplicateAccountNumberException(new AccountNumber("ES1234567890123456789012"));
             when(commands.openAccount(any(Caller.class), any())).thenThrow(error);
 
-            mvc.perform(altaCon("ES1234567890123456789012", "Ana Lopez", "100.00"))
+            mvc.perform(altaCon("12345678Z", "Ana Lopez", "100.00"))
                     .andExpect(status().isOk())
                     .andExpect(view().name("accounts/new"))
                     .andExpect(content().string(containsString(error.getMessage())));
@@ -1188,10 +1224,9 @@ class AccountWebControllerTests {
         void una_divisa_bien_formada_pero_inexistente_vuelve_al_formulario_con_el_error_y_sin_llamar_al_servicio()
                 throws Exception {
             mvc.perform(post("/accounts/new")
-                            .param("accountNumber", "ES1234567890123456789012")
+                            .param("holderTaxId", "12345678Z")
                             .param("ownerUsername", "ana")
                             .param("holderName", "Ana Lopez")
-                            .param("segment", "RETAIL")
                             .param("initialDeposit", "100.00")
                             .param("currency", "XYZ"))
                     .andExpect(status().isOk())
