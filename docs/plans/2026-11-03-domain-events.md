@@ -124,7 +124,7 @@ Technical notes:
 - **Acceptance criteria:**
   - [x] Both transfer outcomes publish exactly their events.
 
-### [ ] T7 — Consumers in `application.listener` (~10 min)
+### [x] T7 — Consumers in `application.listener` (~10 min)
 
 - **Layer:** application
 - **Files:** `application/listener/AuditLogListener.java`, `application/listener/CustomerNotificationListener.java`, their tests
@@ -133,7 +133,7 @@ Technical notes:
   1. Tests first (plain unit tests with `OutputCaptureExtension`): the audit listener logs every `DomainEvent` with its type, account and instant; the notification listener logs a simulated message to the customer for deposits, withdrawals and rejected withdrawals (not for the opening).
   2. Both listeners: `@Component`, `@Slf4j`, `@EventListener` methods; Javadoc says the notification is simulated.
 - **Acceptance criteria:**
-  - [ ] Both listener tests pass.
+  - [x] Both listener tests pass.
 
 ### [x] T8 — `SpringDomainEventPublisher` and architecture rules (~10 min)
 
