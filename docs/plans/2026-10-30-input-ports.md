@@ -56,7 +56,7 @@ Technical notes:
 - **Acceptance criteria:**
   - [x] The service implements both ports; `./mvnw verify` green.
 
-### [ ] T2 — `DemoDataLoader` uses the commands port (~5 min)
+### [x] T2 — `DemoDataLoader` uses the commands port (~5 min)
 
 - **Layer:** application
 - **Files:** `DemoDataLoader.java`, `DemoDataLoaderTests.java`
@@ -64,7 +64,7 @@ Technical notes:
 - **What to do:**
   1. Field typed as `CheckingAccountCommands`; the test builds it with the port type.
 - **Acceptance criteria:**
-  - [ ] `DemoDataLoaderTests` and `DemoProfileTests` pass.
+  - [x] `DemoDataLoaderTests` and `DemoProfileTests` pass.
 
 ### [ ] T3 — REST controllers depend on the ports (~10 min)
 
