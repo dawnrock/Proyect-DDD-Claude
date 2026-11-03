@@ -47,7 +47,7 @@ The architecture is already guarded by existing rules, which now cover the new p
 - **Acceptance criteria:**
   - [x] `DomainModelRunnerTests`, `DemoProfileTests` and `DddLabApplicationTests` pass; `./mvnw verify` green.
 
-### [ ] T2 — Readable trace of each use case (~10 min)
+### [x] T2 — Readable trace of each use case (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `DomainModelRunner.java`, `DomainModelRunnerTests.java`
@@ -56,7 +56,7 @@ The architecture is already guarded by existing rules, which now cover the new p
   1. Tests first (`OutputCaptureExtension`): each opening logs one line with the use case, the generated IBAN, the holder, the segment label and the initial balance (for example `[demo] Abrir cuenta · ES… · Grace Hopper · Alto patrimonio · 5000.00 EUR · propietario grace`), and a closing line with how many accounts were opened.
   2. Implement the trace in the runner.
 - **Acceptance criteria:**
-  - [ ] The trace tests pass; the log of `./mvnw spring-boot:run` shows the three lines and the summary.
+  - [x] The trace tests pass; the log of `./mvnw spring-boot:run` shows the three lines and the summary.
 
 ### [ ] T3 — Architecture rules cover the CLI adapter (~5 min)
 

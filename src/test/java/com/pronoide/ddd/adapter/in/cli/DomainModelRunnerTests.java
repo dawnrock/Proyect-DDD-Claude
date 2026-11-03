@@ -9,7 +9,10 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.DefaultApplicationArguments;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 
 import com.pronoide.ddd.adapter.out.persistence.PersistenceTestAdapters;
 import com.pronoide.ddd.application.AccountOwnershipRepository;
@@ -19,6 +22,7 @@ import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.pronoide.ddd.domain.model.DomainEventPublisher;
 
+@ExtendWith(OutputCaptureExtension.class)
 class DomainModelRunnerTests {
 
     private final AccountOwnershipRepository ownership = PersistenceTestAdapters.ownership();
@@ -70,5 +74,24 @@ class DomainModelRunnerTests {
 
         assertThat(service.listAccounts(CallerDef.system())).extracting(AccountSummary::accountNumber)
                 .doesNotHaveDuplicates().allMatch(number -> number.startsWith("ES") && number.startsWith("2100", 4));
+    }
+
+    @Test
+    @DisplayName("Deja una traza legible de cada apertura: IBAN generado, titular, segmento, saldo y propietario")
+    void deja_una_traza_legible_de_cada_apertura(CapturedOutput output) {
+        new DomainModelRunner(service).run(new DefaultApplicationArguments());
+
+        assertThat(output)
+                .containsPattern("\\[demo\\] Abrir cuenta · ES\\d{22} · Ada Lovelace · Minorista · 1000\\.00 EUR · propietario ada")
+                .containsPattern("\\[demo\\] Abrir cuenta · ES\\d{22} · Grace Hopper · Alto patrimonio · 5000\\.00 EUR · propietario grace")
+                .containsPattern("\\[demo\\] Abrir cuenta · ES\\d{22} · Alan Turing · Minorista · 250\\.00 EUR · propietario alan");
+    }
+
+    @Test
+    @DisplayName("Termina con un resumen de cuántas cuentas de demostración ha abierto")
+    void termina_con_un_resumen_de_las_cuentas_abiertas(CapturedOutput output) {
+        new DomainModelRunner(service).run(new DefaultApplicationArguments());
+
+        assertThat(output).contains("[demo] 3 cuentas de demostración abiertas");
     }
 }
