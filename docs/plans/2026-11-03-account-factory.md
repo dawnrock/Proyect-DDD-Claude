@@ -104,7 +104,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Acceptance criteria:**
   - [x] Generated IBANs are valid (mod 97 = 1) and unique.
 
-### [ ] T4 — `FakeTaxAgencyIncomeVerifier` (~5 min)
+### [x] T4 — `FakeTaxAgencyIncomeVerifier` (~5 min)
 
 - **Side:** back
 - **Layer:** adapter.out
@@ -114,7 +114,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
   1. Tests first: the demo NIFs return their income; an unknown NIF is not verified.
   2. Package-private `@Component` with the fixed table; Javadoc says it is simulated.
 - **Acceptance criteria:**
-  - [ ] Verifier test passes; the ArchUnit rules on `adapter.out..` cover the new package (adapters do not know each other).
+  - [x] Verifier test passes; the ArchUnit rules on `adapter.out..` cover the new package (adapters do not know each other).
 
 ### [ ] T5 — The service opens through the factory (~10 min)
 
