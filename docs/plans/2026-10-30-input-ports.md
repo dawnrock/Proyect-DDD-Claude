@@ -45,7 +45,7 @@ Technical notes:
 
 ## Tasks
 
-### [ ] T1 — `CheckingAccountCommands` and `CheckingAccountQueries` (~10 min)
+### [x] T1 — `CheckingAccountCommands` and `CheckingAccountQueries` (~10 min)
 
 - **Layer:** application
 - **Files:** `CheckingAccountCommands.java`, `CheckingAccountQueries.java`, `CheckingAccountService.java`, `CheckingAccountServiceTests.java`
@@ -54,7 +54,7 @@ Technical notes:
   1. Create both interfaces; move each use case's Javadoc (rules, `@throws`) to the port and leave `@Override` in the service.
   2. Test (red first): the service is a `CheckingAccountCommands` and a `CheckingAccountQueries`; type the service fields in the application tests by port where they only use one side.
 - **Acceptance criteria:**
-  - [ ] The service implements both ports; `./mvnw verify` green.
+  - [x] The service implements both ports; `./mvnw verify` green.
 
 ### [ ] T2 — `DemoDataLoader` uses the commands port (~5 min)
 
