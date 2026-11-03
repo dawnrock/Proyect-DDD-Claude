@@ -174,7 +174,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Acceptance criteria:**
   - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors (issue criterion).
 
-### [ ] T10 — Web: form and controller (~10 min)
+### [x] T10 — Web: form and controller (~10 min)
 
 - **Side:** web
 - **Layer:** adapter.in
@@ -184,9 +184,9 @@ Simulated adapters (deterministic, documented in their Javadoc):
   1. Tests first (`@MockitoBean` of the ports): the form posts `holderTaxId` (field error if invalid) and builds the command without IBAN or segment; after opening, the confirmation message shows the generated IBAN and the computed segment ("Alto patrimonio" / "Minorista").
   2. Form and controller; remove the segment list from the model.
 - **Acceptance criteria:**
-  - [ ] Web tests of the new open-account, including the computed segment (issue criterion).
+  - [x] Web tests of the new open-account, including the computed segment (issue criterion).
 
-### [ ] T11 — Web: open-account template (~10 min)
+### [x] T11 — Web: open-account template (~10 min)
 
 - **Side:** web
 - **Layer:** adapter.in
@@ -196,7 +196,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
   1. Test first: the page has a NIF field and no IBAN or segment fields.
   2. Template: NIF input with its error, a short note that the IBAN is generated and the segment is decided from the verified income.
 - **Acceptance criteria:**
-  - [ ] Rendered form matches the contract's screen.
+  - [x] Rendered form matches the contract's screen.
 
 ### [ ] T12 — Contract the command (~5 min)
 
