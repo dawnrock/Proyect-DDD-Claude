@@ -16,12 +16,13 @@ import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.CompositeArchRule;
 import org.springframework.stereotype.Controller;
 
+import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.domain.model.DomainException;
 
 /**
  * Arquitectura en capas de la fase 1: cada regla es una fila de la tabla de dependencias (D1-D5) de
  * {@code docs/arquitectura/fase-1-capas.md}, más las que pide la #12. Provisional en la fase 2: se ajusta a los puertos
- * a medida que llegan (#15) hasta que la sustituya {@code HexagonalArchitectureTests} (#22).
+ * a medida que llegan (#15, #16) hasta que la sustituya {@code HexagonalArchitectureTests} (#22).
  */
 @AnalyzeClasses(packages = "com.pronoide.ddd",
                 importOptions = ImportOption.DoNotIncludeTests.class)
@@ -64,6 +65,16 @@ class LayeredArchitectureTests {
     static final ArchRule la_web_y_rest_no_se_conocen = slices()
             .matching("..adapter.in.(*)..")
             .should().notDependOnEachOther();
+
+    /**
+     * #16: los adaptadores de entrada usan los puertos {@code CheckingAccountCommands} y {@code CheckingAccountQueries},
+     * nunca la clase que los implementa. Se nombra por clase para que un renombrado rompa la compilación en lugar de
+     * dejar la regla vacía.
+     */
+    @ArchTest
+    static final ArchRule los_adaptadores_de_entrada_solo_conocen_los_puertos_de_entrada = noClasses()
+            .that().resideInAPackage("..adapter.in..")
+            .should().dependOnClassesThat().areAssignableTo(CheckingAccountService.class);
 
     /** El dominio solo cambia de estado con métodos de negocio: no tiene {@code set*} públicos. */
     @ArchTest

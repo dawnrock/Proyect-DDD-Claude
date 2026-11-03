@@ -89,7 +89,7 @@ Technical notes:
   - [x] `AccountWebControllerTests` and `WebSecurityTests` pass mocking only the ports.
   - [x] No import of `CheckingAccountService` in `adapter.in.web`.
 
-### [ ] T5 — ArchUnit rule for the input side (~10 min)
+### [x] T5 — ArchUnit rule for the input side (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/pronoide/ddd/LayeredArchitectureTests.java`
@@ -98,7 +98,7 @@ Technical notes:
   1. Rule `los_adaptadores_de_entrada_solo_conocen_los_puertos_de_entrada`: no class in `..adapter.in..` depends on `CheckingAccountService` (by class, so a rename breaks compilation instead of silently weakening it).
   2. Validate by breaking it: temporarily inject the service into a controller, see the rule fail, revert. Mention it in the commit.
 - **Acceptance criteria:**
-  - [ ] The rule fails when broken and passes after reverting; `./mvnw verify` green.
+  - [x] The rule fails when broken and passes after reverting; `./mvnw verify` green.
 
 ### [ ] T6 — Documentation and project status (~10 min)
 
