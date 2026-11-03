@@ -111,7 +111,7 @@ class AccountWebControllerTests {
             return AccountSummary.builder()
                     .id(id)
                     .accountNumber(accountNumber)
-                    .holderName(holder)
+                    .holderName(holder).segment("RETAIL")
                     .balance(new BigDecimal(balance))
                     .currency("EUR")
                     .build();
@@ -216,7 +216,7 @@ class AccountWebControllerTests {
         return AccountSummary.builder()
                 .id(id)
                 .accountNumber(number)
-                .holderName(holder)
+                .holderName(holder).segment("RETAIL")
                 .balance(new BigDecimal("150.00"))
                 .currency("EUR")
                 .build();
@@ -439,7 +439,7 @@ class AccountWebControllerTests {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(AccountSummary.builder()
                     .id(ACCOUNT_ID)
                     .accountNumber("ES1234567890123456789012")
-                    .holderName("Ana Pérez")
+                    .holderName("Ana Pérez").segment("RETAIL")
                     .balance(new BigDecimal("150.00"))
                     .currency("EUR")
                     .build()));
@@ -1037,7 +1037,7 @@ class AccountWebControllerTests {
             when(commands.openAccount(any(Caller.class), any())).thenReturn(AccountSummary.builder()
                     .id(UUID.randomUUID())
                     .accountNumber("ES1234567890123456789012")
-                    .holderName("Ana Pérez")
+                    .holderName("Ana Pérez").segment("RETAIL")
                     .balance(new BigDecimal("100.00"))
                     .currency("EUR")
                     .build());

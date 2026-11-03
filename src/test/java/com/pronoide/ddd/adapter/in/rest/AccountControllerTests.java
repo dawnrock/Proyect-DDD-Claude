@@ -73,7 +73,7 @@ class AccountControllerTests {
     private CheckingAccountQueries queries;
 
     private static AccountSummary summary() {
-        return AccountSummary.builder().id(ID).accountNumber(IBAN).holderName("Ada Lovelace")
+        return AccountSummary.builder().id(ID).accountNumber(IBAN).holderName("Ada Lovelace").segment("RETAIL")
                 .balance(new BigDecimal("100.00")).currency("EUR").build();
     }
 

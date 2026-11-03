@@ -174,6 +174,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
                 .id(account.id())
                 .accountNumber(account.accountNumber().value())
                 .holderName(account.primaryHolder().fullName())
+                .segment(account.primaryHolder().segment().name())
                 .balance(account.currentBalance().amount())
                 .currency(account.currentBalance().currency().getCurrencyCode())
                 .build();

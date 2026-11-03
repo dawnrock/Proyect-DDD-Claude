@@ -52,8 +52,8 @@ class OpenAccountCommandTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "   "})
-    @DisplayName("El número de cuenta no puede estar en blanco")
+    @ValueSource(strings = {"   "})
+    @DisplayName("Si se indica, el número de cuenta no puede estar en blanco")
     void el_numero_de_cuenta_no_puede_estar_en_blanco(String accountNumber) {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().accountNumber(accountNumber).build())
@@ -70,8 +70,8 @@ class OpenAccountCommandTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "retail", "VIP", "HIGH NET WORTH"})
-    @DisplayName("El segmento solo puede ser RETAIL o HIGH_NET_WORTH")
+    @ValueSource(strings = {"retail", "VIP", "HIGH NET WORTH"})
+    @DisplayName("Si se indica, el segmento solo puede ser RETAIL o HIGH_NET_WORTH")
     void el_segmento_solo_puede_ser_retail_o_high_net_worth(String segment) {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().segment(segment).build())

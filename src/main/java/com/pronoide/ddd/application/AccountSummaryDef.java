@@ -17,6 +17,9 @@ public interface AccountSummaryDef {
 
     String holderName();
 
+    /** {@code RETAIL} o {@code HIGH_NET_WORTH}: el segmento que decidió la factoría (#18). */
+    String segment();
+
     BigDecimal balance();
 
     String currency();
