@@ -68,7 +68,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Acceptance criteria:**
   - [x] Contract agreed and frozen in a commit; `./mvnw verify` green against it.
 
-### [ ] T1 — `TaxId` and the two output ports (~10 min)
+### [x] T1 — `TaxId` and the two output ports (~10 min)
 
 - **Side:** back
 - **Layer:** domain
@@ -78,7 +78,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
   1. Tests first: a NIF is normalized (spaces, lowercase) and rejected if it is not 8 digits + a letter.
   2. `record TaxId`; ports `AccountNumber next()` and `Optional<MonetaryAmount> verifiedAnnualIncome(TaxId)`.
 - **Acceptance criteria:**
-  - [ ] `TaxIdTests` pass; `check-domain.mjs` and `DomainIsolationTests` green.
+  - [x] `TaxIdTests` pass; `check-domain.mjs` and `DomainIsolationTests` green.
 
 ### [ ] T2 — `CheckingAccountFactory` (~10 min)
 
