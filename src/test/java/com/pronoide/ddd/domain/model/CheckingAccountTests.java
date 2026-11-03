@@ -148,6 +148,20 @@ class CheckingAccountTests {
     class DomainEvents {
 
         @Test
+        @DisplayName("Abrir una cuenta registra el evento de cuenta abierta seguido del ingreso del depósito inicial")
+        void abrir_una_cuenta_registra_cuenta_abierta_y_el_ingreso_del_deposito_inicial() {
+            AccountHolder titular = AccountHolder.register("Ada Lovelace", CustomerSegment.RETAIL);
+
+            CheckingAccount cuenta = CheckingAccount.open(IBAN, titular, MonetaryAmount.euros("500.00"));
+
+            Transaction deposito = cuenta.transactions().get(0);
+            assertThat(cuenta.pullDomainEvents()).containsExactly(
+                    new CheckingAccountOpened(cuenta.id(), IBAN, "Ada Lovelace", MonetaryAmount.euros("500.00"),
+                            deposito.occurredOn()),
+                    new MoneyDeposited(cuenta.id(), deposito.id(), MonetaryAmount.euros("500.00"), deposito.occurredOn()));
+        }
+
+        @Test
         @DisplayName("Un ingreso registra el evento de dinero ingresado con su movimiento")
         void un_ingreso_registra_el_evento_de_dinero_ingresado_con_su_movimiento() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();

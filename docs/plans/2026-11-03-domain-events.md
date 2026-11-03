@@ -79,7 +79,7 @@ Technical notes:
 - **Acceptance criteria:**
   - [x] Each outcome of a withdrawal records exactly its event.
 
-### [ ] T3 — `CheckingAccountOpened` (~5 min)
+### [x] T3 — `CheckingAccountOpened` (~5 min)
 
 - **Layer:** domain
 - **Files:** `CheckingAccountOpened.java`, `CheckingAccount.java`, `CheckingAccountTests.java`
@@ -88,7 +88,7 @@ Technical notes:
   1. Test first: opening records `CheckingAccountOpened` followed by the `MoneyDeposited` of the initial deposit; a failed opening (R1) records nothing because no account exists.
   2. Record and recording in `open`.
 - **Acceptance criteria:**
-  - [ ] `pullDomainEvents()` after `open` returns `[CheckingAccountOpened, MoneyDeposited]`.
+  - [x] `pullDomainEvents()` after `open` returns `[CheckingAccountOpened, MoneyDeposited]`.
 
 ### [ ] T4 — Events of a transfer (~5 min)
 

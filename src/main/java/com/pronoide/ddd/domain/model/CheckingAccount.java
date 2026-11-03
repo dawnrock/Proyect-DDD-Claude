@@ -37,7 +37,7 @@ public class CheckingAccount {
         }
 
         CheckingAccount account = new CheckingAccount(accountNumber, primaryHolder, initialDeposit);
-        account.deposit(initialDeposit);
+        account.recordOpening(initialDeposit);
         return account;
     }
 
@@ -107,6 +107,14 @@ public class CheckingAccount {
     private Transaction register(Transaction transaction) {
         transactions.add(transaction);
         return transaction;
+    }
+
+    /** El evento de apertura va antes que el del depósito inicial, pero comparte su instante. */
+    private void recordOpening(MonetaryAmount initialDeposit) {
+        int firstEvent = domainEvents.size();
+        Transaction deposit = deposit(initialDeposit);
+        domainEvents.add(firstEvent, new CheckingAccountOpened(
+                id, accountNumber, primaryHolder.fullName(), initialDeposit, deposit.occurredOn()));
     }
 
     private void record(DomainEvent event) {
