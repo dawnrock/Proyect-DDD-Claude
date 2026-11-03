@@ -1,4 +1,4 @@
-package com.pronoide.ddd.application;
+package com.pronoide.ddd.adapter.in.cli;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -12,10 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.DefaultApplicationArguments;
 
 import com.pronoide.ddd.adapter.out.persistence.PersistenceTestAdapters;
+import com.pronoide.ddd.application.AccountOwnershipRepository;
+import com.pronoide.ddd.application.AccountSummary;
+import com.pronoide.ddd.application.CallerDef;
+import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.pronoide.ddd.domain.model.DomainEventPublisher;
 
-class DemoDataLoaderTests {
+class DomainModelRunnerTests {
 
     private final AccountOwnershipRepository ownership = PersistenceTestAdapters.ownership();
     private final CheckingAccountService service =
@@ -25,7 +29,7 @@ class DemoDataLoaderTests {
     @Test
     @DisplayName("Al arrancar abre tres cuentas de demostración con el caso de uso, una de ellas de alto patrimonio")
     void al_arrancar_abre_tres_cuentas_de_demostracion_con_el_caso_de_uso() {
-        new DemoDataLoader(service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(service).run(new DefaultApplicationArguments());
 
         List<AccountSummary> accounts = service.listAccounts(CallerDef.system());
         assertThat(accounts).hasSize(3);
@@ -37,7 +41,7 @@ class DemoDataLoaderTests {
     @Test
     @DisplayName("Cada cuenta de demostración queda a nombre de su usuario: ada, grace y alan")
     void cada_cuenta_de_demostracion_queda_a_nombre_de_su_usuario() {
-        new DemoDataLoader(service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(service).run(new DefaultApplicationArguments());
 
         assertThat(service.listAccounts(CallerDef.system()))
                 .extracting(AccountSummary::holderName, account -> ownership.ownerOf(account.id()).orElse(null))
@@ -53,7 +57,7 @@ class DemoDataLoaderTests {
         CheckingAccountService withoutIncomes = new CheckingAccountService(PersistenceTestAdapters.accounts(), ownership,
                 mock(DomainEventPublisher.class), PersistenceTestAdapters.accountNumbers(), taxId -> Optional.empty());
 
-        new DemoDataLoader(withoutIncomes).run(new DefaultApplicationArguments());
+        new DomainModelRunner(withoutIncomes).run(new DefaultApplicationArguments());
 
         assertThat(withoutIncomes.listAccounts(CallerDef.system()))
                 .extracting(AccountSummary::segment).containsOnly("RETAIL");
@@ -62,7 +66,7 @@ class DemoDataLoaderTests {
     @Test
     @DisplayName("Las cuentas de demostración llevan un IBAN generado y distinto")
     void las_cuentas_de_demostracion_llevan_un_iban_generado() {
-        new DemoDataLoader(service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(service).run(new DefaultApplicationArguments());
 
         assertThat(service.listAccounts(CallerDef.system())).extracting(AccountSummary::accountNumber)
                 .doesNotHaveDuplicates().allMatch(number -> number.startsWith("ES") && number.startsWith("2100", 4));

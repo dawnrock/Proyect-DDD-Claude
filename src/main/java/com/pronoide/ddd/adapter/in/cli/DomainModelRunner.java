@@ -1,4 +1,4 @@
-package com.pronoide.ddd.application;
+package com.pronoide.ddd.adapter.in.cli;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -8,21 +8,27 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import com.pronoide.ddd.application.AccountSummary;
+import com.pronoide.ddd.application.CallerDef;
+import com.pronoide.ddd.application.CheckingAccountCommands;
+import com.pronoide.ddd.application.OpenAccountCommand;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Abre cuentas de demostración al arrancar, para poder probar la aplicación sin preparar datos. Usa el caso de uso
- * {@code openAccount} del puerto {@link CheckingAccountCommands}, nunca el repositorio, así que los datos cumplen las
- * mismas reglas que los reales: el IBAN lo genera la numeración y el segmento lo decide la agencia tributaria a partir
- * del NIF de cada titular (Grace Hopper es de alto patrimonio por sus ingresos verificados). Solo se activa con el perfil {@code demo}, que {@code ./mvnw spring-boot:run} activa
- * por defecto; los tests no lo cargan.
+ * Adaptador de entrada de línea de comandos (#19): al arrancar con el perfil {@code demo}, que
+ * {@code ./mvnw spring-boot:run} activa por defecto, abre las cuentas de demostración para poder probar la aplicación
+ * sin preparar datos. Como la API REST y la web, solo usa el puerto de entrada {@link CheckingAccountCommands}: los
+ * datos cumplen las mismas reglas que los reales (el IBAN lo genera la numeración y el segmento lo decide la agencia
+ * tributaria a partir del NIF; Grace Hopper es de alto patrimonio por sus ingresos verificados). Los tests no lo
+ * cargan.
  */
 @Slf4j
 @Component
 @Profile("demo")
 @RequiredArgsConstructor
-public class DemoDataLoader implements ApplicationRunner {
+public class DomainModelRunner implements ApplicationRunner {
 
     private static final List<OpenAccountCommand> DEMO_ACCOUNTS = List.of(
             account("Ada Lovelace", "12345678Z", "1000.00", "ada"),

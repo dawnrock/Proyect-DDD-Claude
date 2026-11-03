@@ -26,9 +26,9 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
 
+import com.pronoide.ddd.adapter.in.cli.DomainModelRunner;
 import com.pronoide.ddd.application.Caller;
 import com.pronoide.ddd.application.CheckingAccountCommands;
-import com.pronoide.ddd.application.DemoDataLoader;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
 
@@ -92,7 +92,7 @@ class DddLabApplicationTests {
 	@Test
 	@DisplayName("Sin el perfil demo no se cargan los datos de demostración")
 	void sin_el_perfil_demo_no_se_cargan_los_datos_de_demostracion() {
-		assertThat(context.getBeansOfType(DemoDataLoader.class)).isEmpty();
+		assertThat(context.getBeansOfType(DomainModelRunner.class)).isEmpty();
 	}
 
 	@Test

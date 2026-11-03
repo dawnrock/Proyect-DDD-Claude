@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-03
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~35 min (4 tasks)
 
 ## Goal
@@ -36,7 +36,7 @@ The architecture is already guarded by existing rules, which now cover the new p
 
 ## Tasks
 
-### [ ] T1 — Move the runner to `adapter.in.cli` (~10 min)
+### [x] T1 — Move the runner to `adapter.in.cli` (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `application/DemoDataLoader.java` → `adapter/in/cli/DomainModelRunner.java`, `application/DemoDataLoaderTests.java` → `adapter/in/cli/DomainModelRunnerTests.java`, `DddLabApplicationTests.java`
@@ -45,7 +45,7 @@ The architecture is already guarded by existing rules, which now cover the new p
   1. `git mv` both files and rename the classes; the runner's field and the test's construction are typed as `CheckingAccountCommands` (pending item from #16). Javadoc: CLI input adapter, demo profile.
   2. The existing tests act as characterization tests: same three accounts, owners and segments. `DddLabApplicationTests` checks that `DomainModelRunner` is not loaded without the `demo` profile.
 - **Acceptance criteria:**
-  - [ ] `DomainModelRunnerTests`, `DemoProfileTests` and `DddLabApplicationTests` pass; `./mvnw verify` green.
+  - [x] `DomainModelRunnerTests`, `DemoProfileTests` and `DddLabApplicationTests` pass; `./mvnw verify` green.
 
 ### [ ] T2 — Readable trace of each use case (~10 min)
 
