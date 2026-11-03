@@ -214,6 +214,19 @@ class CheckingAccountServiceOwnershipTests {
         }
 
         @Test
+        @DisplayName("El llamador de sistema (la demo) ingresa, retira y transfiere en cuentas de otros usuarios")
+        void el_llamador_de_sistema_opera_cuentas_de_otros_usuarios() {
+            Caller system = CallerDef.system();
+
+            service.deposit(system, deposit(adas));
+            service.withdraw(system, withdraw(graces));
+            service.transfer(system, transfer(adas, graces.accountNumber()));
+
+            assertThat(balanceOf(adas)).isEqualByComparingTo("500.00");
+            assertThat(balanceOf(graces)).isEqualByComparingTo("500.00");
+        }
+
+        @Test
         @DisplayName("Un usuario ingresa en su cuenta")
         void un_usuario_ingresa_en_su_cuenta() {
             assertThat(service.deposit(ADA, deposit(adas)).status()).isEqualTo("APPROVED");

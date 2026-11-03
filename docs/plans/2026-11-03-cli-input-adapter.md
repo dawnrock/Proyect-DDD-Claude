@@ -69,7 +69,7 @@ The architecture is already guarded by existing rules, which now cover the new p
 - **Acceptance criteria:**
   - [x] Each sabotage fails its rule; after reverting `./mvnw verify` is green (issue criterion: the runner imports nothing from `adapter.out` nor the application service).
 
-### [ ] T4 — `CallerDef.system()` operates any account (~5 min)
+### [x] T4 — `CallerDef.system()` operates any account (~5 min)
 
 - **Layer:** application
 - **Files:** `CheckingAccountServiceOwnershipTests.java`
@@ -77,7 +77,7 @@ The architecture is already guarded by existing rules, which now cover the new p
 - **What to do:**
   1. Test: the system caller deposits into, withdraws from and transfers from an account owned by another user (it is an administrator, ADR 0008). No production change expected; prove the test can fail by temporarily making `system()` a non-admin.
 - **Acceptance criteria:**
-  - [ ] The test passes and fails when `system()` is not an administrator (sabotage, reverted).
+  - [x] The test passes and fails when `system()` is not an administrator (sabotage, reverted).
 
 ### [ ] T5 — Demo deposits and withdrawals (~10 min)
 
