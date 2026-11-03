@@ -92,7 +92,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Acceptance criteria:**
   - [x] Factory tests pass with stubs of the two ports (issue criterion).
 
-### [ ] T3 — `InMemoryAccountNumberSequence` (~10 min)
+### [x] T3 — `InMemoryAccountNumberSequence` (~10 min)
 
 - **Side:** back
 - **Layer:** adapter.out
@@ -102,7 +102,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
   1. Tests first: consecutive numbers are different, start with `ES`, have the bank and branch, and pass the IBAN mod-97 check and the CCC check digits.
   2. Package-private `@Component`, `AtomicLong` counter.
 - **Acceptance criteria:**
-  - [ ] Generated IBANs are valid (mod 97 = 1) and unique.
+  - [x] Generated IBANs are valid (mod 97 = 1) and unique.
 
 ### [ ] T4 — `FakeTaxAgencyIncomeVerifier` (~5 min)
 
