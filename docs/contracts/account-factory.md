@@ -1,7 +1,7 @@
 # Contract: open an account through the factory
 
 - **Issue:** [#18](https://github.com/dawnrock/Proyect-DDD-Claude/issues/18) · **Plan:** `docs/plans/2026-11-03-account-factory.md`
-- **Status:** agreed (frozen at the commit noted below)
+- **Status:** frozen at `bc31fa7`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed with clarifications, merged by the lead)
 
 Replaces the open-account part of `open-query-list-accounts.md` (#5) and keeps the ownership rules of `login-roles.md` (#50). Querying and listing do not change.
