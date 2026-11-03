@@ -100,7 +100,7 @@ Technical notes:
 - **Acceptance criteria:**
   - [x] The rule fails when broken and passes after reverting; `./mvnw verify` green.
 
-### [ ] T6 — Documentation and project status (~10 min)
+### [x] T6 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/fase-2-hexagonal.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -109,8 +109,8 @@ Technical notes:
   1. `fase-2-hexagonal.md`: "State after #16"; rows for the controllers, `DemoDataLoader`, the service and the two input ports; remove them from "classes that arrive later".
   2. Project status: #16 done, next step `/plan-feature 17`; decisions about the ports, no query objects and keeping the service name; historial row.
 - **Acceptance criteria:**
-  - [ ] The class-role table reflects the ports.
-  - [ ] The CI check of the project status passes.
+  - [x] The class-role table reflects the ports.
+  - [x] The CI check of the project status passes.
 
 ## Global acceptance criteria
 

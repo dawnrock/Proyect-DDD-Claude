@@ -2,7 +2,7 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores, y se mantiene **corto a propósito**: se carga en cada sesión. **Se actualiza en cada PR que cierra una issue** (lo comprueba el CI).
 
-- **Última actualización:** 2026-10-30 · PR #62 (#15, puertos de salida de la persistencia)
+- **Última actualización:** 2026-11-03 · PR #PRNUM (#16, puertos de entrada)
 - **Rama activa:** `Hexagonal` (fase 2), rama por defecto del repositorio. `Monolithic` congelada en la etiqueta `v1-monolito`; `master` congelada.
 
 ## Dónde estamos
@@ -10,11 +10,11 @@
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
 | 1 · Monolito en capas | Cerrada: #2-#8, #11-#13, #31, #48, #50, #54, #57 (detalle en el [historial](historial.md)) | — | — |
-| 2 · Hexagonal | #14, #15 | — | #16 → #23 |
+| 2 · Hexagonal | #14-#16 | — | #17 → #23 |
 
 ## Siguiente paso
 
-`/plan-feature 16` sobre `Hexagonal` (puertos de entrada `CheckingAccountCommands` y `CheckingAccountQueries`).
+`/plan-feature 17` sobre `Hexagonal` (eventos de dominio: publicación y consumidores).
 
 Diseño objetivo de la fase 2: `docs/arquitectura/fase-2-hexagonal.md`; las issues, en el milestone "Fase 2 · Arquitectura hexagonal".
 
