@@ -68,7 +68,7 @@ Technical notes:
 - **Acceptance criteria:**
   - [x] The new tests pass; `check-domain.mjs` and `DomainIsolationTests` stay green.
 
-### [ ] T2 — `MoneyWithdrawn` and `WithdrawalRejected` (~10 min)
+### [x] T2 — `MoneyWithdrawn` and `WithdrawalRejected` (~10 min)
 
 - **Layer:** domain
 - **Files:** `MoneyWithdrawn.java`, `WithdrawalRejected.java`, `CheckingAccount.java`, `CheckingAccountTests.java`
@@ -77,7 +77,7 @@ Technical notes:
   1. Tests first: an approved withdrawal records `MoneyWithdrawn`; a rejected one records `WithdrawalRejected` and no `MoneyWithdrawn`.
   2. Both records and the recording in `tryWithdraw`.
 - **Acceptance criteria:**
-  - [ ] Each outcome of a withdrawal records exactly its event.
+  - [x] Each outcome of a withdrawal records exactly its event.
 
 ### [ ] T3 — `CheckingAccountOpened` (~5 min)
 

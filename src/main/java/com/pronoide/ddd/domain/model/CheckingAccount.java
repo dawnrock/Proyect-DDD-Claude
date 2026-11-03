@@ -62,8 +62,10 @@ public class CheckingAccount {
         if (isAllowed(newBalance)) {
             transaction.approve();
             currentBalance = newBalance;
+            record(new MoneyWithdrawn(id, transaction.id(), amount, transaction.occurredOn()));
         } else {
             transaction.reject();
+            record(new WithdrawalRejected(id, transaction.id(), amount, transaction.occurredOn()));
         }
         return transaction;
     }

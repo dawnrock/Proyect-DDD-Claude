@@ -160,6 +160,30 @@ class CheckingAccountTests {
         }
 
         @Test
+        @DisplayName("Una retirada aprobada registra el evento de dinero retirado")
+        void una_retirada_aprobada_registra_el_evento_de_dinero_retirado() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+            cuenta.pullDomainEvents();
+
+            Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("200.00"));
+
+            assertThat(cuenta.pullDomainEvents()).containsExactly(new MoneyWithdrawn(
+                    cuenta.id(), retirada.id(), MonetaryAmount.euros("200.00"), retirada.occurredOn()));
+        }
+
+        @Test
+        @DisplayName("Una retirada rechazada registra el evento de retirada rechazada y no el de dinero retirado")
+        void una_retirada_rechazada_registra_el_evento_de_retirada_rechazada() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+            cuenta.pullDomainEvents();
+
+            Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("600.00"));
+
+            assertThat(cuenta.pullDomainEvents()).containsExactly(new WithdrawalRejected(
+                    cuenta.id(), retirada.id(), MonetaryAmount.euros("600.00"), retirada.occurredOn()));
+        }
+
+        @Test
         @DisplayName("Recoger los eventos los vacía: una segunda recogida no devuelve nada")
         void recoger_los_eventos_los_vacia() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
