@@ -66,7 +66,7 @@ Technical notes:
 - **Acceptance criteria:**
   - [x] `DemoDataLoaderTests` and `DemoProfileTests` pass.
 
-### [ ] T3 — REST controllers depend on the ports (~10 min)
+### [x] T3 — REST controllers depend on the ports (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `AccountController.java`, `TransferController.java`, `AccountControllerTests.java`, `TransferControllerTests.java`
@@ -75,8 +75,8 @@ Technical notes:
   1. Tests first: `@MockitoBean CheckingAccountCommands commands` and `@MockitoBean CheckingAccountQueries queries` (only `commands` in `TransferControllerTests`); stubs and `verify` point to the right port. They fail to start the slice until the controllers change.
   2. `AccountController` receives both ports; `TransferController` only `CheckingAccountCommands`. Javadoc updated.
 - **Acceptance criteria:**
-  - [ ] Both test classes pass mocking only the ports.
-  - [ ] No import of `CheckingAccountService` in `adapter.in.rest`.
+  - [x] Both test classes pass mocking only the ports.
+  - [x] No import of `CheckingAccountService` in `adapter.in.rest`.
 
 ### [ ] T4 — Web controller depends on the ports (~10 min)
 
