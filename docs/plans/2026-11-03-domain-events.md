@@ -113,7 +113,7 @@ Technical notes:
   - [x] Publication happens after saving, verified with `InOrder`.
   - [x] `./mvnw verify` green.
 
-### [ ] T6 — Publishing a transfer (~5 min)
+### [x] T6 — Publishing a transfer (~5 min)
 
 - **Layer:** application
 - **Files:** `CheckingAccountService.java`, `CheckingAccountServiceTests.java`
@@ -122,7 +122,7 @@ Technical notes:
   1. Test first: an approved transfer publishes `MoneyWithdrawn` (source) and `MoneyDeposited` (target) after both saves; a rejected one publishes only `WithdrawalRejected`.
   2. Service: publish the events of both accounts after saving them.
 - **Acceptance criteria:**
-  - [ ] Both transfer outcomes publish exactly their events.
+  - [x] Both transfer outcomes publish exactly their events.
 
 ### [ ] T7 — Consumers in `application.listener` (~10 min)
 

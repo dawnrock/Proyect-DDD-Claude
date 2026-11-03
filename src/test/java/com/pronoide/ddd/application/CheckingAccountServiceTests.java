@@ -36,6 +36,7 @@ import com.pronoide.ddd.domain.model.DomainEventPublisher;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
 import com.pronoide.ddd.domain.model.MoneyDeposited;
+import com.pronoide.ddd.domain.model.MoneyWithdrawn;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
 import com.pronoide.ddd.domain.model.WithdrawalRejected;
 import com.pronoide.ddd.adapter.out.persistence.PersistenceTestAdapters;
@@ -396,6 +397,33 @@ class CheckingAccountServiceTests {
                     .targetAccountNumber(targetAccountNumber)
                     .amount(new BigDecimal(amount))
                     .build();
+        }
+
+        @Test
+        @DisplayName("Una transferencia aprobada publica la retirada del origen y el ingreso del destino tras guardarlas")
+        void una_transferencia_aprobada_publica_sus_eventos_tras_guardar_ambas_cuentas() {
+            clearInvocations(publisher);
+
+            service.transfer(ADMIN, transfer(sourceId, OTHER_IBAN, "200"));
+
+            InOrder order = inOrder(repository, publisher);
+            order.verify(repository, times(2)).save(any(CheckingAccount.class));
+            order.verify(publisher, times(2)).publishAll(any());
+            assertThat(publishedBatches()).flatMap(events -> events)
+                    .extracting(DomainEvent::getClass, DomainEvent::accountId)
+                    .containsExactly(tuple(MoneyWithdrawn.class, sourceId), tuple(MoneyDeposited.class, targetId));
+        }
+
+        @Test
+        @DisplayName("Una transferencia rechazada solo publica la retirada rechazada del origen")
+        void una_transferencia_rechazada_solo_publica_la_retirada_rechazada() {
+            clearInvocations(publisher);
+
+            service.transfer(ADMIN, transfer(sourceId, OTHER_IBAN, "5000"));
+
+            assertThat(publishedBatches()).flatMap(events -> events)
+                    .extracting(DomainEvent::getClass, DomainEvent::accountId)
+                    .containsExactly(tuple(WithdrawalRejected.class, sourceId));
         }
 
         @Test

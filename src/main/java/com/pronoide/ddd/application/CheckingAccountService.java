@@ -104,6 +104,8 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
                 transferService.transfer(source, target, toAmount(command.amount(), command.currency()));
         repository.save(source);
         repository.save(target);
+        publisher.publishAll(source.pullDomainEvents());
+        publisher.publishAll(target.pullDomainEvents());
         return TransferSummary.builder()
                 .sourceAccountId(source.id())
                 .sourceAccountNumber(source.accountNumber().value())
