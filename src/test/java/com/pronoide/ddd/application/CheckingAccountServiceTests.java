@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -363,6 +364,18 @@ class CheckingAccountServiceTests {
 
             assertThat(publishedBatches()).singleElement().satisfies(events -> assertThat(events)
                     .map(DomainEvent::getClass).containsExactly(WithdrawalRejected.class));
+        }
+
+        @Test
+        @DisplayName("Si guardar la cuenta falla, no se publica ningún evento")
+        void si_guardar_la_cuenta_falla_no_se_publica_ningun_evento() {
+            UUID id = service.openAccount(ADMIN, command(IBAN).build()).id();
+            clearInvocations(publisher);
+            doThrow(new IllegalStateException("fallo al guardar")).when(repository).save(any(CheckingAccount.class));
+
+            assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() ->
+                    service.deposit(ADMIN, DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).build()));
+            verify(publisher, never()).publishAll(any());
         }
 
         @Test

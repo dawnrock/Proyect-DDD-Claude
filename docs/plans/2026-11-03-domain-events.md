@@ -170,6 +170,17 @@ Technical notes:
 - **Acceptance criteria:**
   - [x] New terms in the glossary; the CI check of the project status passes.
 
+### [x] T11 — Review fixes (~5 min)
+
+- **Layer:** tests · docs
+- **Files:** `CheckingAccountServiceTests.java`, `docs/ia/pendientes.md`
+- **Depends on:** T10
+- **What to do:**
+  1. `revisor-ddd`: fix the core rule with a test where `save` throws and nothing is published.
+  2. Pending item: `pullDomainEvents()` empties the list before publishing, so a failing listener loses the remaining events (outbox or `@TransactionalEventListener` when a real listener arrives).
+- **Acceptance criteria:**
+  - [x] The new test passes and fails if the service publishes before saving; `./mvnw verify` green.
+
 ## Global acceptance criteria
 
 **Specific:**
