@@ -128,7 +128,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Acceptance criteria:**
   - [x] Opening goes through the factory; the duplicate check is a safety net after generation.
 
-### [ ] T6 — Remaining application tests and demo data (~10 min)
+### [x] T6 — Remaining application tests and demo data (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -138,7 +138,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
   1. Tests that relied on a typed IBAN read it from the returned summary.
   2. `DemoDataLoader` opens the three demo accounts with their NIFs; Grace stays `HIGH_NET_WORTH` because of the tax agency, not because of a typed segment.
 - **Acceptance criteria:**
-  - [ ] `DemoDataLoaderTests` still finds `RETAIL`, `RETAIL`, `HIGH_NET_WORTH`; `./mvnw verify` green.
+  - [x] `DemoDataLoaderTests` still finds `RETAIL`, `RETAIL`, `HIGH_NET_WORTH`; `./mvnw verify` green.
 
 ### [ ] T7 — `CheckingAccount.open` only inside the domain (~5 min)
 
