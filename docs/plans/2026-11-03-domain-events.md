@@ -148,7 +148,7 @@ Technical notes:
 - **Acceptance criteria:**
   - [x] Adapter test passes; the widened rule fails when broken and passes after reverting.
 
-### [ ] T9 — Integration: a deposit reaches the audit consumer (~10 min)
+### [x] T9 — Integration: a deposit reaches the audit consumer (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/pronoide/ddd/DddLabApplicationTests.java`
@@ -156,7 +156,7 @@ Technical notes:
 - **What to do:**
   1. With the full context: open an account and deposit through `CheckingAccountCommands` as admin, and check (`OutputCaptureExtension`) that the audit log line for the `MoneyDeposited` of that account appears.
 - **Acceptance criteria:**
-  - [ ] The integration test passes, and fails if the publisher adapter is removed from the context (sabotage, reverted).
+  - [x] The integration test passes, and fails if the publisher adapter stops forwarding the events (sabotage, reverted).
 
 ### [ ] T10 — Documentation and project status (~10 min)
 
