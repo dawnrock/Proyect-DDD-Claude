@@ -123,4 +123,5 @@ AccountSummary:            # merged into the existing schema: add `segment` to `
 
 ## Changes
 
+- 2026-11-03 (T12, lead): transition closed. `accountNumber`, `segment` and `SEGMENTS` removed from the command and the service's legacy path deleted; `holderTaxId` is required. The command now has its final shape.
 - 2026-11-03 (round 1, lead): while the transition lasts, a command without `holderTaxId` opens the old way instead of being rejected (backend-dev proposed a 400), so each side stays green until both have migrated; removed in T12. `SEGMENTS` stays in the command until T12, with the deprecated `segment`.

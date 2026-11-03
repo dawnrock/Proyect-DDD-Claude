@@ -198,7 +198,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Acceptance criteria:**
   - [x] Rendered form matches the contract's screen.
 
-### [ ] T12 — Contract the command (~5 min)
+### [x] T12 — Contract the command (~5 min)
 
 - **Side:** both
 - **Layer:** application
@@ -207,7 +207,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **What to do:**
   1. Remove the deprecated `accountNumber`, `segment` and `SEGMENTS`, and the service's legacy path without NIF; `holderTaxId` becomes required with its format validation; update the command tests and mark the contract as final.
 - **Acceptance criteria:**
-  - [ ] Nobody references the removed fields; `./mvnw verify` green.
+  - [x] Nobody references the removed fields; `./mvnw verify` green.
 
 ### [ ] T13 — End-to-end tests (~10 min)
 

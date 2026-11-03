@@ -1,7 +1,6 @@
 package com.pronoide.ddd.application;
 
 import java.math.BigDecimal;
-import java.util.Set;
 
 import org.immutables.value.Value;
 
@@ -11,15 +10,10 @@ import org.immutables.value.Value;
  *
  * <p>El IBAN lo genera la factoría y el segmento lo decide a partir de los ingresos verificados del titular, que se
  * identifica por su NIF ({@code holderTaxId}). {@code currency} es un código ISO 4217 ({@code EUR} por defecto).
- *
- * <p>Transición (#18): {@code accountNumber} y {@code segment} siguen como campos opcionales y obsoletos hasta que la
- * web y el back usen el NIF; después se eliminan y {@code holderTaxId} pasa a ser obligatorio.
  */
 @ApplicationValue
 @Value.Immutable
 public interface OpenAccountCommandDef {
-
-    Set<String> SEGMENTS = Set.of("RETAIL", "HIGH_NET_WORTH");
 
     /** Formato de un nombre de usuario: 3-30 minúsculas, dígitos, punto, guion o guion bajo. */
     String USERNAME_PATTERN = "[a-z0-9._-]{3,30}";
@@ -27,27 +21,10 @@ public interface OpenAccountCommandDef {
     /** Formato de un NIF: 8 dígitos y una letra; se admiten espacios y minúsculas. No se comprueba la letra. */
     String TAX_ID_PATTERN = "^ *\\d{8} *[A-Za-z] *$";
 
-    /** Obsoleto (#18): lo genera {@code AccountNumberSequence}. Vacío si no se indica. */
-    @Deprecated
-    @Value.Default
-    default String accountNumber() {
-        return "";
-    }
-
     String holderName();
 
-    /** NIF del titular, para verificar sus ingresos. Vacío por defecto solo durante la transición (#18). */
-    @Value.Default
-    default String holderTaxId() {
-        return "";
-    }
-
-    /** Obsoleto (#18): lo decide la factoría. Vacío si no se indica. */
-    @Deprecated
-    @Value.Default
-    default String segment() {
-        return "";
-    }
+    /** NIF del titular, para verificar sus ingresos; lo normaliza {@code TaxId}. */
+    String holderTaxId();
 
     BigDecimal initialDeposit();
 
@@ -67,17 +44,11 @@ public interface OpenAccountCommandDef {
 
     @Value.Check
     default void validate() {
-        if (!accountNumber().isEmpty() && accountNumber().isBlank()) {
-            throw new IllegalArgumentException("El número de cuenta es obligatorio");
-        }
-        if (!holderTaxId().isEmpty() && !holderTaxId().matches(TAX_ID_PATTERN)) {
+        if (!holderTaxId().matches(TAX_ID_PATTERN)) {
             throw new IllegalArgumentException("El NIF debe tener 8 dígitos y una letra");
         }
         if (holderName().isBlank()) {
             throw new IllegalArgumentException("El nombre del titular es obligatorio");
-        }
-        if (!segment().isEmpty() && !SEGMENTS.contains(segment())) {
-            throw new IllegalArgumentException("El segmento debe ser RETAIL o HIGH_NET_WORTH");
         }
         if (initialDeposit().signum() <= 0) {
             throw new IllegalArgumentException("El depósito inicial debe ser positivo");

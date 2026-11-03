@@ -78,9 +78,8 @@ class DddLabApplicationTests {
 	void un_ingreso_llega_al_consumidor_de_auditoria(CapturedOutput output) {
 		Caller admin = Caller.builder().username("admin").admin(true).build();
 		UUID accountId = commands.openAccount(admin, OpenAccountCommand.builder()
-				.accountNumber("ES0000000000000000001701")
 				.holderName("Ada Lovelace")
-				.segment("RETAIL")
+				.holderTaxId("12345678Z")
 				.initialDeposit(new BigDecimal("100"))
 				.ownerUsername("ada")
 				.build()).id();

@@ -125,8 +125,6 @@ class AccountControllerTests {
             OpenAccountCommand command = captor.getValue();
             assertThat(command.holderName()).isEqualTo("Ada Lovelace");
             assertThat(command.holderTaxId()).isEqualTo("12345678Z");
-            assertThat(command.accountNumber()).isEmpty();
-            assertThat(command.segment()).isEmpty();
             assertThat(command.initialDeposit()).isEqualByComparingTo("100.00");
             assertThat(command.currency()).isEqualTo("EUR");
         }

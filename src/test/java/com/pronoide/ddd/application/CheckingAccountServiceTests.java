@@ -46,7 +46,6 @@ import com.pronoide.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 /** Casos de uso con el adaptador en memoria real detrás de los puertos: no hace falta simularlo. */
 class CheckingAccountServiceTests {
 
-    private static final String IBAN = "ES9121000418450200051332";
 
     /** Los casos de uso se piden como administrador; la propiedad se prueba en CheckingAccountServiceOwnershipTests. */
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
@@ -85,81 +84,10 @@ class CheckingAccountServiceTests {
         return command().holderName("Grace Hopper").holderTaxId("87654321X");
     }
 
-    /** Camino antiguo con IBAN y segmento escritos; se elimina en T12 junto con los campos obsoletos. */
-    @SuppressWarnings("deprecation")
-    private static OpenAccountCommand.Builder legacyCommand(String accountNumber) {
-        return OpenAccountCommand.builder()
-                .accountNumber(accountNumber)
-                .holderName("Ada Lovelace")
-                .segment("RETAIL")
-                .initialDeposit(new BigDecimal("100"))
-                .ownerUsername("ada");
-    }
-
     @Test
     @DisplayName("El servicio ofrece los casos de uso por sus puertos de entrada de commands y de queries")
     void el_servicio_ofrece_los_casos_de_uso_por_sus_puertos_de_entrada_de_commands_y_de_queries() {
         assertThat(service).isInstanceOf(CheckingAccountCommands.class).isInstanceOf(CheckingAccountQueries.class);
-    }
-
-    @Nested
-    @DisplayName("Abrir cuenta con IBAN y segmento escritos (camino antiguo, hasta T12)")
-    class OpenAccountLegacy {
-
-        @Test
-        @DisplayName("Un depósito válido abre la cuenta, la guarda y devuelve su resumen")
-        void un_deposito_valido_abre_la_cuenta_la_guarda_y_devuelve_su_resumen() {
-            AccountSummary summary = service.openAccount(ADMIN, legacyCommand("es91 2100 0418 4502 0005 1332").build());
-
-            assertThat(summary.accountNumber()).isEqualTo(IBAN);
-            assertThat(summary.holderName()).isEqualTo("Ada Lovelace");
-            assertThat(summary.balance()).isEqualByComparingTo("100.00");
-            assertThat(summary.balance().scale()).isEqualTo(2);
-            assertThat(summary.currency()).isEqualTo("EUR");
-            assertThat(repository.findById(summary.id())).isPresent();
-        }
-
-        @Test
-        @DisplayName("Un depósito por debajo del mínimo se rechaza y no se guarda")
-        void un_deposito_por_debajo_del_minimo_se_rechaza_y_no_se_guarda() {
-            OpenAccountCommand tooLow = legacyCommand(IBAN).initialDeposit(new BigDecimal("49.99")).build();
-
-            assertThatExceptionOfType(InsufficientInitialDepositException.class)
-                    .isThrownBy(() -> service.openAccount(ADMIN, tooLow));
-            assertThat(repository.findAll()).isEmpty();
-        }
-
-        @Test
-        @DisplayName("Un depósito en otra divisa se rechaza y no se guarda")
-        void un_deposito_en_otra_divisa_se_rechaza_y_no_se_guarda() {
-            OpenAccountCommand inDollars = legacyCommand(IBAN).currency("USD").build();
-
-            assertThatExceptionOfType(CurrencyMismatchException.class)
-                    .isThrownBy(() -> service.openAccount(ADMIN, inDollars));
-            assertThat(repository.findAll()).isEmpty();
-        }
-
-        @Test
-        @DisplayName("Un número de cuenta en uso se rechaza aunque venga con espacios o en minúsculas")
-        void un_numero_de_cuenta_en_uso_se_rechaza_aunque_venga_con_espacios_o_en_minusculas() {
-            service.openAccount(ADMIN, legacyCommand(IBAN).build());
-            OpenAccountCommand duplicate = legacyCommand("es91 2100 0418 4502 0005 1332").holderName("Grace Hopper").build();
-
-            assertThatExceptionOfType(DuplicateAccountNumberException.class)
-                    .isThrownBy(() -> service.openAccount(ADMIN, duplicate))
-                    .withMessageContaining(IBAN);
-            assertThat(repository.findAll()).hasSize(1);
-            assertThat(repository.findByAccountNumber(new AccountNumber(IBAN)).orElseThrow().primaryHolder().fullName())
-                    .isEqualTo("Ada Lovelace");
-        }
-
-        @Test
-        @DisplayName("Un cliente de alto patrimonio abre su cuenta con su segmento")
-        void un_cliente_de_alto_patrimonio_abre_su_cuenta_con_su_segmento() {
-            AccountSummary summary = service.openAccount(ADMIN, legacyCommand(IBAN).segment("HIGH_NET_WORTH").build());
-
-            assertThat(repository.findById(summary.id()).orElseThrow().primaryHolder().isHighNetWorth()).isTrue();
-        }
     }
 
     @Nested
@@ -199,26 +127,15 @@ class CheckingAccountServiceTests {
         }
 
         @Test
-        @DisplayName("Con NIF se ignoran el IBAN y el segmento obsoletos del command")
-        @SuppressWarnings("deprecation")
-        void con_nif_se_ignoran_los_campos_obsoletos() {
-            AccountSummary summary = service.openAccount(ADMIN,
-                    byTaxId("12345678Z").accountNumber(IBAN).segment("HIGH_NET_WORTH").build());
-
-            assertThat(summary.accountNumber()).isNotEqualTo(IBAN);
-            assertThat(summary.segment()).isEqualTo("RETAIL");
-        }
-
-        @Test
         @DisplayName("Un número generado que ya está en uso se rechaza y no se guarda")
         void un_numero_generado_en_uso_se_rechaza() {
-            service.openAccount(ADMIN, legacyCommand(IBAN).build());
+            String used = service.openAccount(ADMIN, command().build()).accountNumber();
             CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
-                    publisher, () -> new AccountNumber(IBAN), TaxAgencyTestAdapters.incomeVerifier());
+                    publisher, () -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier());
 
             assertThatExceptionOfType(DuplicateAccountNumberException.class)
                     .isThrownBy(() -> faulty.openAccount(ADMIN, byTaxId("87654321X").build()))
-                    .withMessageContaining(IBAN);
+                    .withMessageContaining(used);
             assertThat(repository.findAll()).hasSize(1);
         }
 
@@ -233,6 +150,28 @@ class CheckingAccountServiceTests {
                     .hasAtLeastOneElementOfType(CheckingAccountOpened.class));
             assertThat(service.listAccounts(Caller.builder().username("grace").admin(false).build()))
                     .extracting(AccountSummary::id).containsExactly(summary.id());
+        }
+
+        @Test
+        @DisplayName("Un depósito válido abre la cuenta, la guarda y devuelve su resumen")
+        void un_deposito_valido_abre_la_cuenta_la_guarda_y_devuelve_su_resumen() {
+            AccountSummary summary = service.openAccount(ADMIN, command().build());
+
+            assertThat(summary.holderName()).isEqualTo("Ada Lovelace");
+            assertThat(summary.balance()).isEqualByComparingTo("100.00");
+            assertThat(summary.balance().scale()).isEqualTo(2);
+            assertThat(summary.currency()).isEqualTo("EUR");
+            assertThat(repository.findById(summary.id())).isPresent();
+        }
+
+        @Test
+        @DisplayName("Un depósito en otra divisa se rechaza y no se guarda")
+        void un_deposito_en_otra_divisa_se_rechaza_y_no_se_guarda() {
+            OpenAccountCommand inDollars = command().currency("USD").build();
+
+            assertThatExceptionOfType(CurrencyMismatchException.class)
+                    .isThrownBy(() -> service.openAccount(ADMIN, inDollars));
+            assertThat(repository.findAll()).isEmpty();
         }
 
         @Test
