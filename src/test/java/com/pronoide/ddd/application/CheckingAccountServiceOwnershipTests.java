@@ -2,6 +2,7 @@ package com.pronoide.ddd.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.pronoide.ddd.adapter.out.persistence.PersistenceTestAdapters;
+import com.pronoide.ddd.domain.model.DomainEventPublisher;
 import com.pronoide.ddd.domain.model.CheckingAccountRepository;
 import com.pronoide.ddd.support.TestAccounts;
 
@@ -36,7 +38,7 @@ class CheckingAccountServiceOwnershipTests {
     void setUp() {
         accounts = PersistenceTestAdapters.accounts();
         owners = PersistenceTestAdapters.ownership();
-        service = new CheckingAccountService(accounts, owners);
+        service = new CheckingAccountService(accounts, owners, mock(DomainEventPublisher.class));
     }
 
     private static OpenAccountCommand.Builder command(String accountNumber, String owner) {

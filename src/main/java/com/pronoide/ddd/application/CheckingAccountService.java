@@ -12,6 +12,7 @@ import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CheckingAccountRepository;
 import com.pronoide.ddd.domain.model.CustomerSegment;
+import com.pronoide.ddd.domain.model.DomainEventPublisher;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.Transaction;
@@ -30,8 +31,9 @@ import lombok.RequiredArgsConstructor;
  * 404) para no revelar que existe.
  *
  * <p>Implementa los puertos de entrada {@link CheckingAccountCommands} y {@link CheckingAccountQueries}, que son lo
- * único que conocen los adaptadores de entrada. Solo conoce los puertos de salida ({@link CheckingAccountRepository}
- * y {@link AccountOwnershipRepository}); Spring le inyecta sus adaptadores.
+ * único que conocen los adaptadores de entrada. Solo conoce los puertos de salida ({@link CheckingAccountRepository},
+ * {@link AccountOwnershipRepository} y {@link DomainEventPublisher}); Spring le inyecta sus adaptadores. Publica los
+ * eventos de dominio de cada cuenta después de guardarla.
  */
 @Service
 @RequiredArgsConstructor
@@ -39,6 +41,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
 
     private final CheckingAccountRepository repository;
     private final AccountOwnershipRepository ownership;
+    private final DomainEventPublisher publisher;
     private final MoneyTransferService transferService = new MoneyTransferService();
 
     @Override
@@ -57,7 +60,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         AccountHolder holder = AccountHolder.register(command.holderName(), CustomerSegment.valueOf(command.segment()));
         MonetaryAmount initialDeposit =
                 new MonetaryAmount(command.initialDeposit(), Currency.getInstance(command.currency()));
-        CheckingAccount account = repository.save(CheckingAccount.open(accountNumber, holder, initialDeposit));
+        CheckingAccount account = saveAndPublish(CheckingAccount.open(accountNumber, holder, initialDeposit));
         ownership.assign(account.id(), command.ownerUsername());
         return toSummary(account);
     }
@@ -79,7 +82,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     public TransactionSummary deposit(Caller caller, DepositCommand command) {
         CheckingAccount account = loadFor(caller, command.accountId());
         Transaction transaction = account.deposit(toAmount(command.amount(), command.currency()));
-        repository.save(account);
+        saveAndPublish(account);
         return toTransaction(transaction);
     }
 
@@ -87,7 +90,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     public TransactionSummary withdraw(Caller caller, WithdrawCommand command) {
         CheckingAccount account = loadFor(caller, command.accountId());
         Transaction transaction = account.tryWithdraw(toAmount(command.amount(), command.currency()));
-        repository.save(account);
+        saveAndPublish(account);
         return toTransaction(transaction);
     }
 
@@ -120,6 +123,13 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
             throw new AccountNotFoundException(id);
         }
         return account;
+    }
+
+    /** Guarda la cuenta y, solo después, publica los eventos que ha registrado. */
+    private CheckingAccount saveAndPublish(CheckingAccount account) {
+        CheckingAccount saved = repository.save(account);
+        publisher.publishAll(account.pullDomainEvents());
+        return saved;
     }
 
     private boolean canAccess(Caller caller, UUID accountId) {

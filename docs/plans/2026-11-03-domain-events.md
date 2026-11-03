@@ -100,7 +100,7 @@ Technical notes:
 - **Acceptance criteria:**
   - [x] Both tests pass and were seen failing when `transfer` was sabotaged.
 
-### [ ] T5 — `DomainEventPublisher` port; the service publishes after saving (~10 min)
+### [x] T5 — `DomainEventPublisher` port; the service publishes after saving (~10 min)
 
 - **Layer:** domain · application
 - **Files:** `DomainEventPublisher.java`, `CheckingAccountService.java`, `CheckingAccountServiceTests.java`, `CheckingAccountServiceOwnershipTests.java`, `DemoDataLoaderTests.java`
@@ -110,8 +110,8 @@ Technical notes:
   2. Tests first (publisher mocked): open, deposit and withdraw publish the account's events **after** `save` (`InOrder`); a rejected withdrawal publishes `WithdrawalRejected`; a use case that fails before saving publishes nothing.
   3. Service: `publisher.publishAll(account.pullDomainEvents())` after each `save`. Existing test constructions get a mock publisher.
 - **Acceptance criteria:**
-  - [ ] Publication happens after saving, verified with `InOrder`.
-  - [ ] `./mvnw verify` green.
+  - [x] Publication happens after saving, verified with `InOrder`.
+  - [x] `./mvnw verify` green.
 
 ### [ ] T6 — Publishing a transfer (~5 min)
 

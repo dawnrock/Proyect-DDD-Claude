@@ -2,6 +2,7 @@ package com.pronoide.ddd.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
@@ -10,12 +11,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.DefaultApplicationArguments;
 
 import com.pronoide.ddd.adapter.out.persistence.PersistenceTestAdapters;
+import com.pronoide.ddd.domain.model.DomainEventPublisher;
 
 class DemoDataLoaderTests {
 
     private final AccountOwnershipRepository ownership = PersistenceTestAdapters.ownership();
     private final CheckingAccountService service =
-            new CheckingAccountService(PersistenceTestAdapters.accounts(), ownership);
+            new CheckingAccountService(PersistenceTestAdapters.accounts(), ownership, mock(DomainEventPublisher.class));
 
     @Test
     @DisplayName("Al arrancar abre tres cuentas de demostración con el caso de uso, una de ellas de alto patrimonio")
