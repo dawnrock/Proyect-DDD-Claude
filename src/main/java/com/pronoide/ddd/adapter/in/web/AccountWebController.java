@@ -1,7 +1,6 @@
 package com.pronoide.ddd.adapter.in.web;
 
 import java.math.BigDecimal;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -221,8 +220,8 @@ public class AccountWebController {
         if (command != null) {
             try {
                 AccountSummary account = commands.openAccount(CurrentCaller.from(authentication), command);
-                redirect.addFlashAttribute("message",
-                        "Cuenta %s abierta correctamente".formatted(account.accountNumber()));
+                redirect.addFlashAttribute("message", "Cuenta %s abierta correctamente como %s"
+                        .formatted(account.accountNumber(), segmentLabel(account.segment())));
                 return "redirect:/";
             } catch (DomainException | IllegalArgumentException e) {
                 result.reject("domain", e.getMessage());
@@ -239,9 +238,8 @@ public class AccountWebController {
     private OpenAccountCommand toCommand(OpenAccountForm form, BindingResult result) {
         try {
             return OpenAccountCommand.builder()
-                    .accountNumber(form.getAccountNumber())
                     .holderName(form.getHolderName())
-                    .segment(form.getSegment())
+                    .holderTaxId(form.getHolderTaxId())
                     .initialDeposit(form.getInitialDeposit())
                     .currency(form.getCurrency())
                     .ownerUsername(form.getOwnerUsername())
@@ -252,11 +250,16 @@ public class AccountWebController {
         }
     }
 
+    /** Etiqueta en español del segmento; si el código es desconocido se muestra tal cual. */
+    private static String segmentLabel(String segment) {
+        return switch (segment) {
+            case "RETAIL" -> "Minorista";
+            case "HIGH_NET_WORTH" -> "Alto patrimonio";
+            default -> segment;
+        };
+    }
+
     private void addFormOptions(Model model) {
-        Map<String, String> segments = new LinkedHashMap<>();
-        segments.put("RETAIL", "Minorista");
-        segments.put("HIGH_NET_WORTH", "Alto patrimonio");
-        model.addAttribute("segments", segments);
         model.addAttribute("currencies", List.of("EUR", "USD", "GBP"));
     }
 }
