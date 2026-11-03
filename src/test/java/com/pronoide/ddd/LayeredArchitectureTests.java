@@ -30,8 +30,9 @@ class LayeredArchitectureTests {
 
     /**
      * D2 y D3: nadie depende de {@code adapter.in}, ni de {@code application} desde el dominio. Desde la #15 nadie
-     * depende de la persistencia (se usa por sus puertos), y la persistencia sí conoce {@code application}: implementa
-     * su puerto de propiedad de las cuentas (ADR 0008).
+     * depende de los adaptadores de salida (se usan por sus puertos), y la persistencia sí conoce {@code application}:
+     * implementa su puerto de propiedad de las cuentas (ADR 0008). Desde la #17 la capa de adaptadores de salida
+     * incluye {@code adapter.out.event}.
      */
     @ArchTest
     static final ArchRule las_capas_solo_dependen_hacia_abajo = layeredArchitecture()
@@ -39,11 +40,11 @@ class LayeredArchitectureTests {
             .layer("Presentation").definedBy("..adapter.in..")
             .layer("Application").definedBy("..application..")
             .layer("Domain").definedBy("..domain..")
-            .layer("Persistence").definedBy("..adapter.out.persistence..")
+            .layer("OutputAdapters").definedBy("..adapter.out..")
             .whereLayer("Presentation").mayNotBeAccessedByAnyLayer()
-            .whereLayer("Application").mayOnlyBeAccessedByLayers("Presentation", "Persistence")
-            .whereLayer("Persistence").mayNotBeAccessedByAnyLayer()
-            .whereLayer("Domain").mayOnlyBeAccessedByLayers("Application", "Persistence", "Presentation");
+            .whereLayer("Application").mayOnlyBeAccessedByLayers("Presentation", "OutputAdapters")
+            .whereLayer("OutputAdapters").mayNotBeAccessedByAnyLayer()
+            .whereLayer("Domain").mayOnlyBeAccessedByLayers("Application", "OutputAdapters", "Presentation");
 
     /** D1: el dominio solo conoce el JDK (ni Spring, ni {@code jakarta}, ni {@code org.immutables}). */
     @ArchTest
@@ -116,13 +117,20 @@ class LayeredArchitectureTests {
                     .orShould().beAnnotatedWith(SECURED));
 
     /**
-     * #15: los adaptadores de salida solo los conocen su propio paquete y {@code config}, que los cablea (#20). El resto
-     * usa los puertos {@code CheckingAccountRepository} y {@code AccountOwnershipRepository}.
+     * #15 y #17: los adaptadores de salida solo los conocen su propio paquete y {@code config}, que los cablea (#20). El
+     * resto usa sus puertos ({@code CheckingAccountRepository}, {@code AccountOwnershipRepository},
+     * {@code DomainEventPublisher}).
      */
     @ArchTest
-    static final ArchRule solo_la_persistencia_y_config_conocen_los_adaptadores_de_salida = noClasses()
-            .that().resideOutsideOfPackages("..adapter.out.persistence..", "..config..")
-            .should().dependOnClassesThat().resideInAPackage("..adapter.out.persistence..");
+    static final ArchRule solo_los_adaptadores_de_salida_y_config_conocen_los_adaptadores_de_salida = noClasses()
+            .that().resideOutsideOfPackages("..adapter.out..", "..config..")
+            .should().dependOnClassesThat().resideInAPackage("..adapter.out..");
+
+    /** #17: los adaptadores de salida no se conocen entre sí; cada uno implementa su puerto. */
+    @ArchTest
+    static final ArchRule los_adaptadores_de_salida_no_se_conocen = slices()
+            .matching("..adapter.out.(*)..")
+            .should().notDependOnEachOther();
 
     /**
      * ADR 0004: la persistencia no declara interfaces. En la fase 1 no había puertos; en la fase 2 (#15) los puertos se
@@ -139,6 +147,6 @@ class LayeredArchitectureTests {
      */
     @ArchTest
     static final ArchRule toda_clase_pertenece_a_una_capa = classes()
-            .that().resideOutsideOfPackages("..adapter.in..", "..application..", "..domain..", "..adapter.out.persistence..")
+            .that().resideOutsideOfPackages("..adapter.in..", "..application..", "..domain..", "..adapter.out..")
             .should().haveFullyQualifiedName(DddLabApplication.class.getName());
 }

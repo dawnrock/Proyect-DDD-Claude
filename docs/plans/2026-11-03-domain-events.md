@@ -135,7 +135,7 @@ Technical notes:
 - **Acceptance criteria:**
   - [ ] Both listener tests pass.
 
-### [ ] T8 — `SpringDomainEventPublisher` and architecture rules (~10 min)
+### [x] T8 — `SpringDomainEventPublisher` and architecture rules (~10 min)
 
 - **Layer:** adapter.out · tests
 - **Files:** `adapter/out/event/SpringDomainEventPublisher.java`, its test, `LayeredArchitectureTests.java`
@@ -143,9 +143,10 @@ Technical notes:
 - **What to do:**
   1. Test first: the adapter forwards each event to `ApplicationEventPublisher` (mocked).
   2. Package-private `@Component` that implements `DomainEventPublisher`.
-  3. `LayeredArchitectureTests`: the output-adapter layer becomes `..adapter.out..`; the rule "nobody knows the output adapters" covers `adapter.out..`; `toda_clase_pertenece_a_una_capa` accepts `adapter.out..`. Validate by breaking it (reference the adapter from `application`), then revert.
+  3. *(Done before T5, and the port `DomainEventPublisher` is created here: the service can only require it once a bean implements it, or the Spring context fails.)*
+  4. `LayeredArchitectureTests`: the output-adapter layer becomes `..adapter.out..`; the rule "nobody knows the output adapters" covers `adapter.out..`; new rule `los_adaptadores_de_salida_no_se_conocen`; `toda_clase_pertenece_a_una_capa` accepts `adapter.out..`. Validate by breaking it (reference the adapter from `application`), then revert.
 - **Acceptance criteria:**
-  - [ ] Adapter test passes; the widened rule fails when broken and passes after reverting.
+  - [x] Adapter test passes; the widened rule fails when broken and passes after reverting.
 
 ### [ ] T9 — Integration: a deposit reaches the audit consumer (~10 min)
 
