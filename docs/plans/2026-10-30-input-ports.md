@@ -78,7 +78,7 @@ Technical notes:
   - [x] Both test classes pass mocking only the ports.
   - [x] No import of `CheckingAccountService` in `adapter.in.rest`.
 
-### [ ] T4 — Web controller depends on the ports (~10 min)
+### [x] T4 — Web controller depends on the ports (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `AccountWebController.java`, `AccountWebControllerTests.java`, `WebSecurityTests.java`
@@ -86,8 +86,8 @@ Technical notes:
 - **What to do:**
   1. Same as T3 for the web: tests mock both ports, then the controller receives `CheckingAccountCommands` and `CheckingAccountQueries`.
 - **Acceptance criteria:**
-  - [ ] `AccountWebControllerTests` and `WebSecurityTests` pass mocking only the ports.
-  - [ ] No import of `CheckingAccountService` in `adapter.in.web`.
+  - [x] `AccountWebControllerTests` and `WebSecurityTests` pass mocking only the ports.
+  - [x] No import of `CheckingAccountService` in `adapter.in.web`.
 
 ### [ ] T5 — ArchUnit rule for the input side (~10 min)
 
