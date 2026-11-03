@@ -53,7 +53,13 @@ paths:
       tags: [accounts]
       operationId: openAccount
       summary: Open a checking account with its initial deposit (admin only)
-      description: The account belongs to `ownerUsername`, who will see and operate it. Only an admin opens accounts (403 otherwise).
+      description: |
+        The account belongs to `ownerUsername`, who will see and operate it. Only an admin opens accounts (403 otherwise).
+
+        The IBAN is **generated** and the `segment` is **computed** from the holder's verified annual income
+        (the holder is `HIGH_NET_WORTH` only above 100,000.00 EUR; an unknown tax id opens a `RETAIL` account).
+
+        **Incompatible change (#18):** the body no longer carries `accountNumber` or `segment`; it carries `holderTaxId`.
       requestBody:
         required: true
         content:
@@ -272,25 +278,22 @@ components:
           description: Status of the withdrawal in the source account.
     OpenAccountRequest:
       type: object
-      required: [accountNumber, holderName, segment, initialDeposit, ownerUsername]
+      required: [holderName, holderTaxId, initialDeposit, ownerUsername]
       properties:
         ownerUsername:
           type: string
           description: User (customer) who owns the account and will see and operate it.
           pattern: '^[a-z0-9._-]{3,30}$'
           example: ada
-        accountNumber:
-          type: string
-          description: Spanish IBAN (`ES` + 22 digits); spaces and lowercase are accepted and normalized.
-          pattern: '^ *[Ee][Ss]( *\d){22} *$'
-          example: ES91 2100 0418 4502 0005 1332
         holderName:
           type: string
           minLength: 1
           example: Ada Lovelace
-        segment:
+        holderTaxId:
           type: string
-          enum: [RETAIL, HIGH_NET_WORTH]
+          description: Spanish NIF (8 digits + a letter); spaces and lowercase are accepted. The control letter is not checked.
+          pattern: '^ *\d{8} *[A-Za-z] *$'
+          example: 12345678Z
         initialDeposit:
           type: number
           exclusiveMinimum: 0
@@ -303,17 +306,21 @@ components:
           description: ISO 4217 code. A currency other than EUR fails with 422.
     AccountSummary:
       type: object
-      required: [id, accountNumber, holderName, balance, currency]
+      required: [id, accountNumber, holderName, segment, balance, currency]
       properties:
         id:
           type: string
           format: uuid
         accountNumber:
           type: string
-          description: Normalized IBAN.
+          description: Normalized IBAN, generated when the account is opened.
           example: ES9121000418450200051332
         holderName:
           type: string
+        segment:
+          type: string
+          enum: [RETAIL, HIGH_NET_WORTH]
+          description: Computed by the factory from the holder's verified income (R20).
         balance:
           type: number
           example: 100.00
@@ -324,11 +331,8 @@ components:
       allOf:
         - $ref: '#/components/schemas/AccountSummary'
         - type: object
-          required: [segment, transactions]
+          required: [transactions]
           properties:
-            segment:
-              type: string
-              enum: [RETAIL, HIGH_NET_WORTH]
             transactions:
               type: array
               items:

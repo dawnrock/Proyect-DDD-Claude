@@ -163,7 +163,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Acceptance criteria:**
   - [x] REST tests of the new open-account, including the computed segment in the response (issue criterion).
 
-### [ ] T9 — OpenAPI (~5 min)
+### [x] T9 — OpenAPI (~5 min)
 
 - **Side:** back
 - **Layer:** docs
@@ -172,7 +172,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **What to do:**
   1. `OpenAccountRequest` without `accountNumber`/`segment` and with `holderTaxId`; `AccountSummary.segment`; note the incompatible change.
 - **Acceptance criteria:**
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors (issue criterion).
+  - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors (issue criterion).
 
 ### [ ] T10 — Web: form and controller (~10 min)
 
