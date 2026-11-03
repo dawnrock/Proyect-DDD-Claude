@@ -7,12 +7,13 @@ import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CustomerSegment;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
+import com.pronoide.ddd.domain.model.TestCheckingAccounts;
 
 import lombok.Builder;
 
 /**
  * Cuentas de prueba: {@code anAccount().segment(HIGH_NET_WORTH).initialDeposit("500.00").open()}. Abre la cuenta con
- * su método factoría ({@code CheckingAccount.open}); los datos que no se indican toman un valor por defecto válido.
+ * el puente de test {@link TestCheckingAccounts}, sin pasar por la factoría ni sus puertos; los datos que no se indican toman un valor por defecto válido.
  */
 public final class TestAccounts {
 
@@ -27,7 +28,7 @@ public final class TestAccounts {
     @Builder(builderMethodName = "anAccount", buildMethodName = "open")
     private static CheckingAccount newAccount(String accountNumber, String holderName, CustomerSegment segment,
                                               String initialDeposit) {
-        return CheckingAccount.open(
+        return TestCheckingAccounts.open(
                 new AccountNumber(Objects.requireNonNullElse(accountNumber, DEFAULT_ACCOUNT_NUMBER)),
                 AccountHolder.register(Objects.requireNonNullElse(holderName, "Ada Lovelace"),
                         Objects.requireNonNullElse(segment, CustomerSegment.RETAIL)),

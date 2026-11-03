@@ -3,11 +3,11 @@ package com.pronoide.ddd.application;
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.pronoide.ddd.domain.model.AccountHolder;
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.AccountNumberSequence;
 import com.pronoide.ddd.domain.model.CheckingAccount;
@@ -44,6 +44,9 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     private final CheckingAccountRepository repository;
     private final AccountOwnershipRepository ownership;
     private final DomainEventPublisher publisher;
+    /** Solo para el camino antiguo de la transición (#18): el NIF no se usa, el verificador es de pega. */
+    private static final TaxId LEGACY_TAX_ID = new TaxId("00000000T");
+
     private final MoneyTransferService transferService = new MoneyTransferService();
     private final CheckingAccountFactory factory;
 
@@ -81,11 +84,17 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
 
     /**
      * Camino antiguo, solo durante la transición del contrato (#18, hasta T12): IBAN y segmento escritos en el command.
+     * {@code CheckingAccount.open} ya no es accesible desde aquí, así que se abre con una factoría desechable cuya
+     * numeración devuelve el IBAN escrito y cuyo verificador da ingresos por encima del umbral solo si el segmento
+     * escrito es de alto patrimonio. Se elimina en T12.
      */
     @SuppressWarnings("deprecation")
     private static CheckingAccount openTypedAccount(OpenAccountCommand command, MonetaryAmount initialDeposit) {
-        AccountHolder holder = AccountHolder.register(command.holderName(), CustomerSegment.valueOf(command.segment()));
-        return CheckingAccount.open(new AccountNumber(command.accountNumber()), holder, initialDeposit);
+        AccountNumber typedNumber = new AccountNumber(command.accountNumber());
+        boolean highNetWorth = CustomerSegment.valueOf(command.segment()) == CustomerSegment.HIGH_NET_WORTH;
+        CheckingAccountFactory typed = new CheckingAccountFactory(() -> typedNumber,
+                taxId -> highNetWorth ? Optional.of(MonetaryAmount.euros("100000.01")) : Optional.empty());
+        return typed.open(command.holderName(), LEGACY_TAX_ID, initialDeposit);
     }
 
     /** R16: con la numeración generada es solo una red de seguridad ante un generador defectuoso. */

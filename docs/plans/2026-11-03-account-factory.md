@@ -140,7 +140,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Acceptance criteria:**
   - [x] `DemoDataLoaderTests` still finds `RETAIL`, `RETAIL`, `HIGH_NET_WORTH`; `./mvnw verify` green.
 
-### [ ] T7 — `CheckingAccount.open` only inside the domain (~5 min)
+### [x] T7 — `CheckingAccount.open` only inside the domain (~5 min)
 
 - **Side:** back
 - **Layer:** domain · tests
@@ -149,7 +149,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **What to do:**
   1. `open` becomes package-private. `TestAccounts` keeps building accounts **without the factory** through a small public bridge in the test package `domain.model` (issue criterion).
 - **Acceptance criteria:**
-  - [ ] No class outside `domain.model` calls `CheckingAccount.open` (the compiler enforces it); all tests green.
+  - [x] No class outside `domain.model` calls `CheckingAccount.open` (the compiler enforces it); all tests green.
 
 ### [ ] T8 — REST: new open-account body and segment in the response (~10 min)
 
