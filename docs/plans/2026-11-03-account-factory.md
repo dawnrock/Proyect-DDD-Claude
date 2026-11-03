@@ -80,7 +80,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Acceptance criteria:**
   - [x] `TaxIdTests` pass; `check-domain.mjs` and `DomainIsolationTests` green.
 
-### [ ] T2 — `CheckingAccountFactory` (~10 min)
+### [x] T2 — `CheckingAccountFactory` (~10 min)
 
 - **Side:** back
 - **Layer:** domain
@@ -90,7 +90,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
   1. Tests first, with stubs (lambdas) of both ports: the account gets the generated number; income above the threshold → `HIGH_NET_WORTH`; exactly the threshold, lower or not verified → `RETAIL`; the aggregate's own rules still apply (R1 minimum deposit).
   2. `open(String holderName, TaxId taxId, MonetaryAmount initialDeposit)`: registers the holder with the computed segment and calls `CheckingAccount.open`.
 - **Acceptance criteria:**
-  - [ ] Factory tests pass with stubs of the two ports (issue criterion).
+  - [x] Factory tests pass with stubs of the two ports (issue criterion).
 
 ### [ ] T3 — `InMemoryAccountNumberSequence` (~10 min)
 
