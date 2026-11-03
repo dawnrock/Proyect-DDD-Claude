@@ -4,6 +4,8 @@
 - **Status:** frozen at `9bd7290`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed with clarifications, merged by the lead)
 
+> **Superseded for opening accounts** by [`account-factory.md`](account-factory.md) (#18): the IBAN is generated and the segment is computed, so `accountNumber` and `segment` are no longer inputs of `OpenAccountCommand`, `OpenAccountRequest` or `OpenAccountForm`. Querying and listing below still apply.
+
 ## Application service
 
 Phase 1: concrete class `com.pronoide.ddd.application.CheckingAccountService` (`@Service`), backed by `InMemoryCheckingAccountRepository`.

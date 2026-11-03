@@ -233,6 +233,17 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Acceptance criteria:**
   - [x] New terms in the glossary; the CI check of the project status passes.
 
+### [x] T15 — Review fixes (~5 min)
+
+- **Side:** both
+- **Layer:** docs
+- **Files:** `docs/dominio/glosario.md`, `docs/contracts/open-query-list-accounts.md`
+- **Depends on:** T14
+- **What to do:**
+  1. `revisor-ddd`: the glossary row of `OpenAccountCommand` and the note on the unique account number still described the typed IBAN and segment; the #5 contract now points to `account-factory.md` for opening accounts.
+- **Acceptance criteria:**
+  - [x] No current document describes the IBAN or the segment as inputs of the open-account.
+
 ## Global acceptance criteria
 
 **Specific:**
