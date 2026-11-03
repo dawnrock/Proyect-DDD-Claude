@@ -19,6 +19,7 @@ import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountOwnershipRepository;
 import com.pronoide.ddd.application.AccountSummary;
 import com.pronoide.ddd.application.CallerDef;
+import com.pronoide.ddd.application.CheckingAccountCommands;
 import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.application.TransactionSummary;
 import com.pronoide.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
@@ -31,11 +32,13 @@ class DomainModelRunnerTests {
     private final CheckingAccountService service =
             new CheckingAccountService(PersistenceTestAdapters.accounts(), ownership, mock(DomainEventPublisher.class),
                     PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier());
+    /** El runner solo recibe el puerto de commands; el servicio concreto se usa aquí solo para consultar. */
+    private final CheckingAccountCommands commands = service;
 
     @Test
     @DisplayName("Al arrancar abre tres cuentas de demostración con el caso de uso, una de ellas de alto patrimonio")
     void al_arrancar_abre_tres_cuentas_de_demostracion_con_el_caso_de_uso() {
-        new DomainModelRunner(service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands).run(new DefaultApplicationArguments());
 
         List<AccountSummary> accounts = service.listAccounts(CallerDef.system());
         assertThat(accounts).hasSize(3);
@@ -47,7 +50,7 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("Cada cuenta de demostración queda a nombre de su usuario: ada, grace y alan")
     void cada_cuenta_de_demostracion_queda_a_nombre_de_su_usuario() {
-        new DomainModelRunner(service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands).run(new DefaultApplicationArguments());
 
         assertThat(service.listAccounts(CallerDef.system()))
                 .extracting(AccountSummary::holderName, account -> ownership.ownerOf(account.id()).orElse(null))
@@ -72,7 +75,7 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("Las cuentas de demostración llevan un IBAN generado y distinto")
     void las_cuentas_de_demostracion_llevan_un_iban_generado() {
-        new DomainModelRunner(service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands).run(new DefaultApplicationArguments());
 
         assertThat(service.listAccounts(CallerDef.system())).extracting(AccountSummary::accountNumber)
                 .doesNotHaveDuplicates().allMatch(number -> number.startsWith("ES") && number.startsWith("2100", 4));
@@ -81,7 +84,7 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("Deja una traza legible de cada apertura: IBAN generado, titular, segmento, saldo y propietario")
     void deja_una_traza_legible_de_cada_apertura(CapturedOutput output) {
-        new DomainModelRunner(service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands).run(new DefaultApplicationArguments());
 
         assertThat(output)
                 .containsPattern("\\[demo\\] Abrir cuenta · ES\\d{22} · Ada Lovelace · Minorista · 1000\\.00 EUR · propietario ada")
@@ -92,7 +95,7 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("Termina con un resumen de cuántas cuentas de demostración ha abierto")
     void termina_con_un_resumen_de_las_cuentas_abiertas(CapturedOutput output) {
-        new DomainModelRunner(service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands).run(new DefaultApplicationArguments());
 
         assertThat(output).contains("[demo] 3 cuentas de demostración abiertas");
     }
@@ -109,7 +112,7 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("Tras abrir las cuentas, la demo ingresa en la de Ada y retira de la de Alan una vez con éxito y otra sin saldo")
     void tras_abrir_las_cuentas_la_demo_ingresa_y_retira() {
-        new DomainModelRunner(service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands).run(new DefaultApplicationArguments());
 
         assertThat(detailsOf("Ada Lovelace").transactions())
                 .extracting(TransactionSummary::type, TransactionSummary::status, t -> t.amount().toPlainString())
@@ -126,7 +129,7 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("Deja una traza de cada ingreso y retirada con el IBAN, el importe y su resultado")
     void deja_una_traza_de_cada_ingreso_y_retirada(CapturedOutput output) {
-        new DomainModelRunner(service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands).run(new DefaultApplicationArguments());
 
         assertThat(output)
                 .containsPattern("\\[demo\\] Ingresar · ES\\d{22} · 200\\.00 EUR · aprobado")
@@ -137,7 +140,7 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("La demo transfiere de Grace a Ada usando el IBAN generado de Ada")
     void la_demo_transfiere_de_grace_a_ada_con_el_iban_generado() {
-        new DomainModelRunner(service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands).run(new DefaultApplicationArguments());
 
         assertThat(detailsOf("Grace Hopper").balance()).isEqualByComparingTo("4700.00");
         assertThat(detailsOf("Ada Lovelace").balance()).isEqualByComparingTo("1500.00");
@@ -146,7 +149,7 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("Deja una traza de la transferencia con los dos IBAN, el importe y su resultado")
     void deja_una_traza_de_la_transferencia(CapturedOutput output) {
-        new DomainModelRunner(service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands).run(new DefaultApplicationArguments());
 
         String adaIban = detailsOf("Ada Lovelace").accountNumber();
         String graceIban = detailsOf("Grace Hopper").accountNumber();

@@ -112,6 +112,16 @@ The architecture is already guarded by existing rules, which now cover the new p
 - **Acceptance criteria:**
   - [x] No current document (outside `docs/plans/`, `historial.md`, `docs/analysis/` and `fase-1-capas.md`) names `DemoDataLoader` except as the former name of `DomainModelRunner`; the CI check of the project status passes.
 
+### [x] T8 — Review fixes (~5 min)
+
+- **Layer:** tests · docs
+- **Files:** `DomainModelRunnerTests.java`, `LayeredArchitectureTests.java`, `docs/ia/arquitectura-ia.md`
+- **Depends on:** T7
+- **What to do:**
+  1. `revisor-ddd`: the test passes the runner the port type (pending item from #16); the Javadoc of the input-adapter rule loses a stray line break; `arquitectura-ia.md` explains that the clean-up hook and the new branch-deletion step of the skills complement each other.
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green.
+
 ## Global acceptance criteria
 
 **Specific:**
