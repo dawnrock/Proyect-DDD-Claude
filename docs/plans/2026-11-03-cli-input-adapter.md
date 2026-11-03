@@ -101,7 +101,7 @@ The architecture is already guarded by existing rules, which now cover the new p
 - **Acceptance criteria:**
   - [x] Transfer done with the generated IBAN; demo tests adjusted to the new balances.
 
-### [ ] T7 — Documentation and project status (~10 min)
+### [x] T7 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/fase-2-hexagonal.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -110,7 +110,7 @@ The architecture is already guarded by existing rules, which now cover the new p
   1. `fase-2-hexagonal.md`: "State after #19", row of `DomainModelRunner` in `adapter.in.cli` instead of `DemoDataLoader`; remove it from "classes that arrive later".
   2. Project status: #19 done, next step `/plan-feature 20`; remove the pending item about `DemoDataLoader` (#16); decisions that mention `DemoDataLoader` point to the new name.
 - **Acceptance criteria:**
-  - [ ] No current document (outside `docs/plans/`, `historial.md`, `docs/analysis/` and `fase-1-capas.md`) names `DemoDataLoader`; the CI check of the project status passes.
+  - [x] No current document (outside `docs/plans/`, `historial.md`, `docs/analysis/` and `fase-1-capas.md`) names `DemoDataLoader` except as the former name of `DomainModelRunner`; the CI check of the project status passes.
 
 ## Global acceptance criteria
 
