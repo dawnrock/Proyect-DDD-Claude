@@ -21,7 +21,7 @@ Diseño objetivo de la fase 2: `docs/arquitectura/fase-2-hexagonal.md`; las issu
 ## Acuerdos de trabajo con el usuario
 
 - **Siempre se planifica antes de implementar** (`/plan-feature`) y el usuario aprueba el plan.
-- **Las fusiones las decide el usuario.** No se fusiona ninguna PR sin su "sí".
+- **Las fusiones las decide el usuario.** No se fusiona ninguna PR sin su "sí". **Tras fusionarla, se borran todas sus ramas y worktrees** (locales y remotos, también los `-back`/`-web` de equipo), comprobando antes que están contenidas en la rama base (2026-11-03).
 - **`CLAUDE.md` y la configuración de `.claude/`** solo se cambian con su visto bueno explícito, nunca a petición de un agente.
 - **Los diagramas se le enseñan antes de commitearlos.** Estilo de los diagramas: escala de grises, sin colores.
 - El usuario puede seguir la sesión desde el móvil (Remote Control). **Los avisos por Telegram están activos** (el usuario los reactivó el 2026-10-30): las skills ejecutan `scripts/notify.mjs` cuando lo piden.
