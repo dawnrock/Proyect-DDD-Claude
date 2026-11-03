@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-03
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~95 min (10 tasks)
 
 ## Goal
@@ -194,7 +194,12 @@ Technical notes:
 
 ## Risks and open questions
 
-- **Opening records two events** (`CheckingAccountOpened` + `MoneyDeposited`). The alternative is only `CheckingAccountOpened` (it already carries the initial deposit), but then the initial deposit would be the only movement without an event.
-- **No transfer event:** a transfer shows up to consumers as a withdrawal and a deposit on two accounts, consistent with the glossary. A `MoneyTransferred` event would need the domain service to record it, which is out of scope.
-- **Synchronous listeners:** a failing listener surfaces in the use case after the account is saved. Acceptable while they only log; noted in `pendientes.md` for when a real notification exists.
-- The tracker issue mentions `@Slf4j` consumers; Spring's `@EventListener` in `application.listener` is allowed (the application already uses `@Service`; the domain stays free of Spring).
+Decided with the user (2026-11-03):
+
+- **Opening records two events** (`CheckingAccountOpened` + `MoneyDeposited` of the initial deposit), so every deposit, the first one included, has its event.
+- **No transfer event:** consumers see a withdrawal and a deposit on two accounts, consistent with the glossary.
+- **Synchronous listeners:** a failing listener surfaces in the use case after the account is saved. Accepted while they only log; noted in `pendientes.md` for when an asynchronous listener is needed.
+
+Other notes:
+
+- Spring's `@EventListener` in `application.listener` is allowed (the application already uses `@Service`; the domain stays free of Spring).
