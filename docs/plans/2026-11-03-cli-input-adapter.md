@@ -79,7 +79,7 @@ The architecture is already guarded by existing rules, which now cover the new p
 - **Acceptance criteria:**
   - [x] The test passes and fails when `system()` is not an administrator (sabotage, reverted).
 
-### [ ] T5 — Demo deposits and withdrawals (~10 min)
+### [x] T5 — Demo deposits and withdrawals (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `DomainModelRunner.java`, `DomainModelRunnerTests.java`
@@ -88,7 +88,7 @@ The architecture is already guarded by existing rules, which now cover the new p
   1. Tests first: after opening, the runner deposits 200.00 € into Ada's account, withdraws 50.00 € from Alan's (approved) and 1000.00 € from Alan's (rejected: retail, no overdraft); final balances and a `[demo]` line per operation with the IBAN, the amount and the result ("aprobada" / "rechazada").
   2. The runner keeps the summaries it opened (generated IBAN and id) and uses `CheckingAccountCommands.deposit` / `withdraw`.
 - **Acceptance criteria:**
-  - [ ] Balances after the demo: Ada 1200.00, Alan 200.00; traces of the three movements.
+  - [x] Balances after the demo: Ada 1200.00, Alan 200.00; traces of the three movements.
 
 ### [ ] T6 — Demo transfer (~10 min)
 

@@ -15,10 +15,12 @@ import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
 import com.pronoide.ddd.adapter.out.persistence.PersistenceTestAdapters;
+import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountOwnershipRepository;
 import com.pronoide.ddd.application.AccountSummary;
 import com.pronoide.ddd.application.CallerDef;
 import com.pronoide.ddd.application.CheckingAccountService;
+import com.pronoide.ddd.application.TransactionSummary;
 import com.pronoide.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.pronoide.ddd.domain.model.DomainEventPublisher;
 
@@ -93,5 +95,42 @@ class DomainModelRunnerTests {
         new DomainModelRunner(service).run(new DefaultApplicationArguments());
 
         assertThat(output).contains("[demo] 3 cuentas de demostración abiertas");
+    }
+
+    /** Detalle de la cuenta de demostración de un titular, con sus movimientos. */
+    private AccountDetails detailsOf(String holderName) {
+        return service.listAccounts(CallerDef.system()).stream()
+                .filter(account -> account.holderName().equals(holderName))
+                .map(account -> service.findAccount(CallerDef.system(), account.id()))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    @Test
+    @DisplayName("Tras abrir las cuentas, la demo ingresa en la de Ada y retira de la de Alan una vez con éxito y otra sin saldo")
+    void tras_abrir_las_cuentas_la_demo_ingresa_y_retira() {
+        new DomainModelRunner(service).run(new DefaultApplicationArguments());
+
+        assertThat(detailsOf("Ada Lovelace").transactions())
+                .extracting(TransactionSummary::type, TransactionSummary::status, t -> t.amount().toPlainString())
+                .contains(tuple("DEPOSIT", "APPROVED", "200.00"));
+        assertThat(detailsOf("Alan Turing").transactions())
+                .extracting(TransactionSummary::type, TransactionSummary::status, t -> t.amount().toPlainString())
+                .containsExactly(
+                        tuple("DEPOSIT", "APPROVED", "250.00"),
+                        tuple("WITHDRAWAL", "APPROVED", "50.00"),
+                        tuple("WITHDRAWAL", "REJECTED", "1000.00"));
+        assertThat(detailsOf("Alan Turing").balance()).isEqualByComparingTo("200.00");
+    }
+
+    @Test
+    @DisplayName("Deja una traza de cada ingreso y retirada con el IBAN, el importe y su resultado")
+    void deja_una_traza_de_cada_ingreso_y_retirada(CapturedOutput output) {
+        new DomainModelRunner(service).run(new DefaultApplicationArguments());
+
+        assertThat(output)
+                .containsPattern("\\[demo\\] Ingresar · ES\\d{22} · 200\\.00 EUR · aprobado")
+                .containsPattern("\\[demo\\] Retirar · ES\\d{22} · 50\\.00 EUR · aprobada")
+                .containsPattern("\\[demo\\] Retirar · ES\\d{22} · 1000\\.00 EUR · rechazada");
     }
 }

@@ -12,7 +12,10 @@ import org.springframework.stereotype.Component;
 import com.pronoide.ddd.application.AccountSummary;
 import com.pronoide.ddd.application.CallerDef;
 import com.pronoide.ddd.application.CheckingAccountCommands;
+import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
+import com.pronoide.ddd.application.TransactionSummary;
+import com.pronoide.ddd.application.WithdrawCommand;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,15 +45,42 @@ public class DomainModelRunner implements ApplicationRunner {
 
     private final CheckingAccountCommands commands;
 
+    /**
+     * Abre las cuentas de demostración y, con los IBAN generados que devuelven sus resúmenes, ingresa en la de Ada y
+     * retira de la de Alan una vez con saldo y otra sin él. Opera como {@code CallerDef.system()}, un administrador.
+     */
     @Override
     public void run(ApplicationArguments args) {
-        DEMO_ACCOUNTS.forEach(command -> {
-            AccountSummary account = commands.openAccount(CallerDef.system(), command);
-            log.info("[demo] Abrir cuenta · {} · {} · {} · {} {} · propietario {}", account.accountNumber(),
-                    account.holderName(), segmentLabel(account.segment()), account.balance(), account.currency(),
-                    command.ownerUsername());
-        });
-        log.info("[demo] {} cuentas de demostración abiertas", DEMO_ACCOUNTS.size());
+        List<AccountSummary> opened = DEMO_ACCOUNTS.stream().map(this::open).toList();
+        log.info("[demo] {} cuentas de demostración abiertas", opened.size());
+        AccountSummary ada = opened.get(0);
+        AccountSummary alan = opened.get(2);
+
+        deposit(ada, "200.00");
+        withdraw(alan, "50.00");
+        withdraw(alan, "1000.00");
+    }
+
+    private AccountSummary open(OpenAccountCommand command) {
+        AccountSummary account = commands.openAccount(CallerDef.system(), command);
+        log.info("[demo] Abrir cuenta · {} · {} · {} · {} {} · propietario {}", account.accountNumber(),
+                account.holderName(), segmentLabel(account.segment()), account.balance(), account.currency(),
+                command.ownerUsername());
+        return account;
+    }
+
+    private void deposit(AccountSummary account, String amount) {
+        TransactionSummary deposit = commands.deposit(CallerDef.system(),
+                DepositCommand.builder().accountId(account.id()).amount(new BigDecimal(amount)).build());
+        log.info("[demo] Ingresar · {} · {} {} · {}", account.accountNumber(), deposit.amount(), deposit.currency(),
+                deposit.status().equals("APPROVED") ? "aprobado" : "rechazado");
+    }
+
+    private void withdraw(AccountSummary account, String amount) {
+        TransactionSummary withdrawal = commands.withdraw(CallerDef.system(),
+                WithdrawCommand.builder().accountId(account.id()).amount(new BigDecimal(amount)).build());
+        log.info("[demo] Retirar · {} · {} {} · {}", account.accountNumber(), withdrawal.amount(),
+                withdrawal.currency(), withdrawal.status().equals("APPROVED") ? "aprobada" : "rechazada");
     }
 
     private static String segmentLabel(String segment) {
