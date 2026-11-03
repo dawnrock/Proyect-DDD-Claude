@@ -15,30 +15,25 @@ import lombok.experimental.Accessors;
 
 /**
  * Formulario de alta de cuenta. Aplica la misma validación que {@code OpenAccountRequest} (REST), según
- * "Shared presentation validation" de {@code docs/contracts/open-query-list-accounts.md}.
+ * "Shared presentation validation" de {@code docs/contracts/account-factory.md}.
  */
 @Getter
 @Setter
 @Accessors(fluent = false)
 public class OpenAccountForm {
 
-    @NotBlank(message = "El número de cuenta es obligatorio")
-    @Pattern(regexp = "^ *[Ee][Ss]( *\\d){22} *$",
-            message = "El número de cuenta debe ser ES seguido de 22 dígitos")
-    private String accountNumber;
-
     @NotBlank(message = "El titular es obligatorio")
     private String holderName;
+
+    @NotBlank(message = "El NIF es obligatorio")
+    @Pattern(regexp = OpenAccountCommandDef.TAX_ID_PATTERN, message = "El NIF debe tener 8 dígitos y una letra")
+    private String holderTaxId;
 
     /** Usuario (cliente) que verá y operará la cuenta; mismo formato que el command (contrato login-roles). */
     @NotBlank(message = "El usuario del titular es obligatorio")
     @Pattern(regexp = OpenAccountCommandDef.USERNAME_PATTERN,
             message = "El usuario del titular debe tener de 3 a 30 minúsculas, dígitos, puntos o guiones")
     private String ownerUsername;
-
-    @NotBlank(message = "El segmento es obligatorio")
-    @Pattern(regexp = "RETAIL|HIGH_NET_WORTH", message = "El segmento debe ser Minorista o Alto patrimonio")
-    private String segment;
 
     @NotNull(message = "El depósito inicial es obligatorio")
     @Positive(message = "El depósito inicial debe ser positivo")

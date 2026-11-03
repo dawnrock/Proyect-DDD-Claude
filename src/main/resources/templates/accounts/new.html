@@ -10,30 +10,21 @@
         <p class="flash flash-error" role="alert" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
 
         <div class="field">
-            <label for="accountNumber">Número de cuenta</label>
-            <input type="text" id="accountNumber" th:field="*{accountNumber}" placeholder="ES00 0000 0000 0000 0000 0000">
-            <p class="field-error" th:if="${#fields.hasErrors('accountNumber')}" th:errors="*{accountNumber}"></p>
-        </div>
-
-        <div class="field">
             <label for="holderName">Titular</label>
             <input type="text" id="holderName" th:field="*{holderName}">
             <p class="field-error" th:if="${#fields.hasErrors('holderName')}" th:errors="*{holderName}"></p>
         </div>
 
         <div class="field">
-            <label for="ownerUsername">Usuario del titular</label>
-            <input type="text" id="ownerUsername" autocomplete="off" autocapitalize="none" spellcheck="false" th:field="*{ownerUsername}">
-            <p class="field-error" th:if="${#fields.hasErrors('ownerUsername')}" th:errors="*{ownerUsername}"></p>
+            <label for="holderTaxId">NIF del titular</label>
+            <input type="text" id="holderTaxId" autocomplete="off" placeholder="12345678Z" th:field="*{holderTaxId}">
+            <p class="field-error" th:if="${#fields.hasErrors('holderTaxId')}" th:errors="*{holderTaxId}"></p>
         </div>
 
         <div class="field">
-            <label for="segment">Segmento</label>
-            <select id="segment" th:field="*{segment}">
-                <option value="">Selecciona un segmento</option>
-                <option th:each="s : ${segments}" th:value="${s.key}" th:text="${s.value}">Segmento</option>
-            </select>
-            <p class="field-error" th:if="${#fields.hasErrors('segment')}" th:errors="*{segment}"></p>
+            <label for="ownerUsername">Usuario del titular</label>
+            <input type="text" id="ownerUsername" autocomplete="off" autocapitalize="none" spellcheck="false" th:field="*{ownerUsername}">
+            <p class="field-error" th:if="${#fields.hasErrors('ownerUsername')}" th:errors="*{ownerUsername}"></p>
         </div>
 
         <div class="field">
@@ -49,6 +40,8 @@
             </select>
             <p class="field-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
         </div>
+
+        <p class="hint">El número de cuenta (IBAN) se genera automáticamente y el segmento se decide según los ingresos verificados del titular.</p>
 
         <div class="form-actions">
             <button class="button" type="submit">Abrir cuenta</button>
