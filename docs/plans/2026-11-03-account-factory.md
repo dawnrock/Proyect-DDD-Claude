@@ -151,7 +151,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Acceptance criteria:**
   - [x] No class outside `domain.model` calls `CheckingAccount.open` (the compiler enforces it); all tests green.
 
-### [ ] T8 — REST: new open-account body and segment in the response (~10 min)
+### [x] T8 — REST: new open-account body and segment in the response (~10 min)
 
 - **Side:** back
 - **Layer:** adapter.in
@@ -161,7 +161,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
   1. Tests first (`@MockitoBean` of the ports): the body carries `holderTaxId` (field error if it is not 8 digits + letter) and no IBAN or segment; the response includes `segment`.
   2. Request record and mapping to the command.
 - **Acceptance criteria:**
-  - [ ] REST tests of the new open-account, including the computed segment in the response (issue criterion).
+  - [x] REST tests of the new open-account, including the computed segment in the response (issue criterion).
 
 ### [ ] T9 — OpenAPI (~5 min)
 

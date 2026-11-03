@@ -21,6 +21,9 @@ public interface AccountSummaryResponseDef {
 
     String holderName();
 
+    /** {@code RETAIL} o {@code HIGH_NET_WORTH}: el segmento que ha calculado la factoría. */
+    String segment();
+
     BigDecimal balance();
 
     String currency();
