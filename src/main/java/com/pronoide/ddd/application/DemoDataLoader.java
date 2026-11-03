@@ -14,7 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Abre cuentas de demostración al arrancar, para poder probar la aplicación sin preparar datos. Usa el caso de uso
  * {@code openAccount} del puerto {@link CheckingAccountCommands}, nunca el repositorio, así que los datos cumplen las
- * mismas reglas que los reales. Solo se activa con el perfil {@code demo}, que {@code ./mvnw spring-boot:run} activa
+ * mismas reglas que los reales: el IBAN lo genera la numeración y el segmento lo decide la agencia tributaria a partir
+ * del NIF de cada titular (Grace Hopper es de alto patrimonio por sus ingresos verificados). Solo se activa con el perfil {@code demo}, que {@code ./mvnw spring-boot:run} activa
  * por defecto; los tests no lo cargan.
  */
 @Slf4j
@@ -24,9 +25,9 @@ import lombok.extern.slf4j.Slf4j;
 public class DemoDataLoader implements ApplicationRunner {
 
     private static final List<OpenAccountCommand> DEMO_ACCOUNTS = List.of(
-            account("ES9121000418450200051332", "Ada Lovelace", "RETAIL", "1000.00", "ada"),
-            account("ES7921000813610123456789", "Grace Hopper", "HIGH_NET_WORTH", "5000.00", "grace"),
-            account("ES6000491500051234567892", "Alan Turing", "RETAIL", "250.00", "alan"));
+            account("Ada Lovelace", "12345678Z", "1000.00", "ada"),
+            account("Grace Hopper", "87654321X", "5000.00", "grace"),
+            account("Alan Turing", "11111111H", "250.00", "alan"));
 
     private final CheckingAccountCommands commands;
 
@@ -39,12 +40,11 @@ public class DemoDataLoader implements ApplicationRunner {
         });
     }
 
-    private static OpenAccountCommand account(String accountNumber, String holderName, String segment,
-                                              String initialDeposit, String owner) {
+    private static OpenAccountCommand account(String holderName, String holderTaxId, String initialDeposit,
+                                              String owner) {
         return OpenAccountCommand.builder()
-                .accountNumber(accountNumber)
                 .holderName(holderName)
-                .segment(segment)
+                .holderTaxId(holderTaxId)
                 .initialDeposit(new BigDecimal(initialDeposit))
                 .ownerUsername(owner)
                 .build();

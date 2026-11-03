@@ -68,7 +68,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Acceptance criteria:**
   - [x] Contract agreed and frozen in a commit; `./mvnw verify` green against it.
 
-### [ ] T1 — `TaxId` and the two output ports (~10 min)
+### [x] T1 — `TaxId` and the two output ports (~10 min)
 
 - **Side:** back
 - **Layer:** domain
@@ -78,9 +78,9 @@ Simulated adapters (deterministic, documented in their Javadoc):
   1. Tests first: a NIF is normalized (spaces, lowercase) and rejected if it is not 8 digits + a letter.
   2. `record TaxId`; ports `AccountNumber next()` and `Optional<MonetaryAmount> verifiedAnnualIncome(TaxId)`.
 - **Acceptance criteria:**
-  - [ ] `TaxIdTests` pass; `check-domain.mjs` and `DomainIsolationTests` green.
+  - [x] `TaxIdTests` pass; `check-domain.mjs` and `DomainIsolationTests` green.
 
-### [ ] T2 — `CheckingAccountFactory` (~10 min)
+### [x] T2 — `CheckingAccountFactory` (~10 min)
 
 - **Side:** back
 - **Layer:** domain
@@ -90,9 +90,9 @@ Simulated adapters (deterministic, documented in their Javadoc):
   1. Tests first, with stubs (lambdas) of both ports: the account gets the generated number; income above the threshold → `HIGH_NET_WORTH`; exactly the threshold, lower or not verified → `RETAIL`; the aggregate's own rules still apply (R1 minimum deposit).
   2. `open(String holderName, TaxId taxId, MonetaryAmount initialDeposit)`: registers the holder with the computed segment and calls `CheckingAccount.open`.
 - **Acceptance criteria:**
-  - [ ] Factory tests pass with stubs of the two ports (issue criterion).
+  - [x] Factory tests pass with stubs of the two ports (issue criterion).
 
-### [ ] T3 — `InMemoryAccountNumberSequence` (~10 min)
+### [x] T3 — `InMemoryAccountNumberSequence` (~10 min)
 
 - **Side:** back
 - **Layer:** adapter.out
@@ -102,9 +102,9 @@ Simulated adapters (deterministic, documented in their Javadoc):
   1. Tests first: consecutive numbers are different, start with `ES`, have the bank and branch, and pass the IBAN mod-97 check and the CCC check digits.
   2. Package-private `@Component`, `AtomicLong` counter.
 - **Acceptance criteria:**
-  - [ ] Generated IBANs are valid (mod 97 = 1) and unique.
+  - [x] Generated IBANs are valid (mod 97 = 1) and unique.
 
-### [ ] T4 — `FakeTaxAgencyIncomeVerifier` (~5 min)
+### [x] T4 — `FakeTaxAgencyIncomeVerifier` (~5 min)
 
 - **Side:** back
 - **Layer:** adapter.out
@@ -114,9 +114,9 @@ Simulated adapters (deterministic, documented in their Javadoc):
   1. Tests first: the demo NIFs return their income; an unknown NIF is not verified.
   2. Package-private `@Component` with the fixed table; Javadoc says it is simulated.
 - **Acceptance criteria:**
-  - [ ] Verifier test passes; the ArchUnit rules on `adapter.out..` cover the new package (adapters do not know each other).
+  - [x] Verifier test passes; the ArchUnit rules on `adapter.out..` cover the new package (adapters do not know each other).
 
-### [ ] T5 — The service opens through the factory (~10 min)
+### [x] T5 — The service opens through the factory (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -126,9 +126,9 @@ Simulated adapters (deterministic, documented in their Javadoc):
   1. Tests first: opening uses `holderTaxId`, the summary has a generated IBAN and the computed segment; a generated number already in use → `DuplicateAccountNumberException` (stubbed sequence); events and ownership as before.
   2. Explicit constructor that builds `CheckingAccountFactory` from the two new ports (moves to `config` in #20); with `holderTaxId`, `openAccount` uses the factory and ignores the deprecated fields; without it, it keeps the old path until T12 (contract, round 1).
 - **Acceptance criteria:**
-  - [ ] Opening goes through the factory; the duplicate check is a safety net after generation.
+  - [x] Opening goes through the factory; the duplicate check is a safety net after generation.
 
-### [ ] T6 — Remaining application tests and demo data (~10 min)
+### [x] T6 — Remaining application tests and demo data (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -138,9 +138,9 @@ Simulated adapters (deterministic, documented in their Javadoc):
   1. Tests that relied on a typed IBAN read it from the returned summary.
   2. `DemoDataLoader` opens the three demo accounts with their NIFs; Grace stays `HIGH_NET_WORTH` because of the tax agency, not because of a typed segment.
 - **Acceptance criteria:**
-  - [ ] `DemoDataLoaderTests` still finds `RETAIL`, `RETAIL`, `HIGH_NET_WORTH`; `./mvnw verify` green.
+  - [x] `DemoDataLoaderTests` still finds `RETAIL`, `RETAIL`, `HIGH_NET_WORTH`; `./mvnw verify` green.
 
-### [ ] T7 — `CheckingAccount.open` only inside the domain (~5 min)
+### [x] T7 — `CheckingAccount.open` only inside the domain (~5 min)
 
 - **Side:** back
 - **Layer:** domain · tests
@@ -149,9 +149,9 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **What to do:**
   1. `open` becomes package-private. `TestAccounts` keeps building accounts **without the factory** through a small public bridge in the test package `domain.model` (issue criterion).
 - **Acceptance criteria:**
-  - [ ] No class outside `domain.model` calls `CheckingAccount.open` (the compiler enforces it); all tests green.
+  - [x] No class outside `domain.model` calls `CheckingAccount.open` (the compiler enforces it); all tests green.
 
-### [ ] T8 — REST: new open-account body and segment in the response (~10 min)
+### [x] T8 — REST: new open-account body and segment in the response (~10 min)
 
 - **Side:** back
 - **Layer:** adapter.in
@@ -161,9 +161,9 @@ Simulated adapters (deterministic, documented in their Javadoc):
   1. Tests first (`@MockitoBean` of the ports): the body carries `holderTaxId` (field error if it is not 8 digits + letter) and no IBAN or segment; the response includes `segment`.
   2. Request record and mapping to the command.
 - **Acceptance criteria:**
-  - [ ] REST tests of the new open-account, including the computed segment in the response (issue criterion).
+  - [x] REST tests of the new open-account, including the computed segment in the response (issue criterion).
 
-### [ ] T9 — OpenAPI (~5 min)
+### [x] T9 — OpenAPI (~5 min)
 
 - **Side:** back
 - **Layer:** docs
@@ -172,7 +172,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **What to do:**
   1. `OpenAccountRequest` without `accountNumber`/`segment` and with `holderTaxId`; `AccountSummary.segment`; note the incompatible change.
 - **Acceptance criteria:**
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors (issue criterion).
+  - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors (issue criterion).
 
 ### [ ] T10 — Web: form and controller (~10 min)
 
