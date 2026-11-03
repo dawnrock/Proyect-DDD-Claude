@@ -116,7 +116,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Acceptance criteria:**
   - [x] Verifier test passes; the ArchUnit rules on `adapter.out..` cover the new package (adapters do not know each other).
 
-### [ ] T5 — The service opens through the factory (~10 min)
+### [x] T5 — The service opens through the factory (~10 min)
 
 - **Side:** back
 - **Layer:** application
@@ -126,7 +126,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
   1. Tests first: opening uses `holderTaxId`, the summary has a generated IBAN and the computed segment; a generated number already in use → `DuplicateAccountNumberException` (stubbed sequence); events and ownership as before.
   2. Explicit constructor that builds `CheckingAccountFactory` from the two new ports (moves to `config` in #20); with `holderTaxId`, `openAccount` uses the factory and ignores the deprecated fields; without it, it keeps the old path until T12 (contract, round 1).
 - **Acceptance criteria:**
-  - [ ] Opening goes through the factory; the duplicate check is a safety net after generation.
+  - [x] Opening goes through the factory; the duplicate check is a safety net after generation.
 
 ### [ ] T6 — Remaining application tests and demo data (~10 min)
 

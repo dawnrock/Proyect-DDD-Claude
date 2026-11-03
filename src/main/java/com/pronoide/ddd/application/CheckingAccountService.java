@@ -9,16 +9,18 @@ import org.springframework.stereotype.Service;
 
 import com.pronoide.ddd.domain.model.AccountHolder;
 import com.pronoide.ddd.domain.model.AccountNumber;
+import com.pronoide.ddd.domain.model.AccountNumberSequence;
 import com.pronoide.ddd.domain.model.CheckingAccount;
+import com.pronoide.ddd.domain.model.CheckingAccountFactory;
 import com.pronoide.ddd.domain.model.CheckingAccountRepository;
 import com.pronoide.ddd.domain.model.CustomerSegment;
 import com.pronoide.ddd.domain.model.DomainEventPublisher;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
+import com.pronoide.ddd.domain.model.IncomeVerifier;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
+import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.domain.model.Transaction;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
-
-import lombok.RequiredArgsConstructor;
 
 /**
  * Casos de uso de las cuentas corrientes: abrir, consultar, listar, ingresar, retirar y transferir. Carga y guarda el
@@ -32,17 +34,31 @@ import lombok.RequiredArgsConstructor;
  *
  * <p>Implementa los puertos de entrada {@link CheckingAccountCommands} y {@link CheckingAccountQueries}, que son lo
  * único que conocen los adaptadores de entrada. Solo conoce los puertos de salida ({@link CheckingAccountRepository},
- * {@link AccountOwnershipRepository} y {@link DomainEventPublisher}); Spring le inyecta sus adaptadores. Publica los
+ * {@link AccountOwnershipRepository}, {@link DomainEventPublisher}, {@link AccountNumberSequence} e
+ * {@link IncomeVerifier}); Spring le inyecta sus adaptadores. Publica los
  * eventos de dominio de cada cuenta después de guardarla.
  */
 @Service
-@RequiredArgsConstructor
 public class CheckingAccountService implements CheckingAccountCommands, CheckingAccountQueries {
 
     private final CheckingAccountRepository repository;
     private final AccountOwnershipRepository ownership;
     private final DomainEventPublisher publisher;
     private final MoneyTransferService transferService = new MoneyTransferService();
+    private final CheckingAccountFactory factory;
+
+    /**
+     * Construye la factoría de cuentas a partir de sus dos puertos de salida (numeración y verificación de ingresos).
+     * Cuando exista el paquete {@code config} (#20), la factoría se construirá allí.
+     */
+    public CheckingAccountService(CheckingAccountRepository repository, AccountOwnershipRepository ownership,
+                                  DomainEventPublisher publisher, AccountNumberSequence numbering,
+                                  IncomeVerifier incomeVerifier) {
+        this.repository = repository;
+        this.ownership = ownership;
+        this.publisher = publisher;
+        this.factory = new CheckingAccountFactory(numbering, incomeVerifier);
+    }
 
     @Override
     public AccountSummary openAccount(Caller caller, OpenAccountCommand command) {
@@ -52,17 +68,31 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         if (command.ownerUsername().isEmpty()) {
             throw new IllegalArgumentException("El usuario propietario de la cuenta es obligatorio");
         }
-        AccountNumber accountNumber = new AccountNumber(command.accountNumber());
+        MonetaryAmount initialDeposit =
+                new MonetaryAmount(command.initialDeposit(), Currency.getInstance(command.currency()));
+        CheckingAccount opened = command.holderTaxId().isEmpty()
+                ? openTypedAccount(command, initialDeposit)
+                : factory.open(command.holderName(), new TaxId(command.holderTaxId()), initialDeposit);
+        requireUnused(opened.accountNumber());
+        CheckingAccount account = saveAndPublish(opened);
+        ownership.assign(account.id(), command.ownerUsername());
+        return toSummary(account);
+    }
+
+    /**
+     * Camino antiguo, solo durante la transición del contrato (#18, hasta T12): IBAN y segmento escritos en el command.
+     */
+    @SuppressWarnings("deprecation")
+    private static CheckingAccount openTypedAccount(OpenAccountCommand command, MonetaryAmount initialDeposit) {
+        AccountHolder holder = AccountHolder.register(command.holderName(), CustomerSegment.valueOf(command.segment()));
+        return CheckingAccount.open(new AccountNumber(command.accountNumber()), holder, initialDeposit);
+    }
+
+    /** R16: con la numeración generada es solo una red de seguridad ante un generador defectuoso. */
+    private void requireUnused(AccountNumber accountNumber) {
         repository.findByAccountNumber(accountNumber).ifPresent(existing -> {
             throw new DuplicateAccountNumberException(accountNumber);
         });
-
-        AccountHolder holder = AccountHolder.register(command.holderName(), CustomerSegment.valueOf(command.segment()));
-        MonetaryAmount initialDeposit =
-                new MonetaryAmount(command.initialDeposit(), Currency.getInstance(command.currency()));
-        CheckingAccount account = saveAndPublish(CheckingAccount.open(accountNumber, holder, initialDeposit));
-        ownership.assign(account.id(), command.ownerUsername());
-        return toSummary(account);
     }
 
     @Override

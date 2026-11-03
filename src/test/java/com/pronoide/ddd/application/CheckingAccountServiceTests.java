@@ -41,6 +41,7 @@ import com.pronoide.ddd.domain.model.MoneyWithdrawn;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
 import com.pronoide.ddd.domain.model.WithdrawalRejected;
 import com.pronoide.ddd.adapter.out.persistence.PersistenceTestAdapters;
+import com.pronoide.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 
 /** Casos de uso con el adaptador en memoria real detrás de los puertos: no hace falta simularlo. */
 class CheckingAccountServiceTests {
@@ -59,7 +60,8 @@ class CheckingAccountServiceTests {
     void setUp() {
         repository = spy(PersistenceTestAdapters.accounts());
         publisher = mock(DomainEventPublisher.class);
-        service = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(), publisher);
+        service = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(), publisher,
+                PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier());
     }
 
     /** Eventos publicados en cada llamada a {@code publishAll}, en orden. */
@@ -142,6 +144,90 @@ class CheckingAccountServiceTests {
             AccountSummary summary = service.openAccount(ADMIN, command(IBAN).segment("HIGH_NET_WORTH").build());
 
             assertThat(repository.findById(summary.id()).orElseThrow().primaryHolder().isHighNetWorth()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("Abrir cuenta con la factoría")
+    class OpenAccountThroughFactory {
+
+        private OpenAccountCommand.Builder byTaxId(String taxId) {
+            return OpenAccountCommand.builder()
+                    .holderName("Grace Hopper")
+                    .holderTaxId(taxId)
+                    .initialDeposit(new BigDecimal("100"))
+                    .ownerUsername("grace");
+        }
+
+        @Test
+        @DisplayName("Con NIF la cuenta recibe un IBAN generado y el resumen lo devuelve")
+        void con_nif_la_cuenta_recibe_un_iban_generado() {
+            AccountSummary summary = service.openAccount(ADMIN, byTaxId("87654321X").build());
+
+            assertThat(summary.accountNumber()).startsWith("ES").hasSize(24);
+            assertThat(repository.findByAccountNumber(new AccountNumber(summary.accountNumber()))).isPresent();
+        }
+
+        @Test
+        @DisplayName("Con ingresos verificados por encima del umbral el resumen es de alto patrimonio")
+        void con_ingresos_altos_el_resumen_es_de_alto_patrimonio() {
+            AccountSummary summary = service.openAccount(ADMIN, byTaxId("87654321X").build());
+
+            assertThat(summary.segment()).isEqualTo("HIGH_NET_WORTH");
+        }
+
+        @Test
+        @DisplayName("Con ingresos bajos o un NIF desconocido el resumen es minorista")
+        void con_ingresos_bajos_o_nif_desconocido_el_resumen_es_minorista() {
+            assertThat(service.openAccount(ADMIN, byTaxId("12345678Z").build()).segment()).isEqualTo("RETAIL");
+            assertThat(service.openAccount(ADMIN, byTaxId("99999999R").build()).segment()).isEqualTo("RETAIL");
+        }
+
+        @Test
+        @DisplayName("Con NIF se ignoran el IBAN y el segmento obsoletos del command")
+        @SuppressWarnings("deprecation")
+        void con_nif_se_ignoran_los_campos_obsoletos() {
+            AccountSummary summary = service.openAccount(ADMIN,
+                    byTaxId("12345678Z").accountNumber(IBAN).segment("HIGH_NET_WORTH").build());
+
+            assertThat(summary.accountNumber()).isNotEqualTo(IBAN);
+            assertThat(summary.segment()).isEqualTo("RETAIL");
+        }
+
+        @Test
+        @DisplayName("Un número generado que ya está en uso se rechaza y no se guarda")
+        void un_numero_generado_en_uso_se_rechaza() {
+            service.openAccount(ADMIN, command(IBAN).build());
+            CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
+                    publisher, () -> new AccountNumber(IBAN), TaxAgencyTestAdapters.incomeVerifier());
+
+            assertThatExceptionOfType(DuplicateAccountNumberException.class)
+                    .isThrownBy(() -> faulty.openAccount(ADMIN, byTaxId("87654321X").build()))
+                    .withMessageContaining(IBAN);
+            assertThat(repository.findAll()).hasSize(1);
+        }
+
+        @Test
+        @DisplayName("Con NIF se publican los eventos de apertura y se asigna el propietario")
+        void con_nif_se_publican_los_eventos_y_se_asigna_el_propietario() {
+            clearInvocations(publisher);
+
+            AccountSummary summary = service.openAccount(ADMIN, byTaxId("87654321X").build());
+
+            assertThat(publishedBatches()).singleElement().satisfies(events -> assertThat(events)
+                    .hasAtLeastOneElementOfType(CheckingAccountOpened.class));
+            assertThat(service.listAccounts(Caller.builder().username("grace").admin(false).build()))
+                    .extracting(AccountSummary::id).containsExactly(summary.id());
+        }
+
+        @Test
+        @DisplayName("Un depósito por debajo del mínimo se rechaza también con NIF")
+        void un_deposito_bajo_se_rechaza_tambien_con_nif() {
+            OpenAccountCommand tooLow = byTaxId("87654321X").initialDeposit(new BigDecimal("49.99")).build();
+
+            assertThatExceptionOfType(InsufficientInitialDepositException.class)
+                    .isThrownBy(() -> service.openAccount(ADMIN, tooLow));
+            assertThat(repository.findAll()).isEmpty();
         }
     }
 
