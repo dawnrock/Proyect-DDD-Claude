@@ -4,13 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,14 +24,22 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CheckingAccountRepository;
+import com.pronoide.ddd.domain.model.CheckingAccountOpened;
 import com.pronoide.ddd.domain.model.CurrencyMismatchException;
+import com.pronoide.ddd.domain.model.DomainEvent;
+import com.pronoide.ddd.domain.model.DomainEventPublisher;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
+import com.pronoide.ddd.domain.model.MoneyDeposited;
+import com.pronoide.ddd.domain.model.MoneyWithdrawn;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
+import com.pronoide.ddd.domain.model.WithdrawalRejected;
 import com.pronoide.ddd.adapter.out.persistence.PersistenceTestAdapters;
 
 /** Casos de uso con el adaptador en memoria real detrás de los puertos: no hace falta simularlo. */
@@ -39,12 +52,22 @@ class CheckingAccountServiceTests {
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
 
     private CheckingAccountRepository repository;
+    private DomainEventPublisher publisher;
     private CheckingAccountService service;
 
     @BeforeEach
     void setUp() {
         repository = spy(PersistenceTestAdapters.accounts());
-        service = new CheckingAccountService(repository, PersistenceTestAdapters.ownership());
+        publisher = mock(DomainEventPublisher.class);
+        service = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(), publisher);
+    }
+
+    /** Eventos publicados en cada llamada a {@code publishAll}, en orden. */
+    @SuppressWarnings("unchecked")
+    private List<List<DomainEvent>> publishedBatches() {
+        ArgumentCaptor<List<DomainEvent>> captor = ArgumentCaptor.forClass(List.class);
+        verify(publisher, atLeast(0)).publishAll(captor.capture());
+        return captor.getAllValues();
     }
 
     private static OpenAccountCommand.Builder command(String accountNumber) {
@@ -301,6 +324,73 @@ class CheckingAccountServiceTests {
     }
 
     @Nested
+    @DisplayName("Publicar los eventos de dominio")
+    class PublishDomainEvents {
+
+        @Test
+        @DisplayName("Abrir una cuenta publica cuenta abierta y el ingreso inicial después de guardarla")
+        void abrir_una_cuenta_publica_sus_eventos_despues_de_guardarla() {
+            service.openAccount(ADMIN, command(IBAN).build());
+
+            InOrder order = inOrder(repository, publisher);
+            order.verify(repository).save(any(CheckingAccount.class));
+            order.verify(publisher).publishAll(any());
+            assertThat(publishedBatches()).singleElement().satisfies(events -> assertThat(events)
+                    .map(DomainEvent::getClass).containsExactly(CheckingAccountOpened.class, MoneyDeposited.class));
+        }
+
+        @Test
+        @DisplayName("Un ingreso publica el evento de dinero ingresado después de guardar la cuenta")
+        void un_ingreso_publica_su_evento_despues_de_guardar() {
+            UUID id = service.openAccount(ADMIN, command(IBAN).build()).id();
+            clearInvocations(repository, publisher);
+
+            service.deposit(ADMIN, DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).build());
+
+            InOrder order = inOrder(repository, publisher);
+            order.verify(repository).save(any(CheckingAccount.class));
+            order.verify(publisher).publishAll(any());
+            assertThat(publishedBatches()).singleElement().satisfies(events -> assertThat(events)
+                    .map(DomainEvent::getClass).containsExactly(MoneyDeposited.class));
+        }
+
+        @Test
+        @DisplayName("Una retirada rechazada publica el evento de retirada rechazada")
+        void una_retirada_rechazada_publica_su_evento() {
+            UUID id = service.openAccount(ADMIN, command(IBAN).build()).id();
+            clearInvocations(publisher);
+
+            service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("5000")).build());
+
+            assertThat(publishedBatches()).singleElement().satisfies(events -> assertThat(events)
+                    .map(DomainEvent::getClass).containsExactly(WithdrawalRejected.class));
+        }
+
+        @Test
+        @DisplayName("Si guardar la cuenta falla, no se publica ningún evento")
+        void si_guardar_la_cuenta_falla_no_se_publica_ningun_evento() {
+            UUID id = service.openAccount(ADMIN, command(IBAN).build()).id();
+            clearInvocations(publisher);
+            doThrow(new IllegalStateException("fallo al guardar")).when(repository).save(any(CheckingAccount.class));
+
+            assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() ->
+                    service.deposit(ADMIN, DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).build()));
+            verify(publisher, never()).publishAll(any());
+        }
+
+        @Test
+        @DisplayName("Un caso de uso que falla antes de guardar no publica nada")
+        void un_caso_de_uso_que_falla_antes_de_guardar_no_publica_nada() {
+            service.openAccount(ADMIN, command(IBAN).build());
+            clearInvocations(publisher);
+
+            assertThatExceptionOfType(DuplicateAccountNumberException.class)
+                    .isThrownBy(() -> service.openAccount(ADMIN, command(IBAN).build()));
+            verify(publisher, never()).publishAll(any());
+        }
+    }
+
+    @Nested
     @DisplayName("Transferir")
     class Transfer {
 
@@ -320,6 +410,33 @@ class CheckingAccountServiceTests {
                     .targetAccountNumber(targetAccountNumber)
                     .amount(new BigDecimal(amount))
                     .build();
+        }
+
+        @Test
+        @DisplayName("Una transferencia aprobada publica la retirada del origen y el ingreso del destino tras guardarlas")
+        void una_transferencia_aprobada_publica_sus_eventos_tras_guardar_ambas_cuentas() {
+            clearInvocations(publisher);
+
+            service.transfer(ADMIN, transfer(sourceId, OTHER_IBAN, "200"));
+
+            InOrder order = inOrder(repository, publisher);
+            order.verify(repository, times(2)).save(any(CheckingAccount.class));
+            order.verify(publisher, times(2)).publishAll(any());
+            assertThat(publishedBatches()).flatMap(events -> events)
+                    .extracting(DomainEvent::getClass, DomainEvent::accountId)
+                    .containsExactly(tuple(MoneyWithdrawn.class, sourceId), tuple(MoneyDeposited.class, targetId));
+        }
+
+        @Test
+        @DisplayName("Una transferencia rechazada solo publica la retirada rechazada del origen")
+        void una_transferencia_rechazada_solo_publica_la_retirada_rechazada() {
+            clearInvocations(publisher);
+
+            service.transfer(ADMIN, transfer(sourceId, OTHER_IBAN, "5000"));
+
+            assertThat(publishedBatches()).flatMap(events -> events)
+                    .extracting(DomainEvent::getClass, DomainEvent::accountId)
+                    .containsExactly(tuple(WithdrawalRejected.class, sourceId));
         }
 
         @Test

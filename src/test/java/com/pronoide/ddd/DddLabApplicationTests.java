@@ -8,18 +8,27 @@ import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
 
+import com.pronoide.ddd.application.Caller;
+import com.pronoide.ddd.application.CheckingAccountCommands;
 import com.pronoide.ddd.application.DemoDataLoader;
+import com.pronoide.ddd.application.DepositCommand;
+import com.pronoide.ddd.application.OpenAccountCommand;
 
 /**
  * Usuarios de test (#50): admin, ada, grace y alan, todos con la contraseña "demo" (mismo hash que el perfil demo).
@@ -54,8 +63,29 @@ class DddLabApplicationTests {
 	@Autowired
 	private ApplicationContext context;
 
+	@Autowired
+	private CheckingAccountCommands commands;
+
 	@Test
 	void contextLoads() {
+	}
+
+	@Test
+	@ExtendWith(OutputCaptureExtension.class)
+	@DisplayName("Un ingreso llega al consumidor de auditoría a través del publicador de eventos")
+	void un_ingreso_llega_al_consumidor_de_auditoria(CapturedOutput output) {
+		Caller admin = Caller.builder().username("admin").admin(true).build();
+		UUID accountId = commands.openAccount(admin, OpenAccountCommand.builder()
+				.accountNumber("ES0000000000000000001701")
+				.holderName("Ada Lovelace")
+				.segment("RETAIL")
+				.initialDeposit(new BigDecimal("100"))
+				.ownerUsername("ada")
+				.build()).id();
+
+		commands.deposit(admin, DepositCommand.builder().accountId(accountId).amount(new BigDecimal("25")).build());
+
+		assertThat(output).contains("Auditoría · MoneyDeposited · cuenta " + accountId);
 	}
 
 	@Test

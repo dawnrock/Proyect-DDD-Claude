@@ -13,6 +13,7 @@ public class CheckingAccount {
     private final AccountNumber accountNumber;
     private final AccountHolder primaryHolder;
     private final List<Transaction> transactions = new ArrayList<>();
+    private final List<DomainEvent> domainEvents = new ArrayList<>();
     private MonetaryAmount currentBalance;
 
     private CheckingAccount(AccountNumber accountNumber, 
@@ -36,7 +37,7 @@ public class CheckingAccount {
         }
 
         CheckingAccount account = new CheckingAccount(accountNumber, primaryHolder, initialDeposit);
-        account.deposit(initialDeposit);
+        account.recordOpening(initialDeposit);
         return account;
     }
 
@@ -47,6 +48,7 @@ public class CheckingAccount {
         Transaction transaction = register(Transaction.deposit(id, amount));
         transaction.approve();
         currentBalance = newBalance;
+        record(new MoneyDeposited(id, transaction.id(), amount, transaction.occurredOn()));
         return transaction;
     }
 
@@ -60,14 +62,23 @@ public class CheckingAccount {
         if (isAllowed(newBalance)) {
             transaction.approve();
             currentBalance = newBalance;
+            record(new MoneyWithdrawn(id, transaction.id(), amount, transaction.occurredOn()));
         } else {
             transaction.reject();
+            record(new WithdrawalRejected(id, transaction.id(), amount, transaction.occurredOn()));
         }
         return transaction;
     }
 
     public List<Transaction> transactions() {
         return List.copyOf(transactions);
+    }
+
+    /** Entrega los eventos registrados desde la última recogida y los olvida, para no publicarlos dos veces. */
+    public List<DomainEvent> pullDomainEvents() {
+        List<DomainEvent> pulled = List.copyOf(domainEvents);
+        domainEvents.clear();
+        return pulled;
     }
 
     public UUID id() {
@@ -96,6 +107,18 @@ public class CheckingAccount {
     private Transaction register(Transaction transaction) {
         transactions.add(transaction);
         return transaction;
+    }
+
+    /** El evento de apertura va antes que el del depósito inicial, pero comparte su instante. */
+    private void recordOpening(MonetaryAmount initialDeposit) {
+        int firstEvent = domainEvents.size();
+        Transaction deposit = deposit(initialDeposit);
+        domainEvents.add(firstEvent, new CheckingAccountOpened(
+                id, accountNumber, primaryHolder.fullName(), initialDeposit, deposit.occurredOn()));
+    }
+
+    private void record(DomainEvent event) {
+        domainEvents.add(event);
     }
 
     private static void requirePositive(MonetaryAmount amount) {
