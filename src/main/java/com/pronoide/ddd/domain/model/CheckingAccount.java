@@ -13,6 +13,7 @@ public class CheckingAccount {
     private final AccountNumber accountNumber;
     private final AccountHolder primaryHolder;
     private final List<Transaction> transactions = new ArrayList<>();
+    private final List<DomainEvent> domainEvents = new ArrayList<>();
     private MonetaryAmount currentBalance;
 
     private CheckingAccount(AccountNumber accountNumber, 
@@ -47,6 +48,7 @@ public class CheckingAccount {
         Transaction transaction = register(Transaction.deposit(id, amount));
         transaction.approve();
         currentBalance = newBalance;
+        record(new MoneyDeposited(id, transaction.id(), amount, transaction.occurredOn()));
         return transaction;
     }
 
@@ -68,6 +70,13 @@ public class CheckingAccount {
 
     public List<Transaction> transactions() {
         return List.copyOf(transactions);
+    }
+
+    /** Entrega los eventos registrados desde la última recogida y los olvida, para no publicarlos dos veces. */
+    public List<DomainEvent> pullDomainEvents() {
+        List<DomainEvent> pulled = List.copyOf(domainEvents);
+        domainEvents.clear();
+        return pulled;
     }
 
     public UUID id() {
@@ -96,6 +105,10 @@ public class CheckingAccount {
     private Transaction register(Transaction transaction) {
         transactions.add(transaction);
         return transaction;
+    }
+
+    private void record(DomainEvent event) {
+        domainEvents.add(event);
     }
 
     private static void requirePositive(MonetaryAmount amount) {

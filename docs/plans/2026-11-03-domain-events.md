@@ -57,7 +57,7 @@ Technical notes:
 
 ## Tasks
 
-### [ ] T1 — `DomainEvent` and `MoneyDeposited` (~10 min)
+### [x] T1 — `DomainEvent` and `MoneyDeposited` (~10 min)
 
 - **Layer:** domain
 - **Files:** `DomainEvent.java`, `MoneyDeposited.java`, `CheckingAccount.java`, `CheckingAccountTests.java`
@@ -66,7 +66,7 @@ Technical notes:
   1. Tests first: a deposit records one `MoneyDeposited` with the account id, the transaction id, the amount and the transaction's instant; `pullDomainEvents()` empties the list (a second call returns nothing).
   2. Interface `DomainEvent` (`accountId()`, `occurredOn()`), record `MoneyDeposited` (null checks in the compact constructor), private event list and `pullDomainEvents()` in the aggregate.
 - **Acceptance criteria:**
-  - [ ] The new tests pass; `check-domain.mjs` and `DomainIsolationTests` stay green.
+  - [x] The new tests pass; `check-domain.mjs` and `DomainIsolationTests` stay green.
 
 ### [ ] T2 — `MoneyWithdrawn` and `WithdrawalRejected` (~10 min)
 

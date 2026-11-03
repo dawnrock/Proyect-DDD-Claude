@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.math.BigDecimal;
 import java.util.Currency;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -142,4 +143,39 @@ class CheckingAccountTests {
                 .withMessageContaining("APPROVED");
     }
 
+    @Nested
+    @DisplayName("Eventos de dominio")
+    class DomainEvents {
+
+        @Test
+        @DisplayName("Un ingreso registra el evento de dinero ingresado con su movimiento")
+        void un_ingreso_registra_el_evento_de_dinero_ingresado_con_su_movimiento() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+            cuenta.pullDomainEvents();
+
+            Transaction ingreso = cuenta.deposit(MonetaryAmount.euros("25.00"));
+
+            assertThat(cuenta.pullDomainEvents()).containsExactly(new MoneyDeposited(
+                    cuenta.id(), ingreso.id(), MonetaryAmount.euros("25.00"), ingreso.occurredOn()));
+        }
+
+        @Test
+        @DisplayName("Recoger los eventos los vacía: una segunda recogida no devuelve nada")
+        void recoger_los_eventos_los_vacia() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+            cuenta.deposit(MonetaryAmount.euros("25.00"));
+
+            assertThat(cuenta.pullDomainEvents()).isNotEmpty();
+            assertThat(cuenta.pullDomainEvents()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Los eventos recogidos no pueden modificarse desde fuera del agregado")
+        void los_eventos_recogidos_no_pueden_modificarse() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+
+            assertThatExceptionOfType(UnsupportedOperationException.class)
+                    .isThrownBy(() -> cuenta.pullDomainEvents().clear());
+        }
+    }
 }
