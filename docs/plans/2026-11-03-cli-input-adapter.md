@@ -6,7 +6,7 @@
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-03
 - **Status:** in progress
-- **Total estimate:** ~35 min (4 tasks)
+- **Total estimate:** ~60 min (7 tasks; T4-T6 added on 2026-11-03 at the user's request)
 
 ## Goal
 
@@ -14,9 +14,10 @@ Show that the hexagon is used the same way from several adapters: the demo data 
 
 With the `demo` profile the same operations as in phase 1 run: the three demo accounts (Ada Lovelace, Grace Hopper, Alan Turing) are opened with their owners. Since #18 they are opened by NIF, with a generated IBAN and the segment decided by the tax agency.
 
+**Extended at the user's request (2026-11-03):** after opening the three accounts, the demo also deposits, withdraws (one approved and one rejected withdrawal) and transfers, reading the generated IBANs from the returned summaries, with a `[demo]` trace for each operation. The demo runs as `CallerDef.system()`, an administrator, which may operate any account (ADR 0008); a test pins it.
+
 ### Out of scope
 
-- New demo operations (deposits, transfers): the issue asks for the same operations as in phase 1.
 - Command-line arguments or an interactive shell: the runner is an `ApplicationRunner` activated by the profile.
 - Building the core in `config` (#20) and `HexagonalArchitectureTests` (#22).
 - Updating `docs/analysis/` and `fase-1-capas.md`, which describe phase 1 and keep the old name on purpose.
@@ -58,7 +59,7 @@ The architecture is already guarded by existing rules, which now cover the new p
 - **Acceptance criteria:**
   - [x] The trace tests pass; the log of `./mvnw spring-boot:run` shows the three lines and the summary.
 
-### [ ] T3 — Architecture rules cover the CLI adapter (~5 min)
+### [x] T3 — Architecture rules cover the CLI adapter (~5 min)
 
 - **Layer:** tests
 - **Files:** `LayeredArchitectureTests.java` (Javadoc only, if needed)
@@ -66,13 +67,45 @@ The architecture is already guarded by existing rules, which now cover the new p
 - **What to do:**
   1. Validate by breaking them, one at a time, from `DomainModelRunner`: a reference to `CheckingAccountService`, to an output adapter and to a web class; each must fail its rule (`los_adaptadores_de_entrada_solo_conocen_los_puertos_de_entrada`, `solo_los_adaptadores_de_salida_y_config_conocen_los_adaptadores_de_salida`, `la_web_y_rest_no_se_conocen`). Revert. Mention the CLI in the Javadoc of the input-adapter rule.
 - **Acceptance criteria:**
-  - [ ] Each sabotage fails its rule; after reverting `./mvnw verify` is green (issue criterion: the runner imports nothing from `adapter.out` nor the application service).
+  - [x] Each sabotage fails its rule; after reverting `./mvnw verify` is green (issue criterion: the runner imports nothing from `adapter.out` nor the application service).
 
-### [ ] T4 — Documentation and project status (~10 min)
+### [ ] T4 — `CallerDef.system()` operates any account (~5 min)
+
+- **Layer:** application
+- **Files:** `CheckingAccountServiceOwnershipTests.java`
+- **Depends on:** T3
+- **What to do:**
+  1. Test: the system caller deposits into, withdraws from and transfers from an account owned by another user (it is an administrator, ADR 0008). No production change expected; prove the test can fail by temporarily making `system()` a non-admin.
+- **Acceptance criteria:**
+  - [ ] The test passes and fails when `system()` is not an administrator (sabotage, reverted).
+
+### [ ] T5 — Demo deposits and withdrawals (~10 min)
+
+- **Layer:** adapter.in
+- **Files:** `DomainModelRunner.java`, `DomainModelRunnerTests.java`
+- **Depends on:** T4
+- **What to do:**
+  1. Tests first: after opening, the runner deposits 200.00 € into Ada's account, withdraws 50.00 € from Alan's (approved) and 1000.00 € from Alan's (rejected: retail, no overdraft); final balances and a `[demo]` line per operation with the IBAN, the amount and the result ("aprobada" / "rechazada").
+  2. The runner keeps the summaries it opened (generated IBAN and id) and uses `CheckingAccountCommands.deposit` / `withdraw`.
+- **Acceptance criteria:**
+  - [ ] Balances after the demo: Ada 1200.00, Alan 200.00; traces of the three movements.
+
+### [ ] T6 — Demo transfer (~10 min)
+
+- **Layer:** adapter.in · tests
+- **Files:** `DomainModelRunner.java`, `DomainModelRunnerTests.java`, `DemoProfileTests.java`
+- **Depends on:** T5
+- **What to do:**
+  1. Tests first: Grace transfers 300.00 € to Ada, by Ada's generated IBAN read from her summary; final balances (Grace 4700.00, Ada 1500.00) and a `[demo]` trace with both IBANs and the result.
+  2. `DemoProfileTests`: with the full context and the `demo` profile, the API shows those final balances.
+- **Acceptance criteria:**
+  - [ ] Transfer done with the generated IBAN; demo tests adjusted to the new balances.
+
+### [ ] T7 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/fase-2-hexagonal.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
-- **Depends on:** T2, T3
+- **Depends on:** T6
 - **What to do:**
   1. `fase-2-hexagonal.md`: "State after #19", row of `DomainModelRunner` in `adapter.in.cli` instead of `DemoDataLoader`; remove it from "classes that arrive later".
   2. Project status: #19 done, next step `/plan-feature 20`; remove the pending item about `DemoDataLoader` (#16); decisions that mention `DemoDataLoader` point to the new name.

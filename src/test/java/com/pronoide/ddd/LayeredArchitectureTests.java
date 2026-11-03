@@ -68,7 +68,8 @@ class LayeredArchitectureTests {
             .should().notDependOnEachOther();
 
     /**
-     * #16: los adaptadores de entrada usan los puertos {@code CheckingAccountCommands} y {@code CheckingAccountQueries},
+     * #16 y #19: los adaptadores de entrada (REST, web y CLI) usan los puertos {@code CheckingAccountCommands} y
+     * {@code CheckingAccountQueries},
      * nunca la clase que los implementa. Se nombra por clase para que un renombrado rompa la compilación en lugar de
      * dejar la regla vacía.
      */
