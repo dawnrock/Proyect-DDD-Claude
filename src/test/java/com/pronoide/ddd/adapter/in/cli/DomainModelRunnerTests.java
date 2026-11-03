@@ -133,4 +133,24 @@ class DomainModelRunnerTests {
                 .containsPattern("\\[demo\\] Retirar · ES\\d{22} · 50\\.00 EUR · aprobada")
                 .containsPattern("\\[demo\\] Retirar · ES\\d{22} · 1000\\.00 EUR · rechazada");
     }
+
+    @Test
+    @DisplayName("La demo transfiere de Grace a Ada usando el IBAN generado de Ada")
+    void la_demo_transfiere_de_grace_a_ada_con_el_iban_generado() {
+        new DomainModelRunner(service).run(new DefaultApplicationArguments());
+
+        assertThat(detailsOf("Grace Hopper").balance()).isEqualByComparingTo("4700.00");
+        assertThat(detailsOf("Ada Lovelace").balance()).isEqualByComparingTo("1500.00");
+    }
+
+    @Test
+    @DisplayName("Deja una traza de la transferencia con los dos IBAN, el importe y su resultado")
+    void deja_una_traza_de_la_transferencia(CapturedOutput output) {
+        new DomainModelRunner(service).run(new DefaultApplicationArguments());
+
+        String adaIban = detailsOf("Ada Lovelace").accountNumber();
+        String graceIban = detailsOf("Grace Hopper").accountNumber();
+        assertThat(output).contains(
+                "[demo] Transferir · %s → %s · 300.00 EUR · aprobada".formatted(graceIban, adaIban));
+    }
 }

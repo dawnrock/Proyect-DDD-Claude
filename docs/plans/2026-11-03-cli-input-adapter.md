@@ -90,7 +90,7 @@ The architecture is already guarded by existing rules, which now cover the new p
 - **Acceptance criteria:**
   - [x] Balances after the demo: Ada 1200.00, Alan 200.00; traces of the three movements.
 
-### [ ] T6 — Demo transfer (~10 min)
+### [x] T6 — Demo transfer (~10 min)
 
 - **Layer:** adapter.in · tests
 - **Files:** `DomainModelRunner.java`, `DomainModelRunnerTests.java`, `DemoProfileTests.java`
@@ -99,7 +99,7 @@ The architecture is already guarded by existing rules, which now cover the new p
   1. Tests first: Grace transfers 300.00 € to Ada, by Ada's generated IBAN read from her summary; final balances (Grace 4700.00, Ada 1500.00) and a `[demo]` trace with both IBANs and the result.
   2. `DemoProfileTests`: with the full context and the `demo` profile, the API shows those final balances.
 - **Acceptance criteria:**
-  - [ ] Transfer done with the generated IBAN; demo tests adjusted to the new balances.
+  - [x] Transfer done with the generated IBAN; demo tests adjusted to the new balances.
 
 ### [ ] T7 — Documentation and project status (~10 min)
 

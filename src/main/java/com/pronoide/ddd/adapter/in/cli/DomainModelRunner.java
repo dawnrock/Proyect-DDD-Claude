@@ -15,6 +15,8 @@ import com.pronoide.ddd.application.CheckingAccountCommands;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
 import com.pronoide.ddd.application.TransactionSummary;
+import com.pronoide.ddd.application.TransferCommand;
+import com.pronoide.ddd.application.TransferSummary;
 import com.pronoide.ddd.application.WithdrawCommand;
 
 import lombok.RequiredArgsConstructor;
@@ -46,19 +48,22 @@ public class DomainModelRunner implements ApplicationRunner {
     private final CheckingAccountCommands commands;
 
     /**
-     * Abre las cuentas de demostración y, con los IBAN generados que devuelven sus resúmenes, ingresa en la de Ada y
-     * retira de la de Alan una vez con saldo y otra sin él. Opera como {@code CallerDef.system()}, un administrador.
+     * Abre las cuentas de demostración y, con los IBAN generados que devuelven sus resúmenes, ingresa en la de Ada,
+     * retira de la de Alan una vez con saldo y otra sin él, y transfiere de Grace a Ada por el IBAN de Ada. Opera como
+     * {@code CallerDef.system()}, un administrador.
      */
     @Override
     public void run(ApplicationArguments args) {
         List<AccountSummary> opened = DEMO_ACCOUNTS.stream().map(this::open).toList();
         log.info("[demo] {} cuentas de demostración abiertas", opened.size());
         AccountSummary ada = opened.get(0);
+        AccountSummary grace = opened.get(1);
         AccountSummary alan = opened.get(2);
 
         deposit(ada, "200.00");
         withdraw(alan, "50.00");
         withdraw(alan, "1000.00");
+        transfer(grace, ada, "300.00");
     }
 
     private AccountSummary open(OpenAccountCommand command) {
@@ -81,6 +86,17 @@ public class DomainModelRunner implements ApplicationRunner {
                 WithdrawCommand.builder().accountId(account.id()).amount(new BigDecimal(amount)).build());
         log.info("[demo] Retirar · {} · {} {} · {}", account.accountNumber(), withdrawal.amount(),
                 withdrawal.currency(), withdrawal.status().equals("APPROVED") ? "aprobada" : "rechazada");
+    }
+
+    private void transfer(AccountSummary source, AccountSummary target, String amount) {
+        TransferSummary transfer = commands.transfer(CallerDef.system(), TransferCommand.builder()
+                .sourceAccountId(source.id())
+                .targetAccountNumber(target.accountNumber())
+                .amount(new BigDecimal(amount))
+                .build());
+        log.info("[demo] Transferir · {} → {} · {} {} · {}", transfer.sourceAccountNumber(),
+                transfer.targetAccountNumber(), transfer.amount(), transfer.currency(),
+                transfer.status().equals("APPROVED") ? "aprobada" : "rechazada");
     }
 
     private static String segmentLabel(String segment) {
