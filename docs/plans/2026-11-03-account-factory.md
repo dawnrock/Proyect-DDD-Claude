@@ -55,7 +55,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 
 ## Tasks
 
-### [ ] T0 — Contract (~15 min)
+### [x] T0 — Contract (~15 min)
 
 - **Side:** both
 - **Layer:** application · docs
@@ -66,7 +66,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
   2. Expand the types: `holderTaxId` (`@Value.Default ""` during the transition), `accountNumber` and `segment` optional and `@Deprecated`; `AccountSummary.segment` filled from the holder in `toSummary`; fix the test builders of `AccountSummary`.
   3. backend-dev and web-dev review and agree; freeze it in a commit.
 - **Acceptance criteria:**
-  - [ ] Contract agreed and frozen in a commit; `./mvnw verify` green against it.
+  - [x] Contract agreed and frozen in a commit; `./mvnw verify` green against it.
 
 ### [ ] T1 — `TaxId` and the two output ports (~10 min)
 
@@ -124,7 +124,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Depends on:** T2, T3, T4
 - **What to do:**
   1. Tests first: opening uses `holderTaxId`, the summary has a generated IBAN and the computed segment; a generated number already in use → `DuplicateAccountNumberException` (stubbed sequence); events and ownership as before.
-  2. Explicit constructor that builds `CheckingAccountFactory` from the two new ports (moves to `config` in #20); `openAccount` ignores the deprecated fields.
+  2. Explicit constructor that builds `CheckingAccountFactory` from the two new ports (moves to `config` in #20); with `holderTaxId`, `openAccount` uses the factory and ignores the deprecated fields; without it, it keeps the old path until T12 (contract, round 1).
 - **Acceptance criteria:**
   - [ ] Opening goes through the factory; the duplicate check is a safety net after generation.
 
@@ -205,7 +205,7 @@ Simulated adapters (deterministic, documented in their Javadoc):
 - **Files:** `OpenAccountCommandDef.java`, `OpenAccountCommandTests.java`, `docs/contracts/account-factory.md`
 - **Depends on:** T7, T9, T11
 - **What to do:**
-  1. Remove the deprecated `accountNumber` and `segment`; `holderTaxId` becomes required with its format validation; update the command tests and mark the contract as final.
+  1. Remove the deprecated `accountNumber`, `segment` and `SEGMENTS`, and the service's legacy path without NIF; `holderTaxId` becomes required with its format validation; update the command tests and mark the contract as final.
 - **Acceptance criteria:**
   - [ ] Nobody references the removed fields; `./mvnw verify` green.
 
