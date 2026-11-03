@@ -20,7 +20,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.pronoide.ddd.application.CheckingAccountService;
+import com.pronoide.ddd.application.CheckingAccountCommands;
+import com.pronoide.ddd.application.CheckingAccountQueries;
 import com.pronoide.ddd.adapter.in.SecuritySupport;
 
 /** Reglas de la cadena de seguridad web (ADR 0008, #50): acceso, CSRF y rol de administrador. */
@@ -32,7 +33,10 @@ class WebSecurityTests {
     private MockMvc mvc;
 
     @MockitoBean
-    private CheckingAccountService service;
+    private CheckingAccountCommands commands;
+
+    @MockitoBean
+    private CheckingAccountQueries queries;
 
     @Test
     @DisplayName("Un anónimo que pide el listado es redirigido al login")

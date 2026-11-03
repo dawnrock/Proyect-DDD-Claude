@@ -20,7 +20,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.pronoide.ddd.application.AccountSummary;
 import com.pronoide.ddd.application.Caller;
-import com.pronoide.ddd.application.CheckingAccountService;
+import com.pronoide.ddd.application.CheckingAccountCommands;
+import com.pronoide.ddd.application.CheckingAccountQueries;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
 import com.pronoide.ddd.application.TargetAccountNotFoundException;
@@ -45,14 +46,16 @@ public class AccountWebController {
 
     private static final List<String> CURRENCIES = List.of("EUR", "USD", "GBP");
 
-    private final CheckingAccountService service;
+    private final CheckingAccountCommands commands;
+
+    private final CheckingAccountQueries queries;
 
     private final WebFormat fmt;
 
     @GetMapping("/")
     public String list(Authentication authentication, Model model) {
         Caller caller = CurrentCaller.from(authentication);
-        List<AccountSummary> accounts = service.listAccounts(caller);
+        List<AccountSummary> accounts = queries.listAccounts(caller);
         if (!caller.admin() && accounts.size() == 1) {
             return redirectToDetail(accounts.get(0).id());
         }
@@ -86,7 +89,7 @@ public class AccountWebController {
             }
             if (command != null) {
                 try {
-                    TransactionSummary deposit = service.deposit(CurrentCaller.from(authentication), command);
+                    TransactionSummary deposit = commands.deposit(CurrentCaller.from(authentication), command);
                     redirect.addFlashAttribute("message",
                             "Ingreso de %s aprobado".formatted(fmt.money(deposit.amount(), deposit.currency())));
                     return redirectToDetail(id);
@@ -111,7 +114,7 @@ public class AccountWebController {
             }
             if (command != null) {
                 try {
-                    TransactionSummary withdrawal = service.withdraw(CurrentCaller.from(authentication), command);
+                    TransactionSummary withdrawal = commands.withdraw(CurrentCaller.from(authentication), command);
                     String amount = fmt.money(withdrawal.amount(), withdrawal.currency());
                     if ("REJECTED".equals(withdrawal.status())) {
                         redirect.addFlashAttribute("rejection",
@@ -147,7 +150,7 @@ public class AccountWebController {
             }
             if (command != null) {
                 try {
-                    TransferSummary transfer = service.transfer(CurrentCaller.from(authentication), command);
+                    TransferSummary transfer = commands.transfer(CurrentCaller.from(authentication), command);
                     String amount = fmt.money(transfer.amount(), transfer.currency());
                     String target = fmt.maskedIban(transfer.targetAccountNumber());
                     if ("REJECTED".equals(transfer.status())) {
@@ -183,7 +186,7 @@ public class AccountWebController {
             model.addAttribute("transferForm", new TransferForm());
         }
         // Primero la cuenta: una ajena es un 404 sin consultar nada más
-        model.addAttribute("account", service.findAccount(caller, id));
+        model.addAttribute("account", queries.findAccount(caller, id));
         model.addAttribute("backLabel", backLabel(caller));
         model.addAttribute("currencies", CURRENCIES);
         return DETAIL_VIEW;
@@ -197,7 +200,7 @@ public class AccountWebController {
         if (caller.admin()) {
             return "Cuentas";
         }
-        return service.listAccounts(caller).size() > 1 ? "Mis cuentas" : null;
+        return queries.listAccounts(caller).size() > 1 ? "Mis cuentas" : null;
     }
 
     private static String redirectToDetail(UUID id) {
@@ -217,7 +220,7 @@ public class AccountWebController {
         OpenAccountCommand command = result.hasErrors() ? null : toCommand(form, result);
         if (command != null) {
             try {
-                AccountSummary account = service.openAccount(CurrentCaller.from(authentication), command);
+                AccountSummary account = commands.openAccount(CurrentCaller.from(authentication), command);
                 redirect.addFlashAttribute("message",
                         "Cuenta %s abierta correctamente".formatted(account.accountNumber()));
                 return "redirect:/";

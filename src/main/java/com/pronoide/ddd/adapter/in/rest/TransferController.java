@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.pronoide.ddd.application.CheckingAccountService;
+import com.pronoide.ddd.application.CheckingAccountCommands;
 import com.pronoide.ddd.application.TransferCommand;
 import com.pronoide.ddd.application.TransferSummary;
 import com.pronoide.ddd.adapter.in.CurrentCaller;
@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TransferController {
 
-    private final CheckingAccountService service;
+    private final CheckingAccountCommands commands;
 
     @PostMapping
     public ResponseEntity<TransferResponse> transfer(
@@ -38,7 +38,7 @@ public class TransferController {
         if (request.currency() != null) {
             command.currency(request.currency());
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(service.transfer(CurrentCaller.from(authentication), command.build())));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(commands.transfer(CurrentCaller.from(authentication), command.build())));
     }
 
     private static TransferResponse toResponse(TransferSummary transfer) {

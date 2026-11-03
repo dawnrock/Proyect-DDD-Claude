@@ -56,6 +56,12 @@ class CheckingAccountServiceTests {
                 .ownerUsername("ada");
     }
 
+    @Test
+    @DisplayName("El servicio ofrece los casos de uso por sus puertos de entrada de commands y de queries")
+    void el_servicio_ofrece_los_casos_de_uso_por_sus_puertos_de_entrada_de_commands_y_de_queries() {
+        assertThat(service).isInstanceOf(CheckingAccountCommands.class).isInstanceOf(CheckingAccountQueries.class);
+    }
+
     @Nested
     @DisplayName("Abrir cuenta")
     class OpenAccount {

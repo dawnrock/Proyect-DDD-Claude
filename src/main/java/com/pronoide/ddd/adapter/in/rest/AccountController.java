@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountSummary;
-import com.pronoide.ddd.application.CheckingAccountService;
+import com.pronoide.ddd.application.CheckingAccountCommands;
+import com.pronoide.ddd.application.CheckingAccountQueries;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
 import com.pronoide.ddd.application.TransactionSummary;
@@ -27,16 +28,18 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
- * API REST de cuentas: {@code /api/accounts}. Mapea la petición a un command, delega en
- * {@link CheckingAccountService} y convierte las vistas de aplicación en DTOs de respuesta. Los errores
- * los traduce {@link RestExceptionHandler}. Contrato: {@code docs/contracts/open-query-list-accounts.md}.
+ * API REST de cuentas: {@code /api/accounts}. Mapea la petición a un command, delega en los puertos de entrada
+ * {@link CheckingAccountCommands} y {@link CheckingAccountQueries} y convierte las vistas de aplicación en DTOs de
+ * respuesta. Los errores los traduce {@link RestExceptionHandler}. Contrato: {@code docs/contracts/open-query-list-accounts.md}.
  */
 @RestController
 @RequestMapping("/api/accounts")
 @RequiredArgsConstructor
 public class AccountController {
 
-    private final CheckingAccountService service;
+    private final CheckingAccountCommands commands;
+
+    private final CheckingAccountQueries queries;
 
     @PostMapping
     public ResponseEntity<AccountSummaryResponse> openAccount(
@@ -51,18 +54,18 @@ public class AccountController {
             command.currency(request.currency());
         }
 
-        AccountSummaryResponse body = toResponse(service.openAccount(CurrentCaller.from(authentication), command.build()));
+        AccountSummaryResponse body = toResponse(commands.openAccount(CurrentCaller.from(authentication), command.build()));
         return ResponseEntity.created(URI.create("/api/accounts/" + body.id())).body(body);
     }
 
     @GetMapping
     public List<AccountSummaryResponse> listAccounts(Authentication authentication) {
-        return service.listAccounts(CurrentCaller.from(authentication)).stream().map(AccountController::toResponse).toList();
+        return queries.listAccounts(CurrentCaller.from(authentication)).stream().map(AccountController::toResponse).toList();
     }
 
     @GetMapping("/{id}")
     public AccountDetailsResponse findAccount(Authentication authentication, @PathVariable UUID id) {
-        return toResponse(service.findAccount(CurrentCaller.from(authentication), id));
+        return toResponse(queries.findAccount(CurrentCaller.from(authentication), id));
     }
 
     @PostMapping("/{id}/deposits")
@@ -72,7 +75,7 @@ public class AccountController {
         if (request.currency() != null) {
             command.currency(request.currency());
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(service.deposit(CurrentCaller.from(authentication), command.build())));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(commands.deposit(CurrentCaller.from(authentication), command.build())));
     }
 
     @PostMapping("/{id}/withdrawals")
@@ -82,7 +85,7 @@ public class AccountController {
         if (request.currency() != null) {
             command.currency(request.currency());
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(service.withdraw(CurrentCaller.from(authentication), command.build())));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(commands.withdraw(CurrentCaller.from(authentication), command.build())));
     }
 
     private static AccountSummaryResponse toResponse(AccountSummary summary) {
