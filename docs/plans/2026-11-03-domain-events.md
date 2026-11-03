@@ -158,7 +158,7 @@ Technical notes:
 - **Acceptance criteria:**
   - [x] The integration test passes, and fails if the publisher adapter stops forwarding the events (sabotage, reverted).
 
-### [ ] T10 — Documentation and project status (~10 min)
+### [x] T10 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/dominio/glosario.md`, `docs/arquitectura/fase-2-hexagonal.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -168,7 +168,7 @@ Technical notes:
   2. `fase-2-hexagonal.md`: "State after #17", rows for the new classes; remove them from "classes that arrive later".
   3. Project status: #17 done, next step `/plan-feature 18`; decisions (events published after saving, opening records two events, no transfer event); pending items (listener failure surfaces in the use case).
 - **Acceptance criteria:**
-  - [ ] New terms in the glossary; the CI check of the project status passes.
+  - [x] New terms in the glossary; the CI check of the project status passes.
 
 ## Global acceptance criteria
 

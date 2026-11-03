@@ -24,6 +24,22 @@ Términos del dominio de cuentas corrientes. El código usa el nombre en inglés
 | Número de cuenta duplicado | `DuplicateAccountNumberException` | Excepción de dominio | Se intenta abrir una cuenta con un número que ya usa otra (R16). La lanza el caso de uso "abrir cuenta", que es quien consulta el repositorio. |
 | Transferencia a la misma cuenta | `SameAccountTransferException` | Excepción de dominio | Se intenta transferir de una cuenta a sí misma (R17). La lanza `MoneyTransferService` antes de registrar ningún movimiento. |
 
+## Eventos de dominio (`domain.model`, #17)
+
+| Término | En el código | Tipo DDD | Definición |
+| ------- | ------------ | -------- | ---------- |
+| Evento de dominio | `DomainEvent` | Contrato de evento | Algo relevante que ya ha ocurrido en una cuenta, en pasado e inmutable (`record`), con el id de la cuenta y su instante (`occurredOn`). Lo registra la cuenta al cambiar de estado y la aplicación lo publica **después de guardarla**. |
+| Cuenta abierta | `CheckingAccountOpened` | Evento de dominio | Se ha abierto una cuenta: número, titular y depósito inicial. Va seguido del `MoneyDeposited` del depósito inicial y comparte su instante. |
+| Dinero ingresado | `MoneyDeposited` | Evento de dominio | Se ha ingresado un importe, también el depósito inicial y el lado de destino de una transferencia. |
+| Dinero retirado | `MoneyWithdrawn` | Evento de dominio | Se ha aprobado una retirada, también el lado de origen de una transferencia aprobada. |
+| Retirada rechazada | `WithdrawalRejected` | Evento de dominio | Se ha rechazado una retirada (o una transferencia) porque dejaría la cuenta por debajo de lo permitido; el saldo no cambia. |
+| Recoger los eventos | `pullDomainEvents` | Operación de la cuenta | Entrega los eventos registrados desde la última recogida y los olvida, para no publicarlos dos veces. |
+| Publicador de eventos | `DomainEventPublisher` | Puerto de salida | Entrega los eventos a quien quiera reaccionar. Lo implementa `SpringDomainEventPublisher` (`adapter.out.event`). |
+| Auditoría | `AuditLogListener` | Consumidor (`application.listener`) | Anota en el log todos los eventos, con su tipo, su cuenta y su instante. |
+| Aviso al cliente | `CustomerNotificationListener` | Consumidor (`application.listener`) | Avisa al cliente de ingresos, retiradas y retiradas rechazadas. Simulado: escribe el aviso en el log. No avisa de la apertura. |
+
+Una transferencia no tiene evento propio: los consumidores ven una retirada en el origen y un ingreso en el destino.
+
 ## Servicios de dominio (`domain.service`)
 
 | Término | En el código | Tipo DDD | Definición |

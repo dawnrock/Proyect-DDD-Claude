@@ -41,7 +41,7 @@ com.pronoide.ddd
 
 ## Class → role
 
-State after #16 (packages moved, adapters behind input and output ports). The last column says which issue changes the class's role.
+State after #17 (adapters behind input and output ports, domain events published after saving). The last column says which issue changes the class's role.
 
 | Class | Package | Role in the architecture | Changes in |
 | ----- | ------- | ------------------------ | ---------- |
@@ -55,14 +55,18 @@ State after #16 (packages moved, adapters behind input and output ports). The la
 | `WebSecurityConfig` | `adapter.in.web` | Input adapter: fallback security chain (form login) | — |
 | `SecuritySupport`, `CurrentCaller`, `SecurityUsersProperties` | `adapter.in` | Support shared by the input adapters: authenticated user → `Caller` | — |
 | `InMemoryCheckingAccountRepository` | `adapter.out.persistence` | Output adapter (simulated persistence, package-private): implements `CheckingAccountRepository` | #20: wired in `config` |
+| `SpringDomainEventPublisher` | `adapter.out.event` | Output adapter (package-private): implements `DomainEventPublisher` over Spring's `ApplicationEventPublisher` | #20: wired in `config` |
 | `InMemoryAccountOwnershipRepository` | `adapter.out.persistence` | Output adapter (package-private): implements `AccountOwnershipRepository`, which user owns each account (ADR 0008) | #20: wired in `config` |
-| `CheckingAccountService` | `application` | Application service: implements `CheckingAccountCommands` and `CheckingAccountQueries` (use cases and account ownership); uses the output ports only. Keeps its name (not `CheckingAccountApplicationService`): nobody outside `application` sees it | #17 publishes events; #20 built in `config` |
+| `CheckingAccountService` | `application` | Application service: implements `CheckingAccountCommands` and `CheckingAccountQueries` (use cases and account ownership); uses the output ports only and publishes each account's domain events after saving it. Keeps its name (not `CheckingAccountApplicationService`): nobody outside `application` sees it | #20 built in `config` |
 | `CheckingAccountCommands`, `CheckingAccountQueries` | `application` | Input ports: use cases that change accounts (open, deposit, withdraw, transfer) and that query them (list, detail) | — |
 | `AccountOwnershipRepository` | `application` | Output port: account ownership. In `application`, not `domain.model`, because the user's identity never reaches the domain (ADR 0008) | — |
 | `*CommandDef`, `*SummaryDef`, `AccountDetailsDef`, `CallerDef`, `ApplicationValue`, `CommandValidation` | `application` | Commands, views and `Caller` (Immutables) and their validation | #18: `OpenAccountCommand` changes |
+| `AuditLogListener`, `CustomerNotificationListener` | `application.listener` | Domain event consumers (`@EventListener`, `@Slf4j`): audit log and simulated customer notification | — |
 | `NotFoundException`, `AccountNotFoundException`, `TargetAccountNotFoundException`, `ForbiddenOperationException`, `OperationNotAllowedException` | `application` | Application errors | — |
 | `DemoDataLoader` | `application` | Demo data with the `demo` profile, through `CheckingAccountCommands` | #19: becomes the CLI input adapter `DomainModelRunner` |
-| `CheckingAccount` | `domain.model` | Aggregate root | #17: records domain events; #18: opened only through the factory |
+| `CheckingAccount` | `domain.model` | Aggregate root; records its domain events (`pullDomainEvents`) | #18: opened only through the factory |
+| `DomainEvent`, `CheckingAccountOpened`, `MoneyDeposited`, `MoneyWithdrawn`, `WithdrawalRejected` | `domain.model` | Domain events (`record`) | — |
+| `DomainEventPublisher` | `domain.model` | Output port: publishes domain events | — |
 | `CheckingAccountRepository` | `domain.model` | Output port: repository of the aggregate | — |
 | `AccountHolder`, `Transaction` | `domain.model` | Entities | — |
 | `AccountNumber`, `MonetaryAmount` | `domain.model` | Value objects | — |
@@ -71,4 +75,4 @@ State after #16 (packages moved, adapters behind input and output ports). The la
 | `MoneyTransferService` | `domain.service` | Domain service (transfers, R17-R19) | #20: built in `config` |
 | `DddLabApplication` | root | Spring Boot entry point | — |
 
-Classes that arrive later: output ports `AccountNumberSequence` and `IncomeVerifier` (#18) and `DomainEventPublisher` (#17) in `domain.model`; `CheckingAccountFactory` (#18); adapters `InMemoryAccountNumberSequence`, `FakeTaxAgencyIncomeVerifier` (#18), `SpringDomainEventPublisher` (#17) and `DomainModelRunner` (#19); listeners in `application.listener` (#17); `DomainConfiguration` (#20).
+Classes that arrive later: output ports `AccountNumberSequence` and `IncomeVerifier` (#18) in `domain.model`; `CheckingAccountFactory` (#18); adapters `InMemoryAccountNumberSequence`, `FakeTaxAgencyIncomeVerifier` (#18) and `DomainModelRunner` (#19); `DomainConfiguration` (#20).
