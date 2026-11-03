@@ -90,7 +90,7 @@ Technical notes:
 - **Acceptance criteria:**
   - [x] `pullDomainEvents()` after `open` returns `[CheckingAccountOpened, MoneyDeposited]`.
 
-### [ ] T4 — Events of a transfer (~5 min)
+### [x] T4 — Events of a transfer (~5 min)
 
 - **Layer:** domain (tests)
 - **Files:** `MoneyTransferServiceTests.java`
@@ -98,7 +98,7 @@ Technical notes:
 - **What to do:**
   1. Characterization of the composition: an approved transfer leaves `MoneyWithdrawn` in the source and `MoneyDeposited` in the target; a rejected one leaves `WithdrawalRejected` in the source and nothing in the target. No production change expected; prove the tests can fail by temporarily breaking `transfer`.
 - **Acceptance criteria:**
-  - [ ] Both tests pass and were seen failing when `transfer` was sabotaged.
+  - [x] Both tests pass and were seen failing when `transfer` was sabotaged.
 
 ### [ ] T5 — `DomainEventPublisher` port; the service publishes after saving (~10 min)
 

@@ -15,10 +15,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.domain.model.CustomerSegment;
+import com.pronoide.ddd.domain.model.DomainEvent;
+import com.pronoide.ddd.domain.model.MoneyDeposited;
+import com.pronoide.ddd.domain.model.MoneyWithdrawn;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
 import com.pronoide.ddd.domain.model.Transaction;
 import com.pronoide.ddd.domain.model.TransactionType;
+import com.pronoide.ddd.domain.model.WithdrawalRejected;
 import com.pronoide.ddd.support.TestAccounts;
 
 class MoneyTransferServiceTests {
@@ -134,6 +138,39 @@ class MoneyTransferServiceTests {
                     .withMessageContaining("ES9121000418450200051332");
             assertThat(account.transactions()).hasSize(1);
             assertThat(account.currentBalance()).isEqualTo(MonetaryAmount.euros("500.00"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Eventos de una transferencia")
+    class TransferEvents {
+
+        @Test
+        @DisplayName("Una transferencia aprobada deja dinero retirado en el origen y dinero ingresado en el destino")
+        void una_transferencia_aprobada_deja_dinero_retirado_en_origen_e_ingresado_en_destino() {
+            CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
+            CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
+            source.pullDomainEvents();
+            target.pullDomainEvents();
+
+            service.transfer(source, target, MonetaryAmount.euros("200.00"));
+
+            assertThat(source.pullDomainEvents()).map(DomainEvent::getClass).containsExactly(MoneyWithdrawn.class);
+            assertThat(target.pullDomainEvents()).map(DomainEvent::getClass).containsExactly(MoneyDeposited.class);
+        }
+
+        @Test
+        @DisplayName("Una transferencia rechazada deja una retirada rechazada en el origen y nada en el destino")
+        void una_transferencia_rechazada_deja_una_retirada_rechazada_en_origen_y_nada_en_destino() {
+            CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("100.00").open();
+            CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
+            source.pullDomainEvents();
+            target.pullDomainEvents();
+
+            service.transfer(source, target, MonetaryAmount.euros("200.00"));
+
+            assertThat(source.pullDomainEvents()).map(DomainEvent::getClass).containsExactly(WithdrawalRejected.class);
+            assertThat(target.pullDomainEvents()).isEmpty();
         }
     }
 }
