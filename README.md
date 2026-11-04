@@ -11,7 +11,7 @@ It starts from a copy of [DDD-Lab-Java](https://github.com/dawnrock/DDD-Lab-Java
 | ------ | ------------ | ------- |
 | `master` | Starting point (domain only), frozen | — |
 | `Monolithic` | Layered monolith: Thymeleaf web + REST → application → domain / in-memory persistence. **Closed and frozen at tag `v1-monolito`** | [Phase 1 · Layered monolith](https://github.com/dawnrock/Proyect-DDD-Claude/milestones) |
-| `Hexagonal` | Ports and adapters, domain events, factory with ports, simulated adapters. **Default and active branch** | [Phase 2 · Hexagonal architecture](https://github.com/dawnrock/Proyect-DDD-Claude/milestones) |
+| `Hexagonal` | Ports and adapters, domain events, factory with ports, simulated adapters. **Phase closed at tag `v2-hexagonal`; still the default and active branch** | [Phase 2 · Hexagonal architecture](https://github.com/dawnrock/Proyect-DDD-Claude/milestones) |
 
 Technologies: Java 21, Spring Boot 4.1, Spring Security, JUnit 5, ArchUnit, Lombok, Immutables, Thymeleaf, H2.
 
@@ -24,7 +24,7 @@ Technologies: Java 21, Spring Boot 4.1, Spring Security, JUnit 5, ArchUnit, Lomb
 
 On Windows, `mvnw.cmd`. Requires Java 21.
 
-`spring-boot:run` starts with the `demo` profile, which opens three demo accounts (two retail and one high net worth) through the use cases. To start without data: `./mvnw spring-boot:run -Dspring-boot.run.profiles=default`. Tests and `java -jar` do not load the demo data.
+`spring-boot:run` starts with the `demo` profile: the command-line adapter opens three demo accounts (two retail and one high net worth) through the use cases, then deposits, makes two withdrawals (one approved, one rejected) and a transfer, with a `[demo]` line in the log for each. To start without data: `./mvnw spring-boot:run -Dspring-boot.run.profiles=default`. Tests and `java -jar` do not load the demo data.
 
 **Login (#50).** You must sign in. With the `demo` profile: `admin` (sees every account and opens accounts) and `ada`, `grace` and `alan` (each one only sees their own account), all with password `demo` (local practice data: `application-demo.properties` only holds its BCrypt hash). The API uses HTTP Basic: `curl -u admin:demo http://localhost:8080/api/accounts`. Without the `demo` profile there are no users; an administrator can be created with the `APP_ADMIN_USERNAME` and `APP_ADMIN_PASSWORD` environment variables.
 
@@ -40,6 +40,6 @@ On Windows, `mvnw.cmd`. Requires Java 21.
 ## Documentation
 
 - [AI architecture](docs/ia/arquitectura-ia.md) · [Telegram notifications](docs/ia/notificaciones.md) · [Project status](docs/ia/estado-del-proyecto.md)
-- [Phase 1 · layers](docs/arquitectura/fase-1-capas.md) · [Phase 2 · hexagonal](docs/arquitectura/fase-2-hexagonal.md)
+- [Phase 1 · layers](docs/arquitectura/fase-1-capas.md) · [Phase 2 · hexagonal](docs/arquitectura/fase-2-hexagonal.md) · [Layers vs hexagonal](docs/arquitectura/comparativa-capas-hexagonal.md)
 - [Glossary](docs/dominio/glosario.md) · [ADR](docs/adr/README.md) · [Plans](docs/plans/) · [Contracts](docs/contracts/) · [OpenAPI](docs/api/openapi.yaml)
 - [Functional analysis](docs/analysis/functional-analysis.md) · [Technical analysis](docs/analysis/technical-analysis.md) (in Spanish)

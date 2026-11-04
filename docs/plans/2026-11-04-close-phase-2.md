@@ -82,7 +82,7 @@ Facts gathered for the documentation:
 - **Acceptance criteria:**
   - [x] The table lists the 10 issues of the milestone; the package tree matches `src/main` on `Hexagonal`.
 
-### [ ] T4 — `README.md` with the final state (~5 min)
+### [x] T4 — `README.md` with the final state (~5 min)
 
 - **Layer:** docs
 - **Files:** `README.md`
@@ -91,7 +91,7 @@ Facts gathered for the documentation:
   1. Branches table: phase 2 closed at tag `v2-hexagonal`; `Hexagonal` stays the default and active branch. Documentation: link to the comparison.
   2. "Run": the `demo` profile opens the three accounts and also runs a deposit, two withdrawals (approved and rejected) and a transfer (#19).
 - **Acceptance criteria:**
-  - [ ] The commands in "Run" still work (`mvn verify`, `spring-boot:run`, `curl -u admin:demo …/api/accounts` returns 200).
+  - [x] The commands in "Run" still work (`mvn verify`, `spring-boot:run`, `curl -u admin:demo …/api/accounts` returns 200).
 
 ### [x] T5 — `arquitectura-ia.md`: usage log of phase 2 (~10 min)
 
