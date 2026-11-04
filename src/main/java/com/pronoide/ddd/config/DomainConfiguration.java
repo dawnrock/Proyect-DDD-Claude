@@ -3,8 +3,12 @@ package com.pronoide.ddd.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.pronoide.ddd.application.AccountOwnershipRepository;
+import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.domain.model.AccountNumberSequence;
 import com.pronoide.ddd.domain.model.CheckingAccountFactory;
+import com.pronoide.ddd.domain.model.CheckingAccountRepository;
+import com.pronoide.ddd.domain.model.DomainEventPublisher;
 import com.pronoide.ddd.domain.model.IncomeVerifier;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
 
@@ -24,5 +28,14 @@ public class DomainConfiguration {
     @Bean
     public CheckingAccountFactory checkingAccountFactory(AccountNumberSequence numbering, IncomeVerifier incomeVerifier) {
         return new CheckingAccountFactory(numbering, incomeVerifier);
+    }
+
+    /** Implementa los puertos de entrada; los adaptadores de entrada lo reciben por ellos, nunca por su clase. */
+    @Bean
+    public CheckingAccountService checkingAccountService(CheckingAccountRepository repository,
+                                                         AccountOwnershipRepository ownership,
+                                                         DomainEventPublisher publisher, CheckingAccountFactory factory,
+                                                         MoneyTransferService transferService) {
+        return new CheckingAccountService(repository, ownership, publisher, factory, transferService);
     }
 }

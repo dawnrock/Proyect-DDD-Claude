@@ -1,15 +1,20 @@
 package com.pronoide.ddd.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.pronoide.ddd.adapter.out.persistence.PersistenceTestAdapters;
+import com.pronoide.ddd.application.CheckingAccountCommands;
+import com.pronoide.ddd.application.CheckingAccountQueries;
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CheckingAccountFactory;
+import com.pronoide.ddd.domain.model.DomainEventPublisher;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
@@ -36,5 +41,18 @@ class DomainConfigurationTests {
     @DisplayName("Construye el servicio de dominio de las transferencias")
     void construye_el_servicio_de_transferencias() {
         assertThat(configuration.moneyTransferService()).isInstanceOf(MoneyTransferService.class);
+    }
+
+    @Test
+    @DisplayName("Construye el servicio de aplicación, que ofrece los dos puertos de entrada")
+    void construye_el_servicio_de_aplicacion_con_los_dos_puertos_de_entrada() {
+        CheckingAccountFactory factory = configuration.checkingAccountFactory(
+                PersistenceTestAdapters.accountNumbers(), taxId -> Optional.empty());
+
+        Object service = configuration.checkingAccountService(PersistenceTestAdapters.accounts(),
+                PersistenceTestAdapters.ownership(), mock(DomainEventPublisher.class), factory,
+                configuration.moneyTransferService());
+
+        assertThat(service).isInstanceOf(CheckingAccountCommands.class).isInstanceOf(CheckingAccountQueries.class);
     }
 }

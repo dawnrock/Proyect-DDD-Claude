@@ -5,8 +5,6 @@ import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.stereotype.Service;
-
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CheckingAccountFactory;
@@ -34,7 +32,6 @@ import com.pronoide.ddd.domain.service.MoneyTransferService;
  * sus adaptadores. Publica los
  * eventos de dominio de cada cuenta después de guardarla.
  */
-@Service
 public class CheckingAccountService implements CheckingAccountCommands, CheckingAccountQueries {
 
     private final CheckingAccountRepository repository;

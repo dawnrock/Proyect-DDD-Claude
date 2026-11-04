@@ -50,7 +50,7 @@ Spring imports in the core today: `domain..` has none (`DomainIsolationTests`); 
 - **Acceptance criteria:**
   - [x] `DomainConfigurationTests` passes; `./mvnw verify` green (the context still starts).
 
-### [ ] T2 — `CheckingAccountService` without `@Service` (~5 min)
+### [x] T2 — `CheckingAccountService` without `@Service` (~5 min)
 
 - **Layer:** application · config
 - **Files:** `CheckingAccountService.java`, `DomainConfiguration.java`, `DomainConfigurationTests.java`
@@ -59,7 +59,7 @@ Spring imports in the core today: `domain..` has none (`DomainIsolationTests`); 
   1. Test first: the configuration builds a `CheckingAccountService` that is both input ports, from the output ports, the factory and the domain service.
   2. Remove `@Service` and its import; `@Bean CheckingAccountService` in `config`. Prove the context tests depend on it: without the `@Bean` the context fails to start (sabotage, reverted).
 - **Acceptance criteria:**
-  - [ ] No `org.springframework` import in `CheckingAccountService`; `DddLabApplicationTests` and `DemoProfileTests` green.
+  - [x] No `org.springframework` import in `CheckingAccountService`; `DddLabApplicationTests` and `DemoProfileTests` green.
 
 ### [ ] T3 — Listeners declared in `config` (~5 min)
 
