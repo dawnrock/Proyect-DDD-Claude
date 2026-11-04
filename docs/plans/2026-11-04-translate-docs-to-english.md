@@ -89,7 +89,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **Acceptance criteria:**
   - [x] R1-R20 all present with the same numbers and amounts (checked with a diff of the codes and numbers before and after).
 
-### [ ] T5 — OpenAPI descriptions (~5 min)
+### [x] T5 — OpenAPI descriptions (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`
@@ -97,7 +97,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **What to do:**
   1. Translate the API description, the error table and the response descriptions. The description still says "phase 1 REST API": it becomes the API of the project (both phases share it). The `title`/`detail` values of the examples are what the API really returns and stay in Spanish; the table says so in one line.
 - **Acceptance criteria:**
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors; the example payloads are byte-for-byte the same (diff).
+  - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors; the example payloads are byte-for-byte the same (diff).
 
 ### [ ] T6 — Contracts index and Telegram notifications (~5 min)
 
