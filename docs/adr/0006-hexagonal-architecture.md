@@ -29,7 +29,7 @@ Rules: dependencies always point into the hexagon; adapters do not know each oth
 #14 only moves packages; behaviour does not change. Until the following issues land:
 
 - **`application` still uses `adapter.out.persistence`** directly (dependency from the hexagon to an adapter). #15 removes it with the `CheckingAccountRepository` port and a port for account ownership.
-- **`LayeredArchitectureTests` only has its package patterns adjusted** (`presentation` → `adapter.in`, `persistence` → `adapter.out.persistence`). #22 replaces it with `HexagonalArchitectureTests`.
+- **`LayeredArchitectureTests` only has its package patterns adjusted** (`presentation` → `adapter.in`, `persistence` → `adapter.out.persistence`). #22 replaced it with `HexagonalArchitectureTests` (`onionArchitecture()` plus explicit rules for ports, Spring and security).
 - **Shared security support** (`SecuritySupport`, `CurrentCaller`, `SecurityUsersProperties`) goes to the `adapter.in` root: both input adapters use it without knowing each other, as `presentation` did in phase 1. It is technology of the input side, not wiring of the core, so it does not go to `config`.
 
 ## Alternatives

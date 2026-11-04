@@ -105,7 +105,7 @@ What the onion checks on its own: the domain model does not depend on services, 
 - **Acceptance criteria:**
   - [x] Every row of the mapping is covered; `LayeredArchitectureTests` is gone; `./mvnw verify` green.
 
-### [ ] T5 — Documentation and project status (~10 min)
+### [x] T5 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/fase-2-hexagonal.md`, `docs/adr/0006-hexagonal-architecture.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -115,7 +115,7 @@ What the onion checks on its own: the domain model does not depend on services, 
   2. ADR 0006: note that the provisional `LayeredArchitectureTests` was replaced in #22.
   3. Project status: #22 done, next step `/plan-feature 23`; remove the pending items from #15 and #54 about `HexagonalArchitectureTests`; decision (onion + explicit rules, mapping).
 - **Acceptance criteria:**
-  - [ ] No current document says `LayeredArchitectureTests` guards phase 2; the CI check of the project status passes.
+  - [x] No current document says `LayeredArchitectureTests` guards phase 2; the CI check of the project status passes.
 
 ## Global acceptance criteria
 
