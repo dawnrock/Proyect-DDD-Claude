@@ -150,7 +150,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **Acceptance criteria:**
   - [x] Every agreement still there with the same meaning; links resolve.
 
-### [ ] T11 — Lines that would become wrong in `CLAUDE.md` and `implement-plan` (~5 min, needs the user's approval)
+### [x] T11 — Lines that would become wrong in `CLAUDE.md` and `implement-plan` (~5 min, needs the user's approval)
 
 - **Layer:** docs (`CLAUDE.md`, `.claude/`)
 - **Files:** `CLAUDE.md`, `.claude/skills/implement-plan/SKILL.md`
@@ -158,7 +158,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **What to do:**
   1. Approved by the user on 2026-11-04 (agreement on `CLAUDE.md` and `.claude/`): `CLAUDE.md` loses "Los documentos que aún están en español se traducen en una issue aparte" (it says instead that `docs/analysis/` is the only exception); step 6.3 of `implement-plan` names the English headings ("Done", "Next step", "Last updated"). Both stay in Spanish; nothing else changes.
 - **Acceptance criteria:**
-  - [ ] Both lines changed; nothing else in `CLAUDE.md` or `.claude/` changes (diff).
+  - [x] Both lines changed; nothing else in `CLAUDE.md` or `.claude/` changes (diff).
 
 ### [ ] T12 — Check and project status (~10 min)
 
