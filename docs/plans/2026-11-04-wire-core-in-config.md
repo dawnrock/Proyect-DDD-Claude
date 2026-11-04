@@ -72,7 +72,7 @@ Spring imports in the core today: `domain..` has none (`DomainIsolationTests`); 
 - **Acceptance criteria:**
   - [x] Listener tests and the audit integration test green.
 
-### [ ] T4 — ArchUnit: the core does not depend on Spring (~10 min)
+### [x] T4 — ArchUnit: the core does not depend on Spring (~10 min)
 
 - **Layer:** tests
 - **Files:** `LayeredArchitectureTests.java`
@@ -81,7 +81,7 @@ Spring imports in the core today: `domain..` has none (`DomainIsolationTests`); 
   1. Rule `el_nucleo_no_depende_de_spring`: no class in `..domain..` or `..application..` depends on `org.springframework..`, except `..application.listener..` on `org.springframework.context.event..` (the justified exception).
   2. Validate by breaking it: `@Service` back on `CheckingAccountService`, and `@Component` on a listener; each must fail. Revert.
 - **Acceptance criteria:**
-  - [ ] The rule fails for each sabotage and passes after reverting (issue criterion).
+  - [x] The rule fails for each sabotage and passes after reverting (issue criterion).
 
 ### [ ] T5 — Documentation and project status (~10 min)
 

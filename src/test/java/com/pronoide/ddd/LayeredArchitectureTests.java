@@ -145,6 +145,22 @@ class LayeredArchitectureTests {
             .should().beInterfaces();
 
     /**
+     * #20: el núcleo no depende de Spring; lo construye {@code config.DomainConfiguration}. La única excepción
+     * justificada es {@code @EventListener} en {@code application.listener}: los eventos de dominio llegan a los
+     * consumidores por el mecanismo de eventos de Spring.
+     */
+    @ArchTest
+    static final ArchRule el_nucleo_no_depende_de_spring = CompositeArchRule
+            .of(noClasses()
+                    .that().resideInAnyPackage("..domain..", "..application..")
+                    .and().resideOutsideOfPackage("..application.listener..")
+                    .should().dependOnClassesThat().resideInAPackage("org.springframework.."))
+            .and(noClasses()
+                    .that().resideInAPackage("..application.listener..")
+                    .should().dependOnClassesThat(resideInAPackage("org.springframework..")
+                            .and(not(resideInAPackage("org.springframework.context.event..")))));
+
+    /**
      * Toda clase pertenece a una capa: la regla de capas solo mira dependencias entre capas, así que un paquete nuevo
      * fuera de ellas quedaría sin vigilar. Desde la #20, {@code config} es una capa más. La única excepción es la clase
      * de arranque.
