@@ -37,7 +37,16 @@ com.pronoide.ddd
 - Dependencies always point into the hexagon; adapters do not know each other.
 - The core carries no Spring annotations: `config` builds it and hands it its adapters, which it receives by their port types (it imports no class of `adapter.out`). The only exception is `@EventListener` on the event consumers.
 - Every output adapter is simulated (in memory / fake), which is enough to show the architecture.
-- Checked by `HexagonalArchitectureTests` (ArchUnit, #22). Until then, `LayeredArchitectureTests` with its patterns adjusted to the new packages (#14).
+- Checked by `HexagonalArchitectureTests` (ArchUnit, #22), which replaced the provisional `LayeredArchitectureTests` (the phase-1 rules live on in the `Monolithic` branch). Its backbone is `onionArchitecture()`:
+
+  | Ring | Packages |
+  | ---- | -------- |
+  | Domain model (and output ports) | `domain.model` |
+  | Domain services | `domain.service` |
+  | Application services (input ports, ownership port, listeners) | `application` |
+  | Adapters, one per technology, that do not know each other | `adapter.in.cli`, `adapter.in.rest`, `adapter.in.web`, `adapter.out.persistence`, `adapter.out.event`, `adapter.out.taxagency` |
+
+  The shared security support in the root of `adapter.in`, `config` and the boot class sit outside the rings. Explicit rules complete the onion: output adapters only implement ports of the hexagon and know `application` only through interfaces; input ports (`*Commands`, `*Queries`) are interfaces and input adapters never use `CheckingAccountService`; input adapters only know `DomainException` from the domain; nobody outside `adapter.in` depends on it, and its shared security support does not know `cli`, `rest` or `web`; only `adapter.out` knows the output adapters; nobody depends on `config`; only adapters and `config` depend on Spring web, HTTP, MVC or data; the core does not depend on Spring (except `@EventListener` in `application.listener`); the domain only depends on the JDK (no `org.immutables`) and has no public setters; the ADR 0008 security rules; every class belongs to the hexagon, an adapter or `config`. `DomainIsolationTests` (both phases) and `AdapterTestIsolationTests` (test code, #21) complete them.
 
 ## How adapters are tested
 
