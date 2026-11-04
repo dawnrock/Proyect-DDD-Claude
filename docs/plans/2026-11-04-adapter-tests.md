@@ -72,7 +72,7 @@ Output adapters: `InMemoryCheckingAccountRepositoryTests` and `InMemoryAccountOw
 - **Acceptance criteria:**
   - [x] The test passes with a real Spring event bus and fails when the adapter does not forward (issue criterion: Spring adapter with a test listener).
 
-### [ ] T3 — Port contract for `AccountNumberSequence` (~10 min)
+### [x] T3 — Port contract for `AccountNumberSequence` (~10 min)
 
 - **Layer:** tests (adapter.out)
 - **Files:** `src/test/java/com/pronoide/ddd/domain/model/AccountNumberSequenceContract.java`, `InMemoryAccountNumberSequenceTests.java`
@@ -81,7 +81,7 @@ Output adapters: `InMemoryCheckingAccountRepositoryTests` and `InMemoryAccountOw
   1. Abstract contract (any implementation): generated numbers are valid Spanish IBANs (`AccountNumber` accepts them and the mod-97 check holds) and never repeat. The in-memory test extends it and keeps only what is specific (bank 2100, branch 0418, consecutive numbers, concurrency).
   2. Prove it can fail: an adapter that repeats a number fails the contract (sabotage), revert.
 - **Acceptance criteria:**
-  - [ ] Same scenarios as before, now split between the contract and the adapter test; all green (issue criterion: persistence contract against the in-memory adapter).
+  - [x] Same scenarios as before, now split between the contract and the adapter test; all green (issue criterion: persistence contract against the in-memory adapter).
 
 ### [ ] T4 — Documentation and project status (~10 min)
 

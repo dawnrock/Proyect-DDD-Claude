@@ -2,7 +2,6 @@ package com.pronoide.ddd.adapter.out.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,17 +12,16 @@ import org.junit.jupiter.api.Test;
 
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.AccountNumberSequence;
+import com.pronoide.ddd.domain.model.AccountNumberSequenceContract;
 
-class InMemoryAccountNumberSequenceTests {
+/** Lo propio del adaptador en memoria; lo común a cualquier numeración está en {@link AccountNumberSequenceContract}. */
+class InMemoryAccountNumberSequenceTests extends AccountNumberSequenceContract {
 
     private static final int[] CCC_WEIGHTS = {1, 2, 4, 8, 5, 10, 9, 7, 3, 6};
 
-    private final AccountNumberSequence sequence = new InMemoryAccountNumberSequence();
-
-    @Test
-    @DisplayName("Los números consecutivos son distintos")
-    void los_numeros_consecutivos_son_distintos() {
-        assertThat(sequence.next()).isNotEqualTo(sequence.next());
+    @Override
+    protected AccountNumberSequence createSequence() {
+        return new InMemoryAccountNumberSequence();
     }
 
     @Test
@@ -34,19 +32,6 @@ class InMemoryAccountNumberSequenceTests {
         assertThat(iban).startsWith("ES").hasSize(24);
         assertThat(iban.substring(4, 8)).isEqualTo("2100");
         assertThat(iban.substring(8, 12)).isEqualTo("0418");
-    }
-
-    @Test
-    @DisplayName("El IBAN generado supera la comprobación módulo 97")
-    void el_iban_generado_supera_el_modulo_97() {
-        IntStream.range(0, 50).forEach(i -> {
-            String iban = sequence.next().value();
-            String rearranged = iban.substring(4) + iban.substring(0, 4);
-            String digits = rearranged.chars()
-                    .mapToObj(c -> Character.isLetter(c) ? String.valueOf(c - 'A' + 10) : String.valueOf((char) c))
-                    .reduce("", String::concat);
-            assertThat(new BigInteger(digits).mod(BigInteger.valueOf(97))).as(iban).isEqualTo(BigInteger.ONE);
-        });
     }
 
     @Test
