@@ -77,7 +77,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **Acceptance criteria:**
   - [x] Every term of the current table is still there with its Spanish name; no definition changes meaning.
 
-### [ ] T4 — Glossary: business rules, persistence, application (~10 min)
+### [x] T4 — Glossary: business rules, persistence, application (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/dominio/glosario.md` (from "Business rules" to the end)
@@ -85,8 +85,9 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **What to do:**
   1. Translate the rules R1-R20 (same codes, same order, same limits and amounts), "Rules implemented without a test" and the persistence and application sections, with the same columns as T3.
   2. The `persistence` section names the phase-2 package if it still says `persistence` (`adapter.out.persistence`): it is the only factual fix allowed, because the heading would otherwise be wrong in English.
+  3. Done: besides the `persistence` heading, the package names that were wrong after phase 2 are fixed in the same lines (`InMemoryAccountOwnershipRepository` in `adapter.out.persistence` behind the `AccountOwnershipRepository` port; "presentation" → "input adapters"). Amounts use English notation (€50.00); test names stay in Spanish.
 - **Acceptance criteria:**
-  - [ ] R1-R20 all present with the same numbers and amounts (checked with a diff of the codes and numbers before and after).
+  - [x] R1-R20 all present with the same numbers and amounts (checked with a diff of the codes and numbers before and after).
 
 ### [ ] T5 — OpenAPI descriptions (~5 min)
 
