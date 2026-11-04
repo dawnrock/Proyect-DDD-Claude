@@ -41,7 +41,7 @@ com.pronoide.ddd
 
 ## Class → role
 
-State after #18 (adapters behind input and output ports, domain events published after saving, accounts opened through the factory). The last column says which issue changes the class's role.
+State after #19 (adapters behind input and output ports, domain events published after saving, accounts opened through the factory, demo data as a CLI input adapter). The last column says which issue changes the class's role.
 
 | Class | Package | Role in the architecture | Changes in |
 | ----- | ------- | ------------------------ | ---------- |
@@ -65,7 +65,7 @@ State after #18 (adapters behind input and output ports, domain events published
 | `*CommandDef`, `*SummaryDef`, `AccountDetailsDef`, `CallerDef`, `ApplicationValue`, `CommandValidation` | `application` | Commands, views and `Caller` (Immutables) and their validation | — |
 | `AuditLogListener`, `CustomerNotificationListener` | `application.listener` | Domain event consumers (`@EventListener`, `@Slf4j`): audit log and simulated customer notification | — |
 | `NotFoundException`, `AccountNotFoundException`, `TargetAccountNotFoundException`, `ForbiddenOperationException`, `OperationNotAllowedException` | `application` | Application errors | — |
-| `DemoDataLoader` | `application` | Demo data with the `demo` profile, through `CheckingAccountCommands` | #19: becomes the CLI input adapter `DomainModelRunner` |
+| `DomainModelRunner` | `adapter.in.cli` | Input adapter (CLI): with the `demo` profile, opens the demo accounts and runs a deposit, two withdrawals (approved and rejected) and a transfer through `CheckingAccountCommands`, with a `[demo]` trace per use case | — |
 | `CheckingAccount` | `domain.model` | Aggregate root; records its domain events (`pullDomainEvents`); `open` is package-private, used only by the factory | — |
 | `CheckingAccountFactory` | `domain.model` | Factory: number + segment from the verified income (R20) | #20: built in `config` |
 | `AccountNumberSequence`, `IncomeVerifier` | `domain.model` | Output ports: account numbering and income verification | — |
@@ -79,4 +79,4 @@ State after #18 (adapters behind input and output ports, domain events published
 | `MoneyTransferService` | `domain.service` | Domain service (transfers, R17-R19) | #20: built in `config` |
 | `DddLabApplication` | root | Spring Boot entry point | — |
 
-Classes that arrive later: the CLI adapter `DomainModelRunner` (#19) and `DomainConfiguration` (#20).
+Classes that arrive later: `DomainConfiguration` (#20).

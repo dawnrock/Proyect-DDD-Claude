@@ -54,4 +54,21 @@ class DemoProfileTests {
 		assertThat(response.statusCode()).isEqualTo(200);
 		assertThat(response.body()).contains("Ada Lovelace").doesNotContain("Grace Hopper", "Alan Turing");
 	}
+
+	@Test
+	@DisplayName("Con el perfil demo, los saldos reflejan los ingresos, retiradas y la transferencia de la demo")
+	void con_el_perfil_demo_los_saldos_reflejan_las_operaciones_de_la_demo() throws Exception {
+		String body = listAccountsAs("admin").body();
+
+		assertThat(body)
+				.containsPattern(accountWithBalance("Ada Lovelace", "1500.00"))
+				.containsPattern(accountWithBalance("Grace Hopper", "4700.00"))
+				.containsPattern(accountWithBalance("Alan Turing", "200.00"));
+	}
+
+	/** Un objeto JSON de cuenta con ese titular y ese saldo, sea cual sea el orden de sus campos. */
+	private static String accountWithBalance(String holderName, String balance) {
+		return "\\{(?=[^}]*\"holderName\":\"%s\")(?=[^}]*\"balance\":%s[,}])".formatted(holderName,
+				balance.replace(".", "\\."));
+	}
 }

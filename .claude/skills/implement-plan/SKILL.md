@@ -93,4 +93,4 @@ No avises si no hay PR. Si falla o no está configurado, menciónalo en el infor
 
 ### 9. Informar
 
-Issue, rama, worktree, URL de la PR, `git log --oneline origin/<rama-base>..HEAD`, tareas y criterios (con desviaciones y validaciones por sabotaje) y si se avisó por Telegram. No hagas merge ni borres el worktree: eso lo decide el usuario.
+Issue, rama, worktree, URL de la PR, `git log --oneline origin/<rama-base>..HEAD`, tareas y criterios (con desviaciones y validaciones por sabotaje) y si se avisó por Telegram. No hagas merge: lo decide el usuario. Cuando confirme que la PR está fusionada, borra el worktree y las ramas de la PR, local y remota, tras comprobar que están contenidas en la rama base (`git merge-base --is-ancestor`); nunca `master`, `Monolithic` ni `Hexagonal`.

@@ -68,9 +68,9 @@ class LayeredArchitectureTests {
             .should().notDependOnEachOther();
 
     /**
-     * #16: los adaptadores de entrada usan los puertos {@code CheckingAccountCommands} y {@code CheckingAccountQueries},
-     * nunca la clase que los implementa. Se nombra por clase para que un renombrado rompa la compilación en lugar de
-     * dejar la regla vacía.
+     * #16 y #19: los adaptadores de entrada (REST, web y CLI) usan los puertos {@code CheckingAccountCommands} y
+     * {@code CheckingAccountQueries}, nunca la clase que los implementa. Se nombra por clase para que un renombrado
+     * rompa la compilación en lugar de dejar la regla vacía.
      */
     @ArchTest
     static final ArchRule los_adaptadores_de_entrada_solo_conocen_los_puertos_de_entrada = noClasses()
