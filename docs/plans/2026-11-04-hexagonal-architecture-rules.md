@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-04
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~50 min (5 tasks)
 
 ## Goal
@@ -58,7 +58,7 @@ What the onion checks on its own: the domain model does not depend on services, 
 
 ## Tasks
 
-### [ ] T1 — Onion backbone (~10 min)
+### [x] T1 — Onion backbone (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/pronoide/ddd/HexagonalArchitectureTests.java`
@@ -67,7 +67,7 @@ What the onion checks on its own: the domain model does not depend on services, 
   1. `@AnalyzeClasses(DoNotIncludeTests)` with `las_dependencias_apuntan_hacia_el_hexagono` = `onionArchitecture()` with the components above. It passes against today's code.
   2. Validate by breaking it, one at a time: a web class referencing a REST class (adapter → adapter), an output adapter referencing another one, the application referencing an adapter, the domain model referencing `domain.service`. Revert.
 - **Acceptance criteria:**
-  - [ ] Each sabotage fails the onion rule; `./mvnw verify` green after reverting.
+  - [x] Each sabotage fails the onion rule; `./mvnw verify` green after reverting.
 
 ### [ ] T2 — Ports rules (~10 min)
 
