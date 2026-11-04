@@ -129,15 +129,15 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **Acceptance criteria:**
   - [x] Same number of entries before and after; every `#n` and date kept.
 
-### [ ] T9 — `pendientes.md` and `historial.md` (~10 min)
+### [x] T9 — `pendientes.md` and `historial.md` (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/pendientes.md`, `docs/ia/historial.md`
 - **Depends on:** —
 - **What to do:**
-  1. Translate both. In `pendientes.md`, remove the two items this issue resolves (translation of `docs/`, and the #5 additions and annexes "translated with the rest"); the history table keeps one row per PR with the same columns.
+  1. Translate both. In `pendientes.md`, remove the items this issue resolves (translation of `docs/`, the #5 additions and the annexes "translated with the rest": three items, the last one found while translating); the history table keeps one row per PR with the same columns.
 - **Acceptance criteria:**
-  - [ ] `historial.md` has the same number of rows; `pendientes.md` keeps every open item except the two resolved ones.
+  - [x] `historial.md` has the same number of rows; `pendientes.md` keeps every open item except the three resolved ones (16 → 13).
 
 ### [ ] T10 — `estado-del-proyecto.md` (~5 min)
 

@@ -1,39 +1,39 @@
-# Historial del proyecto
+# Project history
 
-> Anexo de [`estado-del-proyecto.md`](estado-del-proyecto.md). **No se lee al empezar cada sesión**: cada PR que cierra una issue añade aquí su fila.
+> Annex of [`estado-del-proyecto.md`](estado-del-proyecto.md). **It is not read at the start of every session**: every PR that closes an issue adds its row here.
 
-| Fecha | PR | Issue | Cambio de estado |
-| ----- | -- | ----- | ---------------- |
-| 2026-10-23 | #1 | — | Arquitectura de IA en `Monolithic` |
-| 2026-10-23 | #24 | #2 | Lombok e Immutables en el build |
-| 2026-10-23 | #32 | #31 (parcial) | Flujo de equipo back/web y backlog reorganizado |
-| 2026-10-23 | #33, #34 | #3 | Glosario, capas, ADR 0004 y diagrama hexagonal |
-| 2026-10-23 | #35 | #4 | Repositorio en memoria |
-| 2026-10-23 | #36 | #8 | Base REST + web: errores a HTTP, OpenAPI, Thymeleaf y página 404 |
-| 2026-10-23 | #37 | — | Estado del proyecto entre sesiones, exigido en cada PR |
-| 2026-10-23 | #38 | — | Documentación en inglés; plan de la #5 aprobado |
-| 2026-10-23 | #39 | #5 | Abrir, consultar y listar cuentas (REST + web), primera issue en equipo; cierra también la #31 (flujo en equipo) |
-| 2026-10-23 | #40 | — | Interruptor `TELEGRAM_DISABLED` para silenciar los avisos |
-| 2026-10-24 | #41 | #6 | Ingresos y retiradas con detalle de la cuenta (REST + web); cierra el pendiente de sinónimos heredados |
-| 2026-10-25 | #43 | #7 | Transferencias entre cuentas (REST + web): primer servicio de dominio `MoneyTransferService` (R17-R19) |
-| 2026-10-25 | #44 | — | Quita la regla deny `Write(./.claude/hooks/**)`, que nunca se aplicaba |
-| 2026-10-25 | #45 | #11 | Datos de demostración con el perfil `demo` y builder de cuentas de test `TestAccounts` |
-| 2026-10-25 | #46 | — | Quita del estado el pendiente resuelto de las ramas de los teammates |
-| 2026-10-25 | #47 | #12 | `LayeredArchitectureTests`: D1-D5 de la fase 1, sin setters públicos en el dominio y controladores sin repositorio |
-| 2026-10-25 | #49 | #48 | Rediseño oscuro y minimalista de la web, `WebFormat` e importes en formato español |
-| 2026-10-25 | #51 | #50 | Login con roles admin y usuario (Spring Security, ADR 0008), propiedad de cuentas y transferencia por IBAN |
-| 2026-10-26 | #52 | — | Análisis funcional y técnico (`docs/analysis/`, en castellano como excepción) y `check-domain` de `@EqualsAndHashCode` |
-| 2026-10-26 | #53, #55 | — | ADR 0009: el dominio no usa Lombok; `check-domain` rechaza cualquier `lombok`; referencias a ArchUnit corregidas |
-| 2026-10-26 | #56 | #54 | Reglas de ArchUnit de los ADR 0004 y 0008 y `DomainIsolationTests` sin el paquete `bootstrap` |
-| 2026-10-30 | #58 | #57 | Graphify solo para preguntas de dependencias (ADR 0010) y estado del proyecto dividido en estado corto + anexos |
-| 2026-10-30 | #60 | #13 | Cierre de la fase 1: `README`, `fase-1-capas.md` y `arquitectura-ia.md` en inglés con el estado final, etiqueta `v1-monolito` y `Hexagonal` como rama por defecto |
-| 2026-10-30 | #61 | #14 | Paquetes hexagonales: `presentation` → `adapter.in`, `persistence` → `adapter.out.persistence` (`git mv`), ADR 0006 y tabla clase → papel; T7-T8 de la #13 marcadas |
-| 2026-10-30 | #62 | #15 | Puertos de salida `CheckingAccountRepository` (`domain.model`) y `AccountOwnershipRepository` (`application`) con contratos de test; adaptadores en memoria package-private y regla de ArchUnit; Telegram reactivado en el estado del proyecto |
-| 2026-11-03 | #63 | #16 | Puertos de entrada `CheckingAccountCommands` y `CheckingAccountQueries`; controladores REST/web y `DemoDataLoader` solo los conocen (`@MockitoBean` de los puertos y regla de ArchUnit); sin objetos query ni renombrado del servicio |
-| 2026-11-03 | #64 | #17 | Eventos de dominio (`CheckingAccountOpened`, `MoneyDeposited`, `MoneyWithdrawn`, `WithdrawalRejected`) publicados tras guardar por el puerto `DomainEventPublisher` y su adaptador `SpringDomainEventPublisher`; consumidores de auditoría y aviso al cliente (simulado); ArchUnit sobre `adapter.out..` |
-| 2026-11-03 | #65 | #18 | Factoría de cuentas con los puertos `AccountNumberSequence` (IBAN generado) e `IncomeVerifier` (agencia tributaria simulada) y regla R20; alta por NIF en REST y web; primera issue de equipo de la fase 2 (contrato acordado en una ronda) |
-| 2026-11-03 | #66 | #19 | `DemoDataLoader` pasa a ser el adaptador CLI `adapter.in.cli.DomainModelRunner`, con traza `[demo]` y, a petición del usuario, ingresos, retiradas y una transferencia; acuerdo de borrar las ramas y worktrees de cada PR tras fusionarla |
-| 2026-11-04 | #67 | #20 | `config.DomainConfiguration` construye el núcleo (servicio de transferencias, factoría, servicio de aplicación y consumidores de eventos); sin anotaciones de Spring en el dominio ni en `application` salvo `@EventListener` (regla de ArchUnit) |
-| 2026-11-04 | #68 | #21 | Tests de adaptadores sin el hexágono: regla de ArchUnit sobre los tests (ningún test de adaptador de entrada con `@SpringBootTest`), adaptador de eventos con un oyente de prueba en un contexto mínimo y contrato de `AccountNumberSequence` |
-| 2026-11-04 | #69 | #22 | `HexagonalArchitectureTests` (`onionArchitecture()` + reglas de puertos, Spring y seguridad) sustituye a `LayeredArchitectureTests`; cada regla validada rompiéndola |
-| 2026-11-04 | #73 | #23 | Cierre de la fase 2: comparativa capas vs hexagonal (con el mismo ingreso en las dos fases), estado final de `fase-2-hexagonal.md`, registro de uso de la IA en la fase 2, issues #70-#72 para el trabajo siguiente y etiqueta `v2-hexagonal`; `Hexagonal` sigue activa |
+| Date | PR | Issue | Change |
+| ---- | -- | ----- | ------ |
+| 2026-10-23 | #1 | — | AI architecture on `Monolithic` |
+| 2026-10-23 | #24 | #2 | Lombok and Immutables in the build |
+| 2026-10-23 | #32 | #31 (partial) | Back/web team flow and reorganised backlog |
+| 2026-10-23 | #33, #34 | #3 | Glossary, layers, ADR 0004 and hexagonal diagram |
+| 2026-10-23 | #35 | #4 | In-memory repository |
+| 2026-10-23 | #36 | #8 | REST + web foundation: errors to HTTP, OpenAPI, Thymeleaf and 404 page |
+| 2026-10-23 | #37 | — | Project status between sessions, required in every PR |
+| 2026-10-23 | #38 | — | Documentation in English; #5 plan approved |
+| 2026-10-23 | #39 | #5 | Open, query and list accounts (REST + web), first team issue; also closes #31 (team flow) |
+| 2026-10-23 | #40 | — | `TELEGRAM_DISABLED` switch to silence the notices |
+| 2026-10-24 | #41 | #6 | Deposits and withdrawals with account details (REST + web); closes the pending item on inherited synonyms |
+| 2026-10-25 | #43 | #7 | Transfers between accounts (REST + web): first domain service `MoneyTransferService` (R17-R19) |
+| 2026-10-25 | #44 | — | Removes the deny rule `Write(./.claude/hooks/**)`, which never applied |
+| 2026-10-25 | #45 | #11 | Demo data with the `demo` profile and the `TestAccounts` test account builder |
+| 2026-10-25 | #46 | — | Removes from the status the resolved pending item on the teammates' branches |
+| 2026-10-25 | #47 | #12 | `LayeredArchitectureTests`: D1-D5 of phase 1, no public setters in the domain and controllers without the repository |
+| 2026-10-25 | #49 | #48 | Dark minimal web redesign, `WebFormat` and amounts in Spanish format |
+| 2026-10-25 | #51 | #50 | Login with admin and user roles (Spring Security, ADR 0008), account ownership and transfer by IBAN |
+| 2026-10-26 | #52 | — | Functional and technical analysis (`docs/analysis/`, in Spanish as an exception) and `check-domain` for `@EqualsAndHashCode` |
+| 2026-10-26 | #53, #55 | — | ADR 0009: the domain does not use Lombok; `check-domain` rejects any `lombok`; ArchUnit references fixed |
+| 2026-10-26 | #56 | #54 | ArchUnit rules of ADRs 0004 and 0008 and `DomainIsolationTests` without the `bootstrap` package |
+| 2026-10-30 | #58 | #57 | Graphify only for dependency questions (ADR 0010) and project status split into a short status + annexes |
+| 2026-10-30 | #60 | #13 | Phase 1 closed: `README`, `fase-1-capas.md` and `arquitectura-ia.md` in English with the final state, tag `v1-monolito` and `Hexagonal` as the default branch |
+| 2026-10-30 | #61 | #14 | Hexagonal packages: `presentation` → `adapter.in`, `persistence` → `adapter.out.persistence` (`git mv`), ADR 0006 and class → role table; T7-T8 of #13 checked |
+| 2026-10-30 | #62 | #15 | Output ports `CheckingAccountRepository` (`domain.model`) and `AccountOwnershipRepository` (`application`) with test contracts; package-private in-memory adapters and ArchUnit rule; Telegram back on in the project status |
+| 2026-11-03 | #63 | #16 | Input ports `CheckingAccountCommands` and `CheckingAccountQueries`; REST/web controllers and `DemoDataLoader` only know them (`@MockitoBean` of the ports and ArchUnit rule); no query objects and no renaming of the service |
+| 2026-11-03 | #64 | #17 | Domain events (`CheckingAccountOpened`, `MoneyDeposited`, `MoneyWithdrawn`, `WithdrawalRejected`) published after saving through the `DomainEventPublisher` port and its `SpringDomainEventPublisher` adapter; audit and customer-notification consumers (simulated); ArchUnit over `adapter.out..` |
+| 2026-11-03 | #65 | #18 | Account factory with the `AccountNumberSequence` (generated IBAN) and `IncomeVerifier` (simulated tax agency) ports and rule R20; opening by NIF on REST and web; first team issue of phase 2 (contract agreed in one round) |
+| 2026-11-03 | #66 | #19 | `DemoDataLoader` becomes the CLI adapter `adapter.in.cli.DomainModelRunner`, with a `[demo]` trace and, at the user's request, deposits, withdrawals and a transfer; agreement to delete each PR's branches and worktrees once merged |
+| 2026-11-04 | #67 | #20 | `config.DomainConfiguration` builds the core (transfer service, factory, application service and event consumers); no Spring annotations in the domain or `application` except `@EventListener` (ArchUnit rule) |
+| 2026-11-04 | #68 | #21 | Adapter tests without the hexagon: ArchUnit rule over the tests (no input-adapter test with `@SpringBootTest`), event adapter with a test listener in a minimal context and `AccountNumberSequence` contract |
+| 2026-11-04 | #69 | #22 | `HexagonalArchitectureTests` (`onionArchitecture()` + port, Spring and security rules) replaces `LayeredArchitectureTests`; each rule validated by breaking it |
+| 2026-11-04 | #73 | #23 | Phase 2 closed: layers vs hexagonal comparison (with the same deposit in both phases), final state of `fase-2-hexagonal.md`, AI usage log of phase 2, issues #70-#72 for the next work and tag `v2-hexagonal`; `Hexagonal` stays active |
