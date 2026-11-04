@@ -58,7 +58,7 @@ Facts gathered for the documentation:
   - [x] Every relative link resolves; the compare links use the final tag name.
   - [x] The deposit diagram matches the code at both tags and the user approved it.
 
-### [ ] T2 — Comparison: cost and benefits (~10 min)
+### [x] T2 — Comparison: cost and benefits (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/comparativa-capas-hexagonal.md`
@@ -68,8 +68,8 @@ Facts gathered for the documentation:
   2. "Cost": more types (ports, events, factory, config), indirection (who implements a port), wiring in `config`, the justified exceptions (`@EventListener`, ownership port in `application`, package-private adapters component-scanned), synchronous listeners (pending item from #17).
   3. "Numbers": files and lines from `git diff --stat`, production classes and tests per tag, ArchUnit rules per phase. "When each one fits": two or three lines.
 - **Acceptance criteria:**
-  - [ ] Every benefit and cost names a class, test or ADR that exists on `Hexagonal`.
-  - [ ] The numbers match the commands they come from (written next to each number).
+  - [x] Every benefit and cost names a class, test or ADR that exists on `Hexagonal`.
+  - [x] The numbers match the commands they come from (written next to each number).
 
 ### [x] T3 — `fase-2-hexagonal.md`: final state (~10 min)
 
