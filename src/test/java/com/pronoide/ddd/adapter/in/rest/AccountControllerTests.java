@@ -578,5 +578,24 @@ class AccountControllerTests {
                     .andExpect(status().isUnprocessableContent())
                     .andExpect(jsonPath("$.title").value("Regla de negocio incumplida"));
         }
+        @Test
+        @DisplayName("Con la divisa mal formada responde 400 con el error del campo")
+        void con_la_divisa_mal_formada_responde_400_con_el_error_del_campo() throws Exception {
+            mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"amount\": 10, \"currency\": \"eur\"}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.currency").exists());
+
+            verifyNoInteractions(commands, queries);
+        }
+
+        @Test
+        @DisplayName("Una divisa bien formada pero desconocida responde 400")
+        void una_divisa_bien_formada_pero_desconocida_responde_400() throws Exception {
+            mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"amount\": 10, \"currency\": \"XYZ\"}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Petición no válida"));
+        }
     }
 }

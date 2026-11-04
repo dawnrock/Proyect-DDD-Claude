@@ -52,16 +52,16 @@ Each adapter is tested without the hexagon (#21). `AdapterTestIsolationTests` (A
 | Events | a minimal Spring context with only the adapter and a recording `@EventListener`; plus a unit test with a mocked `ApplicationEventPublisher` | `SpringDomainEventPublisherContextTests`, `SpringDomainEventPublisherTests` |
 | Tax agency | the fake on its own | `FakeTaxAgencyIncomeVerifierTests` |
 
-Error paths of every endpoint, all with the ports mocked:
+Error paths of every endpoint, all with the ports mocked. With the ports mocked, an account that does not exist and one that belongs to someone else are the same case for the adapter: the service throws `AccountNotFoundException` for both (ADR 0008), and the ownership rule is tested in `CheckingAccountServiceOwnershipTests`:
 
 | Endpoint | 404 | 422 | 400 |
 | -------- | --- | --- | --- |
-| `POST /api/accounts` | n/a | minimum deposit, duplicate number | field errors, malformed JSON (and 403 for non-admins) |
+| `POST /api/accounts` | n/a | minimum deposit, duplicate number | field errors (and 403 for non-admins); malformed JSON in `RestExceptionHandlerTests`, shared by every endpoint |
 | `GET /api/accounts` | n/a | n/a | n/a (no error path) |
-| `GET /api/accounts/{id}` | unknown or not owned | n/a | malformed UUID |
-| `POST /api/accounts/{id}/deposits`, `/withdrawals` | unknown or not owned | currency | amount, currency |
-| `POST /api/transfers` | source and target | same account, currency | IBAN, amount |
-| Web screens (detail, movements, transfers, open account) | custom 404 page | form with the domain message | form with the field error (and 403 page) |
+| `GET /api/accounts/{id}` | `AccountNotFoundException` | n/a | malformed UUID |
+| `POST /api/accounts/{id}/deposits`, `/withdrawals` | `AccountNotFoundException` | currency mismatch | amount, malformed or unknown currency |
+| `POST /api/transfers` | source and target not found | same account, currency mismatch | IBAN, amount |
+| Web (detail and its deposit, withdrawal and transfer forms; open account) | custom 404 page | 200: form with the domain message | 200: form with the field error (and 403 page) |
 
 ## Class → role
 

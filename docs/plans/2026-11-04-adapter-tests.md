@@ -94,6 +94,18 @@ Output adapters: `InMemoryCheckingAccountRepositoryTests` and `InMemoryAccountOw
 - **Acceptance criteria:**
   - [x] The CI check of the project status passes.
 
+### [x] T5 — Review fixes (~10 min)
+
+- **Layer:** tests · docs
+- **Files:** `AccountControllerTests.java`, `AdapterTestIsolationTests.java`, `docs/arquitectura/fase-2-hexagonal.md`, `docs/ia/decisiones.md`
+- **Depends on:** T4
+- **What to do:**
+  1. `revisor-ddd` found a real gap in the audit: REST withdrawals had no 400 test for the currency (deposits did). Two tests added (malformed and unknown currency), validated by removing the currency `@Pattern` from `MovementRequest`.
+  2. The isolation rule also catches `@SpringBootTest` inherited from a base class (validated with an annotated abstract base); its Javadoc states the `@Import` limit and why it uses `OnlyIncludeTests`.
+  3. The matrix is made exact: `AccountNotFoundException` instead of "not owned" (indistinguishable with mocked ports), malformed JSON tested once in `RestExceptionHandlerTests`, web errors are 200 with the form.
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green; the new tests and the widened rule fail when broken.
+
 ## Global acceptance criteria
 
 **Specific:**
