@@ -2,7 +2,7 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores, y se mantiene **corto a propósito**: se carga en cada sesión. **Se actualiza en cada PR que cierra una issue** (lo comprueba el CI).
 
-- **Última actualización:** 2026-11-04 · PR #PRNUM (#23, cierre de la fase 2)
+- **Última actualización:** 2026-11-04 · PR #73 (#23, cierre de la fase 2)
 - **Rama activa:** `Hexagonal`, rama por defecto del repositorio; la fase 2 queda marcada en la etiqueta `v2-hexagonal` y se sigue trabajando en la rama. `Monolithic` congelada en la etiqueta `v1-monolito`; `master` congelada.
 
 ## Dónde estamos

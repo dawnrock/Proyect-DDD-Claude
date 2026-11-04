@@ -132,7 +132,7 @@ Same flow as phase 1, now against `Hexagonal`: `/plan-feature` → plan approved
 | #20 | [wire-core-in-config](../plans/2026-11-04-wire-core-in-config.md) | `implement-plan` | #67 |
 | #21 | [adapter-tests](../plans/2026-11-04-adapter-tests.md) | `implement-plan` | #68 |
 | #22 | [hexagonal-architecture-rules](../plans/2026-11-04-hexagonal-architecture-rules.md) | `implement-plan` | #69 |
-| #23 | [close-phase-2](../plans/2026-11-04-close-phase-2.md) | `implement-plan` | #PRNUM |
+| #23 | [close-phase-2](../plans/2026-11-04-close-phase-2.md) | `implement-plan` | #73 |
 
 **Adjustments made during the phase**
 

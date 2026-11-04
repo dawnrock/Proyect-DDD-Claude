@@ -128,6 +128,6 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | #20 | Wire ports and adapters in `config` without Spring in the core | #67 |
 | #21 | Adapter tests without the hexagon | #68 |
 | #22 | ArchUnit rules for the hexagonal architecture | #69 |
-| #23 | Close phase 2: layers vs hexagonal comparison and `v2-hexagonal` tag | #PRNUM |
+| #23 | Close phase 2: layers vs hexagonal comparison and `v2-hexagonal` tag | #73 |
 
 Issues marked *team* were implemented with `/implement-plan-team` (contract first, ADR 0007).
