@@ -39,6 +39,30 @@ com.pronoide.ddd
 - Every output adapter is simulated (in memory / fake), which is enough to show the architecture.
 - Checked by `HexagonalArchitectureTests` (ArchUnit, #22). Until then, `LayeredArchitectureTests` with its patterns adjusted to the new packages (#14).
 
+## How adapters are tested
+
+Each adapter is tested without the hexagon (#21). `AdapterTestIsolationTests` (ArchUnit over the test code) forbids `@SpringBootTest` in any input-adapter test; the full-context tests live in the root package (`DddLabApplicationTests`, `DemoProfileTests`).
+
+| Adapter | How | Test class |
+| ------- | --- | ---------- |
+| REST controllers | `@WebMvcTest` with `CheckingAccountCommands`/`CheckingAccountQueries` mocked (`@MockitoBean`) | `AccountControllerTests`, `TransferControllerTests`, `RestExceptionHandlerTests` |
+| Web controllers | `@WebMvcTest` with the ports mocked | `AccountWebControllerTests`, `WebSecurityTests` |
+| CLI runner | the real application service with in-memory adapters, without Spring | `DomainModelRunnerTests` |
+| Persistence | port contracts (`*Contract`) extended by the in-memory adapter's test | `InMemoryCheckingAccountRepositoryTests`, `InMemoryAccountOwnershipRepositoryTests`, `InMemoryAccountNumberSequenceTests` |
+| Events | a minimal Spring context with only the adapter and a recording `@EventListener`; plus a unit test with a mocked `ApplicationEventPublisher` | `SpringDomainEventPublisherContextTests`, `SpringDomainEventPublisherTests` |
+| Tax agency | the fake on its own | `FakeTaxAgencyIncomeVerifierTests` |
+
+Error paths of every endpoint, all with the ports mocked. With the ports mocked, an account that does not exist and one that belongs to someone else are the same case for the adapter: the service throws `AccountNotFoundException` for both (ADR 0008), and the ownership rule is tested in `CheckingAccountServiceOwnershipTests`:
+
+| Endpoint | 404 | 422 | 400 |
+| -------- | --- | --- | --- |
+| `POST /api/accounts` | n/a | minimum deposit, duplicate number | field errors (and 403 for non-admins); malformed JSON in `RestExceptionHandlerTests`, shared by every endpoint |
+| `GET /api/accounts` | n/a | n/a | n/a (no error path) |
+| `GET /api/accounts/{id}` | `AccountNotFoundException` | n/a | malformed UUID |
+| `POST /api/accounts/{id}/deposits`, `/withdrawals` | `AccountNotFoundException` | currency mismatch | amount, malformed or unknown currency |
+| `POST /api/transfers` | source and target not found | same account, currency mismatch | IBAN, amount |
+| Web (detail and its deposit, withdrawal and transfer forms; open account) | custom 404 page | 200: form with the domain message | 200: form with the field error (and 403 page) |
+
 ## Class → role
 
 State after #20 (adapters behind input and output ports, domain events published after saving, accounts opened through the factory, demo data as a CLI input adapter, core built in `config` without Spring annotations). The last column says which issue changes the class's role.
