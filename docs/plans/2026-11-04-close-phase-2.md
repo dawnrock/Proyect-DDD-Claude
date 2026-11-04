@@ -104,7 +104,7 @@ Facts gathered for the documentation:
 - **Acceptance criteria:**
   - [x] Every phase-2 plan in `docs/plans/` appears in the table and every PR link resolves.
 
-### [ ] T6 — Issues for the next work (~5 min)
+### [x] T6 — Issues for the next work (~5 min)
 
 - **Layer:** docs (GitHub)
 - **Files:** —
@@ -115,7 +115,7 @@ Facts gathered for the documentation:
      - Re-measure Graphify on the phase-2 code with the #57 method (`claude -p --agent buscador-referencias`, ADR 0010) and decide whether to widen its use.
      - Pending web items from #48: segment in the account list, own label for transfers, non-breaking spaces in `WebFormat.maskedIban`, movements order.
 - **Acceptance criteria:**
-  - [ ] The three issues exist and their numbers are written in the project status (T7).
+  - [x] The three issues exist (#70 translation, #71 Graphify, #72 web) and their numbers are written in the project status (T7).
 
 ### [ ] T7 — Project status (~5 min)
 
