@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import com.pronoide.ddd.adapter.out.persistence.PersistenceTestAdapters;
 import com.pronoide.ddd.application.CheckingAccountCommands;
 import com.pronoide.ddd.application.CheckingAccountQueries;
+import com.pronoide.ddd.application.listener.AuditLogListener;
+import com.pronoide.ddd.application.listener.CustomerNotificationListener;
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CheckingAccountFactory;
@@ -54,5 +56,12 @@ class DomainConfigurationTests {
                 configuration.moneyTransferService());
 
         assertThat(service).isInstanceOf(CheckingAccountCommands.class).isInstanceOf(CheckingAccountQueries.class);
+    }
+
+    @Test
+    @DisplayName("Construye los consumidores de eventos de auditoría y de aviso al cliente")
+    void construye_los_consumidores_de_eventos() {
+        assertThat(configuration.auditLogListener()).isInstanceOf(AuditLogListener.class);
+        assertThat(configuration.customerNotificationListener()).isInstanceOf(CustomerNotificationListener.class);
     }
 }

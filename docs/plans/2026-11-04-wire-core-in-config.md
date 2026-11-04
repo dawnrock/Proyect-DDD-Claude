@@ -94,6 +94,16 @@ Spring imports in the core today: `domain..` has none (`DomainIsolationTests`); 
 - **Acceptance criteria:**
   - [x] The CI check of the project status passes.
 
+### [x] T6 — Review fixes (~10 min)
+
+- **Layer:** tests · docs
+- **Files:** `LayeredArchitectureTests.java`, `DomainConfigurationTests.java`, `DddLabApplicationTests.java`, `docs/arquitectura/fase-2-hexagonal.md`
+- **Depends on:** T5
+- **What to do:**
+  1. `revisor-ddd`: the listeners' exception allows only `@EventListener` (not the whole `org.springframework.context.event`); the output-adapter rule no longer exempts `config`, which never imports them (renamed `solo_adapter_out_conoce_los_adaptadores_de_salida`); `DomainConfigurationTests` covers the listener beans; a context test checks a single service behind both input ports and both listeners registered. Both rule changes validated by breaking them.
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green; each tightened rule fails when broken.
+
 ## Global acceptance criteria
 
 **Specific:**

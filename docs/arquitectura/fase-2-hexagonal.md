@@ -35,7 +35,7 @@ com.pronoide.ddd
 | Adapter | uses the port | implements the port |
 
 - Dependencies always point into the hexagon; adapters do not know each other.
-- The core carries no Spring annotations: `config` builds it and hands it its adapters.
+- The core carries no Spring annotations: `config` builds it and hands it its adapters, which it receives by their port types (it imports no class of `adapter.out`). The only exception is `@EventListener` on the event consumers.
 - Every output adapter is simulated (in memory / fake), which is enough to show the architecture.
 - Checked by `HexagonalArchitectureTests` (ArchUnit, #22). Until then, `LayeredArchitectureTests` with its patterns adjusted to the new packages (#14).
 
