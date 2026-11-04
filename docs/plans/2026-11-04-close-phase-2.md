@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-04
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~75 min (8 tasks: 7 in the PR + 1 after it is merged; open questions answered by the user on 2026-11-04)
 
 ## Goal
@@ -71,7 +71,7 @@ Facts gathered for the documentation:
   - [ ] Every benefit and cost names a class, test or ADR that exists on `Hexagonal`.
   - [ ] The numbers match the commands they come from (written next to each number).
 
-### [ ] T3 — `fase-2-hexagonal.md`: final state (~10 min)
+### [x] T3 — `fase-2-hexagonal.md`: final state (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/fase-2-hexagonal.md`
@@ -80,7 +80,7 @@ Facts gathered for the documentation:
   1. A line at the top: state at the end of the phase, tagged `v2-hexagonal`, with a link to the comparison. "Target at the end of the phase" → "Final package structure"; "State after #20" → final state, and the "Changes in" column (all "—") goes away.
   2. New "Issues of the phase" table: issue → title → PR, for #14-#23 (from `historial.md`).
 - **Acceptance criteria:**
-  - [ ] The table lists the 10 issues of the milestone; the package tree matches `src/main` on `Hexagonal`.
+  - [x] The table lists the 10 issues of the milestone; the package tree matches `src/main` on `Hexagonal`.
 
 ### [ ] T4 — `README.md` with the final state (~5 min)
 
