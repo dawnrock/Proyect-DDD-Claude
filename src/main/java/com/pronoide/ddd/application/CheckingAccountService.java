@@ -8,13 +8,11 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.pronoide.ddd.domain.model.AccountNumber;
-import com.pronoide.ddd.domain.model.AccountNumberSequence;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CheckingAccountFactory;
 import com.pronoide.ddd.domain.model.CheckingAccountRepository;
 import com.pronoide.ddd.domain.model.DomainEventPublisher;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
-import com.pronoide.ddd.domain.model.IncomeVerifier;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.domain.model.Transaction;
@@ -32,8 +30,8 @@ import com.pronoide.ddd.domain.service.MoneyTransferService;
  *
  * <p>Implementa los puertos de entrada {@link CheckingAccountCommands} y {@link CheckingAccountQueries}, que son lo
  * único que conocen los adaptadores de entrada. Solo conoce los puertos de salida ({@link CheckingAccountRepository},
- * {@link AccountOwnershipRepository}, {@link DomainEventPublisher}, {@link AccountNumberSequence} e
- * {@link IncomeVerifier}); Spring le inyecta sus adaptadores. Publica los
+ * {@link AccountOwnershipRepository} y {@link DomainEventPublisher}) y la factoría de cuentas; {@code config} le entrega
+ * sus adaptadores. Publica los
  * eventos de dominio de cada cuenta después de guardarla.
  */
 @Service
@@ -42,20 +40,18 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     private final CheckingAccountRepository repository;
     private final AccountOwnershipRepository ownership;
     private final DomainEventPublisher publisher;
-    private final MoneyTransferService transferService = new MoneyTransferService();
     private final CheckingAccountFactory factory;
+    private final MoneyTransferService transferService;
 
-    /**
-     * Construye la factoría de cuentas a partir de sus dos puertos de salida (numeración y verificación de ingresos).
-     * Cuando exista el paquete {@code config} (#20), la factoría se construirá allí.
-     */
+    /** Recibe sus colaboradores ya construidos: los entrega {@code config.DomainConfiguration} (#20). */
     public CheckingAccountService(CheckingAccountRepository repository, AccountOwnershipRepository ownership,
-                                  DomainEventPublisher publisher, AccountNumberSequence numbering,
-                                  IncomeVerifier incomeVerifier) {
+                                  DomainEventPublisher publisher, CheckingAccountFactory factory,
+                                  MoneyTransferService transferService) {
         this.repository = repository;
         this.ownership = ownership;
         this.publisher = publisher;
-        this.factory = new CheckingAccountFactory(numbering, incomeVerifier);
+        this.factory = factory;
+        this.transferService = transferService;
     }
 
     @Override

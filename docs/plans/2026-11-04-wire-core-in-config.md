@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-04
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~45 min (5 tasks)
 
 ## Goal
@@ -38,7 +38,7 @@ Spring imports in the core today: `domain..` has none (`DomainIsolationTests`); 
 
 ## Tasks
 
-### [ ] T1 — `DomainConfiguration` builds the factory and the domain service (~10 min)
+### [x] T1 — `DomainConfiguration` builds the factory and the domain service (~10 min)
 
 - **Layer:** config · application
 - **Files:** `config/DomainConfiguration.java`, `config/DomainConfigurationTests.java`, `CheckingAccountService.java`, the 6 test constructions, `LayeredArchitectureTests.java`
@@ -48,7 +48,7 @@ Spring imports in the core today: `domain..` has none (`DomainIsolationTests`); 
   2. `@Configuration` with `@Bean MoneyTransferService` and `@Bean CheckingAccountFactory(AccountNumberSequence, IncomeVerifier)`. `CheckingAccountService` receives `CheckingAccountFactory` and `MoneyTransferService` by constructor (no more `new` inside); update the test constructions.
   3. `LayeredArchitectureTests`: `config` becomes a layer (`toda_clase_pertenece_a_una_capa` accepts it; it may use every other layer and nobody uses it).
 - **Acceptance criteria:**
-  - [ ] `DomainConfigurationTests` passes; `./mvnw verify` green (the context still starts).
+  - [x] `DomainConfigurationTests` passes; `./mvnw verify` green (the context still starts).
 
 ### [ ] T2 — `CheckingAccountService` without `@Service` (~5 min)
 

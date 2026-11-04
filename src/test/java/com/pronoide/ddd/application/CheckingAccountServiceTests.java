@@ -42,6 +42,8 @@ import com.pronoide.ddd.domain.model.SameAccountTransferException;
 import com.pronoide.ddd.domain.model.WithdrawalRejected;
 import com.pronoide.ddd.adapter.out.persistence.PersistenceTestAdapters;
 import com.pronoide.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
+import com.pronoide.ddd.domain.model.CheckingAccountFactory;
+import com.pronoide.ddd.domain.service.MoneyTransferService;
 
 /** Casos de uso con el adaptador en memoria real detrás de los puertos: no hace falta simularlo. */
 class CheckingAccountServiceTests {
@@ -59,7 +61,7 @@ class CheckingAccountServiceTests {
         repository = spy(PersistenceTestAdapters.accounts());
         publisher = mock(DomainEventPublisher.class);
         service = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(), publisher,
-                PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier());
+                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService());
     }
 
     /** Eventos publicados en cada llamada a {@code publishAll}, en orden. */
@@ -131,7 +133,7 @@ class CheckingAccountServiceTests {
         void un_numero_generado_en_uso_se_rechaza() {
             String used = service.openAccount(ADMIN, command().build()).accountNumber();
             CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
-                    publisher, () -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier());
+                    publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService());
 
             assertThatExceptionOfType(DuplicateAccountNumberException.class)
                     .isThrownBy(() -> faulty.openAccount(ADMIN, byTaxId("87654321X").build()))
@@ -424,7 +426,7 @@ class CheckingAccountServiceTests {
         void un_caso_de_uso_que_falla_antes_de_guardar_no_publica_nada() {
             String used = service.openAccount(ADMIN, command().build()).accountNumber();
             CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
-                    publisher, () -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier());
+                    publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService());
             clearInvocations(publisher);
 
             assertThatExceptionOfType(DuplicateAccountNumberException.class)

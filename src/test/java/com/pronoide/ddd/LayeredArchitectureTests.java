@@ -32,7 +32,8 @@ class LayeredArchitectureTests {
      * D2 y D3: nadie depende de {@code adapter.in}, ni de {@code application} desde el dominio. Desde la #15 nadie
      * depende de los adaptadores de salida (se usan por sus puertos), y la persistencia sí conoce {@code application}:
      * implementa su puerto de propiedad de las cuentas (ADR 0008). Desde la #17 la capa de adaptadores de salida
-     * incluye {@code adapter.out.event}.
+     * incluye {@code adapter.out.event}. Desde la #20 {@code config} construye el núcleo: puede usar el dominio y
+     * {@code application}, y nadie la usa.
      */
     @ArchTest
     static final ArchRule las_capas_solo_dependen_hacia_abajo = layeredArchitecture()
@@ -41,10 +42,12 @@ class LayeredArchitectureTests {
             .layer("Application").definedBy("..application..")
             .layer("Domain").definedBy("..domain..")
             .layer("OutputAdapters").definedBy("..adapter.out..")
+            .layer("Config").definedBy("..config..")
+            .whereLayer("Config").mayNotBeAccessedByAnyLayer()
             .whereLayer("Presentation").mayNotBeAccessedByAnyLayer()
-            .whereLayer("Application").mayOnlyBeAccessedByLayers("Presentation", "OutputAdapters")
+            .whereLayer("Application").mayOnlyBeAccessedByLayers("Presentation", "OutputAdapters", "Config")
             .whereLayer("OutputAdapters").mayNotBeAccessedByAnyLayer()
-            .whereLayer("Domain").mayOnlyBeAccessedByLayers("Application", "OutputAdapters", "Presentation");
+            .whereLayer("Domain").mayOnlyBeAccessedByLayers("Application", "OutputAdapters", "Presentation", "Config");
 
     /** D1: el dominio solo conoce el JDK (ni Spring, ni {@code jakarta}, ni {@code org.immutables}). */
     @ArchTest
@@ -143,10 +146,11 @@ class LayeredArchitectureTests {
 
     /**
      * Toda clase pertenece a una capa: la regla de capas solo mira dependencias entre capas, así que un paquete nuevo
-     * fuera de ellas (por ejemplo {@code config}) quedaría sin vigilar. La única excepción es la clase de arranque.
+     * fuera de ellas quedaría sin vigilar. Desde la #20, {@code config} es una capa más. La única excepción es la clase
+     * de arranque.
      */
     @ArchTest
     static final ArchRule toda_clase_pertenece_a_una_capa = classes()
-            .that().resideOutsideOfPackages("..adapter.in..", "..application..", "..domain..", "..adapter.out..")
+            .that().resideOutsideOfPackages("..adapter.in..", "..application..", "..domain..", "..adapter.out..", "..config..")
             .should().haveFullyQualifiedName(DddLabApplication.class.getName());
 }

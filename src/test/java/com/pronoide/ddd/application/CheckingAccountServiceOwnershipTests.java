@@ -17,6 +17,8 @@ import com.pronoide.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.pronoide.ddd.domain.model.DomainEventPublisher;
 import com.pronoide.ddd.domain.model.CheckingAccountRepository;
 import com.pronoide.ddd.support.TestAccounts;
+import com.pronoide.ddd.domain.model.CheckingAccountFactory;
+import com.pronoide.ddd.domain.service.MoneyTransferService;
 
 /**
  * Reglas de propiedad de las cuentas (#50): un administrador accede a todo; un usuario solo a sus cuentas, y una ajena
@@ -37,7 +39,7 @@ class CheckingAccountServiceOwnershipTests {
         accounts = PersistenceTestAdapters.accounts();
         owners = PersistenceTestAdapters.ownership();
         service = new CheckingAccountService(accounts, owners, mock(DomainEventPublisher.class),
-                PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier());
+                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService());
     }
 
     private static OpenAccountCommand.Builder command(String owner) {
