@@ -1,117 +1,117 @@
-# Glosario (lenguaje ubicuo)
+# Glossary (ubiquitous language)
 
-Términos del dominio de cuentas corrientes. El código usa el nombre en inglés; la documentación, los mensajes de error y los `@DisplayName`, el término en español. Si aparece un término nuevo, se añade aquí en la misma PR.
+Terms of the checking-accounts domain. The code and the documentation use the English term; error messages and `@DisplayName` use the **Spanish term**, which is why each table keeps it. If a new term appears, it is added here in the same PR.
 
-## Términos del dominio actual (`domain.model`)
+## Terms of the domain model (`domain.model`)
 
-| Término | En el código | Tipo DDD | Definición |
-| ------- | ------------ | -------- | ---------- |
-| Cuenta corriente | `CheckingAccount` | Agregado (raíz) | Cuenta de un titular en una única divisa, con saldo y lista de movimientos. Es el único punto de entrada para operar: protege sus invariantes (R1-R11). Se abre con `CheckingAccount.open(...)`. |
-| Titular | `AccountHolder` | Entidad | Persona a nombre de la que está la cuenta. Tiene identidad propia (`id`), nombre completo y segmento. Se da de alta con `AccountHolder.register(...)` y cambia con `rename` y `promoteToHighNetWorth`. |
-| Segmento de cliente | `CustomerSegment` | Enumerado | Clasificación comercial del titular: `RETAIL` (minorista) o `HIGH_NET_WORTH` (alto patrimonio). Determina si puede quedar en descubierto. |
-| Número de cuenta | `AccountNumber` | Objeto de valor | IBAN español que identifica la cuenta (R14). |
-| Importe | `MonetaryAmount` | Objeto de valor | Cantidad y divisa. Inmutable y normalizado a los decimales de su divisa (R12, R13). Se crea con `MonetaryAmount.euros("100.00")`. |
-| Movimiento | `Transaction` | Entidad (hija del agregado) | Ingreso o retirada sobre una cuenta, con importe, instante (`occurredOn`) y estado. Solo lo crea y lo resuelve la cuenta. |
-| Tipo de movimiento | `TransactionType` | Enumerado | `DEPOSIT` (ingreso) o `WITHDRAWAL` (retirada). |
-| Estado del movimiento | `TransactionStatus` | Enumerado | `PENDING` (pendiente, al crearse), `APPROVED` (aprobado) o `REJECTED` (rechazado). Un movimiento se resuelve una sola vez (R11). |
-| Ingreso | `deposit` | Operación de la cuenta | Suma el importe al saldo. Siempre se aprueba si el importe es válido (R3, R4). |
-| Retirada | `tryWithdraw` | Operación de la cuenta | Resta el importe si el saldo resultante es válido; si no, el movimiento queda rechazado y el saldo no cambia (R5-R9). En el código, `WITHDRAWAL` y `WithdrawCommand`. |
-| Depósito inicial mínimo | `MINIMUM_INITIAL_DEPOSIT` | Regla | 50,00 € (R1). |
-| Descubierto | `OVERDRAFT_LIMIT` | Regla | Saldo negativo permitido solo a alto patrimonio, con un límite de -1.000,00 € (R6-R8). |
-| Error de dominio | `DomainException` | Excepción de dominio (abstracta) | Base de los errores de negocio. Su mensaje, en español, se muestra tal cual al usuario. |
-| Depósito inicial insuficiente | `InsufficientInitialDepositException` | Excepción de dominio | La cuenta se intenta abrir por debajo del depósito mínimo (R1). |
-| Divisa distinta | `CurrencyMismatchException` | Excepción de dominio | Se combinan importes de divisas distintas o se opera en una divisa distinta a la de la cuenta (R4). |
-| Número de cuenta duplicado | `DuplicateAccountNumberException` | Excepción de dominio | Se intenta abrir una cuenta con un número que ya usa otra (R16). La lanza el caso de uso "abrir cuenta", que es quien consulta el repositorio. Desde la #18 el número lo genera la numeración, así que es solo una red de seguridad ante un generador defectuoso. |
-| NIF | `TaxId` | Objeto de valor | Identificador fiscal del titular: 8 dígitos y una letra (no se comprueba la letra de control). Se normaliza sin espacios y en mayúsculas. Solo se usa para verificar los ingresos al abrir la cuenta; no se guarda (#18). |
-| Factoría de cuentas | `CheckingAccountFactory` | Factoría | Abre las cuentas: pide un número a la numeración, consulta los ingresos del titular a la verificación de ingresos, decide su segmento (R20) y llama a `CheckingAccount.open`, que ya no es accesible fuera de `domain.model` (#18). |
-| Numeración de cuentas | `AccountNumberSequence` | Puerto de salida | Genera el número (IBAN) de cada cuenta nueva. Lo implementa `InMemoryAccountNumberSequence` (simulado: IBAN españoles válidos y consecutivos del banco 2100, oficina 0418). |
-| Verificación de ingresos | `IncomeVerifier` | Puerto de salida | Devuelve los ingresos anuales verificados de un titular por su NIF, o nada si no los conoce. Lo implementa `FakeTaxAgencyIncomeVerifier` (agencia tributaria simulada con una tabla fija). |
-| Umbral de alto patrimonio | `HIGH_NET_WORTH_THRESHOLD` | Regla | 100.000,00 € de ingresos anuales verificados (R20). |
-| Transferencia a la misma cuenta | `SameAccountTransferException` | Excepción de dominio | Se intenta transferir de una cuenta a sí misma (R17). La lanza `MoneyTransferService` antes de registrar ningún movimiento. |
+| Term | Spanish term | In the code | DDD type | Definition |
+| ---- | ------------ | ----------- | -------- | ---------- |
+| Checking account | Cuenta corriente | `CheckingAccount` | Aggregate (root) | Account of one holder in a single currency, with a balance and a list of transactions. It is the only entry point to operate: it protects its invariants (R1-R11). Opened with `CheckingAccount.open(...)`. |
+| Holder | Titular | `AccountHolder` | Entity | Person the account belongs to. Has its own identity (`id`), full name and segment. Registered with `AccountHolder.register(...)` and changed with `rename` and `promoteToHighNetWorth`. |
+| Customer segment | Segmento de cliente | `CustomerSegment` | Enumeration | Commercial classification of the holder: `RETAIL` (minorista) or `HIGH_NET_WORTH` (alto patrimonio). Decides whether the account may be overdrawn. |
+| Account number | Número de cuenta | `AccountNumber` | Value object | Spanish IBAN that identifies the account (R14). |
+| Amount | Importe | `MonetaryAmount` | Value object | Quantity and currency. Immutable and normalised to its currency's decimals (R12, R13). Created with `MonetaryAmount.euros("100.00")`. |
+| Transaction | Movimiento | `Transaction` | Entity (child of the aggregate) | Deposit or withdrawal on an account, with amount, instant (`occurredOn`) and status. Only the account creates and resolves it. |
+| Transaction type | Tipo de movimiento | `TransactionType` | Enumeration | `DEPOSIT` (ingreso) or `WITHDRAWAL` (retirada). |
+| Transaction status | Estado del movimiento | `TransactionStatus` | Enumeration | `PENDING` (pendiente, when created), `APPROVED` (aprobado) or `REJECTED` (rechazado). A transaction is resolved only once (R11). |
+| Deposit | Ingreso | `deposit` | Account operation | Adds the amount to the balance. Always approved if the amount is valid (R3, R4). |
+| Withdrawal | Retirada | `tryWithdraw` | Account operation | Subtracts the amount if the resulting balance is valid; otherwise the transaction is rejected and the balance does not change (R5-R9). In the code, `WITHDRAWAL` and `WithdrawCommand`. |
+| Minimum initial deposit | Depósito inicial mínimo | `MINIMUM_INITIAL_DEPOSIT` | Rule | €50.00 (R1). |
+| Overdraft | Descubierto | `OVERDRAFT_LIMIT` | Rule | Negative balance allowed only for high net worth, with a limit of -€1,000.00 (R6-R8). |
+| Domain error | Error de dominio | `DomainException` | Domain exception (abstract) | Base of the business errors. Its message, in Spanish, is shown to the user as it is. |
+| Insufficient initial deposit | Depósito inicial insuficiente | `InsufficientInitialDepositException` | Domain exception | An account is opened below the minimum deposit (R1). |
+| Currency mismatch | Divisa distinta | `CurrencyMismatchException` | Domain exception | Amounts in different currencies are combined, or an operation uses a currency other than the account's (R4). |
+| Duplicate account number | Número de cuenta duplicado | `DuplicateAccountNumberException` | Domain exception | An account is opened with a number another one already uses (R16). Thrown by the "open account" use case, which is the one that queries the repository. Since #18 the number is generated by the numbering, so it is only a safety net against a faulty generator. |
+| NIF (tax id) | NIF | `TaxId` | Value object | The holder's tax identifier: 8 digits and a letter (the check letter is not verified). Normalised without spaces and in upper case. Only used to verify the income when the account is opened; it is not stored (#18). |
+| Account factory | Factoría de cuentas | `CheckingAccountFactory` | Factory | Opens the accounts: asks the numbering for a number, asks the income verification for the holder's income, decides the segment (R20) and calls `CheckingAccount.open`, which is no longer reachable outside `domain.model` (#18). |
+| Account numbering | Numeración de cuentas | `AccountNumberSequence` | Output port | Generates the number (IBAN) of each new account. Implemented by `InMemoryAccountNumberSequence` (simulated: valid, consecutive Spanish IBANs of bank 2100, branch 0418). |
+| Income verification | Verificación de ingresos | `IncomeVerifier` | Output port | Returns a holder's verified annual income by NIF, or nothing if it does not know them. Implemented by `FakeTaxAgencyIncomeVerifier` (simulated tax agency with a fixed table). |
+| High net worth threshold | Umbral de alto patrimonio | `HIGH_NET_WORTH_THRESHOLD` | Rule | €100,000.00 of verified annual income (R20). |
+| Transfer to the same account | Transferencia a la misma cuenta | `SameAccountTransferException` | Domain exception | A transfer from an account to itself (R17). Thrown by `MoneyTransferService` before recording any transaction. |
 
-## Eventos de dominio (`domain.model`, #17)
+## Domain events (`domain.model`, #17)
 
-| Término | En el código | Tipo DDD | Definición |
-| ------- | ------------ | -------- | ---------- |
-| Evento de dominio | `DomainEvent` | Contrato de evento | Algo relevante que ya ha ocurrido en una cuenta, en pasado e inmutable (`record`), con el id de la cuenta y su instante (`occurredOn`). Lo registra la cuenta al cambiar de estado y la aplicación lo publica **después de guardarla**. |
-| Cuenta abierta | `CheckingAccountOpened` | Evento de dominio | Se ha abierto una cuenta: número, titular y depósito inicial. Va seguido del `MoneyDeposited` del depósito inicial y comparte su instante. |
-| Dinero ingresado | `MoneyDeposited` | Evento de dominio | Se ha ingresado un importe, también el depósito inicial y el lado de destino de una transferencia. |
-| Dinero retirado | `MoneyWithdrawn` | Evento de dominio | Se ha aprobado una retirada, también el lado de origen de una transferencia aprobada. |
-| Retirada rechazada | `WithdrawalRejected` | Evento de dominio | Se ha rechazado una retirada (o una transferencia) porque dejaría la cuenta por debajo de lo permitido; el saldo no cambia. |
-| Recoger los eventos | `pullDomainEvents` | Operación de la cuenta | Entrega los eventos registrados desde la última recogida y los olvida, para no publicarlos dos veces. |
-| Publicador de eventos | `DomainEventPublisher` | Puerto de salida | Entrega los eventos a quien quiera reaccionar. Lo implementa `SpringDomainEventPublisher` (`adapter.out.event`). |
-| Auditoría | `AuditLogListener` | Consumidor (`application.listener`) | Anota en el log todos los eventos, con su tipo, su cuenta y su instante. |
-| Aviso al cliente | `CustomerNotificationListener` | Consumidor (`application.listener`) | Avisa al cliente de ingresos, retiradas y retiradas rechazadas. Simulado: escribe el aviso en el log. No avisa de la apertura. |
+| Term | Spanish term | In the code | DDD type | Definition |
+| ---- | ------------ | ----------- | -------- | ---------- |
+| Domain event | Evento de dominio | `DomainEvent` | Event contract | Something relevant that has already happened to an account, in the past tense and immutable (`record`), with the account id and its instant (`occurredOn`). The account records it when its state changes and the application publishes it **after saving the account**. |
+| Account opened | Cuenta abierta | `CheckingAccountOpened` | Domain event | An account was opened: number, holder and initial deposit. Followed by the `MoneyDeposited` of the initial deposit, with the same instant. |
+| Money deposited | Dinero ingresado | `MoneyDeposited` | Domain event | An amount was deposited, including the initial deposit and the target side of a transfer. |
+| Money withdrawn | Dinero retirado | `MoneyWithdrawn` | Domain event | A withdrawal was approved, including the source side of an approved transfer. |
+| Withdrawal rejected | Retirada rechazada | `WithdrawalRejected` | Domain event | A withdrawal (or a transfer) was rejected because it would leave the account below what is allowed; the balance does not change. |
+| Pull the events | Recoger los eventos | `pullDomainEvents` | Account operation | Hands over the events recorded since the last pull and forgets them, so they are not published twice. |
+| Event publisher | Publicador de eventos | `DomainEventPublisher` | Output port | Delivers the events to whoever wants to react. Implemented by `SpringDomainEventPublisher` (`adapter.out.event`). |
+| Audit | Auditoría | `AuditLogListener` | Consumer (`application.listener`) | Logs every event, with its type, its account and its instant. |
+| Customer notification | Aviso al cliente | `CustomerNotificationListener` | Consumer (`application.listener`) | Notifies the customer of deposits, withdrawals and rejected withdrawals. Simulated: writes the notice to the log. Does not notify account openings. |
 
-Una transferencia no tiene evento propio: los consumidores ven una retirada en el origen y un ingreso en el destino.
+A transfer has no event of its own: the consumers see a withdrawal on the source and a deposit on the target.
 
-## Servicios de dominio (`domain.service`)
+## Domain services (`domain.service`)
 
-| Término | En el código | Tipo DDD | Definición |
-| ------- | ------------ | -------- | ---------- |
-| Transferencia | `MoneyTransferService.transfer` | Servicio de dominio (sin estado, Java puro) | Mueve un importe de una cuenta de origen a una de destino. Comprueba la misma cuenta (R17) y la divisa del destino (R19), intenta la retirada en origen y **solo si se aprueba** ingresa en destino (R18). Devuelve la retirada del origen, cuyo estado es el resultado de la transferencia. Se registra como una retirada (`WITHDRAWAL`) en origen y un ingreso (`DEPOSIT`) en destino; no hay tipos de movimiento propios. |
+| Term | Spanish term | In the code | DDD type | Definition |
+| ---- | ------------ | ----------- | -------- | ---------- |
+| Transfer | Transferencia | `MoneyTransferService.transfer` | Domain service (stateless, plain Java) | Moves an amount from a source account to a target account. Checks the same account (R17) and the target's currency (R19), tries the withdrawal on the source and deposits on the target **only if it is approved** (R18). Returns the source's withdrawal, whose status is the result of the transfer. Recorded as a withdrawal (`WITHDRAWAL`) on the source and a deposit (`DEPOSIT`) on the target; there are no transaction types of its own. |
 
-**Transferencias simultáneas:** el caso de uso guarda las dos cuentas con dos `save` sin transacción ni bloqueo, así que dos transferencias simultáneas sobre la misma cuenta podrían perder una actualización. Se acepta en un repositorio en memoria de práctica (como la carrera de R16); en la fase 2, con persistencia real, irá en una transacción.
+**Simultaneous transfers:** the use case saves the two accounts with two `save` calls, without a transaction or a lock, so two simultaneous transfers on the same account could lose an update. Accepted for an in-memory practice repository (like the R16 race); with real persistence it will go in a transaction.
 
-Los argumentos nulos o inválidos que no son reglas de negocio (por ejemplo, un importe no positivo o un IBAN mal formado) se rechazan con `IllegalArgumentException` o `NullPointerException`.
+Null or invalid arguments that are not business rules (for example, a non-positive amount or a malformed IBAN) are rejected with `IllegalArgumentException` or `NullPointerException`.
 
-## Reglas de negocio
+## Business rules
 
-Cada regla cita el test que la demuestra (`src/test/java/com/pronoide/ddd/domain/model/` y, para R17-R19, `domain/service/`).
+Each rule cites the test that proves it (`src/test/java/com/pronoide/ddd/domain/model/` and, for R17-R19, `domain/service/`). Test names are in Spanish, like every `@DisplayName`.
 
-| Regla | Descripción | Test |
-| ----- | ----------- | ---- |
-| R1 | Una cuenta no se abre con un depósito inicial inferior a 50,00 € | `CheckingAccountTests#una_cuenta_no_puede_abrirse_por_debajo_del_deposito_minimo` |
-| R2 | Al abrir la cuenta, el depósito inicial queda registrado como un ingreso aprobado | `CheckingAccountTests#al_abrir_la_cuenta_el_deposito_inicial_queda_registrado` |
-| R3 | Los importes de los ingresos y retiradas deben ser positivos | `CheckingAccountTests#los_importes_de_las_operaciones_deben_ser_positivos` |
-| R4 | La cuenta solo opera en la divisa con la que se abrió, y no se combinan importes de divisas distintas | `CheckingAccountTests#la_cuenta_solo_opera_en_la_divisa_con_la_que_se_abrio`, `MonetaryAmountTests#no_se_pueden_combinar_importes_de_divisas_distintas` |
-| R5 | Una retirada con saldo suficiente se aprueba | `CheckingAccountTests#una_retirada_con_saldo_suficiente_se_aprueba` |
-| R6 | Un cliente minorista no puede dejar la cuenta en descubierto | `CheckingAccountTests#un_cliente_minorista_no_puede_dejar_la_cuenta_en_descubierto` |
-| R7 | Un cliente de alto patrimonio puede dejar la cuenta en descubierto | `CheckingAccountTests#un_cliente_de_alto_patrimonio_puede_dejar_la_cuenta_en_descubierto` |
-| R8 | Ningún cliente puede superar el límite de descubierto de -1.000,00 € | `CheckingAccountTests#ningun_cliente_puede_superar_el_limite_de_descubierto`, `CheckingAccountTests#las_retiradas_en_el_limite_del_descubierto_dependen_del_segmento` |
-| R9 | Una retirada rechazada no cambia el saldo | `CheckingAccountTests#ningun_cliente_puede_superar_el_limite_de_descubierto` |
-| R10 | Los movimientos no pueden manipularse desde fuera del agregado | `CheckingAccountTests#los_movimientos_no_pueden_manipularse_desde_fuera_del_agregado` |
-| R11 | Un movimiento ya resuelto no puede volver a resolverse | `CheckingAccountTests#un_movimiento_ya_resuelto_no_puede_volver_a_resolverse` |
-| R12 | Un importe se normaliza a los decimales de su divisa, y dos importes con el mismo valor y divisa son iguales | `MonetaryAmountTests#el_importe_se_normaliza_a_los_decimales_de_su_divisa`, `MonetaryAmountTests#dos_importes_con_el_mismo_valor_y_divisa_son_equivalentes` |
-| R13 | Un importe es inmutable: las operaciones devuelven instancias nuevas; no existe sin divisa | `MonetaryAmountTests#las_operaciones_devuelven_nuevas_instancias`, `MonetaryAmountTests#un_importe_no_puede_construirse_sin_divisa` |
-| R14 | El número de cuenta es un IBAN español: `ES` seguido de 22 dígitos, normalizado sin espacios y en mayúsculas. **No se valida el dígito de control.** | `AccountNumberTests#el_numero_de_cuenta_se_normaliza`, `AccountNumberTests#un_iban_con_formato_incorrecto_no_llega_a_construirse` |
-| R15 | Un titular conserva su identidad aunque cambien sus atributos, y dos titulares con los mismos datos son distintos | `AccountHolderTests#un_titular_mantiene_su_identidad_aunque_cambien_sus_atributos`, `AccountHolderTests#dos_titulares_con_los_mismos_datos_son_entidades_distintas` |
-| R16 | No se puede abrir una cuenta con un número que ya usa otra. Desde la #18 el número se genera, y la comprobación es una red de seguridad | `CheckingAccountServiceTests#un_numero_generado_en_uso_se_rechaza`, `DuplicateAccountNumberExceptionTests#un_numero_de_cuenta_duplicado_es_una_regla_de_negocio_incumplida` |
-| R17 | No se puede transferir a la misma cuenta; se rechaza sin registrar movimientos | `MoneyTransferServiceTests#transferir_a_la_misma_cuenta_se_rechaza_sin_registrar_movimientos` |
-| R18 | Si la retirada en origen se rechaza, no se ingresa nada en destino y ningún saldo cambia | `MoneyTransferServiceTests#si_la_retirada_se_rechaza_no_se_ingresa_nada_en_el_destino` |
-| R19 | Una transferencia en una divisa distinta a la de las cuentas se rechaza antes de retirar, sin registrar movimientos | `MoneyTransferServiceTests#un_importe_en_otra_divisa_se_rechaza_sin_registrar_movimientos` (hoy la retirada en origen ya lo impide, porque todas las cuentas son en euros; la comprobación del destino protege el caso de cuentas en otra divisa) |
-| R20 | Un titular se da de alta como alto patrimonio solo si sus ingresos anuales verificados superan 100.000,00 €; con ingresos iguales o menores, o sin verificar, es minorista | `CheckingAccountFactoryTests#con_ingresos_por_encima_del_umbral_el_titular_es_de_alto_patrimonio`, `#con_ingresos_exactamente_en_el_umbral_el_titular_es_minorista`, `#si_los_ingresos_no_se_verifican_el_titular_es_minorista` |
+| Rule | Description | Test |
+| ---- | ----------- | ---- |
+| R1 | An account is not opened with an initial deposit below €50.00 | `CheckingAccountTests#una_cuenta_no_puede_abrirse_por_debajo_del_deposito_minimo` |
+| R2 | When the account is opened, the initial deposit is recorded as an approved deposit | `CheckingAccountTests#al_abrir_la_cuenta_el_deposito_inicial_queda_registrado` |
+| R3 | Deposit and withdrawal amounts must be positive | `CheckingAccountTests#los_importes_de_las_operaciones_deben_ser_positivos` |
+| R4 | The account only operates in the currency it was opened with, and amounts in different currencies are not combined | `CheckingAccountTests#la_cuenta_solo_opera_en_la_divisa_con_la_que_se_abrio`, `MonetaryAmountTests#no_se_pueden_combinar_importes_de_divisas_distintas` |
+| R5 | A withdrawal with enough balance is approved | `CheckingAccountTests#una_retirada_con_saldo_suficiente_se_aprueba` |
+| R6 | A retail customer cannot overdraw the account | `CheckingAccountTests#un_cliente_minorista_no_puede_dejar_la_cuenta_en_descubierto` |
+| R7 | A high net worth customer can overdraw the account | `CheckingAccountTests#un_cliente_de_alto_patrimonio_puede_dejar_la_cuenta_en_descubierto` |
+| R8 | No customer can go beyond the overdraft limit of -€1,000.00 | `CheckingAccountTests#ningun_cliente_puede_superar_el_limite_de_descubierto`, `CheckingAccountTests#las_retiradas_en_el_limite_del_descubierto_dependen_del_segmento` |
+| R9 | A rejected withdrawal does not change the balance | `CheckingAccountTests#ningun_cliente_puede_superar_el_limite_de_descubierto` |
+| R10 | Transactions cannot be manipulated from outside the aggregate | `CheckingAccountTests#los_movimientos_no_pueden_manipularse_desde_fuera_del_agregado` |
+| R11 | A transaction already resolved cannot be resolved again | `CheckingAccountTests#un_movimiento_ya_resuelto_no_puede_volver_a_resolverse` |
+| R12 | An amount is normalised to its currency's decimals, and two amounts with the same value and currency are equal | `MonetaryAmountTests#el_importe_se_normaliza_a_los_decimales_de_su_divisa`, `MonetaryAmountTests#dos_importes_con_el_mismo_valor_y_divisa_son_equivalentes` |
+| R13 | An amount is immutable: operations return new instances; it does not exist without a currency | `MonetaryAmountTests#las_operaciones_devuelven_nuevas_instancias`, `MonetaryAmountTests#un_importe_no_puede_construirse_sin_divisa` |
+| R14 | The account number is a Spanish IBAN: `ES` followed by 22 digits, normalised without spaces and in upper case. **The check digits are not validated.** | `AccountNumberTests#el_numero_de_cuenta_se_normaliza`, `AccountNumberTests#un_iban_con_formato_incorrecto_no_llega_a_construirse` |
+| R15 | A holder keeps its identity even if its attributes change, and two holders with the same data are different | `AccountHolderTests#un_titular_mantiene_su_identidad_aunque_cambien_sus_atributos`, `AccountHolderTests#dos_titulares_con_los_mismos_datos_son_entidades_distintas` |
+| R16 | An account cannot be opened with a number another one already uses. Since #18 the number is generated, and the check is a safety net | `CheckingAccountServiceTests#un_numero_generado_en_uso_se_rechaza`, `DuplicateAccountNumberExceptionTests#un_numero_de_cuenta_duplicado_es_una_regla_de_negocio_incumplida` |
+| R17 | A transfer to the same account is not allowed; it is rejected without recording transactions | `MoneyTransferServiceTests#transferir_a_la_misma_cuenta_se_rechaza_sin_registrar_movimientos` |
+| R18 | If the withdrawal on the source is rejected, nothing is deposited on the target and no balance changes | `MoneyTransferServiceTests#si_la_retirada_se_rechaza_no_se_ingresa_nada_en_el_destino` |
+| R19 | A transfer in a currency other than the accounts' is rejected before withdrawing, without recording transactions | `MoneyTransferServiceTests#un_importe_en_otra_divisa_se_rechaza_sin_registrar_movimientos` (today the withdrawal on the source already prevents it, because every account is in euros; the target check protects the case of accounts in another currency) |
+| R20 | A holder is registered as high net worth only if their verified annual income is above €100,000.00; with equal or lower income, or unverified, they are retail | `CheckingAccountFactoryTests#con_ingresos_por_encima_del_umbral_el_titular_es_de_alto_patrimonio`, `#con_ingresos_exactamente_en_el_umbral_el_titular_es_minorista`, `#si_los_ingresos_no_se_verifican_el_titular_es_minorista` |
 
-### Reglas implementadas sin test
+### Rules implemented without a test
 
-- El nombre del titular es obligatorio y no puede estar vacío (`AccountHolder.register` y `rename`). Falta su test: se añadirá en la primera issue que toque `AccountHolder`.
+- The holder's name is mandatory and cannot be blank (`AccountHolder.register` and `rename`). Its test is missing: it will be added in the first issue that touches `AccountHolder`.
 
-## Persistencia (`persistence`)
+## Persistence (`adapter.out.persistence`)
 
-| Término | En el código | Tipo | Definición |
-| ------- | ------------ | ---- | ---------- |
-| Repositorio de cuentas | `InMemoryCheckingAccountRepository` | Repositorio del agregado (en memoria, simulado) | Guarda y recupera cuentas corrientes completas, con sus movimientos: `save` (guarda o sustituye por id), `findById`, `findByAccountNumber` y `findAll` (ordenadas por número de cuenta, lista no modificable). **El número de cuenta es único**: guardar otra cuenta con un número ya usado lanza `IllegalStateException`, como un índice único en una base de datos. Guarda referencias, no copias, así que los casos de uso deben llamar siempre a `save` después de modificar una cuenta. Tests: `InMemoryCheckingAccountRepositoryTests`. |
+| Term | Spanish term | In the code | Type | Definition |
+| ---- | ------------ | ----------- | ---- | ---------- |
+| Account repository | Repositorio de cuentas | `InMemoryCheckingAccountRepository` | Aggregate repository (in memory, simulated) | Saves and loads whole checking accounts, with their transactions: `save` (saves or replaces by id), `findById`, `findByAccountNumber` and `findAll` (sorted by account number, unmodifiable list). **The account number is unique**: saving another account with a number already in use throws `IllegalStateException`, like a unique index in a database. It stores references, not copies, so the use cases must always call `save` after changing an account. Tests: `InMemoryCheckingAccountRepositoryTests`. |
 
-**Número de cuenta único como regla de negocio:** desde la #18 el número lo genera la numeración y la comprobación de R16 es solo una red de seguridad (ver la fila de R16); lo que sigue describe cómo se vigila. El repositorio lo vigila como una restricción técnica (`IllegalStateException`, que no es una `DomainException`). El caso de uso "abrir cuenta" (#5) lo comprueba antes con `findByAccountNumber` y lanza `DuplicateAccountNumberException` (R16), que la presentación traduce (D4) a 422 o a un mensaje en el formulario. Limitación conocida: dos altas simultáneas con el mismo número pueden pasar la comprobación, y entonces `save` lanza `IllegalStateException` (500); se acepta en un repositorio en memoria de práctica.
+**Unique account number as a business rule:** since #18 the number is generated by the numbering and the R16 check is only a safety net (see the R16 row); what follows describes how it is guarded. The repository guards it as a technical constraint (`IllegalStateException`, which is not a `DomainException`). The "open account" use case (#5) checks it first with `findByAccountNumber` and throws `DuplicateAccountNumberException` (R16), which the input adapters translate (D4) to 422 or to a message on the form. Known limitation: two simultaneous openings with the same number can both pass the check, and then `save` throws `IllegalStateException` (500); accepted for an in-memory practice repository.
 
-## Aplicación y presentación
+## Application and input adapters
 
-| Término | En el código | Tipo | Definición |
-| ------- | ------------ | ---- | ---------- |
-| Recurso inexistente | `NotFoundException` (`application`) | Error de aplicación (abstracto) | Base de los errores "lo que se pide no existe". No es una regla de negocio: lo decide el caso de uso al consultar la persistencia. La API REST lo traduce a **404** con el título "Recurso inexistente"; sus subclases concretas (por ejemplo, `AccountNotFoundException`, #5) aportan el mensaje. |
-| Regla de negocio incumplida | `DomainException` → 422 | Traducción HTTP | Título del `ProblemDetail` con el que la API devuelve cualquier excepción de dominio. |
-| Petición no válida | `IllegalArgumentException` y validación → 400 | Traducción HTTP | Título del `ProblemDetail` para formatos, validaciones o argumentos que el dominio rechaza; la validación añade `errors` con un mensaje por campo. |
-| Servicio de cuentas | `CheckingAccountService` | Servicio de aplicación | Casos de uso abrir (`openAccount`), consultar (`findAccount`) y listar (`listAccounts`) cuentas, ingresar (`deposit`), retirar (`withdraw`) y transferir (`transfer`). Cada caso de uso recibe quién lo pide (`Caller`, #50). Carga y guarda los agregados; sin reglas de negocio salvo la comprobación de R16 (la transferencia la delega en `MoneyTransferService`). Contratos: `docs/contracts/open-query-list-accounts.md`, `deposits-withdrawals.md` y `money-transfers.md`. |
-| Cuenta inexistente | `AccountNotFoundException` (hereda de `NotFoundException`) | Error de aplicación | Se consulta una cuenta con un id que no existe → 404. |
-| Abrir cuenta (orden) | `OpenAccountCommand` | Command de aplicación | Titular, NIF del titular (`holderTaxId`), depósito inicial, divisa (`EUR` por defecto) y usuario propietario. Desde la #18 no lleva el número de cuenta (lo genera la numeración) ni el segmento (lo decide la factoría). Valida sus campos al construirse (`IllegalArgumentException`). |
-| Resumen y detalle de cuenta | `AccountSummary`, `AccountDetails` | Vistas de aplicación | Lo que la presentación ve de una cuenta, sin exponer el agregado; el detalle incluye el segmento y los movimientos. |
-| Movimiento (vista) | `TransactionSummary` | Vista de aplicación | Tipo, importe, divisa, instante y estado de un movimiento. |
-| Ingresar / retirar (orden) | `DepositCommand`, `WithdrawCommand` | Commands de aplicación | Cuenta, importe y divisa (`EUR` por defecto) de un ingreso o una retirada. Validan al construirse que el importe sea positivo después de redondearlo a los decimales de la divisa y que la divisa exista (`IllegalArgumentException`). Los usan `CheckingAccountService.deposit` y `withdraw`, que devuelven el movimiento (`TransactionSummary`); una retirada no permitida vuelve como `REJECTED`, no como error. |
-| Transferir (orden) | `TransferCommand` | Command de aplicación | Cuenta de origen, **número de cuenta de destino** (`targetAccountNumber`, IBAN con o sin espacios; desde la #50, para que un cliente no vea las cuentas de los demás), importe y divisa (`EUR` por defecto). Valida el formato del IBAN y del importe; que origen y destino coincidan es una regla de negocio (R17), no de formato. |
-| Transferencia (vista) | `TransferSummary` | Vista de aplicación | Ids y números de las dos cuentas, importe e instante de la retirada en origen y estado (`APPROVED` o `REJECTED`). Una transferencia no permitida vuelve como `REJECTED`, no como error. |
-| Usuario | `username` (Spring Security, `SecuritySupport`) | Identidad (presentación) | Quien entra en la aplicación con su contraseña (#50). Formato `[a-z0-9._-]{3,30}`. No es lenguaje del dominio de cuentas: no llega a `domain`. |
-| Rol | `ADMIN`, `USER` | Identidad (presentación) | Administrador: ve todas las cuentas y es el único que abre cuentas. Usuario (cliente): solo ve y opera sus cuentas. |
-| Quien pide | `Caller` | Vista de aplicación | Usuario y si es administrador; lo construye la presentación (`CurrentCaller`) y lo reciben todos los casos de uso. `CallerDef.system()` es el administrador interno de los procesos sin usuario (datos de demostración). |
-| Propietario de la cuenta | `InMemoryAccountOwnershipRepository` (`persistence`), `OpenAccountCommand.ownerUsername` | Relación de aplicación | Usuario al que pertenece una cuenta; lo indica el administrador al abrirla. Se guarda fuera del agregado. Para un usuario, una cuenta ajena (o sin propietario) se trata como inexistente (404) para no revelar que existe. |
-| Operación no permitida | `OperationNotAllowedException` → `ForbiddenOperationException` (`application`) | Error de aplicación | Falta el rol necesario (un usuario intenta abrir una cuenta) → 403. No confundir con la `AccessDeniedException` de Spring Security. |
-| Cuenta de destino inexistente | `TargetAccountNotFoundException` (hereda de `NotFoundException`) | Error de aplicación | No hay ninguna cuenta con el número de destino de una transferencia → 404 en la API; en la web, mensaje en el formulario. |
+| Term | Spanish term | In the code | Type | Definition |
+| ---- | ------------ | ----------- | ---- | ---------- |
+| Resource not found | Recurso inexistente | `NotFoundException` (`application`) | Application error (abstract) | Base of the "what you asked for does not exist" errors. Not a business rule: the use case decides it when querying persistence. The REST API translates it to **404** with the title "Recurso inexistente"; its concrete subclasses (for example `AccountNotFoundException`, #5) provide the message. |
+| Business rule violated | Regla de negocio incumplida | `DomainException` → 422 | HTTP translation | Title of the `ProblemDetail` with which the API returns any domain exception. |
+| Invalid request | Petición no válida | `IllegalArgumentException` and validation → 400 | HTTP translation | Title of the `ProblemDetail` for formats, validations or arguments the domain rejects; validation adds `errors` with one message per field. |
+| Account service | Servicio de cuentas | `CheckingAccountService` | Application service | Use cases to open (`openAccount`), query (`findAccount`) and list (`listAccounts`) accounts, deposit (`deposit`), withdraw (`withdraw`) and transfer (`transfer`). Each use case receives who asks for it (`Caller`, #50). Loads and saves the aggregates; no business rules except the R16 check (the transfer is delegated to `MoneyTransferService`). Contracts: `docs/contracts/open-query-list-accounts.md`, `deposits-withdrawals.md` and `money-transfers.md`. |
+| Account not found | Cuenta inexistente | `AccountNotFoundException` (extends `NotFoundException`) | Application error | An account is queried with an id that does not exist → 404. |
+| Open account (command) | Abrir cuenta (orden) | `OpenAccountCommand` | Application command | Holder, holder's NIF (`holderTaxId`), initial deposit, currency (`EUR` by default) and owner user. Since #18 it carries neither the account number (generated by the numbering) nor the segment (decided by the factory). Validates its fields when built (`IllegalArgumentException`). |
+| Account summary and details | Resumen y detalle de cuenta | `AccountSummary`, `AccountDetails` | Application views | What the input adapters see of an account, without exposing the aggregate; the details include the segment and the transactions. |
+| Transaction (view) | Movimiento (vista) | `TransactionSummary` | Application view | Type, amount, currency, instant and status of a transaction. |
+| Deposit / withdraw (command) | Ingresar / retirar (orden) | `DepositCommand`, `WithdrawCommand` | Application commands | Account, amount and currency (`EUR` by default) of a deposit or a withdrawal. When built they check that the amount is positive after rounding it to the currency's decimals and that the currency exists (`IllegalArgumentException`). Used by `CheckingAccountService.deposit` and `withdraw`, which return the transaction (`TransactionSummary`); a withdrawal that is not allowed comes back as `REJECTED`, not as an error. |
+| Transfer (command) | Transferir (orden) | `TransferCommand` | Application command | Source account, **target account number** (`targetAccountNumber`, IBAN with or without spaces; since #50, so that a customer does not see other people's accounts), amount and currency (`EUR` by default). Validates the format of the IBAN and the amount; source and target being the same is a business rule (R17), not a format one. |
+| Transfer (view) | Transferencia (vista) | `TransferSummary` | Application view | Ids and numbers of both accounts, amount and instant of the withdrawal on the source, and status (`APPROVED` or `REJECTED`). A transfer that is not allowed comes back as `REJECTED`, not as an error. |
+| User | Usuario | `username` (Spring Security, `SecuritySupport`) | Identity (input adapters) | Whoever signs in to the application with their password (#50). Format `[a-z0-9._-]{3,30}`. Not part of the accounts domain language: it never reaches `domain`. |
+| Role | Rol | `ADMIN`, `USER` | Identity (input adapters) | Administrator: sees every account and is the only one who opens accounts. User (customer): only sees and operates their own accounts. |
+| Caller | Quien pide | `Caller` | Application view | User and whether they are an administrator; built by the input adapters (`CurrentCaller`) and received by every use case. `CallerDef.system()` is the internal administrator of processes without a user (demo data). |
+| Account owner | Propietario de la cuenta | `AccountOwnershipRepository` (port in `application`, implemented by `InMemoryAccountOwnershipRepository` in `adapter.out.persistence`), `OpenAccountCommand.ownerUsername` | Application relationship | User an account belongs to; the administrator states it when opening it. Stored outside the aggregate. For a user, someone else's account (or one without an owner) is treated as non-existent (404) so as not to reveal that it exists. |
+| Operation not allowed | Operación no permitida | `OperationNotAllowedException` → `ForbiddenOperationException` (`application`) | Application error | The required role is missing (a user tries to open an account) → 403. Not to be confused with Spring Security's `AccessDeniedException`. |
+| Target account not found | Cuenta de destino inexistente | `TargetAccountNotFoundException` (extends `NotFoundException`) | Application error | No account has the target number of a transfer → 404 in the API; on the web, a message on the form. |

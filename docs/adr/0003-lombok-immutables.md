@@ -1,42 +1,42 @@
-# 0003 · Dónde se usan Lombok e Immutables
+# 0003 · Where Lombok and Immutables are used
 
-- **Estado:** aceptada · 2026-10-23 · la parte del dominio (`@Getter` y `@EqualsAndHashCode` permitidos en `domain..`) la sustituye el [ADR 0009](0009-domain-without-lombok.md): en el dominio no se usa Lombok
+- **Status:** accepted · 2026-10-23 · the domain part (`@Getter` and `@EqualsAndHashCode` allowed in `domain..`) is superseded by [ADR 0009](0009-domain-without-lombok.md): the domain does not use Lombok
 
-## Contexto
+## Context
 
-Se quiere practicar con Lombok e Immutables, pero el dominio debe proteger sus invariantes y no depender de librerías (hoy lo comprueba la regla D1 de `LayeredArchitectureTests`, "el dominio solo depende del JDK", desde la #12; `DomainIsolationTests` solo prohíbe Spring y `jakarta`).
+We want to practise with Lombok and Immutables, but the domain must protect its invariants and not depend on libraries (today checked by rule D1 of `LayeredArchitectureTests`, "the domain only depends on the JDK", since #12; `DomainIsolationTests` only forbids Spring and `jakarta`).
 
-## Decisión
+## Decision
 
-- **Lombok** fuera del dominio para inyección por constructor (`@RequiredArgsConstructor`) y logs (`@Slf4j`); en el dominio solo `@Getter` con accesores fluidos y `@EqualsAndHashCode(onlyExplicitlyIncluded = true)`. `@Builder` solo en builders de test.
-- **Immutables** para commands, queries y vistas de `application` y para DTOs de los adaptadores. **Nunca** en `domain..`.
-- Los objetos de valor del dominio siguen siendo `record` escritos a mano.
-- `scripts/check-domain.mjs` (skill `ddd-building-block`) y la CI comprueban lo que ArchUnit no ve (anotaciones de Lombok con retención `SOURCE`). ArchUnit prohíbe `org.immutables` en el dominio desde la fase 1 (regla D1, #12).
+- **Lombok** outside the domain for constructor injection (`@RequiredArgsConstructor`) and logging (`@Slf4j`); in the domain only `@Getter` with fluent accessors and `@EqualsAndHashCode(onlyExplicitlyIncluded = true)`. `@Builder` only in test builders.
+- **Immutables** for the commands, queries and views of `application` and for the adapters' DTOs. **Never** in `domain..`.
+- The domain's value objects stay hand-written `record`s.
+- `scripts/check-domain.mjs` (`ddd-building-block` skill) and CI check what ArchUnit cannot see (Lombok annotations with `SOURCE` retention). ArchUnit forbids `org.immutables` in the domain since phase 1 (rule D1, #12).
 
-## Configuración
+## Configuration
 
-Implementada en la issue [#2](https://github.com/dawnrock/Proyect-DDD-Claude/issues/2).
+Implemented in issue [#2](https://github.com/dawnrock/Proyect-DDD-Claude/issues/2).
 
-| Pieza | Valor | Dónde |
+| Piece | Value | Where |
 | ----- | ----- | ----- |
-| Lombok | 1.18.46, versión gestionada por Spring Boot 4.1.1; dependencia `optional` y excluida del JAR ejecutable | [`pom.xml`](../../pom.xml) |
-| Immutables | 2.12.3: `org.immutables:value-annotations` (`provided`) para las anotaciones y `org.immutables:value` solo como procesador | [`pom.xml`](../../pom.xml) |
-| Procesadores | `maven-compiler-plugin` → `annotationProcessorPaths` con Lombok e Immutables. Al declararlos, Maven deja de buscar procesadores en el classpath, así que hay que listar los dos. Se aplican a `compile` y a `testCompile` | [`pom.xml`](../../pom.xml) |
-| Accesores fluidos | `lombok.accessors.fluent = true` (`name()` en lugar de `getName()`), `config.stopBubbling = true` y `lombok.addLombokGeneratedAnnotation = true` | [`lombok.config`](../../lombok.config) |
-| Estilo de Immutables | Meta-anotación `@ApplicationValue`: el tipo abstracto lleva el sufijo `Def` y el generado toma el nombre sin él (`OpenAccountCommandDef` → `OpenAccountCommand`), con visibilidad pública y sin métodos `with*` | [`ApplicationValue.java`](../../src/main/java/com/pronoide/ddd/application/ApplicationValue.java) |
+| Lombok | 1.18.46, version managed by Spring Boot 4.1.1; `optional` dependency, excluded from the executable JAR | [`pom.xml`](../../pom.xml) |
+| Immutables | 2.12.3: `org.immutables:value-annotations` (`provided`) for the annotations and `org.immutables:value` only as a processor | [`pom.xml`](../../pom.xml) |
+| Processors | `maven-compiler-plugin` → `annotationProcessorPaths` with Lombok and Immutables. Once they are declared, Maven stops looking for processors on the classpath, so both must be listed. They apply to `compile` and `testCompile` | [`pom.xml`](../../pom.xml) |
+| Fluent accessors | `lombok.accessors.fluent = true` (`name()` instead of `getName()`), `config.stopBubbling = true` and `lombok.addLombokGeneratedAnnotation = true` | [`lombok.config`](../../lombok.config) |
+| Immutables style | `@ApplicationValue` meta-annotation: the abstract type carries the `Def` suffix and the generated one takes the name without it (`OpenAccountCommandDef` → `OpenAccountCommand`), public, without `with*` methods | [`ApplicationValue.java`](../../src/main/java/com/pronoide/ddd/application/ApplicationValue.java) |
 
-Los tests `LombokSetupTests` e `ImmutablesSetupTests` (en `src/test/.../build`) demuestran que los dos procesadores generan código.
+The `LombokSetupTests` and `ImmutablesSetupTests` tests (in `src/test/.../build`) prove that both processors generate code.
 
-**IDE:** para que el IDE reconozca el código generado hay que activar el procesamiento de anotaciones (IntelliJ: *Enable annotation processing*; Eclipse/STS: instalar el agente de Lombok y activar *annotation processing* en el proyecto). `./mvnw` no lo necesita.
+**IDE:** for the IDE to see the generated code, annotation processing must be enabled (IntelliJ: *Enable annotation processing*; Eclipse/STS: install the Lombok agent and enable *annotation processing* in the project). `./mvnw` does not need it.
 
-## Riesgo resuelto: Immutables con Jackson 3
+## Risk resolved: Immutables with Jackson 3
 
-Spring Boot 4.1 usa **Jackson 3** (`tools.jackson.databind` 3.1.5, con `com.fasterxml.jackson.annotation` 2.21). La duda era si la integración de Immutables, pensada para Jackson 2, funcionaba con él. Se comprobó en la issue [#8](https://github.com/dawnrock/Proyect-DDD-Claude/issues/8):
+Spring Boot 4.1 uses **Jackson 3** (`tools.jackson.databind` 3.1.5, with `com.fasterxml.jackson.annotation` 2.21). The question was whether the Immutables integration, designed for Jackson 2, works with it. Checked in issue [#8](https://github.com/dawnrock/Proyect-DDD-Claude/issues/8):
 
-- **Funciona** con Immutables 2.12.3 si el tipo abstracto se anota con `@JsonSerialize(as = X.class)` y `@JsonDeserialize(as = X.class)` de **`tools.jackson.databind.annotation`** (no los de `com.fasterxml.jackson.databind`, que no están en el classpath). El código generado añade `@JsonCreator` y `@JsonProperty(required = true)` por atributo.
-- Lo demuestra `JacksonImmutablesTests`, que hace la ida y vuelta a JSON. Sin las anotaciones, el mismo test falla con `InvalidDefinitionException` (validado por sabotaje).
+- **It works** with Immutables 2.12.3 if the abstract type is annotated with `@JsonSerialize(as = X.class)` and `@JsonDeserialize(as = X.class)` from **`tools.jackson.databind.annotation`** (not the `com.fasterxml.jackson.databind` ones, which are not on the classpath). The generated code adds `@JsonCreator` and `@JsonProperty(required = true)` per attribute.
+- `JacksonImmutablesTests` proves it with a round trip to JSON. Without the annotations the same test fails with `InvalidDefinitionException` (validated by sabotage).
 
-**Regla para los DTOs REST (#5 en adelante):** pueden ser de Immutables con `@ApplicationValue`, `@Value.Immutable` y las dos anotaciones de Jackson 3:
+**Rule for the REST DTOs (#5 onwards):** they may be Immutables types with `@ApplicationValue`, `@Value.Immutable` and the two Jackson 3 annotations:
 
 ```java
 @ApplicationValue
@@ -49,9 +49,9 @@ interface OpenAccountRequestDef {
 }
 ```
 
-Si un DTO necesita validación con Bean Validation (`@Valid`) y resulta incómodo con Immutables, se permite un `record`, justificándolo en el contrato de la funcionalidad.
+If a DTO needs Bean Validation (`@Valid`) and that is awkward with Immutables, a `record` is allowed, justified in the feature's contract.
 
-## Consecuencias
+## Consequences
 
-- Menos código repetitivo en servicios, adaptadores y DTOs sin abrir la puerta a setters en los agregados.
-- Dos procesadores de anotaciones en el build (`annotationProcessorPaths`).
+- Less boilerplate in services, adapters and DTOs without opening the door to setters in the aggregates.
+- Two annotation processors in the build (`annotationProcessorPaths`).

@@ -1,22 +1,22 @@
-# 0005 · Interfaz web con Thymeleaf
+# 0005 · Web interface with Thymeleaf
 
-- **Estado:** aceptada · 2026-10-23
+- **Status:** accepted · 2026-10-23
 
-## Contexto
+## Context
 
-La aplicación necesita una interfaz web sencilla, con la mejor integración posible con Spring y Java, y que en la fase 2 se convierta en un adaptador de entrada más.
+The application needs a simple web interface, with the best possible integration with Spring and Java, that becomes one more input adapter in phase 2.
 
-## Decisión
+## Decision
 
-Thymeleaf con `spring-boot-starter-thymeleaf` y Spring MVC: plantillas renderizadas en el servidor, formularios con validación de Spring, sin proyecto de frontend aparte ni Node en el build.
+Thymeleaf with `spring-boot-starter-thymeleaf` and Spring MVC: server-rendered templates, forms with Spring validation, no separate frontend project and no Node in the build.
 
-## Alternativas
+## Alternatives
 
-- SPA (Angular/React): obliga a mantener un segundo proyecto y desvía el foco del dominio.
-- JSP: soporte limitado con Spring Boot y JAR ejecutable.
-- Vaadin: muy integrado, pero añade un modelo de componentes propio que oculta la separación en capas.
+- SPA (Angular/React): requires maintaining a second project and moves the focus away from the domain.
+- JSP: limited support with Spring Boot and an executable JAR.
+- Vaadin: well integrated, but it adds its own component model that hides the separation into layers.
 
-## Consecuencias
+## Consequences
 
-- `presentation.web` (fase 1) y `adapter.in.web` (fase 2) se prueban con `@WebMvcTest`.
-- La misma lógica se expone por REST y por web, lo que en la fase 2 demuestra dos adaptadores de entrada sobre los mismos puertos.
+- `presentation.web` (phase 1) and `adapter.in.web` (phase 2) are tested with `@WebMvcTest`.
+- The same logic is exposed through REST and the web, which in phase 2 shows two input adapters on the same ports.

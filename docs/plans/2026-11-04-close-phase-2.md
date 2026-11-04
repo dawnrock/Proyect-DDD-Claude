@@ -140,26 +140,27 @@ Facts gathered for the documentation:
 - **Acceptance criteria:**
   - [x] Every number in the comparison matches its command; `mvn verify` green.
 
-### [ ] T8 — Tag `v2-hexagonal` (~5 min, after the PR is merged)
+### [x] T8 — Tag `v2-hexagonal` (~5 min, after the PR is merged)
 
 - **Layer:** build
 - **Files:** —
 - **Depends on:** the user merges the PR
+- **Done (2026-11-04, checked in #70):** the session could not push tags (403), so the user created and pushed `v2-hexagonal` on 258f528; the compare and tree links answer 200.
 - **What to do:**
   1. With the user's go-ahead: `git fetch`, `mvn verify` on `origin/Hexagonal`, check that `Monolithic` is still `v1-monolito` and `master` still 3ef3c48, then `git tag -a v2-hexagonal origin/Hexagonal -m "Fase 2 · Arquitectura hexagonal"` and `git push origin v2-hexagonal`.
   2. Check that #23 and the milestone are closed (close the milestone if GitHub does not) and that the compare links of the comparison now resolve.
 - **Acceptance criteria:**
-  - [ ] `git ls-remote --tags origin v2-hexagonal` points to the merge commit of this PR, where `mvn verify` ends in `BUILD SUCCESS`.
-  - [ ] No open issue left in the "Fase 2 · Arquitectura hexagonal" milestone.
+  - [x] `git ls-remote --tags origin v2-hexagonal` points to the merge commit of this PR, where `mvn verify` ends in `BUILD SUCCESS`.
+  - [x] No open issue left in the "Fase 2 · Arquitectura hexagonal" milestone.
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] Every issue in the "Fase 2 · Arquitectura hexagonal" milestone is closed (#14-#22 closed; #23 closes with this PR, checked in T8).
+- [x] Every issue in the "Fase 2 · Arquitectura hexagonal" milestone is closed (#14-#22 closed; #23 closes with this PR, checked in T8).
 - [x] The issues for the translation, the Graphify re-measure and the pending web items exist.
 - [x] `Monolithic`, `Hexagonal` and `master` coexist without cross changes (`Monolithic` = `v1-monolito`, `master` unchanged).
-- [ ] `./mvnw verify` green on `Hexagonal` at the tag `v2-hexagonal` (green on this branch; checked again at the tag in T8).
+- [x] `./mvnw verify` green on `Hexagonal` at the tag `v2-hexagonal` (green on this branch; checked again at the tag in T8).
 - [x] `comparativa-capas-hexagonal.md` exists with both diagrams, the deposit in both architectures, changes per package, cost and benefits and diff links; `README.md` and `arquitectura-ia.md` describe phase 2.
 
 **Fixed:**

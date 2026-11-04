@@ -1,38 +1,38 @@
-# Notificaciones push por Telegram
+# Telegram push notifications
 
-Sustituyen a los avisos de Slack de curso-claude. Llegan al móvil cuando:
+They replace the Slack notices of curso-claude. They reach the phone when:
 
-| Evento | Quién avisa |
-| ------ | ----------- |
-| Plan publicado en la issue | skill `plan-feature` (`scripts/notify.mjs`) |
-| PR lista para revisar | skill `implement-plan` (`scripts/notify.mjs`) |
-| Claude espera un permiso | hook `Notification` |
-| Claude termina de responder (opcional) | hook `Stop`, si `TELEGRAM_NOTIFY_ON_STOP=1` |
-| Falla la CI | `.github/workflows/ci.yml` |
+| Event | Who sends it |
+| ----- | ------------ |
+| Plan published on the issue | `plan-feature` skill (`scripts/notify.mjs`) |
+| PR ready for review | `implement-plan` skill (`scripts/notify.mjs`) |
+| Claude is waiting for a permission | `Notification` hook |
+| Claude finishes answering (optional) | `Stop` hook, if `TELEGRAM_NOTIFY_ON_STOP=1` |
+| CI fails | `.github/workflows/ci.yml` |
 
-Sin configuración no pasa nada: el script avisa de que no está configurado y las skills continúan.
+Without configuration nothing happens: the script says it is not configured and the skills carry on.
 
-## Configuración (una vez)
+## Configuration (once)
 
-1. En Telegram, abre **@BotFather**, envía `/newbot` y guarda el **token** que te da.
-2. Escribe cualquier mensaje a tu bot nuevo.
-3. Obtén tu **chat id** (en PowerShell, sustituyendo el token):
+1. In Telegram, open **@BotFather**, send `/newbot` and keep the **token** it gives you.
+2. Send any message to your new bot.
+3. Get your **chat id** (in PowerShell, replacing the token):
    ```powershell
    (Invoke-RestMethod "https://api.telegram.org/bot<TOKEN>/getUpdates").result[-1].message.chat.id
    ```
-4. Copia `.claude/settings.local.example.json` a `.claude/settings.local.json` (ignorado por git) y rellena `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID`.
-5. Prueba:
+4. Copy `.claude/settings.local.example.json` to `.claude/settings.local.json` (ignored by git) and fill in `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`.
+5. Test it:
    ```bash
    TELEGRAM_BOT_TOKEN=... TELEGRAM_CHAT_ID=... node scripts/notify.mjs "Hola desde Proyect-DDD-Claude"
    ```
-6. Para la CI, añade los mismos valores como secretos del repositorio:
+6. For CI, add the same values as repository secrets:
    ```bash
    gh secret set TELEGRAM_BOT_TOKEN -R dawnrock/Proyect-DDD-Claude
    gh secret set TELEGRAM_CHAT_ID -R dawnrock/Proyect-DDD-Claude
    ```
 
-El token da control sobre el bot: no lo pegues en el chat con Claude ni lo commitees.
+The token gives control over the bot: do not paste it in the chat with Claude or commit it.
 
-## Desactivar los avisos sin borrar la configuración
+## Turning the notices off without deleting the configuration
 
-Con `TELEGRAM_DISABLED=1`, `scripts/notify.mjs` no envía nada (responde "Notificación no enviada: desactivado…") y los hooks `Notification` y `Stop` tampoco, porque usan el mismo script. Se define en el bloque `env` de `.claude/settings.local.json` o de `~/.claude/settings.json`, y se aplica al abrir una sesión nueva de Claude Code. Para reactivar los avisos, se quita la variable. No afecta a la CI, que no la define.
+With `TELEGRAM_DISABLED=1`, `scripts/notify.mjs` sends nothing (it answers "Notificación no enviada: desactivado…") and neither do the `Notification` and `Stop` hooks, because they use the same script. It is set in the `env` block of `.claude/settings.local.json` or `~/.claude/settings.json`, and applies when a new Claude Code session starts. To turn the notices back on, remove the variable. It does not affect CI, which does not set it.

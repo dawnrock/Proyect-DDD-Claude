@@ -1,27 +1,27 @@
-# 0002 · Una rama por fotografía
+# 0002 · One branch per snapshot
 
-- **Estado:** aceptada · 2026-10-23
+- **Status:** accepted · 2026-10-23
 
-## Contexto
+## Context
 
-Se quieren conservar por separado dos versiones completas de la aplicación (monolito en capas y hexagonal) para poder compararlas, además del punto de partida del curso.
+We want to keep two complete versions of the application apart (layered monolith and hexagonal) so they can be compared, besides the course's starting point.
 
-## Decisión
+## Decision
 
-| Rama | Contenido | Regla |
-| ---- | --------- | ----- |
-| `master` | Copia de DDD-Lab-Java (Lab 22) | Congelada: no recibe commits ni PRs |
-| `Monolithic` | Arquitectura de IA + fase 1 | Base de las PRs del milestone *Fase 1*. Rama por defecto mientras dura la fase 1 |
-| `Hexagonal` | Fase 2 | Se crea desde `Monolithic` al cerrar la fase 1 (etiqueta `v1-monolito`). Pasa a ser la rama por defecto |
+| Branch | Content | Rule |
+| ------ | ------- | ---- |
+| `master` | Copy of DDD-Lab-Java (Lab 22) | Frozen: receives no commits or PRs |
+| `Monolithic` | AI architecture + phase 1 | Base of the PRs of the *Phase 1* milestone. Default branch while phase 1 lasts |
+| `Hexagonal` | Phase 2 | Created from `Monolithic` when phase 1 closes (tag `v1-monolito`). Becomes the default branch |
 
-Las PRs de cada issue van contra la rama de su fase (las skills la deducen de la etiqueta `fase:*`). Cada fase termina con una etiqueta (`v1-monolito`, `v2-hexagonal`).
+Each issue's PRs go against its phase's branch (the skills infer it from the `fase:*` label). Each phase ends with a tag (`v1-monolito`, `v2-hexagonal`).
 
-## Alternativas
+## Alternatives
 
-- Dos repositorios: duplica la configuración de IA, las issues y los secretos.
-- Un único `main` con etiquetas: las fotografías no quedarían visibles como ramas navegables.
+- Two repositories: duplicates the AI configuration, the issues and the secrets.
+- A single `main` with tags: the snapshots would not be visible as browsable branches.
 
-## Consecuencias
+## Consequences
 
-- `master` no es la rama por defecto del repositorio (GitHub ejecuta los workflows de issues y comentarios desde la rama por defecto).
-- La comparación entre fases es un diff directo: `git diff v1-monolito v2-hexagonal`.
+- `master` is not the repository's default branch (GitHub runs the issue and comment workflows from the default branch).
+- Comparing the phases is a plain diff: `git diff v1-monolito v2-hexagonal`.

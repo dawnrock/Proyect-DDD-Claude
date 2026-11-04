@@ -1,38 +1,38 @@
-# Estado del proyecto
+# Project status
 
-> **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores, y se mantiene **corto a propósito**: se carga en cada sesión. **Se actualiza en cada PR que cierra una issue** (lo comprueba el CI).
+> **Read it at the start of every session.** It is the entry point to carry on without depending on earlier conversations, and it is kept **short on purpose**: it is loaded in every session. **It is updated in every PR that closes an issue** (CI checks it).
 
-- **Última actualización:** 2026-11-04 · PR #73 (#23, cierre de la fase 2)
-- **Rama activa:** `Hexagonal`, rama por defecto del repositorio; la fase 2 queda marcada en la etiqueta `v2-hexagonal` y se sigue trabajando en la rama. `Monolithic` congelada en la etiqueta `v1-monolito`; `master` congelada.
+- **Last updated:** 2026-11-04 · PR #74 (#70, documentation in English)
+- **Active branch:** `Hexagonal`, the repository's default branch; phase 2 is marked by the `v2-hexagonal` tag and work continues on the branch. `Monolithic` frozen at the `v1-monolito` tag; `master` frozen.
 
-## Dónde estamos
+## Where we are
 
-| Fase | Hecho | En curso | Pendiente |
-| ---- | ----- | -------- | --------- |
-| 1 · Monolito en capas | Cerrada: #2-#8, #11-#13, #31, #48, #50, #54, #57 (detalle en el [historial](historial.md)) | — | — |
-| 2 · Hexagonal | Cerrada: #14-#23, etiqueta `v2-hexagonal` | — | — |
-| Después de la fase 2 (sin milestone) | — | — | #70 traducción, #71 Graphify, #72 web |
+| Phase | Done | In progress | Pending |
+| ----- | ---- | ----------- | ------- |
+| 1 · Layered monolith | Closed: #2-#8, #11-#13, #31, #48, #50, #54, #57 (details in the [history](historial.md)) | — | — |
+| 2 · Hexagonal | Closed: #14-#23, tag `v2-hexagonal` | — | — |
+| After phase 2 (no milestone) | #70 translation | — | #71 Graphify, #72 web |
 
-## Siguiente paso
+## Next step
 
-`/plan-feature 70` sobre `Hexagonal` (traducir al inglés la documentación que sigue en español); después, #71 (volver a medir Graphify) y #72 (pendientes de la web), en el orden que eligió el usuario.
+`/plan-feature 71` on `Hexagonal` (measure Graphify again on the phase-2 code); then #72 (pending web items), in the order the user chose.
 
-Diseño de la fase 2: `docs/arquitectura/fase-2-hexagonal.md`; comparación con la fase 1: `docs/arquitectura/comparativa-capas-hexagonal.md`.
+Phase 2 design: `docs/arquitectura/fase-2-hexagonal.md`; comparison with phase 1: `docs/arquitectura/comparativa-capas-hexagonal.md`.
 
-## Acuerdos de trabajo con el usuario
+## Working agreements with the user
 
-- **Siempre se planifica antes de implementar** (`/plan-feature`) y el usuario aprueba el plan.
-- **Las fusiones las decide el usuario.** No se fusiona ninguna PR sin su "sí". **Tras fusionarla, se borran todas sus ramas y worktrees** (locales y remotos, también los `-back`/`-web` de equipo), comprobando antes que están contenidas en la rama base (2026-11-03).
-- **`CLAUDE.md` y la configuración de `.claude/`** solo se cambian con su visto bueno explícito, nunca a petición de un agente.
-- **Los diagramas se le enseñan antes de commitearlos.** Estilo de los diagramas: escala de grises, sin colores.
-- El usuario puede seguir la sesión desde el móvil (Remote Control). **Los avisos por Telegram están activos** (el usuario los reactivó el 2026-10-30): las skills ejecutan `scripts/notify.mjs` cuando lo piden.
-- Idioma: conversación, commits, `@DisplayName` y mensajes de error del dominio en español; código y **documentación en inglés** (desde la PR de convención de idioma, 2026-10-23). Los documentos existentes en español se traducirán en una issue aparte.
-- **Ahorro de tokens (#57):** este archivo solo contiene lo necesario para arrancar. Lo demás va a sus anexos y se lee solo cuando la tarea lo necesita.
+- **Always plan before implementing** (`/plan-feature`) and the user approves the plan.
+- **The user decides the merges.** No PR is merged without their "yes". **Once merged, all its branches and worktrees are deleted** (local and remote, also the team's `-back`/`-web` ones), after checking they are contained in the base branch (2026-11-03).
+- **`CLAUDE.md` and the `.claude/` configuration** only change with their explicit approval, never at an agent's request.
+- **Diagrams are shown to the user before they are committed.** Diagram style: grayscale, no colours.
+- The user may follow the session from the phone (Remote Control). **Telegram notices are on** (the user turned them back on on 2026-10-30): the skills run `scripts/notify.mjs` when they say so.
+- Language: conversation, commits, `@DisplayName` and domain error messages in Spanish; code and **documentation in English** (since the language-convention PR, 2026-10-23; the older documents were translated in #70). Only `docs/analysis/` and the five phase-1 plans of 2026-10-23 stay in Spanish; file names are not translated.
+- **Token savings (#57):** this file only holds what is needed to start. Everything else goes to its annexes and is only read when the task needs it.
 
-## Anexos (léelos solo cuando la tarea lo necesite)
+## Annexes (read them only when the task needs it)
 
-| Anexo | Cuándo leerlo | Qué se actualiza en cada PR |
-| ----- | ------------- | --------------------------- |
-| [`decisiones.md`](decisiones.md) | Al planificar, implementar o revisar algo del área de una decisión (errores, validación, transferencias, seguridad…) y para dudas del entorno | Decisiones nuevas que afectan a issues futuras |
-| [`pendientes.md`](pendientes.md) | Al planificar una issue (puede haber avisos para ella) | Pendientes nuevos y los que se resuelven |
-| [`historial.md`](historial.md) | Solo si hace falta saber cuándo o en qué PR se hizo algo | Una fila por PR |
+| Annex | When to read it | What each PR updates |
+| ----- | --------------- | -------------------- |
+| [`decisiones.md`](decisiones.md) | When planning, implementing or reviewing something in the area of a decision (errors, validation, transfers, security…) and for questions about the environment | New decisions that affect future issues |
+| [`pendientes.md`](pendientes.md) | When planning an issue (there may be notes for it) | New pending items and the ones resolved |
+| [`historial.md`](historial.md) | Only when you need to know when or in which PR something was done | One row per PR |

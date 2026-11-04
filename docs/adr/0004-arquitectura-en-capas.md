@@ -1,37 +1,37 @@
-# 0004 · Arquitectura en capas de la fase 1
+# 0004 · Layered architecture for phase 1
 
-- **Estado:** aceptada · 2026-10-23
+- **Status:** accepted · 2026-10-23
 
-## Contexto
+## Context
 
-La fase 1 debe convertir el modelo de dominio del Lab 22 (solo `domain.model`) en una aplicación web mínima, y quedar como la primera de dos "fotografías" comparables: monolito en capas (`Monolithic`) frente a hexagonal (`Hexagonal`, ADR 0002).
+Phase 1 must turn the domain model of Lab 22 (only `domain.model`) into a minimal web application, and stand as the first of two comparable "snapshots": layered monolith (`Monolithic`) versus hexagonal (`Hexagonal`, ADR 0002).
 
-El curso de DDD presenta la arquitectura en capas (**capítulo 14**) como la más común: presentación, aplicación, dominio y persistencia, con dependencias en un solo sentido, de arriba abajo, y cada capa accediendo idealmente solo a la inmediatamente inferior. También advierte de dos antipatrones:
+The DDD course presents the layered architecture (**chapter 14**) as the most common one: presentation, application, domain and persistence, with dependencies in one direction only, top-down, each layer ideally reaching only the one right below it. It also warns about two anti-patterns:
 
-- **Layer cake (capítulo 17):** capas que solo reenvían la llamada a la de abajo (por ejemplo, `findById` repetido en cada capa) sin aportar nada.
-- **Anemic translation (capítulo 18):** cada capa define su propio tipo casi idéntico para el mismo concepto y obliga a traducir entre ellos en cada frontera.
+- **Layer cake (chapter 17):** layers that only forward the call to the one below (for example, `findById` repeated in every layer) without adding anything.
+- **Anemic translation (chapter 18):** each layer defines its own almost identical type for the same concept and forces a translation at every boundary.
 
-Y propone, con cuidado, el **bypass entre capas (capítulo 18.1)**: permitir de forma deliberada que una capa se salte otra, vigilándolo con ArchUnit.
+And it proposes, with care, **bypassing layers (chapter 18.1)**: deliberately letting one layer skip another, guarded by ArchUnit.
 
-## Decisión
+## Decision
 
-- Cuatro capas: `presentation` (`web` y `rest`) → `application` → `domain` (`model`, `service`) y `persistence`. Detalle en [fase-1-capas.md](../arquitectura/fase-1-capas.md).
-- **El dominio está en el fondo y no depende de nadie.** `persistence` conoce el dominio (guarda agregados), y `application` usa las dos. Es un *bypass* deliberado (cap. 18.1): la aplicación carga y guarda directamente con la persistencia, en lugar de que el dominio la llame.
-- **Clases concretas, sin interfaces de puerto.** La aplicación usa `InMemoryCheckingAccountRepository` directamente. Es el rasgo que diferencia esta fotografía de la hexagonal, donde el dominio declarará el puerto (`CheckingAccountRepository`) y la dependencia se invertirá.
-- **Contra el anemic translation:** las vistas y commands de `application` (Immutables) son el único tipo intermedio. La presentación no define otro modelo del mismo concepto salvo los DTOs REST cuando el formato JSON lo exija, y todos usan los nombres del [glosario](../dominio/glosario.md).
-- **Contra el layer cake:** no se crea una capa o método que solo reenvíe; las consultas simples no se duplican en cada capa por simetría.
-- `presentation` solo conoce del dominio las excepciones (`DomainException` y subclases), para traducirlas a HTTP o a mensajes de pantalla; nunca agregados, entidades ni objetos de valor (regla D4).
-- Las reglas de dependencia D1-D5 de `fase-1-capas.md` se verifican con ArchUnit (`LayeredArchitectureTests`, issue #12).
+- Four layers: `presentation` (`web` and `rest`) → `application` → `domain` (`model`, `service`) and `persistence`. Details in [fase-1-capas.md](../arquitectura/fase-1-capas.md).
+- **The domain is at the bottom and depends on nobody.** `persistence` knows the domain (it stores aggregates), and `application` uses both. It is a deliberate *bypass* (ch. 18.1): the application loads and saves directly through persistence, instead of the domain calling it.
+- **Concrete classes, no port interfaces.** The application uses `InMemoryCheckingAccountRepository` directly. This is the trait that sets this snapshot apart from the hexagonal one, where the domain will declare the port (`CheckingAccountRepository`) and the dependency will be inverted.
+- **Against anemic translation:** the views and commands of `application` (Immutables) are the only intermediate type. Presentation defines no other model of the same concept except the REST DTOs when the JSON format requires it, and all of them use the names of the [glossary](../dominio/glosario.md).
+- **Against layer cake:** no layer or method is created only to forward; simple queries are not duplicated in every layer for symmetry.
+- From the domain, `presentation` only knows the exceptions (`DomainException` and subclasses), to translate them to HTTP or screen messages; never aggregates, entities or value objects (rule D4).
+- The dependency rules D1-D5 of `fase-1-capas.md` are checked with ArchUnit (`LayeredArchitectureTests`, issue #12).
 
-## Alternativas
+## Alternatives
 
-- **Capas estrictas** (`application → domain → persistence`, sin saltos): obligaría al dominio a conocer la persistencia, rompiendo su aislamiento (regla D1 de `LayeredArchitectureTests`), o a añadir en el dominio métodos que solo reenvían al repositorio (layer cake). Descartada.
-- **Hexagonal desde el principio:** es el objetivo de la fase 2; empezar por ella eliminaría la comparación entre las dos fotografías. Descartada para esta fase.
-- **Interfaces de repositorio ya en la fase 1:** acercaría la fase 1 a la hexagonal y diluiría la diferencia que se quiere mostrar. Se introducen en la fase 2 (#15).
+- **Strict layers** (`application → domain → persistence`, no skipping): would force the domain to know persistence, breaking its isolation (rule D1 of `LayeredArchitectureTests`), or to add domain methods that only forward to the repository (layer cake). Discarded.
+- **Hexagonal from the start:** it is the goal of phase 2; starting with it would remove the comparison between the two snapshots. Discarded for this phase.
+- **Repository interfaces already in phase 1:** would bring phase 1 closer to hexagonal and blur the difference we want to show. They arrive in phase 2 (#15).
 
-## Consecuencias
+## Consequences
 
-- La aplicación depende de la implementación concreta de la persistencia: sustituirla (por JPA, por ejemplo) obliga a tocar `application`. Es el coste que la fase 2 elimina con los puertos.
-- Los tests de aplicación usan el repositorio en memoria real, no simulaciones.
-- El bypass `application → persistence` es una excepción consciente: ArchUnit la permite explícitamente y prohíbe las demás (por ejemplo, `presentation → persistence`).
-- El riesgo de anemic translation se vigila en la revisión (`revisor-ddd`) y con el glosario como fuente de los nombres.
+- The application depends on the concrete persistence implementation: replacing it (with JPA, for example) means touching `application`. That is the cost phase 2 removes with ports.
+- Application tests use the real in-memory repository, not mocks.
+- The `application → persistence` bypass is a conscious exception: ArchUnit allows it explicitly and forbids the others (for example, `presentation → persistence`).
+- The risk of anemic translation is watched in review (`revisor-ddd`) and with the glossary as the source of names.

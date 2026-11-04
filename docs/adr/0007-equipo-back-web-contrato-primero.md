@@ -1,31 +1,31 @@
-# 0007 · Equipo back/web con el contrato primero
+# 0007 · Back/web team with the contract first
 
-- **Estado:** aceptada · 2026-10-23
+- **Status:** accepted · 2026-10-23
 
-## Contexto
+## Context
 
-Las funcionalidades de la fase 1 tocan a la vez el back (dominio, aplicación, persistencia y REST) y la web (Thymeleaf). Hacerlas en secuencia obliga a esperar al back para empezar las pantallas. El curso de Claude Code (capítulo 13) propone **equipos de agentes**: un lead y varios teammates con su propio contexto, que se comunican entre ellos y comparten una lista de tareas, cada uno en su git worktree.
+The phase 1 features touch the back (domain, application, persistence and REST) and the web (Thymeleaf) at the same time. Doing them in sequence means waiting for the back before starting the screens. The Claude Code course (chapter 13) proposes **agent teams**: a lead and several teammates with their own context, who talk to each other and share a task list, each one in its own git worktree.
 
-Con Thymeleaf, la web no consume la API REST: sus controladores llaman a los servicios de aplicación dentro de la misma aplicación (ADR 0005).
+With Thymeleaf, the web does not consume the REST API: its controllers call the application services inside the same application (ADR 0005).
 
-## Decisión
+## Decision
 
-- Para cada issue que toca back y web (etiqueta `equipo`), se acuerda primero un **contrato** en `docs/contracts/<slug>.md`, que cubre las dos fronteras reales:
-  - **Web ↔ back:** servicio de aplicación (firmas), commands y vistas (Immutables) y errores.
-  - **REST:** el fragmento de `docs/api/openapi.yaml`.
-- El lead crea los tipos del contrato sin lógica. Los agentes `backend-dev` y `web-dev` lo revisan y lo acuerdan entre ellos, y se **congela** en un commit.
-- Cada agente implementa su lado en paralelo en su worktree. La web prueba contra el servicio simulado (`@MockitoBean`) hasta la integración.
-- Los cambios de contrato se renegocian a través del lead y se registran en el propio contrato. Nadie lo cambia en su rama.
-- Lo orquesta la skill `implement-plan-team`. `plan-feature` añade `T0 · Contrato` y el campo `Lado` a las tareas.
+- For each issue that touches back and web (label `equipo`), a **contract** is agreed first in `docs/contracts/<slug>.md`, covering the two real boundaries:
+  - **Web ↔ back:** application service (signatures), commands and views (Immutables) and errors.
+  - **REST:** the fragment of `docs/api/openapi.yaml`.
+- The lead creates the contract's types without logic. The `backend-dev` and `web-dev` agents review it and agree on it, and it is **frozen** in a commit.
+- Each agent implements its side in parallel in its worktree. The web tests against the mocked service (`@MockitoBean`) until integration.
+- Contract changes are renegotiated through the lead and recorded in the contract itself. Nobody changes it in their own branch.
+- The `implement-plan-team` skill orchestrates it. `plan-feature` adds `T0 · Contract` and the `Side` field to the tasks.
 
-## Alternativas
+## Alternatives
 
-- **La web consume la API REST** (`RestClient`, patrón BFF): un único contrato OpenAPI, pero la aplicación se llamaría a sí misma por HTTP y la web dejaría de ser un adaptador más de los mismos casos de uso en la fase 2. Descartada.
-- **Subagentes en lugar de un equipo:** más baratos, pero no se hablan entre ellos, así que no pueden negociar el contrato. Se siguen usando para tareas de un solo lado.
+- **The web consumes the REST API** (`RestClient`, BFF pattern): a single OpenAPI contract, but the application would call itself over HTTP and the web would stop being one more adapter of the same use cases in phase 2. Discarded.
+- **Subagents instead of a team:** cheaper, but they do not talk to each other, so they cannot negotiate the contract. They are still used for single-side tasks.
 
-## Consecuencias
+## Consequences
 
-- Back y web avanzan a la vez; la integración solo une dos ramas que ya compilan contra los mismos tipos.
-- El contrato documenta cada funcionalidad y se puede revisar en la PR.
-- Cada teammate es una instancia completa de Claude: una issue en equipo consume entre 2 y 3 veces más cuota. Solo se usa cuando la issue toca los dos lados.
-- En la fase 2, el contrato web ↔ back pasa a ser el de los puertos de entrada (`*Commands` / `*Queries`), sin cambiar el flujo.
+- Back and web move forward at the same time; integration only joins two branches that already compile against the same types.
+- The contract documents each feature and can be reviewed in the PR.
+- Each teammate is a full Claude instance: a team issue uses 2 to 3 times more quota. It is only used when the issue touches both sides.
+- In phase 2, the web ↔ back contract becomes the input ports' (`*Commands` / `*Queries`), without changing the flow.

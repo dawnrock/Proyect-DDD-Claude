@@ -1,28 +1,32 @@
 openapi: 3.1.0
 info:
-  title: Proyect-DDD-Claude · API de cuentas corrientes
+  title: Proyect-DDD-Claude · Checking accounts API
   version: 0.1.0
   description: |
-    API REST de la fase 1 (monolito en capas). Contrato escrito a mano: cada funcionalidad añade
-    aquí sus operaciones (ver `docs/contracts/`).
+    REST API of the project (the same in both phases: in phase 1 it lives in `presentation.rest`,
+    in phase 2 in the `adapter.in.rest` input adapter). Hand-written contract: each feature adds
+    its operations here (see `docs/contracts/`).
 
-    Los errores de las operaciones de esta API usan el formato `ProblemDetail` (RFC 9457) y se
-    traducen en un único punto (`RestExceptionHandler`). Una ruta que no existe (`/api/...` sin
-    operación) la responde Spring Boot con su JSON de error estándar, no con `ProblemDetail`.
+    Errors of this API's operations use the `ProblemDetail` format (RFC 9457) and are translated
+    in a single place (`RestExceptionHandler`). A path that does not exist (`/api/...` with no
+    operation) is answered by Spring Boot with its standard JSON error, not with `ProblemDetail`.
 
-    | Código | Cuándo | `title` |
-    | ------ | ------ | ------- |
-    | 400 | Petición no válida (formato, validación o argumento que el dominio rechaza) | Petición no válida |
-    | 401 | Falta autenticarse (HTTP Basic) o las credenciales no son válidas | No autenticado |
-    | 403 | Autenticado, pero sin el rol necesario (solo un administrador abre cuentas) | Acceso denegado |
-    | 404 | El recurso pedido no existe, o es una cuenta de otro cliente (no se revela que existe) | Recurso inexistente |
-    | 422 | Se incumple una regla de negocio del dominio | Regla de negocio incumplida |
+    The API answers in Spanish: the `title` and `detail` values below and in the examples are the
+    real ones and are not translated.
+
+    | Code | When | `title` |
+    | ---- | ---- | ------- |
+    | 400 | Invalid request (format, validation or an argument the domain rejects) | Petición no válida |
+    | 401 | Not authenticated (HTTP Basic) or invalid credentials | No autenticado |
+    | 403 | Authenticated, but without the required role (only an administrator opens accounts) | Acceso denegado |
+    | 404 | The requested resource does not exist, or it is another customer's account (its existence is not revealed) | Recurso inexistente |
+    | 422 | A domain business rule is violated | Regla de negocio incumplida |
   license:
-    name: Proyecto de práctica
+    name: Practice project
     identifier: MIT
 servers:
   - url: http://localhost:8080
-    description: Desarrollo local
+    description: Local development
 # Every operation needs HTTP Basic credentials (#50). An admin sees every account; a user only their own.
 security:
   - basicAuth: []
@@ -359,7 +363,7 @@ components:
           enum: [PENDING, APPROVED, REJECTED]
     ProblemDetail:
       type: object
-      description: Error en formato RFC 9457.
+      description: Error in RFC 9457 format.
       required:
         - status
         - title
@@ -378,7 +382,7 @@ components:
           type: string
           format: uri-reference
     ValidationProblemDetail:
-      description: Error 400. Si viene de la validación del cuerpo, `errors` trae un mensaje por campo no válido.
+      description: 400 error. If it comes from body validation, `errors` carries one message per invalid field.
       allOf:
         - $ref: '#/components/schemas/ProblemDetail'
         - type: object
@@ -394,7 +398,7 @@ components:
       description: Username and password of a configured user (demo profile users are in the README).
   responses:
     Unauthorized:
-      description: No autenticado.
+      description: Not authenticated.
       content:
         application/problem+json:
           schema:
@@ -405,7 +409,7 @@ components:
             status: 401
             detail: Hace falta autenticarse para usar la API
     Forbidden:
-      description: Acceso denegado.
+      description: Access denied.
       content:
         application/problem+json:
           schema:
@@ -416,21 +420,21 @@ components:
             status: 403
             detail: Solo un administrador puede abrir cuentas
     BadRequest:
-      description: Petición no válida.
+      description: Invalid request.
       content:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/ValidationProblemDetail'
           examples:
-            argumentoInvalido:
-              summary: Argumento que el dominio rechaza
+            invalidArgument:
+              summary: Argument the domain rejects
               value:
                 type: about:blank
                 title: Petición no válida
                 status: 400
                 detail: El número de cuenta ES00 no es un IBAN español válido
-            validacion:
-              summary: Cuerpo que no pasa la validación
+            validation:
+              summary: Body that fails validation
               value:
                 type: about:blank
                 title: Petición no válida
@@ -439,7 +443,7 @@ components:
                 errors:
                   holderName: must not be blank
     NotFound:
-      description: El recurso pedido no existe.
+      description: The requested resource does not exist.
       content:
         application/problem+json:
           schema:
@@ -450,7 +454,7 @@ components:
             status: 404
             detail: No existe la cuenta 9f1c…
     UnprocessableContent:
-      description: Se incumple una regla de negocio.
+      description: A business rule is violated.
       content:
         application/problem+json:
           schema:
