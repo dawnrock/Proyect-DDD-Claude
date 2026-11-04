@@ -55,7 +55,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **Acceptance criteria:**
   - [x] No Spanish prose left (heuristic of T12 + reading); every relative link resolves.
 
-### [ ] T2 — ADRs 0004, 0005, 0007 and the ADR index (~10 min)
+### [x] T2 — ADRs 0004, 0005, 0007 and the ADR index (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0004-arquitectura-en-capas.md`, `0005-thymeleaf.md`, `0007-equipo-back-web-contrato-primero.md`, `docs/adr/README.md`
@@ -64,7 +64,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
   1. Translate the three ADRs as in T1.
   2. `README.md`: the whole index in English (titles of 0001-0005 and 0007 translated, status "Accepted").
 - **Acceptance criteria:**
-  - [ ] The index lists the ten ADRs in English and every link resolves.
+  - [x] The index lists the ten ADRs in English and every link resolves.
 
 ### [ ] T3 — Glossary: domain terms and events (~10 min)
 
