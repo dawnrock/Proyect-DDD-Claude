@@ -99,7 +99,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **Acceptance criteria:**
   - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors; the example payloads are byte-for-byte the same (diff).
 
-### [ ] T6 — Contracts index and Telegram notifications (~5 min)
+### [x] T6 — Contracts index and Telegram notifications (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/contracts/README.md`, `docs/ia/notificaciones.md`
@@ -107,7 +107,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **What to do:**
   1. Translate both. In `notificaciones.md`, commands, variable names and paths stay as they are.
 - **Acceptance criteria:**
-  - [ ] Commands and paths unchanged (diff of the code blocks).
+  - [x] Commands and paths unchanged (diff of the code blocks).
 
 ### [ ] T7 — Labels of the hexagonal diagram (~5 min)
 
