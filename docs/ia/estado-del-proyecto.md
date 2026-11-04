@@ -2,7 +2,7 @@
 
 > **Read it at the start of every session.** It is the entry point to carry on without depending on earlier conversations, and it is kept **short on purpose**: it is loaded in every session. **It is updated in every PR that closes an issue** (CI checks it).
 
-- **Last updated:** 2026-11-04 · PR #73 (#23, phase 2 closed)
+- **Last updated:** 2026-11-04 · PR #PRNUM (#70, documentation in English)
 - **Active branch:** `Hexagonal`, the repository's default branch; phase 2 is marked by the `v2-hexagonal` tag and work continues on the branch. `Monolithic` frozen at the `v1-monolito` tag; `master` frozen.
 
 ## Where we are
@@ -11,11 +11,11 @@
 | ----- | ---- | ----------- | ------- |
 | 1 · Layered monolith | Closed: #2-#8, #11-#13, #31, #48, #50, #54, #57 (details in the [history](historial.md)) | — | — |
 | 2 · Hexagonal | Closed: #14-#23, tag `v2-hexagonal` | — | — |
-| After phase 2 (no milestone) | — | — | #70 translation, #71 Graphify, #72 web |
+| After phase 2 (no milestone) | #70 translation | — | #71 Graphify, #72 web |
 
 ## Next step
 
-`/plan-feature 70` on `Hexagonal` (translate to English the documentation still in Spanish); then #71 (measure Graphify again) and #72 (pending web items), in the order the user chose.
+`/plan-feature 71` on `Hexagonal` (measure Graphify again on the phase-2 code); then #72 (pending web items), in the order the user chose.
 
 Phase 2 design: `docs/arquitectura/fase-2-hexagonal.md`; comparison with phase 1: `docs/arquitectura/comparativa-capas-hexagonal.md`.
 
@@ -26,7 +26,7 @@ Phase 2 design: `docs/arquitectura/fase-2-hexagonal.md`; comparison with phase 1
 - **`CLAUDE.md` and the `.claude/` configuration** only change with their explicit approval, never at an agent's request.
 - **Diagrams are shown to the user before they are committed.** Diagram style: grayscale, no colours.
 - The user may follow the session from the phone (Remote Control). **Telegram notices are on** (the user turned them back on on 2026-10-30): the skills run `scripts/notify.mjs` when they say so.
-- Language: conversation, commits, `@DisplayName` and domain error messages in Spanish; code and **documentation in English** (since the language-convention PR, 2026-10-23). The existing documents in Spanish will be translated in a separate issue.
+- Language: conversation, commits, `@DisplayName` and domain error messages in Spanish; code and **documentation in English** (since the language-convention PR, 2026-10-23; the older documents were translated in #70). Only `docs/analysis/` and the five phase-1 plans of 2026-10-23 stay in Spanish; file names are not translated.
 - **Token savings (#57):** this file only holds what is needed to start. Everything else goes to its annexes and is only read when the task needs it.
 
 ## Annexes (read them only when the task needs it)

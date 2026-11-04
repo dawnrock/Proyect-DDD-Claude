@@ -27,7 +27,7 @@ Arrows show **who depends on whom**: always downwards. `domain` sits at the bott
 
 ## Dependencies
 
-This table is the specification of [`LayeredArchitectureTests`](../../src/test/java/com/pronoide/ddd/LayeredArchitectureTests.java). Each row is an ArchUnit rule.
+This table is the specification of [`LayeredArchitectureTests`](https://github.com/dawnrock/Proyect-DDD-Claude/blob/v1-monolito/src/test/java/com/pronoide/ddd/LayeredArchitectureTests.java). Each row is an ArchUnit rule.
 
 | # | Source | May depend on | May not depend on |
 | - | ------ | ------------- | ----------------- |
@@ -92,7 +92,7 @@ sequenceDiagram
 
 ## REST endpoints
 
-The source of truth is [`openapi.yaml`](../api/openapi.yaml), linted with Redocly in CI. All endpoints use HTTP Basic, without session or CSRF; errors are `ProblemDetail` (RFC 9457) from [`RestExceptionHandler`](../../src/main/java/com/pronoide/ddd/presentation/rest/RestExceptionHandler.java).
+The source of truth is [`openapi.yaml`](../api/openapi.yaml), linted with Redocly in CI. All endpoints use HTTP Basic, without session or CSRF; errors are `ProblemDetail` (RFC 9457) from [`RestExceptionHandler`](https://github.com/dawnrock/Proyect-DDD-Claude/blob/v1-monolito/src/main/java/com/pronoide/ddd/presentation/rest/RestExceptionHandler.java).
 
 | Method | Path | Role | Responses |
 | ------ | ---- | ---- | --------- |
@@ -105,7 +105,7 @@ The source of truth is [`openapi.yaml`](../api/openapi.yaml), linted with Redocl
 
 ## Screens
 
-Thymeleaf over the [base layout fragments](../../src/main/resources/templates/fragments/layout.html), dark minimal theme in `static/css/app.css` (#48), amounts formatted by [`WebFormat`](../../src/main/java/com/pronoide/ddd/presentation/web/WebFormat.java).
+Thymeleaf over the [base layout fragments](../../src/main/resources/templates/fragments/layout.html), dark minimal theme in `static/css/app.css` (#48), amounts formatted by [`WebFormat`](https://github.com/dawnrock/Proyect-DDD-Claude/blob/v1-monolito/src/main/java/com/pronoide/ddd/presentation/web/WebFormat.java).
 
 | Route | What it shows | Role |
 | ----- | ------------- | ---- |
@@ -121,7 +121,7 @@ Thymeleaf over the [base layout fragments](../../src/main/resources/templates/fr
 
 Decided in [ADR 0008](../adr/0008-spring-security.md) (#50, contract [`login-roles.md`](../contracts/login-roles.md)):
 
-- **Authentication in `presentation`**, with one Spring Security chain per channel so back and web do not share a file: [`ApiSecurityConfig`](../../src/main/java/com/pronoide/ddd/presentation/rest/ApiSecurityConfig.java) (`/api/**`, HTTP Basic, 401/403 as `ProblemDetail`) and [`WebSecurityConfig`](../../src/main/java/com/pronoide/ddd/presentation/web/WebSecurityConfig.java) (fallback chain, form login, CSRF, 403 page).
+- **Authentication in `presentation`**, with one Spring Security chain per channel so back and web do not share a file: [`ApiSecurityConfig`](https://github.com/dawnrock/Proyect-DDD-Claude/blob/v1-monolito/src/main/java/com/pronoide/ddd/presentation/rest/ApiSecurityConfig.java) (`/api/**`, HTTP Basic, 401/403 as `ProblemDetail`) and [`WebSecurityConfig`](https://github.com/dawnrock/Proyect-DDD-Claude/blob/v1-monolito/src/main/java/com/pronoide/ddd/presentation/web/WebSecurityConfig.java) (fallback chain, form login, CSRF, 403 page).
 - **Roles in the URLs (Spring), ownership in `application`:** only `ADMIN` opens accounts; who may touch which account is decided by `CheckingAccountService` with the `Caller` each use case receives, the same for both channels and tested without Spring. Someone else's account is a 404, not a 403, so its existence is not revealed.
 - **Identity never reaches `domain`:** the owner of an account is a username stored in `persistence` (`InMemoryAccountOwnershipRepository`), outside the aggregate.
 
