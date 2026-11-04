@@ -19,7 +19,7 @@ Also closes the T8 checkbox of the #23 plan (tag `v2-hexagonal`, pushed by the u
 - File names: they stay as they are (`glosario.md`, `estado-del-proyecto.md`, `0001-arquitectura-ia-claude-code.md`…). Renaming would break links in `CLAUDE.md`, the skills, the agents and `scripts/check-project-status.mjs` for no gain (see open questions).
 - `CLAUDE.md`, `src/test/CLAUDE.md` and `.claude/` (skills, agents, commands): their instructions are in Spanish and are not `docs/`. Only the lines that become **wrong** after the translation are touched, with the user's explicit approval (T11).
 - `docs/analysis/` (stays in Spanish, #52).
-- The five phase-1 plans still in Spanish, unless the user wants them (see open questions).
+- The five phase-1 plans still in Spanish: they stay as a record of finished work (user's decision, 2026-11-04).
 - Code, tests, `pom.xml`: no change. Spanish strings produced by the code (error messages, `ProblemDetail` titles and details, log lines) stay as they are.
 
 ## Context
@@ -155,10 +155,9 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **Files:** `CLAUDE.md`, `.claude/skills/implement-plan/SKILL.md`
 - **Depends on:** T10
 - **What to do:**
-  1. Only with the user's explicit approval (agreement on `CLAUDE.md` and `.claude/`): `CLAUDE.md` loses "Los documentos que aún están en español se traducen en una issue aparte" (it says instead that `docs/analysis/` is the only exception); step 6.3 of `implement-plan` names the English headings ("Done", "Next step", "Last updated"). Both stay in Spanish; nothing else changes.
-  2. Without approval, the task is skipped and the mismatch is recorded in `pendientes.md`.
+  1. Approved by the user on 2026-11-04 (agreement on `CLAUDE.md` and `.claude/`): `CLAUDE.md` loses "Los documentos que aún están en español se traducen en una issue aparte" (it says instead that `docs/analysis/` is the only exception); step 6.3 of `implement-plan` names the English headings ("Done", "Next step", "Last updated"). Both stay in Spanish; nothing else changes.
 - **Acceptance criteria:**
-  - [ ] Approved and applied, or skipped and recorded.
+  - [ ] Both lines changed; nothing else in `CLAUDE.md` or `.claude/` changes (diff).
 
 ### [ ] T12 — Check and project status (~10 min)
 
@@ -167,7 +166,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **Depends on:** T1-T11
 - **What to do:**
   1. Run the stop-word heuristic over `docs/` (outside `docs/analysis/` and the phase-1 plans): no file with more Spanish than English; read the hits by hand (quoted messages are fine). Check every relative link of `docs/` resolves.
-  2. Status: #70 done, next step `/plan-feature 71`; decision: documentation fully in English except `docs/analysis/` (and the phase-1 plans, if so decided); a row in `historial.md`. Mark T8 of the #23 plan as done.
+  2. Status: #70 done, next step `/plan-feature 71`; decision: documentation fully in English except `docs/analysis/` and the five phase-1 plans; file names stay in Spanish; a row in `historial.md`. Mark T8 of the #23 plan as done.
 - **Acceptance criteria:**
   - [ ] The heuristic and the link check pass; the CI check of the project status passes.
 
@@ -175,7 +174,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 
 **Specific:**
 
-- [ ] No document in `docs/` outside `docs/analysis/` (and, if so decided, the phase-1 plans) is still in Spanish.
+- [ ] No document in `docs/` outside `docs/analysis/` and the five phase-1 plans is still in Spanish.
 - [ ] Every relative link resolves.
 - [ ] Quoted Spanish strings produced by the code (OpenAPI examples, messages in the glossary) are unchanged.
 
@@ -194,6 +193,8 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
+
+Answered by the user on 2026-11-04: (1) the phase-1 plans stay in Spanish as a record; (2) file names stay in Spanish; (3) T11 approved (only the two lines named there).
 
 - **Phase-1 plans in Spanish (5 files, ~6,000 words).** The issue assumed every plan was in English; five of the first ones are not. They are a record of finished work. Proposal: leave them as they are and record the exception (cost ~40 min more and no reader needs them in English). If you want them translated, they become two more tasks.
 - **File names in Spanish** (`glosario.md`, `estado-del-proyecto.md`, `decisiones.md`, ADR slugs…): kept, because renaming touches `CLAUDE.md`, skills, agents and the CI script. Could be a separate issue if you want English names too.
