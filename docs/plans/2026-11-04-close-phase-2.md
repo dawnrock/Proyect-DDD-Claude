@@ -43,7 +43,7 @@ Facts gathered for the documentation:
 
 ## Tasks
 
-### [ ] T1 — Comparison: diagrams and changes per package (~10 min)
+### [x] T1 — Comparison: diagrams and changes per package (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/comparativa-capas-hexagonal.md`
@@ -52,11 +52,11 @@ Facts gathered for the documentation:
   1. Both diagrams side by side: the phase-1 Mermaid layers diagram (copied, same grayscale style) and `img/hexagonal.svg`; one sentence each on where the dependencies point.
   2. New diagram (Mermaid, grayscale): the same deposit in both architectures, from the REST controller to the repository, showing which class each call reaches (concrete classes in phase 1; input port → service → output port ← adapter, plus the event published after saving, in phase 2). **Shown to the user before committing.**
   3. Table "What changed in each package": phase-1 package → phase-2 package → what changed → issue (#14-#20), from the facts above.
-  4. Section "See the diffs": links to `compare/v1-monolito...v2-hexagonal` (whole repository) and to the main changes (`src/main/java/.../adapter`, `application`, `domain/model`, `config`, ArchUnit tests).
+  4. Section "See the diffs" (done as the compare link, the source tree at each tag and `git diff -M` commands per package: GitHub's compare view cannot be limited to a path): links to `compare/v1-monolito...v2-hexagonal` (whole repository) and to the main changes (`src/main/java/.../adapter`, `application`, `domain/model`, `config`, ArchUnit tests).
 - **Acceptance criteria:**
-  - [ ] Every package of `src/main` at both tags appears in the table (checked with `git ls-tree` on `v1-monolito` and `HEAD`).
-  - [ ] Every relative link resolves; the compare links use the final tag name.
-  - [ ] The deposit diagram matches the code at both tags and the user approved it.
+  - [x] Every package of `src/main` at both tags appears in the table (checked with `git ls-tree` on `v1-monolito` and `HEAD`).
+  - [x] Every relative link resolves; the compare links use the final tag name.
+  - [x] The deposit diagram matches the code at both tags and the user approved it.
 
 ### [ ] T2 — Comparison: cost and benefits (~10 min)
 
