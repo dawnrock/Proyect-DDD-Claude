@@ -83,7 +83,7 @@ Output adapters: `InMemoryCheckingAccountRepositoryTests` and `InMemoryAccountOw
 - **Acceptance criteria:**
   - [x] Same scenarios as before, now split between the contract and the adapter test; all green (issue criterion: persistence contract against the in-memory adapter).
 
-### [ ] T4 — Documentation and project status (~10 min)
+### [x] T4 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/fase-2-hexagonal.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -92,7 +92,7 @@ Output adapters: `InMemoryCheckingAccountRepositoryTests` and `InMemoryAccountOw
   1. `fase-2-hexagonal.md`: new section "How adapters are tested" with the matrix of error paths per endpoint and the test type of each adapter.
   2. Project status: #21 done, next step `/plan-feature 22`; decision (adapter tests never start the full context, enforced by ArchUnit over the tests).
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes.
+  - [x] The CI check of the project status passes.
 
 ## Global acceptance criteria
 
