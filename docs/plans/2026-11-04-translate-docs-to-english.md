@@ -66,7 +66,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **Acceptance criteria:**
   - [x] The index lists the ten ADRs in English and every link resolves.
 
-### [ ] T3 — Glossary: domain terms and events (~10 min)
+### [x] T3 — Glossary: domain terms and events (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/dominio/glosario.md` (introduction and sections up to "Domain services")
@@ -75,7 +75,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
   1. Introduction: the code and the documentation use the English term; the **Spanish term** is the one error messages and `@DisplayName` use.
   2. The term tables get the columns Term (English) · Spanish term · In code · DDD type · Definition; definitions translated, `#` references kept.
 - **Acceptance criteria:**
-  - [ ] Every term of the current table is still there with its Spanish name; no definition changes meaning.
+  - [x] Every term of the current table is still there with its Spanish name; no definition changes meaning.
 
 ### [ ] T4 — Glossary: business rules, persistence, application (~10 min)
 
