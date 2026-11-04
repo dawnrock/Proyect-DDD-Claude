@@ -61,7 +61,7 @@ Spring imports in the core today: `domain..` has none (`DomainIsolationTests`); 
 - **Acceptance criteria:**
   - [x] No `org.springframework` import in `CheckingAccountService`; `DddLabApplicationTests` and `DemoProfileTests` green.
 
-### [ ] T3 — Listeners declared in `config` (~5 min)
+### [x] T3 — Listeners declared in `config` (~5 min)
 
 - **Layer:** application.listener · config
 - **Files:** `AuditLogListener.java`, `CustomerNotificationListener.java`, `DomainConfiguration.java`
@@ -70,7 +70,7 @@ Spring imports in the core today: `domain..` has none (`DomainIsolationTests`); 
   1. Remove `@Component`; `@Bean` for both in `config`. Their Javadoc explains why `@EventListener` stays.
   2. The integration test from #17 ("un ingreso llega al consumidor de auditoría") proves the wiring; check it fails without the `@Bean` (sabotage, reverted).
 - **Acceptance criteria:**
-  - [ ] Listener tests and the audit integration test green.
+  - [x] Listener tests and the audit integration test green.
 
 ### [ ] T4 — ArchUnit: the core does not depend on Spring (~10 min)
 

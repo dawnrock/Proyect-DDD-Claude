@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Configuration;
 
 import com.pronoide.ddd.application.AccountOwnershipRepository;
 import com.pronoide.ddd.application.CheckingAccountService;
+import com.pronoide.ddd.application.listener.AuditLogListener;
+import com.pronoide.ddd.application.listener.CustomerNotificationListener;
 import com.pronoide.ddd.domain.model.AccountNumberSequence;
 import com.pronoide.ddd.domain.model.CheckingAccountFactory;
 import com.pronoide.ddd.domain.model.CheckingAccountRepository;
@@ -26,7 +28,8 @@ public class DomainConfiguration {
     }
 
     @Bean
-    public CheckingAccountFactory checkingAccountFactory(AccountNumberSequence numbering, IncomeVerifier incomeVerifier) {
+    public CheckingAccountFactory checkingAccountFactory(AccountNumberSequence numbering,
+                                                         IncomeVerifier incomeVerifier) {
         return new CheckingAccountFactory(numbering, incomeVerifier);
     }
 
@@ -37,5 +40,16 @@ public class DomainConfiguration {
                                                          DomainEventPublisher publisher, CheckingAccountFactory factory,
                                                          MoneyTransferService transferService) {
         return new CheckingAccountService(repository, ownership, publisher, factory, transferService);
+    }
+
+    /** Consumidores de los eventos de dominio: Spring les entrega cada evento por su {@code @EventListener}. */
+    @Bean
+    public AuditLogListener auditLogListener() {
+        return new AuditLogListener();
+    }
+
+    @Bean
+    public CustomerNotificationListener customerNotificationListener() {
+        return new CustomerNotificationListener();
     }
 }
