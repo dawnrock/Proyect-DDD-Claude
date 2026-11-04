@@ -139,16 +139,16 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **Acceptance criteria:**
   - [x] `historial.md` has the same number of rows; `pendientes.md` keeps every open item except the three resolved ones (16 → 13).
 
-### [ ] T10 — `estado-del-proyecto.md` (~5 min)
+### [x] T10 — `estado-del-proyecto.md` (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`
 - **Depends on:** T8, T9
 - **What to do:**
-  1. Translate it, keeping it short; headings "Where we are", "Next step", "Working agreements with the user", "Annexes". The agreement on language says: conversation, commits, `@DisplayName` and domain messages in Spanish; documentation in English (all of it since #70, except `docs/analysis/`).
+  1. Translate it, keeping it short; headings "Where we are", "Next step", "Working agreements with the user", "Annexes". The agreement on language is updated in T12, together with the status of #70 (here it is only translated).
   2. Annex table links unchanged (file names stay).
 - **Acceptance criteria:**
-  - [ ] Every agreement still there with the same meaning; links resolve.
+  - [x] Every agreement still there with the same meaning; links resolve.
 
 ### [ ] T11 — Lines that would become wrong in `CLAUDE.md` and `implement-plan` (~5 min, needs the user's approval)
 
