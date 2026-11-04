@@ -6,17 +6,17 @@
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-04
 - **Status:** draft
-- **Total estimate:** ~60 min (7 tasks: 6 in the PR + 1 after it is merged)
+- **Total estimate:** ~75 min (8 tasks: 7 in the PR + 1 after it is merged; open questions answered by the user on 2026-11-04)
 
 ## Goal
 
-Document the second snapshot as it really ended up and compare it with the first one: a new `docs/arquitectura/comparativa-capas-hexagonal.md` with the diagrams of both phases, what changed in each package, the cost and the benefits (isolated tests, swappable adapters) and links to the `v1-monolito...v2-hexagonal` diffs. `README.md`, `fase-2-hexagonal.md` and `docs/ia/arquitectura-ia.md` are brought to the final state, and the phase is frozen with the `v2-hexagonal` tag on `Hexagonal`. Nothing under `src/` changes.
+Document the second snapshot as it really ended up and compare it with the first one: a new `docs/arquitectura/comparativa-capas-hexagonal.md` with the diagrams of both phases, what changed in each package, the cost and the benefits (isolated tests, swappable adapters) and links to the `v1-monolito...v2-hexagonal` diffs. `README.md`, `fase-2-hexagonal.md` and `docs/ia/arquitectura-ia.md` are brought to the final state, and the phase-2 snapshot is marked with the `v2-hexagonal` tag on `Hexagonal`. `Hexagonal` stays the active branch after the tag (user's decision): the next work (translation, Graphify re-measure, pending web items) goes there, each in its own issue. Nothing under `src/` changes.
 
 ### Out of scope
 
 - Any code, test or `openapi.yaml` change.
 - Translating the documents that are still in Spanish (its own issue, see `pendientes.md`).
-- Re-measuring Graphify in phase 2 (pending item from #57): it is a measurement with its own method, not documentation (see open questions).
+- Doing the translation, the Graphify re-measure (pending item from #57) or the pending web items: this plan only opens their issues (T6).
 - Opening a phase 3 or changing the default branch.
 - Changes to `CLAUDE.md` or `.claude/` (none are needed).
 
@@ -25,10 +25,11 @@ Document the second snapshot as it really ended up and compare it with the first
 | Area | File | Change |
 | ---- | ---- | ------ |
 | docs | `docs/arquitectura/comparativa-capas-hexagonal.md` (new) | Diagrams of both phases, package-by-package changes, cost and benefits, diff links |
-| docs | `docs/arquitectura/fase-2-hexagonal.md` | "Target at the end of the phase" → final state frozen at `v2-hexagonal`; "Class → role" no longer "State after #20"; new "Issues of the phase" table (issue → PR), like `fase-1-capas.md` |
-| docs | `README.md` | `Hexagonal` closed and frozen at `v2-hexagonal`; link to the comparison; the demo also deposits, withdraws and transfers (#19) |
+| docs | `docs/arquitectura/fase-2-hexagonal.md` | "Target at the end of the phase" → final state, tagged `v2-hexagonal`; "Class → role" no longer "State after #20"; new "Issues of the phase" table (issue → PR), like `fase-1-capas.md` |
+| docs | `README.md` | Phase 2 closed at `v2-hexagonal`, `Hexagonal` still active; link to the comparison; the demo also deposits, withdraws and transfers (#19) |
 | docs | `docs/ia/arquitectura-ia.md` | "Usage log · Phase 2": issue → plan → how → PR, and the adjustments of the phase |
 | docs | `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md` | Status as it will be after the merge and the tag |
+| GitHub | three new issues | Translation of the docs still in Spanish, Graphify re-measure, pending web items (T6) |
 | git | tag `v2-hexagonal` | After the PR is merged, with the user's go-ahead |
 
 Facts gathered for the documentation:
@@ -37,7 +38,7 @@ Facts gathered for the documentation:
 - `Monolithic` is still at `v1-monolito` (10eb227, merge of #60) and `master` at 3ef3c48: no cross changes since phase 1 closed.
 - `git diff --stat v1-monolito origin/Hexagonal`: 117 files, +4802 / −916 (code, tests and docs).
 - Package moves at `v1-monolito`: `presentation.{rest,web}` + root support → `adapter.in.{rest,web}` + root; `persistence` → `adapter.out.persistence`; `application.DemoDataLoader` → `adapter.in.cli.DomainModelRunner`. New: output ports and events in `domain.model`, the factory, input ports and `listener` in `application`, `adapter.out.{event,taxagency}`, `config`.
-- Diagrams that already exist: the layers diagram (Mermaid, in `fase-1-capas.md`) and `img/hexagonal.svg` (grayscale, `fase-2-hexagonal.md`). The comparison reuses them; no new diagram is planned.
+- Diagrams that already exist: the layers diagram (Mermaid, in `fase-1-capas.md`) and `img/hexagonal.svg` (grayscale, `fase-2-hexagonal.md`). The comparison reuses them and adds a new one, approved by the user: the same deposit drawn in both architectures.
 - ArchUnit: `LayeredArchitectureTests` (phase 1, lives on in `Monolithic`) vs `HexagonalArchitectureTests` (17 rules, `onionArchitecture()` + 16 explicit), plus `DomainIsolationTests` (both) and `AdapterTestIsolationTests` (phase 2).
 
 ## Tasks
@@ -49,11 +50,13 @@ Facts gathered for the documentation:
 - **Depends on:** —
 - **What to do:**
   1. Both diagrams side by side: the phase-1 Mermaid layers diagram (copied, same grayscale style) and `img/hexagonal.svg`; one sentence each on where the dependencies point.
-  2. Table "What changed in each package": phase-1 package → phase-2 package → what changed → issue (#14-#20), from the facts above.
-  3. Section "See the diffs": links to `compare/v1-monolito...v2-hexagonal` (whole repository) and to the main changes (`src/main/java/.../adapter`, `application`, `domain/model`, `config`, ArchUnit tests).
+  2. New diagram (Mermaid, grayscale): the same deposit in both architectures, from the REST controller to the repository, showing which class each call reaches (concrete classes in phase 1; input port → service → output port ← adapter, plus the event published after saving, in phase 2). **Shown to the user before committing.**
+  3. Table "What changed in each package": phase-1 package → phase-2 package → what changed → issue (#14-#20), from the facts above.
+  4. Section "See the diffs": links to `compare/v1-monolito...v2-hexagonal` (whole repository) and to the main changes (`src/main/java/.../adapter`, `application`, `domain/model`, `config`, ArchUnit tests).
 - **Acceptance criteria:**
   - [ ] Every package of `src/main` at both tags appears in the table (checked with `git ls-tree` on `v1-monolito` and `HEAD`).
   - [ ] Every relative link resolves; the compare links use the final tag name.
+  - [ ] The deposit diagram matches the code at both tags and the user approved it.
 
 ### [ ] T2 — Comparison: cost and benefits (~10 min)
 
@@ -74,7 +77,7 @@ Facts gathered for the documentation:
 - **Files:** `docs/arquitectura/fase-2-hexagonal.md`
 - **Depends on:** —
 - **What to do:**
-  1. A line at the top: final state of the phase, frozen at `v2-hexagonal`, with a link to the comparison. "Target at the end of the phase" → "Final package structure"; "State after #20" → final state, and the "Changes in" column (all "—") goes away.
+  1. A line at the top: state at the end of the phase, tagged `v2-hexagonal`, with a link to the comparison. "Target at the end of the phase" → "Final package structure"; "State after #20" → final state, and the "Changes in" column (all "—") goes away.
   2. New "Issues of the phase" table: issue → title → PR, for #14-#23 (from `historial.md`).
 - **Acceptance criteria:**
   - [ ] The table lists the 10 issues of the milestone; the package tree matches `src/main` on `Hexagonal`.
@@ -85,7 +88,7 @@ Facts gathered for the documentation:
 - **Files:** `README.md`
 - **Depends on:** T1
 - **What to do:**
-  1. Branches table: `Hexagonal` closed and frozen at `v2-hexagonal` (still the default branch). Documentation: link to the comparison.
+  1. Branches table: phase 2 closed at tag `v2-hexagonal`; `Hexagonal` stays the default and active branch. Documentation: link to the comparison.
   2. "Run": the `demo` profile opens the three accounts and also runs a deposit, two withdrawals (approved and rejected) and a transfer (#19).
 - **Acceptance criteria:**
   - [ ] The commands in "Run" still work (`mvn verify`, `spring-boot:run`, `curl -u admin:demo …/api/accounts` returns 200).
@@ -101,20 +104,33 @@ Facts gathered for the documentation:
 - **Acceptance criteria:**
   - [ ] Every phase-2 plan in `docs/plans/` appears in the table and every PR link resolves.
 
-### [ ] T6 — Project status (~5 min)
+### [ ] T6 — Issues for the next work (~5 min)
+
+- **Layer:** docs (GitHub)
+- **Files:** —
+- **Depends on:** —
+- **What to do:**
+  1. Open three issues on `Hexagonal` (labels `fase:2-hexagonal` and the type/layer ones; no milestone, since phase 2 closes), in Spanish like the others, each with goal, scope and acceptance criteria taken from `pendientes.md`:
+     - Translate to English the docs still in Spanish (glossary, ADRs, `docs/ia` annexes, the rest listed in `pendientes.md`; `docs/analysis/` stays in Spanish as agreed in #52).
+     - Re-measure Graphify on the phase-2 code with the #57 method (`claude -p --agent buscador-referencias`, ADR 0010) and decide whether to widen its use.
+     - Pending web items from #48: segment in the account list, own label for transfers, non-breaking spaces in `WebFormat.maskedIban`, movements order.
+- **Acceptance criteria:**
+  - [ ] The three issues exist and their numbers are written in the project status (T7).
+
+### [ ] T7 — Project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
-- **Depends on:** T1-T5
+- **Depends on:** T1-T6
 - **What to do:**
-  1. `estado-del-proyecto.md` as it will be after the merge and the tag: phase 2 closed (#14-#23) at `v2-hexagonal`; next step: decide with the user what comes next (no open issues; candidates in the open questions).
-  2. `decisiones.md`: `Hexagonal` is frozen at `v2-hexagonal` like `Monolithic` and `master` (changes only by explicit decision) and stays the default branch.
-  3. `pendientes.md`: items that said "for phase 2" are rephrased as pending for future work (#7 transaction, Graphify re-measure).
+  1. `estado-del-proyecto.md` as it will be after the merge and the tag: phase 2 closed (#14-#23) at `v2-hexagonal`; `Hexagonal` still active; next step: `/plan-feature` of the first of the three new issues.
+  2. `decisiones.md`: `v2-hexagonal` marks the phase-2 snapshot; unlike `Monolithic` after #13, `Hexagonal` is not frozen: work continues on it and it stays the default branch (user's decision, 2026-11-04).
+  3. `pendientes.md`: the items now covered by an issue point to it (translation, Graphify, web from #48); the ones that said "for phase 2" are rephrased as pending for future work (#7 transaction).
   4. `historial.md`: one row for this PR.
 - **Acceptance criteria:**
   - [ ] `git diff --name-only origin/Hexagonal...HEAD | node scripts/check-project-status.mjs -` (the CI check) passes.
 
-### [ ] T7 — Tag `v2-hexagonal` (~5 min, after the PR is merged)
+### [ ] T8 — Tag `v2-hexagonal` (~5 min, after the PR is merged)
 
 - **Layer:** build
 - **Files:** —
@@ -131,9 +147,10 @@ Facts gathered for the documentation:
 **Specific:**
 
 - [ ] Every issue in the "Fase 2 · Arquitectura hexagonal" milestone is closed.
+- [ ] The issues for the translation, the Graphify re-measure and the pending web items exist.
 - [ ] `Monolithic`, `Hexagonal` and `master` coexist without cross changes (`Monolithic` = `v1-monolito`, `master` unchanged).
 - [ ] `./mvnw verify` green on `Hexagonal` at the tag `v2-hexagonal`.
-- [ ] `comparativa-capas-hexagonal.md` exists with both diagrams, changes per package, cost and benefits and diff links; `README.md` and `arquitectura-ia.md` describe phase 2.
+- [ ] `comparativa-capas-hexagonal.md` exists with both diagrams, the deposit in both architectures, changes per package, cost and benefits and diff links; `README.md` and `arquitectura-ia.md` describe phase 2.
 
 **Fixed:**
 
@@ -151,8 +168,9 @@ Facts gathered for the documentation:
 
 ## Risks and open questions
 
-- **Diagrams:** the plan reuses the two existing ones (both grayscale). If a new one is wanted (for example the same deposit flow drawn in both architectures), it is shown to the user before committing.
-- **The compare links point to a tag that does not exist yet:** they resolve once T7 publishes `v2-hexagonal`; T7 checks them.
-- **T7 happens after the merge** and asks for the go-ahead first (it publishes to the repository). The tag points to the merge commit, which already carries the status written as after the tag (as in #13).
-- **What comes after phase 2:** there are no more open issues. Candidates for the next step: the translation issue for the docs still in Spanish, the Graphify re-measure (#57), the pending web items (segment in the list, transfer label) or a phase 3. The status will say "decide with the user" unless you choose now.
-- **Freezing `Hexagonal`:** the plan treats it like `Monolithic` after #13 (changes only by explicit decision). If you would rather keep working on it after the tag, the decision line changes.
+Answered by the user on 2026-11-04: (1) yes to a new diagram, the deposit in both architectures; (2) next work: translation, Graphify re-measure and pending web items, each in its own issue; (3) `Hexagonal` stays active after the tag.
+
+- **The compare links point to a tag that does not exist yet:** they resolve once T8 publishes `v2-hexagonal`; T8 checks them.
+- **T8 happens after the merge** and asks for the go-ahead first (it publishes to the repository). The tag points to the merge commit, which already carries the status written as after the tag (as in #13).
+- **The tag and the active branch:** with `Hexagonal` still active, the phase-2 snapshot lives only in the tag; the comparison and the compare links use the tag, never the branch.
+- **New issues without a milestone:** they are not part of phase 2. If you would rather group them (for example a "Mantenimiento" milestone), say so.
