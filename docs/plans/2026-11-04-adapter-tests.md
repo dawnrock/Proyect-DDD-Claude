@@ -61,7 +61,7 @@ Output adapters: `InMemoryCheckingAccountRepositoryTests` and `InMemoryAccountOw
 - **Acceptance criteria:**
   - [x] The rule passes and fails when broken (issue criterion: no input-adapter test starts the full context).
 
-### [ ] T2 — Spring event adapter with a test listener (~10 min)
+### [x] T2 — Spring event adapter with a test listener (~10 min)
 
 - **Layer:** tests (adapter.out)
 - **Files:** `src/test/java/com/pronoide/ddd/adapter/out/event/SpringDomainEventPublisherContextTests.java`
@@ -70,7 +70,7 @@ Output adapters: `InMemoryCheckingAccountRepositoryTests` and `InMemoryAccountOw
   1. `@SpringJUnitConfig` with only `SpringDomainEventPublisher` and a test `@EventListener` that records what it receives (no application, no hexagon). Publishing two events through the port reaches the listener in order; a listener for `MoneyDeposited` does not receive `MoneyWithdrawn`.
   2. Prove it can fail: make the adapter not forward (sabotage), see red, revert.
 - **Acceptance criteria:**
-  - [ ] The test passes with a real Spring event bus and fails when the adapter does not forward (issue criterion: Spring adapter with a test listener).
+  - [x] The test passes with a real Spring event bus and fails when the adapter does not forward (issue criterion: Spring adapter with a test listener).
 
 ### [ ] T3 — Port contract for `AccountNumberSequence` (~10 min)
 
