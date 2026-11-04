@@ -22,7 +22,7 @@ flowchart TD
 
 ## The same deposit in both phases
 
-`POST /api/accounts/{id}/deposits` by the owner of the account. Validation and error translation are the same in both phases (see the deposit flow in [phase 1](fase-1-capas.md#example-flow-a-deposit)).
+`POST /api/accounts/{id}/deposits` by the owner of the account. Request validation (400) and error translation are left out of both diagrams: they are the same in both phases (see the deposit flow in [phase 1](fase-1-capas.md#example-flow-a-deposit)).
 
 **Phase 1:** every call reaches a concrete class.
 
@@ -127,13 +127,19 @@ Each one with where to see it in `Hexagonal`.
 
 | | `v1-monolito` | `v2-hexagonal` | Command |
 | - | ------------- | -------------- | ------- |
-| Production classes (`.java` in `src/main/java`) | 59 | 79 | `git ls-tree -r --name-only <tag> src/main/java \| grep -c '\.java$'` |
-| Test classes (`.java` in `src/test/java`) | 30 | 46 | same, on `src/test/java` |
-| Test methods and ArchUnit rules (`@Test`, `@ParameterizedTest`, `@ArchTest`) | 287 | 362 | `git grep -E '^\s*@(Test\|ParameterizedTest\|ArchTest)\s*$' <tag> -- src/test/java \| wc -l` |
+| Production classes (`.java` in `src/main/java`) | 59 | 79 | (1) |
+| Test classes (`.java` in `src/test/java`) | 30 | 46 | (1) on `src/test/java` |
+| Test methods and ArchUnit rules (`@Test`, `@ParameterizedTest`, `@ArchTest`) | 287 | 362 | (2) |
 | ArchUnit rules on production code | 10 + 2 | 17 + 2 | `@ArchTest` in `LayeredArchitectureTests` / `HexagonalArchitectureTests`, plus `DomainIsolationTests` |
 | ArchUnit rules on test code | 0 | 1 | `AdapterTestIsolationTests` |
 
-Changes from `v1-monolito` to `v2-hexagonal` (`git diff --shortstat v1-monolito v2-hexagonal -- <path>`): `src/main` 54 files, +895 / −247; `src/test` 39 files, +2014 / −607; `docs` 23 files, +2114 / −62. Most of the growth is in tests and documentation: the production code grew by a third in classes and changed little in lines.
+```bash
+git ls-tree -r --name-only <tag> src/main/java | grep -c '\.java$'                    # (1)
+git grep -E '^\s*@(Test|ParameterizedTest|ArchTest)\s*$' <tag> -- src/test/java | wc -l   # (2)
+git diff --shortstat v1-monolito v2-hexagonal -- src/main                            # (3), also on src/test
+```
+
+Changes from `v1-monolito` to `v2-hexagonal` (3): `src/main` 54 files, +895 / −247; `src/test` 39 files, +2014 / −607. The tests grew more than the production code, which grew by a third in classes and changed little in lines; most of the rest of the diff is documentation (`docs/`).
 
 ## When each one fits
 

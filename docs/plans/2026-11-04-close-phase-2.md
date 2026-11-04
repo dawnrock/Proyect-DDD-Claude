@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-04
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~75 min (8 tasks: 7 in the PR + 1 after it is merged; open questions answered by the user on 2026-11-04)
 
 ## Goal
@@ -130,6 +130,16 @@ Facts gathered for the documentation:
 - **Acceptance criteria:**
   - [x] `git diff --name-only origin/Hexagonal...HEAD | node scripts/check-project-status.mjs -` (the CI check) passes.
 
+### [x] T9 — Review fixes (~5 min)
+
+- **Layer:** docs
+- **Files:** `docs/arquitectura/comparativa-capas-hexagonal.md`
+- **Depends on:** T7
+- **What to do:**
+  1. `revisor-ddd` checked every claim against the code at `v1-monolito` and `HEAD` and found one wrong number: the `docs/` diff stat changes with this very PR, so it is dropped (only `src/main` and `src/test` are given). The commands move out of the table into a code block (no `\|` escapes to remove when copying), and the deposit section says that validation and error translation are left out of both diagrams.
+- **Acceptance criteria:**
+  - [x] Every number in the comparison matches its command; `mvn verify` green.
+
 ### [ ] T8 — Tag `v2-hexagonal` (~5 min, after the PR is merged)
 
 - **Layer:** build
@@ -146,25 +156,25 @@ Facts gathered for the documentation:
 
 **Specific:**
 
-- [ ] Every issue in the "Fase 2 · Arquitectura hexagonal" milestone is closed.
-- [ ] The issues for the translation, the Graphify re-measure and the pending web items exist.
-- [ ] `Monolithic`, `Hexagonal` and `master` coexist without cross changes (`Monolithic` = `v1-monolito`, `master` unchanged).
-- [ ] `./mvnw verify` green on `Hexagonal` at the tag `v2-hexagonal`.
-- [ ] `comparativa-capas-hexagonal.md` exists with both diagrams, the deposit in both architectures, changes per package, cost and benefits and diff links; `README.md` and `arquitectura-ia.md` describe phase 2.
+- [ ] Every issue in the "Fase 2 · Arquitectura hexagonal" milestone is closed (#14-#22 closed; #23 closes with this PR, checked in T8).
+- [x] The issues for the translation, the Graphify re-measure and the pending web items exist.
+- [x] `Monolithic`, `Hexagonal` and `master` coexist without cross changes (`Monolithic` = `v1-monolito`, `master` unchanged).
+- [ ] `./mvnw verify` green on `Hexagonal` at the tag `v2-hexagonal` (green on this branch; checked again at the tag in T8).
+- [x] `comparativa-capas-hexagonal.md` exists with both diagrams, the deposit in both architectures, changes per package, cost and benefits and diff links; `README.md` and `arquitectura-ia.md` describe phase 2.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit. Unchanged: no code changes.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md`: n/a (no new tests).
-- [ ] No dependencies added beyond the planned ones.
-- [ ] If the API changes: n/a (the API does not change).
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a (no new terms).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked (T8 happens after the merge).
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit. Unchanged: no code changes.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md`: n/a (no new tests).
+- [x] No dependencies added beyond the planned ones.
+- [x] If the API changes: n/a (the API does not change).
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a (no new terms).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
