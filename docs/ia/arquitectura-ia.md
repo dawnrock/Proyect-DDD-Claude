@@ -102,7 +102,7 @@ Every functional issue went through `/plan-feature` → plan approved by the use
 | #50 | [login-roles](../plans/2026-10-25-login-roles.md) | `implement-plan-team` | #51 |
 | #54 | [pending-adr-archunit-rules](../plans/2026-10-26-pending-adr-archunit-rules.md) | `implement-plan` | #56 |
 | #57 | [graphify-token-savings](../plans/2026-10-30-graphify-token-savings.md) | `implement-plan` | #58 |
-| #13 | [close-phase-1](../plans/2026-10-30-close-phase-1.md) | `implement-plan` | this PR |
+| #13 | [close-phase-1](../plans/2026-10-30-close-phase-1.md) | `implement-plan` | #60 |
 
 #9 and #10 (web-only issues) were folded into the team issues #5 and #6 when the backlog was reorganised (#32).
 
@@ -116,3 +116,31 @@ Every functional issue went through `/plan-feature` → plan approved by the use
 - Language: documentation in English from #38; conversation, commits and domain messages stay in Spanish.
 - Domain without Lombok (ADR 0009, #53, #55): `check-domain.mjs` rejects any `lombok` import, because ArchUnit cannot see it.
 - Graphify only for dependency questions (ADR 0010, #58): measured on `buscador-referencias`, it saves tokens on dependency questions but not on general searches, and its reminder hooks were left out.
+
+### Phase 2 · Hexagonal architecture (tag `v2-hexagonal`)
+
+Same flow as phase 1, now against `Hexagonal`: `/plan-feature` → plan approved by the user (open questions answered before implementing) → implementation → PR with the `revisor-ddd` review, CI and Claude Code Review → the user merges. Only #18 touched back and web and used the team flow.
+
+| Issue | Plan | Implemented with | PR |
+| ----- | ---- | ---------------- | -- |
+| #14 | [hexagonal-packages](../plans/2026-10-30-hexagonal-packages.md) | `implement-plan` | #61 |
+| #15 | [account-repository-ports](../plans/2026-10-30-account-repository-ports.md) | `implement-plan` | #62 |
+| #16 | [input-ports](../plans/2026-10-30-input-ports.md) | `implement-plan` | #63 |
+| #17 | [domain-events](../plans/2026-11-03-domain-events.md) | `implement-plan` | #64 |
+| #18 | [account-factory](../plans/2026-11-03-account-factory.md) | `implement-plan-team` | #65 |
+| #19 | [cli-input-adapter](../plans/2026-11-03-cli-input-adapter.md) | `implement-plan` | #66 |
+| #20 | [wire-core-in-config](../plans/2026-11-04-wire-core-in-config.md) | `implement-plan` | #67 |
+| #21 | [adapter-tests](../plans/2026-11-04-adapter-tests.md) | `implement-plan` | #68 |
+| #22 | [hexagonal-architecture-rules](../plans/2026-11-04-hexagonal-architecture-rules.md) | `implement-plan` | #69 |
+| #23 | [close-phase-2](../plans/2026-11-04-close-phase-2.md) | `implement-plan` | #73 |
+
+**Adjustments made during the phase**
+
+- Cloud session: the whole phase was worked from a Claude Code session in the cloud, followed from the phone. The Maven wrapper cannot download its Maven there, so the system `mvn` is used (`mvn verify`); force pushes are refused, so every fix is a new commit.
+- Team flow in the cloud (#65): `backend-dev` and `web-dev` ran as subagents in local worktrees without pushing; they could not talk to each other, so the lead merged their contract reviews (agreed in one round). The contract changed the opening of accounts, so the old path stayed alive during the transition (expand → contract).
+- Branches: every branch and worktree of a PR is deleted once the user merges it, after checking it is contained in the base branch; recorded as a step of the `implement-plan` skills (#66).
+- Telegram notices back on (#62).
+- Proving tests can fail: characterization tests for every refactor and every new ArchUnit rule were validated by breaking the code on purpose (red) and reverting (green).
+- `revisor-ddd` caught real problems before each PR: a port contract comparing accounts by reference, a property of the in-memory adapter only (#62); a missing 400 test for the currency of REST withdrawals (#68); an ArchUnit rule that only checked `*Queries` because of the `.and()/.or()` precedence, and an `ignoreDependency` that silently dropped two guarantees of the onion (#69).
+- The `hexagonal-adapter` skill guided the input ports and the CLI adapter (#63, #66).
+- User requests during implementation went into the plan as new tasks before the docs task, in the same PR (the demo operations of #66).

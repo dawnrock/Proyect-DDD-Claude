@@ -2,21 +2,22 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores, y se mantiene **corto a propósito**: se carga en cada sesión. **Se actualiza en cada PR que cierra una issue** (lo comprueba el CI).
 
-- **Última actualización:** 2026-11-04 · PR #69 (#22, reglas hexagonales)
-- **Rama activa:** `Hexagonal` (fase 2), rama por defecto del repositorio. `Monolithic` congelada en la etiqueta `v1-monolito`; `master` congelada.
+- **Última actualización:** 2026-11-04 · PR #73 (#23, cierre de la fase 2)
+- **Rama activa:** `Hexagonal`, rama por defecto del repositorio; la fase 2 queda marcada en la etiqueta `v2-hexagonal` y se sigue trabajando en la rama. `Monolithic` congelada en la etiqueta `v1-monolito`; `master` congelada.
 
 ## Dónde estamos
 
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
 | 1 · Monolito en capas | Cerrada: #2-#8, #11-#13, #31, #48, #50, #54, #57 (detalle en el [historial](historial.md)) | — | — |
-| 2 · Hexagonal | #14-#22 | — | #23 |
+| 2 · Hexagonal | Cerrada: #14-#23, etiqueta `v2-hexagonal` | — | — |
+| Después de la fase 2 (sin milestone) | — | — | #70 traducción, #71 Graphify, #72 web |
 
 ## Siguiente paso
 
-`/plan-feature 23` sobre `Hexagonal` (cerrar la fase 2: comparativa capas vs hexagonal y etiqueta `v2-hexagonal`).
+`/plan-feature 70` sobre `Hexagonal` (traducir al inglés la documentación que sigue en español); después, #71 (volver a medir Graphify) y #72 (pendientes de la web), en el orden que eligió el usuario.
 
-Diseño objetivo de la fase 2: `docs/arquitectura/fase-2-hexagonal.md`; las issues, en el milestone "Fase 2 · Arquitectura hexagonal".
+Diseño de la fase 2: `docs/arquitectura/fase-2-hexagonal.md`; comparación con la fase 1: `docs/arquitectura/comparativa-capas-hexagonal.md`.
 
 ## Acuerdos de trabajo con el usuario
 
