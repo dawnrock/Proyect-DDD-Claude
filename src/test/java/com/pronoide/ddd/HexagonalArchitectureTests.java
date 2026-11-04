@@ -3,6 +3,7 @@ package com.pronoide.ddd;
 import static com.tngtech.archunit.base.DescribedPredicate.alwaysTrue;
 import static com.tngtech.archunit.base.DescribedPredicate.not;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.INTERFACES;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.equivalentTo;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
@@ -25,6 +26,7 @@ import com.tngtech.archunit.lang.SimpleConditionEvent;
 import org.springframework.context.event.EventListener;
 
 import com.pronoide.ddd.application.CheckingAccountService;
+import com.pronoide.ddd.domain.model.DomainException;
 
 /**
  * Arquitectura hexagonal de la fase 2 (#22, Lab 27.10): todas las dependencias apuntan hacia el hexágono. Sustituye a
@@ -55,7 +57,7 @@ class HexagonalArchitectureTests {
             .adapter("persistence", "..adapter.out.persistence..")
             .adapter("event", "..adapter.out.event..")
             .adapter("taxagency", "..adapter.out.taxagency..")
-            .ignoreDependency(resideInAnyPackage(ADAPTER_IN_SUPPORT, "..config.."), alwaysTrue());
+            .ignoreDependency(resideInAnyPackage(ADAPTER_IN_SUPPORT, "com.pronoide.ddd.config.."), alwaysTrue());
 
     /** Donde viven los puertos: los de salida en {@code domain.model}; el de propiedad, en {@code application}. */
     private static final List<String> PORT_PACKAGES =
@@ -105,7 +107,7 @@ class HexagonalArchitectureTests {
      */
     @ArchTest
     static final ArchRule solo_los_adaptadores_y_config_dependen_de_spring_web = noClasses()
-            .that().resideOutsideOfPackages("..adapter..", "..config..")
+            .that().resideOutsideOfPackages("..adapter..", "com.pronoide.ddd.config..")
             .should().dependOnClassesThat().resideInAnyPackage("org.springframework.web..", "org.springframework.http..",
                     "org.springframework.ui..", "org.springframework.data..");
 
@@ -163,6 +165,40 @@ class HexagonalArchitectureTests {
             .and(noClasses().should().beAnnotatedWith(PRE_AUTHORIZE)
                     .orShould().beAnnotatedWith(POST_AUTHORIZE)
                     .orShould().beAnnotatedWith(SECURED));
+
+    /**
+     * D4: los adaptadores de entrada trabajan con commands y vistas; del dominio solo conocen {@code DomainException} y
+     * sus subclases, para traducirlas a HTTP o a mensajes. Incluye el soporte de seguridad de la raíz de
+     * {@code adapter.in}.
+     */
+    @ArchTest
+    static final ArchRule los_adaptadores_de_entrada_solo_conocen_las_excepciones_del_dominio = noClasses()
+            .that().resideInAPackage("..adapter.in..")
+            .should().dependOnClassesThat(resideInAPackage("..domain..").and(not(assignableTo(DomainException.class))));
+
+    /**
+     * #15, #17 y #20: los adaptadores de salida solo los conoce su propio paquete. Cubre lo que la cebolla no ve: el
+     * soporte de seguridad, {@code config} (que los recibe por sus puertos) y la clase de arranque.
+     */
+    @ArchTest
+    static final ArchRule solo_adapter_out_conoce_los_adaptadores_de_salida = noClasses()
+            .that().resideOutsideOfPackage("..adapter.out..")
+            .should().dependOnClassesThat().resideInAPackage("..adapter.out..");
+
+    /** #20: {@code config} construye el núcleo y nadie depende de ella. */
+    @ArchTest
+    static final ArchRule nadie_depende_de_config = noClasses()
+            .that().resideOutsideOfPackage("com.pronoide.ddd.config..")
+            .should().dependOnClassesThat().resideInAPackage("com.pronoide.ddd.config..");
+
+    /**
+     * Toda clase pertenece al hexágono, a un adaptador o a {@code config}: un paquete nuevo fuera de ellos quedaría sin
+     * vigilar. La única excepción es la clase de arranque.
+     */
+    @ArchTest
+    static final ArchRule toda_clase_pertenece_al_hexagono_o_a_un_adaptador = classes()
+            .that().resideOutsideOfPackages("..domain..", "..application..", "..adapter..", "com.pronoide.ddd.config..")
+            .should().haveFullyQualifiedName(DddLabApplication.class.getName());
 
     private static ArchCondition<JavaClass> implementOnlyPortsOfTheHexagon() {
         return new ArchCondition<>("implement only ports of the hexagon") {

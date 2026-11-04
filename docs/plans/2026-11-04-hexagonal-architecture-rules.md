@@ -94,7 +94,7 @@ What the onion checks on its own: the domain model does not depend on services, 
 - **Acceptance criteria:**
   - [x] Each rule fails for its sabotage and passes after reverting.
 
-### [ ] T4 — Remaining rules and goodbye to `LayeredArchitectureTests` (~10 min)
+### [x] T4 — Remaining rules and goodbye to `LayeredArchitectureTests` (~10 min)
 
 - **Layer:** tests
 - **Files:** `HexagonalArchitectureTests.java`, `LayeredArchitectureTests.java` (deleted)
@@ -103,7 +103,7 @@ What the onion checks on its own: the domain model does not depend on services, 
   1. Carry over `los_adaptadores_de_entrada_solo_conocen_las_excepciones_del_dominio` (D4), `solo_adapter_out_conoce_los_adaptadores_de_salida`, `nadie_depende_de_config` and `toda_clase_pertenece_al_hexagono_o_a_un_adaptador` (root of `adapter.in`, `config` and the boot class allowed). Validate the ones not yet validated by breaking them.
   2. Check the mapping table rule by rule, then `git rm LayeredArchitectureTests.java`.
 - **Acceptance criteria:**
-  - [ ] Every row of the mapping is covered; `LayeredArchitectureTests` is gone; `./mvnw verify` green.
+  - [x] Every row of the mapping is covered; `LayeredArchitectureTests` is gone; `./mvnw verify` green.
 
 ### [ ] T5 — Documentation and project status (~10 min)
 
