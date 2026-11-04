@@ -93,7 +93,7 @@ Facts gathered for the documentation:
 - **Acceptance criteria:**
   - [ ] The commands in "Run" still work (`mvn verify`, `spring-boot:run`, `curl -u admin:demo …/api/accounts` returns 200).
 
-### [ ] T5 — `arquitectura-ia.md`: usage log of phase 2 (~10 min)
+### [x] T5 — `arquitectura-ia.md`: usage log of phase 2 (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/arquitectura-ia.md`
@@ -102,7 +102,7 @@ Facts gathered for the documentation:
   1. "Phase 2 · Hexagonal architecture (tag `v2-hexagonal`)": table issue → plan → implemented with → PR for #14-#23 (#18 with `implement-plan-team`, the rest with `implement-plan`).
   2. "Adjustments made during the phase", one line each with its PR: the whole phase worked from a cloud session (system `mvn` because the wrapper cannot download Maven, no force push); the team flow in the cloud with subagents in local worktrees and the contract agreed in one round (#65); branches and worktrees deleted after every merge, now a step of the `implement-plan` skills (#66); Telegram back on (#62); characterization tests and every ArchUnit rule validated by breaking it; what `revisor-ddd` caught (contract comparing by reference #62, missing 400 #68, `.and()/.or()` precedence #69); the `hexagonal-adapter` skill used for ports and adapters.
 - **Acceptance criteria:**
-  - [ ] Every phase-2 plan in `docs/plans/` appears in the table and every PR link resolves.
+  - [x] Every phase-2 plan in `docs/plans/` appears in the table and every PR link resolves.
 
 ### [ ] T6 — Issues for the next work (~5 min)
 
