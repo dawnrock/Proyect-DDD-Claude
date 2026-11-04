@@ -117,7 +117,7 @@ Facts gathered for the documentation:
 - **Acceptance criteria:**
   - [x] The three issues exist (#70 translation, #71 Graphify, #72 web) and their numbers are written in the project status (T7).
 
-### [ ] T7 — Project status (~5 min)
+### [x] T7 — Project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -128,7 +128,7 @@ Facts gathered for the documentation:
   3. `pendientes.md`: the items now covered by an issue point to it (translation, Graphify, web from #48); the ones that said "for phase 2" are rephrased as pending for future work (#7 transaction).
   4. `historial.md`: one row for this PR.
 - **Acceptance criteria:**
-  - [ ] `git diff --name-only origin/Hexagonal...HEAD | node scripts/check-project-status.mjs -` (the CI check) passes.
+  - [x] `git diff --name-only origin/Hexagonal...HEAD | node scripts/check-project-status.mjs -` (the CI check) passes.
 
 ### [ ] T8 — Tag `v2-hexagonal` (~5 min, after the PR is merged)
 
