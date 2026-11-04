@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-04
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~40 min (4 tasks)
 
 ## Goal
@@ -50,7 +50,7 @@ Output adapters: `InMemoryCheckingAccountRepositoryTests` and `InMemoryAccountOw
 
 ## Tasks
 
-### [ ] T1 — No input-adapter test starts the full context (~10 min)
+### [x] T1 — No input-adapter test starts the full context (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/pronoide/ddd/AdapterTestIsolationTests.java`
@@ -59,7 +59,7 @@ Output adapters: `InMemoryCheckingAccountRepositoryTests` and `InMemoryAccountOw
   1. ArchUnit test that imports **only test classes** (`ImportOption.OnlyIncludeTests`): no class in `..adapter.in..` is annotated (or meta-annotated) with `@SpringBootTest`. The full-context tests stay in the root package (`DddLabApplicationTests`, `DemoProfileTests`), as `src/test/CLAUDE.md` says.
   2. Validate by breaking it: temporarily annotate a test in `adapter.in.rest` with `@SpringBootTest`, see the rule fail, revert.
 - **Acceptance criteria:**
-  - [ ] The rule passes and fails when broken (issue criterion: no input-adapter test starts the full context).
+  - [x] The rule passes and fails when broken (issue criterion: no input-adapter test starts the full context).
 
 ### [ ] T2 — Spring event adapter with a test listener (~10 min)
 
