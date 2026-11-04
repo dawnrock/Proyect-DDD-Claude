@@ -83,7 +83,7 @@ Spring imports in the core today: `domain..` has none (`DomainIsolationTests`); 
 - **Acceptance criteria:**
   - [x] The rule fails for each sabotage and passes after reverting (issue criterion).
 
-### [ ] T5 — Documentation and project status (~10 min)
+### [x] T5 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/fase-2-hexagonal.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -92,7 +92,7 @@ Spring imports in the core today: `domain..` has none (`DomainIsolationTests`); 
   1. `fase-2-hexagonal.md`: "State after #20"; `DomainConfiguration` row; core classes "built in `config`"; adapters "component-scanned, injected into `config` by their ports"; listeners' exception.
   2. Project status: #20 done, next step `/plan-feature 21`; decision (what `config` builds, adapters stay components, listeners keep `@EventListener`); pending items: remove "register `MoneyTransferService` as a bean in `config`" (#7) and update the #7 decision that said the service creates it with `new`.
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes.
+  - [x] The CI check of the project status passes.
 
 ## Global acceptance criteria
 

@@ -2,7 +2,7 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores, y se mantiene **corto a propósito**: se carga en cada sesión. **Se actualiza en cada PR que cierra una issue** (lo comprueba el CI).
 
-- **Última actualización:** 2026-11-03 · PR #66 (#19, adaptador CLI)
+- **Última actualización:** 2026-11-04 · PR #PRNUM (#20, núcleo construido en `config`)
 - **Rama activa:** `Hexagonal` (fase 2), rama por defecto del repositorio. `Monolithic` congelada en la etiqueta `v1-monolito`; `master` congelada.
 
 ## Dónde estamos
@@ -10,11 +10,11 @@
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
 | 1 · Monolito en capas | Cerrada: #2-#8, #11-#13, #31, #48, #50, #54, #57 (detalle en el [historial](historial.md)) | — | — |
-| 2 · Hexagonal | #14-#19 | — | #20 → #23 |
+| 2 · Hexagonal | #14-#20 | — | #21 → #23 |
 
 ## Siguiente paso
 
-`/plan-feature 20` sobre `Hexagonal` (cablear puertos y adaptadores en `config`, sin anotaciones de Spring en el núcleo).
+`/plan-feature 21` sobre `Hexagonal` (tests de los adaptadores sin el hexágono).
 
 Diseño objetivo de la fase 2: `docs/arquitectura/fase-2-hexagonal.md`; las issues, en el milestone "Fase 2 · Arquitectura hexagonal".
 
