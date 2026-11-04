@@ -119,7 +119,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **Acceptance criteria:**
   - [ ] Rendered PNG approved by the user; package names unchanged.
 
-### [ ] T8 — `decisiones.md` (~10 min)
+### [x] T8 — `decisiones.md` (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/decisiones.md`
@@ -127,7 +127,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **What to do:**
   1. Translate it entry by entry ("Decisions already made that affect what comes next", "Environment"), keeping issue numbers, dates and the "decided by the user on …" mentions.
 - **Acceptance criteria:**
-  - [ ] Same number of entries before and after; every `#n` and date kept.
+  - [x] Same number of entries before and after; every `#n` and date kept.
 
 ### [ ] T9 — `pendientes.md` and `historial.md` (~10 min)
 
