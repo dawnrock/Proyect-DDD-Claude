@@ -109,7 +109,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **Acceptance criteria:**
   - [x] Commands and paths unchanged (diff of the code blocks).
 
-### [ ] T7 — Labels of the hexagonal diagram (~5 min)
+### [x] T7 — Labels of the hexagonal diagram (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/img/hexagonal.svg`
@@ -117,7 +117,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **What to do:**
   1. Translate the Spanish labels (input side / driving, output side / driven, Application, Domain, Command line, Persistence (in memory), Events (Spring), Tax agency (simulated), "uses"…); same layout, grayscale. **Shown to the user before committing**; check no label overflows its box at the new length.
 - **Acceptance criteria:**
-  - [ ] Rendered PNG approved by the user; package names unchanged.
+  - [x] Rendered PNG approved by the user; package names unchanged.
 
 ### [x] T8 — `decisiones.md` (~10 min)
 
@@ -160,7 +160,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **Acceptance criteria:**
   - [x] Both lines changed; nothing else in `CLAUDE.md` or `.claude/` changes (diff).
 
-### [ ] T12 — Check and project status (~10 min)
+### [x] T12 — Check and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `historial.md`, `docs/plans/2026-11-04-close-phase-2.md`
@@ -168,8 +168,9 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 - **What to do:**
   1. Run the stop-word heuristic over `docs/` (outside `docs/analysis/` and the phase-1 plans): no file with more Spanish than English; read the hits by hand (quoted messages are fine). Check every relative link of `docs/` resolves.
   2. Status: #70 done, next step `/plan-feature 71`; decision: documentation fully in English except `docs/analysis/` and the five phase-1 plans; file names stay in Spanish; a row in `historial.md`. Mark T8 of the #23 plan as done.
+  3. Also done: `docs/plans/README.md` translated (not in the inventory) with the note on the phase-1 plans; the five links of `fase-1-capas.md` to phase-1-only classes now point to the `v1-monolito` tag on GitHub (they were broken on `Hexagonal`).
 - **Acceptance criteria:**
-  - [ ] The heuristic and the link check pass; the CI check of the project status passes.
+  - [x] The heuristic and the link check pass; the CI check of the project status passes.
 
 ## Global acceptance criteria
 
