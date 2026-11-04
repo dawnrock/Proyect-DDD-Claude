@@ -69,7 +69,7 @@ What the onion checks on its own: the domain model does not depend on services, 
 - **Acceptance criteria:**
   - [x] Each sabotage fails the onion rule; `./mvnw verify` green after reverting.
 
-### [ ] T2 — Ports rules (~10 min)
+### [x] T2 — Ports rules (~10 min)
 
 - **Layer:** tests
 - **Files:** `HexagonalArchitectureTests.java`
@@ -80,7 +80,7 @@ What the onion checks on its own: the domain model does not depend on services, 
   3. `los_puertos_de_entrada_son_interfaces`: `*Commands`/`*Queries` in `application` are interfaces; carry over `los_adaptadores_de_entrada_solo_conocen_los_puertos_de_entrada`.
   4. Validate each by breaking it (an adapter implementing an interface of its own package; persistence using `CheckingAccountService`; a `*Queries` class; a controller using the service). Revert.
 - **Acceptance criteria:**
-  - [ ] Each rule fails for its sabotage and passes after reverting.
+  - [x] Each rule fails for its sabotage and passes after reverting.
 
 ### [ ] T3 — Spring, security and domain rules (~10 min)
 
