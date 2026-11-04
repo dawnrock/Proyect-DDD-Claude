@@ -82,7 +82,7 @@ What the onion checks on its own: the domain model does not depend on services, 
 - **Acceptance criteria:**
   - [x] Each rule fails for its sabotage and passes after reverting.
 
-### [ ] T3 — Spring, security and domain rules (~10 min)
+### [x] T3 — Spring, security and domain rules (~10 min)
 
 - **Layer:** tests
 - **Files:** `HexagonalArchitectureTests.java`
@@ -92,7 +92,7 @@ What the onion checks on its own: the domain model does not depend on services, 
   2. Carry over `el_nucleo_no_depende_de_spring`, `el_dominio_solo_depende_del_jdk` (no `org.immutables` in the domain: issue rule), `el_dominio_no_tiene_setters_publicos`, `la_aplicacion_no_depende_de_spring_security`, `nadie_usa_la_seguridad_por_metodos`.
   3. Validate each new or moved rule by breaking it (a `@RestController`-style import in `application`, `@Value.Immutable` in a domain class, a public setter, `@PreAuthorize`, a Spring Security import in `application`). Revert.
 - **Acceptance criteria:**
-  - [ ] Each rule fails for its sabotage and passes after reverting.
+  - [x] Each rule fails for its sabotage and passes after reverting.
 
 ### [ ] T4 — Remaining rules and goodbye to `LayeredArchitectureTests` (~10 min)
 

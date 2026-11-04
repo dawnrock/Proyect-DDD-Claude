@@ -3,10 +3,12 @@ package com.pronoide.ddd;
 import static com.tngtech.archunit.base.DescribedPredicate.alwaysTrue;
 import static com.tngtech.archunit.base.DescribedPredicate.not;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.INTERFACES;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.equivalentTo;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 import static com.tngtech.archunit.library.Architectures.onionArchitecture;
 
 import java.util.List;
@@ -17,8 +19,10 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
+import com.tngtech.archunit.lang.CompositeArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
+import org.springframework.context.event.EventListener;
 
 import com.pronoide.ddd.application.CheckingAccountService;
 
@@ -94,6 +98,71 @@ class HexagonalArchitectureTests {
     static final ArchRule los_adaptadores_de_entrada_solo_conocen_los_puertos_de_entrada = noClasses()
             .that().resideInAPackage("..adapter.in..")
             .should().dependOnClassesThat().areAssignableTo(CheckingAccountService.class);
+
+    /**
+     * Solo los adaptadores y {@code config} dependen de Spring web, HTTP, MVC o datos: el hexágono no sabe por qué canal
+     * le llegan las peticiones ni dónde se guardan las cuentas.
+     */
+    @ArchTest
+    static final ArchRule solo_los_adaptadores_y_config_dependen_de_spring_web = noClasses()
+            .that().resideOutsideOfPackages("..adapter..", "..config..")
+            .should().dependOnClassesThat().resideInAnyPackage("org.springframework.web..", "org.springframework.http..",
+                    "org.springframework.ui..", "org.springframework.data..");
+
+    /**
+     * #20: el núcleo no depende de Spring; lo construye {@code config.DomainConfiguration}. La única excepción
+     * justificada es la anotación {@code @EventListener} en {@code application.listener}: los eventos de dominio llegan a
+     * los consumidores por el mecanismo de eventos de Spring. Nada más de Spring, tampoco del paquete de eventos.
+     */
+    @ArchTest
+    static final ArchRule el_nucleo_no_depende_de_spring = CompositeArchRule
+            .of(noClasses()
+                    .that().resideInAnyPackage("..domain..", "..application..")
+                    .and().resideOutsideOfPackage("..application.listener..")
+                    .should().dependOnClassesThat().resideInAPackage("org.springframework.."))
+            .and(noClasses()
+                    .that().resideInAPackage("..application.listener..")
+                    .should().dependOnClassesThat(resideInAPackage("org.springframework..")
+                            .and(not(equivalentTo(EventListener.class)))));
+
+    /** D1: el dominio solo conoce el JDK (ni Spring, ni {@code jakarta}, ni {@code org.immutables}). */
+    @ArchTest
+    static final ArchRule el_dominio_solo_depende_del_jdk = classes()
+            .that().resideInAPackage("..domain..")
+            .should().onlyDependOnClassesThat().resideInAnyPackage("java..", "com.pronoide.ddd.domain..");
+
+    /** El dominio solo cambia de estado con métodos de negocio: no tiene {@code set*} públicos. */
+    @ArchTest
+    static final ArchRule el_dominio_no_tiene_setters_publicos = noMethods()
+            .that().areDeclaredInClassesThat().resideInAPackage("..domain..")
+            .and().arePublic()
+            .should().haveNameMatching("set[A-Z].*");
+
+    /**
+     * ADR 0008: la aplicación decide a qué cuentas accede cada usuario con un {@code Caller} sencillo, sin Spring
+     * Security, para que la regla se pruebe sin Spring.
+     */
+    @ArchTest
+    static final ArchRule la_aplicacion_no_depende_de_spring_security = noClasses()
+            .that().resideInAPackage("..application..")
+            .should().dependOnClassesThat().resideInAPackage("org.springframework.security..");
+
+    private static final String PRE_AUTHORIZE = "org.springframework.security.access.prepost.PreAuthorize";
+    private static final String POST_AUTHORIZE = "org.springframework.security.access.prepost.PostAuthorize";
+    private static final String SECURED = "org.springframework.security.access.annotation.Secured";
+
+    /**
+     * ADR 0008: nadie usa la seguridad por métodos. Llevaría la comprobación del propietario al framework y se saltaría
+     * el {@code Caller}; Spring Security solo comprueba roles en las URL.
+     */
+    @ArchTest
+    static final ArchRule nadie_usa_la_seguridad_por_metodos = CompositeArchRule
+            .of(noMethods().should().beAnnotatedWith(PRE_AUTHORIZE)
+                    .orShould().beAnnotatedWith(POST_AUTHORIZE)
+                    .orShould().beAnnotatedWith(SECURED))
+            .and(noClasses().should().beAnnotatedWith(PRE_AUTHORIZE)
+                    .orShould().beAnnotatedWith(POST_AUTHORIZE)
+                    .orShould().beAnnotatedWith(SECURED));
 
     private static ArchCondition<JavaClass> implementOnlyPortsOfTheHexagon() {
         return new ArchCondition<>("implement only ports of the hexagon") {
