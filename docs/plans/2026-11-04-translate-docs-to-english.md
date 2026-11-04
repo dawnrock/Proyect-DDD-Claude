@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone)
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-04
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~110 min (12 tasks)
 
 ## Goal
@@ -44,7 +44,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
 
 ## Tasks
 
-### [ ] T1 — ADRs 0001-0003 (~10 min)
+### [x] T1 — ADRs 0001-0003 (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0001-arquitectura-ia-claude-code.md`, `0002-ramas-por-fase.md`, `0003-lombok-immutables.md`
@@ -53,7 +53,7 @@ Already in English: `README.md`, `docs/arquitectura/*.md`, ADRs 0006 and 0008-00
   1. Translate them with the format of the English ADRs (0006, 0008): Context, Decision, Alternatives, Consequences; status "Accepted" (0003: "Accepted (the domain part, superseded by 0009)").
   2. Keep the dates, issue numbers and every link.
 - **Acceptance criteria:**
-  - [ ] No Spanish prose left (heuristic of T12 + reading); every relative link resolves.
+  - [x] No Spanish prose left (heuristic of T12 + reading); every relative link resolves.
 
 ### [ ] T2 — ADRs 0004, 0005, 0007 and the ADR index (~10 min)
 

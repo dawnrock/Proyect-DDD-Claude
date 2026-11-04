@@ -1,22 +1,22 @@
-# 0001 · Arquitectura de IA con Claude Code
+# 0001 · AI architecture with Claude Code
 
-- **Estado:** aceptada · 2026-10-23
+- **Status:** accepted · 2026-10-23
 
-## Contexto
+## Context
 
-El proyecto sirve para practicar a la vez DDD en Java y el trabajo con agentes. En [curso-claude](https://github.com/dawnrock/curso-claude) ya existe un flujo probado: issues de GitHub → plan → implementación en worktree con TDD → PR, apoyado en skills, hooks y GitHub Actions. Aquel proyecto avisaba por Slack, que no se usa en este.
+The project is a way to practise DDD in Java and working with agents at the same time. [curso-claude](https://github.com/dawnrock/curso-claude) already has a proven flow: GitHub issues → plan → implementation in a worktree with TDD → PR, backed by skills, hooks and GitHub Actions. That project sent its notices to Slack, which is not used in this one.
 
-## Decisión
+## Decision
 
-- Reutilizar ese flujo adaptado a Java/Maven: `CLAUDE.md`, `/commit`, skills `plan-feature` e `implement-plan`, hook de bloqueo del backlog y workflows `claude.yml` y `claude-code-review.yml`.
-- Añadir piezas propias del dominio: skill `ddd-building-block` (con `references/`, `templates/` y `scripts/`), skill `hexagonal-adapter`, agentes `revisor-ddd` y `buscador-referencias`, y un `ci.yml` determinista.
-- Escribir hooks y scripts en **Node** en lugar de bash + `jq`, para que funcionen igual en Windows, Linux y en la CI.
-- Sustituir Slack por **Telegram** (Bot API): push inmediato al móvil, gratuito, sin servidor de correo. El email (SMTP) se descartó por necesitar credenciales de correo y llegar con más retraso.
+- Reuse that flow adapted to Java/Maven: `CLAUDE.md`, `/commit`, the `plan-feature` and `implement-plan` skills, the hook that blocks the backlog and the `claude.yml` and `claude-code-review.yml` workflows.
+- Add pieces specific to the domain: the `ddd-building-block` skill (with `references/`, `templates/` and `scripts/`), the `hexagonal-adapter` skill, the `revisor-ddd` and `buscador-referencias` agents, and a deterministic `ci.yml`.
+- Write hooks and scripts in **Node** instead of bash + `jq`, so they work the same on Windows, Linux and in CI.
+- Replace Slack with **Telegram** (Bot API): immediate push to the phone, free, no mail server. Email (SMTP) was discarded because it needs mail credentials and arrives later.
 
-## Consecuencias
+## Consequences
 
-- Las tareas siempre parten de una issue con milestone de fase; el plan queda versionado en `docs/plans/` y publicado en la issue.
-- Las notificaciones son opcionales: sin token, nada falla.
-- Los workflows de Claude necesitan el secreto `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`) y, como GitHub ejecuta los de issues desde la rama por defecto, esa rama debe ser la de la fase activa (ADR 0002).
+- Tasks always start from an issue with a phase milestone; the plan is versioned in `docs/plans/` and published on the issue.
+- Notifications are optional: without a token, nothing fails.
+- The Claude workflows need the `CLAUDE_CODE_OAUTH_TOKEN` secret (`claude setup-token`) and, since GitHub runs the issue workflows from the default branch, that branch must be the active phase's (ADR 0002).
 
-Detalle de cada pieza: [docs/ia/arquitectura-ia.md](../ia/arquitectura-ia.md).
+Details of each piece: [docs/ia/arquitectura-ia.md](../ia/arquitectura-ia.md).
