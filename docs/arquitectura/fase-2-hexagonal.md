@@ -35,13 +35,13 @@ com.pronoide.ddd
 | Adapter | uses the port | implements the port |
 
 - Dependencies always point into the hexagon; adapters do not know each other.
-- The core carries no Spring annotations: `config` builds it and hands it its adapters.
+- The core carries no Spring annotations: `config` builds it and hands it its adapters, which it receives by their port types (it imports no class of `adapter.out`). The only exception is `@EventListener` on the event consumers.
 - Every output adapter is simulated (in memory / fake), which is enough to show the architecture.
 - Checked by `HexagonalArchitectureTests` (ArchUnit, #22). Until then, `LayeredArchitectureTests` with its patterns adjusted to the new packages (#14).
 
 ## Class → role
 
-State after #19 (adapters behind input and output ports, domain events published after saving, accounts opened through the factory, demo data as a CLI input adapter). The last column says which issue changes the class's role.
+State after #20 (adapters behind input and output ports, domain events published after saving, accounts opened through the factory, demo data as a CLI input adapter, core built in `config` without Spring annotations). The last column says which issue changes the class's role.
 
 | Class | Package | Role in the architecture | Changes in |
 | ----- | ------- | ------------------------ | ---------- |
@@ -54,20 +54,20 @@ State after #19 (adapters behind input and output ports, domain events published
 | `WebExceptionHandler`, `WebModelAdvice`, `WebFormat` | `adapter.in.web` | Web support: 404 page, common model attributes, amount formatting | — |
 | `WebSecurityConfig` | `adapter.in.web` | Input adapter: fallback security chain (form login) | — |
 | `SecuritySupport`, `CurrentCaller`, `SecurityUsersProperties` | `adapter.in` | Support shared by the input adapters: authenticated user → `Caller` | — |
-| `InMemoryCheckingAccountRepository` | `adapter.out.persistence` | Output adapter (simulated persistence, package-private): implements `CheckingAccountRepository` | #20: wired in `config` |
-| `SpringDomainEventPublisher` | `adapter.out.event` | Output adapter (package-private): implements `DomainEventPublisher` over Spring's `ApplicationEventPublisher` | #20: wired in `config` |
-| `InMemoryAccountNumberSequence` | `adapter.out.persistence` | Output adapter (simulated, package-private): implements `AccountNumberSequence`, valid consecutive Spanish IBANs | #20: wired in `config` |
-| `FakeTaxAgencyIncomeVerifier` | `adapter.out.taxagency` | Output adapter (simulated, package-private): implements `IncomeVerifier` with a fixed table | #20: wired in `config` |
-| `InMemoryAccountOwnershipRepository` | `adapter.out.persistence` | Output adapter (package-private): implements `AccountOwnershipRepository`, which user owns each account (ADR 0008) | #20: wired in `config` |
-| `CheckingAccountService` | `application` | Application service: implements `CheckingAccountCommands` and `CheckingAccountQueries` (use cases and account ownership); uses the output ports only, opens accounts through `CheckingAccountFactory` (which it builds from its two ports) and publishes each account's domain events after saving it. Keeps its name (not `CheckingAccountApplicationService`): nobody outside `application` sees it | #20 built in `config` |
+| `InMemoryCheckingAccountRepository` | `adapter.out.persistence` | Output adapter (simulated persistence, package-private): implements `CheckingAccountRepository` | — (component-scanned; `config` receives it by its port) |
+| `SpringDomainEventPublisher` | `adapter.out.event` | Output adapter (package-private): implements `DomainEventPublisher` over Spring's `ApplicationEventPublisher` | — (component-scanned; `config` receives it by its port) |
+| `InMemoryAccountNumberSequence` | `adapter.out.persistence` | Output adapter (simulated, package-private): implements `AccountNumberSequence`, valid consecutive Spanish IBANs | — (component-scanned; `config` receives it by its port) |
+| `FakeTaxAgencyIncomeVerifier` | `adapter.out.taxagency` | Output adapter (simulated, package-private): implements `IncomeVerifier` with a fixed table | — (component-scanned; `config` receives it by its port) |
+| `InMemoryAccountOwnershipRepository` | `adapter.out.persistence` | Output adapter (package-private): implements `AccountOwnershipRepository`, which user owns each account (ADR 0008) | — (component-scanned; `config` receives it by its port) |
+| `CheckingAccountService` | `application` | Application service: implements `CheckingAccountCommands` and `CheckingAccountQueries` (use cases and account ownership); uses the output ports only, opens accounts through `CheckingAccountFactory` and publishes each account's domain events after saving it. Keeps its name (not `CheckingAccountApplicationService`): nobody outside `application` sees it. No Spring annotations: built in `config` | — |
 | `CheckingAccountCommands`, `CheckingAccountQueries` | `application` | Input ports: use cases that change accounts (open, deposit, withdraw, transfer) and that query them (list, detail) | — |
 | `AccountOwnershipRepository` | `application` | Output port: account ownership. In `application`, not `domain.model`, because the user's identity never reaches the domain (ADR 0008) | — |
 | `*CommandDef`, `*SummaryDef`, `AccountDetailsDef`, `CallerDef`, `ApplicationValue`, `CommandValidation` | `application` | Commands, views and `Caller` (Immutables) and their validation | — |
-| `AuditLogListener`, `CustomerNotificationListener` | `application.listener` | Domain event consumers (`@EventListener`, `@Slf4j`): audit log and simulated customer notification | — |
+| `AuditLogListener`, `CustomerNotificationListener` | `application.listener` | Domain event consumers: audit log and simulated customer notification. Declared in `config`; they keep `@EventListener`, the only Spring dependency allowed in the core (events reach them through Spring) | — |
 | `NotFoundException`, `AccountNotFoundException`, `TargetAccountNotFoundException`, `ForbiddenOperationException`, `OperationNotAllowedException` | `application` | Application errors | — |
 | `DomainModelRunner` | `adapter.in.cli` | Input adapter (CLI): with the `demo` profile, opens the demo accounts and runs a deposit, two withdrawals (approved and rejected) and a transfer through `CheckingAccountCommands`, with a `[demo]` trace per use case | — |
 | `CheckingAccount` | `domain.model` | Aggregate root; records its domain events (`pullDomainEvents`); `open` is package-private, used only by the factory | — |
-| `CheckingAccountFactory` | `domain.model` | Factory: number + segment from the verified income (R20) | #20: built in `config` |
+| `CheckingAccountFactory` | `domain.model` | Factory: number + segment from the verified income (R20); built in `config` | — |
 | `AccountNumberSequence`, `IncomeVerifier` | `domain.model` | Output ports: account numbering and income verification | — |
 | `DomainEvent`, `CheckingAccountOpened`, `MoneyDeposited`, `MoneyWithdrawn`, `WithdrawalRejected` | `domain.model` | Domain events (`record`) | — |
 | `DomainEventPublisher` | `domain.model` | Output port: publishes domain events | — |
@@ -76,7 +76,8 @@ State after #19 (adapters behind input and output ports, domain events published
 | `AccountNumber`, `MonetaryAmount`, `TaxId` | `domain.model` | Value objects | — |
 | `CustomerSegment`, `TransactionStatus`, `TransactionType` | `domain.model` | Domain enumerations; the segment is decided by the factory | — |
 | `DomainException` and its subclasses (`CurrencyMismatchException`, `DuplicateAccountNumberException`, `InsufficientInitialDepositException`, `SameAccountTransferException`) | `domain.model` | Business rule violations (422) | — |
-| `MoneyTransferService` | `domain.service` | Domain service (transfers, R17-R19) | #20: built in `config` |
+| `MoneyTransferService` | `domain.service` | Domain service (transfers, R17-R19); built in `config` | — |
+| `DomainConfiguration` | `config` | `@Configuration` that builds the core (`MoneyTransferService`, `CheckingAccountFactory`, `CheckingAccountService`, the listeners) and hands it the output adapters by their ports | — |
 | `DddLabApplication` | root | Spring Boot entry point | — |
 
-Classes that arrive later: `DomainConfiguration` (#20).
+All the classes of the target design are in place; #21 and #22 add tests and `HexagonalArchitectureTests`.

@@ -24,6 +24,8 @@ import com.pronoide.ddd.application.CheckingAccountService;
 import com.pronoide.ddd.application.TransactionSummary;
 import com.pronoide.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.pronoide.ddd.domain.model.DomainEventPublisher;
+import com.pronoide.ddd.domain.model.CheckingAccountFactory;
+import com.pronoide.ddd.domain.service.MoneyTransferService;
 
 @ExtendWith(OutputCaptureExtension.class)
 class DomainModelRunnerTests {
@@ -31,7 +33,7 @@ class DomainModelRunnerTests {
     private final AccountOwnershipRepository ownership = PersistenceTestAdapters.ownership();
     private final CheckingAccountService service =
             new CheckingAccountService(PersistenceTestAdapters.accounts(), ownership, mock(DomainEventPublisher.class),
-                    PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier());
+                    new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService());
     /** El runner solo recibe el puerto de commands; el servicio concreto se usa aquí solo para consultar. */
     private final CheckingAccountCommands commands = service;
 
@@ -64,7 +66,7 @@ class DomainModelRunnerTests {
     @DisplayName("El segmento lo decide la agencia tributaria: sin ingresos verificados las tres cuentas son minoristas")
     void el_segmento_lo_decide_la_agencia_tributaria() {
         CheckingAccountService withoutIncomes = new CheckingAccountService(PersistenceTestAdapters.accounts(), ownership,
-                mock(DomainEventPublisher.class), PersistenceTestAdapters.accountNumbers(), taxId -> Optional.empty());
+                mock(DomainEventPublisher.class), new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), taxId -> Optional.empty()), new MoneyTransferService());
 
         new DomainModelRunner(withoutIncomes).run(new DefaultApplicationArguments());
 

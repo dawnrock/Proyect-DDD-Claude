@@ -2,6 +2,7 @@ package com.pronoide.ddd;
 
 import static com.tngtech.archunit.base.DescribedPredicate.not;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.equivalentTo;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
@@ -14,6 +15,7 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.CompositeArchRule;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Controller;
 
 import com.pronoide.ddd.application.CheckingAccountService;
@@ -32,7 +34,8 @@ class LayeredArchitectureTests {
      * D2 y D3: nadie depende de {@code adapter.in}, ni de {@code application} desde el dominio. Desde la #15 nadie
      * depende de los adaptadores de salida (se usan por sus puertos), y la persistencia sí conoce {@code application}:
      * implementa su puerto de propiedad de las cuentas (ADR 0008). Desde la #17 la capa de adaptadores de salida
-     * incluye {@code adapter.out.event}.
+     * incluye {@code adapter.out.event}. Desde la #20 {@code config} construye el núcleo: puede usar el dominio y
+     * {@code application}, y nadie la usa.
      */
     @ArchTest
     static final ArchRule las_capas_solo_dependen_hacia_abajo = layeredArchitecture()
@@ -41,10 +44,12 @@ class LayeredArchitectureTests {
             .layer("Application").definedBy("..application..")
             .layer("Domain").definedBy("..domain..")
             .layer("OutputAdapters").definedBy("..adapter.out..")
+            .layer("Config").definedBy("..config..")
+            .whereLayer("Config").mayNotBeAccessedByAnyLayer()
             .whereLayer("Presentation").mayNotBeAccessedByAnyLayer()
-            .whereLayer("Application").mayOnlyBeAccessedByLayers("Presentation", "OutputAdapters")
+            .whereLayer("Application").mayOnlyBeAccessedByLayers("Presentation", "OutputAdapters", "Config")
             .whereLayer("OutputAdapters").mayNotBeAccessedByAnyLayer()
-            .whereLayer("Domain").mayOnlyBeAccessedByLayers("Application", "OutputAdapters", "Presentation");
+            .whereLayer("Domain").mayOnlyBeAccessedByLayers("Application", "OutputAdapters", "Presentation", "Config");
 
     /** D1: el dominio solo conoce el JDK (ni Spring, ni {@code jakarta}, ni {@code org.immutables}). */
     @ArchTest
@@ -117,13 +122,13 @@ class LayeredArchitectureTests {
                     .orShould().beAnnotatedWith(SECURED));
 
     /**
-     * #15 y #17: los adaptadores de salida solo los conocen su propio paquete y {@code config}, que los cablea (#20). El
-     * resto usa sus puertos ({@code CheckingAccountRepository}, {@code AccountOwnershipRepository},
-     * {@code DomainEventPublisher}).
+     * #15, #17 y #20: los adaptadores de salida solo los conoce su propio paquete. El resto, también {@code config}, usa
+     * sus puertos ({@code CheckingAccountRepository}, {@code AccountOwnershipRepository}, {@code DomainEventPublisher},
+     * {@code AccountNumberSequence}, {@code IncomeVerifier}); Spring los registra porque son {@code @Component}.
      */
     @ArchTest
-    static final ArchRule solo_los_adaptadores_de_salida_y_config_conocen_los_adaptadores_de_salida = noClasses()
-            .that().resideOutsideOfPackages("..adapter.out..", "..config..")
+    static final ArchRule solo_adapter_out_conoce_los_adaptadores_de_salida = noClasses()
+            .that().resideOutsideOfPackage("..adapter.out..")
             .should().dependOnClassesThat().resideInAPackage("..adapter.out..");
 
     /** #17: los adaptadores de salida no se conocen entre sí; cada uno implementa su puerto. */
@@ -142,11 +147,28 @@ class LayeredArchitectureTests {
             .should().beInterfaces();
 
     /**
+     * #20: el núcleo no depende de Spring; lo construye {@code config.DomainConfiguration}. La única excepción
+     * justificada es la anotación {@code @EventListener} en {@code application.listener}: los eventos de dominio llegan a
+     * los consumidores por el mecanismo de eventos de Spring. Nada más de Spring, tampoco del paquete de eventos.
+     */
+    @ArchTest
+    static final ArchRule el_nucleo_no_depende_de_spring = CompositeArchRule
+            .of(noClasses()
+                    .that().resideInAnyPackage("..domain..", "..application..")
+                    .and().resideOutsideOfPackage("..application.listener..")
+                    .should().dependOnClassesThat().resideInAPackage("org.springframework.."))
+            .and(noClasses()
+                    .that().resideInAPackage("..application.listener..")
+                    .should().dependOnClassesThat(resideInAPackage("org.springframework..")
+                            .and(not(equivalentTo(EventListener.class)))));
+
+    /**
      * Toda clase pertenece a una capa: la regla de capas solo mira dependencias entre capas, así que un paquete nuevo
-     * fuera de ellas (por ejemplo {@code config}) quedaría sin vigilar. La única excepción es la clase de arranque.
+     * fuera de ellas quedaría sin vigilar. Desde la #20, {@code config} es una capa más. La única excepción es la clase
+     * de arranque.
      */
     @ArchTest
     static final ArchRule toda_clase_pertenece_a_una_capa = classes()
-            .that().resideOutsideOfPackages("..adapter.in..", "..application..", "..domain..", "..adapter.out..")
+            .that().resideOutsideOfPackages("..adapter.in..", "..application..", "..domain..", "..adapter.out..", "..config..")
             .should().haveFullyQualifiedName(DddLabApplication.class.getName());
 }

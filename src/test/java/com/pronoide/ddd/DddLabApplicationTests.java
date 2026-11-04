@@ -29,8 +29,11 @@ import org.springframework.context.ApplicationContext;
 import com.pronoide.ddd.adapter.in.cli.DomainModelRunner;
 import com.pronoide.ddd.application.Caller;
 import com.pronoide.ddd.application.CheckingAccountCommands;
+import com.pronoide.ddd.application.CheckingAccountQueries;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
+import com.pronoide.ddd.application.listener.AuditLogListener;
+import com.pronoide.ddd.application.listener.CustomerNotificationListener;
 
 /**
  * Usuarios de test (#50): admin, ada, grace y alan, todos con la contraseña "demo" (mismo hash que el perfil demo).
@@ -87,6 +90,15 @@ class DddLabApplicationTests {
 		commands.deposit(admin, DepositCommand.builder().accountId(accountId).amount(new BigDecimal("25")).build());
 
 		assertThat(output).contains("Auditoría · MoneyDeposited · cuenta " + accountId);
+	}
+
+	@Test
+	@DisplayName("El contexto tiene un único servicio detrás de los dos puertos de entrada y los dos consumidores de eventos")
+	void el_contexto_cablea_el_nucleo_desde_config() {
+		assertThat(context.getBeansOfType(CheckingAccountCommands.class)).hasSize(1);
+		assertThat(context.getBean(CheckingAccountCommands.class)).isSameAs(context.getBean(CheckingAccountQueries.class));
+		assertThat(context.getBeansOfType(AuditLogListener.class)).hasSize(1);
+		assertThat(context.getBeansOfType(CustomerNotificationListener.class)).hasSize(1);
 	}
 
 	@Test
