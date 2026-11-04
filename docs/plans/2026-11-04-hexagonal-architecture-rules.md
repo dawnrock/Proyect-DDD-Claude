@@ -37,7 +37,7 @@ What the onion checks on its own: the domain model does not depend on services, 
 
 | `LayeredArchitectureTests` (today) | `HexagonalArchitectureTests` |
 | ---------------------------------- | ---------------------------- |
-| `las_capas_solo_dependen_hacia_abajo` | `las_dependencias_apuntan_hacia_el_hexagono` (onion) + `nadie_depende_de_config` |
+| `las_capas_solo_dependen_hacia_abajo` | `las_dependencias_apuntan_hacia_el_hexagono` (onion) + `nadie_depende_de_config` + `nadie_fuera_de_adapter_in_depende_de_adapter_in` and `el_soporte_de_adapter_in_no_conoce_a_los_adaptadores` (added in T6: the first version lost "nobody depends on the input adapters") |
 | `el_dominio_solo_depende_del_jdk` (D1) | kept: `el_dominio_solo_depende_del_jdk` (covers `org.immutables`, issue rule) |
 | `la_presentacion_solo_conoce_las_excepciones_del_dominio` (D4) | kept, renamed `los_adaptadores_de_entrada_solo_conocen_las_excepciones_del_dominio` |
 | `la_web_y_rest_no_se_conocen` (D5), `los_adaptadores_de_salida_no_se_conocen`, `los_controladores_no_acceden_al_repositorio` | onion: adapters do not depend on each other |
@@ -116,6 +116,17 @@ What the onion checks on its own: the domain model does not depend on services, 
   3. Project status: #22 done, next step `/plan-feature 23`; remove the pending items from #15 and #54 about `HexagonalArchitectureTests`; decision (onion + explicit rules, mapping).
 - **Acceptance criteria:**
   - [x] No current document says `LayeredArchitectureTests` guards phase 2; the CI check of the project status passes.
+
+### [x] T6 — Review fixes (~10 min)
+
+- **Layer:** tests · docs
+- **Files:** `HexagonalArchitectureTests.java`, `docs/arquitectura/fase-2-hexagonal.md`, this plan
+- **Depends on:** T5
+- **What to do:**
+  1. `revisor-ddd` found real gaps: `los_puertos_de_entrada_son_interfaces` only checked `*Queries` (ArchUnit chains `.and()`/`.or()` left to right; the T2 sabotage used a `*Queries` class, so it did not show), and the `ignoreDependency` of the onion dropped the old "nobody depends on the input adapters" (the application or `config` could use `adapter.in`) and let the security support use `cli`, `rest` or `web`.
+  2. The name goes in one predicate; new rules `nadie_fuera_de_adapter_in_depende_de_adapter_in` and `el_soporte_de_adapter_in_no_conoce_a_los_adaptadores`; the mapping table is corrected.
+- **Acceptance criteria:**
+  - [x] Validated by breaking them: a `SabotageCommands` and a `SabotageQueries` class, the application using `CurrentCaller`, `config` using `AccountController`, and `CurrentCaller` using `WebFormat` each fail their rule.
 
 ## Global acceptance criteria
 

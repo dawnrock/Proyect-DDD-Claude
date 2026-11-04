@@ -7,6 +7,7 @@ import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.equivalentTo;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.simpleNameEndingWith;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
@@ -82,13 +83,14 @@ class HexagonalArchitectureTests {
             .that().resideInAPackage("..adapter.out..")
             .should().dependOnClassesThat(resideInAPackage("..application..").and(not(INTERFACES)));
 
-    /** Los puertos de entrada ({@code *Commands}, {@code *Queries}) son interfaces de {@code application}. */
+    /**
+     * Los puertos de entrada ({@code *Commands}, {@code *Queries}) son interfaces de {@code application}. El nombre va en
+     * un solo predicado: ArchUnit encadena {@code .and()} y {@code .or()} de izquierda a derecha, sin precedencia.
+     */
     @ArchTest
     static final ArchRule los_puertos_de_entrada_son_interfaces = classes()
-            .that().resideInAPackage("..application..")
-            .and().haveSimpleNameEndingWith("Commands")
-            .or().resideInAPackage("..application..")
-            .and().haveSimpleNameEndingWith("Queries")
+            .that(simpleNameEndingWith("Commands").or(simpleNameEndingWith("Queries")))
+            .and().resideInAPackage("..application..")
             .should().beInterfaces();
 
     /**
@@ -184,6 +186,22 @@ class HexagonalArchitectureTests {
     static final ArchRule solo_adapter_out_conoce_los_adaptadores_de_salida = noClasses()
             .that().resideOutsideOfPackage("..adapter.out..")
             .should().dependOnClassesThat().resideInAPackage("..adapter.out..");
+
+    /**
+     * Nadie fuera de {@code adapter.in} depende de los adaptadores de entrada ni de su soporte de seguridad: ni el
+     * hexágono, ni los adaptadores de salida, ni {@code config}. Cubre lo que la cebolla no ve en su raíz.
+     */
+    @ArchTest
+    static final ArchRule nadie_fuera_de_adapter_in_depende_de_adapter_in = noClasses()
+            .that().resideOutsideOfPackage("..adapter.in..")
+            .should().dependOnClassesThat().resideInAPackage("..adapter.in..");
+
+    /** El soporte de seguridad de la raíz de {@code adapter.in} es común: no conoce a ningún adaptador de entrada. */
+    @ArchTest
+    static final ArchRule el_soporte_de_adapter_in_no_conoce_a_los_adaptadores = noClasses()
+            .that().resideInAPackage(ADAPTER_IN_SUPPORT)
+            .should().dependOnClassesThat()
+            .resideInAnyPackage("..adapter.in.cli..", "..adapter.in.rest..", "..adapter.in.web..");
 
     /** #20: {@code config} construye el núcleo y nadie depende de ella. */
     @ArchTest
