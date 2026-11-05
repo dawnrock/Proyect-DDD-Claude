@@ -73,17 +73,18 @@ Graphify is not installed in the cloud session: it is installed with `pip instal
 - **Acceptance criteria:**
   - [x] One run prints its tokens and the answer is complete; `graphify-out/` is back after an A run.
 
-### [ ] T3 — Configuration A: no graph (~10 min)
+### [x] T3 — Configuration A: no graph (~10 min)
 
 - **Layer:** docs (measurement notes)
 - **Files:** notes for T6
 - **Depends on:** T2
 - **What to do:**
   1. `node scripts/measure-graphify.mjs A 2`; keep the output and check each answer is complete (same files as a manual Grep).
+  2. Done: every answer was checked automatically against the expected classes (all 30 complete). Without a graph the agent still tries it on dependency questions (`ls graphify-out/graph.json && …`, which fails at once), so A includes that cheap check.
 - **Acceptance criteria:**
-  - [ ] 10 runs recorded, with the exact questions.
+  - [x] 10 runs recorded, with the exact questions.
 
-### [ ] T4 — Configuration B: current rule (~10 min)
+### [x] T4 — Configuration B: current rule (~10 min)
 
 - **Layer:** docs (measurement notes)
 - **Files:** notes for T6
@@ -91,9 +92,9 @@ Graphify is not installed in the cloud session: it is installed with `pip instal
 - **What to do:**
   1. `node scripts/measure-graphify.mjs B 2`; same checks. Note whether the agent used the graph on the dependency questions (2-4) and not on the others.
 - **Acceptance criteria:**
-  - [ ] 10 runs recorded; graph use per question noted.
+  - [x] 10 runs recorded; graph use per question noted.
 
-### [ ] T5 — Configuration C: graph first (~10 min)
+### [x] T5 — Configuration C: graph first (~10 min)
 
 - **Layer:** docs (measurement notes)
 - **Files:** notes for T6
@@ -101,7 +102,7 @@ Graphify is not installed in the cloud session: it is installed with `pip instal
 - **What to do:**
   1. `node scripts/measure-graphify.mjs C 2`; same checks. This is the "widen its use" option the issue asks about.
 - **Acceptance criteria:**
-  - [ ] 10 runs recorded.
+  - [x] 10 runs recorded.
 
 ### [ ] T6 — ADR 0010: phase-2 measurement and conclusion (~10 min)
 
