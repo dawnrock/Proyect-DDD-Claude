@@ -1,7 +1,7 @@
 # Contract: transfers show their counterpart account
 
 - **Issue:** [#72](https://github.com/dawnrock/Proyect-DDD-Claude/issues/72) · **Plan:** `docs/plans/2026-11-05-web-pending-items.md`
-- **Status:** agreed (frozen in the next commit)
+- **Status:** frozen at `4d12b7c`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed with clarifications, merged by the lead)
 
 Extends the transaction view of `deposits-withdrawals.md` (#6) and `money-transfers.md` (#7). Transfers are still recorded as a `WITHDRAWAL` on the source and a `DEPOSIT` on the target (#7 decision); each of those two transactions now also records the **counterpart account** (the other account of the transfer). The signatures of the input ports do not change: the back tasks (T1-T3) only fill the new field. No domain event changes.
