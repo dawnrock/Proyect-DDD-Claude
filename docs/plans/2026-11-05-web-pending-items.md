@@ -43,7 +43,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
 
 ## Tasks
 
-### [ ] T0 — Contract (~10 min)
+### [x] T0 — Contract (~10 min)
 
 - **Side:** both
 - **Layer:** application · docs
@@ -53,7 +53,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
   1. Contract from the template: `TransactionSummary.counterpartAccountNumber()` (`Optional<String>`, normalised IBAN of the other account, present only for transactions of a transfer, also a rejected one); REST `Transaction` schema gains `counterpartAccountNumber` (string, omitted when absent); screens: list with segment, details with "Transferencia a/de <shortened IBAN>" and newest first. No new errors.
   2. Add the attribute to `TransactionSummaryDef` without filling it (always empty); backend-dev and web-dev review and agree; frozen in a commit.
 - **Acceptance criteria:**
-  - [ ] Contract agreed and frozen; `./mvnw verify` green with the new (empty) attribute.
+  - [x] Contract agreed and frozen; `./mvnw verify` green with the new (empty) attribute.
 
 ### [ ] T1 — Domain: transactions of a transfer know the other account (~10 min)
 
