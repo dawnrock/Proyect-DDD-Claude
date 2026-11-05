@@ -70,7 +70,7 @@ The root of `adapter.in` already holds the security support shared by REST and w
 - **Acceptance criteria:**
   - [x] `SegmentLabelsTests` and `WebFormatTests` green; `HexagonalArchitectureTests` green.
 
-### [ ] T4 — The CLI uses `SegmentLabels` (~5 min)
+### [x] T4 — The CLI uses `SegmentLabels` (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/cli/DomainModelRunner.java`
@@ -79,7 +79,7 @@ The root of `adapter.in` already holds the security support shared by REST and w
   1. Remove the runner's own map and `segmentLabel`; use `SegmentLabels`. The trace tests of `DomainModelRunnerTests` act as characterization tests (same `[demo]` lines).
   2. Check the architecture rules: the CLI may use the support in the root of `adapter.in`, and the support still knows no adapter.
 - **Acceptance criteria:**
-  - [ ] `DomainModelRunnerTests` and `HexagonalArchitectureTests` green; no segment label left outside `SegmentLabels` (grep).
+  - [x] `DomainModelRunnerTests` and `HexagonalArchitectureTests` green; no segment label left outside `SegmentLabels` (grep).
 
 ### [ ] T5 — Documentation and project status (~10 min)
 

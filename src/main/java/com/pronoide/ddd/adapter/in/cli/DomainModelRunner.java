@@ -2,13 +2,13 @@ package com.pronoide.ddd.adapter.in.cli;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import com.pronoide.ddd.adapter.in.SegmentLabels;
 import com.pronoide.ddd.application.AccountSummary;
 import com.pronoide.ddd.application.CallerDef;
 import com.pronoide.ddd.application.CheckingAccountCommands;
@@ -41,10 +41,6 @@ public class DomainModelRunner implements ApplicationRunner {
             account("Grace Hopper", "87654321X", "5000.00", "grace"),
             account("Alan Turing", "11111111H", "250.00", "alan"));
 
-    /** Nombre del segmento en la traza, como en la web; un código desconocido se muestra tal cual. */
-    private static final Map<String, String> SEGMENT_LABELS =
-            Map.of("RETAIL", "Minorista", "HIGH_NET_WORTH", "Alto patrimonio");
-
     private final CheckingAccountCommands commands;
 
     /**
@@ -69,7 +65,7 @@ public class DomainModelRunner implements ApplicationRunner {
     private AccountSummary open(OpenAccountCommand command) {
         AccountSummary account = commands.openAccount(CallerDef.system(), command);
         log.info("[demo] Abrir cuenta · {} · {} · {} · {} {} · propietario {}", account.accountNumber(),
-                account.holderName(), segmentLabel(account.segment()), account.balance(), account.currency(),
+                account.holderName(), SegmentLabels.of(account.segment()), account.balance(), account.currency(),
                 command.ownerUsername());
         return account;
     }
@@ -97,10 +93,6 @@ public class DomainModelRunner implements ApplicationRunner {
         log.info("[demo] Transferir · {} → {} · {} {} · {}", transfer.sourceAccountNumber(),
                 transfer.targetAccountNumber(), transfer.amount(), transfer.currency(),
                 transfer.status().equals("APPROVED") ? "aprobada" : "rechazada");
-    }
-
-    private static String segmentLabel(String segment) {
-        return SEGMENT_LABELS.getOrDefault(segment, segment);
     }
 
     private static OpenAccountCommand account(String holderName, String holderTaxId, String initialDeposit,
