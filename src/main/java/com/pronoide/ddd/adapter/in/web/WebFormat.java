@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.pronoide.ddd.adapter.in.SegmentLabels;
+
 /**
  * Formatos de la web, usables desde las plantillas como {@code ${@fmt.money(...)}}: importes en formato español
  * ({@code 1.000,00 €}), importes con signo, IBAN abreviado e iniciales del titular. Solo recibe valores de las vistas
@@ -49,11 +51,7 @@ public class WebFormat {
 
     /** Etiqueta en español del segmento; si el código es desconocido se muestra tal cual. Único sitio de la web. */
     public String segment(String segment) {
-        return switch (segment) {
-            case "RETAIL" -> "Minorista";
-            case "HIGH_NET_WORTH" -> "Alto patrimonio";
-            default -> segment;
-        };
+        return SegmentLabels.of(segment);
     }
 
     /** Iniciales de las dos primeras palabras del titular: {@code Grace Hopper} → {@code GH}. */

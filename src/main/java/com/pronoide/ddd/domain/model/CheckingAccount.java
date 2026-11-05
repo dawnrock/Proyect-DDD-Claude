@@ -53,6 +53,7 @@ public class CheckingAccount {
     /** Ingreso que llega por una transferencia desde {@code source}; mismas reglas que {@link #deposit}. */
     public Transaction depositFromTransfer(MonetaryAmount amount, AccountNumber source) {
         requirePositive(amount);
+        requireOtherAccount(source);
         return deposit(Transaction.depositFromTransfer(id, amount, source));
     }
 
@@ -74,7 +75,15 @@ public class CheckingAccount {
     /** Retirada que sale por una transferencia hacia {@code target}; mismas reglas que {@link #tryWithdraw}, también si se rechaza. */
     public Transaction tryWithdrawForTransfer(MonetaryAmount amount, AccountNumber target) {
         requirePositive(amount);
+        requireOtherAccount(target);
         return tryWithdraw(Transaction.withdrawalForTransfer(id, amount, target));
+    }
+
+    /** R17: la contrapartida de una transferencia es siempre otra cuenta. */
+    private void requireOtherAccount(AccountNumber counterpart) {
+        if (accountNumber.equals(Objects.requireNonNull(counterpart, "La cuenta de contrapartida es obligatoria"))) {
+            throw new SameAccountTransferException(accountNumber);
+        }
     }
 
     private Transaction tryWithdraw(Transaction movement) {

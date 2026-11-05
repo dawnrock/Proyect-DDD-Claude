@@ -6,8 +6,8 @@ Terms of the checking-accounts domain. The code and the documentation use the En
 
 | Term | Spanish term | In the code | DDD type | Definition |
 | ---- | ------------ | ----------- | -------- | ---------- |
-| Checking account | Cuenta corriente | `CheckingAccount` | Aggregate (root) | Account of one holder in a single currency, with a balance and a list of transactions. It is the only entry point to operate: it protects its invariants (R1-R11). Opened with `CheckingAccount.open(...)`. |
-| Holder | Titular | `AccountHolder` | Entity | Person the account belongs to. Has its own identity (`id`), full name and segment. Registered with `AccountHolder.register(...)` and changed with `rename` and `promoteToHighNetWorth`. |
+| Checking account | Cuenta corriente | `CheckingAccount` | Aggregate (root) | Account of one holder in a single currency, with a balance and a list of transactions. It is the only entry point to operate: it protects its invariants (R1-R11, and R17 for the counterpart of a transfer). Opened with `CheckingAccount.open(...)`. |
+| Holder | Titular | `AccountHolder` | Entity | Person the account belongs to. Has its own identity (`id`), full name and segment. Registered with `AccountHolder.register(...)` and changed with `rename` and `promoteToHighNetWorth`; the name is mandatory (R21). |
 | Customer segment | Segmento de cliente | `CustomerSegment` | Enumeration | Commercial classification of the holder: `RETAIL` (minorista) or `HIGH_NET_WORTH` (alto patrimonio). Decides whether the account may be overdrawn. |
 | Account number | Número de cuenta | `AccountNumber` | Value object | Spanish IBAN that identifies the account (R14). |
 | Amount | Importe | `MonetaryAmount` | Value object | Quantity and currency. Immutable and normalised to its currency's decimals (R12, R13). Created with `MonetaryAmount.euros("100.00")`. |
@@ -28,7 +28,7 @@ Terms of the checking-accounts domain. The code and the documentation use the En
 | Account numbering | Numeración de cuentas | `AccountNumberSequence` | Output port | Generates the number (IBAN) of each new account. Implemented by `InMemoryAccountNumberSequence` (simulated: valid, consecutive Spanish IBANs of bank 2100, branch 0418). |
 | Income verification | Verificación de ingresos | `IncomeVerifier` | Output port | Returns a holder's verified annual income by NIF, or nothing if it does not know them. Implemented by `FakeTaxAgencyIncomeVerifier` (simulated tax agency with a fixed table). |
 | High net worth threshold | Umbral de alto patrimonio | `HIGH_NET_WORTH_THRESHOLD` | Rule | €100,000.00 of verified annual income (R20). |
-| Transfer to the same account | Transferencia a la misma cuenta | `SameAccountTransferException` | Domain exception | A transfer from an account to itself (R17). Thrown by `MoneyTransferService` before recording any transaction. |
+| Transfer to the same account | Transferencia a la misma cuenta | `SameAccountTransferException` | Domain exception | A transfer from an account to itself (R17). Thrown by `MoneyTransferService` before recording any transaction, and by the account itself if it receives its own number as counterpart (#77). |
 
 ## Domain events (`domain.model`, #17)
 
@@ -78,14 +78,11 @@ Each rule cites the test that proves it (`src/test/java/com/pronoide/ddd/domain/
 | R14 | The account number is a Spanish IBAN: `ES` followed by 22 digits, normalised without spaces and in upper case. **The check digits are not validated.** | `AccountNumberTests#el_numero_de_cuenta_se_normaliza`, `AccountNumberTests#un_iban_con_formato_incorrecto_no_llega_a_construirse` |
 | R15 | A holder keeps its identity even if its attributes change, and two holders with the same data are different | `AccountHolderTests#un_titular_mantiene_su_identidad_aunque_cambien_sus_atributos`, `AccountHolderTests#dos_titulares_con_los_mismos_datos_son_entidades_distintas` |
 | R16 | An account cannot be opened with a number another one already uses. Since #18 the number is generated, and the check is a safety net | `CheckingAccountServiceTests#un_numero_generado_en_uso_se_rechaza`, `DuplicateAccountNumberExceptionTests#un_numero_de_cuenta_duplicado_es_una_regla_de_negocio_incumplida` |
-| R17 | A transfer to the same account is not allowed; it is rejected without recording transactions | `MoneyTransferServiceTests#transferir_a_la_misma_cuenta_se_rechaza_sin_registrar_movimientos` |
+| R17 | A transfer to the same account is not allowed; it is rejected without recording transactions. The account also refuses its own number as counterpart in `tryWithdrawForTransfer` and `depositFromTransfer` (#77) | `MoneyTransferServiceTests#transferir_a_la_misma_cuenta_se_rechaza_sin_registrar_movimientos`, `CheckingAccountTests#una_cuenta_no_puede_ser_su_propia_contrapartida` |
 | R18 | If the withdrawal on the source is rejected, nothing is deposited on the target and no balance changes | `MoneyTransferServiceTests#si_la_retirada_se_rechaza_no_se_ingresa_nada_en_el_destino` |
 | R19 | A transfer in a currency other than the accounts' is rejected before withdrawing, without recording transactions | `MoneyTransferServiceTests#un_importe_en_otra_divisa_se_rechaza_sin_registrar_movimientos` (today the withdrawal on the source already prevents it, because every account is in euros; the target check protects the case of accounts in another currency) |
 | R20 | A holder is registered as high net worth only if their verified annual income is above €100,000.00; with equal or lower income, or unverified, they are retail | `CheckingAccountFactoryTests#con_ingresos_por_encima_del_umbral_el_titular_es_de_alto_patrimonio`, `#con_ingresos_exactamente_en_el_umbral_el_titular_es_minorista`, `#si_los_ingresos_no_se_verifican_el_titular_es_minorista` |
-
-### Rules implemented without a test
-
-- The holder's name is mandatory and cannot be blank (`AccountHolder.register` and `rename`). Its test is missing: it will be added in the first issue that touches `AccountHolder`.
+| R21 | A holder's name is mandatory and cannot be blank, when registering and when renaming; a rejected rename keeps the previous name | `AccountHolderTests#el_nombre_del_titular_es_obligatorio_al_darlo_de_alta`, `AccountHolderTests#un_cambio_de_nombre_vacio_se_rechaza_y_conserva_el_anterior` |
 
 ## Persistence (`adapter.out.persistence`)
 

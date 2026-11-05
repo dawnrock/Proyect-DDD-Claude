@@ -89,6 +89,7 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | `WebExceptionHandler`, `WebModelAdvice`, `WebFormat` | `adapter.in.web` | Web support: 404 page, common model attributes, formatting (amounts, shortened IBAN, segment label) |
 | `WebSecurityConfig` | `adapter.in.web` | Input adapter: fallback security chain (form login) |
 | `SecuritySupport`, `CurrentCaller`, `SecurityUsersProperties` | `adapter.in` | Support shared by the input adapters: authenticated user → `Caller` |
+| `SegmentLabels` | `adapter.in` | Support shared by the input adapters: Spanish label of a segment code, used by the web (`WebFormat.segment`) and the CLI trace (#77) |
 | `InMemoryCheckingAccountRepository` | `adapter.out.persistence` | Output adapter (simulated persistence, package-private): implements `CheckingAccountRepository` |
 | `SpringDomainEventPublisher` | `adapter.out.event` | Output adapter (package-private): implements `DomainEventPublisher` over Spring's `ApplicationEventPublisher` |
 | `InMemoryAccountNumberSequence` | `adapter.out.persistence` | Output adapter (simulated, package-private): implements `AccountNumberSequence`, valid consecutive Spanish IBANs |
