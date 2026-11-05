@@ -86,7 +86,7 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | `ApiSecurityConfig` | `adapter.in.rest` | Input adapter: security chain of `/api/**` (HTTP Basic) |
 | `AccountWebController`, `LoginController`, `AccessDeniedController` | `adapter.in.web` | Input adapter (web): screens and forms; uses the input ports only |
 | `MovementForm`, `OpenAccountForm`, `TransferForm` | `adapter.in.web` | Web forms; the open-account form asks for the holder's NIF |
-| `WebExceptionHandler`, `WebModelAdvice`, `WebFormat` | `adapter.in.web` | Web support: 404 page, common model attributes, amount formatting |
+| `WebExceptionHandler`, `WebModelAdvice`, `WebFormat` | `adapter.in.web` | Web support: 404 page, common model attributes, formatting (amounts, shortened IBAN, segment label) |
 | `WebSecurityConfig` | `adapter.in.web` | Input adapter: fallback security chain (form login) |
 | `SecuritySupport`, `CurrentCaller`, `SecurityUsersProperties` | `adapter.in` | Support shared by the input adapters: authenticated user → `Caller` |
 | `InMemoryCheckingAccountRepository` | `adapter.out.persistence` | Output adapter (simulated persistence, package-private): implements `CheckingAccountRepository` |

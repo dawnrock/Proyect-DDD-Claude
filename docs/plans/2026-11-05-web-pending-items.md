@@ -163,7 +163,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
 - **Acceptance criteria:**
   - [x] The integration test passes and fails when the counterpart is not mapped; `./mvnw verify` green.
 
-### [ ] T10 — Glossary, documentation and project status (~10 min)
+### [x] T10 — Glossary, documentation and project status (~10 min)
 
 - **Side:** both
 - **Layer:** docs
@@ -173,7 +173,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
   1. Glossary: "Counterpart account / Cuenta de contrapartida" and the transfer row says the transactions record it; the views row mentions the new field.
   2. Status: #72 done; next step decided with the user (no open issues left); decision (counterpart instead of transfer types; newest first only on the web); `pendientes.md` loses the #48 web items.
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes.
+  - [x] The CI check of the project status passes.
 
 ## Global acceptance criteria
 
