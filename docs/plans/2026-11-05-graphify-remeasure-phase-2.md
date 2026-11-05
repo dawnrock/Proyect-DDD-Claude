@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone)
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-05
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~70 min (7 tasks)
 
 ## Goal
@@ -50,15 +50,16 @@ Graphify is not installed in the cloud session: it is installed with `pip instal
 
 ## Tasks
 
-### [ ] T1 — Install Graphify and build the graph (~5 min)
+### [x] T1 — Install Graphify and build the graph (~5 min)
 
 - **Layer:** tooling
 - **Files:** — (`graphify-out/` is ignored)
 - **Depends on:** —
 - **What to do:**
   1. `pip install --user graphifyy==0.9.97` (the #57 version, for comparability; if it is no longer available, the latest, recorded in the ADR). `node scripts/graphify.mjs update .` and check `affected "MoneyTransferService"` answers with file and line.
+  2. Done: Graphify 0.9.97 (same as #57), graph built in ~3 s. Note: `affected "MoneyTransferService"` lists `CheckingAccountService` and the tests, but not `config.DomainConfiguration`, which builds it (to check in the measurement).
 - **Acceptance criteria:**
-  - [ ] `graphify-out/graph.json` exists and is not tracked (`git status` clean); the version is noted.
+  - [x] `graphify-out/graph.json` exists and is not tracked (`git status` clean); the version is noted.
 
 ### [ ] T2 — Measurement script (~10 min)
 
