@@ -91,7 +91,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
 - **Acceptance criteria:**
   - [x] Service tests green.
 
-### [ ] T4 — REST: the transaction response carries the counterpart (~10 min)
+### [x] T4 — REST: the transaction response carries the counterpart (~10 min)
 
 - **Side:** back
 - **Layer:** adapter.in.rest
@@ -101,7 +101,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
   1. Test first (`@WebMvcTest`, ports mocked): `GET /api/accounts/{id}` returns `counterpartAccountNumber` on a transfer transaction and omits it on a deposit.
   2. Add the field to the response and its mapping.
 - **Acceptance criteria:**
-  - [ ] REST tests green; JSON as in the contract.
+  - [x] REST tests green; JSON as in the contract.
 
 ### [ ] T5 — OpenAPI (~5 min)
 
