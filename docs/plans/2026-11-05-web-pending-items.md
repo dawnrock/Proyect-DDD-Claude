@@ -55,7 +55,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
 - **Acceptance criteria:**
   - [x] Contract agreed and frozen; `./mvnw verify` green with the new (empty) attribute.
 
-### [ ] T1 — Domain: transactions of a transfer know the other account (~10 min)
+### [x] T1 — Domain: transactions of a transfer know the other account (~10 min)
 
 - **Side:** back
 - **Layer:** domain
@@ -65,9 +65,9 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
   1. Tests first: a withdrawal for a transfer records the target account number (approved and rejected); a deposit from a transfer records the source account number; a plain deposit or withdrawal has no counterpart.
   2. `Transaction.counterpart()` (`Optional<AccountNumber>`), set only by the factory methods inside the package; `CheckingAccount` gains the business methods (for example `tryWithdrawForTransfer(amount, target)` and `depositFromTransfer(amount, source)`), reusing the same rules (R3-R9). Names checked against the glossary.
 - **Acceptance criteria:**
-  - [ ] Domain tests green; `check-domain.mjs` without errors (no Lombok, no public setters).
+  - [x] Domain tests green; `check-domain.mjs` without errors (no Lombok, no public setters).
 
-### [ ] T2 — Domain service: transfers record the counterpart (~5 min)
+### [x] T2 — Domain service: transfers record the counterpart (~5 min)
 
 - **Side:** back
 - **Layer:** domain.service
@@ -77,9 +77,9 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
   1. Test first: after a transfer, the source's withdrawal points to the target and the target's deposit to the source; a rejected transfer leaves the rejected withdrawal pointing to the target and nothing on the target (R18).
   2. `MoneyTransferService` uses the new methods; R17-R19 unchanged.
 - **Acceptance criteria:**
-  - [ ] `MoneyTransferServiceTests` green, including the existing R17-R19 tests.
+  - [x] `MoneyTransferServiceTests` green, including the existing R17-R19 tests.
 
-### [ ] T3 — Application: the view carries the counterpart (~5 min)
+### [x] T3 — Application: the view carries the counterpart (~5 min)
 
 - **Side:** back
 - **Layer:** application
@@ -89,9 +89,9 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
   1. Test first: the details of both accounts after a transfer show the counterpart on the transfer's transactions and none on the others.
   2. The mapping fills `counterpartAccountNumber` from `Transaction.counterpart()`.
 - **Acceptance criteria:**
-  - [ ] Service tests green.
+  - [x] Service tests green.
 
-### [ ] T4 — REST: the transaction response carries the counterpart (~10 min)
+### [x] T4 — REST: the transaction response carries the counterpart (~10 min)
 
 - **Side:** back
 - **Layer:** adapter.in.rest
@@ -101,9 +101,9 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
   1. Test first (`@WebMvcTest`, ports mocked): `GET /api/accounts/{id}` returns `counterpartAccountNumber` on a transfer transaction and omits it on a deposit.
   2. Add the field to the response and its mapping.
 - **Acceptance criteria:**
-  - [ ] REST tests green; JSON as in the contract.
+  - [x] REST tests green; JSON as in the contract.
 
-### [ ] T5 — OpenAPI (~5 min)
+### [x] T5 — OpenAPI (~5 min)
 
 - **Side:** back
 - **Layer:** docs
@@ -112,7 +112,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
 - **What to do:**
   1. `Transaction` schema: optional `counterpartAccountNumber` with its description; check it matches the contract fragment.
 - **Acceptance criteria:**
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
+  - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
 
 ### [ ] T6 — Web format: unbroken IBAN and segment label (~5 min)
 

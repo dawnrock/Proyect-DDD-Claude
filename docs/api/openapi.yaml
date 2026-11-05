@@ -361,6 +361,12 @@ components:
         status:
           type: string
           enum: [PENDING, APPROVED, REJECTED]
+        counterpartAccountNumber:
+          type: string
+          description: >-
+            Normalised IBAN of the other account when the transaction belongs to a transfer
+            (target on the source's withdrawal, source on the target's deposit). Omitted otherwise.
+          example: ES7921000418450200051332
     ProblemDetail:
       type: object
       description: Error in RFC 9457 format.

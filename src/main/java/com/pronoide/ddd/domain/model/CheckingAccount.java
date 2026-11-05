@@ -47,9 +47,19 @@ public class CheckingAccount {
 
     public Transaction deposit(MonetaryAmount amount) {
         requirePositive(amount);
+        return deposit(Transaction.deposit(id, amount));
+    }
 
+    /** Ingreso que llega por una transferencia desde {@code source}; mismas reglas que {@link #deposit}. */
+    public Transaction depositFromTransfer(MonetaryAmount amount, AccountNumber source) {
+        requirePositive(amount);
+        return deposit(Transaction.depositFromTransfer(id, amount, source));
+    }
+
+    private Transaction deposit(Transaction movement) {
+        MonetaryAmount amount = movement.amount();
         MonetaryAmount newBalance = currentBalance.add(amount);
-        Transaction transaction = register(Transaction.deposit(id, amount));
+        Transaction transaction = register(movement);
         transaction.approve();
         currentBalance = newBalance;
         record(new MoneyDeposited(id, transaction.id(), amount, transaction.occurredOn()));
@@ -58,10 +68,20 @@ public class CheckingAccount {
 
     public Transaction tryWithdraw(MonetaryAmount amount) {
         requirePositive(amount);
+        return tryWithdraw(Transaction.withdrawal(id, amount));
+    }
 
+    /** Retirada que sale por una transferencia hacia {@code target}; mismas reglas que {@link #tryWithdraw}, también si se rechaza. */
+    public Transaction tryWithdrawForTransfer(MonetaryAmount amount, AccountNumber target) {
+        requirePositive(amount);
+        return tryWithdraw(Transaction.withdrawalForTransfer(id, amount, target));
+    }
+
+    private Transaction tryWithdraw(Transaction movement) {
+        MonetaryAmount amount = movement.amount();
         MonetaryAmount newBalance = currentBalance.subtract(amount);
 
-        Transaction transaction = register(Transaction.withdrawal(id, amount));
+        Transaction transaction = register(movement);
 
         if (isAllowed(newBalance)) {
             transaction.approve();
