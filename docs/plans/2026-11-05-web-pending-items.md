@@ -150,7 +150,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
 - **Acceptance criteria:**
   - [x] Web tests green; plain deposits and withdrawals keep their current labels.
 
-### [ ] T9 — Integration: the demo shows the transfer (~10 min)
+### [x] T9 — Integration: the demo shows the transfer (~10 min)
 
 - **Side:** both
 - **Layer:** tests
@@ -159,8 +159,9 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
 - **What to do:**
   1. Merge back and web. Full context with the `demo` profile: the REST details of Ada's account show the €300 deposit with Grace's account number as counterpart, and the web details of Grace's account show "Transferencia a …" first.
   2. Prove the test can fail: break the mapping of T3 temporarily, see red, revert.
+  3. Done in `DemoProfileTests` (full context, real HTTP): the REST check reads the account list and Ada's details as JSON; the web check signs in as `grace` through the login form (cookie session + CSRF token) and looks for "Transferencia a <Ada's shortened IBAN>" before the initial "Ingreso". Sabotage: mapping the counterpart as empty in `CheckingAccountService` makes both tests fail; reverted.
 - **Acceptance criteria:**
-  - [ ] The integration test passes and fails when the counterpart is not mapped; `./mvnw verify` green.
+  - [x] The integration test passes and fails when the counterpart is not mapped; `./mvnw verify` green.
 
 ### [ ] T10 — Glossary, documentation and project status (~10 min)
 
