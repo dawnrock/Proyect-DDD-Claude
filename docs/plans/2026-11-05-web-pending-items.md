@@ -138,7 +138,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
 - **Acceptance criteria:**
   - [x] Web tests green.
 
-### [ ] T8 — Web: transfer label and newest transactions first (~10 min)
+### [x] T8 — Web: transfer label and newest transactions first (~10 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -148,7 +148,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
   1. Tests first, with stubbed views: a withdrawal with a counterpart reads "Transferencia a ES79 •••• 6789", a deposit with one "Transferencia de …", a rejected one keeps its rejected style; transactions appear newest first.
   2. Implement the label in the template and the order in the controller (the view list stays as `application` returns it).
 - **Acceptance criteria:**
-  - [ ] Web tests green; plain deposits and withdrawals keep their current labels.
+  - [x] Web tests green; plain deposits and withdrawals keep their current labels.
 
 ### [ ] T9 — Integration: the demo shows the transfer (~10 min)
 

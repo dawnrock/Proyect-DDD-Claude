@@ -1,5 +1,6 @@
 package com.pronoide.ddd.adapter.in.web;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
@@ -366,6 +367,18 @@ class AccountWebControllerTests {
                 .build();
     }
 
+    private static TransactionSummary transfer(String type, String amount, String status, String counterpart) {
+        return TransactionSummary.builder()
+                .id(UUID.randomUUID())
+                .type(type)
+                .amount(new BigDecimal(amount))
+                .currency("EUR")
+                .occurredOn(Instant.parse("2026-10-23T10:15:00Z"))
+                .status(status)
+                .counterpartAccountNumber(counterpart)
+                .build();
+    }
+
     private static AccountDetails details(TransactionSummary... transactions) {
         return AccountDetails.builder()
                 .id(ACCOUNT_ID)
@@ -401,6 +414,56 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("+100,00 €")))
                     .andExpect(content().string(containsString("−30,00 €")))
                     .andExpect(content().string(containsString("/2026")));
+        }
+
+        @Test
+        @DisplayName("Una retirada con contrapartida se muestra como transferencia a la cuenta de destino")
+        void una_retirada_con_contrapartida_se_muestra_como_transferencia_a() throws Exception {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details(
+                    transfer("WITHDRAWAL", "30.00", "APPROVED", "ES7921000813610123456789")));
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(content().string(containsString("Transferencia a ES79\u00A0••••\u00A06789")))
+                    .andExpect(content().string(not(containsString(">Retirada<"))));
+        }
+
+        @Test
+        @DisplayName("Un ingreso con contrapartida se muestra como transferencia desde la cuenta de origen")
+        void un_ingreso_con_contrapartida_se_muestra_como_transferencia_de() throws Exception {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details(
+                    transfer("DEPOSIT", "30.00", "APPROVED", "ES7921000813610123456789")));
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(content().string(containsString("Transferencia de ES79\u00A0••••\u00A06789")))
+                    .andExpect(content().string(not(containsString(">Ingreso<"))));
+        }
+
+        @Test
+        @DisplayName("Una transferencia rechazada conserva el estilo de rechazada y su etiqueta de transferencia")
+        void una_transferencia_rechazada_conserva_el_estilo_de_rechazada() throws Exception {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details(
+                    transfer("WITHDRAWAL", "500.00", "REJECTED", "ES7921000813610123456789")));
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(content().string(containsString("row-rejected")))
+                    .andExpect(content().string(containsString("Transferencia a ES79\u00A0••••\u00A06789")))
+                    .andExpect(content().string(containsString("Rechazado")));
+        }
+
+        @Test
+        @DisplayName("Los movimientos se muestran del más reciente al más antiguo, aunque compartan instante")
+        void los_movimientos_se_muestran_del_mas_reciente_al_mas_antiguo() throws Exception {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details(
+                    transaction("DEPOSIT", "111.00", "APPROVED"),
+                    transaction("DEPOSIT", "222.00", "APPROVED"),
+                    transaction("DEPOSIT", "333.00", "APPROVED")));
+
+            String html = mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andReturn().getResponse().getContentAsString();
+
+            assertThat(html.indexOf("+333,00 €")).isPositive()
+                    .isLessThan(html.indexOf("+222,00 €"));
+            assertThat(html.indexOf("+222,00 €")).isLessThan(html.indexOf("+111,00 €"));
         }
 
         @Test

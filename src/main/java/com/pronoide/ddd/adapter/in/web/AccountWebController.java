@@ -1,6 +1,8 @@
 package com.pronoide.ddd.adapter.in.web;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountSummary;
 import com.pronoide.ddd.application.Caller;
 import com.pronoide.ddd.application.CheckingAccountCommands;
@@ -185,7 +188,13 @@ public class AccountWebController {
             model.addAttribute("transferForm", new TransferForm());
         }
         // Primero la cuenta: una ajena es un 404 sin consultar nada más
-        model.addAttribute("account", queries.findAccount(caller, id));
+        AccountDetails account = queries.findAccount(caller, id);
+        model.addAttribute("account", account);
+        // application devuelve los movimientos del más antiguo al más reciente; la web los pinta al revés. Se invierte
+        // una copia, sin ordenar por fecha: dos movimientos pueden compartir instante.
+        List<TransactionSummary> newestFirst = new ArrayList<>(List.copyOf(account.transactions()));
+        Collections.reverse(newestFirst);
+        model.addAttribute("transactions", newestFirst);
         model.addAttribute("backLabel", backLabel(caller));
         model.addAttribute("currencies", CURRENCIES);
         return DETAIL_VIEW;

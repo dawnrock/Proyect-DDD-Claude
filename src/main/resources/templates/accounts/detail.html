@@ -82,19 +82,19 @@
     </div>
 
     <h2>Movimientos</h2>
-    <ul class="list" th:if="${!account.transactions().isEmpty()}">
+    <ul class="list" th:if="${!transactions.isEmpty()}">
         <!--/* Un ingreso suma (+) y una retirada resta (−); un movimiento rechazado no cambió el saldo y va sin signo.
              Supone que solo hay DEPOSIT y WITHDRAWAL: un tipo nuevo exigiría revisar el signo. */-->
-        <li class="row" th:each="t : ${account.transactions()}" th:classappend="${t.status() == 'REJECTED'} ? 'row-rejected'">
+        <li class="row" th:each="t : ${transactions}" th:with="cp=${t.counterpartAccountNumber().orElse(null)}" th:classappend="${t.status() == 'REJECTED'} ? 'row-rejected'">
             <span class="row-main">
-                <span class="row-title" th:text="${t.type() == 'DEPOSIT' ? 'Ingreso' : (t.type() == 'WITHDRAWAL' ? 'Retirada' : t.type())}">Ingreso</span>
+                <span class="row-title" th:text="${t.type() == 'DEPOSIT' ? (cp != null ? 'Transferencia de ' + @fmt.maskedIban(cp) : 'Ingreso') : (t.type() == 'WITHDRAWAL' ? (cp != null ? 'Transferencia a ' + @fmt.maskedIban(cp) : 'Retirada') : t.type())}">Ingreso</span>
                 <span class="row-sub"><span th:text="${#temporals.format(t.occurredOn(), 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</span><span class="status" th:if="${t.status() == 'REJECTED'}"> · Rechazado</span><span class="status" th:if="${t.status() == 'PENDING'}"> · Pendiente</span></span>
             </span>
             <span class="row-amount" th:classappend="${t.type() == 'DEPOSIT' and t.status() == 'APPROVED'} ? 'positive'"
                   th:text="${t.status() == 'REJECTED' ? @fmt.money(t.amount(), t.currency()) : @fmt.signedMoney(t.amount(), t.currency(), t.type() == 'DEPOSIT')}">+0,00 €</span>
         </li>
     </ul>
-    <p th:if="${account.transactions().isEmpty()}" class="empty">Todavía no hay movimientos.</p>
+    <p th:if="${transactions.isEmpty()}" class="empty">Todavía no hay movimientos.</p>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
