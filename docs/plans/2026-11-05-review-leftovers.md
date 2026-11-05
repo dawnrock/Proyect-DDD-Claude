@@ -81,17 +81,17 @@ The root of `adapter.in` already holds the security support shared by REST and w
 - **Acceptance criteria:**
   - [x] `DomainModelRunnerTests` and `HexagonalArchitectureTests` green; no segment label left outside `SegmentLabels` (grep).
 
-### [ ] T5 — Documentation and project status (~10 min)
+### [x] T5 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/dominio/glosario.md`, `docs/arquitectura/fase-2-hexagonal.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
 - **Depends on:** T1-T4
 - **What to do:**
-  1. Glossary: the holder-name rule moves from "Rules implemented without a test" to its tests (the section is removed if empty); R17 says the aggregate also rejects its own number in the transfer methods.
+  1. Glossary: the holder-name rule becomes R21 with its tests and the section "Rules implemented without a test" is removed (it only held this rule); R17 says the aggregate also rejects its own number in the transfer methods.
   2. `fase-2-hexagonal.md`: `SegmentLabels` in the row of the shared support of `adapter.in`; `WebFormat` row.
   3. Status: #77 done, next step `/plan-feature 78`; `pendientes.md` loses the three items; a row in `historial.md`.
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes.
+  - [x] The CI check of the project status passes.
 
 ## Global acceptance criteria
 
