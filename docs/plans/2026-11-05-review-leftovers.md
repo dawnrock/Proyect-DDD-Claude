@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone)
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-05
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~40 min (5 tasks)
 
 ## Goal
@@ -37,7 +37,7 @@ The root of `adapter.in` already holds the security support shared by REST and w
 
 ## Tasks
 
-### [ ] T1 — The holder name is mandatory (test) (~5 min)
+### [x] T1 — The holder name is mandatory (test) (~5 min)
 
 - **Layer:** domain
 - **Files:** `src/test/java/com/pronoide/ddd/domain/model/AccountHolderTests.java`
@@ -46,7 +46,7 @@ The root of `adapter.in` already holds the security support shared by REST and w
   1. Tests (characterization, they pass at once): `register` and `rename` with `null` throw `NullPointerException`, and with a blank name `IllegalArgumentException`; a failed `rename` keeps the previous name.
   2. Prove they can fail: remove the blank check from `AccountHolder.requireName` temporarily, see red, revert.
 - **Acceptance criteria:**
-  - [ ] The tests pass and fail when the check is removed.
+  - [x] The tests pass and fail when the check is removed.
 
 ### [ ] T2 — The aggregate rejects its own number as counterpart (~10 min)
 
