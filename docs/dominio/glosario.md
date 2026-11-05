@@ -6,7 +6,7 @@ Terms of the checking-accounts domain. The code and the documentation use the En
 
 | Term | Spanish term | In the code | DDD type | Definition |
 | ---- | ------------ | ----------- | -------- | ---------- |
-| Checking account | Cuenta corriente | `CheckingAccount` | Aggregate (root) | Account of one holder in a single currency, with a balance and a list of transactions. It is the only entry point to operate: it protects its invariants (R1-R11). Opened with `CheckingAccount.open(...)`. |
+| Checking account | Cuenta corriente | `CheckingAccount` | Aggregate (root) | Account of one holder in a single currency, with a balance and a list of transactions. It is the only entry point to operate: it protects its invariants (R1-R11, and R17 for the counterpart of a transfer). Opened with `CheckingAccount.open(...)`. |
 | Holder | Titular | `AccountHolder` | Entity | Person the account belongs to. Has its own identity (`id`), full name and segment. Registered with `AccountHolder.register(...)` and changed with `rename` and `promoteToHighNetWorth`; the name is mandatory (R21). |
 | Customer segment | Segmento de cliente | `CustomerSegment` | Enumeration | Commercial classification of the holder: `RETAIL` (minorista) or `HIGH_NET_WORTH` (alto patrimonio). Decides whether the account may be overdrawn. |
 | Account number | Número de cuenta | `AccountNumber` | Value object | Spanish IBAN that identifies the account (R14). |
@@ -28,7 +28,7 @@ Terms of the checking-accounts domain. The code and the documentation use the En
 | Account numbering | Numeración de cuentas | `AccountNumberSequence` | Output port | Generates the number (IBAN) of each new account. Implemented by `InMemoryAccountNumberSequence` (simulated: valid, consecutive Spanish IBANs of bank 2100, branch 0418). |
 | Income verification | Verificación de ingresos | `IncomeVerifier` | Output port | Returns a holder's verified annual income by NIF, or nothing if it does not know them. Implemented by `FakeTaxAgencyIncomeVerifier` (simulated tax agency with a fixed table). |
 | High net worth threshold | Umbral de alto patrimonio | `HIGH_NET_WORTH_THRESHOLD` | Rule | €100,000.00 of verified annual income (R20). |
-| Transfer to the same account | Transferencia a la misma cuenta | `SameAccountTransferException` | Domain exception | A transfer from an account to itself (R17). Thrown by `MoneyTransferService` before recording any transaction. |
+| Transfer to the same account | Transferencia a la misma cuenta | `SameAccountTransferException` | Domain exception | A transfer from an account to itself (R17). Thrown by `MoneyTransferService` before recording any transaction, and by the account itself if it receives its own number as counterpart (#77). |
 
 ## Domain events (`domain.model`, #17)
 
