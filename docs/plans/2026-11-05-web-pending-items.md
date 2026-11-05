@@ -55,7 +55,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
 - **Acceptance criteria:**
   - [x] Contract agreed and frozen; `./mvnw verify` green with the new (empty) attribute.
 
-### [ ] T1 — Domain: transactions of a transfer know the other account (~10 min)
+### [x] T1 — Domain: transactions of a transfer know the other account (~10 min)
 
 - **Side:** back
 - **Layer:** domain
@@ -65,7 +65,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
   1. Tests first: a withdrawal for a transfer records the target account number (approved and rejected); a deposit from a transfer records the source account number; a plain deposit or withdrawal has no counterpart.
   2. `Transaction.counterpart()` (`Optional<AccountNumber>`), set only by the factory methods inside the package; `CheckingAccount` gains the business methods (for example `tryWithdrawForTransfer(amount, target)` and `depositFromTransfer(amount, source)`), reusing the same rules (R3-R9). Names checked against the glossary.
 - **Acceptance criteria:**
-  - [ ] Domain tests green; `check-domain.mjs` without errors (no Lombok, no public setters).
+  - [x] Domain tests green; `check-domain.mjs` without errors (no Lombok, no public setters).
 
 ### [ ] T2 — Domain service: transfers record the counterpart (~5 min)
 

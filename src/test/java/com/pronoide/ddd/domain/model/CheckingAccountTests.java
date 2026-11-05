@@ -216,4 +216,70 @@ class CheckingAccountTests {
                     .isThrownBy(() -> cuenta.pullDomainEvents().clear());
         }
     }
+
+    @Nested
+    @DisplayName("Cuenta de contrapartida")
+    class Counterpart {
+
+        private static final AccountNumber OTHER_IBAN = new AccountNumber("ES79 2100 0813 6101 2345 6789");
+
+        @Test
+        @DisplayName("Una retirada para una transferencia aprobada guarda la cuenta de destino")
+        void una_retirada_de_transferencia_aprobada_guarda_el_destino() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+
+            Transaction retirada = cuenta.tryWithdrawForTransfer(MonetaryAmount.euros("200.00"), OTHER_IBAN);
+
+            assertThat(retirada.isApproved()).isTrue();
+            assertThat(retirada.type()).isEqualTo(TransactionType.WITHDRAWAL);
+            assertThat(retirada.counterpart()).contains(OTHER_IBAN);
+            assertThat(cuenta.currentBalance()).isEqualTo(MonetaryAmount.euros("300.00"));
+        }
+
+        @Test
+        @DisplayName("Una retirada para una transferencia rechazada también guarda la cuenta de destino")
+        void una_retirada_de_transferencia_rechazada_guarda_el_destino() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+
+            Transaction retirada = cuenta.tryWithdrawForTransfer(MonetaryAmount.euros("600.00"), OTHER_IBAN);
+
+            assertThat(retirada.isRejected()).isTrue();
+            assertThat(retirada.counterpart()).contains(OTHER_IBAN);
+            assertThat(cuenta.currentBalance()).isEqualTo(MonetaryAmount.euros("500.00"));
+        }
+
+        @Test
+        @DisplayName("Un ingreso de una transferencia guarda la cuenta de origen")
+        void un_ingreso_de_transferencia_guarda_el_origen() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+
+            Transaction ingreso = cuenta.depositFromTransfer(MonetaryAmount.euros("200.00"), OTHER_IBAN);
+
+            assertThat(ingreso.isApproved()).isTrue();
+            assertThat(ingreso.type()).isEqualTo(TransactionType.DEPOSIT);
+            assertThat(ingreso.counterpart()).contains(OTHER_IBAN);
+            assertThat(cuenta.currentBalance()).isEqualTo(MonetaryAmount.euros("700.00"));
+        }
+
+        @Test
+        @DisplayName("Los movimientos de transferencia exigen una cuenta de contrapartida")
+        void los_movimientos_de_transferencia_exigen_contrapartida() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+
+            assertThatExceptionOfType(NullPointerException.class)
+                    .isThrownBy(() -> cuenta.tryWithdrawForTransfer(MonetaryAmount.euros("10.00"), null));
+            assertThatExceptionOfType(NullPointerException.class)
+                    .isThrownBy(() -> cuenta.depositFromTransfer(MonetaryAmount.euros("10.00"), null));
+        }
+
+        @Test
+        @DisplayName("Un ingreso o una retirada normales y el depósito inicial no tienen contrapartida")
+        void los_movimientos_normales_no_tienen_contrapartida() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+            cuenta.deposit(MonetaryAmount.euros("10.00"));
+            cuenta.tryWithdraw(MonetaryAmount.euros("5.00"));
+
+            assertThat(cuenta.transactions()).hasSize(3).allSatisfy(t -> assertThat(t.counterpart()).isEmpty());
+        }
+    }
 }
