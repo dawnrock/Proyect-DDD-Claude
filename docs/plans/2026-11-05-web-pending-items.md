@@ -103,7 +103,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
 - **Acceptance criteria:**
   - [x] REST tests green; JSON as in the contract.
 
-### [ ] T5 — OpenAPI (~5 min)
+### [x] T5 — OpenAPI (~5 min)
 
 - **Side:** back
 - **Layer:** docs
@@ -112,7 +112,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
 - **What to do:**
   1. `Transaction` schema: optional `counterpartAccountNumber` with its description; check it matches the contract fragment.
 - **Acceptance criteria:**
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
+  - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
 
 ### [ ] T6 — Web format: unbroken IBAN and segment label (~5 min)
 
