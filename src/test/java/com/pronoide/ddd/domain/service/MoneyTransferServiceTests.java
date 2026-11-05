@@ -173,4 +173,36 @@ class MoneyTransferServiceTests {
             assertThat(target.pullDomainEvents()).isEmpty();
         }
     }
+
+    @Nested
+    @DisplayName("Cuenta de contrapartida")
+    class TransferCounterpart {
+
+        @Test
+        @DisplayName("Una transferencia aprobada deja la retirada apuntando al destino y el ingreso al origen")
+        void una_transferencia_aprobada_registra_la_contrapartida_en_ambas_cuentas() {
+            CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
+            CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
+
+            service.transfer(source, target, MonetaryAmount.euros("200.00"));
+
+            Transaction withdrawal = source.transactions().get(source.transactions().size() - 1);
+            Transaction deposit = target.transactions().get(target.transactions().size() - 1);
+            assertThat(withdrawal.counterpart()).contains(target.accountNumber());
+            assertThat(deposit.counterpart()).contains(source.accountNumber());
+        }
+
+        @Test
+        @DisplayName("Una transferencia rechazada deja la retirada rechazada apuntando al destino y nada en el destino")
+        void una_transferencia_rechazada_registra_la_contrapartida_solo_en_el_origen() {
+            CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
+            CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
+
+            Transaction withdrawal = service.transfer(source, target, MonetaryAmount.euros("600.00"));
+
+            assertThat(withdrawal.isRejected()).isTrue();
+            assertThat(withdrawal.counterpart()).contains(target.accountNumber());
+            assertThat(target.transactions()).hasSize(1);
+        }
+    }
 }

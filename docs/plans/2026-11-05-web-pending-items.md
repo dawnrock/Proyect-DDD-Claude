@@ -67,7 +67,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
 - **Acceptance criteria:**
   - [x] Domain tests green; `check-domain.mjs` without errors (no Lombok, no public setters).
 
-### [ ] T2 — Domain service: transfers record the counterpart (~5 min)
+### [x] T2 — Domain service: transfers record the counterpart (~5 min)
 
 - **Side:** back
 - **Layer:** domain.service
@@ -77,7 +77,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
   1. Test first: after a transfer, the source's withdrawal points to the target and the target's deposit to the source; a rejected transfer leaves the rejected withdrawal pointing to the target and nothing on the target (R18).
   2. `MoneyTransferService` uses the new methods; R17-R19 unchanged.
 - **Acceptance criteria:**
-  - [ ] `MoneyTransferServiceTests` green, including the existing R17-R19 tests.
+  - [x] `MoneyTransferServiceTests` green, including the existing R17-R19 tests.
 
 ### [ ] T3 — Application: the view carries the counterpart (~5 min)
 
