@@ -114,7 +114,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
 - **Acceptance criteria:**
   - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
 
-### [ ] T6 — Web format: unbroken IBAN and segment label (~5 min)
+### [x] T6 — Web format: unbroken IBAN and segment label (~5 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -124,9 +124,9 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
   1. Tests first: `maskedIban` uses non-breaking spaces (U+00A0) between the groups; `segment("RETAIL")` → "Minorista", `segment("HIGH_NET_WORTH")` → "Alto patrimonio", an unknown code is shown as it is.
   2. Implement both; the controller's private `segmentLabel` and the ternary in `detail.html` use `fmt.segment` (one place for the label).
 - **Acceptance criteria:**
-  - [ ] `WebFormatTests` green; no other place translates the segment on the web.
+  - [x] `WebFormatTests` green; no other place translates the segment on the web.
 
-### [ ] T7 — Web: segment in the account list (~5 min)
+### [x] T7 — Web: segment in the account list (~5 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -136,9 +136,9 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
   1. Test first (`@WebMvcTest`, ports mocked): the list shows "Alto patrimonio" for a high net worth account and "Minorista" for a retail one.
   2. Add the segment to each row (`row-sub`, after the shortened IBAN).
 - **Acceptance criteria:**
-  - [ ] Web tests green.
+  - [x] Web tests green.
 
-### [ ] T8 — Web: transfer label and newest transactions first (~10 min)
+### [x] T8 — Web: transfer label and newest transactions first (~10 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -148,7 +148,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
   1. Tests first, with stubbed views: a withdrawal with a counterpart reads "Transferencia a ES79 •••• 6789", a deposit with one "Transferencia de …", a rejected one keeps its rejected style; transactions appear newest first.
   2. Implement the label in the template and the order in the controller (the view list stays as `application` returns it).
 - **Acceptance criteria:**
-  - [ ] Web tests green; plain deposits and withdrawals keep their current labels.
+  - [x] Web tests green; plain deposits and withdrawals keep their current labels.
 
 ### [ ] T9 — Integration: the demo shows the transfer (~10 min)
 
