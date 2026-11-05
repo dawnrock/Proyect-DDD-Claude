@@ -42,3 +42,4 @@ build/
 
 ### Graphify (grafo local del código, ADR 0010) ###
 graphify-out/
+graphify-out.measure-aside/
