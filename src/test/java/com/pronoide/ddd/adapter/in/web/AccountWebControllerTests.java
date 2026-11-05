@@ -118,6 +118,21 @@ class AccountWebControllerTests {
         }
 
         @Test
+        @DisplayName("El listado muestra el segmento de cada cuenta junto al IBAN abreviado")
+        void el_listado_muestra_el_segmento_de_cada_cuenta() throws Exception {
+            when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(
+                    AccountSummary.builder().id(UUID.randomUUID()).accountNumber("ES1234567890123456789012")
+                            .holderName("Ana Pérez").segment("HIGH_NET_WORTH")
+                            .balance(new BigDecimal("150.00")).currency("EUR").build(),
+                    summary(UUID.randomUUID(), "ES7921000813610123456789", "Grace Hopper", "5000.00")));
+
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("Alto patrimonio")))
+                    .andExpect(content().string(containsString("Minorista")));
+        }
+
+        @Test
         @DisplayName("Sin cuentas, el listado muestra el mensaje de estado vacío")
         void sin_cuentas_el_listado_muestra_el_mensaje_de_estado_vacio() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());

@@ -21,8 +21,8 @@
                 <span class="avatar" aria-hidden="true" th:text="${@fmt.initials(account.holderName())}">AP</span>
                 <span class="row-main">
                     <span class="row-title" th:text="${account.holderName()}">Titular</span>
-                    <span class="row-sub" th:text="${@fmt.maskedIban(account.accountNumber())}"
-                          th:title="${account.accountNumber()}">ES00 •••• 0000</span>
+                    <span class="row-sub"><span th:text="${@fmt.maskedIban(account.accountNumber())}"
+                          th:title="${account.accountNumber()}">ES00 •••• 0000</span> · <span th:text="${@fmt.segment(account.segment())}">Minorista</span></span>
                 </span>
                 <span class="row-amount" th:text="${@fmt.money(account.balance(), account.currency())}">0,00 €</span>
             </a>

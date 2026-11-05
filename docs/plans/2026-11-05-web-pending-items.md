@@ -126,7 +126,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
 - **Acceptance criteria:**
   - [x] `WebFormatTests` green; no other place translates the segment on the web.
 
-### [ ] T7 — Web: segment in the account list (~5 min)
+### [x] T7 — Web: segment in the account list (~5 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -136,7 +136,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
   1. Test first (`@WebMvcTest`, ports mocked): the list shows "Alto patrimonio" for a high net worth account and "Minorista" for a retail one.
   2. Add the segment to each row (`row-sub`, after the shortened IBAN).
 - **Acceptance criteria:**
-  - [ ] Web tests green.
+  - [x] Web tests green.
 
 ### [ ] T8 — Web: transfer label and newest transactions first (~10 min)
 
