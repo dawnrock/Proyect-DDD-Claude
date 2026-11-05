@@ -104,7 +104,7 @@ Graphify is not installed in the cloud session: it is installed with `pip instal
 - **Acceptance criteria:**
   - [x] 10 runs recorded.
 
-### [ ] T6 — ADR 0010: phase-2 measurement and conclusion (~10 min)
+### [x] T6 — ADR 0010: phase-2 measurement and conclusion (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0010-graphify-token-savings.md`
@@ -113,7 +113,7 @@ Graphify is not installed in the cloud session: it is installed with `pip instal
   1. New section "Measurement on phase 2 (2026-11-05)": code size, Graphify version, method, a table question × A/B/C (both runs and the mean), cost in dollars if the JSON reports it, and how complete each answer was.
   2. Conclusion: keep the current rule, or propose widening it (C cheaper than B on general searches). The status line of the ADR says whether it was confirmed or a change is proposed; "To revisit in phase 2" in Consequences is marked as done.
 - **Acceptance criteria:**
-  - [ ] Every number in the table comes from the script output kept in T3-T5.
+  - [x] Every number in the table comes from the script output kept in T3-T5.
 
 ### [ ] T7 — Documentation and project status (~10 min)
 

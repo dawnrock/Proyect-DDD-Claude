@@ -1,7 +1,7 @@
 # 0010 · Graphify for dependency questions only, and a short project status
 
-- **Status:** accepted · 2026-10-30
-- **Issue:** #57
+- **Status:** accepted · 2026-10-30 · confirmed on phase 2 on 2026-11-05 (#71)
+- **Issue:** #57 (re-measured in #71)
 
 ## Context
 
@@ -55,4 +55,35 @@ A first attempt measured inside the working session showed no graph use at all: 
 - Dependency questions are cheaper and include indirect dependants (tests, controllers) in one call.
 - Machines without Graphify behave exactly as before.
 - The graph can be stale between commits; `node scripts/graphify.mjs update .` rebuilds it in seconds.
-- To revisit in phase 2: repeat the measurement with the same method when the code base is larger (tracked in `docs/ia/pendientes.md`).
+- ~~To revisit in phase 2: repeat the measurement with the same method when the code base is larger.~~ Done in #71: the decision holds (see below).
+
+## Measurement on phase 2 (2026-11-05, #71)
+
+The code grew from 89 to 125 Java files (`v1-monolito` → `Hexagonal`), with ports, adapters and events. Same method as above, now repeatable with [`scripts/measure-graphify.mjs`](../../scripts/measure-graphify.mjs): each question in a new headless session (`claude -p --agent buscador-referencias`, Haiku 5.5, Claude Code 2.1.318, cloud Linux session), Graphify 0.9.97, **two runs** per question and configuration. Tokens processed = input + cache creation + cache read + output.
+
+- **A · no graph:** no `graphify-out/`; the agent as it is (it still checks for the graph on dependency questions, and that check fails at once).
+- **B · current rule:** graph built; the agent as it is (graph only for dependency questions).
+- **C · graph first:** graph built; an inline variant of the agent (`--agents`) told to query the graph first for every code search (`query`, `explain`, `affected`, `path`). `.claude/` was not changed.
+
+Every one of the 30 answers was complete (checked against the expected classes). Mean of the two runs:
+
+| Question | A · no graph | B · current rule | C · graph first |
+| -------- | ------------ | ---------------- | --------------- |
+| 1. Where is `CheckingAccount.withdraw` used? (ambiguous: the method is `tryWithdraw`) | 55,012 | 118,046 (+115 %) | 76,207 (+39 %) |
+| 2. Which classes depend on `MoneyTransferService`? | 34,063 | **20,865 (−39 %)** | 32,439 (−5 %) |
+| 3. Which input adapters use `CheckingAccountCommands`? | 35,877 | **20,632 (−42 %)** | 28,759 (−20 %) |
+| 4. Which class implements `DomainEventPublisher`, and who calls it? | 59,707 | **46,939 (−21 %)** | 65,718 (+10 %) |
+| 5. Where is rule R20 defined, tested and documented? (general, code + docs) | 46,871 | 55,169 (+18 %) | 51,126 (+9 %) |
+| **Dependency questions (2-4)** | **129,647** | **88,436 (−32 %)** | **126,916 (−2 %)** |
+| **All five** | **231,529** | **261,650 (+13 %)** | **254,248 (+10 %)** |
+
+Cost of the ten runs of each configuration: A USD 0.038, B USD 0.037, C USD 0.050.
+
+Reading:
+
+- **Dependency questions are clearly cheaper with the current rule (−32 %)**, more than in phase 1 (−27 % on one question): one `affected` call answers with file and line, in two turns instead of three to five.
+- **"Graph first" (C) does not pay off.** It spends the saving on `explain`/`query` calls that do not answer the question, then greps anyway; on dependency questions it is barely better than no graph, and it is the most expensive in dollars.
+- **The ambiguous question is where B loses** (+115 %): "where is X used" reads as a dependency question, `withdraw` has no node, and the agent retries before falling back to Grep. Same pattern as in phase 1. B's whole-set total is worse than A's only because of this question; without it, B saves 19 % (143,604 vs 176,517).
+- **General searches (question 5) do not use the graph** in B, as intended; the B/A difference there is run-to-run noise (B's two runs: 48,842 and 61,495).
+
+**Decision: confirmed.** The graph stays limited to dependency questions about classes; it is not widened. A possible refinement, not applied (it changes `.claude/`, which needs the user's approval): tell `buscador-referencias` to use Grep, not the graph, when the question names a **method** (`Class.method`), which would avoid the only case where the current rule costs more.
