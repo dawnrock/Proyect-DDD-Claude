@@ -2,6 +2,7 @@ package com.pronoide.ddd.application;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.immutables.value.Value;
@@ -24,4 +25,10 @@ public interface TransactionSummaryDef {
 
     /** {@code PENDING}, {@code APPROVED} o {@code REJECTED}. */
     String status();
+
+    /**
+     * IBAN normalizado de la otra cuenta si el movimiento forma parte de una transferencia (también si se rechazó):
+     * la de destino en la retirada del origen y la de origen en el ingreso del destino. Vacío en los demás (#72).
+     */
+    Optional<String> counterpartAccountNumber();
 }

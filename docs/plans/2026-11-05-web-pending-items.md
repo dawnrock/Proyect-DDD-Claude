@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone)
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-05
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~100 min (11 tasks)
 
 ## Goal
