@@ -308,7 +308,7 @@ class DddLabApplicationTests {
 			assertThat(response.headers().firstValue("Location")).hasValueSatisfying(
 					location -> assertThat(location).endsWith(source).doesNotContain(";jsessionid"));
 			assertThat(browse(source)).contains("Transferencia de 25,00 € a "
-					+ targetIban.substring(0, 4) + " •••• " + targetIban.substring(20) + " aprobada")
+					+ targetIban.substring(0, 4) + "\u00A0••••\u00A0" + targetIban.substring(20) + " aprobada")
 					.contains("75,00 €");
 			assertThat(browse(target)).contains("125,00 €");
 		}

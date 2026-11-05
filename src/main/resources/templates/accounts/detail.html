@@ -11,7 +11,7 @@
     <div class="hero">
         <h1 class="hero-label"><span th:text="${account.holderName()}">Titular</span> · <span class="nowrap" th:text="${account.accountNumber()}">ES00</span></h1>
         <p class="hero-amount" th:text="${@fmt.money(account.balance(), account.currency())}">0,00 €</p>
-        <p class="hero-sub" th:text="${account.segment() == 'RETAIL' ? 'Minorista' : (account.segment() == 'HIGH_NET_WORTH' ? 'Alto patrimonio' : account.segment())}">Minorista</p>
+        <p class="hero-sub" th:text="${@fmt.segment(account.segment())}">Minorista</p>
     </div>
 
     <div class="actions">

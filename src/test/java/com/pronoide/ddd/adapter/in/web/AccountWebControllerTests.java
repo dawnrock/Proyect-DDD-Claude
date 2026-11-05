@@ -98,7 +98,7 @@ class AccountWebControllerTests {
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("Saldo total")))
                     .andExpect(content().string(containsString("5.150,00 €")))
-                    .andExpect(content().string(containsString("ES12 •••• 9012")))
+                    .andExpect(content().string(containsString("ES12\u00A0••••\u00A09012")))
                     .andExpect(content().string(containsString("title=\"ES1234567890123456789012\"")))
                     .andExpect(content().string(containsString(">AP<")))
                     .andExpect(content().string(containsString("Ana Pérez")))
@@ -767,7 +767,7 @@ class AccountWebControllerTests {
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
                     .andExpect(flash().attribute("message",
-                            "Transferencia de 25,00 € a ES98 •••• 1098 aprobada"))
+                            "Transferencia de 25,00 € a ES98\u00A0••••\u00A01098 aprobada"))
                     .andExpect(flash().attributeCount(1));
 
             verify(commands).transfer(ADMIN, TransferCommand.builder()
@@ -800,7 +800,7 @@ class AccountWebControllerTests {
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
                     .andExpect(flash().attribute("rejection",
-                            "Transferencia de 900,00 € a ES98 •••• 1098 rechazada: "
+                            "Transferencia de 900,00 € a ES98\u00A0••••\u00A01098 rechazada: "
                                     + "el saldo resultante no está permitido para la cuenta de origen"))
                     .andExpect(flash().attributeCount(1));
         }

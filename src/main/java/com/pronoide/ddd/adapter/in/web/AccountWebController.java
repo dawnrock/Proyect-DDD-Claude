@@ -221,7 +221,7 @@ public class AccountWebController {
             try {
                 AccountSummary account = commands.openAccount(CurrentCaller.from(authentication), command);
                 redirect.addFlashAttribute("message", "Cuenta %s abierta correctamente como %s"
-                        .formatted(account.accountNumber(), segmentLabel(account.segment())));
+                        .formatted(account.accountNumber(), fmt.segment(account.segment())));
                 return "redirect:/";
             } catch (DomainException | IllegalArgumentException e) {
                 result.reject("domain", e.getMessage());
@@ -248,15 +248,6 @@ public class AccountWebController {
             result.reject("invalid", e.getMessage());
             return null;
         }
-    }
-
-    /** Etiqueta en español del segmento; si el código es desconocido se muestra tal cual. */
-    private static String segmentLabel(String segment) {
-        return switch (segment) {
-            case "RETAIL" -> "Minorista";
-            case "HIGH_NET_WORTH" -> "Alto patrimonio";
-            default -> segment;
-        };
     }
 
     private void addFormOptions(Model model) {

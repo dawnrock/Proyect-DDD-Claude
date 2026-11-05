@@ -114,7 +114,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
 - **Acceptance criteria:**
   - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
 
-### [ ] T6 — Web format: unbroken IBAN and segment label (~5 min)
+### [x] T6 — Web format: unbroken IBAN and segment label (~5 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -124,7 +124,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
   1. Tests first: `maskedIban` uses non-breaking spaces (U+00A0) between the groups; `segment("RETAIL")` → "Minorista", `segment("HIGH_NET_WORTH")` → "Alto patrimonio", an unknown code is shown as it is.
   2. Implement both; the controller's private `segmentLabel` and the ternary in `detail.html` use `fmt.segment` (one place for the label).
 - **Acceptance criteria:**
-  - [ ] `WebFormatTests` green; no other place translates the segment on the web.
+  - [x] `WebFormatTests` green; no other place translates the segment on the web.
 
 ### [ ] T7 — Web: segment in the account list (~5 min)
 
