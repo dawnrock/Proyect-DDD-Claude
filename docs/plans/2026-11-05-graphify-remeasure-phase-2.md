@@ -61,7 +61,7 @@ Graphify is not installed in the cloud session: it is installed with `pip instal
 - **Acceptance criteria:**
   - [x] `graphify-out/graph.json` exists and is not tracked (`git status` clean); the version is noted.
 
-### [ ] T2 — Measurement script (~10 min)
+### [x] T2 — Measurement script (~10 min)
 
 - **Layer:** tooling
 - **Files:** `scripts/measure-graphify.mjs`
@@ -69,8 +69,9 @@ Graphify is not installed in the cloud session: it is installed with `pip instal
 - **What to do:**
   1. Node script (no dependencies, like the other scripts): takes the configuration (`A`/`B`/`C`) and the number of runs, runs each question with `claude -p` as above (for C, the agent variant through `--agents`), parses the JSON `usage` and prints one line per run plus the mean per question. For A it moves `graphify-out/` aside and restores it at the end, even on failure.
   2. Try it with one question and one run.
+  3. Done: headless sessions ignore the project's `permissions.allow` (untrusted workspace), so the script passes `--allowedTools` with the same Graphify commands the agent may run; it also records how many Graphify calls each run made and how many were denied. Answers are saved in `MEASURE_OUT_DIR` (or the temp dir), never in the repository.
 - **Acceptance criteria:**
-  - [ ] One run prints its tokens and the answer is complete; `graphify-out/` is back after an A run.
+  - [x] One run prints its tokens and the answer is complete; `graphify-out/` is back after an A run.
 
 ### [ ] T3 — Configuration A: no graph (~10 min)
 
@@ -147,6 +148,8 @@ Graphify is not installed in the cloud session: it is installed with `pip instal
 - [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
+
+Answered by the user on 2026-11-05, as proposed: (1) the cost of the 30 Haiku runs is accepted; (2) `scripts/measure-graphify.mjs` is committed; (3) if C wins, changing `.claude/` goes to a new issue with the user's approval, not to this PR.
 
 - **Cost:** 30 headless runs with Haiku (3 configurations × 5 questions × 2 runs). In #57 one run cost about USD 0.004; expect well under USD 1, counted against your plan's usage.
 - **Committing the script:** `scripts/measure-graphify.mjs` makes the next measurement a single command. If you would rather not add a script, it stays in the session's scratchpad and only the method goes into the ADR.
