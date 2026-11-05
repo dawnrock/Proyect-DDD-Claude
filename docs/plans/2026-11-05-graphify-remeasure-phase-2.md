@@ -115,7 +115,7 @@ Graphify is not installed in the cloud session: it is installed with `pip instal
 - **Acceptance criteria:**
   - [x] Every number in the table comes from the script output kept in T3-T5.
 
-### [ ] T7 — Documentation and project status (~10 min)
+### [x] T7 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/arquitectura-ia.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -124,7 +124,7 @@ Graphify is not installed in the cloud session: it is installed with `pip instal
   1. `arquitectura-ia.md`: the code-graph row mentions the phase-2 measurement and `scripts/measure-graphify.mjs`.
   2. Status: #71 done, next step `/plan-feature 72`; decision (kept or proposed change); `pendientes.md` loses the Graphify item (and gains the proposal for `.claude/`, if any); a row in `historial.md`.
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes.
+  - [x] The CI check of the project status passes.
 
 ## Global acceptance criteria
 
