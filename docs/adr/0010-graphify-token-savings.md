@@ -75,13 +75,13 @@ Every one of the 30 answers was complete (checked against the expected classes).
 | 4. Which class implements `DomainEventPublisher`, and who calls it? | 59,707 | **46,939 (−21 %)** | 65,718 (+10 %) |
 | 5. Where is rule R20 defined, tested and documented? (general, code + docs) | 46,871 | 55,169 (+18 %) | 51,126 (+9 %) |
 | **Dependency questions (2-4)** | **129,647** | **88,436 (−32 %)** | **126,916 (−2 %)** |
-| **All five** | **231,529** | **261,650 (+13 %)** | **254,248 (+10 %)** |
+| **All five** | **231,529** | **261,650 (+13 %)** | **254,249 (+10 %)** |
 
 Cost of the ten runs of each configuration: A USD 0.038, B USD 0.037, C USD 0.050.
 
 Reading:
 
-- **Dependency questions are clearly cheaper with the current rule (−32 %)**, more than in phase 1 (−27 % on one question): one `affected` call answers with file and line, in two turns instead of three to five.
+- **Dependency questions are clearly cheaper with the current rule (−32 %)**, more than in phase 1 (−27 % on one question): one `affected` call answers with file and line, in two turns (questions 2 and 3) instead of three to seven without the graph.
 - **"Graph first" (C) does not pay off.** It spends the saving on `explain`/`query` calls that do not answer the question, then greps anyway; on dependency questions it is barely better than no graph, and it is the most expensive in dollars.
 - **The ambiguous question is where B loses** (+115 %): "where is X used" reads as a dependency question, `withdraw` has no node, and the agent retries before falling back to Grep. Same pattern as in phase 1. B's whole-set total is worse than A's only because of this question; without it, B saves 19 % (143,604 vs 176,517).
 - **General searches (question 5) do not use the graph** in B, as intended; the B/A difference there is run-to-run noise (B's two runs: 48,842 and 61,495).

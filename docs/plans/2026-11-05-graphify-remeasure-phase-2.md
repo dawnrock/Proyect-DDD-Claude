@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone)
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-05
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~70 min (7 tasks)
 
 ## Goal
@@ -126,27 +126,38 @@ Graphify is not installed in the cloud session: it is installed with `pip instal
 - **Acceptance criteria:**
   - [x] The CI check of the project status passes.
 
+### [x] T8 — Review fixes (~10 min)
+
+- **Layer:** tooling · docs
+- **Files:** `scripts/measure-graphify.mjs`, `docs/adr/0010-graphify-token-savings.md`
+- **Depends on:** T7
+- **What to do:**
+  1. `revisor-ddd` recomputed every figure (consistent) and found two real risks in the script: an interrupted A run (Ctrl-C) left the graph set aside, and `spawnSync`'s default 1 MB buffer could cut a long `stream-json` output. Fixed: the graph is restored on `SIGINT`/`SIGTERM` (checked by interrupting an A run) and a leftover copy stops the next run with a message; 64 MB buffer. Also: the C variant fails loudly if the agent text no longer matches, CRLF files are accepted and the script works from the repository root wherever it is called from.
+  2. ADR: C's total rounded from the raw runs (254,249) and the "turns" sentence matches the saved runs. The exported helpers have no unit test: the project has no JavaScript test runner in CI, and the T2 trial plus the 30 runs exercised them.
+- **Acceptance criteria:**
+  - [x] Interrupting an A run leaves `graphify-out/` in place; `mvn verify` green.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] Measurement done with the #57 method and results (tokens with and without the graph, by question type) in ADR 0010.
-- [ ] Decision documented: the current use is kept or a wider use is proposed (with the user's approval, in its own issue).
-- [ ] `./mvnw verify` green (the build does not change).
+- [x] Measurement done with the #57 method and results (tokens with and without the graph, by question type) in ADR 0010.
+- [x] Decision documented: the current use is kept or a wider use is proposed (with the user's approval, in its own issue).
+- [x] `./mvnw verify` green (the build does not change).
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit. Unchanged: no code changes.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md`: n/a (no new tests).
-- [ ] No dependencies added beyond the planned ones (Graphify is a per-machine development tool, not a build dependency, ADR 0010).
-- [ ] If the API changes: n/a.
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit. Unchanged: no code changes.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md`: n/a (no new tests).
+- [x] No dependencies added beyond the planned ones (Graphify is a per-machine development tool, not a build dependency, ADR 0010).
+- [x] If the API changes: n/a.
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a.
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

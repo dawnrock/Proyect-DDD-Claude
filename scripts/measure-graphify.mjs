@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Mide cuántos tokens gasta el agente buscador-referencias con y sin el grafo de Graphify (ADR 0010, #71).
 //
-// Uso:
+// Uso (desde cualquier directorio: el script trabaja en la raíz del repositorio):
 //   node scripts/measure-graphify.mjs <A|B|C> [ejecuciones=2] [pregunta=1-5]
 //     A · sin grafo: aparta graphify-out/ y lo restaura al terminar.
 //     B · regla actual: el agente tal cual (grafo solo para dependencias).
@@ -13,7 +13,8 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 export const QUESTIONS = [
   'Where is CheckingAccount.withdraw used?',
@@ -30,7 +31,7 @@ const GRAPH_TOOLS = ['Bash(node scripts/graphify.mjs affected:*)', 'Bash(node sc
 
 /** Variante C: el mismo agente, pero con el grafo como primera fuente para cualquier búsqueda de código. */
 export function graphFirstAgent(markdown) {
-  const [, front, body] = markdown.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  const [, front, body] = markdown.replace(/\r\n/g, '\n').match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   const field = (name) => front.match(new RegExp(`^${name}: (.*)$`, 'm'))[1];
   const prompt = body.replace(
     /\*\*Preguntas de dependencias[\s\S]*?Para todo lo demás[^\n]*\n/,
@@ -39,6 +40,7 @@ export function graphFirstAgent(markdown) {
       '`explain "<X>"`, `affected "<X>"` o `path "<A>" "<B>"`), desde la raíz y un comando por llamada. Usa Grep ' +
       'solo para lo que el grafo no responda y para `docs/`, `.claude/` y `pom.xml`.\n',
   );
+  if (prompt === body) throw new Error(`graphFirstAgent: el texto de ${AGENT_FILE} ha cambiado; ajusta la variante C`);
   return {
     'buscador-referencias-grafo': {
       description: field('description'),
@@ -76,7 +78,9 @@ function runQuestion(config, question) {
     args.push('--agent', 'buscador-referencias', '--allowedTools', ...GRAPH_TOOLS);
   }
   args.push('--', question);
-  const run = spawnSync('claude', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 600_000 });
+  const run = spawnSync('claude', args, {
+    encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 600_000, maxBuffer: 64 * 1024 * 1024,
+  });
   const { result, graphCalls } = parseStream(run.stdout ?? '');
   if (!result) throw new Error(`Sin resultado para "${question}": ${run.stderr?.slice(0, 500)}`);
   return {
@@ -98,11 +102,18 @@ function main() {
   }
   const runs = Number(runsArg);
   const questions = only ? [QUESTIONS[Number(only) - 1]] : QUESTIONS;
+  process.chdir(join(dirname(fileURLToPath(import.meta.url)), '..'));
+  if (existsSync(GRAPH_ASIDE)) {
+    console.error(`Quedó un grafo apartado de una medición interrumpida: mueve ${GRAPH_ASIDE}/ a ${GRAPH_DIR}/ (o bórralo).`);
+    process.exit(1);
+  }
   const asideGraph = config === 'A' && existsSync(GRAPH_DIR);
   if (config !== 'A' && !existsSync(`${GRAPH_DIR}/graph.json`)) {
     console.error('Falta el grafo: node scripts/graphify.mjs update .');
     process.exit(1);
   }
+  const restore = () => { if (asideGraph && existsSync(GRAPH_ASIDE)) renameSync(GRAPH_ASIDE, GRAPH_DIR); };
+  for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => { restore(); process.exit(130); });
   if (asideGraph) renameSync(GRAPH_DIR, GRAPH_ASIDE);
   const records = [];
   try {
@@ -119,7 +130,7 @@ function main() {
       console.log(`${config} · mean ${mean} tokens · ${question}`);
     }
   } finally {
-    if (asideGraph) renameSync(GRAPH_ASIDE, GRAPH_DIR);
+    restore();
     const out = join(process.env.MEASURE_OUT_DIR ?? tmpdir(), `measure-graphify-${config}.json`);
     writeFileSync(out, JSON.stringify(records, null, 2));
     console.log(`Respuestas: ${out}`);
