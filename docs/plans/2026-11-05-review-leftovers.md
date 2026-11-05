@@ -59,7 +59,7 @@ The root of `adapter.in` already holds the security support shared by REST and w
 - **Acceptance criteria:**
   - [x] New tests green; `MoneyTransferServiceTests` unchanged and green; `check-domain.mjs` without errors.
 
-### [ ] T3 — `SegmentLabels` in the input adapters' support (~10 min)
+### [x] T3 — `SegmentLabels` in the input adapters' support (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/SegmentLabels.java`, `SegmentLabelsTests.java`, `adapter/in/web/WebFormat.java`
@@ -68,7 +68,7 @@ The root of `adapter.in` already holds the security support shared by REST and w
   1. Tests first: `RETAIL` → "Minorista", `HIGH_NET_WORTH` → "Alto patrimonio", an unknown code is shown as it is.
   2. `WebFormat.segment` delegates to it (`WebFormatTests` unchanged and green).
 - **Acceptance criteria:**
-  - [ ] `SegmentLabelsTests` and `WebFormatTests` green; `HexagonalArchitectureTests` green.
+  - [x] `SegmentLabelsTests` and `WebFormatTests` green; `HexagonalArchitectureTests` green.
 
 ### [ ] T4 — The CLI uses `SegmentLabels` (~5 min)
 
