@@ -79,7 +79,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
 - **Acceptance criteria:**
   - [x] `MoneyTransferServiceTests` green, including the existing R17-R19 tests.
 
-### [ ] T3 — Application: the view carries the counterpart (~5 min)
+### [x] T3 — Application: the view carries the counterpart (~5 min)
 
 - **Side:** back
 - **Layer:** application
@@ -89,7 +89,7 @@ DDD building blocks: `Transaction` is an entity inside the `CheckingAccount` agg
   1. Test first: the details of both accounts after a transfer show the counterpart on the transfer's transactions and none on the others.
   2. The mapping fills `counterpartAccountNumber` from `Transaction.counterpart()`.
 - **Acceptance criteria:**
-  - [ ] Service tests green.
+  - [x] Service tests green.
 
 ### [ ] T4 — REST: the transaction response carries the counterpart (~10 min)
 

@@ -16,6 +16,7 @@ import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -511,6 +512,38 @@ class CheckingAccountServiceTests {
             CheckingAccount target = repository.findById(targetId).orElseThrow();
             verify(repository).save(source);
             verify(repository).save(target);
+        }
+
+        @Test
+        @DisplayName("Tras una transferencia, el detalle de ambas cuentas muestra la contrapartida solo en sus movimientos")
+        void tras_una_transferencia_el_detalle_muestra_la_contrapartida_solo_en_sus_movimientos() {
+            service.transfer(ADMIN, transfer(sourceId, targetNumber, "200"));
+
+            List<TransactionSummary> inSource = service.findAccount(ADMIN, sourceId).transactions();
+            List<TransactionSummary> inTarget = service.findAccount(ADMIN, targetId).transactions();
+            assertThat(inSource).extracting(TransactionSummary::type, TransactionSummary::counterpartAccountNumber)
+                    .containsExactly(tuple("DEPOSIT", Optional.empty()), tuple("WITHDRAWAL", Optional.of(targetNumber)));
+            assertThat(inTarget).extracting(TransactionSummary::type, TransactionSummary::counterpartAccountNumber)
+                    .containsExactly(tuple("DEPOSIT", Optional.empty()), tuple("DEPOSIT", Optional.of(sourceNumber)));
+        }
+
+        @Test
+        @DisplayName("Una transferencia rechazada deja la contrapartida en la retirada rechazada del origen")
+        void una_transferencia_rechazada_deja_la_contrapartida_en_la_retirada_rechazada() {
+            service.transfer(ADMIN, transfer(sourceId, targetNumber, "600"));
+
+            assertThat(service.findAccount(ADMIN, sourceId).transactions()).last()
+                    .returns("REJECTED", TransactionSummary::status)
+                    .returns(Optional.of(targetNumber), TransactionSummary::counterpartAccountNumber);
+        }
+
+        @Test
+        @DisplayName("Un ingreso o una retirada normales no llevan contrapartida")
+        void un_ingreso_o_una_retirada_normales_no_llevan_contrapartida() {
+            TransactionSummary deposit = service.deposit(ADMIN,
+                    DepositCommand.builder().accountId(sourceId).amount(new BigDecimal("10")).build());
+
+            assertThat(deposit.counterpartAccountNumber()).isEmpty();
         }
 
         @Test
