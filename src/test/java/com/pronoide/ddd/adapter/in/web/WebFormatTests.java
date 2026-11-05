@@ -41,7 +41,14 @@ class WebFormatTests {
     @Test
     @DisplayName("El IBAN abreviado muestra los cuatro primeros y los cuatro últimos caracteres")
     void el_iban_abreviado_muestra_los_cuatro_primeros_y_los_cuatro_ultimos() {
-        assertThat(fmt.maskedIban("ES7921000813610123456789")).isEqualTo("ES79 •••• 6789");
+        assertThat(fmt.maskedIban("ES7921000813610123456789")).isEqualTo("ES79\u00A0••••\u00A06789");
+    }
+
+    @ParameterizedTest(name = "{0} → {1}")
+    @CsvSource({"RETAIL, Minorista", "HIGH_NET_WORTH, Alto patrimonio", "OTHER, OTHER"})
+    @DisplayName("El segmento se muestra con su etiqueta en español y un código desconocido se muestra tal cual")
+    void el_segmento_se_muestra_con_su_etiqueta_en_espanol(String segment, String expected) {
+        assertThat(fmt.segment(segment)).isEqualTo(expected);
     }
 
     @ParameterizedTest(name = "{0} → {1}")

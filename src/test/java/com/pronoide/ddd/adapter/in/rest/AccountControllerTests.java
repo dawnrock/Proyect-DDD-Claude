@@ -374,6 +374,27 @@ class AccountControllerTests {
         }
 
         @Test
+        @DisplayName("Un movimiento de transferencia lleva counterpartAccountNumber y los demás no incluyen la clave")
+        void un_movimiento_de_transferencia_lleva_la_contrapartida_y_los_demas_no_incluyen_la_clave() throws Exception {
+            given(queries.findAccount(any(Caller.class), eq(ID))).willReturn(AccountDetails.builder()
+                    .id(ID).accountNumber(IBAN).holderName("Ada Lovelace").segment("RETAIL")
+                    .balance(new BigDecimal("0.00")).currency("EUR")
+                    .addTransactions(TransactionSummary.builder().id(UUID.randomUUID()).type("DEPOSIT")
+                            .amount(new BigDecimal("100.00")).currency("EUR")
+                            .occurredOn(Instant.parse("2026-10-23T10:15:30Z")).status("APPROVED").build())
+                    .addTransactions(TransactionSummary.builder().id(UUID.randomUUID()).type("WITHDRAWAL")
+                            .amount(new BigDecimal("100.00")).currency("EUR")
+                            .occurredOn(Instant.parse("2026-10-23T10:16:30Z")).status("APPROVED")
+                            .counterpartAccountNumber("ES7921000813610123456789").build())
+                    .build());
+
+            mvc.perform(get("/api/accounts/{id}", ID))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.transactions[0].counterpartAccountNumber").doesNotExist())
+                    .andExpect(jsonPath("$.transactions[1].counterpartAccountNumber").value("ES7921000813610123456789"));
+        }
+
+        @Test
         @DisplayName("Un id desconocido responde 404 Recurso inexistente")
         void un_id_desconocido_responde_404_recurso_inexistente() throws Exception {
             given(queries.findAccount(any(Caller.class), eq(ID))).willThrow(new AccountNotFoundException(ID));

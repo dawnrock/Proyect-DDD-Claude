@@ -118,6 +118,7 @@ public class AccountController {
                 .currency(transaction.currency())
                 .occurredOn(transaction.occurredOn())
                 .status(transaction.status())
+                .counterpartAccountNumber(transaction.counterpartAccountNumber().orElse(null))
                 .build();
     }
 }

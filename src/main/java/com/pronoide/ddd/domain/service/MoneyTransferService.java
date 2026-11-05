@@ -27,9 +27,9 @@ public class MoneyTransferService {
         if (!amount.currency().equals(targetCurrency)) {
             throw new CurrencyMismatchException(targetCurrency, amount.currency());
         }
-        Transaction withdrawal = source.tryWithdraw(amount);
+        Transaction withdrawal = source.tryWithdrawForTransfer(amount, target.accountNumber());
         if (withdrawal.isApproved()) {
-            target.deposit(amount);
+            target.depositFromTransfer(amount, source.accountNumber());
         }
         return withdrawal;
     }

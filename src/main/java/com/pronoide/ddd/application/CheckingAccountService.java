@@ -177,6 +177,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
                 .currency(transaction.amount().currency().getCurrencyCode())
                 .occurredOn(transaction.occurredOn())
                 .status(transaction.status().name())
+                .counterpartAccountNumber(transaction.counterpart().map(AccountNumber::value))
                 .build();
     }
 

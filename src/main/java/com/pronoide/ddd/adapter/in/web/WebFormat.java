@@ -20,6 +20,7 @@ public class WebFormat {
 
     private static final Locale SPANISH = Locale.of("es", "ES");
     private static final String MINUS = "−";
+    private static final String NBSP = "\u00A0";
 
     /** {@code 1000.00 EUR} → {@code 1.000,00 €}; siempre con separador de miles, a diferencia de {@code es-ES}. */
     public String money(BigDecimal amount, String currency) {
@@ -35,12 +36,24 @@ public class WebFormat {
         return (credit ? "+" : MINUS) + money(amount.abs(), currency);
     }
 
-    /** {@code ES7921000813610123456789} → {@code ES79 •••• 6789}. */
+    /**
+     * {@code ES7921000813610123456789} → {@code ES79 •••• 6789}, con espacios de no separación (U+00A0) para que
+     * no se parta entre líneas.
+     */
     public String maskedIban(String accountNumber) {
         if (accountNumber.length() < 8) {
             return accountNumber;
         }
-        return accountNumber.substring(0, 4) + " •••• " + accountNumber.substring(accountNumber.length() - 4);
+        return accountNumber.substring(0, 4) + NBSP + "••••" + NBSP + accountNumber.substring(accountNumber.length() - 4);
+    }
+
+    /** Etiqueta en español del segmento; si el código es desconocido se muestra tal cual. Único sitio de la web. */
+    public String segment(String segment) {
+        return switch (segment) {
+            case "RETAIL" -> "Minorista";
+            case "HIGH_NET_WORTH" -> "Alto patrimonio";
+            default -> segment;
+        };
     }
 
     /** Iniciales de las dos primeras palabras del titular: {@code Grace Hopper} → {@code GH}. */

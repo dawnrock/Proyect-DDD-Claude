@@ -2,7 +2,7 @@
 
 > **Read it at the start of every session.** It is the entry point to carry on without depending on earlier conversations, and it is kept **short on purpose**: it is loaded in every session. **It is updated in every PR that closes an issue** (CI checks it).
 
-- **Last updated:** 2026-11-05 · PR #75 (#71, Graphify measured on phase 2)
+- **Last updated:** 2026-11-05 · PR #76 (#72, web pending items)
 - **Active branch:** `Hexagonal`, the repository's default branch; phase 2 is marked by the `v2-hexagonal` tag and work continues on the branch. `Monolithic` frozen at the `v1-monolito` tag; `master` frozen.
 
 ## Where we are
@@ -11,11 +11,11 @@
 | ----- | ---- | ----------- | ------- |
 | 1 · Layered monolith | Closed: #2-#8, #11-#13, #31, #48, #50, #54, #57 (details in the [history](historial.md)) | — | — |
 | 2 · Hexagonal | Closed: #14-#23, tag `v2-hexagonal` | — | — |
-| After phase 2 (no milestone) | #70 translation, #71 Graphify | — | #72 web |
+| After phase 2 (no milestone) | #70 translation, #71 Graphify, #72 web | — | — |
 
 ## Next step
 
-`/plan-feature 72` on `Hexagonal` (pending web items from #48).
+No issues left open: decide the next work with the user. Candidates in `pendientes.md`: the Graphify refinement for method names (#71, touches `.claude/`), a transaction for the two `save` calls of a transfer (#7 review), the missing holder-name test.
 
 Phase 2 design: `docs/arquitectura/fase-2-hexagonal.md`; comparison with phase 1: `docs/arquitectura/comparativa-capas-hexagonal.md`.
 
