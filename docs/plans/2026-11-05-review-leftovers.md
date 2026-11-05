@@ -48,7 +48,7 @@ The root of `adapter.in` already holds the security support shared by REST and w
 - **Acceptance criteria:**
   - [x] The tests pass and fail when the check is removed.
 
-### [ ] T2 — The aggregate rejects its own number as counterpart (~10 min)
+### [x] T2 — The aggregate rejects its own number as counterpart (~10 min)
 
 - **Layer:** domain
 - **Files:** `domain/model/CheckingAccount.java`, `CheckingAccountTests.java`
@@ -57,7 +57,7 @@ The root of `adapter.in` already holds the security support shared by REST and w
   1. Tests first: `tryWithdrawForTransfer` and `depositFromTransfer` with the account's own number throw `SameAccountTransferException`, record no transaction, change no balance and record no event.
   2. Check it before recording, in both methods. `MoneyTransferService` keeps its own R17 check (it compares source and target before touching either account).
 - **Acceptance criteria:**
-  - [ ] New tests green; `MoneyTransferServiceTests` unchanged and green; `check-domain.mjs` without errors.
+  - [x] New tests green; `MoneyTransferServiceTests` unchanged and green; `check-domain.mjs` without errors.
 
 ### [ ] T3 — `SegmentLabels` in the input adapters' support (~10 min)
 

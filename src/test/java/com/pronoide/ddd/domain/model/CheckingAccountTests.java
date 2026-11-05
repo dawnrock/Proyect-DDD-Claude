@@ -273,6 +273,23 @@ class CheckingAccountTests {
         }
 
         @Test
+        @DisplayName("Una cuenta no puede ser su propia contrapartida y no registra nada (R17)")
+        void una_cuenta_no_puede_ser_su_propia_contrapartida() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+            cuenta.pullDomainEvents();
+            AccountNumber propia = cuenta.accountNumber();
+
+            assertThatExceptionOfType(SameAccountTransferException.class)
+                    .isThrownBy(() -> cuenta.tryWithdrawForTransfer(MonetaryAmount.euros("10.00"), propia));
+            assertThatExceptionOfType(SameAccountTransferException.class)
+                    .isThrownBy(() -> cuenta.depositFromTransfer(MonetaryAmount.euros("10.00"), propia));
+
+            assertThat(cuenta.transactions()).hasSize(1);
+            assertThat(cuenta.currentBalance()).isEqualTo(MonetaryAmount.euros("500.00"));
+            assertThat(cuenta.pullDomainEvents()).isEmpty();
+        }
+
+        @Test
         @DisplayName("Un ingreso o una retirada normales y el depósito inicial no tienen contrapartida")
         void los_movimientos_normales_no_tienen_contrapartida() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
