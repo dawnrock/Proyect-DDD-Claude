@@ -40,6 +40,19 @@ public abstract class UnitOfWorkContract {
     }
 
     @Test
+    @DisplayName("Una unidad abierta dentro de otra en el mismo hilo no se bloquea")
+    void una_unidad_dentro_de_otra_no_se_bloquea() throws Exception {
+        UnitOfWork unit = unitOfWork();
+        ExecutorService pool = Executors.newSingleThreadExecutor();
+        try {
+            Future<String> nested = pool.submit(() -> unit.execute(() -> unit.execute(() -> "anidada")));
+            assertThat(nested.get(5, TimeUnit.SECONDS)).isEqualTo("anidada");
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
+    @Test
     @DisplayName("Mientras una unidad se ejecuta, otra lanzada desde otro hilo espera a que termine")
     void dos_unidades_no_se_solapan() throws Exception {
         UnitOfWork unit = unitOfWork();

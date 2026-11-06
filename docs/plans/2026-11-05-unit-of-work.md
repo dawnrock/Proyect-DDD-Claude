@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone)
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-05
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~60 min (6 tasks)
 
 ## Goal
@@ -106,27 +106,37 @@ What must not change: the behaviour of every use case, R1-R21, the ports' existi
 - **Acceptance criteria:**
   - [x] The CI check of the project status passes.
 
+### [x] T7 — Review fixes (~5 min)
+
+- **Layer:** tests · docs
+- **Files:** `CheckingAccountServiceConcurrencyTests.java`, `UnitOfWorkContract.java`, `docs/ia/decisiones.md`
+- **Depends on:** T6
+- **What to do:**
+  1. `revisor-ddd` found no errors. Applied: the concurrency test shuts its pool down in a `finally`; the contract gains a re-entrance test (the adapter's Javadoc promised it); the decision records that a unit failing after changing an account and before saving it would leave events for the next save. Not applied: shorter test constructor lines (cosmetic) and replacing the timed negative check of the overlap test (it can only give a false pass, never a false failure).
+- **Acceptance criteria:**
+  - [x] `mvn verify` green.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] A test reproduces the problem and passes after the change.
-- [ ] The `UnitOfWork` port and its contract exist; the in-memory adapter meets it.
-- [ ] R17-R19 unchanged; ArchUnit rules green.
+- [x] A test reproduces the problem and passes after the change.
+- [x] The `UnitOfWork` port and its contract exist; the in-memory adapter meets it.
+- [x] R17-R19 unchanged; ArchUnit rules green.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: n/a (no REST change).
-- [ ] Any new business term is in `docs/dominio/glosario.md` (unit of work).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: n/a (no REST change).
+- [x] Any new business term is in `docs/dominio/glosario.md` (unit of work).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

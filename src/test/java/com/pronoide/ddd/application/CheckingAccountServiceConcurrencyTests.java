@@ -61,6 +61,16 @@ class CheckingAccountServiceConcurrencyTests {
         AccountSummary alan = open(service, "Alan Turing", "11111111H", "alan");
 
         ExecutorService pool = Executors.newFixedThreadPool(THREADS);
+        try {
+            runConcurrently(service, ada, alan, pool);
+        } finally {
+            pool.shutdownNow();
+        }
+        assertBalancesAndTransactions(service, ada, alan);
+    }
+
+    private static void runConcurrently(CheckingAccountService service, AccountSummary ada, AccountSummary alan,
+                                        ExecutorService pool) throws Exception {
         CountDownLatch start = new CountDownLatch(1);
         List<Future<?>> results = new ArrayList<>();
         for (int t = 0; t < THREADS; t++) {
@@ -81,8 +91,10 @@ class CheckingAccountServiceConcurrencyTests {
         for (Future<?> result : results) {
             result.get(60, TimeUnit.SECONDS);
         }
-        pool.shutdown();
+    }
 
+    private static void assertBalancesAndTransactions(CheckingAccountService service, AccountSummary ada,
+                                                      AccountSummary alan) {
         int operations = THREADS * OPERATIONS_PER_THREAD;
         AccountDetails adaDetails = service.findAccount(ADMIN, ada.id());
         AccountDetails alanDetails = service.findAccount(ADMIN, alan.id());
