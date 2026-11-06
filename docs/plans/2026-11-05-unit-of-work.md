@@ -39,7 +39,7 @@ What must not change: the behaviour of every use case, R1-R21, the ports' existi
 
 ## Tasks
 
-### [ ] T1 — Concurrency test that reproduces the problem (~10 min)
+### [x] T1 — Concurrency test that reproduces the problem (~10 min)
 
 - **Layer:** application (test)
 - **Files:** `src/test/java/com/pronoide/ddd/application/CheckingAccountServiceConcurrencyTests.java`
@@ -47,8 +47,9 @@ What must not change: the behaviour of every use case, R1-R21, the ports' existi
 - **What to do:**
   1. Real `CheckingAccountService` with the in-memory adapters, no Spring. Two accounts; many threads at once transfer small amounts A → B and B → A, and deposit into both. Afterwards: the total money equals the initial total plus the deposits, each account's balance equals the sum of its approved transactions, and every operation left exactly its transactions.
   2. Run it against the current code and see it fail (red). Races are not deterministic: repeat the scenario enough times (in the same test) that it fails reliably here; if it still passes, record that and rely on the sabotage of T4 to prove the test can fail.
+  3. Done: red in 3 of 3 runs on the current code, for the right reason (the account's event list, an `ArrayList`, ended up with null slots after concurrent writes; `pullDomainEvents` failed). The test is committed together with T4, when it turns green, so that no commit leaves `verify` red.
 - **Acceptance criteria:**
-  - [ ] The test fails on the current code (or the attempt is recorded as described).
+  - [x] The test fails on the current code (or the attempt is recorded as described).
 
 ### [x] T2 — `UnitOfWork` port and its contract (~10 min)
 
@@ -72,7 +73,7 @@ What must not change: the behaviour of every use case, R1-R21, the ports' existi
 - **Acceptance criteria:**
   - [x] Contract green; prove it can fail: an adapter that does not lock fails the overlap test (sabotage, reverted).
 
-### [ ] T4 — Every use case runs in the unit (~10 min)
+### [x] T4 — Every use case runs in the unit (~10 min)
 
 - **Layer:** application · config
 - **Files:** `CheckingAccountService.java`, `DomainConfiguration.java`, `DomainConfigurationTests.java`, the service's test constructions (`CheckingAccountServiceTests`, `CheckingAccountServiceOwnershipTests`, `DomainModelRunnerTests`)
@@ -81,7 +82,7 @@ What must not change: the behaviour of every use case, R1-R21, the ports' existi
   1. `CheckingAccountService` receives `UnitOfWork`; each command and query runs inside `execute`. Inside: load, operate, save, pull the events; after `execute` returns: publish them (as today, after saving). `DomainConfiguration` passes the port.
   2. T1 turns green. Sabotage: `InMemoryUnitOfWork` without the lock makes T1 fail again; reverted.
 - **Acceptance criteria:**
-  - [ ] T1 green; every existing test green; `HexagonalArchitectureTests` green (no Spring in the core).
+  - [x] T1 green; every existing test green; `HexagonalArchitectureTests` green (no Spring in the core).
 
 ### [ ] T5 — Events are published after the unit (~5 min)
 

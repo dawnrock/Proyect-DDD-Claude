@@ -62,7 +62,7 @@ class CheckingAccountServiceTests {
         repository = spy(PersistenceTestAdapters.accounts());
         publisher = mock(DomainEventPublisher.class);
         service = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(), publisher,
-                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService());
+                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(), PersistenceTestAdapters.unitOfWork());
     }
 
     /** Eventos publicados en cada llamada a {@code publishAll}, en orden. */
@@ -134,7 +134,7 @@ class CheckingAccountServiceTests {
         void un_numero_generado_en_uso_se_rechaza() {
             String used = service.openAccount(ADMIN, command().build()).accountNumber();
             CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
-                    publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService());
+                    publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(), PersistenceTestAdapters.unitOfWork());
 
             assertThatExceptionOfType(DuplicateAccountNumberException.class)
                     .isThrownBy(() -> faulty.openAccount(ADMIN, byTaxId("87654321X").build()))
@@ -427,7 +427,7 @@ class CheckingAccountServiceTests {
         void un_caso_de_uso_que_falla_antes_de_guardar_no_publica_nada() {
             String used = service.openAccount(ADMIN, command().build()).accountNumber();
             CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
-                    publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService());
+                    publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(), PersistenceTestAdapters.unitOfWork());
             clearInvocations(publisher);
 
             assertThatExceptionOfType(DuplicateAccountNumberException.class)

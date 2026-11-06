@@ -1,14 +1,17 @@
 package com.pronoide.ddd.application;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CheckingAccountFactory;
 import com.pronoide.ddd.domain.model.CheckingAccountRepository;
+import com.pronoide.ddd.domain.model.DomainEvent;
 import com.pronoide.ddd.domain.model.DomainEventPublisher;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
@@ -29,8 +32,11 @@ import com.pronoide.ddd.domain.service.MoneyTransferService;
  * <p>Implementa los puertos de entrada {@link CheckingAccountCommands} y {@link CheckingAccountQueries}, que son lo
  * único que conocen los adaptadores de entrada. Solo conoce los puertos de salida ({@link CheckingAccountRepository},
  * {@link AccountOwnershipRepository} y {@link DomainEventPublisher}) y la factoría de cuentas; {@code config} le entrega
- * sus adaptadores. Publica los
- * eventos de dominio de cada cuenta después de guardarla.
+ * sus adaptadores.
+ *
+ * <p>Cada caso de uso, también las consultas, se ejecuta dentro de una {@link UnitOfWork} (#78): nadie ve una cuenta a
+ * medio cambiar ni pisa los cambios de otro. Los eventos de dominio de cada cuenta se recogen al guardarla y se
+ * publican cuando la unidad ha terminado.
  */
 public class CheckingAccountService implements CheckingAccountCommands, CheckingAccountQueries {
 
@@ -39,20 +45,26 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     private final DomainEventPublisher publisher;
     private final CheckingAccountFactory factory;
     private final MoneyTransferService transferService;
+    private final UnitOfWork unitOfWork;
 
     /** Recibe sus colaboradores ya construidos: los entrega {@code config.DomainConfiguration} (#20). */
     public CheckingAccountService(CheckingAccountRepository repository, AccountOwnershipRepository ownership,
                                   DomainEventPublisher publisher, CheckingAccountFactory factory,
-                                  MoneyTransferService transferService) {
+                                  MoneyTransferService transferService, UnitOfWork unitOfWork) {
         this.repository = repository;
         this.ownership = ownership;
         this.publisher = publisher;
         this.factory = factory;
         this.transferService = transferService;
+        this.unitOfWork = unitOfWork;
     }
 
     @Override
     public AccountSummary openAccount(Caller caller, OpenAccountCommand command) {
+        return inUnit(events -> open(caller, command, events));
+    }
+
+    private AccountSummary open(Caller caller, OpenAccountCommand command, Events events) {
         if (!caller.admin()) {
             throw new ForbiddenOperationException("abrir cuentas");
         }
@@ -64,7 +76,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         CheckingAccount opened =
                 factory.open(command.holderName(), new TaxId(command.holderTaxId()), initialDeposit);
         requireUnused(opened.accountNumber());
-        CheckingAccount account = saveAndPublish(opened);
+        CheckingAccount account = save(opened, events);
         ownership.assign(account.id(), command.ownerUsername());
         return toSummary(account);
     }
@@ -78,45 +90,51 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
 
     @Override
     public List<AccountSummary> listAccounts(Caller caller) {
-        return repository.findAll().stream()
+        return unitOfWork.execute(() -> repository.findAll().stream()
                 .filter(account -> canAccess(caller, account.id()))
                 .map(CheckingAccountService::toSummary)
-                .toList();
+                .toList());
     }
 
     @Override
     public AccountDetails findAccount(Caller caller, UUID id) {
-        return toDetails(loadFor(caller, id));
+        return unitOfWork.execute(() -> toDetails(loadFor(caller, id)));
     }
 
     @Override
     public TransactionSummary deposit(Caller caller, DepositCommand command) {
-        CheckingAccount account = loadFor(caller, command.accountId());
-        Transaction transaction = account.deposit(toAmount(command.amount(), command.currency()));
-        saveAndPublish(account);
-        return toTransaction(transaction);
+        return inUnit(events -> {
+            CheckingAccount account = loadFor(caller, command.accountId());
+            Transaction transaction = account.deposit(toAmount(command.amount(), command.currency()));
+            save(account, events);
+            return toTransaction(transaction);
+        });
     }
 
     @Override
     public TransactionSummary withdraw(Caller caller, WithdrawCommand command) {
-        CheckingAccount account = loadFor(caller, command.accountId());
-        Transaction transaction = account.tryWithdraw(toAmount(command.amount(), command.currency()));
-        saveAndPublish(account);
-        return toTransaction(transaction);
+        return inUnit(events -> {
+            CheckingAccount account = loadFor(caller, command.accountId());
+            Transaction transaction = account.tryWithdraw(toAmount(command.amount(), command.currency()));
+            save(account, events);
+            return toTransaction(transaction);
+        });
     }
 
     @Override
     public TransferSummary transfer(Caller caller, TransferCommand command) {
+        return inUnit(events -> transfer(caller, command, events));
+    }
+
+    private TransferSummary transfer(Caller caller, TransferCommand command, Events events) {
         CheckingAccount source = loadFor(caller, command.sourceAccountId());
         AccountNumber targetNumber = new AccountNumber(command.targetAccountNumber());
         CheckingAccount target = repository.findByAccountNumber(targetNumber)
                 .orElseThrow(() -> new TargetAccountNotFoundException(targetNumber.value()));
         Transaction withdrawal =
                 transferService.transfer(source, target, toAmount(command.amount(), command.currency()));
-        repository.save(source);
-        repository.save(target);
-        publisher.publishAll(source.pullDomainEvents());
-        publisher.publishAll(target.pullDomainEvents());
+        save(source, events);
+        save(target, events);
         return TransferSummary.builder()
                 .sourceAccountId(source.id())
                 .sourceAccountNumber(source.accountNumber().value())
@@ -138,11 +156,27 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         return account;
     }
 
-    /** Guarda la cuenta y, solo después, publica los eventos que ha registrado. */
-    private CheckingAccount saveAndPublish(CheckingAccount account) {
+    /**
+     * Ejecuta el caso de uso dentro de la unidad de trabajo y, cuando ha terminado, publica los eventos de cada cuenta
+     * guardada, una llamada por cuenta y en el orden en que se guardaron. Si el caso de uso falla, no publica nada.
+     */
+    private <T> T inUnit(Function<Events, T> work) {
+        Events events = new Events();
+        T result = unitOfWork.execute(() -> work.apply(events));
+        events.batches.forEach(publisher::publishAll);
+        return result;
+    }
+
+    /** Guarda la cuenta y recoge los eventos que ha registrado, para publicarlos al terminar la unidad. */
+    private CheckingAccount save(CheckingAccount account, Events events) {
         CheckingAccount saved = repository.save(account);
-        publisher.publishAll(account.pullDomainEvents());
+        events.batches.add(account.pullDomainEvents());
         return saved;
+    }
+
+    /** Eventos pendientes de publicar de un caso de uso: un lote por cuenta guardada. */
+    private static final class Events {
+        private final List<List<DomainEvent>> batches = new ArrayList<>();
     }
 
     private boolean canAccess(Caller caller, UUID accountId) {
