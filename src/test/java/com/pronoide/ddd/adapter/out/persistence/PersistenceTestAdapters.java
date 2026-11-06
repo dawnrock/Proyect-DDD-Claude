@@ -1,6 +1,7 @@
 package com.pronoide.ddd.adapter.out.persistence;
 
 import com.pronoide.ddd.application.AccountOwnershipRepository;
+import com.pronoide.ddd.application.UnitOfWork;
 import com.pronoide.ddd.domain.model.AccountNumberSequence;
 import com.pronoide.ddd.domain.model.CheckingAccountRepository;
 
@@ -21,6 +22,11 @@ public final class PersistenceTestAdapters {
     /** Una numeración de cuentas en memoria, que empieza desde el primer número. */
     public static AccountNumberSequence accountNumbers() {
         return new InMemoryAccountNumberSequence();
+    }
+
+    /** La unidad de trabajo en memoria (un cerrojo para todos los casos de uso, #78). */
+    public static UnitOfWork unitOfWork() {
+        return new InMemoryUnitOfWork();
     }
 
     /** Un repositorio de propietarios de cuentas en memoria, vacío. */

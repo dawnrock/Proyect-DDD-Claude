@@ -61,7 +61,7 @@ What must not change: the behaviour of every use case, R1-R21, the ports' existi
 - **Acceptance criteria:**
   - [x] The port compiles; the contract exists (exercised in T3).
 
-### [ ] T3 — In-memory adapter (~10 min)
+### [x] T3 — In-memory adapter (~10 min)
 
 - **Layer:** adapter.out
 - **Files:** `adapter/out/persistence/InMemoryUnitOfWork.java`, `InMemoryUnitOfWorkTests.java`, `PersistenceTestAdapters.java`
@@ -70,7 +70,7 @@ What must not change: the behaviour of every use case, R1-R21, the ports' existi
   1. `InMemoryUnitOfWorkTests extends UnitOfWorkContract` first (red: no adapter), then the package-private `@Component` with a fair `ReentrantLock` (`lock` / `try` / `finally unlock`); re-entrant, so a unit that calls another does not deadlock.
   2. `PersistenceTestAdapters.unitOfWork()` returns it typed as the port.
 - **Acceptance criteria:**
-  - [ ] Contract green; prove it can fail: an adapter that does not lock fails the overlap test (sabotage, reverted).
+  - [x] Contract green; prove it can fail: an adapter that does not lock fails the overlap test (sabotage, reverted).
 
 ### [ ] T4 — Every use case runs in the unit (~10 min)
 
