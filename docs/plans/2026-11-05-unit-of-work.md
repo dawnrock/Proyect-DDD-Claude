@@ -94,7 +94,7 @@ What must not change: the behaviour of every use case, R1-R21, the ports' existi
 - **Acceptance criteria:**
   - [x] The test passes and fails if the publication is moved inside the unit (sabotage, reverted).
 
-### [ ] T6 — Documentation and project status (~10 min)
+### [x] T6 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/dominio/glosario.md`, `docs/arquitectura/fase-2-hexagonal.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -104,7 +104,7 @@ What must not change: the behaviour of every use case, R1-R21, the ports' existi
   2. `fase-2-hexagonal.md`: rows for `UnitOfWork` and `InMemoryUnitOfWork`; the service row; the adapter-tests table gains the unit of work's contract.
   3. Status: #78 done, next step `/plan-feature 79`; decision (unit of work port, lock in memory, events after the unit); `pendientes.md` loses the transaction item of the #7 review; a row in `historial.md`.
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes.
+  - [x] The CI check of the project status passes.
 
 ## Global acceptance criteria
 

@@ -2,7 +2,7 @@
 
 > **Read it at the start of every session.** It is the entry point to carry on without depending on earlier conversations, and it is kept **short on purpose**: it is loaded in every session. **It is updated in every PR that closes an issue** (CI checks it).
 
-- **Last updated:** 2026-11-05 · PR #80 (#77, review leftovers)
+- **Last updated:** 2026-11-06 · PR #PRNUM (#78, unit of work)
 - **Active branch:** `Hexagonal`, the repository's default branch; phase 2 is marked by the `v2-hexagonal` tag and work continues on the branch. `Monolithic` frozen at the `v1-monolito` tag; `master` frozen.
 
 ## Where we are
@@ -11,11 +11,11 @@
 | ----- | ---- | ----------- | ------- |
 | 1 · Layered monolith | Closed: #2-#8, #11-#13, #31, #48, #50, #54, #57 (details in the [history](historial.md)) | — | — |
 | 2 · Hexagonal | Closed: #14-#23, tag `v2-hexagonal` | — | — |
-| After phase 2 (no milestone) | #70 translation, #71 Graphify, #72 web, #77 review leftovers | — | #78 transfer atomicity, #79 Graphify for methods |
+| After phase 2 (no milestone) | #70 translation, #71 Graphify, #72 web, #77 review leftovers, #78 unit of work | — | #79 Graphify for methods |
 
 ## Next step
 
-`/plan-feature 78` on `Hexagonal` (save both accounts of a transfer atomically); then #79 (Grep instead of the graph for method questions; touches `.claude/`, needs the user's approval).
+`/plan-feature 79` on `Hexagonal` (Grep instead of the graph for method questions; touches `.claude/`, needs the user's approval).
 
 Phase 2 design: `docs/arquitectura/fase-2-hexagonal.md`; comparison with phase 1: `docs/arquitectura/comparativa-capas-hexagonal.md`.
 
