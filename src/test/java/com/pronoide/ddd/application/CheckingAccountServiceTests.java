@@ -18,6 +18,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,7 +64,7 @@ class CheckingAccountServiceTests {
         repository = spy(PersistenceTestAdapters.accounts());
         publisher = mock(DomainEventPublisher.class);
         service = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(), publisher,
-                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService());
+                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(), PersistenceTestAdapters.unitOfWork());
     }
 
     /** Eventos publicados en cada llamada a {@code publishAll}, en orden. */
@@ -134,7 +136,7 @@ class CheckingAccountServiceTests {
         void un_numero_generado_en_uso_se_rechaza() {
             String used = service.openAccount(ADMIN, command().build()).accountNumber();
             CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
-                    publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService());
+                    publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(), PersistenceTestAdapters.unitOfWork());
 
             assertThatExceptionOfType(DuplicateAccountNumberException.class)
                     .isThrownBy(() -> faulty.openAccount(ADMIN, byTaxId("87654321X").build()))
@@ -427,7 +429,7 @@ class CheckingAccountServiceTests {
         void un_caso_de_uso_que_falla_antes_de_guardar_no_publica_nada() {
             String used = service.openAccount(ADMIN, command().build()).accountNumber();
             CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
-                    publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService());
+                    publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(), PersistenceTestAdapters.unitOfWork());
             clearInvocations(publisher);
 
             assertThatExceptionOfType(DuplicateAccountNumberException.class)
@@ -603,6 +605,71 @@ class CheckingAccountServiceTests {
             assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> service.transfer(ADMIN, dollars));
             assertThat(service.findAccount(ADMIN, sourceId).balance()).isEqualByComparingTo("500.00");
             assertThat(service.findAccount(ADMIN, targetId).balance()).isEqualByComparingTo("100.00");
+        }
+    }
+
+    @Nested
+    @DisplayName("Unidad de trabajo")
+    class UnitOfWorkBoundary {
+
+        /** Unidad de trabajo que anota si hay una en curso y, si se le pide, falla al terminar (como un commit fallido). */
+        private final class RecordingUnitOfWork implements UnitOfWork {
+            private final AtomicBoolean inside = new AtomicBoolean(false);
+            private boolean failOnFinish;
+
+            @Override
+            public <T> T execute(Supplier<T> work) {
+                inside.set(true);
+                try {
+                    T result = work.get();
+                    if (failOnFinish) {
+                        throw new IllegalStateException("la unidad de trabajo no pudo terminar");
+                    }
+                    return result;
+                } finally {
+                    inside.set(false);
+                }
+            }
+        }
+
+        private final RecordingUnitOfWork unit = new RecordingUnitOfWork();
+        private final AtomicBoolean publishedInsideUnit = new AtomicBoolean(false);
+        private int publications;
+        private CheckingAccountService recorded;
+
+        @BeforeEach
+        void setUp() {
+            DomainEventPublisher recordingPublisher = event -> {
+                publications++;
+                if (unit.inside.get()) {
+                    publishedInsideUnit.set(true);
+                }
+            };
+            recorded = new CheckingAccountService(PersistenceTestAdapters.accounts(), PersistenceTestAdapters.ownership(),
+                    recordingPublisher, new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(),
+                            TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(), unit);
+        }
+
+        @Test
+        @DisplayName("Los eventos se publican cuando la unidad de trabajo ha terminado, nunca dentro")
+        void los_eventos_se_publican_al_terminar_la_unidad() {
+            UUID id = recorded.openAccount(ADMIN, command().build()).id();
+            recorded.deposit(ADMIN, DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).build());
+
+            assertThat(publications).isPositive();
+            assertThat(publishedInsideUnit).as("algún evento se publicó dentro de la unidad").isFalse();
+        }
+
+        @Test
+        @DisplayName("Si la unidad de trabajo no termina bien, no se publica ningún evento")
+        void si_la_unidad_no_termina_bien_no_se_publica_nada() {
+            UUID id = recorded.openAccount(ADMIN, command().build()).id();
+            publications = 0;
+            unit.failOnFinish = true;
+
+            assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() ->
+                    recorded.deposit(ADMIN, DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).build()));
+            assertThat(publications).isZero();
         }
     }
 }

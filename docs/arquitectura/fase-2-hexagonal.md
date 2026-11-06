@@ -59,7 +59,7 @@ Each adapter is tested without the hexagon (#21). `AdapterTestIsolationTests` (A
 | REST controllers | `@WebMvcTest` with `CheckingAccountCommands`/`CheckingAccountQueries` mocked (`@MockitoBean`) | `AccountControllerTests`, `TransferControllerTests`, `RestExceptionHandlerTests` |
 | Web controllers | `@WebMvcTest` with the ports mocked | `AccountWebControllerTests`, `WebSecurityTests` |
 | CLI runner | the real application service with in-memory adapters, without Spring | `DomainModelRunnerTests` |
-| Persistence | port contracts (`*Contract`) extended by the in-memory adapter's test | `InMemoryCheckingAccountRepositoryTests`, `InMemoryAccountOwnershipRepositoryTests`, `InMemoryAccountNumberSequenceTests` |
+| Persistence | port contracts (`*Contract`) extended by the in-memory adapter's test | `InMemoryCheckingAccountRepositoryTests`, `InMemoryAccountOwnershipRepositoryTests`, `InMemoryAccountNumberSequenceTests`, `InMemoryUnitOfWorkTests` |
 | Events | a minimal Spring context with only the adapter and a recording `@EventListener`; plus a unit test with a mocked `ApplicationEventPublisher` | `SpringDomainEventPublisherContextTests`, `SpringDomainEventPublisherTests` |
 | Tax agency | the fake on its own | `FakeTaxAgencyIncomeVerifierTests` |
 
@@ -95,9 +95,11 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | `InMemoryAccountNumberSequence` | `adapter.out.persistence` | Output adapter (simulated, package-private): implements `AccountNumberSequence`, valid consecutive Spanish IBANs |
 | `FakeTaxAgencyIncomeVerifier` | `adapter.out.taxagency` | Output adapter (simulated, package-private): implements `IncomeVerifier` with a fixed table |
 | `InMemoryAccountOwnershipRepository` | `adapter.out.persistence` | Output adapter (package-private): implements `AccountOwnershipRepository`, which user owns each account (ADR 0008) |
-| `CheckingAccountService` | `application` | Application service: implements `CheckingAccountCommands` and `CheckingAccountQueries` (use cases and account ownership); uses the output ports only, opens accounts through `CheckingAccountFactory` and publishes each account's domain events after saving it. Keeps its name (not `CheckingAccountApplicationService`): nobody outside `application` sees it. No Spring annotations: built in `config` |
+| `InMemoryUnitOfWork` | `adapter.out.persistence` | Output adapter (simulated, package-private): implements `UnitOfWork` with one fair lock for every use case (#78) |
+| `CheckingAccountService` | `application` | Application service: implements `CheckingAccountCommands` and `CheckingAccountQueries` (use cases and account ownership); uses the output ports only, opens accounts through `CheckingAccountFactory` and runs every use case inside a `UnitOfWork` and publishes the domain events of the saved accounts once the unit has finished (#78). Keeps its name (not `CheckingAccountApplicationService`): nobody outside `application` sees it. No Spring annotations: built in `config` |
 | `CheckingAccountCommands`, `CheckingAccountQueries` | `application` | Input ports: use cases that change accounts (open, deposit, withdraw, transfer) and that query them (list, detail) |
 | `AccountOwnershipRepository` | `application` | Output port: account ownership. In `application`, not `domain.model`, because the user's identity never reaches the domain (ADR 0008) |
+| `UnitOfWork` | `application` | Output port: runs a use case as one unit (load, change, save); in `application` because the boundary of a use case is an application concern (#78) |
 | `*CommandDef`, `*SummaryDef`, `AccountDetailsDef`, `CallerDef`, `ApplicationValue`, `CommandValidation` | `application` | Commands, views and `Caller` (Immutables) and their validation |
 | `AuditLogListener`, `CustomerNotificationListener` | `application.listener` | Domain event consumers: audit log and simulated customer notification. Declared in `config`; they keep `@EventListener`, the only Spring dependency allowed in the core (events reach them through Spring) |
 | `NotFoundException`, `AccountNotFoundException`, `TargetAccountNotFoundException`, `ForbiddenOperationException`, `OperationNotAllowedException` | `application` | Application errors |

@@ -39,7 +39,7 @@ class CheckingAccountServiceOwnershipTests {
         accounts = PersistenceTestAdapters.accounts();
         owners = PersistenceTestAdapters.ownership();
         service = new CheckingAccountService(accounts, owners, mock(DomainEventPublisher.class),
-                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService());
+                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(), PersistenceTestAdapters.unitOfWork());
     }
 
     private static OpenAccountCommand.Builder command(String owner) {
