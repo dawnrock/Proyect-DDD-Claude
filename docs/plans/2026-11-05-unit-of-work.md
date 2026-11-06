@@ -84,7 +84,7 @@ What must not change: the behaviour of every use case, R1-R21, the ports' existi
 - **Acceptance criteria:**
   - [x] T1 green; every existing test green; `HexagonalArchitectureTests` green (no Spring in the core).
 
-### [ ] T5 — Events are published after the unit (~5 min)
+### [x] T5 — Events are published after the unit (~5 min)
 
 - **Layer:** application (test)
 - **Files:** `CheckingAccountServiceTests.java` (or a new nested class)
@@ -92,7 +92,7 @@ What must not change: the behaviour of every use case, R1-R21, the ports' existi
 - **What to do:**
   1. Test with a recording unit of work and publisher: the publisher is called only once the unit has finished, and a use case that fails inside the unit publishes nothing.
 - **Acceptance criteria:**
-  - [ ] The test passes and fails if the publication is moved inside the unit (sabotage, reverted).
+  - [x] The test passes and fails if the publication is moved inside the unit (sabotage, reverted).
 
 ### [ ] T6 — Documentation and project status (~10 min)
 
