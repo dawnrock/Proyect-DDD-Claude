@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone)
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-05
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~60 min (6 tasks)
 
 ## Goal
@@ -50,7 +50,7 @@ What must not change: the behaviour of every use case, R1-R21, the ports' existi
 - **Acceptance criteria:**
   - [ ] The test fails on the current code (or the attempt is recorded as described).
 
-### [ ] T2 — `UnitOfWork` port and its contract (~10 min)
+### [x] T2 — `UnitOfWork` port and its contract (~10 min)
 
 - **Layer:** application
 - **Files:** `application/UnitOfWork.java`, `src/test/java/com/pronoide/ddd/application/UnitOfWorkContract.java`
@@ -59,7 +59,7 @@ What must not change: the behaviour of every use case, R1-R21, the ports' existi
   1. Port: `<T> T execute(Supplier<T> work)`; Javadoc says what any implementation guarantees: the work runs once, its result is returned, its exception propagates, and two units never overlap on the same data.
   2. Abstract contract (any implementation): returns the result; propagates the exception and a later unit still runs; while one unit is running, another started from a second thread does not enter until the first ends.
 - **Acceptance criteria:**
-  - [ ] The port compiles; the contract exists (exercised in T3).
+  - [x] The port compiles; the contract exists (exercised in T3).
 
 ### [ ] T3 — In-memory adapter (~10 min)
 
