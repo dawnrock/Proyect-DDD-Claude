@@ -88,16 +88,16 @@ Close the pending items of `docs/ia/pendientes.md` that touch the Claude Code co
 - **Acceptance criteria:**
   - [x] Only those two places change; both statements match the code (`pom.xml`, `LayeredArchitectureTests` at `v1-monolito`).
 
-### [ ] T6 — Documentation and project status (~10 min)
+### [x] T6 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/arquitectura-ia.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
 - **Depends on:** T3, T4, T5
 - **What to do:**
   1. `arquitectura-ia.md`: the code-graph row mentions the method rule; the team flow notes the lead merging the reviews.
-  2. Status: #79 done, next step `/plan-feature 82`; decision; `pendientes.md` loses the items handled here (Graphify, team, the two `CLAUDE.md` suggestions); a row in `historial.md`.
+  2. Status: #79 done, next step `/implement-plan 82` (its plan was approved together with this one); decision; `pendientes.md` loses the items handled here (Graphify, team, the two `CLAUDE.md` suggestions); a row in `historial.md`.
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes.
+  - [x] The CI check of the project status passes.
 
 ## Global acceptance criteria
 
