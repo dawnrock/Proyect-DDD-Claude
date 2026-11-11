@@ -2,7 +2,7 @@
 
 > **Read it at the start of every session.** It is the entry point to carry on without depending on earlier conversations, and it is kept **short on purpose**: it is loaded in every session. **It is updated in every PR that closes an issue** (CI checks it).
 
-- **Last updated:** 2026-11-11 · PR #PRNUM (#82, code leftovers)
+- **Last updated:** 2026-11-11 · PR #84 (#82, code leftovers)
 - **Active branch:** `Hexagonal`, the repository's default branch; phase 2 is marked by the `v2-hexagonal` tag and work continues on the branch. `Monolithic` frozen at the `v1-monolito` tag; `master` frozen.
 
 ## Where we are
