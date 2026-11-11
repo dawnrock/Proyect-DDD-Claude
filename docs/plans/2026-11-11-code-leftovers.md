@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone)
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-11
-- **Status:** draft
+- **Status:** done
 - **Total estimate:** ~35 min (4 tasks)
 
 ## Goal
@@ -36,7 +36,7 @@ What must not change: the web texts, the `[demo]` trace, the REST responses (the
 
 ## Tasks
 
-### [ ] T1 — Withdrawal evaluated before it is recorded (~10 min)
+### [x] T1 — Withdrawal evaluated before it is recorded (~10 min)
 
 - **Layer:** domain
 - **Files:** `domain/model/CheckingAccount.java`
@@ -46,9 +46,9 @@ What must not change: the web texts, the `[demo]` trace, the REST responses (the
   2. Compute `allowed = isAllowed(newBalance)` before `register(movement)`; then approve or reject as today. Javadoc: why the order matters.
   3. Sabotage: evaluate with the current balance instead of the new one; R6/R8 tests fail; revert.
 - **Acceptance criteria:**
-  - [ ] Domain tests green, red with the sabotage; `check-domain.mjs` without errors.
+  - [x] Domain tests green, red with the sabotage; `check-domain.mjs` without errors.
 
-### [ ] T2 — `approved()` and `rejected()` in the views (~5 min)
+### [x] T2 — `approved()` and `rejected()` in the views (~5 min)
 
 - **Layer:** application
 - **Files:** `application/TransactionSummaryDef.java`, `TransferSummaryDef.java`, a test in `application`
@@ -57,9 +57,9 @@ What must not change: the web texts, the `[demo]` trace, the REST responses (the
   1. Tests first: a summary with status `APPROVED` is `approved()` and not `rejected()`; `REJECTED` the other way round; `PENDING` neither.
   2. `default` methods on both `*Def` interfaces (Immutables does not treat a non-annotated default method as an attribute).
 - **Acceptance criteria:**
-  - [ ] Tests green; `JacksonImmutablesTests` and the REST tests unchanged and green.
+  - [x] Tests green; `JacksonImmutablesTests` and the REST tests unchanged and green.
 
-### [ ] T3 — Adapters use them (~10 min)
+### [x] T3 — Adapters use them (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/web/AccountWebController.java`, `templates/accounts/detail.html`, `adapter/in/cli/DomainModelRunner.java`
@@ -68,9 +68,9 @@ What must not change: the web texts, the `[demo]` trace, the REST responses (the
   1. Replace every status literal comparison in `adapter.in` with `approved()` / `rejected()`. The existing web and CLI tests are the characterization (same notices, same rejected style, same `[demo]` trace).
   2. Grep: no `"REJECTED"` / `"APPROVED"` comparison left in `adapter.in` (the REST DTO keeps the string field).
 - **Acceptance criteria:**
-  - [ ] `AccountWebControllerTests`, `DomainModelRunnerTests` and `DemoProfileTests` green; the grep finds no comparison.
+  - [x] `AccountWebControllerTests`, `DomainModelRunnerTests` and `DemoProfileTests` green; the grep finds no comparison.
 
-### [ ] T4 — Documentation and project status (~10 min)
+### [x] T4 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -78,28 +78,38 @@ What must not change: the web texts, the `[demo]` trace, the REST responses (the
 - **What to do:**
   1. Status: #82 done; next step decided with the user (no open issues left); `pendientes.md` loses the two items; decision (views expose `approved()`/`rejected()`, adapters never compare status strings); a row in `historial.md`.
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes.
+  - [x] The CI check of the project status passes.
+
+### [x] T5 — Review fixes (~2 min)
+
+- **Layer:** tests
+- **Files:** `StatusViewsTests.java`
+- **Depends on:** T4
+- **What to do:**
+  1. `revisor-ddd` found no errors (the reordering keeps R5-R9 and the events; the default methods are not Immutables attributes; no status literal comparison left except `PENDING`, which has no method). Applied: import order in `StatusViewsTests`. The missing direct test for the reordering is already explained in this plan and in the Javadoc of `tryWithdraw`.
+- **Acceptance criteria:**
+  - [x] `mvn verify` green.
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] No adapter compares status literals; tests of the views and the adapters green.
-- [ ] The withdrawal is evaluated before it is recorded; R5-R9 unchanged.
+- [x] No adapter compares status literals; tests of the views and the adapters green.
+- [x] The withdrawal is evaluated before it is recorded; R5-R9 unchanged.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: n/a (REST keeps the `status` string).
-- [ ] Any new business term is in `docs/dominio/glosario.md` (n/a: no new terms).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: n/a (REST keeps the `status` string).
+- [x] Any new business term is in `docs/dominio/glosario.md` (n/a: no new terms).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
