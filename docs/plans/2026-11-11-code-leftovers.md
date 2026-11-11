@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone)
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-11
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~35 min (4 tasks)
 
 ## Goal
@@ -36,7 +36,7 @@ What must not change: the web texts, the `[demo]` trace, the REST responses (the
 
 ## Tasks
 
-### [ ] T1 — Withdrawal evaluated before it is recorded (~10 min)
+### [x] T1 — Withdrawal evaluated before it is recorded (~10 min)
 
 - **Layer:** domain
 - **Files:** `domain/model/CheckingAccount.java`
@@ -46,7 +46,7 @@ What must not change: the web texts, the `[demo]` trace, the REST responses (the
   2. Compute `allowed = isAllowed(newBalance)` before `register(movement)`; then approve or reject as today. Javadoc: why the order matters.
   3. Sabotage: evaluate with the current balance instead of the new one; R6/R8 tests fail; revert.
 - **Acceptance criteria:**
-  - [ ] Domain tests green, red with the sabotage; `check-domain.mjs` without errors.
+  - [x] Domain tests green, red with the sabotage; `check-domain.mjs` without errors.
 
 ### [ ] T2 — `approved()` and `rejected()` in the views (~5 min)
 

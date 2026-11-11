@@ -86,13 +86,18 @@ public class CheckingAccount {
         }
     }
 
+    /**
+     * Evalúa la retirada antes de registrar el movimiento: si la evaluación fallara (por ejemplo, un límite en otra
+     * divisa), no queda ningún movimiento {@code PENDING} en la cuenta (#82).
+     */
     private Transaction tryWithdraw(Transaction movement) {
         MonetaryAmount amount = movement.amount();
         MonetaryAmount newBalance = currentBalance.subtract(amount);
+        boolean allowed = isAllowed(newBalance);
 
         Transaction transaction = register(movement);
 
-        if (isAllowed(newBalance)) {
+        if (allowed) {
             transaction.approve();
             currentBalance = newBalance;
             record(new MoneyWithdrawn(id, transaction.id(), amount, transaction.occurredOn()));
