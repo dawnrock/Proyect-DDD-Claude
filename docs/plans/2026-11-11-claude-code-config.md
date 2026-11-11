@@ -35,7 +35,7 @@ Close the pending items of `docs/ia/pendientes.md` that touch the Claude Code co
 
 ## Tasks
 
-### [ ] T1 — Baseline with the current rule (~10 min)
+### [x] T1 — Baseline with the current rule (~10 min)
 
 - **Layer:** tooling
 - **Files:** — (measurement notes for T3)
@@ -43,9 +43,9 @@ Close the pending items of `docs/ia/pendientes.md` that touch the Claude Code co
 - **What to do:**
   1. Install Graphify if the session lacks it (`pip install --user graphifyy==0.9.97`) and build the graph. Run questions 1-4 of `scripts/measure-graphify.mjs` with configuration B, two runs each; keep the output (scratchpad).
 - **Acceptance criteria:**
-  - [ ] 8 runs recorded, all answers complete.
+  - [x] 8 runs recorded, all answers complete.
 
-### [ ] T2 — `buscador-referencias`: Grep for method questions (~5 min, needs approval)
+### [x] T2 — `buscador-referencias`: Grep for method questions (~5 min, needs approval)
 
 - **Layer:** `.claude`
 - **Files:** `.claude/agents/buscador-referencias.md`
@@ -53,7 +53,7 @@ Close the pending items of `docs/ia/pendientes.md` that touch the Claude Code co
 - **What to do:**
   1. In the "dependency questions" paragraph: when the question names a method or a field (`Class.method`, `method(`), go straight to Grep; the graph only answers who depends on a **class** or how two classes relate. Nothing else in the agent changes.
 - **Acceptance criteria:**
-  - [ ] The diff only touches that paragraph.
+  - [x] The diff only touches that paragraph.
 
 ### [ ] T3 — Measure again and record it in ADR 0010 (~10 min)
 
