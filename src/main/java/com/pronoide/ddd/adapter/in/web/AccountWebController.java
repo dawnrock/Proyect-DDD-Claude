@@ -118,7 +118,7 @@ public class AccountWebController {
                 try {
                     TransactionSummary withdrawal = commands.withdraw(CurrentCaller.from(authentication), command);
                     String amount = fmt.money(withdrawal.amount(), withdrawal.currency());
-                    if ("REJECTED".equals(withdrawal.status())) {
+                    if (withdrawal.rejected()) {
                         redirect.addFlashAttribute("rejection",
                                 "Retirada de %s rechazada: el saldo resultante no está permitido para esta cuenta"
                                         .formatted(amount));
@@ -155,7 +155,7 @@ public class AccountWebController {
                     TransferSummary transfer = commands.transfer(CurrentCaller.from(authentication), command);
                     String amount = fmt.money(transfer.amount(), transfer.currency());
                     String target = fmt.maskedIban(transfer.targetAccountNumber());
-                    if ("REJECTED".equals(transfer.status())) {
+                    if (transfer.rejected()) {
                         redirect.addFlashAttribute("rejection",
                                 ("Transferencia de %s a %s rechazada: el saldo resultante no está permitido "
                                         + "para la cuenta de origen").formatted(amount, target));

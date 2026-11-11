@@ -74,14 +74,14 @@ public class DomainModelRunner implements ApplicationRunner {
         TransactionSummary deposit = commands.deposit(CallerDef.system(),
                 DepositCommand.builder().accountId(account.id()).amount(new BigDecimal(amount)).build());
         log.info("[demo] Ingresar · {} · {} {} · {}", account.accountNumber(), deposit.amount(), deposit.currency(),
-                deposit.status().equals("APPROVED") ? "aprobado" : "rechazado");
+                deposit.approved() ? "aprobado" : "rechazado");
     }
 
     private void withdraw(AccountSummary account, String amount) {
         TransactionSummary withdrawal = commands.withdraw(CallerDef.system(),
                 WithdrawCommand.builder().accountId(account.id()).amount(new BigDecimal(amount)).build());
         log.info("[demo] Retirar · {} · {} {} · {}", account.accountNumber(), withdrawal.amount(),
-                withdrawal.currency(), withdrawal.status().equals("APPROVED") ? "aprobada" : "rechazada");
+                withdrawal.currency(), withdrawal.approved() ? "aprobada" : "rechazada");
     }
 
     private void transfer(AccountSummary source, AccountSummary target, String amount) {
@@ -92,7 +92,7 @@ public class DomainModelRunner implements ApplicationRunner {
                 .build());
         log.info("[demo] Transferir · {} → {} · {} {} · {}", transfer.sourceAccountNumber(),
                 transfer.targetAccountNumber(), transfer.amount(), transfer.currency(),
-                transfer.status().equals("APPROVED") ? "aprobada" : "rechazada");
+                transfer.approved() ? "aprobada" : "rechazada");
     }
 
     private static OpenAccountCommand account(String holderName, String holderTaxId, String initialDeposit,

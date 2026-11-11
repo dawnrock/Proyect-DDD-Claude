@@ -59,7 +59,7 @@ What must not change: the web texts, the `[demo]` trace, the REST responses (the
 - **Acceptance criteria:**
   - [x] Tests green; `JacksonImmutablesTests` and the REST tests unchanged and green.
 
-### [ ] T3 — Adapters use them (~10 min)
+### [x] T3 — Adapters use them (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/web/AccountWebController.java`, `templates/accounts/detail.html`, `adapter/in/cli/DomainModelRunner.java`
@@ -68,7 +68,7 @@ What must not change: the web texts, the `[demo]` trace, the REST responses (the
   1. Replace every status literal comparison in `adapter.in` with `approved()` / `rejected()`. The existing web and CLI tests are the characterization (same notices, same rejected style, same `[demo]` trace).
   2. Grep: no `"REJECTED"` / `"APPROVED"` comparison left in `adapter.in` (the REST DTO keeps the string field).
 - **Acceptance criteria:**
-  - [ ] `AccountWebControllerTests`, `DomainModelRunnerTests` and `DemoProfileTests` green; the grep finds no comparison.
+  - [x] `AccountWebControllerTests`, `DomainModelRunnerTests` and `DemoProfileTests` green; the grep finds no comparison.
 
 ### [ ] T4 — Documentation and project status (~10 min)
 
