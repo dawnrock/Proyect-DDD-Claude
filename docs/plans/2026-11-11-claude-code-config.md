@@ -55,7 +55,7 @@ Close the pending items of `docs/ia/pendientes.md` that touch the Claude Code co
 - **Acceptance criteria:**
   - [x] The diff only touches that paragraph.
 
-### [ ] T3 — Measure again and record it in ADR 0010 (~10 min)
+### [x] T3 — Measure again and record it in ADR 0010 (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0010-graphify-token-savings.md`
@@ -64,7 +64,7 @@ Close the pending items of `docs/ia/pendientes.md` that touch the Claude Code co
   1. Same runs as T1. The method question must not call the graph and must cost less; the dependency questions must keep using it without a clear change (> 15 %).
   2. New short section "Methods go to Grep (#79)" with a before/after table; the "Decision" says the refinement is applied.
 - **Acceptance criteria:**
-  - [ ] Every number comes from the kept output; the conclusion follows from it (or, if the change does not help, the agent is reverted and the ADR says so).
+  - [x] Every number comes from the kept output; the conclusion follows from it (or, if the change does not help, the agent is reverted and the ADR says so).
 
 ### [x] T4 — `implement-plan-team`: lessons of the team issues (~10 min, needs approval)
 

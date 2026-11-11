@@ -1,6 +1,6 @@
 # 0010 · Graphify for dependency questions only, and a short project status
 
-- **Status:** accepted · 2026-10-30 · confirmed on phase 2 on 2026-11-05 (#71)
+- **Status:** accepted · 2026-10-30 · confirmed on phase 2 on 2026-11-05 (#71) · methods go to Grep since 2026-11-11 (#79)
 - **Issue:** #57 (re-measured in #71)
 
 ## Context
@@ -86,4 +86,22 @@ Reading:
 - **The ambiguous question is where B loses** (+115 %): "where is X used" reads as a dependency question, `withdraw` has no node, and the agent retries before falling back to Grep. Same pattern as in phase 1. B's whole-set total is worse than A's only because of this question; without it, B saves 19 % (143,604 vs 176,517).
 - **General searches (question 5) do not use the graph** in B, as intended; the B/A difference there is run-to-run noise (B's two runs: 48,842 and 61,495).
 
-**Decision: confirmed.** The graph stays limited to dependency questions about classes; it is not widened. A possible refinement, not applied (it changes `.claude/`, which needs the user's approval): tell `buscador-referencias` to use Grep, not the graph, when the question names a **method** (`Class.method`), which would avoid the only case where the current rule costs more.
+**Decision: confirmed.** The graph stays limited to dependency questions about classes; it is not widened. The refinement suggested here (Grep, not the graph, when the question names a **method**) was applied in #79: see the next section.
+
+## Methods go to Grep (2026-11-11, #79)
+
+`buscador-referencias` now goes straight to Grep when the question names a method or a field (`Class.method`), because the graph has no method nodes and an approximate name made the agent retry. Approved by the user. Measured with `scripts/measure-graphify.mjs`, configuration B, questions 1-4, two runs each, before and after the change in the same session (Haiku, Claude Code 2.1.322, Graphify 0.9.97). All 16 answers were complete.
+
+| Question | Before (runs → mean) | After (runs → mean) | Graph calls after |
+| -------- | -------------------- | ------------------- | ----------------- |
+| 1. Where is `CheckingAccount.withdraw` used? | 66,542 / 133,491 → **100,017** | 82,031 / 83,407 → **82,719 (−17 %)** | 0 and 0 |
+| 2. Which classes depend on `MoneyTransferService`? | 22,082 / 21,565 → 21,824 | 20,317 / 41,492 → 30,905 | 1 and 1 |
+| 3. Which input adapters use `CheckingAccountCommands`? | 21,108 / 21,275 → 21,192 | 21,309 / 21,653 → 21,481 | 1 and 1 |
+| 4. Which class implements `DomainEventPublisher`, and who calls it? | 76,657 / 62,664 → 69,661 | 41,506 / 53,951 → 47,729 | 1 and 1 |
+
+Reading:
+
+- **The method question no longer touches the graph** and is cheaper and steadier: −17 % on the mean, and the spread between runs drops from 67k to 1.4k tokens (before, one run tried the graph and cost twice the other).
+- **The dependency questions behave as before:** one `affected` call each, both before and after. Their differences are run-to-run noise in both directions (question 2's second run took one more turn; question 4 went down), since the rule for classes did not change.
+
+**Decision: applied.** The graph answers dependency questions about classes; questions about methods or fields go to Grep.
