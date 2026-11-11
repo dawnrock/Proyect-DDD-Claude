@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone)
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-11
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~60 min (6 tasks)
 
 ## Goal
@@ -66,7 +66,7 @@ Close the pending items of `docs/ia/pendientes.md` that touch the Claude Code co
 - **Acceptance criteria:**
   - [ ] Every number comes from the kept output; the conclusion follows from it (or, if the change does not help, the agent is reverted and the ADR says so).
 
-### [ ] T4 — `implement-plan-team`: lessons of the team issues (~10 min, needs approval)
+### [x] T4 — `implement-plan-team`: lessons of the team issues (~10 min, needs approval)
 
 - **Layer:** `.claude`
 - **Files:** `.claude/skills/implement-plan-team/SKILL.md`
@@ -75,7 +75,7 @@ Close the pending items of `docs/ia/pendientes.md` that touch the Claude Code co
   1. Step 2.3: launch the two reviews separately (in parallel); subagents cannot message each other, so the lead merges both reviews into the contract and says so in its "Agreed by" line. Up to two rounds as today.
   2. Step 3.1: the lead creates the side worktrees from the contract commit **because** worktrees created with `isolation: worktree` start from another branch; each teammate gets its worktree's absolute path and checks that every file it edits is inside it, and does not push.
 - **Acceptance criteria:**
-  - [ ] The skill matches what was done in #65 and #72; `pendientes.md` no longer lists the #7, #18 and #50 team items.
+  - [x] The skill matches what was done in #65 and #72; `pendientes.md` no longer lists the #7, #18 and #50 team items.
 
 ### [ ] T5 — `CLAUDE.md`: demo profile and D4 (~5 min, needs approval)
 
