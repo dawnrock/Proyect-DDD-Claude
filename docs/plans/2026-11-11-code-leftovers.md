@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone)
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-11
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~35 min (4 tasks)
 
 ## Goal
@@ -80,26 +80,36 @@ What must not change: the web texts, the `[demo]` trace, the REST responses (the
 - **Acceptance criteria:**
   - [x] The CI check of the project status passes.
 
+### [x] T5 — Review fixes (~2 min)
+
+- **Layer:** tests
+- **Files:** `StatusViewsTests.java`
+- **Depends on:** T4
+- **What to do:**
+  1. `revisor-ddd` found no errors (the reordering keeps R5-R9 and the events; the default methods are not Immutables attributes; no status literal comparison left except `PENDING`, which has no method). Applied: import order in `StatusViewsTests`. The missing direct test for the reordering is already explained in this plan and in the Javadoc of `tryWithdraw`.
+- **Acceptance criteria:**
+  - [x] `mvn verify` green.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] No adapter compares status literals; tests of the views and the adapters green.
-- [ ] The withdrawal is evaluated before it is recorded; R5-R9 unchanged.
+- [x] No adapter compares status literals; tests of the views and the adapters green.
+- [x] The withdrawal is evaluated before it is recorded; R5-R9 unchanged.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: n/a (REST keeps the `status` string).
-- [ ] Any new business term is in `docs/dominio/glosario.md` (n/a: no new terms).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: n/a (REST keeps the `status` string).
+- [x] Any new business term is in `docs/dominio/glosario.md` (n/a: no new terms).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
