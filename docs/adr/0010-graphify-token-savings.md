@@ -101,7 +101,7 @@ Reading:
 
 Reading:
 
-- **The method question no longer touches the graph** and is cheaper and steadier: −17 % on the mean, and the spread between runs drops from 67k to 1.4k tokens (before, one run tried the graph and cost twice the other).
-- **The dependency questions behave as before:** one `affected` call each, both before and after. Their differences are run-to-run noise in both directions (question 2's second run took one more turn; question 4 went down), since the rule for classes did not change.
+- **The method question no longer touches the graph** and is steadier: the spread between runs drops from 67k to 1.4k tokens. The −17 % on the mean comes from avoiding the retry that doubled one run before; the cheapest run before (66,542) was cheaper than both runs after, so the gain is avoiding that occasional retry, not a steady saving.
+- **The dependency questions keep using the graph:** one `affected` call each, both before and after, and the rule for classes did not change. With two runs, their differences cannot be told apart from noise: question 2's mean rose because its second run took three turns instead of two (the measured turn count), and question 4 went down.
 
 **Decision: applied.** The graph answers dependency questions about classes; questions about methods or fields go to Grep.

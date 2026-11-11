@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone)
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-11
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~60 min (6 tasks)
 
 ## Goal
@@ -99,27 +99,37 @@ Close the pending items of `docs/ia/pendientes.md` that touch the Claude Code co
 - **Acceptance criteria:**
   - [x] The CI check of the project status passes.
 
+### [x] T7 — Review fixes (~5 min)
+
+- **Layer:** docs · `.claude`
+- **Files:** `docs/adr/0010-graphify-token-savings.md`, `.claude/agents/buscador-referencias.md`, `.claude/skills/implement-plan-team/SKILL.md`
+- **Depends on:** T6
+- **What to do:**
+  1. `revisor-ddd` found no errors (checked the `CLAUDE.md` statements against `pom.xml` and `v1-monolito`, the measurement script against the changed agent, and every figure). Wording applied: the ADR says the method question's gain is avoiding an occasional retry (steadier, not a steady 17 %) and that question 2's rise cannot be told from noise with two runs; the method note in the agent is its own paragraph after the graph block; the skill says the `isolation: worktree` worktrees *may* start from another branch (observed in #7). The plan's T1 commit also carries T2's checkbox (both were marked before the first commit).
+- **Acceptance criteria:**
+  - [x] `mvn verify` green; `measure-graphify.mjs` still builds its C variant from the agent.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] The agent uses Grep for the method question and the graph for the dependency ones (measured); the method question costs less without a clear worsening of the others; ADR 0010 updated.
-- [ ] `implement-plan-team` records the lessons; `pendientes.md` no longer lists them.
-- [ ] `CLAUDE.md` with both notes, approved by the user.
+- [x] The agent uses Grep for the method question and the graph for the dependency ones (measured); the method question costs less without a clear worsening of the others; ADR 0010 updated.
+- [x] `implement-plan-team` records the lessons; `pendientes.md` no longer lists them.
+- [x] `CLAUDE.md` with both notes, approved by the user.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected, verified by ArchUnit. Unchanged: no code changes.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md`: n/a (no new tests).
-- [ ] No dependencies added beyond the planned ones (Graphify is a per-machine tool, ADR 0010).
-- [ ] If the API changes: n/a.
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a.
-- [ ] Documentation written or changed by this plan is in English (the `.claude/` files and `CLAUDE.md` keep their Spanish).
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected, verified by ArchUnit. Unchanged: no code changes.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md`: n/a (no new tests).
+- [x] No dependencies added beyond the planned ones (Graphify is a per-machine tool, ADR 0010).
+- [x] If the API changes: n/a.
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a.
+- [x] Documentation written or changed by this plan is in English (the `.claude/` files and `CLAUDE.md` keep their Spanish).
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

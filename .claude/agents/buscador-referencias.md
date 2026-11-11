@@ -12,7 +12,9 @@ Recibes un símbolo, término o pregunta de búsqueda. Localiza todas sus aparic
 - ¿Quién usa o depende de X? → `node scripts/graphify.mjs affected "<X>"`
 - ¿Cómo llega A a B? → `node scripts/graphify.mjs path "<A>" "<B>"`
 
-**Si la pregunta nombra un método o un campo** (`Clase.metodo`, `metodo(`), no uses el grafo: no tiene nodos de métodos y un nombre aproximado lo hace reintentar; ve directo a Grep (#79). Usa el nombre simple de la clase (`MoneyTransferService`). Cada nodo trae archivo y línea: eso ya es la respuesta para el código, no lo repitas con Grep. Si sale con 3 (nombre ambiguo), repite con uno de los candidatos; con 4 (sin nodo) o 1 (sin grafo), sigue con Grep.
+Usa el nombre simple de la clase (`MoneyTransferService`). Cada nodo trae archivo y línea: eso ya es la respuesta para el código, no lo repitas con Grep. Si sale con 3 (nombre ambiguo), repite con uno de los candidatos; con 4 (sin nodo) o 1 (sin grafo), sigue con Grep.
+
+**Si la pregunta nombra un método o un campo** (`Clase.metodo`, `metodo(`), no uses el grafo: no tiene nodos de métodos y un nombre aproximado lo hace reintentar; ve directo a Grep (#79).
 
 Para todo lo demás (dónde aparece un método o un texto, `docs/`, `.claude/`, `pom.xml`) usa Grep/Glob, y Read solo para confirmar líneas concretas.
 
