@@ -70,7 +70,7 @@ What must not change: the web texts, the `[demo]` trace, the REST responses (the
 - **Acceptance criteria:**
   - [x] `AccountWebControllerTests`, `DomainModelRunnerTests` and `DemoProfileTests` green; the grep finds no comparison.
 
-### [ ] T4 — Documentation and project status (~10 min)
+### [x] T4 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -78,7 +78,7 @@ What must not change: the web texts, the `[demo]` trace, the REST responses (the
 - **What to do:**
   1. Status: #82 done; next step decided with the user (no open issues left); `pendientes.md` loses the two items; decision (views expose `approved()`/`rejected()`, adapters never compare status strings); a row in `historial.md`.
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes.
+  - [x] The CI check of the project status passes.
 
 ## Global acceptance criteria
 
