@@ -29,4 +29,14 @@ public interface TransferSummaryDef {
 
     /** {@code APPROVED} o {@code REJECTED}: el estado de la retirada en la cuenta de origen. */
     String status();
+
+    /** Si la retirada en origen se aprobó. Los adaptadores lo usan en vez de comparar el texto del estado (#82). */
+    default boolean approved() {
+        return "APPROVED".equals(status());
+    }
+
+    /** Si la retirada en origen se rechazó. */
+    default boolean rejected() {
+        return "REJECTED".equals(status());
+    }
 }

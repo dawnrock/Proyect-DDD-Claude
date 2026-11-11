@@ -48,7 +48,7 @@ What must not change: the web texts, the `[demo]` trace, the REST responses (the
 - **Acceptance criteria:**
   - [x] Domain tests green, red with the sabotage; `check-domain.mjs` without errors.
 
-### [ ] T2 — `approved()` and `rejected()` in the views (~5 min)
+### [x] T2 — `approved()` and `rejected()` in the views (~5 min)
 
 - **Layer:** application
 - **Files:** `application/TransactionSummaryDef.java`, `TransferSummaryDef.java`, a test in `application`
@@ -57,7 +57,7 @@ What must not change: the web texts, the `[demo]` trace, the REST responses (the
   1. Tests first: a summary with status `APPROVED` is `approved()` and not `rejected()`; `REJECTED` the other way round; `PENDING` neither.
   2. `default` methods on both `*Def` interfaces (Immutables does not treat a non-annotated default method as an attribute).
 - **Acceptance criteria:**
-  - [ ] Tests green; `JacksonImmutablesTests` and the REST tests unchanged and green.
+  - [x] Tests green; `JacksonImmutablesTests` and the REST tests unchanged and green.
 
 ### [ ] T3 — Adapters use them (~10 min)
 

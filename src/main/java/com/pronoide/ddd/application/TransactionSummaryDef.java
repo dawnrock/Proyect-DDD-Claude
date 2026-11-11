@@ -31,4 +31,14 @@ public interface TransactionSummaryDef {
      * la de destino en la retirada del origen y la de origen en el ingreso del destino. Vacío en los demás (#72).
      */
     Optional<String> counterpartAccountNumber();
+
+    /** Si el movimiento se aprobó. Los adaptadores lo usan en vez de comparar el texto del estado (#82). */
+    default boolean approved() {
+        return "APPROVED".equals(status());
+    }
+
+    /** Si el movimiento se rechazó. */
+    default boolean rejected() {
+        return "REJECTED".equals(status());
+    }
 }
