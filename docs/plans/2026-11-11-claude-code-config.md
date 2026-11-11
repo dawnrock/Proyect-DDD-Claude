@@ -77,7 +77,7 @@ Close the pending items of `docs/ia/pendientes.md` that touch the Claude Code co
 - **Acceptance criteria:**
   - [x] The skill matches what was done in #65 and #72; `pendientes.md` no longer lists the #7, #18 and #50 team items.
 
-### [ ] T5 — `CLAUDE.md`: demo profile and D4 (~5 min, needs approval)
+### [x] T5 — `CLAUDE.md`: demo profile and D4 (~5 min, needs approval)
 
 - **Layer:** root
 - **Files:** `CLAUDE.md`
@@ -86,7 +86,7 @@ Close the pending items of `docs/ia/pendientes.md` that touch the Claude Code co
   1. Commands block: the comment of `./mvnw spring-boot:run` says it starts with the `demo` profile (three accounts and their operations), and a line with `-Dspring-boot.run.profiles=default` to start without data.
   2. Phase-1 paragraph: `presentation` may know `DomainException` and its subclasses, to translate them (D4). Kept short: `CLAUDE.md` is loaded in every session.
 - **Acceptance criteria:**
-  - [ ] Only those two places change; both statements match the code (`pom.xml`, `LayeredArchitectureTests` at `v1-monolito`).
+  - [x] Only those two places change; both statements match the code (`pom.xml`, `LayeredArchitectureTests` at `v1-monolito`).
 
 ### [ ] T6 — Documentation and project status (~10 min)
 
