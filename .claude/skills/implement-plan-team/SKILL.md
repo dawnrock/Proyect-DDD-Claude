@@ -23,7 +23,7 @@ Crea el worktree de integración desde la rama base, como en `implement-plan` (p
 
 1. Redacta `docs/contracts/<slug>.md` a partir de [assets/contract-template.md](assets/contract-template.md): servicio de aplicación (firmas), commands y vistas (campos y tipos), errores (excepción → qué ve la web → código HTTP) y el fragmento de `docs/api/openapi.yaml`.
 2. Crea en el worktree de integración los **tipos del contrato** para que los dos lados compilen contra ellos: la clase del servicio de aplicación con las firmas y cuerpo `throw new UnsupportedOperationException("pendiente: backend-dev")`, los `*Def` de Immutables de commands y vistas, y el fragmento de OpenAPI. Sin lógica.
-3. Lanza el equipo con los dos teammates y pídeles que **revisen el contrato** (cada uno desde su lado, según su definición) y que se respondan entre ellos hasta estar de acuerdo. Tú arbitras: si no convergen en dos rondas, decide tú y explica por qué en el contrato.
+3. Lanza el equipo con los dos teammates y pídeles que **revisen el contrato** (cada uno desde su lado, según su definición), los dos a la vez y sin editar nada. Los teammates lanzados como subagentes no pueden escribirse entre sí: tú reúnes las dos revisiones, aplicas al contrato lo que acuerden y arbitras lo que no; si hace falta, les devuelves la propuesta del otro para una segunda ronda. Si no convergen en dos rondas, decide tú y explica por qué en el contrato. En su línea "Agreed by" anota las rondas y que el lead unió las revisiones (#65, #76).
 4. Con el acuerdo, `./mvnw verify` (debe compilar) y commit `docs(contract): acuerda el contrato <slug>`. El contrato queda **congelado**: anota en el documento el hash del commit.
 
 ## 3. Implementación en paralelo
@@ -33,9 +33,9 @@ Crea el worktree de integración desde la rama base, como en `implement-plan` (p
    git worktree add -b <tipo>/<slug>-back .claude/worktrees/<slug>-back <commit-contrato>
    git worktree add -b <tipo>/<slug>-web  .claude/worktrees/<slug>-web  <commit-contrato>
    ```
-   En cada uno, genera el grafo del código: `node scripts/graphify.mjs update .` (local, sin tokens; ADR 0010). Si Graphify no está instalado, sigue sin él.
+   Los creas tú, y no con `isolation: worktree` del agente, porque esos worktrees pueden partir de una rama distinta del commit del contrato (observado en #7). En cada uno, genera el grafo del código: `node scripts/graphify.mjs update .` (local, sin tokens; ADR 0010). Si Graphify no está instalado, sigue sin él.
 2. Asigna a `backend-dev` las tareas `Side: back` (en `<slug>-back`) y a `web-dev` las `Side: web` (en `<slug>-web`), en la lista de tareas compartida del equipo. Las `Side: both` las haces tú en la integración.
-3. Cada teammate sigue TDD, un commit por tarea y marca sus tareas en **su** copia del plan. La web trabaja contra el servicio del contrato simulado con `@MockitoBean`.
+3. Cada teammate sigue TDD, un commit por tarea y marca sus tareas en **su** copia del plan. La web trabaja contra el servicio del contrato simulado con `@MockitoBean`. Al lanzarlos, dales la ruta absoluta de su worktree: comprueban que cada archivo que editan está dentro, no hacen push y no tocan el contrato.
 
 ### Renegociar el contrato
 

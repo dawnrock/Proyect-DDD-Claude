@@ -18,7 +18,8 @@ Antes de tocar código, comprueba en qué rama estás (`git branch --show-curren
 ./mvnw verify                      # compila + todos los tests (JUnit + ArchUnit). Es la comprobación de "terminado"
 ./mvnw test -Dtest=CheckingAccountTests              # una clase de test
 ./mvnw test -Dtest='CheckingAccountTests#nombre*'    # un método
-./mvnw spring-boot:run             # arranca en :8080; GET /actuator/health → {"status":"UP"}
+./mvnw spring-boot:run             # arranca en :8080 con el perfil demo (tres cuentas y sus operaciones); GET /actuator/health → {"status":"UP"}
+./mvnw spring-boot:run -Dspring-boot.run.profiles=default   # arranca sin datos de demostración
 node scripts/graphify.mjs update .                   # regenera el grafo del código (local, sin tokens)
 node scripts/graphify.mjs affected "<Clase>"         # quién depende de una clase (ADR 0010)
 ```
@@ -28,7 +29,7 @@ node scripts/graphify.mjs affected "<Clase>"         # quién depende de una cla
 
 ## Arquitectura por fase
 
-**Fase 1 · `Monolithic` (capas):** `presentation` (`web` Thymeleaf, `rest`) → `application` → `domain` (`model`, `service`) y `persistence`; `persistence` solo conoce `domain`, y `domain` no conoce a nadie. Las capas usan clases concretas, sin interfaces de puerto (ADR 0004). Lo verifica `LayeredArchitectureTests` (ArchUnit).
+**Fase 1 · `Monolithic` (capas):** `presentation` (`web` Thymeleaf, `rest`) → `application` → `domain` (`model`, `service`) y `persistence`; `persistence` solo conoce `domain`, y `domain` no conoce a nadie. Del dominio, `presentation` solo conoce `DomainException` y sus subclases, para traducirlas (D4). Las capas usan clases concretas, sin interfaces de puerto (ADR 0004). Lo verifica `LayeredArchitectureTests` (ArchUnit).
 
 **Fase 2 · `Hexagonal`:** `domain.model` (modelo + puertos de salida), `domain.service`, `application` (servicios + puertos de entrada `*Commands`/`*Queries`, `listener`), `adapter.in.{cli,rest,web}`, `adapter.out.{persistence,event,taxagency}`, `config`. Las dependencias apuntan siempre hacia el hexágono. Lo verifica `HexagonalArchitectureTests`.
 
