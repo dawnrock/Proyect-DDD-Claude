@@ -44,7 +44,6 @@ public class AccountController {
         OpenAccountCommand.Builder command = OpenAccountCommand.builder()
                 .accountNumber(request.accountNumber())
                 .holderName(request.holderName())
-                .segment(request.segment())
                 .initialDeposit(request.initialDeposit())
                 .ownerUsername(request.ownerUsername());
         if (request.currency() != null) {

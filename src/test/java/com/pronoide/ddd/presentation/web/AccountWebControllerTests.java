@@ -1023,17 +1023,15 @@ class AccountWebControllerTests {
     class Alta {
 
         @Test
-        @DisplayName("El formulario muestra los campos, el segmento en español y el euro por defecto")
-        void el_formulario_muestra_los_campos_el_segmento_en_espanol_y_el_euro_por_defecto() throws Exception {
+        @DisplayName("El formulario muestra los campos y el euro por defecto, y no pide el segmento")
+        void el_formulario_muestra_los_campos_y_el_euro_por_defecto_y_no_pide_el_segmento() throws Exception {
             mvc.perform(get("/accounts/new"))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("name=\"accountNumber\"")))
                     .andExpect(content().string(containsString("name=\"holderName\"")))
                     .andExpect(content().string(containsString("name=\"initialDeposit\"")))
-                    .andExpect(content().string(containsString("value=\"RETAIL\"")))
-                    .andExpect(content().string(containsString("value=\"HIGH_NET_WORTH\"")))
-                    .andExpect(content().string(containsString("Minorista")))
-                    .andExpect(content().string(containsString("Alto patrimonio")))
+                    .andExpect(content().string(not(containsString("name=\"segment\""))))
+                    .andExpect(content().string(not(containsString("Segmento"))))
                     .andExpect(content().string(matchesPattern("(?s).*<option value=\"EUR\" selected=\"selected\".*")));
         }
 
@@ -1053,7 +1051,6 @@ class AccountWebControllerTests {
                             .param("accountNumber", "es12 3456 7890 1234 5678 9012")
                             .param("holderName", "Ana Pérez")
                             .param("ownerUsername", "ana")
-                            .param("segment", "RETAIL")
                             .param("initialDeposit", "100.00")
                             .param("currency", "EUR"))
                     .andExpect(status().is3xxRedirection())
@@ -1063,7 +1060,6 @@ class AccountWebControllerTests {
             verify(service).openAccount(ADMIN, OpenAccountCommand.builder()
                     .accountNumber("es12 3456 7890 1234 5678 9012")
                     .holderName("Ana Pérez")
-                    .segment("RETAIL")
                     .initialDeposit(new BigDecimal("100.00"))
                     .currency("EUR")
                     .ownerUsername("ana")
@@ -1129,7 +1125,6 @@ class AccountWebControllerTests {
                     .param("accountNumber", accountNumber)
                     .param("ownerUsername", owner)
                     .param("holderName", holderName)
-                    .param("segment", "RETAIL")
                     .param("initialDeposit", deposit)
                     .param("currency", "EUR");
         }
@@ -1198,7 +1193,6 @@ class AccountWebControllerTests {
                             .param("accountNumber", "ES1234567890123456789012")
                             .param("ownerUsername", "ana")
                             .param("holderName", "Ana Lopez")
-                            .param("segment", "RETAIL")
                             .param("initialDeposit", "100.00")
                             .param("currency", "XYZ"))
                     .andExpect(status().isOk())

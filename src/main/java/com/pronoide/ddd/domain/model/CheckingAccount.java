@@ -1,19 +1,26 @@
 package com.pronoide.ddd.domain.model;
 
+import java.time.Instant;
+import java.time.Period;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public class CheckingAccount {
 
     private static final MonetaryAmount MINIMUM_INITIAL_DEPOSIT = MonetaryAmount.euros("50.00");
     private static final MonetaryAmount OVERDRAFT_LIMIT = MonetaryAmount.euros("-1000.00");
+    private static final MonetaryAmount MINIMUM_NET_WORTH = MonetaryAmount.euros("100000.00");
+    private static final Period SEGMENT_GRACE_PERIOD = Period.ofMonths(1);
     private final UUID id;
     private final AccountNumber accountNumber;
     private final AccountHolder primaryHolder;
     private final List<Transaction> transactions = new ArrayList<>();
     private MonetaryAmount currentBalance;
+    private Instant belowMinimumNetWorthSince;
 
     private CheckingAccount(AccountNumber accountNumber, 
                             AccountHolder primaryHolder, 
@@ -47,6 +54,10 @@ public class CheckingAccount {
         Transaction transaction = register(Transaction.deposit(id, amount));
         transaction.approve();
         currentBalance = newBalance;
+        if (reachesMinimumNetWorth()) {
+            primaryHolder.promoteToHighNetWorth();
+            belowMinimumNetWorthSince = null;
+        }
         return transaction;
     }
 
@@ -60,10 +71,29 @@ public class CheckingAccount {
         if (isAllowed(newBalance)) {
             transaction.approve();
             currentBalance = newBalance;
+            if (primaryHolder.isHighNetWorth() && !reachesMinimumNetWorth() && belowMinimumNetWorthSince == null) {
+                belowMinimumNetWorthSince = transaction.occurredOn();
+            }
         } else {
             transaction.reject();
         }
         return transaction;
+    }
+
+    /**
+     * Devuelve al titular a minorista si la cuenta lleva el periodo de gracia completo (un mes natural, en UTC) por
+     * debajo del patrimonio mínimo. No hace nada si el titular es minorista o si aún no se ha cumplido el plazo.
+     */
+    public void reviewSegment(Instant now) {
+        Objects.requireNonNull(now, "El momento de la revisión es obligatorio");
+        if (belowMinimumNetWorthSince == null) {
+            return;
+        }
+        Instant deadline = belowMinimumNetWorthSince.atZone(ZoneOffset.UTC).plus(SEGMENT_GRACE_PERIOD).toInstant();
+        if (!now.isBefore(deadline)) {
+            primaryHolder.demoteToRetail();
+            belowMinimumNetWorthSince = null;
+        }
     }
 
     public List<Transaction> transactions() {
@@ -86,11 +116,20 @@ public class CheckingAccount {
         return currentBalance;
     }
 
+    /** Desde cuándo una cuenta de alto patrimonio está por debajo del patrimonio mínimo; vacío si no lo está. */
+    public Optional<Instant> belowMinimumNetWorthSince() {
+        return Optional.ofNullable(belowMinimumNetWorthSince);
+    }
+
     private boolean isAllowed(MonetaryAmount newBalance) {
         if (!newBalance.isNegative()) {
             return true;
         }
         return primaryHolder.isHighNetWorth() && !newBalance.isLessThan(OVERDRAFT_LIMIT);
+    }
+
+    private boolean reachesMinimumNetWorth() {
+        return !currentBalance.isLessThan(MINIMUM_NET_WORTH);
     }
 
     private Transaction register(Transaction transaction) {

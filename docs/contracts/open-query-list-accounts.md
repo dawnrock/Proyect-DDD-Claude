@@ -22,11 +22,12 @@ public class CheckingAccountService {
 | ---------------- | ----- | ---- | -------- | ----- |
 | `OpenAccountCommandDef` | `accountNumber` | `String` | yes | not blank; the domain normalizes it (no spaces, uppercase) and rejects anything that is not `ES` + 22 digits |
 | | `holderName` | `String` | yes | not blank |
-| | `segment` | `String` | yes | `RETAIL` or `HIGH_NET_WORTH` |
 | | `initialDeposit` | `BigDecimal` | yes | positive |
 | | `currency` | `String` | no (default `EUR`) | ISO 4217 code |
 
-Violations of these rules throw `IllegalArgumentException` when the command is built (`@Value.Check`), including a `segment` other than the two allowed values. Presentation validates the format first, so they should not reach the command.
+Violations of these rules throw `IllegalArgumentException` when the command is built (`@Value.Check`). Presentation validates the format first, so they should not reach the command.
+
+> **Amended by #94 (2026-11-12, requested by the user):** `segment` is no longer an input. The command, the REST request and the web form do not carry it; the domain assigns it from the account balance (rules R20-R23 of the glossary). `AccountDetails.segment` is unchanged.
 
 ### Shared presentation validation
 
@@ -36,7 +37,6 @@ The REST request (`OpenAccountRequest`) and the web form (`OpenAccountForm`) app
 | ----- | ---------- | --- |
 | `accountNumber` | `@NotBlank` + `@Pattern(regexp = "^ *[Ee][Ss]( *\\d){22} *$")` | accepts spaces and lowercase, which `AccountNumber` normalizes; no tabs or other whitespace, because the domain only removes spaces. A malformed IBAN is an `IllegalArgumentException` in the domain, not a `DomainException` |
 | `holderName` | `@NotBlank` | |
-| `segment` | `@NotBlank` + `@Pattern(regexp = "RETAIL\|HIGH_NET_WORTH")`, typed `String` (not an enum) | with an enum, an invalid value would fail JSON parsing without the per-field `errors` map. The web offers a select with these two values (Spanish labels), without importing `CustomerSegment` |
 | `initialDeposit` | `@NotNull` + `@Positive` | |
 | `currency` | `@Pattern(regexp = "[A-Z]{3}")`; `EUR` when absent | an unknown but well-formed code (`XYZ`) still reaches the command and gives 400 (safety net). The web offers a select (`EUR` by default) |
 
@@ -52,7 +52,7 @@ The REST request (`OpenAccountRequest`) and the web form (`OpenAccountForm`) app
 | | `balance` | `BigDecimal` | scaled to the currency (2 decimals for EUR) |
 | | `currency` | `String` | ISO 4217 |
 | `AccountDetailsDef` | `id`, `accountNumber`, `holderName`, `balance`, `currency` | | same as `AccountSummary` |
-| | `segment` | `String` | `RETAIL` or `HIGH_NET_WORTH` |
+| | `segment` | `String` | `RETAIL` or `HIGH_NET_WORTH`, assigned by the domain (#94) |
 | | `transactions` | `List<TransactionSummary>` | in registration order; a new account has one approved `DEPOSIT` |
 | `TransactionSummaryDef` | `id` | `UUID` | |
 | | `type` | `String` | `DEPOSIT` or `WITHDRAWAL` |
@@ -93,7 +93,7 @@ REST DTOs live in `presentation.rest` and map from the views: the request is a `
 | Path | Uses | Shows |
 | ---- | ---- | ----- |
 | `GET /` | `listAccounts()` | table with account number, holder and balance with currency; empty-state message; link "Abrir cuenta" to `/accounts/new`; success flash message after a sign-up |
-| `GET /accounts/new` | — | form: account number, holder, segment (select), initial deposit, currency (EUR by default) |
+| `GET /accounts/new` | — | form: account number, holder, initial deposit, currency (EUR by default); no segment since #94 |
 | `POST /accounts/new` | `openAccount(command)` | valid → redirect to `/` with a flash message (Post/Redirect/Get); validation error → form with messages per field; `DomainException` → form with the domain message and the entered data |
 
 ## Changes

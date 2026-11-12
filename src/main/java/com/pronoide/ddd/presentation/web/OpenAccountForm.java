@@ -36,10 +36,6 @@ public class OpenAccountForm {
             message = "El usuario del titular debe tener de 3 a 30 minúsculas, dígitos, puntos o guiones")
     private String ownerUsername;
 
-    @NotBlank(message = "El segmento es obligatorio")
-    @Pattern(regexp = "RETAIL|HIGH_NET_WORTH", message = "El segmento debe ser Minorista o Alto patrimonio")
-    private String segment;
-
     @NotNull(message = "El depósito inicial es obligatorio")
     @Positive(message = "El depósito inicial debe ser positivo")
     private BigDecimal initialDeposit;

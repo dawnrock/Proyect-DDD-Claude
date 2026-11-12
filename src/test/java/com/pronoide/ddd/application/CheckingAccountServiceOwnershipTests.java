@@ -36,14 +36,13 @@ class CheckingAccountServiceOwnershipTests {
     void setUp() {
         accounts = new InMemoryCheckingAccountRepository();
         owners = new InMemoryAccountOwnershipRepository();
-        service = new CheckingAccountService(accounts, owners);
+        service = new CheckingAccountService(accounts, owners, java.time.Clock.systemUTC());
     }
 
     private static OpenAccountCommand.Builder command(String accountNumber, String owner) {
         return OpenAccountCommand.builder()
                 .accountNumber(accountNumber)
                 .holderName("Titular")
-                .segment("RETAIL")
                 .initialDeposit(new BigDecimal("500"))
                 .ownerUsername(owner);
     }

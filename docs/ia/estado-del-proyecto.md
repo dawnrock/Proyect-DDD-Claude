@@ -2,19 +2,22 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores, y se mantiene **corto a propósito**: se carga en cada sesión. **Se actualiza en cada PR que cierra una issue** (lo comprueba el CI).
 
-- **Última actualización:** 2026-11-12 · PR #93 (#91, pie de la web)
-- **Rama activa:** `Hexagonal` (fase 2), rama por defecto del repositorio. `Monolithic` congelada en la etiqueta `v1-monolito`, con dos excepciones autorizadas por el usuario: el despliegue en Render (#86), que no toca el código, y el pie de la web (#91); `master` congelada.
+- **Última actualización:** 2026-11-12 · PR #97 (#94, segmento automático)
+- **Rama activa:** `Hexagonal` (fase 2), rama por defecto del repositorio. `Monolithic` congelada en la etiqueta `v1-monolito`, con excepciones autorizadas por el usuario: el despliegue en Render (#86), que no toca el código, el pie de la web (#91), el segmento automático (#94) y el alta de cliente (#95, pendiente); `master` congelada.
 
 ## Dónde estamos
 
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
-| 1 · Monolito en capas | Cerrada: #2-#8, #11-#13, #31, #48, #50, #54, #57 (detalle en el [historial](historial.md)); después, #86 despliegue en Render y #91 pie de la web | — | — |
+| 1 · Monolito en capas | Cerrada: #2-#8, #11-#13, #31, #48, #50, #54, #57 (detalle en el [historial](historial.md)); después, #86 despliegue en Render, #91 pie de la web y #94 segmento automático del titular | — | #95 alta de cliente de Mon-A Bank (plan en `docs/plans/2026-11-12-customer-sign-up.md`) |
 | 2 · Hexagonal | En la rama `Hexagonal` (su estado está allí) | — | — |
 
 ## Siguiente paso
 
-Nada en esta rama: sigue congelada. El trabajo continúa en `Hexagonal` (léase su `docs/ia/estado-del-proyecto.md`). El usuario crea el servicio de Render con la [guía](../deploy/render.md).
+1. Llevar la #94 a `Hexagonal` en una issue gemela (`fase:2-hexagonal`): las dos ramas deben quedar con el mismo comportamiento.
+2. Implementar la #95 con `/implement-plan-team 95` cuando el usuario apruebe su plan, y después su gemela en `Hexagonal`.
+
+Fuera de esas dos issues la rama sigue congelada. El resto del trabajo continúa en `Hexagonal` (léase su `docs/ia/estado-del-proyecto.md`). El usuario crea el servicio de Render con la [guía](../deploy/render.md).
 
 Diseño objetivo de la fase 2: `docs/arquitectura/fase-2-hexagonal.md`; las issues, en el milestone "Fase 2 · Arquitectura hexagonal".
 

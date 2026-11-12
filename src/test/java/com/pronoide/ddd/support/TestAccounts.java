@@ -13,6 +13,9 @@ import lombok.Builder;
 /**
  * Cuentas de prueba: {@code anAccount().segment(HIGH_NET_WORTH).initialDeposit("500.00").open()}. Abre la cuenta con
  * su método factoría ({@code CheckingAccount.open}); los datos que no se indican toman un valor por defecto válido.
+ *
+ * <p>{@code segment(HIGH_NET_WORTH)} es un atajo de test: promociona al titular antes de abrir la cuenta, aunque el
+ * depósito no alcance el patrimonio mínimo (una cuenta así no tiene cuenta atrás para volver a minorista).
  */
 public final class TestAccounts {
 
@@ -27,10 +30,13 @@ public final class TestAccounts {
     @Builder(builderMethodName = "anAccount", buildMethodName = "open")
     private static CheckingAccount newAccount(String accountNumber, String holderName, CustomerSegment segment,
                                               String initialDeposit) {
+        AccountHolder holder = AccountHolder.register(Objects.requireNonNullElse(holderName, "Ada Lovelace"));
+        if (segment == CustomerSegment.HIGH_NET_WORTH) {
+            holder.promoteToHighNetWorth();
+        }
         return CheckingAccount.open(
                 new AccountNumber(Objects.requireNonNullElse(accountNumber, DEFAULT_ACCOUNT_NUMBER)),
-                AccountHolder.register(Objects.requireNonNullElse(holderName, "Ada Lovelace"),
-                        Objects.requireNonNullElse(segment, CustomerSegment.RETAIL)),
+                holder,
                 MonetaryAmount.euros(Objects.requireNonNullElse(initialDeposit, "100.00")));
     }
 }

@@ -1,7 +1,6 @@
 package com.pronoide.ddd.application;
 
 import java.math.BigDecimal;
-import java.util.Set;
 
 import org.immutables.value.Value;
 
@@ -9,14 +8,12 @@ import org.immutables.value.Value;
  * Orden de abrir una cuenta corriente. Valida sus campos al construirse ({@code IllegalArgumentException}),
  * antes de llegar al dominio.
  *
- * <p>{@code segment} es {@code RETAIL} o {@code HIGH_NET_WORTH}; {@code currency}, un código ISO 4217
- * ({@code EUR} por defecto).
+ * <p>{@code currency} es un código ISO 4217 ({@code EUR} por defecto). El segmento del titular no se indica: lo
+ * decide el dominio según el saldo de la cuenta.
  */
 @ApplicationValue
 @Value.Immutable
 public interface OpenAccountCommandDef {
-
-    Set<String> SEGMENTS = Set.of("RETAIL", "HIGH_NET_WORTH");
 
     /** Formato de un nombre de usuario: 3-30 minúsculas, dígitos, punto, guion o guion bajo. */
     String USERNAME_PATTERN = "[a-z0-9._-]{3,30}";
@@ -24,8 +21,6 @@ public interface OpenAccountCommandDef {
     String accountNumber();
 
     String holderName();
-
-    String segment();
 
     BigDecimal initialDeposit();
 
@@ -50,9 +45,6 @@ public interface OpenAccountCommandDef {
         }
         if (holderName().isBlank()) {
             throw new IllegalArgumentException("El nombre del titular es obligatorio");
-        }
-        if (!SEGMENTS.contains(segment())) {
-            throw new IllegalArgumentException("El segmento debe ser RETAIL o HIGH_NET_WORTH");
         }
         if (initialDeposit().signum() <= 0) {
             throw new IllegalArgumentException("El depósito inicial debe ser positivo");

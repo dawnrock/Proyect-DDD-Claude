@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +29,7 @@ import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
 import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
+import com.pronoide.ddd.support.MutableClock;
 
 /** Casos de uso con el repositorio en memoria real: es concreto y no hace falta simularlo. */
 class CheckingAccountServiceTests {
@@ -41,17 +43,19 @@ class CheckingAccountServiceTests {
     private InMemoryCheckingAccountRepository repository;
     private CheckingAccountService service;
 
+    private MutableClock clock;
+
     @BeforeEach
     void setUp() {
         repository = spy(new InMemoryCheckingAccountRepository());
-        service = new CheckingAccountService(repository, new InMemoryAccountOwnershipRepository());
+        clock = new MutableClock();
+        service = new CheckingAccountService(repository, new InMemoryAccountOwnershipRepository(), clock);
     }
 
     private static OpenAccountCommand.Builder command(String accountNumber) {
         return OpenAccountCommand.builder()
                 .accountNumber(accountNumber)
                 .holderName("Ada Lovelace")
-                .segment("RETAIL")
                 .initialDeposit(new BigDecimal("100"))
                 .ownerUsername("ada");
     }
@@ -108,9 +112,10 @@ class CheckingAccountServiceTests {
         }
 
         @Test
-        @DisplayName("Un cliente de alto patrimonio abre su cuenta con su segmento")
-        void un_cliente_de_alto_patrimonio_abre_su_cuenta_con_su_segmento() {
-            AccountSummary summary = service.openAccount(ADMIN, command(IBAN).segment("HIGH_NET_WORTH").build());
+        @DisplayName("Una cuenta abierta con el patrimonio mínimo es de alto patrimonio")
+        void una_cuenta_abierta_con_el_patrimonio_minimo_es_de_alto_patrimonio() {
+            AccountSummary summary = service.openAccount(ADMIN,
+                    command(IBAN).initialDeposit(new BigDecimal("100000")).build());
 
             assertThat(repository.findById(summary.id()).orElseThrow().primaryHolder().isHighNetWorth()).isTrue();
         }
@@ -123,14 +128,14 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Una cuenta existente se devuelve con el depósito inicial entre sus movimientos")
         void una_cuenta_existente_se_devuelve_con_el_deposito_inicial_entre_sus_movimientos() {
-            AccountSummary opened = service.openAccount(ADMIN, command(IBAN).segment("HIGH_NET_WORTH").build());
+            AccountSummary opened = service.openAccount(ADMIN, command(IBAN).build());
 
             AccountDetails details = service.findAccount(ADMIN, opened.id());
 
             assertThat(details.id()).isEqualTo(opened.id());
             assertThat(details.accountNumber()).isEqualTo(IBAN);
             assertThat(details.holderName()).isEqualTo("Ada Lovelace");
-            assertThat(details.segment()).isEqualTo("HIGH_NET_WORTH");
+            assertThat(details.segment()).isEqualTo("RETAIL");
             assertThat(details.balance()).isEqualByComparingTo("100.00");
             assertThat(details.currency()).isEqualTo("EUR");
             assertThat(details.transactions()).singleElement().satisfies(transaction -> {
@@ -229,17 +234,20 @@ class CheckingAccountServiceTests {
     @DisplayName("Retirar")
     class Withdraw {
 
-        @ParameterizedTest(name = "{0} con 100.00 retira {1}: {2}, saldo {3}")
+        @ParameterizedTest(name = "con {0} retira {1}: {2}, saldo {3}")
         @DisplayName("Las retiradas en el límite del descubierto se aprueban o se rechazan según el segmento")
         @CsvSource({
-                "RETAIL, 100.00, APPROVED, 0.00",
-                "RETAIL, 100.01, REJECTED, 100.00",
-                "HIGH_NET_WORTH, 1100.00, APPROVED, -1000.00",
-                "HIGH_NET_WORTH, 1100.01, REJECTED, 100.00"
+                // minorista: abre por debajo del patrimonio mínimo
+                "100.00, 100.00, APPROVED, 0.00",
+                "100.00, 100.01, REJECTED, 100.00",
+                // alto patrimonio: abre con el patrimonio mínimo
+                "100000.00, 101000.00, APPROVED, -1000.00",
+                "100000.00, 101000.01, REJECTED, 100000.00"
         })
         void las_retiradas_en_el_limite_del_descubierto_dependen_del_segmento(
-                String segment, String amount, String status, String finalBalance) {
-            UUID id = service.openAccount(ADMIN, command(IBAN).segment(segment).build()).id();
+                String initialDeposit, String amount, String status, String finalBalance) {
+            UUID id = service.openAccount(ADMIN,
+                    command(IBAN).initialDeposit(new BigDecimal(initialDeposit)).build()).id();
 
             TransactionSummary transaction = service.withdraw(ADMIN, 
                     WithdrawCommand.builder().accountId(id).amount(new BigDecimal(amount)).build());
@@ -396,6 +404,96 @@ class CheckingAccountServiceTests {
             assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> service.transfer(ADMIN, dollars));
             assertThat(service.findAccount(ADMIN, sourceId).balance()).isEqualByComparingTo("500.00");
             assertThat(service.findAccount(ADMIN, targetId).balance()).isEqualByComparingTo("100.00");
+        }
+    }
+
+    @Nested
+    @DisplayName("Revisión del segmento antes de un cargo")
+    class SegmentReviewBeforeDebit {
+
+        private UUID id;
+
+        @BeforeEach
+        void unaCuentaDeAltoPatrimonioEnDescubierto() {
+            id = service.openAccount(ADMIN, command(IBAN).initialDeposit(new BigDecimal("100000")).build()).id();
+            service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("100500")).build());
+        }
+
+        @Test
+        @DisplayName("Tras un mes bajo el patrimonio mínimo la retirada se evalúa ya como minorista")
+        void tras_un_mes_bajo_el_patrimonio_minimo_la_retirada_se_evalua_como_minorista() {
+            clock.advance(Duration.ofDays(32));
+
+            TransactionSummary retirada = service.withdraw(ADMIN,
+                    WithdrawCommand.builder().accountId(id).amount(new BigDecimal("10")).build());
+
+            assertThat(retirada.status()).isEqualTo("REJECTED");
+            assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("RETAIL");
+        }
+
+        @Test
+        @DisplayName("Antes de un mes la retirada sigue contando con el descubierto de alto patrimonio")
+        void antes_de_un_mes_la_retirada_sigue_contando_con_el_descubierto() {
+            clock.advance(Duration.ofDays(20));
+
+            TransactionSummary retirada = service.withdraw(ADMIN,
+                    WithdrawCommand.builder().accountId(id).amount(new BigDecimal("10")).build());
+
+            assertThat(retirada.status()).isEqualTo("APPROVED");
+            assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("HIGH_NET_WORTH");
+        }
+
+        @Test
+        @DisplayName("Tras un mes bajo el patrimonio mínimo la transferencia se evalúa ya como minorista")
+        void tras_un_mes_bajo_el_patrimonio_minimo_la_transferencia_se_evalua_como_minorista() {
+            service.openAccount(ADMIN, command(OTHER_IBAN).build());
+            clock.advance(Duration.ofDays(32));
+
+            TransferSummary transferencia = service.transfer(ADMIN, TransferCommand.builder()
+                    .sourceAccountId(id).targetAccountNumber(OTHER_IBAN).amount(new BigDecimal("10")).build());
+
+            assertThat(transferencia.status()).isEqualTo("REJECTED");
+            assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("RETAIL");
+        }
+    }
+
+    @Nested
+    @DisplayName("Revisión periódica de segmentos")
+    class ReviewSegments {
+
+        private UUID belowMinimum;
+        private UUID aboveMinimum;
+        private UUID retail;
+
+        @BeforeEach
+        void tresCuentas() {
+            belowMinimum = service.openAccount(ADMIN, command(IBAN).initialDeposit(new BigDecimal("100000")).build()).id();
+            service.withdraw(ADMIN, WithdrawCommand.builder().accountId(belowMinimum).amount(new BigDecimal("500")).build());
+            aboveMinimum = service.openAccount(ADMIN,
+                    command(OTHER_IBAN).initialDeposit(new BigDecimal("100000")).build()).id();
+            retail = service.openAccount(ADMIN, command("ES6000491500051234567892").build()).id();
+        }
+
+        @Test
+        @DisplayName("Pasado un mes, solo vuelve a minorista el titular que sigue bajo el patrimonio mínimo")
+        void pasado_un_mes_solo_vuelve_a_minorista_el_titular_que_sigue_bajo_el_minimo() {
+            clock.advance(Duration.ofDays(32));
+
+            int demoted = service.reviewSegments();
+
+            assertThat(demoted).isEqualTo(1);
+            assertThat(service.findAccount(ADMIN, belowMinimum).segment()).isEqualTo("RETAIL");
+            assertThat(service.findAccount(ADMIN, aboveMinimum).segment()).isEqualTo("HIGH_NET_WORTH");
+            assertThat(service.findAccount(ADMIN, retail).segment()).isEqualTo("RETAIL");
+        }
+
+        @Test
+        @DisplayName("Antes de un mes la revisión no cambia ningún segmento")
+        void antes_de_un_mes_la_revision_no_cambia_ningun_segmento() {
+            clock.advance(Duration.ofDays(20));
+
+            assertThat(service.reviewSegments()).isZero();
+            assertThat(service.findAccount(ADMIN, belowMinimum).segment()).isEqualTo("HIGH_NET_WORTH");
         }
     }
 }
