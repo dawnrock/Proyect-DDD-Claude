@@ -51,7 +51,7 @@ Facts gathered:
   - [x] `docker build` + `docker run -e PORT=10000` answer `UP` on `/actuator/health` at port 10000 — or, without a Docker daemon, the same `java` command line with the same variables does, and the build is left to Render.
   - Done with Docker: the daemon could be started in the session. The session's HTTPS proxy needs its own CA, so the local build used a copy of the `Dockerfile` (kept out of the repository) whose build stage only adds that CA and proxy to `MAVEN_OPTS`; the run stage is the committed one. `docker run --memory=512m -e PORT=10000`: `UP` on port 10000 after ~8 s, profile `demo`, user `app` (uid 10001), ~240 MB of 512 MB; image ~570 MB.
 
-### [ ] T2 — The demo users' password from the environment (~10 min)
+### [x] T2 — The demo users' password from the environment (~10 min)
 
 - **Layer:** build (verification)
 - **Files:** — (checked by running the JAR)
@@ -60,7 +60,8 @@ Facts gathered:
   1. Generate a BCrypt hash for a test password (`htpasswd -nbBC 10 "" '<password>' | tr -d ':\n'` or another documented way) and start the app with `APP_SECURITY_USERS_0_PASSWORDHASH` … `_3_` set to it.
   2. Check: `curl -u admin:demo …/api/accounts` → 401, `curl -u admin:<password> …` → 200; the same for one customer.
 - **Acceptance criteria:**
-  - [ ] The old password stops working and the new one works, with no code change.
+  - [x] The old password stops working and the new one works, with no code change.
+  - **Deviation:** setting only the four `..._PASSWORDHASH` variables makes the application fail to start (`userDetailsService`: users without a name). Spring Boot replaces a whole list when a property source sets any element of it, so the environment's `app.security.users` list had only hashes. Each user must be given complete: `APP_SECURITY_USERS_<n>_USERNAME`, `_PASSWORDHASH` and `_ROLE` (12 variables), with the same names as the `demo` profile because the demo accounts belong to `admin`, `ada`, `grace` and `alan`. With them: `admin:demo` and `grace:demo` → 401; the new password → 200 for `admin`, `grace` and `alan`; `grace` still sees only her account. The hash was generated with `docker run --rm httpd:2.4-alpine htpasswd -nbBC 10 "" '<password>' | tr -d ':\n'` (`$2y$`, accepted by Spring's BCrypt).
 
 ### [ ] T3 — Deployment guide (~10 min)
 
