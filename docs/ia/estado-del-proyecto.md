@@ -2,7 +2,7 @@
 
 > **Read it at the start of every session.** It is the entry point to carry on without depending on earlier conversations, and it is kept **short on purpose**: it is loaded in every session. **It is updated in every PR that closes an issue** (CI checks it).
 
-- **Last updated:** 2026-11-11 · PR #84 (#82, code leftovers)
+- **Last updated:** 2026-11-12 · PR #87 (#85, deploy on Render)
 - **Active branch:** `Hexagonal`, the repository's default branch; phase 2 is marked by the `v2-hexagonal` tag and work continues on the branch. `Monolithic` frozen at the `v1-monolito` tag; `master` frozen.
 
 ## Where we are
@@ -11,11 +11,11 @@
 | ----- | ---- | ----------- | ------- |
 | 1 · Layered monolith | Closed: #2-#8, #11-#13, #31, #48, #50, #54, #57 (details in the [history](historial.md)) | — | — |
 | 2 · Hexagonal | Closed: #14-#23, tag `v2-hexagonal` | — | — |
-| After phase 2 (no milestone) | #70 translation, #71 Graphify, #72 web, #77 review leftovers, #78 unit of work, #79 Claude Code configuration, #82 code leftovers | — | — |
+| After phase 2 (no milestone) | #70 translation, #71 Graphify, #72 web, #77 review leftovers, #78 unit of work, #79 Claude Code configuration, #82 code leftovers, #85 deploy `Hexagonal` on Render | — | #86 deploy `Monolithic` on Render |
 
 ## Next step
 
-No issues left open: decide the next work with the user. `pendientes.md` only keeps accepted risks and future work (synchronous event consumers, login limitations).
+`/implement-plan 86`: deploy `Monolithic` on Render (plan published on the issue) from a branch based on `origin/Monolithic`, copying the `Dockerfile`, `.dockerignore` and guide of #85. It is the only change allowed on the frozen branch (authorised by the user on 2026-11-11); the `v1-monolito` tag does not move. Afterwards the user creates both services on Render ([guide](../deploy/render.md)).
 
 Phase 2 design: `docs/arquitectura/fase-2-hexagonal.md`; comparison with phase 1: `docs/arquitectura/comparativa-capas-hexagonal.md`.
 
