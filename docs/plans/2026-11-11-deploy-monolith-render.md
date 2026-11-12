@@ -54,7 +54,7 @@ This plan is implemented **after #85 is merged**, from a branch based on `origin
   - [x] Override checked; links resolve.
   - As found in #85, each user is given complete (`APP_SECURITY_USERS_<n>_USERNAME`, `_PASSWORDHASH`, `_ROLE`). With the twelve variables: `admin:demo` and `grace:demo` → 401, the new password → 200 for `admin`, `grace` and `alan`; `grace` sees only her account; web login works; `/h2-console/` → 404 after an admin login; `APP_ADMIN_*` adds an administrator. The guide differs from #85's only in the branch, the service and image names, and the demo data (phase 1 only opens the three accounts).
 
-### [ ] T3 — No code changes (~2 min)
+### [x] T3 — No code changes (~2 min)
 
 - **Layer:** build
 - **Files:** —
@@ -62,7 +62,7 @@ This plan is implemented **after #85 is merged**, from a branch based on `origin
 - **What to do:**
   1. `git diff --name-only origin/Monolithic...HEAD` lists no file under `src/` nor `pom.xml`.
 - **Acceptance criteria:**
-  - [ ] Checked.
+  - [x] Checked: only `Dockerfile`, `.dockerignore`, `README.md`, `docs/deploy/render.md` and the plan (plus the status in T4); `v1-monolito` still points at `origin/Monolithic` (10eb227).
 
 ### [ ] T4 — Project status (~8 min)
 
