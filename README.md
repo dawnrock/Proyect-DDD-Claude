@@ -28,6 +28,10 @@ On Windows, `mvnw.cmd`. Requires Java 21.
 
 **Login (#50).** You must sign in. With the `demo` profile: `admin` (sees every account and opens accounts) and `ada`, `grace` and `alan` (each one only sees their own account), all with password `demo` (local practice data: `application-demo.properties` only holds its BCrypt hash). The API uses HTTP Basic: `curl -u admin:demo http://localhost:8080/api/accounts`. Without the `demo` profile there are no users; an administrator can be created with the `APP_ADMIN_USERNAME` and `APP_ADMIN_PASSWORD` environment variables.
 
+## Deploy
+
+Each branch can be published as its own web service on Render's free plan, built with the [`Dockerfile`](Dockerfile): [deployment guide](docs/deploy/render.md). On a public URL, replace the `demo` password with your own through environment variables (the guide explains how); the image turns the H2 console off.
+
 ## Workflow with Claude Code
 
 ```text
@@ -41,5 +45,5 @@ On Windows, `mvnw.cmd`. Requires Java 21.
 
 - [AI architecture](docs/ia/arquitectura-ia.md) · [Telegram notifications](docs/ia/notificaciones.md) · [Project status](docs/ia/estado-del-proyecto.md)
 - [Phase 1 · layers](docs/arquitectura/fase-1-capas.md) · [Phase 2 · hexagonal](docs/arquitectura/fase-2-hexagonal.md)
-- [Glossary](docs/dominio/glosario.md) · [ADR](docs/adr/README.md) · [Plans](docs/plans/) · [Contracts](docs/contracts/) · [OpenAPI](docs/api/openapi.yaml)
+- [Glossary](docs/dominio/glosario.md) · [ADR](docs/adr/README.md) · [Plans](docs/plans/) · [Contracts](docs/contracts/) · [OpenAPI](docs/api/openapi.yaml) · [Deploy on Render](docs/deploy/render.md)
 - [Functional analysis](docs/analysis/functional-analysis.md) · [Technical analysis](docs/analysis/technical-analysis.md) (in Spanish)

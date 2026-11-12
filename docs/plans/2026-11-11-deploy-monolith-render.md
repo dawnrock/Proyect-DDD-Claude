@@ -42,7 +42,7 @@ This plan is implemented **after #85 is merged**, from a branch based on `origin
   - [x] The image (or, without a Docker daemon, the same `java` command line) answers `UP` on `/actuator/health` with `PORT` set.
   - Files copied unchanged from `Hexagonal` (#87). Built with Docker as in #85 (the session's build adds only its proxy CA, out of the repository); `docker run --memory=512m -e PORT=10000`: `UP` on port 10000 after ~13 s, profile `demo`, user `app` (uid 10001), ~250 MB of 512 MB.
 
-### [ ] T2 — Password override and guide (~10 min)
+### [x] T2 — Password override and guide (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/deploy/render.md`, `README.md`
@@ -51,7 +51,8 @@ This plan is implemented **after #85 is merged**, from a branch based on `origin
   1. Check the password override as in #85 T2 (old password 401, new one 200).
   2. Guide adapted to branch `Monolithic` (otherwise the same as #85's); "Deploy" section in the `README.md`.
 - **Acceptance criteria:**
-  - [ ] Override checked; links resolve.
+  - [x] Override checked; links resolve.
+  - As found in #85, each user is given complete (`APP_SECURITY_USERS_<n>_USERNAME`, `_PASSWORDHASH`, `_ROLE`). With the twelve variables: `admin:demo` and `grace:demo` → 401, the new password → 200 for `admin`, `grace` and `alan`; `grace` sees only her account; web login works; `/h2-console/` → 404 after an admin login; `APP_ADMIN_*` adds an administrator. The guide differs from #85's only in the branch, the service and image names, and the demo data (phase 1 only opens the three accounts).
 
 ### [ ] T3 — No code changes (~2 min)
 
