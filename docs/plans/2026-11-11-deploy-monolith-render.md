@@ -31,7 +31,7 @@ This plan is implemented **after #85 is merged**, from a branch based on `origin
 
 ## Tasks
 
-### [ ] T1 — `Dockerfile` and `.dockerignore` (~10 min)
+### [x] T1 — `Dockerfile` and `.dockerignore` (~10 min)
 
 - **Layer:** build
 - **Files:** `Dockerfile`, `.dockerignore`
@@ -39,7 +39,8 @@ This plan is implemented **after #85 is merged**, from a branch based on `origin
 - **What to do:**
   1. Copy both files from `Hexagonal` (no differences expected); `./mvnw verify` on `Monolithic`.
 - **Acceptance criteria:**
-  - [ ] The image (or, without a Docker daemon, the same `java` command line) answers `UP` on `/actuator/health` with `PORT` set.
+  - [x] The image (or, without a Docker daemon, the same `java` command line) answers `UP` on `/actuator/health` with `PORT` set.
+  - Files copied unchanged from `Hexagonal` (#87). Built with Docker as in #85 (the session's build adds only its proxy CA, out of the repository); `docker run --memory=512m -e PORT=10000`: `UP` on port 10000 after ~13 s, profile `demo`, user `app` (uid 10001), ~250 MB of 512 MB.
 
 ### [ ] T2 — Password override and guide (~10 min)
 

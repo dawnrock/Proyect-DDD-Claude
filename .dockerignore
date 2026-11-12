@@ -1,0 +1,15 @@
+# Only pom.xml, lombok.config and src/ are needed to build the image.
+target/
+.git/
+.github/
+.claude/
+.mvn/
+graphify-out/
+graphify-out.*/
+docs/
+scripts/
+node_modules/
+.idea/
+.vscode/
+*.iml
+.env
