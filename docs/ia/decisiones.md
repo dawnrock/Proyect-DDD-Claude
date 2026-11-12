@@ -5,6 +5,7 @@
 ## Decisiones ya tomadas que afectan a lo que viene
 
 - **Fin de la fase 1 (#13):** `Monolithic` queda congelada en la etiqueta `v1-monolito`, como `master` (solo se toca por decisión expresa del usuario). `Hexagonal` se crea desde `Monolithic` y pasa a ser la rama por defecto del repositorio: las PR de la fase 2 van contra ella.
+- **Despliegue en Render (#86):** excepción a la congelación autorizada por el usuario el 2026-11-11. Solo se añaden `Dockerfile`, `.dockerignore`, la guía `docs/deploy/render.md` (en inglés) y una sección del `README`, copiados de `Hexagonal` (#85, PR #87); `src/` y `pom.xml` no cambian y la etiqueta `v1-monolito` no se mueve. La contraseña propia se da con `APP_SECURITY_USERS_<n>_USERNAME` / `_PASSWORDHASH` / `_ROLE` (los tres por usuario: Spring Boot sustituye la lista entera).
 
 - **Contrato web ↔ back** (ADR 0007, enfoque A): servicio, commands y vistas de `application`, más un fragmento de OpenAPI. La web no consume la API REST.
 - **DTOs REST:** pueden ser de Immutables con `@JsonSerialize`/`@JsonDeserialize` de `tools.jackson.databind.annotation` (ADR 0003).

@@ -64,7 +64,7 @@ This plan is implemented **after #85 is merged**, from a branch based on `origin
 - **Acceptance criteria:**
   - [x] Checked: only `Dockerfile`, `.dockerignore`, `README.md`, `docs/deploy/render.md` and the plan (plus the status in T4); `v1-monolito` still points at `origin/Monolithic` (10eb227).
 
-### [ ] T4 — Project status (~8 min)
+### [x] T4 — Project status (~8 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `historial.md` (on `Monolithic`)
@@ -72,7 +72,7 @@ This plan is implemented **after #85 is merged**, from a branch based on `origin
 - **What to do:**
   1. On `Monolithic`: the status says the branch stays frozen at `v1-monolito` except for this deployment PR (#86); decision and history row. On `Hexagonal` the status is updated when #86 is merged (in the next PR there), as #61 did for #13.
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes on the PR against `Monolithic`.
+  - [x] The CI check of the project status passes on the PR against `Monolithic` (`estado-del-proyecto.md`, `decisiones.md` and `historial.md` updated, in Spanish like the rest of the branch's annexes).
 
 ## Global acceptance criteria
 
