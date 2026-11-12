@@ -5,6 +5,7 @@
 ## Decisiones ya tomadas que afectan a lo que viene
 
 - **Fin de la fase 1 (#13):** `Monolithic` queda congelada en la etiqueta `v1-monolito`, como `master` (solo se toca por decisión expresa del usuario). `Hexagonal` se crea desde `Monolithic` y pasa a ser la rama por defecto del repositorio: las PR de la fase 2 van contra ella.
+- **Pie de la web (#91):** segunda excepción a la congelación, aprobada por el usuario el 2026-11-12, esta vez en `src/` (plantilla `fragments/layout.html` y un test web): el pie dice solo `Fase 1 · arquitectura monolítica`, sin el nombre del proyecto (en `Hexagonal`, `Fase 2 · arquitectura hexagonal`, PR #92). La etiqueta `v1-monolito` no se mueve. Las PR contra `Monolithic` no cierran su issue (`Closes` solo actúa en la rama por defecto): se cierra a mano tras fusionar.
 - **Despliegue en Render (#86):** excepción a la congelación autorizada por el usuario el 2026-11-11. Solo se añaden `Dockerfile`, `.dockerignore`, la guía `docs/deploy/render.md` (en inglés) y una sección del `README`, copiados de `Hexagonal` (#85, PR #87); `src/` y `pom.xml` no cambian y la etiqueta `v1-monolito` no se mueve. La contraseña propia se da con `APP_SECURITY_USERS_<n>_USERNAME` / `_PASSWORDHASH` / `_ROLE` (los tres por usuario: Spring Boot sustituye la lista entera).
 
 - **Contrato web ↔ back** (ADR 0007, enfoque A): servicio, commands y vistas de `application`, más un fragmento de OpenAPI. La web no consume la API REST.

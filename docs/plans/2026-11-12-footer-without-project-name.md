@@ -78,7 +78,7 @@ Two PRs, one per branch, because each branch has its own template. The `Monolith
 - **Acceptance criteria:**
   - [x] Red before, green after; only the listed files change (red: `Expected: a string containing "Fase 1 · arquitectura monolítica"`; `mvn verify` green, layers and ArchUnit).
 
-### [ ] T4 — `Monolithic`: status, PR and closing the issue (~10 min)
+### [x] T4 — `Monolithic`: status, PR and closing the issue (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `historial.md` (on `Monolithic`, in Spanish)
@@ -86,7 +86,7 @@ Two PRs, one per branch, because each branch has its own template. The `Monolith
 - **What to do:**
   1. Status: second exception recorded; history row. PR against `Monolithic`. After its merge: close #91 by hand; the `Hexagonal` status catches up in its next PR.
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes on the PR against `Monolithic`.
+  - [x] The CI check of the project status passes on the PR against `Monolithic`.
 
 ## Global acceptance criteria
 
