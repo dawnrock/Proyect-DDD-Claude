@@ -46,7 +46,7 @@ Two PRs, one per branch, because each branch has its own template. The `Monolith
 - **Acceptance criteria:**
   - [x] Red before the change, green after; `mvn verify` green (the #89 test now checks the new text and the absence of the project name).
 
-### [ ] T2 — `Hexagonal`: status and PR (~5 min)
+### [x] T2 — `Hexagonal`: status and PR (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `historial.md`
@@ -54,7 +54,7 @@ Two PRs, one per branch, because each branch has its own template. The `Monolith
 - **What to do:**
   1. Status: #91 in progress (the `Monolithic` PR follows); decision (second exception on `Monolithic`, authorised); a row in `historial.md`. PR against `Hexagonal` with `Refs #91` (not `Closes`: the issue stays open until the `Monolithic` PR).
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes.
+  - [x] The CI check of the project status passes.
 
 ### [ ] T3 — `Monolithic`: footer `Fase 1 · arquitectura monolítica` (~10 min)
 
