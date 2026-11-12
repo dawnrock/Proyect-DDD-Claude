@@ -143,6 +143,17 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("Todavía no hay cuentas")))
                     .andExpect(content().string(containsString("Abrir cuenta")));
         }
+
+        @Test
+        @DisplayName("El pie de página indica la fase 2, arquitectura hexagonal")
+        void el_pie_de_pagina_indica_la_fase_2_arquitectura_hexagonal() throws Exception {
+            when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
+
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("fase 2 · arquitectura hexagonal")))
+                    .andExpect(content().string(not(containsString("fase 1"))));
+        }
     }
 
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
