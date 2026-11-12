@@ -85,7 +85,7 @@ Facts gathered:
 - **Acceptance criteria:**
   - [x] Links resolve (`Dockerfile`, `docs/deploy/render.md`; also added to the Documentation list).
 
-### [ ] T5 — Project status (~10 min)
+### [x] T5 — Project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `historial.md`
@@ -93,7 +93,7 @@ Facts gathered:
 - **What to do:**
   1. Status: #85 done, next step #86 on `Monolithic`; decision (Render free plan, Docker, configuration only through environment variables, own password on a public URL); a row in `historial.md`.
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes.
+  - [x] The CI check of the project status passes (`check-project-status.mjs` is run in CI on the PR).
 
 ## Global acceptance criteria
 
