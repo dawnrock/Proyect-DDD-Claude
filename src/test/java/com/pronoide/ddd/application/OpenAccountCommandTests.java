@@ -4,15 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import com.pronoide.ddd.domain.model.CustomerSegment;
 
 class OpenAccountCommandTests {
 
@@ -22,7 +19,6 @@ class OpenAccountCommandTests {
         return OpenAccountCommand.builder()
                 .accountNumber(IBAN)
                 .holderName("Ada Lovelace")
-                .segment("RETAIL")
                 .initialDeposit(new BigDecimal("100.00"));
     }
 
@@ -33,16 +29,8 @@ class OpenAccountCommandTests {
 
         assertThat(command.accountNumber()).isEqualTo(IBAN);
         assertThat(command.holderName()).isEqualTo("Ada Lovelace");
-        assertThat(command.segment()).isEqualTo("RETAIL");
         assertThat(command.initialDeposit()).isEqualByComparingTo("100.00");
         assertThat(command.currency()).isEqualTo("EUR");
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"RETAIL", "HIGH_NET_WORTH"})
-    @DisplayName("Los dos segmentos permitidos se aceptan")
-    void los_dos_segmentos_permitidos_se_aceptan(String segment) {
-        assertThat(validCommand().segment(segment).build().segment()).isEqualTo(segment);
     }
 
     @Test
@@ -70,15 +58,6 @@ class OpenAccountCommandTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "retail", "VIP", "HIGH NET WORTH"})
-    @DisplayName("El segmento solo puede ser RETAIL o HIGH_NET_WORTH")
-    void el_segmento_solo_puede_ser_retail_o_high_net_worth(String segment) {
-        assertThatIllegalArgumentException()
-                .isThrownBy(() -> validCommand().segment(segment).build())
-                .withMessage("El segmento debe ser RETAIL o HIGH_NET_WORTH");
-    }
-
-    @ParameterizedTest
     @CsvSource({"0", "0.00", "-1", "-50.00"})
     @DisplayName("El depósito inicial debe ser positivo")
     void el_deposito_inicial_debe_ser_positivo(String deposit) {
@@ -94,13 +73,5 @@ class OpenAccountCommandTests {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().currency(currency).build())
                 .withMessage("La divisa %s no es un código ISO 4217 válido".formatted(currency));
-    }
-
-    @Test
-    @DisplayName("Los segmentos que acepta la orden son exactamente los del dominio")
-    void los_segmentos_que_acepta_la_orden_son_exactamente_los_del_dominio() {
-        assertThat(OpenAccountCommandDef.SEGMENTS)
-                .containsExactlyInAnyOrderElementsOf(
-                        Arrays.stream(CustomerSegment.values()).map(Enum::name).toList());
     }
 }

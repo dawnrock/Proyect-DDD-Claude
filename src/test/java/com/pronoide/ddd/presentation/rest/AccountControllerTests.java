@@ -105,7 +105,6 @@ class AccountControllerTests {
             OpenAccountCommand command = captor.getValue();
             assertThat(command.accountNumber()).isEqualTo("es91 2100 0418 4502 0005 1332");
             assertThat(command.holderName()).isEqualTo("Ada Lovelace");
-            assertThat(command.segment()).isEqualTo("RETAIL");
             assertThat(command.initialDeposit()).isEqualByComparingTo("100.00");
             assertThat(command.currency()).isEqualTo("EUR");
         }
@@ -123,7 +122,6 @@ class AccountControllerTests {
             ArgumentCaptor<OpenAccountCommand> captor = ArgumentCaptor.forClass(OpenAccountCommand.class);
             verify(service).openAccount(any(Caller.class), captor.capture());
             assertThat(captor.getValue().currency()).isEqualTo("USD");
-            assertThat(captor.getValue().segment()).isEqualTo("HIGH_NET_WORTH");
         }
 
         @Test

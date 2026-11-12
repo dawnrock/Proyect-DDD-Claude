@@ -24,7 +24,7 @@ class SegmentReviewJobTests {
         CheckingAccountService service = new CheckingAccountService(
                 new InMemoryCheckingAccountRepository(), new InMemoryAccountOwnershipRepository(), clock);
         UUID id = service.openAccount(ADMIN, OpenAccountCommand.builder()
-                .accountNumber("ES9121000418450200051332").holderName("Grace Hopper").segment("RETAIL")
+                .accountNumber("ES9121000418450200051332").holderName("Grace Hopper")
                 .initialDeposit(new BigDecimal("100000")).ownerUsername("grace").build()).id();
         service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("500")).build());
         clock.advance(Duration.ofDays(32));

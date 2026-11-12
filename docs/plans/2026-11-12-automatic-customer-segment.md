@@ -126,7 +126,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] `./mvnw verify` green; the application starts and logs no scheduling error.
 
-### [ ] T8 — `OpenAccountCommand` without segment (~10 min)
+### [x] T8 — `OpenAccountCommand` without segment (~10 min)
 
 - **Layer:** application (plus one line in each presentation mapper to compile)
 - **Files:** `OpenAccountCommandDef.java`, `DemoDataLoader.java`, `OpenAccountCommandTests.java`, `DemoDataLoaderTests.java`, `CheckingAccountServiceTests.java`, `CheckingAccountServiceOwnershipTests.java`; mapper lines in `AccountController.java` and `AccountWebController.java`
@@ -136,7 +136,7 @@ Decisions taken in this plan:
   2. `DemoDataLoader`: drop the segment argument; Grace Hopper opens with `150000.00`. `DemoDataLoaderTests` keeps asserting `RETAIL, RETAIL, HIGH_NET_WORTH`.
   3. Stop passing `segment` in the two presentation mappers (the request and form fields are removed in T9 and T10).
 - **Acceptance criteria:**
-  - [ ] `grep -n "segment" src/main/java/com/pronoide/ddd/application/OpenAccountCommandDef.java` finds nothing; `./mvnw verify` green.
+  - [x] `grep -n "segment()\|SEGMENTS" src/main/java/com/pronoide/ddd/application/OpenAccountCommandDef.java` finds nothing (only the Javadoc explains that the segment is not an input); `./mvnw verify` green.
 
 ### [ ] T9 — REST: `POST /api/accounts` without segment (~5 min)
 

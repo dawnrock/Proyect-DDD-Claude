@@ -1063,7 +1063,6 @@ class AccountWebControllerTests {
             verify(service).openAccount(ADMIN, OpenAccountCommand.builder()
                     .accountNumber("es12 3456 7890 1234 5678 9012")
                     .holderName("Ana Pérez")
-                    .segment("RETAIL")
                     .initialDeposit(new BigDecimal("100.00"))
                     .currency("EUR")
                     .ownerUsername("ana")

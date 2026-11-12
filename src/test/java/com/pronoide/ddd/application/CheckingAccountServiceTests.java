@@ -56,7 +56,6 @@ class CheckingAccountServiceTests {
         return OpenAccountCommand.builder()
                 .accountNumber(accountNumber)
                 .holderName("Ada Lovelace")
-                .segment("RETAIL")
                 .initialDeposit(new BigDecimal("100"))
                 .ownerUsername("ada");
     }
