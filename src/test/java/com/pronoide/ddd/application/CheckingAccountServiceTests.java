@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +29,7 @@ import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
 import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
+import com.pronoide.ddd.support.MutableClock;
 
 /** Casos de uso con el repositorio en memoria real: es concreto y no hace falta simularlo. */
 class CheckingAccountServiceTests {
@@ -41,10 +43,13 @@ class CheckingAccountServiceTests {
     private InMemoryCheckingAccountRepository repository;
     private CheckingAccountService service;
 
+    private MutableClock clock;
+
     @BeforeEach
     void setUp() {
         repository = spy(new InMemoryCheckingAccountRepository());
-        service = new CheckingAccountService(repository, new InMemoryAccountOwnershipRepository());
+        clock = new MutableClock();
+        service = new CheckingAccountService(repository, new InMemoryAccountOwnershipRepository(), clock);
     }
 
     private static OpenAccountCommand.Builder command(String accountNumber) {
@@ -400,6 +405,56 @@ class CheckingAccountServiceTests {
             assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> service.transfer(ADMIN, dollars));
             assertThat(service.findAccount(ADMIN, sourceId).balance()).isEqualByComparingTo("500.00");
             assertThat(service.findAccount(ADMIN, targetId).balance()).isEqualByComparingTo("100.00");
+        }
+    }
+
+    @Nested
+    @DisplayName("Revisión del segmento antes de un cargo")
+    class SegmentReviewBeforeDebit {
+
+        private UUID id;
+
+        @BeforeEach
+        void unaCuentaDeAltoPatrimonioEnDescubierto() {
+            id = service.openAccount(ADMIN, command(IBAN).initialDeposit(new BigDecimal("100000")).build()).id();
+            service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("100500")).build());
+        }
+
+        @Test
+        @DisplayName("Tras un mes bajo el patrimonio mínimo la retirada se evalúa ya como minorista")
+        void tras_un_mes_bajo_el_patrimonio_minimo_la_retirada_se_evalua_como_minorista() {
+            clock.advance(Duration.ofDays(32));
+
+            TransactionSummary retirada = service.withdraw(ADMIN,
+                    WithdrawCommand.builder().accountId(id).amount(new BigDecimal("10")).build());
+
+            assertThat(retirada.status()).isEqualTo("REJECTED");
+            assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("RETAIL");
+        }
+
+        @Test
+        @DisplayName("Antes de un mes la retirada sigue contando con el descubierto de alto patrimonio")
+        void antes_de_un_mes_la_retirada_sigue_contando_con_el_descubierto() {
+            clock.advance(Duration.ofDays(20));
+
+            TransactionSummary retirada = service.withdraw(ADMIN,
+                    WithdrawCommand.builder().accountId(id).amount(new BigDecimal("10")).build());
+
+            assertThat(retirada.status()).isEqualTo("APPROVED");
+            assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("HIGH_NET_WORTH");
+        }
+
+        @Test
+        @DisplayName("Tras un mes bajo el patrimonio mínimo la transferencia se evalúa ya como minorista")
+        void tras_un_mes_bajo_el_patrimonio_minimo_la_transferencia_se_evalua_como_minorista() {
+            service.openAccount(ADMIN, command(OTHER_IBAN).build());
+            clock.advance(Duration.ofDays(32));
+
+            TransferSummary transferencia = service.transfer(ADMIN, TransferCommand.builder()
+                    .sourceAccountId(id).targetAccountNumber(OTHER_IBAN).amount(new BigDecimal("10")).build());
+
+            assertThat(transferencia.status()).isEqualTo("REJECTED");
+            assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("RETAIL");
         }
     }
 }

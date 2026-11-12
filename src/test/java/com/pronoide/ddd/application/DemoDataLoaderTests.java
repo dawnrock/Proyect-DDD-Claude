@@ -16,7 +16,7 @@ class DemoDataLoaderTests {
 
     private final InMemoryAccountOwnershipRepository ownership = new InMemoryAccountOwnershipRepository();
     private final CheckingAccountService service =
-            new CheckingAccountService(new InMemoryCheckingAccountRepository(), ownership);
+            new CheckingAccountService(new InMemoryCheckingAccountRepository(), ownership, java.time.Clock.systemUTC());
 
     @Test
     @DisplayName("Al arrancar abre tres cuentas de demostración con el caso de uso, una de ellas de alto patrimonio")

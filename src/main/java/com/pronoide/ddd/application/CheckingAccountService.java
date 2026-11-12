@@ -1,6 +1,7 @@
 package com.pronoide.ddd.application;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +36,7 @@ public class CheckingAccountService {
 
     private final InMemoryCheckingAccountRepository repository;
     private final InMemoryAccountOwnershipRepository ownership;
+    private final Clock clock;
     private final MoneyTransferService transferService = new MoneyTransferService();
 
     /**
@@ -99,13 +101,15 @@ public class CheckingAccountService {
 
     /**
      * Intenta retirar un importe de la cuenta y la guarda. Una retirada que dejaría la cuenta por debajo de lo
-     * permitido no es un error: se devuelve el movimiento con estado {@code REJECTED} y el saldo no cambia.
+     * permitido no es un error: se devuelve el movimiento con estado {@code REJECTED} y el saldo no cambia. Antes
+     * revisa el segmento del titular, para que el descubierto se decida con el segmento que le corresponde hoy.
      *
      * @throws AccountNotFoundException si la cuenta no existe o no es de quien lo pide (y no es administrador)
      * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el importe no está en la divisa de la cuenta
      */
     public TransactionSummary withdraw(Caller caller, WithdrawCommand command) {
         CheckingAccount account = loadFor(caller, command.accountId());
+        account.reviewSegment(clock.instant());
         Transaction transaction = account.tryWithdraw(toAmount(command.amount(), command.currency()));
         repository.save(account);
         return toTransaction(transaction);
@@ -127,6 +131,7 @@ public class CheckingAccountService {
         AccountNumber targetNumber = new AccountNumber(command.targetAccountNumber());
         CheckingAccount target = repository.findByAccountNumber(targetNumber)
                 .orElseThrow(() -> new TargetAccountNotFoundException(targetNumber.value()));
+        source.reviewSegment(clock.instant());
         Transaction withdrawal =
                 transferService.transfer(source, target, toAmount(command.amount(), command.currency()));
         repository.save(source);

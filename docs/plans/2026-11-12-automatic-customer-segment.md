@@ -104,7 +104,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] `./mvnw test -Dtest='AccountHolderTests,TestAccountsTests,CheckingAccountService*'` passes; `./mvnw verify` green.
 
-### [ ] T6 — The service reviews the segment before every debit (~10 min)
+### [x] T6 — The service reviews the segment before every debit (~10 min)
 
 - **Layer:** application
 - **Files:** `CheckingAccountService.java`, `CheckingAccountServiceTests.java`, a `Clock` bean (`application`)
@@ -113,7 +113,7 @@ Decisions taken in this plan:
   1. Test first, with a fixed `Clock` moved forward: a high-net-worth account that fell below the minimum more than a month ago gets its overdraft withdrawal rejected and its detail shows `RETAIL`; the same for the source account of a transfer.
   2. Inject `Clock`; call `account.reviewSegment(clock.instant())` before `tryWithdraw` and before the transfer, and save the account.
 - **Acceptance criteria:**
-  - [ ] The two tests pass; `la_aplicacion_no_depende_de_spring_security` and the layer rules stay green.
+  - [x] The two tests pass; `la_aplicacion_no_depende_de_spring_security` and the layer rules stay green.
 
 ### [ ] T7 — Daily segment review job (~10 min)
 
