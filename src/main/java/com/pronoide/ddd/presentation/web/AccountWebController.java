@@ -1,7 +1,6 @@
 package com.pronoide.ddd.presentation.web;
 
 import java.math.BigDecimal;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -249,10 +248,6 @@ public class AccountWebController {
     }
 
     private void addFormOptions(Model model) {
-        Map<String, String> segments = new LinkedHashMap<>();
-        segments.put("RETAIL", "Minorista");
-        segments.put("HIGH_NET_WORTH", "Alto patrimonio");
-        model.addAttribute("segments", segments);
         model.addAttribute("currencies", List.of("EUR", "USD", "GBP"));
     }
 }

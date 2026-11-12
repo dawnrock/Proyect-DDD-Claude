@@ -151,7 +151,7 @@ class DddLabApplicationTests {
 		}
 
 		private HttpResponse<String> submitForm(String accountNumber, String currency) throws Exception {
-			String form = "accountNumber=%s&holderName=Grace+Hopper&ownerUsername=grace&segment=RETAIL&initialDeposit=75.00&currency=%s"
+			String form = "accountNumber=%s&holderName=Grace+Hopper&ownerUsername=grace&initialDeposit=75.00&currency=%s"
 					.formatted(URLEncoder.encode(accountNumber, StandardCharsets.UTF_8), currency);
 			return submit("/accounts/new", form);
 		}

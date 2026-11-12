@@ -150,7 +150,7 @@ Decisions taken in this plan:
   - [x] `./mvnw test -Dtest=AccountControllerTests` passes.
   - [x] `curl -u admin:demo -H 'Content-Type: application/json' -d '{"accountNumber":"ES0000000000000000009401","holderName":"Test","initialDeposit":100,"ownerUsername":"ada"}' localhost:8080/api/accounts` answers `201`.
 
-### [ ] T10 — Web: the open-account form no longer asks for the segment (~10 min)
+### [x] T10 — Web: the open-account form no longer asks for the segment (~10 min)
 
 - **Layer:** presentation (web)
 - **Files:** `presentation/web/OpenAccountForm.java`, `AccountWebController.java` (`addFormOptions`), `templates/accounts/new.html`, `AccountWebControllerTests.java`, `DddLabApplicationTests.java`
@@ -159,7 +159,7 @@ Decisions taken in this plan:
   1. Test first: the form page does not contain `name="segment"`; posting without segment opens the account.
   2. Remove the field, the `segments` model attribute and the `<select>`. The account detail keeps showing the segment.
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest=AccountWebControllerTests` passes; `./mvnw verify` green.
+  - [x] `./mvnw test -Dtest=AccountWebControllerTests` passes; `./mvnw verify` green.
 
 ### [ ] T11 — OpenAPI, contract, glossary and functional analysis (~10 min)
 
