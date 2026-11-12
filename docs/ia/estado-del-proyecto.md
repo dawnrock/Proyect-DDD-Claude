@@ -2,19 +2,19 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores, y se mantiene **corto a propósito**: se carga en cada sesión. **Se actualiza en cada PR que cierra una issue** (lo comprueba el CI).
 
-- **Última actualización:** 2026-10-30 · PR #60 (#13, cierre de la fase 1)
-- **Rama activa:** `Hexagonal` (fase 2), rama por defecto del repositorio. `Monolithic` congelada en la etiqueta `v1-monolito`; `master` congelada.
+- **Última actualización:** 2026-11-12 · PR #88 (#86, despliegue en Render)
+- **Rama activa:** `Hexagonal` (fase 2), rama por defecto del repositorio. `Monolithic` congelada en la etiqueta `v1-monolito`, con una única excepción autorizada por el usuario: la PR de despliegue en Render (#86), que no toca el código; `master` congelada.
 
 ## Dónde estamos
 
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
-| 1 · Monolito en capas | Cerrada: #2-#8, #11-#13, #31, #48, #50, #54, #57 (detalle en el [historial](historial.md)) | — | — |
-| 2 · Hexagonal | — | — | #14 → #23 |
+| 1 · Monolito en capas | Cerrada: #2-#8, #11-#13, #31, #48, #50, #54, #57 (detalle en el [historial](historial.md)); después, #86 despliegue en Render | — | — |
+| 2 · Hexagonal | En la rama `Hexagonal` (su estado está allí) | — | — |
 
 ## Siguiente paso
 
-`/plan-feature 14` sobre `Hexagonal` (reorganizar los paquetes según la arquitectura hexagonal).
+Nada en esta rama: sigue congelada. El trabajo continúa en `Hexagonal` (léase su `docs/ia/estado-del-proyecto.md`). El usuario crea el servicio de Render con la [guía](../deploy/render.md).
 
 Diseño objetivo de la fase 2: `docs/arquitectura/fase-2-hexagonal.md`; las issues, en el milestone "Fase 2 · Arquitectura hexagonal".
 
