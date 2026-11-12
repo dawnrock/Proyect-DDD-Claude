@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone)
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-12
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~15 min (2 tasks)
 
 ## Goal
@@ -31,7 +31,7 @@ The same PR also brings the `Hexagonal` project status up to date with #86 (merg
 
 ## Tasks
 
-### [ ] T1 — Footer names phase 2 (~5 min)
+### [x] T1 — Footer names phase 2 (~5 min)
 
 - **Layer:** adapter.in (web)
 - **Files:** `templates/fragments/layout.html`, `AccountWebControllerTests.java`
@@ -40,7 +40,7 @@ The same PR also brings the `Hexagonal` project status up to date with #86 (merg
   1. Test first (red): the list page contains `fase 2 · arquitectura hexagonal` and not `fase 1`.
   2. Change the footer text (green).
 - **Acceptance criteria:**
-  - [ ] The test fails before the change and passes after it; the other web tests stay green.
+  - [x] The test fails before the change and passes after it; the other web tests stay green (red: `Expected: a string containing "fase 2 · arquitectura hexagonal"`; then `mvn verify` green).
 
 ### [ ] T2 — Project status (~10 min)
 
