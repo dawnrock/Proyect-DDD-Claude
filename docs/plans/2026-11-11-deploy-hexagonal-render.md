@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone)
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-11
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~45 min (5 tasks)
 
 ## Goal
@@ -95,27 +95,37 @@ Facts gathered:
 - **Acceptance criteria:**
   - [x] The CI check of the project status passes (`check-project-status.mjs` is run in CI on the PR).
 
+### [x] T6 — Review fixes (~2 min)
+
+- **Layer:** docs
+- **Files:** `docs/deploy/render.md`
+- **Depends on:** T5
+- **What to do:**
+  1. `revisor-ddd` found no errors (checked the single JAR matched by the `cp` glob, the `.dockerignore`, every property, user, role and path of the guide against the code, no secrets). Applied: the guide says `admin:demo` answers 401 only once the twelve variables are set. Not applied: `dependency:go-offline` covering only part of the plugins (the cache benefit is partial but harmless), pinning the JRE patch version and a `HEALTHCHECK` (Render uses its own health check path).
+- **Acceptance criteria:**
+  - [x] `mvn verify` green.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] The image builds and starts with `PORT` and the `demo` profile; `/actuator/health` answers `UP` (or the equivalent check without Docker, stated).
-- [ ] With the environment variables, the `demo` password stops working and the new one works.
-- [ ] Guide and `README.md` updated.
+- [x] The image builds and starts with `PORT` and the `demo` profile; `/actuator/health` answers `UP` (checked with Docker; the session's build used its proxy CA, see T1).
+- [x] With the environment variables, the `demo` password stops working and the new one works.
+- [x] Guide and `README.md` updated.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected, verified by ArchUnit. Unchanged: no code changes.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md`: n/a (no new tests).
-- [ ] No dependencies added beyond the planned ones: Docker images are a deployment tool, not a build dependency (`pom.xml` unchanged).
-- [ ] If the API changes: n/a.
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected, verified by ArchUnit. Unchanged: no code changes.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md`: n/a (no new tests).
+- [x] No dependencies added beyond the planned ones: Docker images are a deployment tool, not a build dependency (`pom.xml` unchanged).
+- [x] If the API changes: n/a.
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a.
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

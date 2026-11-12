@@ -81,7 +81,7 @@ curl https://<your-service>.onrender.com/actuator/health
 curl -u admin:'your-password' https://<your-service>.onrender.com/api/accounts
 ```
 
-The first answers `{"status":"UP",...}`; the second lists the three demo accounts. `admin:demo` must answer `401`. In the browser, `https://<your-service>.onrender.com` shows the login page: `admin` sees every account, `ada`, `grace` and `alan` only their own.
+The first answers `{"status":"UP",...}`; the second lists the three demo accounts. With the twelve variables set, `admin:demo` must answer `401`. In the browser, `https://<your-service>.onrender.com` shows the login page: `admin` sees every account, `ada`, `grace` and `alan` only their own.
 
 ## What to expect on the free plan
 
