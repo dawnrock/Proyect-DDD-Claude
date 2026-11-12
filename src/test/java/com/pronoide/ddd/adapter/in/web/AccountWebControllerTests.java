@@ -2,6 +2,7 @@ package com.pronoide.ddd.adapter.in.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
@@ -153,7 +154,7 @@ class AccountWebControllerTests {
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("Fase 2 · arquitectura hexagonal")))
                     .andExpect(content().string(not(containsString("Proyect-DDD-Claude"))))
-                    .andExpect(content().string(not(containsString("fase 1"))));
+                    .andExpect(content().string(not(containsStringIgnoringCase("fase 1"))));
         }
     }
 

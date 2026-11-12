@@ -56,6 +56,16 @@ Two PRs, one per branch, because each branch has its own template. The `Monolith
 - **Acceptance criteria:**
   - [x] The CI check of the project status passes.
 
+### [x] T2b — `Hexagonal`: review fixes (~2 min)
+
+- **Layer:** tests
+- **Files:** `AccountWebControllerTests.java`
+- **Depends on:** T2
+- **What to do:**
+  1. `revisor-ddd` found no errors. Applied: the test rejects `fase 1` ignoring case (the new footer starts with a capital letter); checked by sabotage (a footer with `Fase 1` fails the test; reverted).
+- **Acceptance criteria:**
+  - [x] `mvn verify` green.
+
 ### [ ] T3 — `Monolithic`: footer `Fase 1 · arquitectura monolítica` (~10 min)
 
 - **Layer:** presentation (web)
