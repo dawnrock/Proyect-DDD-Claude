@@ -75,7 +75,7 @@ Facts gathered:
   - [x] Every command in the guide was run in T1-T2 (except the ones that happen on Render's site): the three ways to get the hash (`htpasswd` through the `httpd` image, and Python `bcrypt`), the twelve variables, `APP_ADMIN_*`, the health and `curl` checks, and the browser login with the new password.
   - **Addition:** with a public URL, the H2 console (admin only) would still be a way to run code on the server if the admin password leaked. The image sets `SPRING_H2_CONSOLE_ENABLED=false`; checked: `/h2-console/` → 404 after an admin login, the rest of the site unchanged. Local runs keep the console.
 
-### [ ] T4 — `README.md` (~5 min)
+### [x] T4 — `README.md` (~5 min)
 
 - **Layer:** docs
 - **Files:** `README.md`
@@ -83,7 +83,7 @@ Facts gathered:
 - **What to do:**
   1. "Deploy" section: one line on Render + Docker and a link to the guide; note that the demo password must be replaced on a public URL.
 - **Acceptance criteria:**
-  - [ ] Links resolve.
+  - [x] Links resolve (`Dockerfile`, `docs/deploy/render.md`; also added to the Documentation list).
 
 ### [ ] T5 — Project status (~10 min)
 
