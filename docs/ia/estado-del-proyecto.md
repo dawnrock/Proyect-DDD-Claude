@@ -2,7 +2,7 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores, y se mantiene **corto a propósito**: se carga en cada sesión. **Se actualiza en cada PR que cierra una issue** (lo comprueba el CI).
 
-- **Última actualización:** 2026-11-12 · PR #PRNUM (#91, pie de la web)
+- **Última actualización:** 2026-11-12 · PR #93 (#91, pie de la web)
 - **Rama activa:** `Hexagonal` (fase 2), rama por defecto del repositorio. `Monolithic` congelada en la etiqueta `v1-monolito`, con dos excepciones autorizadas por el usuario: el despliegue en Render (#86), que no toca el código, y el pie de la web (#91); `master` congelada.
 
 ## Dónde estamos
