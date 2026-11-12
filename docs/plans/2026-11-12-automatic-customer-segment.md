@@ -69,7 +69,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] `./mvnw test -Dtest=MoneyTransferServiceTests` passes; `MoneyTransferService` is not changed.
 
-### [ ] T3 — The account remembers since when it is below the minimum (~10 min)
+### [x] T3 — The account remembers since when it is below the minimum (~10 min)
 
 - **Layer:** domain
 - **Files:** `CheckingAccount.java`, `CheckingAccountTests.java`
@@ -78,7 +78,7 @@ Decisions taken in this plan:
   1. Failing tests first: an approved withdrawal that leaves a high-net-worth account below the minimum records `belowMinimumNetWorthSince` with the withdrawal's `occurredOn`; a second withdrawal does not move the date; a deposit that reaches the minimum clears it; a rejected withdrawal and a retail account record nothing.
   2. Add the private field and the accessor `belowMinimumNetWorthSince()` (`Optional<Instant>`); set it in `tryWithdraw`, clear it in `deposit`.
 - **Acceptance criteria:**
-  - [ ] The five tests pass; `./mvnw verify` green.
+  - [x] The five tests pass; `./mvnw verify` green.
 
 ### [ ] T4 — The holder goes back to retail after one month below the minimum (~10 min)
 

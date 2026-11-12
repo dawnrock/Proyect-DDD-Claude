@@ -169,4 +169,58 @@ class CheckingAccountTests {
 
         assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
     }
+
+    @Test
+    @DisplayName("Una retirada aprobada que deja una cuenta de alto patrimonio bajo el mínimo anota desde cuándo")
+    void una_retirada_que_deja_la_cuenta_bajo_el_patrimonio_minimo_anota_desde_cuando() {
+        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+
+        Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
+
+        assertThat(cuenta.belowMinimumNetWorthSince()).contains(retirada.occurredOn());
+        assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Una segunda retirada bajo el mínimo no mueve la fecha anotada")
+    void una_segunda_retirada_bajo_el_minimo_no_mueve_la_fecha() {
+        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+        Transaction primera = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
+
+        cuenta.tryWithdraw(MonetaryAmount.euros("10.00"));
+
+        assertThat(cuenta.belowMinimumNetWorthSince()).contains(primera.occurredOn());
+    }
+
+    @Test
+    @DisplayName("Un ingreso que recupera el patrimonio mínimo borra la fecha anotada")
+    void un_ingreso_que_recupera_el_patrimonio_minimo_borra_la_fecha() {
+        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+        cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
+
+        cuenta.deposit(MonetaryAmount.euros("10000.00"));
+
+        assertThat(cuenta.belowMinimumNetWorthSince()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Una retirada rechazada no anota ninguna fecha")
+    void una_retirada_rechazada_no_anota_ninguna_fecha() {
+        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("100000.00").open();
+
+        Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("200000.00"));
+
+        assertThat(retirada.isRejected()).isTrue();
+        assertThat(cuenta.belowMinimumNetWorthSince()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Una cuenta minorista no anota ninguna fecha al retirar")
+    void una_cuenta_minorista_no_anota_ninguna_fecha_al_retirar() {
+        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+
+        cuenta.tryWithdraw(MonetaryAmount.euros("100.00"));
+
+        assertThat(cuenta.belowMinimumNetWorthSince()).isEmpty();
+    }
 }

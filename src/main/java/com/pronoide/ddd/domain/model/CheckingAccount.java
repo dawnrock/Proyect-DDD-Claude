@@ -1,8 +1,10 @@
 package com.pronoide.ddd.domain.model;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public class CheckingAccount {
@@ -15,6 +17,7 @@ public class CheckingAccount {
     private final AccountHolder primaryHolder;
     private final List<Transaction> transactions = new ArrayList<>();
     private MonetaryAmount currentBalance;
+    private Instant belowMinimumNetWorthSince;
 
     private CheckingAccount(AccountNumber accountNumber, 
                             AccountHolder primaryHolder, 
@@ -50,6 +53,7 @@ public class CheckingAccount {
         currentBalance = newBalance;
         if (reachesMinimumNetWorth()) {
             primaryHolder.promoteToHighNetWorth();
+            belowMinimumNetWorthSince = null;
         }
         return transaction;
     }
@@ -64,6 +68,9 @@ public class CheckingAccount {
         if (isAllowed(newBalance)) {
             transaction.approve();
             currentBalance = newBalance;
+            if (primaryHolder.isHighNetWorth() && !reachesMinimumNetWorth() && belowMinimumNetWorthSince == null) {
+                belowMinimumNetWorthSince = transaction.occurredOn();
+            }
         } else {
             transaction.reject();
         }
@@ -88,6 +95,11 @@ public class CheckingAccount {
 
     public MonetaryAmount currentBalance() {
         return currentBalance;
+    }
+
+    /** Desde cuándo una cuenta de alto patrimonio está por debajo del patrimonio mínimo; vacío si no lo está. */
+    public Optional<Instant> belowMinimumNetWorthSince() {
+        return Optional.ofNullable(belowMinimumNetWorthSince);
     }
 
     private boolean isAllowed(MonetaryAmount newBalance) {
