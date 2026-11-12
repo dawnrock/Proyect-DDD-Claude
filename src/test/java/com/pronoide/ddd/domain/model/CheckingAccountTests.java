@@ -3,6 +3,8 @@ package com.pronoide.ddd.domain.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Currency;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -222,5 +224,69 @@ class CheckingAccountTests {
         cuenta.tryWithdraw(MonetaryAmount.euros("100.00"));
 
         assertThat(cuenta.belowMinimumNetWorthSince()).isEmpty();
+    }
+
+    private static Instant unMesDespuesDe(Instant instante) {
+        return instante.atZone(ZoneOffset.UTC).plusMonths(1).toInstant();
+    }
+
+    @Test
+    @DisplayName("Antes de cumplirse un mes bajo el mínimo el titular sigue siendo de alto patrimonio")
+    void antes_de_un_mes_bajo_el_minimo_el_titular_sigue_siendo_de_alto_patrimonio() {
+        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+        Instant desde = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00")).occurredOn();
+
+        cuenta.reviewSegment(unMesDespuesDe(desde).minusSeconds(1));
+
+        assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+        assertThat(cuenta.belowMinimumNetWorthSince()).contains(desde);
+    }
+
+    @Test
+    @DisplayName("Tras un mes bajo el patrimonio mínimo el titular vuelve a ser minorista")
+    void tras_un_mes_bajo_el_patrimonio_minimo_el_titular_vuelve_a_ser_minorista() {
+        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+        Instant desde = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00")).occurredOn();
+
+        cuenta.reviewSegment(unMesDespuesDe(desde));
+
+        assertThat(cuenta.primaryHolder().segment()).isEqualTo(CustomerSegment.RETAIL);
+        assertThat(cuenta.belowMinimumNetWorthSince()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Recuperar el patrimonio mínimo antes de un mes cancela la vuelta a minorista")
+    void recuperar_el_patrimonio_minimo_cancela_la_vuelta_a_minorista() {
+        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+        Instant desde = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00")).occurredOn();
+        cuenta.deposit(MonetaryAmount.euros("10000.00"));
+
+        cuenta.reviewSegment(unMesDespuesDe(desde));
+
+        assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Revisar el segmento de una cuenta minorista no cambia nada")
+    void revisar_el_segmento_de_una_cuenta_minorista_no_cambia_nada() {
+        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+
+        cuenta.reviewSegment(Instant.now().plusSeconds(10L * 365 * 24 * 3600));
+
+        assertThat(cuenta.primaryHolder().segment()).isEqualTo(CustomerSegment.RETAIL);
+    }
+
+    @Test
+    @DisplayName("Un titular que vuelve a minorista en descubierto conserva la deuda y no puede retirar más")
+    void un_titular_que_vuelve_a_minorista_en_descubierto_conserva_la_deuda() {
+        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("100000.00").open();
+        Instant desde = cuenta.tryWithdraw(MonetaryAmount.euros("100500.00")).occurredOn();
+
+        cuenta.reviewSegment(unMesDespuesDe(desde));
+        Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("10.00"));
+
+        assertThat(cuenta.primaryHolder().segment()).isEqualTo(CustomerSegment.RETAIL);
+        assertThat(cuenta.currentBalance()).isEqualTo(MonetaryAmount.euros("-500.00"));
+        assertThat(retirada.isRejected()).isTrue();
     }
 }

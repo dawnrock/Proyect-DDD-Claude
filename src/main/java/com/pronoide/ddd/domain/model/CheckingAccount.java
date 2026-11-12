@@ -1,6 +1,8 @@
 package com.pronoide.ddd.domain.model;
 
 import java.time.Instant;
+import java.time.Period;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -12,6 +14,7 @@ public class CheckingAccount {
     private static final MonetaryAmount MINIMUM_INITIAL_DEPOSIT = MonetaryAmount.euros("50.00");
     private static final MonetaryAmount OVERDRAFT_LIMIT = MonetaryAmount.euros("-1000.00");
     private static final MonetaryAmount MINIMUM_NET_WORTH = MonetaryAmount.euros("100000.00");
+    private static final Period SEGMENT_GRACE_PERIOD = Period.ofMonths(1);
     private final UUID id;
     private final AccountNumber accountNumber;
     private final AccountHolder primaryHolder;
@@ -75,6 +78,22 @@ public class CheckingAccount {
             transaction.reject();
         }
         return transaction;
+    }
+
+    /**
+     * Devuelve al titular a minorista si la cuenta lleva el periodo de gracia completo (un mes natural, en UTC) por
+     * debajo del patrimonio mínimo. No hace nada si el titular es minorista o si aún no se ha cumplido el plazo.
+     */
+    public void reviewSegment(Instant now) {
+        Objects.requireNonNull(now, "El momento de la revisión es obligatorio");
+        if (belowMinimumNetWorthSince == null) {
+            return;
+        }
+        Instant deadline = belowMinimumNetWorthSince.atZone(ZoneOffset.UTC).plus(SEGMENT_GRACE_PERIOD).toInstant();
+        if (!now.isBefore(deadline)) {
+            primaryHolder.demoteToRetail();
+            belowMinimumNetWorthSince = null;
+        }
     }
 
     public List<Transaction> transactions() {

@@ -80,7 +80,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The five tests pass; `./mvnw verify` green.
 
-### [ ] T4 — The holder goes back to retail after one month below the minimum (~10 min)
+### [x] T4 — The holder goes back to retail after one month below the minimum (~10 min)
 
 - **Layer:** domain
 - **Files:** `AccountHolder.java`, `CheckingAccount.java`, `AccountHolderTests.java`, `CheckingAccountTests.java`
@@ -89,7 +89,7 @@ Decisions taken in this plan:
   1. Failing tests first: `reviewSegment(since + 1 month - 1 s)` keeps high net worth; `reviewSegment(since + 1 month)` demotes and clears the date (R19); after recovering the minimum in between, the review does nothing (R20); reviewing a retail account does nothing; a demoted holder in overdraft keeps the balance but its next withdrawal is rejected.
   2. Add `AccountHolder.demoteToRetail()` and `CheckingAccount.reviewSegment(Instant now)`; the month is one calendar month in UTC (constant `SEGMENT_GRACE_PERIOD`).
 - **Acceptance criteria:**
-  - [ ] The five tests pass; `./mvnw verify` green.
+  - [x] The five tests pass; `./mvnw verify` green.
 
 ### [ ] T5 — A holder is always registered as retail (~10 min)
 

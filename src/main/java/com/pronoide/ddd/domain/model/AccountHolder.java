@@ -28,6 +28,10 @@ public class AccountHolder {
         this.segment = CustomerSegment.HIGH_NET_WORTH;
     }
 
+    public void demoteToRetail() {
+        this.segment = CustomerSegment.RETAIL;
+    }
+
     public boolean isHighNetWorth() {
         return segment == CustomerSegment.HIGH_NET_WORTH;
     }

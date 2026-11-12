@@ -27,4 +27,16 @@ class AccountHolderTests {
         assertThat(titular.fullName()).isEqualTo("Ada Byron");
         assertThat(titular.isHighNetWorth()).isTrue();
     }
+
+    @Test
+    @DisplayName("Un titular de alto patrimonio puede volver a ser minorista")
+    void un_titular_de_alto_patrimonio_puede_volver_a_ser_minorista() {
+        AccountHolder titular = AccountHolder.register("Ada Lovelace", CustomerSegment.RETAIL);
+        titular.promoteToHighNetWorth();
+
+        titular.demoteToRetail();
+
+        assertThat(titular.segment()).isEqualTo(CustomerSegment.RETAIL);
+        assertThat(titular.isHighNetWorth()).isFalse();
+    }
 }
