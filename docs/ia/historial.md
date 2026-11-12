@@ -28,3 +28,4 @@
 | 2026-10-30 | #58 | #57 | Graphify solo para preguntas de dependencias (ADR 0010) y estado del proyecto dividido en estado corto + anexos |
 | 2026-10-30 | #60 | #13 | Cierre de la fase 1: `README`, `fase-1-capas.md` y `arquitectura-ia.md` en inglés con el estado final, etiqueta `v1-monolito` y `Hexagonal` como rama por defecto |
 | 2026-11-12 | #88 | #86 | Despliegue en Render (excepción autorizada a la congelación): `Dockerfile`, `.dockerignore`, guía y sección del `README` copiados de `Hexagonal` (#87); sin cambios en `src/` ni `pom.xml` |
+| 2026-11-12 | #93 | #91 | (Segunda excepción autorizada) El pie de la web dice solo `Fase 1 · arquitectura monolítica`, con un test web; la parte de `Hexagonal` fue la PR #92 |
