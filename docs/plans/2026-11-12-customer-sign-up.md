@@ -4,7 +4,7 @@
 - **Type:** feature
 - **Phase:** 1 · Layered monolith
 - **Base branch:** `Monolithic` (frozen; `src/` exception authorised by the user on 2026-11-12)
-- **Date:** 2026-11-12
+- **Date:** 2026-11-12 (revision 2: entity code 9999, unique document)
 - **Status:** draft
 - **Total estimate:** ~255 min (28 tasks; back and web in parallel after T0)
 - **Requires:** #94 merged (no segment in commands, forms or requests)
@@ -22,13 +22,13 @@ A visitor can become a customer of **Mon-A Bank** without the administrator. The
 
 ## Context
 
-Decisions confirmed by the user (2026-11-12): immediate opening; IBAN always assigned by the bank; the administrator can only swap an IBAN for a generated one; holder with document and e-mail; the pair (document, e-mail) is unique; REST follows the existing OpenAPI design.
+Decisions confirmed by the user (2026-11-12): immediate opening; IBAN always assigned by the bank; the administrator can only swap an IBAN for a generated one; holder with document and e-mail; the identity document is unique (one customer per document, whatever the e-mail); REST follows the existing OpenAPI design.
 
 Decisions taken in this plan:
 
-- **Mon-A Bank IBAN:** `ES` + 2 IBAN check digits (mod 97) + entity `9500` + branch `0001` + 2 Spanish control digits + 10-digit account number. The account number is a sequence kept in `persistence` (`0000000001`, `0000000002`…), so the demo accounts always get the same IBANs. `9500` is invented; it has not been checked against the Banco de España registry.
+- **Mon-A Bank IBAN:** `ES` + 2 IBAN check digits (mod 97) + entity `9999` + branch `0001` + 2 Spanish control digits + 10-digit account number. The account number is a sequence kept in `persistence` (`0000000001`, `0000000002`…), so the demo accounts always get the same IBANs. `9999` is invented; it has not been checked against the Banco de España registry.
 - **Value objects:** `IdentityDocument` (DNI: 8 digits + control letter; NIE: `X`/`Y`/`Z` + 7 digits + control letter; normalised to upper case) and `EmailAddress` (normalised to lower case). Plain JDK, no Lombok.
-- **Uniqueness (R23):** checked by the use case against the repository, like R16, with `DuplicateCustomerException` (domain, 422). The same person may hold another account with a different e-mail.
+- **Uniqueness (R23):** no two customers share an identity document, whatever the e-mail. Checked by the use case against the repository, like R16, with `DuplicateCustomerException` (domain, 422).
 - **Users at runtime.** `application` must not depend on Spring Security (ArchUnit), so credentials stay in `presentation`: a shared `CustomerRegistration` component checks that the username is free, calls `CheckingAccountService.signUp` and then creates the user (`USER`, BCrypt) in the `InMemoryUserDetailsManager`. If the use case fails, no user is created.
 - **Wizard state:** a session-scoped `SignUpForm` (`@SessionAttributes`), one validation group per step, cleared on completion. The password stays in the server session between steps 2 and 3, never in the page.
 - **Routes.** Web: `GET /login` (doors), `GET /login?form` (form; `?error` also shows it), `GET|POST /signup`, `/signup/access`, `/signup/account`. REST: `POST /api/customers` (public, `201` + `Location: /api/accounts/{id}`) and `POST /api/accounts/{id}/account-number` (administrator, `200` with the account summary).
@@ -38,7 +38,7 @@ Decisions taken in this plan:
 | Layer / package | File | Change |
 | --------------- | ---- | ------ |
 | `domain.model` | new `IdentityDocument`, `EmailAddress`, `DuplicateCustomerException`; `AccountHolder`, `AccountNumber`, `CheckingAccount` | Holder data, `AccountNumber.monABank(long)`, `reassignAccountNumber` |
-| `persistence` | new `InMemoryAccountNumberSequence`; `InMemoryCheckingAccountRepository` | Sequence; query by document and e-mail; index after an IBAN change |
+| `persistence` | new `InMemoryAccountNumberSequence`; `InMemoryCheckingAccountRepository` | Sequence; query by document; index after an IBAN change |
 | `application` | new `SignUpCommandDef`; `CheckingAccountService`, `OpenAccountCommandDef`, `AccountDetailsDef`, `DemoDataLoader` | `signUp`, `regenerateAccountNumber`, generated IBAN, holder data |
 | `presentation` | new `CustomerRegistration`; `SecuritySupport` | Runtime users |
 | `presentation.rest` | new `CustomerController`, `SignUpRequest`; `AccountController`, `OpenAccountRequest`, `ApiSecurityConfig`, responses | New endpoints, changed request |
@@ -96,17 +96,17 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [ ] The test passes; `la_persistencia_no_tiene_interfaces` stays green.
 
-### [ ] T6 — Find a holder by document and e-mail (~10 min)
+### [ ] T6 — Find a holder by document (~10 min)
 
 - **Side:** back · **Layer:** persistence · **Files:** `InMemoryCheckingAccountRepository.java` + test · **Depends on:** T3
-- **What to do:** `existsByHolder(IdentityDocument, EmailAddress)`; tests: same pair, same document with another e-mail, holder without data.
+- **What to do:** `existsByHolderDocument(IdentityDocument)`; tests: same document with the same and with another e-mail (both found), another document, holder without data.
 - **Acceptance criteria:**
   - [ ] `./mvnw test -Dtest=InMemoryCheckingAccountRepositoryTests` passes.
 
 ### [ ] T7 — Sign-up use case (~10 min)
 
 - **Side:** back · **Layer:** domain · application · **Files:** new `domain/model/DuplicateCustomerException.java`; `CheckingAccountService.java`, `SignUpCommandDef.java` + tests · **Depends on:** T4, T5, T6
-- **What to do:** tests first: `signUp` opens an account with a Mon-A Bank IBAN, the holder data and the username as owner; a repeated pair (document, e-mail) throws `DuplicateCustomerException` (R23); a deposit below 50 € keeps R1; command validation. Implement, skipping sequence values whose IBAN is already used (R16).
+- **What to do:** tests first: `signUp` opens an account with a Mon-A Bank IBAN, the holder data and the username as owner; a repeated document throws `DuplicateCustomerException` even with another e-mail (R23); a deposit below 50 € keeps R1; command validation. Implement, skipping sequence values whose IBAN is already used (R16).
 - **Acceptance criteria:**
   - [ ] The tests pass; `./mvnw verify` green.
 
@@ -208,7 +208,7 @@ Decisions taken in this plan:
 ### [ ] T21 — End-to-end tests (~10 min)
 
 - **Side:** both · **Layer:** tests · **Files:** `DddLabApplicationTests.java` · **Depends on:** T17, T20
-- **What to do:** web: doors → three steps → detail with the session open → logout → login with the new credentials. REST: sign up, list the account, transfer to a demo account. A second sign-up with the same document and e-mail is rejected on both sides.
+- **What to do:** web: doors → three steps → detail with the session open → logout → login with the new credentials. REST: sign up, list the account, transfer to a demo account. A second sign-up with the same document is rejected on both sides, also with a different e-mail.
 - **Acceptance criteria:**
   - [ ] The new tests pass with real beans (no mocks).
 
@@ -261,7 +261,7 @@ Decisions taken in this plan:
 - [ ] `/login` shows two doors; "Quiero ser cliente" completes in three steps and ends on the account detail with the session open.
 - [ ] Every new account, whoever opens it, has a valid Mon-A Bank IBAN; no form or request accepts a typed IBAN for opening.
 - [ ] The administrator can replace the IBAN of an account with a generated one, and a customer cannot.
-- [ ] A second customer with the same document and e-mail is rejected on web and REST; a taken username too.
+- [ ] A second customer with the same document is rejected on web and REST, whatever the e-mail; a taken username too.
 - [ ] `POST /api/customers` works without credentials and the new user can use the API with HTTP Basic.
 - [ ] The `v1-monolito` tag is not moved.
 
@@ -281,11 +281,10 @@ Decisions taken in this plan:
 
 ## Risks and open questions
 
-- **Entity code `9500`:** invented and not checked against the Banco de España registry. Changing it only touches a constant and its tests.
+- **Entity code `9999`:** invented and not checked against the Banco de España registry. Changing it only touches a constant and its tests.
 - **Sign-in after sign-up (T17):** depends on how Spring Security 7 stores a programmatic authentication in the session. If it does not hold, fall back to redirecting to `/login?form` with a "ya puedes entrar" notice.
 - **Atomicity:** account and user are created in two steps. If creating the user failed after the account was opened, an account without a usable owner would remain; accepted for an in-memory practice project and noted in the ADR.
 - **Public endpoint without limits:** anybody can create users and accounts; on Render the data disappears on restart. Accepted risk, recorded in ADR 0011.
-- **Uniqueness of the pair only:** the same document with another e-mail is a different customer, as the user decided.
+- **One account per document:** since the document is unique among holders, a customer cannot open a second account, neither by signing up again nor through the administrator. Confirm that this is intended.
 - **Incompatible REST change** in `POST /api/accounts` and many tests with fixed IBANs to rewrite (T19 is the largest task; split it if it exceeds 15 minutes).
 - **Password in the session** between steps 2 and 3: never rendered, cleared on completion or session expiry.
-- **Plan size:** 28 tasks. If preferred, T8, T9, T12 and T18 (IBAN change by the administrator) can move to their own issue.
