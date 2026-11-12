@@ -5,7 +5,7 @@
 - **Phase:** 1 · Layered monolith
 - **Base branch:** `Monolithic`
 - **Date:** 2026-11-11
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~30 min (4 tasks)
 
 ## Goal
@@ -74,26 +74,28 @@ This plan is implemented **after #85 is merged**, from a branch based on `origin
 - **Acceptance criteria:**
   - [x] The CI check of the project status passes on the PR against `Monolithic` (`estado-del-proyecto.md`, `decisiones.md` and `historial.md` updated, in Spanish like the rest of the branch's annexes).
 
+**Review (`revisor-ddd`):** no errors; it checked the scope (no `src/` or `pom.xml` change), every property, user, path and the demo data of the guide against this branch, and the JAR glob. Nothing to apply (the `#PRNUM` placeholder is replaced once the PR exists).
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] The image builds and starts; `/actuator/health` answers `UP`.
-- [ ] No file under `src/` changes; `./mvnw verify` green on `Monolithic`.
+- [x] The image builds and starts; `/actuator/health` answers `UP`.
+- [x] No file under `src/` changes; `./mvnw verify` green on `Monolithic`.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (layers), verified by ArchUnit. Unchanged: no code changes.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md`: n/a.
-- [ ] No dependencies added beyond the planned ones (`pom.xml` unchanged).
-- [ ] If the API changes: n/a.
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated (on `Monolithic`), with the exception recorded.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (layers), verified by ArchUnit. Unchanged: no code changes.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md`: n/a.
+- [x] No dependencies added beyond the planned ones (`pom.xml` unchanged).
+- [x] If the API changes: n/a.
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a.
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated (on `Monolithic`), with the exception recorded.
 
 ## Risks and open questions
 
