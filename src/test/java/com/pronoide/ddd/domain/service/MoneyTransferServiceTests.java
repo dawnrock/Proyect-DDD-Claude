@@ -136,4 +136,33 @@ class MoneyTransferServiceTests {
             assertThat(account.currentBalance()).isEqualTo(MonetaryAmount.euros("500.00"));
         }
     }
+
+    @Nested
+    @DisplayName("Segmento del titular destino")
+    class TargetHolderSegment {
+
+        @Test
+        @DisplayName("Una transferencia recibida que lleva el saldo al patrimonio mínimo convierte al titular destino en alto patrimonio")
+        void una_transferencia_recibida_que_alcanza_el_patrimonio_minimo_promociona_al_titular_destino() {
+            CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
+            CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).initialDeposit("99900.00").open();
+
+            service.transfer(source, target, MonetaryAmount.euros("100.00"));
+
+            assertThat(target.primaryHolder().isHighNetWorth()).isTrue();
+            assertThat(source.primaryHolder().isHighNetWorth()).isFalse();
+        }
+
+        @Test
+        @DisplayName("Una transferencia rechazada no cambia el segmento de nadie")
+        void una_transferencia_rechazada_no_cambia_el_segmento_de_nadie() {
+            CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("50.00").open();
+            CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).initialDeposit("99900.00").open();
+
+            Transaction withdrawal = service.transfer(source, target, MonetaryAmount.euros("100.00"));
+
+            assertThat(withdrawal.isRejected()).isTrue();
+            assertThat(target.primaryHolder().isHighNetWorth()).isFalse();
+        }
+    }
 }
