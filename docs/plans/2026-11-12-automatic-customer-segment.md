@@ -5,7 +5,7 @@
 - **Phase:** 1 · Layered monolith
 - **Base branch:** `Monolithic` (frozen; `src/` exception authorised by the user on 2026-11-12)
 - **Date:** 2026-11-12 (revision 2: two-way segment with a one-month grace period)
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~100 min (12 tasks)
 
 ## Goal
@@ -175,7 +175,7 @@ Decisions taken in this plan:
   - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
   - [x] Every rule R20-R23 names an existing test.
 
-### [ ] T12 — Project status (~5 min)
+### [x] T12 — Project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -184,7 +184,7 @@ Decisions taken in this plan:
   1. Status: #94 done, third authorised exception to the freeze, next step #95 and the `Hexagonal` twin issue.
   2. Decision: automatic two-way segment (threshold, grace period, who triggers the review). Pending: remove the `AccountHolder` name test if T5 added it.
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes.
+  - [x] The CI check of the project status passes.
 
 ## Global acceptance criteria
 
