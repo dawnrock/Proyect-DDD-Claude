@@ -148,6 +148,25 @@ public class CheckingAccountService {
                 .build();
     }
 
+    /**
+     * Revisa el segmento de todas las cuentas: devuelve a minorista a los titulares que llevan el periodo de gracia
+     * completo por debajo del patrimonio mínimo. Es un proceso interno, sin {@link Caller}.
+     *
+     * @return cuántos titulares han vuelto a minorista
+     */
+    public int reviewSegments() {
+        int demoted = 0;
+        for (CheckingAccount account : repository.findAll()) {
+            boolean wasHighNetWorth = account.primaryHolder().isHighNetWorth();
+            account.reviewSegment(clock.instant());
+            if (wasHighNetWorth && !account.primaryHolder().isHighNetWorth()) {
+                repository.save(account);
+                demoted++;
+            }
+        }
+        return demoted;
+    }
+
     /** Carga la cuenta; una ajena (o sin propietario, para un usuario) se trata como inexistente. */
     private CheckingAccount loadFor(Caller caller, UUID id) {
         CheckingAccount account = load(id);

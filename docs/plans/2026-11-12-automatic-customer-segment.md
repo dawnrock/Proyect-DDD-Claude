@@ -115,7 +115,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The two tests pass; `la_aplicacion_no_depende_de_spring_security` and the layer rules stay green.
 
-### [ ] T7 — Daily segment review job (~10 min)
+### [x] T7 — Daily segment review job (~10 min)
 
 - **Layer:** application
 - **Files:** `CheckingAccountService.java` (`reviewSegments()`), new `SegmentReviewJob.java`, their tests, `@EnableScheduling`
@@ -124,7 +124,7 @@ Decisions taken in this plan:
   1. Test first: `reviewSegments()` demotes only the accounts whose month has passed and returns how many.
   2. `SegmentReviewJob` (`@Component`, `@Scheduled(cron = "0 0 3 * * *")`) calls it and logs the count; enable scheduling in a configuration class of `application`.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green; the application starts and logs no scheduling error.
+  - [x] `./mvnw verify` green; the application starts and logs no scheduling error.
 
 ### [ ] T8 — `OpenAccountCommand` without segment (~10 min)
 
