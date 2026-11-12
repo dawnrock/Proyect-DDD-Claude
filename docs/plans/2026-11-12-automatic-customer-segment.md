@@ -5,7 +5,7 @@
 - **Phase:** 1 · Layered monolith
 - **Base branch:** `Monolithic` (frozen; `src/` exception authorised by the user on 2026-11-12)
 - **Date:** 2026-11-12 (revision 2: two-way segment with a one-month grace period)
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~100 min (12 tasks)
 
 ## Goal
@@ -48,7 +48,7 @@ Decisions taken in this plan:
 
 ## Tasks
 
-### [ ] T1 — The aggregate promotes the holder at the minimum net worth (~10 min)
+### [x] T1 — The aggregate promotes the holder at the minimum net worth (~10 min)
 
 - **Layer:** domain
 - **Files:** `domain/model/CheckingAccount.java`, `CheckingAccountTests.java`
@@ -57,7 +57,7 @@ Decisions taken in this plan:
   1. Failing tests first: a deposit that takes the balance to exactly 100.000,00 € promotes the holder (R17); one cent less does not; an account opened with 100.000,00 € is high net worth from the start (R18).
   2. Add `MINIMUM_NET_WORTH = MonetaryAmount.euros("100000.00")` and, in `deposit`, after updating the balance, call `primaryHolder.promoteToHighNetWorth()` when the balance is not less than it.
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest=CheckingAccountTests` passes with the three new tests; `./mvnw verify` green.
+  - [x] `./mvnw test -Dtest=CheckingAccountTests` passes with the three new tests; `./mvnw verify` green.
 
 ### [ ] T2 — An incoming transfer can promote the target holder (~5 min)
 
