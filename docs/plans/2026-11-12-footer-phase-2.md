@@ -42,7 +42,7 @@ The same PR also brings the `Hexagonal` project status up to date with #86 (merg
 - **Acceptance criteria:**
   - [x] The test fails before the change and passes after it; the other web tests stay green (red: `Expected: a string containing "fase 2 · arquitectura hexagonal"`; then `mvn verify` green).
 
-### [ ] T2 — Project status (~10 min)
+### [x] T2 — Project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `historial.md`
@@ -50,7 +50,8 @@ The same PR also brings the `Hexagonal` project status up to date with #86 (merg
 - **What to do:**
   1. Status: #86 done (PR #88, the only change allowed on `Monolithic`), #89 done; next step: decide with the user. A row in `historial.md` for PR #88 (on `Monolithic`) and one for this PR.
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes.
+  - [x] The CI check of the project status passes.
+  - Also added to `decisiones.md` (as told to the user): PRs against `Monolithic` do not close their issue, because GitHub only applies `Closes #n` on the default branch; #86 was closed by hand.
 
 ## Global acceptance criteria
 
