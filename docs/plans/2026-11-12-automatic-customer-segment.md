@@ -44,7 +44,7 @@ Decisions taken in this plan:
 | `presentation.rest` | `OpenAccountRequest.java`, `AccountController.java` | Remove `segment` from the request |
 | `presentation.web` | `OpenAccountForm.java`, `AccountWebController.java`, `templates/accounts/new.html` | Remove the segment field and its options |
 | tests | `TestAccounts.java` and the tests listed in each task | `segment(HIGH_NET_WORTH)` promotes the holder instead of registering it with a segment |
-| docs | `openapi.yaml`, `contracts/open-query-list-accounts.md`, `dominio/glosario.md`, `analysis/functional-analysis.md`, `ia/*` | Rules R17-R20, terms, project status |
+| docs | `openapi.yaml`, `contracts/open-query-list-accounts.md`, `dominio/glosario.md`, `analysis/functional-analysis.md`, `ia/*` | Rules R20-R23, terms, project status |
 
 ## Tasks
 
@@ -54,7 +54,7 @@ Decisions taken in this plan:
 - **Files:** `domain/model/CheckingAccount.java`, `CheckingAccountTests.java`
 - **Depends on:** —
 - **What to do:**
-  1. Failing tests first: a deposit that takes the balance to exactly 100.000,00 € promotes the holder (R17); one cent less does not; an account opened with 100.000,00 € is high net worth from the start (R18).
+  1. Failing tests first: a deposit that takes the balance to exactly 100.000,00 € promotes the holder (R20); one cent less does not; an account opened with 100.000,00 € is high net worth from the start (R21).
   2. Add `MINIMUM_NET_WORTH = MonetaryAmount.euros("100000.00")` and, in `deposit`, after updating the balance, call `primaryHolder.promoteToHighNetWorth()` when the balance is not less than it.
 - **Acceptance criteria:**
   - [x] `./mvnw test -Dtest=CheckingAccountTests` passes with the three new tests; `./mvnw verify` green.
@@ -86,7 +86,7 @@ Decisions taken in this plan:
 - **Files:** `AccountHolder.java`, `CheckingAccount.java`, `AccountHolderTests.java`, `CheckingAccountTests.java`
 - **Depends on:** T3
 - **What to do:**
-  1. Failing tests first: `reviewSegment(since + 1 month - 1 s)` keeps high net worth; `reviewSegment(since + 1 month)` demotes and clears the date (R19); after recovering the minimum in between, the review does nothing (R20); reviewing a retail account does nothing; a demoted holder in overdraft keeps the balance but its next withdrawal is rejected.
+  1. Failing tests first: `reviewSegment(since + 1 month - 1 s)` keeps high net worth; `reviewSegment(since + 1 month)` demotes and clears the date (R22); after recovering the minimum in between, the review does nothing (R23); reviewing a retail account does nothing; a demoted holder in overdraft keeps the balance but its next withdrawal is rejected.
   2. Add `AccountHolder.demoteToRetail()` and `CheckingAccount.reviewSegment(Instant now)`; the month is one calendar month in UTC (constant `SEGMENT_GRACE_PERIOD`).
 - **Acceptance criteria:**
   - [x] The five tests pass; `./mvnw verify` green.
@@ -161,7 +161,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] `./mvnw test -Dtest=AccountWebControllerTests` passes; `./mvnw verify` green.
 
-### [ ] T11 — OpenAPI, contract, glossary and functional analysis (~10 min)
+### [x] T11 — OpenAPI, contract, glossary and functional analysis (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`, `docs/contracts/open-query-list-accounts.md`, `docs/dominio/glosario.md`, `docs/analysis/functional-analysis.md`
@@ -169,11 +169,11 @@ Decisions taken in this plan:
 - **What to do:**
   1. OpenAPI: remove `segment` from the open-account request and its `required` list; keep it in the details response, described as assigned by the bank.
   2. Contract: amend `OpenAccountCommand` and the shared validation, with a note pointing to #94.
-  3. Glossary: terms "Patrimonio mínimo" (`MINIMUM_NET_WORTH`) and "Periodo de gracia del segmento" (`SEGMENT_GRACE_PERIOD`), updated rows for holder, segment, command and roles, and rules R17 (promotion at the minimum after an approved credit), R18 (an account can open as high net worth), R19 (back to retail after one month below the minimum) and R20 (recovering the minimum cancels the countdown), each with its test.
+  3. Glossary: terms "Patrimonio mínimo" (`MINIMUM_NET_WORTH`) and "Periodo de gracia del segmento" (`SEGMENT_GRACE_PERIOD`), updated rows for holder, segment, command and roles, and rules R20 (promotion at the minimum after an approved credit), R21 (an account can open as high net worth), R22 (back to retail after one month below the minimum) and R23 (recovering the minimum cancels the countdown), each with its test.
   4. Functional analysis: demo data table, holder description and rules table.
 - **Acceptance criteria:**
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
-  - [ ] Every rule R17-R20 names an existing test.
+  - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
+  - [x] Every rule R20-R23 names an existing test.
 
 ### [ ] T12 — Project status (~5 min)
 
@@ -212,6 +212,8 @@ Decisions taken in this plan:
 
 ## Risks and open questions
 
+- **Rule numbers:** the draft numbered the new rules R17-R20, but R17-R19 already existed (transfers); they are R20-R23.
+- **Deviation:** the demo deposit of Grace Hopper (150.000,00 €) was brought forward from T8 to T5, because `DemoDataLoaderTests` failed as soon as the command segment was ignored.
 - **Demotion while in overdraft:** a holder demoted with a negative balance keeps the debt and cannot withdraw until the balance allows it. Accepted; covered by a test in T4.
 - **Data in memory:** a restart (frequent on Render) rebuilds the demo data and loses every countdown, so in practice a demotion is only seen in tests or on a server that stays up for a month.
 - **Currency:** the threshold is in EUR and `isLessThan` throws `CurrencyMismatchException` for another currency. Today no account can open in another currency; same latent warning as in `pendientes.md`.

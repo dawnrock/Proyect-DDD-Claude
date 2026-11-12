@@ -69,8 +69,10 @@ Con el perfil `demo` (el que usa por defecto `./mvnw spring-boot:run`), `DemoDat
 | IBAN | Titular | Segmento | Depósito inicial | Propietario |
 | ---- | ------- | -------- | ---------------- | ----------- |
 | ES9121000418450200051332 | Ada Lovelace | RETAIL | 1.000,00 € | `ada` |
-| ES7921000813610123456789 | Grace Hopper | HIGH_NET_WORTH | 5.000,00 € | `grace` |
+| ES7921000813610123456789 | Grace Hopper | HIGH_NET_WORTH | 150.000,00 € | `grace` |
 | ES6000491500051234567892 | Alan Turing | RETAIL | 250,00 € | `alan` |
+
+El segmento no se indica al abrir: lo asigna el dominio. Grace Hopper es de alto patrimonio porque su depósito alcanza el patrimonio mínimo (R21).
 
 ## 4. Modelo de dominio: entidades y objetos de valor
 
@@ -97,7 +99,7 @@ Con el perfil `demo` (el que usa por defecto `./mvnw spring-boot:run`), `DemoDat
 
 ### 4.2 `AccountHolder` (entidad)
 
-Persona a la que pertenece la cuenta: `id`, `fullName` y `segment`. Se crea con `AccountHolder.register(...)`. Conserva su identidad aunque cambien sus atributos, y dos titulares con los mismos datos son distintos (R15). El segmento decide si se permite el descubierto.
+Persona a la que pertenece la cuenta: `id`, `fullName` y `segment`. Se crea con `AccountHolder.register(fullName)`, siempre como minorista. Conserva su identidad aunque cambien sus atributos, y dos titulares con los mismos datos son distintos (R15). El segmento decide si se permite el descubierto y lo asigna la cuenta según su saldo: sube a alto patrimonio al alcanzar 100.000,00 € y vuelve a minorista tras un mes por debajo (R20-R23).
 
 ### 4.3 `Transaction` (entidad hija)
 
@@ -175,6 +177,10 @@ Una transferencia se registra como una retirada (`WITHDRAWAL`) en el origen y un
 | R17 | Una transferencia a la misma cuenta se rechaza sin registrar movimientos |
 | R18 | Si la retirada en origen se rechaza, no se ingresa nada en el destino |
 | R19 | Una transferencia en una divisa distinta a la de las cuentas se rechaza antes de retirar |
+| R20 | Un abono aprobado que lleva el saldo a 100.000,00 € convierte al titular en alto patrimonio |
+| R21 | Todo titular nace minorista; una cuenta abierta con el patrimonio mínimo nace como alto patrimonio |
+| R22 | Tras un mes por debajo del patrimonio mínimo, el titular vuelve a minorista |
+| R23 | Recuperar el patrimonio mínimo antes de un mes cancela la vuelta a minorista |
 
 El test que demuestra cada regla está en el [glosario](../dominio/glosario.md#reglas-de-negocio).
 

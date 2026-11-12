@@ -272,7 +272,7 @@ components:
           description: Status of the withdrawal in the source account.
     OpenAccountRequest:
       type: object
-      required: [accountNumber, holderName, segment, initialDeposit, ownerUsername]
+      required: [accountNumber, holderName, initialDeposit, ownerUsername]
       properties:
         ownerUsername:
           type: string
@@ -288,9 +288,6 @@ components:
           type: string
           minLength: 1
           example: Ada Lovelace
-        segment:
-          type: string
-          enum: [RETAIL, HIGH_NET_WORTH]
         initialDeposit:
           type: number
           exclusiveMinimum: 0
@@ -329,6 +326,9 @@ components:
             segment:
               type: string
               enum: [RETAIL, HIGH_NET_WORTH]
+              description: >-
+                Assigned by the bank, never sent by the client. A holder becomes HIGH_NET_WORTH when the balance
+                reaches 100000.00 EUR and goes back to RETAIL after one month below that amount.
             transactions:
               type: array
               items:
