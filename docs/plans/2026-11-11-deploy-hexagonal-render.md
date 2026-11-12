@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone)
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-11
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~45 min (5 tasks)
 
 ## Goal
@@ -39,7 +39,7 @@ Facts gathered:
 
 ## Tasks
 
-### [ ] T1 — `Dockerfile` and `.dockerignore` (~10 min)
+### [x] T1 — `Dockerfile` and `.dockerignore` (~10 min)
 
 - **Layer:** build
 - **Files:** `Dockerfile`, `.dockerignore`
@@ -48,7 +48,8 @@ Facts gathered:
   1. Build stage: `maven` image with JDK 21, copy `pom.xml` first (dependency cache), then `src/` and `lombok.config`; `mvn -q -DskipTests package`. Run stage: `eclipse-temurin:21-jre`, non-root user, `SPRING_PROFILES_ACTIVE=demo`, `JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75`, `EXPOSE 8080`, start with the port from `PORT` (default 8080).
   2. `.dockerignore`: `target/`, `.git/`, `.claude/`, `graphify-out/`, `docs/`, IDE files.
 - **Acceptance criteria:**
-  - [ ] `docker build` + `docker run -e PORT=10000` answer `UP` on `/actuator/health` at port 10000 — or, without a Docker daemon, the same `java` command line with the same variables does, and the build is left to Render.
+  - [x] `docker build` + `docker run -e PORT=10000` answer `UP` on `/actuator/health` at port 10000 — or, without a Docker daemon, the same `java` command line with the same variables does, and the build is left to Render.
+  - Done with Docker: the daemon could be started in the session. The session's HTTPS proxy needs its own CA, so the local build used a copy of the `Dockerfile` (kept out of the repository) whose build stage only adds that CA and proxy to `MAVEN_OPTS`; the run stage is the committed one. `docker run --memory=512m -e PORT=10000`: `UP` on port 10000 after ~8 s, profile `demo`, user `app` (uid 10001), ~240 MB of 512 MB; image ~570 MB.
 
 ### [ ] T2 — The demo users' password from the environment (~10 min)
 
