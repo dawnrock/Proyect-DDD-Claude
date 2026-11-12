@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone); also `Monolithic`
 - **Base branch:** `Hexagonal`, then `Monolithic` (second PR)
 - **Date:** 2026-11-12
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~30 min (4 tasks)
 
 ## Goal
@@ -35,7 +35,7 @@ Two PRs, one per branch, because each branch has its own template. The `Monolith
 
 ## Tasks
 
-### [ ] T1 — `Hexagonal`: footer without the project name (~5 min)
+### [x] T1 — `Hexagonal`: footer without the project name (~5 min)
 
 - **Layer:** adapter.in (web)
 - **Files:** `templates/fragments/layout.html`, `AccountWebControllerTests.java`
@@ -44,7 +44,7 @@ Two PRs, one per branch, because each branch has its own template. The `Monolith
   1. Test first (red): the list page contains `Fase 2 · arquitectura hexagonal` and not `Proyect-DDD-Claude` nor `fase 1`.
   2. Change the footer (green).
 - **Acceptance criteria:**
-  - [ ] Red before the change, green after; `mvn verify` green.
+  - [x] Red before the change, green after; `mvn verify` green (the #89 test now checks the new text and the absence of the project name).
 
 ### [ ] T2 — `Hexagonal`: status and PR (~5 min)
 

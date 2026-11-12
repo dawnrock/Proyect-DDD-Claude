@@ -145,13 +145,14 @@ class AccountWebControllerTests {
         }
 
         @Test
-        @DisplayName("El pie de página indica la fase 2, arquitectura hexagonal")
-        void el_pie_de_pagina_indica_la_fase_2_arquitectura_hexagonal() throws Exception {
+        @DisplayName("El pie de página indica solo la fase 2, arquitectura hexagonal, sin el nombre del proyecto")
+        void el_pie_de_pagina_indica_solo_la_fase_2_arquitectura_hexagonal() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
 
             mvc.perform(get("/"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("fase 2 · arquitectura hexagonal")))
+                    .andExpect(content().string(containsString("Fase 2 · arquitectura hexagonal")))
+                    .andExpect(content().string(not(containsString("Proyect-DDD-Claude"))))
                     .andExpect(content().string(not(containsString("fase 1"))));
         }
     }
