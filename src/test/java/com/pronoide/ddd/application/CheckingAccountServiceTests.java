@@ -108,9 +108,10 @@ class CheckingAccountServiceTests {
         }
 
         @Test
-        @DisplayName("Un cliente de alto patrimonio abre su cuenta con su segmento")
-        void un_cliente_de_alto_patrimonio_abre_su_cuenta_con_su_segmento() {
-            AccountSummary summary = service.openAccount(ADMIN, command(IBAN).segment("HIGH_NET_WORTH").build());
+        @DisplayName("Una cuenta abierta con el patrimonio mínimo es de alto patrimonio")
+        void una_cuenta_abierta_con_el_patrimonio_minimo_es_de_alto_patrimonio() {
+            AccountSummary summary = service.openAccount(ADMIN,
+                    command(IBAN).initialDeposit(new BigDecimal("100000")).build());
 
             assertThat(repository.findById(summary.id()).orElseThrow().primaryHolder().isHighNetWorth()).isTrue();
         }
@@ -123,14 +124,14 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Una cuenta existente se devuelve con el depósito inicial entre sus movimientos")
         void una_cuenta_existente_se_devuelve_con_el_deposito_inicial_entre_sus_movimientos() {
-            AccountSummary opened = service.openAccount(ADMIN, command(IBAN).segment("HIGH_NET_WORTH").build());
+            AccountSummary opened = service.openAccount(ADMIN, command(IBAN).build());
 
             AccountDetails details = service.findAccount(ADMIN, opened.id());
 
             assertThat(details.id()).isEqualTo(opened.id());
             assertThat(details.accountNumber()).isEqualTo(IBAN);
             assertThat(details.holderName()).isEqualTo("Ada Lovelace");
-            assertThat(details.segment()).isEqualTo("HIGH_NET_WORTH");
+            assertThat(details.segment()).isEqualTo("RETAIL");
             assertThat(details.balance()).isEqualByComparingTo("100.00");
             assertThat(details.currency()).isEqualTo("EUR");
             assertThat(details.transactions()).singleElement().satisfies(transaction -> {
@@ -229,17 +230,20 @@ class CheckingAccountServiceTests {
     @DisplayName("Retirar")
     class Withdraw {
 
-        @ParameterizedTest(name = "{0} con 100.00 retira {1}: {2}, saldo {3}")
+        @ParameterizedTest(name = "con {0} retira {1}: {2}, saldo {3}")
         @DisplayName("Las retiradas en el límite del descubierto se aprueban o se rechazan según el segmento")
         @CsvSource({
-                "RETAIL, 100.00, APPROVED, 0.00",
-                "RETAIL, 100.01, REJECTED, 100.00",
-                "HIGH_NET_WORTH, 1100.00, APPROVED, -1000.00",
-                "HIGH_NET_WORTH, 1100.01, REJECTED, 100.00"
+                // minorista: abre por debajo del patrimonio mínimo
+                "100.00, 100.00, APPROVED, 0.00",
+                "100.00, 100.01, REJECTED, 100.00",
+                // alto patrimonio: abre con el patrimonio mínimo
+                "100000.00, 101000.00, APPROVED, -1000.00",
+                "100000.00, 101000.01, REJECTED, 100000.00"
         })
         void las_retiradas_en_el_limite_del_descubierto_dependen_del_segmento(
-                String segment, String amount, String status, String finalBalance) {
-            UUID id = service.openAccount(ADMIN, command(IBAN).segment(segment).build()).id();
+                String initialDeposit, String amount, String status, String finalBalance) {
+            UUID id = service.openAccount(ADMIN,
+                    command(IBAN).initialDeposit(new BigDecimal(initialDeposit)).build()).id();
 
             TransactionSummary transaction = service.withdraw(ADMIN, 
                     WithdrawCommand.builder().accountId(id).amount(new BigDecimal(amount)).build());

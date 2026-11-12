@@ -91,7 +91,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The five tests pass; `./mvnw verify` green.
 
-### [ ] T5 — A holder is always registered as retail (~10 min)
+### [x] T5 — A holder is always registered as retail (~10 min)
 
 - **Layer:** domain (plus the callers needed to compile)
 - **Files:** `AccountHolder.java`, `AccountHolderTests.java`, `src/test/java/com/pronoide/ddd/support/TestAccounts.java`, `TestAccountsTests.java`, one line in `CheckingAccountService.java`
@@ -102,7 +102,7 @@ Decisions taken in this plan:
   3. `TestAccounts`: keep `segment(...)` in the builder; for `HIGH_NET_WORTH` it calls `promoteToHighNetWorth()` on the holder before opening (test shortcut: such an account has no countdown).
   4. `CheckingAccountService.openAccount`: call `register(command.holderName())`; `command.segment()` is ignored from now on (removed in T8). Adjust the service tests that expected a high-net-worth account from the command: open with a deposit that reaches the minimum.
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest='AccountHolderTests,TestAccountsTests,CheckingAccountService*'` passes; `./mvnw verify` green.
+  - [x] `./mvnw test -Dtest='AccountHolderTests,TestAccountsTests,CheckingAccountService*'` passes; `./mvnw verify` green.
 
 ### [ ] T6 — The service reviews the segment before every debit (~10 min)
 

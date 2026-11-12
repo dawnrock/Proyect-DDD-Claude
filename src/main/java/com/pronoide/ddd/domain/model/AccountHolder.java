@@ -15,9 +15,9 @@ public class AccountHolder {
         this.segment = segment;
     }
 
-    public static AccountHolder register(String fullName, CustomerSegment segment) {
-        return new AccountHolder(UUID.randomUUID(), requireName(fullName),
-                Objects.requireNonNull(segment, "El segmento del titular es obligatorio"));
+    /** Da de alta a un titular. Todo titular empieza como minorista: el segmento lo decide el saldo de su cuenta. */
+    public static AccountHolder register(String fullName) {
+        return new AccountHolder(UUID.randomUUID(), requireName(fullName), CustomerSegment.RETAIL);
     }
 
     public void rename(String fullName) {

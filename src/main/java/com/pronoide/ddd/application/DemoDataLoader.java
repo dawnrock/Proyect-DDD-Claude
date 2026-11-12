@@ -24,7 +24,7 @@ public class DemoDataLoader implements ApplicationRunner {
 
     private static final List<OpenAccountCommand> DEMO_ACCOUNTS = List.of(
             account("ES9121000418450200051332", "Ada Lovelace", "RETAIL", "1000.00", "ada"),
-            account("ES7921000813610123456789", "Grace Hopper", "HIGH_NET_WORTH", "5000.00", "grace"),
+            account("ES7921000813610123456789", "Grace Hopper", "HIGH_NET_WORTH", "150000.00", "grace"),
             account("ES6000491500051234567892", "Alan Turing", "RETAIL", "250.00", "alan"));
 
     private final CheckingAccountService service;
