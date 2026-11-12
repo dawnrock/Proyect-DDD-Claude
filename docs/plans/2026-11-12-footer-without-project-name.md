@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture (work after the phase, no milestone); also `Monolithic`
 - **Base branch:** `Hexagonal`, then `Monolithic` (second PR)
 - **Date:** 2026-11-12
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~30 min (4 tasks)
 
 ## Goal
@@ -88,26 +88,28 @@ Two PRs, one per branch, because each branch has its own template. The `Monolith
 - **Acceptance criteria:**
   - [x] The CI check of the project status passes on the PR against `Monolithic`.
 
+**Review (`revisor-ddd`, `Monolithic` part):** no errors; only the six listed files change, the test follows `src/test/CLAUDE.md`. Nothing to apply. `v1-monolito` still at 10eb227.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] `Hexagonal` shows `Fase 2 · arquitectura hexagonal`, `Monolithic` shows `Fase 1 · arquitectura monolítica`; neither shows the project name. Each checked by a test.
-- [ ] `v1-monolito` does not move.
+- [x] `Hexagonal` shows `Fase 2 · arquitectura hexagonal`, `Monolithic` shows `Fase 1 · arquitectura monolítica`; neither shows the project name. Each checked by a test.
+- [x] `v1-monolito` does not move.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit) on both branches.
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected, verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: n/a.
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a.
-- [ ] Documentation written or changed by this plan is in English (the `Monolithic` annexes keep their Spanish).
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit) on both branches.
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected, verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: n/a.
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a.
+- [x] Documentation written or changed by this plan is in English (the `Monolithic` annexes keep their Spanish).
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
