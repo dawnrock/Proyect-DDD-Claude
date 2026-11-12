@@ -20,6 +20,8 @@ USER app
 
 # `java -jar` does not load the demo profile (only `spring-boot:run` does).
 ENV SPRING_PROFILES_ACTIVE=demo
+# No H2 console on a public URL (it can run code on the server).
+ENV SPRING_H2_CONSOLE_ENABLED=false
 # Render's free instance has 512 MB.
 ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75"
 EXPOSE 8080

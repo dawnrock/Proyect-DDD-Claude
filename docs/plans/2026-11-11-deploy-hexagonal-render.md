@@ -63,7 +63,7 @@ Facts gathered:
   - [x] The old password stops working and the new one works, with no code change.
   - **Deviation:** setting only the four `..._PASSWORDHASH` variables makes the application fail to start (`userDetailsService`: users without a name). Spring Boot replaces a whole list when a property source sets any element of it, so the environment's `app.security.users` list had only hashes. Each user must be given complete: `APP_SECURITY_USERS_<n>_USERNAME`, `_PASSWORDHASH` and `_ROLE` (12 variables), with the same names as the `demo` profile because the demo accounts belong to `admin`, `ada`, `grace` and `alan`. With them: `admin:demo` and `grace:demo` → 401; the new password → 200 for `admin`, `grace` and `alan`; `grace` still sees only her account. The hash was generated with `docker run --rm httpd:2.4-alpine htpasswd -nbBC 10 "" '<password>' | tr -d ':\n'` (`$2y$`, accepted by Spring's BCrypt).
 
-### [ ] T3 — Deployment guide (~10 min)
+### [x] T3 — Deployment guide (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/deploy/render.md`
@@ -72,7 +72,8 @@ Facts gathered:
   1. Steps: Render account → New Web Service → this repository, branch `Hexagonal`, runtime Docker, free instance, health check path `/actuator/health`, environment variables (the four password hashes and, optionally, `APP_ADMIN_*`), how to generate the hash, what to expect (sleep after idle, ~1 min cold start, data rebuilt on each start), how to redeploy (push) and how to stop (suspend or delete the service).
   2. A note that the phase-1 service is the same with branch `Monolithic` (#86).
 - **Acceptance criteria:**
-  - [ ] Every command in the guide was run in T1-T2 (except the ones that happen on Render's site).
+  - [x] Every command in the guide was run in T1-T2 (except the ones that happen on Render's site): the three ways to get the hash (`htpasswd` through the `httpd` image, and Python `bcrypt`), the twelve variables, `APP_ADMIN_*`, the health and `curl` checks, and the browser login with the new password.
+  - **Addition:** with a public URL, the H2 console (admin only) would still be a way to run code on the server if the admin password leaked. The image sets `SPRING_H2_CONSOLE_ENABLED=false`; checked: `/h2-console/` → 404 after an admin login, the rest of the site unchanged. Local runs keep the console.
 
 ### [ ] T4 — `README.md` (~5 min)
 
