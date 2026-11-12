@@ -47,3 +47,4 @@
 | 2026-11-12 | #87 | #85 | Deploy on Render: `Dockerfile` (multi-stage, non-root, `demo` profile, port from `PORT`, H2 console off), the demo users' own password through environment variables (checked: `demo` → 401, the new one → 200) and the guide `docs/deploy/render.md`; issue #86 opened for `Monolithic` |
 | 2026-11-12 | #88 | #86 | (On `Monolithic`, the authorised exception) Deploy on Render: the `Dockerfile`, `.dockerignore`, guide and README section of #85; no change under `src/` or `pom.xml`, `v1-monolito` unchanged; the issue closed by hand |
 | 2026-11-12 | #90 | #89 | The web footer says `fase 2 · arquitectura hexagonal` (it still named phase 1), checked by a web test; status brought up to date with #86 |
+| 2026-11-12 | #92 | #91 | (`Hexagonal` part) The web footer only says `Fase 2 · arquitectura hexagonal`, without the project name; the `Monolithic` PR follows |
