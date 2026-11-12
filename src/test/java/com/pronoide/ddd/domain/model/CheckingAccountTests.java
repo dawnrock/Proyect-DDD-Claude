@@ -289,4 +289,27 @@ class CheckingAccountTests {
         assertThat(cuenta.currentBalance()).isEqualTo(MonetaryAmount.euros("-500.00"));
         assertThat(retirada.isRejected()).isTrue();
     }
+
+    @Test
+    @DisplayName("Un titular que volvió a minorista recupera el alto patrimonio al alcanzar de nuevo el mínimo")
+    void un_titular_que_volvio_a_minorista_recupera_el_alto_patrimonio_al_alcanzar_de_nuevo_el_minimo() {
+        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+        Instant desde = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00")).occurredOn();
+        cuenta.reviewSegment(unMesDespuesDe(desde));
+
+        cuenta.deposit(MonetaryAmount.euros("10000.00"));
+
+        assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+        assertThat(cuenta.belowMinimumNetWorthSince()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("El segmento no se puede revisar sin indicar el momento")
+    void el_segmento_no_se_puede_revisar_sin_indicar_el_momento() {
+        CheckingAccount cuenta = TestAccounts.anAccount().open();
+
+        assertThatExceptionOfType(NullPointerException.class)
+                .isThrownBy(() -> cuenta.reviewSegment(null))
+                .withMessage("El momento de la revisión es obligatorio");
+    }
 }

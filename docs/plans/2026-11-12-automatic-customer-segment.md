@@ -186,29 +186,39 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The CI check of the project status passes.
 
+### [x] T13 — Review fixes (~5 min)
+
+- **Layer:** domain (tests) · docs
+- **Files:** `CheckingAccountTests.java`, `docs/dominio/glosario.md`, `docs/ia/pendientes.md`
+- **Depends on:** T12
+- **What to do:**
+  1. `revisor-ddd` found no blocking issue. Add the tests it missed (promotion again after a demotion; `reviewSegment(null)`), document in the glossary that a demoted holder keeps an overdraft debt, and note the remaining warnings in `pendientes.md`.
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green with the two new tests.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] No input (web form, REST body, command, demo data) carries a segment.
-- [ ] An account that reaches 100.000,00 € by opening, deposit or incoming transfer shows "Alto patrimonio" in its detail.
-- [ ] A high-net-worth account that stays below the minimum for one month shows "Minorista" and can no longer go into overdraft; one that recovers the minimum in time keeps the segment.
-- [ ] With the `demo` profile, Grace Hopper is high net worth and Ada Lovelace and Alan Turing are retail.
-- [ ] The `v1-monolito` tag is not moved.
+- [x] No input (web form, REST body, command, demo data) carries a segment.
+- [x] An account that reaches 100.000,00 € by opening, deposit or incoming transfer shows "Alto patrimonio" in its detail.
+- [x] A high-net-worth account that stays below the minimum for one month shows "Minorista" and can no longer go into overdraft; one that recovers the minimum in time keeps the segment.
+- [x] With the `demo` profile, Grace Hopper is high net worth and Ada Lovelace and Alan Turing are retail.
+- [x] The `v1-monolito` tag is not moved.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (layers: each layer only uses the one below), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones.
-- [ ] `docs/api/openapi.yaml` reflects the change and `npx @redocly/cli lint docs/api/openapi.yaml` has no errors.
-- [ ] Any new business term is in `docs/dominio/glosario.md`.
-- [ ] Documentation written or changed by this plan is in English (additions to documents still in Spanish follow the language of the document, as agreed in `pendientes.md`).
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (layers: each layer only uses the one below), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones.
+- [x] `docs/api/openapi.yaml` reflects the change and `npx @redocly/cli lint docs/api/openapi.yaml` has no errors.
+- [x] Any new business term is in `docs/dominio/glosario.md`.
+- [x] Documentation written or changed by this plan is in English (additions to documents still in Spanish follow the language of the document, as agreed in `pendientes.md`).
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
