@@ -66,7 +66,7 @@ Two PRs, one per branch, because each branch has its own template. The `Monolith
 - **Acceptance criteria:**
   - [x] `mvn verify` green.
 
-### [ ] T3 — `Monolithic`: footer `Fase 1 · arquitectura monolítica` (~10 min)
+### [x] T3 — `Monolithic`: footer `Fase 1 · arquitectura monolítica` (~10 min)
 
 - **Layer:** presentation (web)
 - **Files:** `templates/fragments/layout.html`, `presentation/web/AccountWebControllerTests.java`
@@ -76,7 +76,7 @@ Two PRs, one per branch, because each branch has its own template. The `Monolith
   2. Change the footer (green); `mvn verify` green (layers, ArchUnit).
   3. `git diff --name-only origin/Monolithic...HEAD` lists only the template, the test, the plan and `docs/ia/*`.
 - **Acceptance criteria:**
-  - [ ] Red before, green after; only the listed files change.
+  - [x] Red before, green after; only the listed files change (red: `Expected: a string containing "Fase 1 · arquitectura monolítica"`; `mvn verify` green, layers and ArchUnit).
 
 ### [ ] T4 — `Monolithic`: status, PR and closing the issue (~10 min)
 

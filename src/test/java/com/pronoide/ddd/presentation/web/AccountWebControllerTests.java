@@ -123,6 +123,17 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("Todavía no hay cuentas")))
                     .andExpect(content().string(containsString("Abrir cuenta")));
         }
+
+        @Test
+        @DisplayName("El pie de página indica solo la fase 1, arquitectura monolítica, sin el nombre del proyecto")
+        void el_pie_de_pagina_indica_solo_la_fase_1_arquitectura_monolitica() throws Exception {
+            when(service.listAccounts(any(Caller.class))).thenReturn(List.of());
+
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("Fase 1 · arquitectura monolítica")))
+                    .andExpect(content().string(not(containsString("Proyect-DDD-Claude"))));
+        }
     }
 
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
