@@ -13,8 +13,7 @@ import jakarta.validation.constraints.Positive;
  * formulario web ("Shared presentation validation" del contrato), de modo que lo que acepta nunca hace
  * que el dominio lance {@code IllegalArgumentException}.
  *
- * <p>{@code segment} es un {@code String} y no un enum para que un valor inválido llegue al mapa de
- * errores por campo en lugar de fallar al leer el JSON. {@code currency} es opcional ({@code EUR}).
+ * <p>{@code currency} es opcional ({@code EUR}). El segmento no se pide: lo asigna el dominio según el saldo.
  */
 public record OpenAccountRequest(
         @NotBlank(message = "El número de cuenta es obligatorio")
@@ -24,10 +23,6 @@ public record OpenAccountRequest(
 
         @NotBlank(message = "El nombre del titular es obligatorio")
         String holderName,
-
-        @NotBlank(message = "El segmento es obligatorio")
-        @Pattern(regexp = "RETAIL|HIGH_NET_WORTH", message = "El segmento debe ser RETAIL o HIGH_NET_WORTH")
-        String segment,
 
         @NotNull(message = "El depósito inicial es obligatorio")
         @Positive(message = "El depósito inicial debe ser positivo")

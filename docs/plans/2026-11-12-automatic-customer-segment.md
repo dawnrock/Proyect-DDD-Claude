@@ -138,7 +138,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] `grep -n "segment()\|SEGMENTS" src/main/java/com/pronoide/ddd/application/OpenAccountCommandDef.java` finds nothing (only the Javadoc explains that the segment is not an input); `./mvnw verify` green.
 
-### [ ] T9 — REST: `POST /api/accounts` without segment (~5 min)
+### [x] T9 — REST: `POST /api/accounts` without segment (~5 min)
 
 - **Layer:** presentation (rest)
 - **Files:** `presentation/rest/OpenAccountRequest.java`, `AccountControllerTests.java`, `DddLabApplicationTests.java`
@@ -147,8 +147,8 @@ Decisions taken in this plan:
   1. Remove `segment` from the record and from the JSON bodies of the tests; remove the tests of the segment validation.
   2. Add a test: a body with 100000.00 answers `201` and `GET /api/accounts/{id}` shows `"segment": "HIGH_NET_WORTH"`.
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest=AccountControllerTests` passes.
-  - [ ] `curl -u admin:demo -H 'Content-Type: application/json' -d '{"accountNumber":"ES0000000000000000009401","holderName":"Test","initialDeposit":100,"ownerUsername":"ada"}' localhost:8080/api/accounts` answers `201`.
+  - [x] `./mvnw test -Dtest=AccountControllerTests` passes.
+  - [x] `curl -u admin:demo -H 'Content-Type: application/json' -d '{"accountNumber":"ES0000000000000000009401","holderName":"Test","initialDeposit":100,"ownerUsername":"ada"}' localhost:8080/api/accounts` answers `201`.
 
 ### [ ] T10 — Web: the open-account form no longer asks for the segment (~10 min)
 
