@@ -31,11 +31,12 @@ public class AccountHolder {
         this.fullName = requireName(fullName);
     }
 
-    public void promoteToHighNetWorth() {
+    /** Solo la cuenta decide el segmento (por saldo o tras una revisión): de ahí la visibilidad de paquete. */
+    void promoteToHighNetWorth() {
         this.segment = CustomerSegment.HIGH_NET_WORTH;
     }
 
-    public void demoteToRetail() {
+    void demoteToRetail() {
         this.segment = CustomerSegment.RETAIL;
     }
 

@@ -794,4 +794,43 @@ class CheckingAccountServiceTests {
             assertThat(publishedBatches().stream().flatMap(List::stream)).isEmpty();
         }
     }
+
+    @Nested
+    @DisplayName("La revisión del segmento no se pierde si el cargo falla")
+    class SegmentReviewSurvivesAFailedDebit {
+
+        @Test
+        @DisplayName("Una retirada no válida sobre una cuenta con la revisión vencida deja al titular en minorista y publica el cambio")
+        void una_retirada_no_valida_no_pierde_la_revision_vencida() {
+            UUID id = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("100000")).build()).id();
+            service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("500")).build());
+            clock.advance(Duration.ofDays(32));
+            clearInvocations(publisher);
+
+            assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> service.withdraw(ADMIN,
+                    WithdrawCommand.builder().accountId(id).amount(BigDecimal.TEN).currency("USD").build()));
+
+            assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("RETAIL");
+            assertThat(publishedBatches().stream().flatMap(List::stream))
+                    .singleElement().isInstanceOf(CustomerSegmentChanged.class);
+        }
+
+        @Test
+        @DisplayName("Una transferencia no válida sobre una cuenta con la revisión vencida deja al titular en minorista y publica el cambio")
+        void una_transferencia_no_valida_no_pierde_la_revision_vencida() {
+            AccountSummary source = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("100000")).build());
+            service.withdraw(ADMIN,
+                    WithdrawCommand.builder().accountId(source.id()).amount(new BigDecimal("500")).build());
+            clock.advance(Duration.ofDays(32));
+            clearInvocations(publisher);
+
+            assertThatExceptionOfType(SameAccountTransferException.class).isThrownBy(() -> service.transfer(ADMIN,
+                    TransferCommand.builder().sourceAccountId(source.id())
+                            .targetAccountNumber(source.accountNumber()).amount(BigDecimal.TEN).build()));
+
+            assertThat(service.findAccount(ADMIN, source.id()).segment()).isEqualTo("RETAIL");
+            assertThat(publishedBatches().stream().flatMap(List::stream))
+                    .singleElement().isInstanceOf(CustomerSegmentChanged.class);
+        }
+    }
 }

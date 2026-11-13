@@ -189,6 +189,18 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The CI check of the project status passes.
 
+### [x] T14 — Review fixes (~10 min)
+
+- **Layer:** application · domain · docs
+- **Files:** `CheckingAccountService.java`, `AccountHolder.java`, `CheckingAccount.java`, `CheckingAccountServiceTests.java`, `docs/dominio/glosario.md`, `docs/ia/pendientes.md`
+- **Depends on:** T13
+- **What to do:**
+  1. Blocking finding of `revisor-ddd`: the segment review ran inside the same unit of work as the debit, so a debit that failed afterwards (other currency, same account) left the holder demoted and lost `CustomerSegmentChanged`. The review now runs in its own unit of work before the debit. Failing tests first for a withdrawal and a transfer.
+  2. `promoteToHighNetWorth` and `demoteToRetail` become package-private (only the account decides the segment) and `resolveSegmentReview` rejects a holder who is not high net worth.
+  3. `reviewSegments` counts a demotion by comparing the segment before and after. Note in `pendientes.md` that a failing tax agency would abort the debit or the daily review.
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green with the two new tests.
+
 ## Global acceptance criteria
 
 **Specific:**

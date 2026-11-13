@@ -144,6 +144,9 @@ public class CheckingAccount {
         if (!segmentReviewDue(now)) {
             throw new IllegalStateException("La revisión del segmento aún no está vencida");
         }
+        if (!primaryHolder.isHighNetWorth()) {
+            throw new IllegalStateException("Solo se revisa el segmento de un titular de alto patrimonio");
+        }
         if (incomeStillHigh) {
             nextSegmentReview = after(now, INCOME_REVIEW_PERIOD);
         } else {

@@ -120,9 +120,9 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
 
     @Override
     public TransactionSummary withdraw(Caller caller, WithdrawCommand command) {
+        reviewSegmentBeforeDebit(caller, command.accountId());
         return inUnit(events -> {
             CheckingAccount account = loadFor(caller, command.accountId());
-            segmentReview.review(account, clock.instant());
             Transaction transaction = account.tryWithdraw(toAmount(command.amount(), command.currency()));
             save(account, events);
             return toTransaction(transaction);
@@ -131,6 +131,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
 
     @Override
     public TransferSummary transfer(Caller caller, TransferCommand command) {
+        reviewSegmentBeforeDebit(caller, command.sourceAccountId());
         return inUnit(events -> transfer(caller, command, events));
     }
 
@@ -139,7 +140,6 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         AccountNumber targetNumber = new AccountNumber(command.targetAccountNumber());
         CheckingAccount target = repository.findByAccountNumber(targetNumber)
                 .orElseThrow(() -> new TargetAccountNotFoundException(targetNumber.value()));
-        segmentReview.review(source, clock.instant());
         Transaction withdrawal =
                 transferService.transfer(source, target, toAmount(command.amount(), command.currency()));
         save(source, events);
@@ -161,17 +161,32 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         return inUnit(events -> {
             int demoted = 0;
             for (CheckingAccount account : repository.findAll()) {
-                if (!account.segmentReviewDue(clock.instant())) {
-                    continue;
-                }
-                segmentReview.review(account, clock.instant());
-                save(account, events);
-                if (!account.primaryHolder().isHighNetWorth()) {
+                if (reviewSegment(account, events)) {
                     demoted++;
                 }
             }
             return demoted;
         });
+    }
+
+    /**
+     * Revisa el segmento de la cuenta antes de un cargo, en su propia unidad de trabajo: así el descubierto se decide
+     * con el segmento que corresponde hoy y, si el cargo falla después, la revisión ya está guardada y su evento
+     * publicado.
+     */
+    private void reviewSegmentBeforeDebit(Caller caller, UUID accountId) {
+        inUnit(events -> reviewSegment(loadFor(caller, accountId), events));
+    }
+
+    /** Revisa el segmento si le toca y guarda la cuenta. Devuelve si el titular ha vuelto a minorista. */
+    private boolean reviewSegment(CheckingAccount account, Events events) {
+        if (!account.segmentReviewDue(clock.instant())) {
+            return false;
+        }
+        boolean wasHighNetWorth = account.primaryHolder().isHighNetWorth();
+        segmentReview.review(account, clock.instant());
+        save(account, events);
+        return wasHighNetWorth && !account.primaryHolder().isHighNetWorth();
     }
 
     /** Carga la cuenta; una ajena (o sin propietario, para un usuario) se trata como inexistente. */

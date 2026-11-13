@@ -13,7 +13,6 @@ import java.util.Objects;
  */
 public class CheckingAccountFactory {
 
-
     private final AccountNumberSequence numbering;
     private final IncomeVerifier incomeVerifier;
 
