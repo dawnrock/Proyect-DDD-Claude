@@ -75,7 +75,10 @@ public class CheckingAccount {
         currentBalance = newBalance;
         record(new MoneyDeposited(id, transaction.id(), amount, transaction.occurredOn()));
         if (reachesMinimumNetWorth()) {
-            primaryHolder.promoteToHighNetWorth();
+            if (!primaryHolder.isHighNetWorth()) {
+                primaryHolder.promoteToHighNetWorth();
+                recordSegmentChange(transaction.occurredOn());
+            }
             nextSegmentReview = null;
         }
         return transaction;
@@ -146,6 +149,7 @@ public class CheckingAccount {
         } else {
             primaryHolder.demoteToRetail();
             nextSegmentReview = null;
+            recordSegmentChange(now);
         }
     }
 
@@ -214,6 +218,10 @@ public class CheckingAccount {
 
     private boolean reachesMinimumNetWorth() {
         return !currentBalance.isLessThan(MINIMUM_NET_WORTH);
+    }
+
+    private void recordSegmentChange(Instant occurredOn) {
+        record(new CustomerSegmentChanged(id, primaryHolder.fullName(), primaryHolder.segment(), occurredOn));
     }
 
     private void record(DomainEvent event) {

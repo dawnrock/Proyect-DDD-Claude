@@ -419,4 +419,47 @@ class CheckingAccountTests {
             assertThat(cuenta.nextSegmentReview()).contains(mesesDespuesDe(apertura, 6));
         }
     }
+
+    @Nested
+    @DisplayName("Evento de cambio de segmento")
+    class SegmentChangedEvent {
+
+        @Test
+        @DisplayName("La promoción a alto patrimonio registra un evento con la cuenta, el titular y el nuevo segmento")
+        void la_promocion_registra_un_evento_de_cambio_de_segmento() {
+            CheckingAccount cuenta = TestAccounts.anAccount().holderName("Ada Lovelace").initialDeposit("99000.00").open();
+            cuenta.pullDomainEvents();
+
+            Transaction ingreso = cuenta.deposit(MonetaryAmount.euros("1000.00"));
+
+            assertThat(cuenta.pullDomainEvents()).filteredOn(CustomerSegmentChanged.class::isInstance)
+                    .containsExactly(new CustomerSegmentChanged(cuenta.id(), "Ada Lovelace",
+                            CustomerSegment.HIGH_NET_WORTH, ingreso.occurredOn()));
+        }
+
+        @Test
+        @DisplayName("La vuelta a minorista registra un evento con el momento de la revisión")
+        void la_vuelta_a_minorista_registra_un_evento_de_cambio_de_segmento() {
+            CheckingAccount cuenta = TestAccounts.anAccount().holderName("Ada Lovelace").initialDeposit("150000.00").open();
+            cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
+            Instant revision = cuenta.nextSegmentReview().orElseThrow();
+            cuenta.pullDomainEvents();
+
+            cuenta.resolveSegmentReview(revision, false);
+
+            assertThat(cuenta.pullDomainEvents()).containsExactly(
+                    new CustomerSegmentChanged(cuenta.id(), "Ada Lovelace", CustomerSegment.RETAIL, revision));
+        }
+
+        @Test
+        @DisplayName("Un ingreso a un titular que ya es de alto patrimonio no registra ningún cambio de segmento")
+        void un_ingreso_a_un_titular_que_ya_es_de_alto_patrimonio_no_registra_cambio_de_segmento() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+            cuenta.pullDomainEvents();
+
+            cuenta.deposit(MonetaryAmount.euros("1000.00"));
+
+            assertThat(cuenta.pullDomainEvents()).noneMatch(CustomerSegmentChanged.class::isInstance);
+        }
+    }
 }

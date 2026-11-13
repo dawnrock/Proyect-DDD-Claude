@@ -107,7 +107,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The seven tests pass; `check-domain.mjs` without errors.
 
-### [ ] T6 — Domain event `CustomerSegmentChanged` (~10 min)
+### [x] T6 — Domain event `CustomerSegmentChanged` (~10 min)
 
 - **Layer:** domain
 - **Files:** new `domain/model/CustomerSegmentChanged.java`, `CheckingAccount.java`, `CheckingAccountTests.java`
@@ -116,7 +116,7 @@ Decisions taken in this plan:
   1. Failing tests first: a promotion and a demotion each record one event with the account, the holder name, the new segment and the instant; a credit to a holder who is already high net worth records none.
   2. Record the event only when the segment really changes.
 - **Acceptance criteria:**
-  - [ ] The three tests pass; the existing event tests stay green.
+  - [x] The three tests pass; the existing event tests stay green.
 
 ### [ ] T7 — The listeners handle the segment change (~5 min)
 
