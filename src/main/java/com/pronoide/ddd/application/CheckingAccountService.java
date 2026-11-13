@@ -156,6 +156,24 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
                 .build();
     }
 
+    @Override
+    public int reviewSegments() {
+        return inUnit(events -> {
+            int demoted = 0;
+            for (CheckingAccount account : repository.findAll()) {
+                if (!account.segmentReviewDue(clock.instant())) {
+                    continue;
+                }
+                segmentReview.review(account, clock.instant());
+                save(account, events);
+                if (!account.primaryHolder().isHighNetWorth()) {
+                    demoted++;
+                }
+            }
+            return demoted;
+        });
+    }
+
     /** Carga la cuenta; una ajena (o sin propietario, para un usuario) se trata como inexistente. */
     private CheckingAccount loadFor(Caller caller, UUID id) {
         CheckingAccount account = load(id);

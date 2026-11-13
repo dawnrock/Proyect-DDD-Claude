@@ -38,6 +38,8 @@ import com.pronoide.ddd.domain.model.CheckingAccountOpened;
 import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.domain.model.DomainEvent;
 import com.pronoide.ddd.domain.model.DomainEventPublisher;
+import com.pronoide.ddd.domain.model.CustomerSegment;
+import com.pronoide.ddd.domain.model.CustomerSegmentChanged;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
 import com.pronoide.ddd.domain.model.MoneyDeposited;
@@ -741,6 +743,53 @@ class CheckingAccountServiceTests {
 
             assertThat(transferencia.status()).isEqualTo("REJECTED");
             assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("RETAIL");
+        }
+    }
+
+    @Nested
+    @DisplayName("Revisión periódica de segmentos")
+    class ReviewSegments {
+
+        private UUID belowMinimum;
+        private UUID aboveMinimum;
+        private UUID retail;
+
+        @BeforeEach
+        void tresCuentas() {
+            belowMinimum = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("100000")).build()).id();
+            service.withdraw(ADMIN, WithdrawCommand.builder().accountId(belowMinimum).amount(new BigDecimal("500")).build());
+            aboveMinimum = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("100000")).build()).id();
+            retail = service.openAccount(ADMIN, command().build()).id();
+            clearInvocations(publisher);
+        }
+
+        @Test
+        @DisplayName("Pasado un mes, solo vuelve a minorista el titular que sigue bajo el mínimo, y se publica su cambio de segmento")
+        void pasado_un_mes_solo_vuelve_a_minorista_el_titular_que_sigue_bajo_el_minimo() {
+            clock.advance(Duration.ofDays(32));
+
+            int demoted = service.reviewSegments();
+
+            assertThat(demoted).isEqualTo(1);
+            assertThat(service.findAccount(ADMIN, belowMinimum).segment()).isEqualTo("RETAIL");
+            assertThat(service.findAccount(ADMIN, aboveMinimum).segment()).isEqualTo("HIGH_NET_WORTH");
+            assertThat(service.findAccount(ADMIN, retail).segment()).isEqualTo("RETAIL");
+            assertThat(publishedBatches().stream().flatMap(List::stream))
+                    .singleElement()
+                    .isInstanceOfSatisfying(CustomerSegmentChanged.class, event -> {
+                        assertThat(event.accountId()).isEqualTo(belowMinimum);
+                        assertThat(event.segment()).isEqualTo(CustomerSegment.RETAIL);
+                    });
+        }
+
+        @Test
+        @DisplayName("Antes de un mes la revisión no cambia ningún segmento ni publica eventos")
+        void antes_de_un_mes_la_revision_no_cambia_ningun_segmento() {
+            clock.advance(Duration.ofDays(20));
+
+            assertThat(service.reviewSegments()).isZero();
+            assertThat(service.findAccount(ADMIN, belowMinimum).segment()).isEqualTo("HIGH_NET_WORTH");
+            assertThat(publishedBatches().stream().flatMap(List::stream)).isEmpty();
         }
     }
 }

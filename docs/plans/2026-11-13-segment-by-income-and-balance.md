@@ -138,7 +138,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The three tests pass; `./mvnw verify` green.
 
-### [ ] T9 — Input port `reviewSegments()` (~10 min)
+### [x] T9 — Input port `reviewSegments()` (~10 min)
 
 - **Layer:** application
 - **Files:** `CheckingAccountCommands.java`, `CheckingAccountService.java` + tests
@@ -147,7 +147,7 @@ Decisions taken in this plan:
   1. Failing tests first: after a month, only the holder still below the minimum and without high verified income is demoted, the count is returned and one `CustomerSegmentChanged` is published; before the month, nothing changes.
   2. Add the method to the input port (no `Caller`: internal process) and implement it in one unit of work.
 - **Acceptance criteria:**
-  - [ ] The two tests pass; `los_puertos_de_entrada_son_interfaces` stays green.
+  - [x] The two tests pass; `los_puertos_de_entrada_son_interfaces` stays green.
 
 ### [ ] T10 — Scheduler input adapter (~10 min)
 
