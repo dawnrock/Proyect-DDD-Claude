@@ -60,7 +60,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
 
 ## Tasks
 
-### [ ] T1 — `TaxId` value object (~5 min)
+### [x] T1 — `TaxId` value object (~5 min)
 
 - **Layer:** domain
 - **Files:** `domain/model/TaxId.java`, `domain/model/TaxIdTests.java`
@@ -68,7 +68,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
 - **What to do:**
   1. Copy `TaxId` from `Hexagonal` (record, normalises spaces and case, 8 digits + letter, control letter not checked) and its tests.
 - **Acceptance criteria:**
-  - [ ] `TaxIdTests` passes: `" 87654321x "` normalises to `87654321X`; null and wrong formats throw with the Spanish messages.
+  - [x] `TaxIdTests` passes: `" 87654321x "` normalises to `87654321X`; null and wrong formats throw with the Spanish messages.
 
 ### [ ] T2 — `HighNetWorthIncome` (~5 min)
 
