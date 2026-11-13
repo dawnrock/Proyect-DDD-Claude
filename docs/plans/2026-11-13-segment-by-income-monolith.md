@@ -5,8 +5,8 @@
 - **Phase:** 1 · Layered monolith
 - **Base branch:** `Monolithic` (frozen; `src/` exception authorised by the user on 2026-11-12 and 2026-11-13; the `v1-monolito` tag does not move)
 - **Date:** 2026-11-13
-- **Status:** in progress
-- **Total estimate:** ~90 min (11 tasks)
+- **Status:** done
+- **Total estimate:** ~100 min (12 tasks; T12 from the review)
 
 ## Goal
 
@@ -207,24 +207,24 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
 
 **Specific:**
 
-- [ ] The five points of the agreed rule behave as on `Hexagonal`, each one proven by a test.
-- [ ] The agency is consulted only at opening and when a review is due, never on a promotion by balance.
-- [ ] No interfaces were added: the layers still use concrete classes (ADR 0004), checked by `LayeredArchitectureTests`.
-- [ ] `./mvnw spring-boot:run` opens the three demo accounts; Grace Hopper shows as high net worth with 5.000,00 €.
+- [x] The five points of the agreed rule behave as on `Hexagonal`, each one proven by a test.
+- [x] The agency is consulted only at opening and when a review is due, never on a promotion by balance.
+- [x] No interfaces were added: the layers still use concrete classes (ADR 0004), checked by `LayeredArchitectureTests`.
+- [x] `./mvnw spring-boot:run` opens the three demo accounts; Grace Hopper shows as high net worth with 5.000,00 €.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (layers: each layer only uses the one below), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: `docs/api/openapi.yaml` reflects it and `npx @redocly/cli lint docs/api/openapi.yaml` has no errors.
-- [ ] Any new business term is in `docs/dominio/glosario.md`.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (layers: each layer only uses the one below), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: `docs/api/openapi.yaml` reflects it and `npx @redocly/cli lint docs/api/openapi.yaml` has no errors.
+- [x] Any new business term is in `docs/dominio/glosario.md`.
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
