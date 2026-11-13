@@ -4,7 +4,7 @@
 - **Type:** feature
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
-- **Date:** 2026-11-13
+- **Date:** 2026-11-13 (revision 2: income verified again when the grace period ends)
 - **Status:** draft
 - **Total estimate:** ~115 min (13 tasks)
 
@@ -23,17 +23,18 @@
 
 `CheckingAccountFactory.open` asks `IncomeVerifier` and registers the holder with its segment. Every credit goes through the private `CheckingAccount.deposit(Transaction)` (plain deposit, incoming transfer and opening deposit) and every debit through the private `tryWithdraw(Transaction)`, so the balance rules live there. The aggregate already records domain events, which the service publishes after the unit of work.
 
-Combined rule (rule 4 is a proposal, to be confirmed on review):
+Combined rule (rule 4 as decided by the user on 2026-11-13). The tax agency is asked only twice: when the account is opened and when a grace period ends. Promotions and the start of a countdown never ask it.
 
 1. Opening: high net worth if the verified annual income is above 100.000,00 € (R20, unchanged).
 2. Any approved credit that takes the balance to 100.000,00 € promotes the holder at once (R22, R23).
-3. A holder who is high net worth **by balance** and stays one calendar month (UTC) below the minimum goes back to retail (R24); reaching the minimum again cancels the countdown (R25).
-4. A holder who is high net worth **by verified income** never goes back to retail because of the balance (R26).
+3. An approved withdrawal that leaves the account of a high-net-worth holder below the minimum starts a countdown of one calendar month (UTC), whatever the reason the holder is high net worth; reaching the minimum again cancels it (R25).
+4. When the month ends and the balance is still below the minimum, the income is verified again. If it is still above 100.000,00 €, the holder stays high net worth and a new month starts (R26); otherwise the holder goes back to retail (R24).
 
 Decisions taken in this plan:
 
-- **The holder remembers why.** `AccountHolder` keeps whether its income was verified above the threshold (`hasVerifiedHighIncome()`), set by the factory. Only holders without it get a countdown.
-- **Time.** The domain receives the instant (`reviewSegment(Instant now)`); the service takes it from a `java.time.Clock` bean defined in `config`. No new port: `Clock` is a JDK type.
+- **The holder keeps its tax id.** To ask the agency again, `AccountHolder` stores the `TaxId` given at opening (today it is only passed to the factory).
+- **Who asks the agency.** A new domain service, `SegmentReviewService` (`domain.service`), with the `IncomeVerifier` port: when the review of an account is due it verifies the income and tells the aggregate the result. The aggregate never calls a port.
+- **Time.** The domain receives the instant (`SegmentReviewService.review(account, now)`); the service takes it from a `java.time.Clock` bean defined in `config`. No new port: `Clock` is a JDK type.
 - **Who triggers the review.** The service, before every withdrawal and outgoing transfer; and a daily scheduled task, which is a new input adapter (`adapter.in.scheduler`) calling a new method of the input port `CheckingAccountCommands`.
 - **Domain event** `CustomerSegmentChanged` (account, holder name, new segment, instant), recorded by the aggregate on every promotion and demotion; the audit and customer-notification listeners handle it.
 - **No input changes:** the segment is not an input here, so forms and requests stay as they are. It is not a team plan: `/implement-plan 98`.
@@ -41,7 +42,8 @@ Decisions taken in this plan:
 
 | Layer / package | File | Change |
 | --------------- | ---- | ------ |
-| `domain.model` | `CheckingAccount.java`, `AccountHolder.java`, `CheckingAccountFactory.java`, new `CustomerSegmentChanged.java` | Balance rules, grace period, event, verified-income flag |
+| `domain.model` | `CheckingAccount.java`, `AccountHolder.java`, `CheckingAccountFactory.java`, new `CustomerSegmentChanged.java` | Balance rules, grace period, event, tax id in the holder |
+| `domain.service` | new `SegmentReviewService.java` | Verifies the income again when a grace period ends |
 | `application` | `CheckingAccountCommands.java`, `CheckingAccountService.java`, `listener/*` | `reviewSegments()`, review before debits, `Clock`, listeners |
 | `adapter.in.scheduler` | new `SegmentReviewScheduler.java` | Daily task calling the input port |
 | `adapter.out.persistence` | `InMemoryAccountNumberSequence.java` | Entity `9999`, branch `0001` |
@@ -71,14 +73,14 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [ ] The two tests pass and fail when the promotion is removed.
 
-### [ ] T3 — The holder remembers a verified high income (~10 min)
+### [ ] T3 — The holder keeps its tax id (~10 min)
 
 - **Layer:** domain
 - **Files:** `AccountHolder.java`, `CheckingAccountFactory.java`, `AccountHolderTests.java`, `CheckingAccountFactoryTests.java`
 - **Depends on:** —
 - **What to do:**
-  1. Failing tests first: the factory registers a holder with income above the threshold as high net worth with `hasVerifiedHighIncome()` true; with lower, equal or unverified income, retail and false.
-  2. Replace `register(fullName, segment)` with a factory method that takes the verification result; keep R20 in `CheckingAccountFactory`. Add `demoteToRetail()`, rejected for a holder with verified high income.
+  1. Failing tests first: a holder registered by the factory exposes the `TaxId` it was opened with; the tax id is mandatory; `demoteToRetail()` makes a high-net-worth holder retail.
+  2. `AccountHolder.register(fullName, taxId, segment)` with the accessor `taxId()`; R20 stays in `CheckingAccountFactory`. Update `TestAccounts` / `TestCheckingAccounts` with a default tax id.
 - **Acceptance criteria:**
   - [ ] `./mvnw test -Dtest='AccountHolderTests,CheckingAccountFactoryTests'` passes; `./mvnw verify` green.
 
@@ -88,19 +90,19 @@ Decisions taken in this plan:
 - **Files:** `CheckingAccount.java`, `CheckingAccountTests.java`
 - **Depends on:** T1, T3
 - **What to do:**
-  1. Failing tests first: an approved withdrawal that leaves a holder who is high net worth by balance below the minimum records `belowMinimumNetWorthSince` (the withdrawal's `occurredOn`); a second withdrawal does not move it; a credit that reaches the minimum clears it; a rejected withdrawal, a retail holder and a holder with verified high income record nothing (R26).
+  1. Failing tests first: an approved withdrawal that leaves a high-net-worth holder below the minimum records `belowMinimumNetWorthSince` (the withdrawal's `occurredOn`); a second withdrawal does not move it; a credit that reaches the minimum clears it (R25); a rejected withdrawal and a retail holder record nothing.
   2. Add the field and the accessor (`Optional<Instant>`).
 - **Acceptance criteria:**
-  - [ ] The six tests pass; `./mvnw verify` green.
+  - [ ] The five tests pass; `./mvnw verify` green.
 
-### [ ] T5 — Back to retail after one month below the minimum (~10 min)
+### [ ] T5 — When the month ends: income verified again, or back to retail (~10 min)
 
 - **Layer:** domain
-- **Files:** `CheckingAccount.java`, `CheckingAccountTests.java`
+- **Files:** `CheckingAccount.java`, new `domain/service/SegmentReviewService.java`, `CheckingAccountTests.java`, new `SegmentReviewServiceTests.java`
 - **Depends on:** T4
 - **What to do:**
-  1. Failing tests first: one second before the month the holder keeps the segment; at one month it is retail and the date is cleared (R24); recovering the minimum in between cancels it (R25); reviewing a retail account does nothing; a holder demoted in overdraft keeps the debt and its next withdrawal is rejected; after a demotion, reaching the minimum promotes again; `reviewSegment(null)` is rejected.
-  2. Add `reviewSegment(Instant now)` with `SEGMENT_GRACE_PERIOD` (one calendar month, UTC).
+  1. Failing tests first, with a fake `IncomeVerifier` that counts its calls: one second before the month nothing changes and the agency is not asked; at one month with income not above the threshold (or unverified) the holder is retail and the date is cleared (R24); at one month with income still above the threshold the holder stays high net worth, the agency was asked once and a new month starts from that instant (R26); recovering the minimum in between means the agency is never asked (R25); a retail account is never reviewed; a holder demoted in overdraft keeps the debt and its next withdrawal is rejected; after a demotion, reaching the minimum promotes again.
+  2. Aggregate: `segmentReviewDue(Instant now)` and `resolveSegmentReview(Instant now, boolean incomeStillHigh)` with `SEGMENT_GRACE_PERIOD` (one calendar month, UTC). Domain service: `review(account, now)` asks the port only when the review is due. Move the income threshold to one place shared with the factory.
 - **Acceptance criteria:**
   - [ ] The seven tests pass; `check-domain.mjs` without errors.
 
@@ -130,8 +132,8 @@ Decisions taken in this plan:
 - **Files:** `CheckingAccountService.java`, `config/DomainConfiguration.java`, service tests, `DomainConfigurationTests.java`
 - **Depends on:** T5
 - **What to do:**
-  1. Failing tests first, with a clock that can be moved forward: after more than a month below the minimum, an overdraft withdrawal is rejected and the detail shows `RETAIL`; the same for the source of a transfer; before the month it is still approved.
-  2. Inject `Clock` (bean in `config`); call `reviewSegment(clock.instant())` before the withdrawal and before the transfer, inside the unit of work; the event is published with the others.
+  1. Failing tests first, with a clock that can be moved forward: after more than a month below the minimum, an overdraft withdrawal of a holder without high income is rejected and the detail shows `RETAIL`; the same for the source of a transfer; before the month it is still approved.
+  2. Inject `Clock` and `SegmentReviewService` (beans in `config`); call `segmentReview.review(account, clock.instant())` before the withdrawal and before the transfer, inside the unit of work; the event is published with the others.
 - **Acceptance criteria:**
   - [ ] The three tests pass; `./mvnw verify` green.
 
@@ -141,7 +143,7 @@ Decisions taken in this plan:
 - **Files:** `CheckingAccountCommands.java`, `CheckingAccountService.java` + tests
 - **Depends on:** T8
 - **What to do:**
-  1. Failing tests first: after a month, only the holder still below the minimum is demoted, the count is returned and one `CustomerSegmentChanged` is published; before the month, nothing changes.
+  1. Failing tests first: after a month, only the holder still below the minimum and without high verified income is demoted, the count is returned and one `CustomerSegmentChanged` is published; before the month, nothing changes.
   2. Add the method to the input port (no `Caller`: internal process) and implement it in one unit of work.
 - **Acceptance criteria:**
   - [ ] The two tests pass; `los_puertos_de_entrada_son_interfaces` stays green.
@@ -190,11 +192,12 @@ Decisions taken in this plan:
 
 **Specific:**
 
-- [ ] A holder with verified income above 100.000,00 € opens as high net worth and never goes back to retail.
-- [ ] A retail holder becomes high net worth when the balance reaches 100.000,00 € (opening, deposit or incoming transfer) and goes back to retail after one month below it, unless the balance recovers.
+- [ ] A holder with verified income above 100.000,00 € opens as high net worth.
+- [ ] A retail holder becomes high net worth when the balance reaches 100.000,00 € (opening, deposit or incoming transfer), without asking the tax agency.
+- [ ] After one month below the minimum the income is verified again: the holder stays high net worth if it is still above the threshold and goes back to retail otherwise; recovering the balance in time cancels the review.
 - [ ] Every segment change is audited and notified through `CustomerSegmentChanged`.
 - [ ] Generated IBANs carry entity `9999` and branch `0001`.
-- [ ] The `IncomeVerifier` port and its adapter are still in use.
+- [ ] The `IncomeVerifier` port is used in two places, the factory and `SegmentReviewService`, and nowhere else.
 
 **Fixed:**
 
@@ -212,8 +215,10 @@ Decisions taken in this plan:
 
 ## Risks and open questions
 
-- **Rule 4 (to confirm):** a holder with verified high income never loses the segment. The alternative (income only counts at opening, and afterwards everybody follows the balance) is simpler but would demote Grace Hopper one month after her first withdrawal unless her deposit is raised.
-- **Demo data:** with rule 4 the demo deposits stay as they are (Grace Hopper qualifies by income).
+- **New month after a favourable verification (to confirm):** if the income is still high the countdown restarts, so the agency is asked again one month later while the balance stays below the minimum. The alternative is not to ask again until the balance recovers and falls once more.
+- **A holder who is high net worth by income and opens below the minimum** (Grace Hopper, 5.000,00 €) has no countdown until an approved withdrawal starts one; her first review then finds her income still high.
+- **Demo data:** the demo deposits stay as they are.
+- **Holders promoted by balance without a known income:** the fake agency only knows the three demo tax ids; anybody else is "unverified", which counts as not high.
 - **Entity code `9999`:** invented; not checked against the Banco de España registry.
 - **Two time sources:** `Transaction.occurredOn` uses `Instant.now()` and the review uses the `Clock` bean, as on `Monolithic`; no end-of-month test is possible until movements can be dated.
 - **Countdowns in memory:** a restart loses them.
