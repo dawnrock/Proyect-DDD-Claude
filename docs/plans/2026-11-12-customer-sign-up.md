@@ -190,12 +190,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Tests for success and the three error routes pass.
 
-### [ ] T17 — Signed in after signing up (~10 min)
+### [x] T17 — Signed in after signing up (~10 min)
 
 - **Side:** web · **Layer:** presentation (web) · **Files:** `SignUpController.java` + tests · **Depends on:** T16
 - **What to do:** after a successful registration, authenticate the new user in the session, clear the wizard (`SessionStatus.setComplete()`) and redirect to `/accounts/{id}` with the flash "Te damos la bienvenida a Mon-A Bank. Tu IBAN es …".
 - **Acceptance criteria:**
-  - [ ] Test: after the final POST, `GET /accounts/{id}` with the same session answers `200`.
+  - [x] Test: after the final POST, `GET /accounts/{id}` with the same session answers `200`.
 
 ### [ ] T18 — "Abrir otra cuenta" for customers (~10 min)
 
