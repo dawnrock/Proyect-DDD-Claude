@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.pronoide.ddd.domain.model.AccountHolder;
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
-import com.pronoide.ddd.domain.model.CustomerSegment;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.HighNetWorthIncome;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
@@ -68,7 +67,8 @@ public class CheckingAccountService {
         });
 
         TaxId taxId = new TaxId(command.holderTaxId());
-        AccountHolder holder = AccountHolder.register(command.holderName(), taxId, segmentFor(taxId));
+        AccountHolder holder = AccountHolder.register(command.holderName(), taxId,
+                HighNetWorthIncome.segmentFor(taxAgency.verifiedAnnualIncome(taxId)));
         MonetaryAmount initialDeposit =
                 new MonetaryAmount(command.initialDeposit(), Currency.getInstance(command.currency()));
         CheckingAccount account = repository.save(CheckingAccount.open(accountNumber, holder, initialDeposit));
@@ -174,15 +174,6 @@ public class CheckingAccountService {
         return demoted;
     }
 
-    /** R24: el titular abre como alto patrimonio si sus ingresos verificados superan el umbral. */
-    private CustomerSegment segmentFor(TaxId taxId) {
-        return hasHighIncome(taxId) ? CustomerSegment.HIGH_NET_WORTH : CustomerSegment.RETAIL;
-    }
-
-    private boolean hasHighIncome(TaxId taxId) {
-        return HighNetWorthIncome.isMetBy(taxAgency.verifiedAnnualIncome(taxId));
-    }
-
     /**
      * Resuelve la revisión del segmento de la cuenta si a esta hora ya le toca: solo entonces verifica de nuevo los
      * ingresos del titular en la agencia tributaria, y el agregado decide (R22, R25). La cuenta se guarda en el acto,
@@ -193,7 +184,8 @@ public class CheckingAccountService {
     private void reviewSegment(CheckingAccount account) {
         Instant now = clock.instant();
         if (account.segmentReviewDue(now)) {
-            account.resolveSegmentReview(now, hasHighIncome(account.primaryHolder().taxId()));
+            account.resolveSegmentReview(now,
+                    HighNetWorthIncome.isMetBy(taxAgency.verifiedAnnualIncome(account.primaryHolder().taxId())));
             repository.save(account);
         }
     }

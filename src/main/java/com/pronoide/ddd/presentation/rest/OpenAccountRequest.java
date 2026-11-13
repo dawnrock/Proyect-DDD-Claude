@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 
+import com.pronoide.ddd.application.OpenAccountCommandDef;
+
 /**
  * Cuerpo de {@code POST /api/accounts}. Es un {@code record} y no un DTO de Immutables porque Hibernate
  * Validator solo ve las restricciones de campos y getters JavaBean. Aplica la misma validación que el
@@ -26,7 +28,8 @@ public record OpenAccountRequest(
         String holderName,
 
         @NotBlank(message = "El NIF del titular es obligatorio")
-        @Pattern(regexp = "^ *\\d{8} *[A-Za-z] *$", message = "El NIF del titular debe tener 8 dígitos y una letra")
+        @Pattern(regexp = OpenAccountCommandDef.TAX_ID_PATTERN,
+                message = "El NIF del titular debe tener 8 dígitos y una letra")
         String holderTaxId,
 
         @NotNull(message = "El depósito inicial es obligatorio")

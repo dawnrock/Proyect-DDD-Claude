@@ -19,6 +19,14 @@ class HighNetWorthIncomeTests {
         assertThat(HighNetWorthIncome.isMetBy(Optional.of(MonetaryAmount.euros(income)))).isEqualTo(highNetWorth);
     }
 
+    @ParameterizedTest(name = "{0} EUR → {1}")
+    @CsvSource({"250000.00, HIGH_NET_WORTH", "100000.00, RETAIL"})
+    @DisplayName("Los ingresos verificados deciden el segmento con el que se registra el titular")
+    void los_ingresos_verificados_deciden_el_segmento_del_titular(String income, CustomerSegment segment) {
+        assertThat(HighNetWorthIncome.segmentFor(Optional.of(MonetaryAmount.euros(income)))).isEqualTo(segment);
+        assertThat(HighNetWorthIncome.segmentFor(Optional.empty())).isEqualTo(CustomerSegment.RETAIL);
+    }
+
     @Test
     @DisplayName("Sin ingresos verificados no hay alto patrimonio")
     void sin_ingresos_verificados_no_hay_alto_patrimonio() {

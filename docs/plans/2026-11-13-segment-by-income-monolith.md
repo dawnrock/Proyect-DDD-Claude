@@ -189,6 +189,20 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
 - **Acceptance criteria:**
   - [x] Every rule R21-R26 cites a test that exists.
 
+### [x] T12 — Fixes from the `revisor-ddd` review (~10 min)
+
+- **Layer:** domain · application · presentation (rest) · docs
+- **Files:** `HighNetWorthIncome.java`, `TaxId.java`, `CheckingAccountService.java`, `OpenAccountRequest.java`, their tests, `docs/ia/pendientes.md`
+- **Depends on:** T1-T11
+- **What to do:**
+  1. Move the "income → segment" rule to the domain: `HighNetWorthIncome.segmentFor(...)`; the service only asks the agency and passes the result.
+  2. `TaxId` normalises with `Locale.ROOT`.
+  3. `OpenAccountRequest` reuses `OpenAccountCommandDef.TAX_ID_PATTERN`, like the web form.
+  4. Record in `pendientes.md` that `AccountHolder.register` accepts any segment (the caller decides it).
+- **Acceptance criteria:**
+  - [x] `HighNetWorthIncomeTests` and `TaxIdTests` (Turkish locale) were red and are green; `./mvnw verify` green.
+  - [x] The review's test request ("the agency is not asked when no review is due") was already covered by `CheckingAccountServiceTests#si_no_toca_revision_no_se_consulta_a_la_agencia`.
+
 ## Global acceptance criteria
 
 **Specific:**

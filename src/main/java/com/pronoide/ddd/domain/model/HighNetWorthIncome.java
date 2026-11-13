@@ -21,4 +21,9 @@ public final class HighNetWorthIncome {
                 .map(income -> THRESHOLD.isLessThan(income))
                 .orElse(false);
     }
+
+    /** R24: segmento con el que se registra un titular según sus ingresos verificados. */
+    public static CustomerSegment segmentFor(Optional<MonetaryAmount> verifiedAnnualIncome) {
+        return isMetBy(verifiedAnnualIncome) ? CustomerSegment.HIGH_NET_WORTH : CustomerSegment.RETAIL;
+    }
 }
