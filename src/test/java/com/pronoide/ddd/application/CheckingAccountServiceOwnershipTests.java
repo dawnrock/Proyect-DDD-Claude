@@ -37,7 +37,8 @@ class CheckingAccountServiceOwnershipTests {
     void setUp() {
         accounts = new InMemoryCheckingAccountRepository();
         owners = new InMemoryAccountOwnershipRepository();
-        service = new CheckingAccountService(accounts, owners, new TaxAgencyClient(),
+        service = new CheckingAccountService(accounts, owners, new com.pronoide.ddd.persistence.InMemoryCustomerRepository(),
+                new com.pronoide.ddd.persistence.InMemoryAccountNumberSequence(), new TaxAgencyClient(),
                 java.time.Clock.systemUTC());
     }
 

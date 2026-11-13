@@ -118,12 +118,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Tests for success and both rejections pass.
 
-### [ ] T7 — Sign-up use case (~10 min)
+### [x] T7 — Sign-up use case (~10 min)
 
 - **Side:** back · **Layer:** application · **Files:** `CheckingAccountService.java`, `SignUpCommandDef.java` + tests · **Depends on:** T4, T5
 - **What to do:** tests first: `signUp` registers the customer, opens an account with a generated IBAN for the username and decides the segment with the tax agency (#99: `87654321X` → high net worth); an existing document throws `DuplicateCustomerException` (R29) even with another e-mail; a deposit below 50 € keeps R1; command validation.
 - **Acceptance criteria:**
-  - [ ] The tests pass; `./mvnw verify` green.
+  - [x] The tests pass; `./mvnw verify` green.
 
 ### [ ] T8 — Open another account (~10 min)
 

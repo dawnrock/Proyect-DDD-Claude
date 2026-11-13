@@ -55,7 +55,9 @@ class CheckingAccountServiceTests {
         repository = spy(new InMemoryCheckingAccountRepository());
         clock = new MutableClock();
         taxAgency = spy(new TaxAgencyClient());
-        service = new CheckingAccountService(repository, new InMemoryAccountOwnershipRepository(), taxAgency, clock);
+        service = new CheckingAccountService(repository, new InMemoryAccountOwnershipRepository(),
+                new com.pronoide.ddd.persistence.InMemoryCustomerRepository(),
+                new com.pronoide.ddd.persistence.InMemoryAccountNumberSequence(), taxAgency, clock);
     }
 
     private static OpenAccountCommand.Builder command(String accountNumber) {
