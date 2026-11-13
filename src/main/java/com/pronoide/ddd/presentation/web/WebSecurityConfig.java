@@ -22,6 +22,7 @@ public class WebSecurityConfig {
         return http
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/login", "/signup/**", "/css/**", "/actuator/health", "/error", "/error/**").permitAll()
+                        .requestMatchers("/accounts/another").hasRole("USER")
                         .requestMatchers("/accounts/new").hasRole("ADMIN")
                         // Consola H2: solo administradores; usa marcos del mismo origen y sus propios formularios sin CSRF
                         .requestMatchers("/h2-console/**").hasRole("ADMIN")

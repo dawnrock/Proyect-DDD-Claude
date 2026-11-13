@@ -15,6 +15,7 @@
     </div>
 
     <div class="actions">
+        <a class="pill pill-secondary" id="another-account" th:if="${customer}" th:href="@{/accounts/another}">+ Abrir otra cuenta</a>
         <details id="deposit-action" th:object="${depositForm}" th:open="${#fields.hasAnyErrors()}">
             <summary>↓ Ingresar</summary>
             <form class="action-panel" th:action="@{/accounts/{id}/deposits(id=${account.id()})}" th:object="${depositForm}" method="post" novalidate>

@@ -197,12 +197,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Test: after the final POST, `GET /accounts/{id}` with the same session answers `200`.
 
-### [ ] T18 — "Abrir otra cuenta" for customers (~10 min)
+### [x] T18 — "Abrir otra cuenta" for customers (~10 min)
 
 - **Side:** web · **Layer:** presentation (web) · **Files:** new `AnotherAccountForm.java`, `templates/accounts/another.html`; `AccountWebController.java`, `accounts/list.html`, `WebSecurityConfig.java` + tests · **Depends on:** T0
 - **What to do:** a customer sees "Abrir otra cuenta" on the list; the page asks only for the deposit and calls `openAnotherAccount` (mocked); success redirects to the new account with its IBAN; the administrator does not see the button and gets 403 on the route.
 - **Acceptance criteria:**
-  - [ ] Tests: button only for customers; deposit validation; success redirect; administrator → 403.
+  - [x] Tests: button only for customers; deposit validation; success redirect; administrator → 403.
 
 ### [ ] T19 — Account detail: new IBAN button (~10 min)
 
