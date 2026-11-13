@@ -125,6 +125,30 @@ public class CheckingAccount {
         return transaction;
     }
 
+    /** Si a {@code now} ya le toca revisión al segmento del titular. */
+    public boolean segmentReviewDue(Instant now) {
+        Objects.requireNonNull(now, "El momento de la revisión es obligatorio");
+        return nextSegmentReview != null && !now.isBefore(nextSegmentReview);
+    }
+
+    /**
+     * Resuelve una revisión vencida con el resultado de verificar de nuevo los ingresos del titular. Si siguen siendo
+     * altos conserva el alto patrimonio y la siguiente revisión es seis meses después; si no, vuelve a minorista.
+     *
+     * @throws IllegalStateException si la revisión aún no está vencida
+     */
+    public void resolveSegmentReview(Instant now, boolean incomeStillHigh) {
+        if (!segmentReviewDue(now)) {
+            throw new IllegalStateException("La revisión del segmento aún no está vencida");
+        }
+        if (incomeStillHigh) {
+            nextSegmentReview = after(now, INCOME_REVIEW_PERIOD);
+        } else {
+            primaryHolder.demoteToRetail();
+            nextSegmentReview = null;
+        }
+    }
+
     public List<Transaction> transactions() {
         return List.copyOf(transactions);
     }

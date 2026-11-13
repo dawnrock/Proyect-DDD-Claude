@@ -96,7 +96,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The seven tests pass; `./mvnw verify` green.
 
-### [ ] T5 — When the month ends: income verified again, or back to retail (~10 min)
+### [x] T5 — When the month ends: income verified again, or back to retail (~10 min)
 
 - **Layer:** domain
 - **Files:** `CheckingAccount.java`, new `domain/service/SegmentReviewService.java`, `CheckingAccountTests.java`, new `SegmentReviewServiceTests.java`
@@ -105,7 +105,7 @@ Decisions taken in this plan:
   1. Failing tests first, with a fake `IncomeVerifier` that counts its calls: one second before the month nothing changes and the agency is not asked; at one month with income not above the threshold (or unverified) the holder is retail and the date is cleared (R24); at one month with income still above the threshold the holder stays high net worth and the agency was asked once; it is not asked again until six months later, when a lower income demotes the holder (R26); recovering the minimum in between means the agency is never asked (R25); a retail account is never reviewed; a holder demoted in overdraft keeps the debt and its next withdrawal is rejected; after a demotion, reaching the minimum promotes again.
   2. Aggregate: `segmentReviewDue(Instant now)` and `resolveSegmentReview(Instant now, boolean incomeStillHigh)` with `SEGMENT_GRACE_PERIOD` (one calendar month, UTC) and `INCOME_REVIEW_PERIOD` (six calendar months); the aggregate keeps the instant of its next review. Domain service: `review(account, now)` asks the port only when the review is due. Move the income threshold to one place shared with the factory.
 - **Acceptance criteria:**
-  - [ ] The seven tests pass; `check-domain.mjs` without errors.
+  - [x] The seven tests pass; `check-domain.mjs` without errors.
 
 ### [ ] T6 — Domain event `CustomerSegmentChanged` (~10 min)
 
