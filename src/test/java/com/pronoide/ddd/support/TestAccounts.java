@@ -16,7 +16,8 @@ import lombok.Builder;
  * su método factoría ({@code CheckingAccount.open}); los datos que no se indican toman un valor por defecto válido.
  *
  * <p>{@code segment(HIGH_NET_WORTH)} es un atajo de test: registra al titular como alto patrimonio, aunque el
- * depósito no alcance el patrimonio mínimo (una cuenta así no tiene cuenta atrás para volver a minorista).
+ * depósito no alcance el patrimonio mínimo, como quien lo es por sus ingresos (su primera revisión es a los seis
+ * meses).
  */
 public final class TestAccounts {
 

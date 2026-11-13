@@ -14,13 +14,16 @@ public class CheckingAccount {
     private static final MonetaryAmount MINIMUM_INITIAL_DEPOSIT = MonetaryAmount.euros("50.00");
     private static final MonetaryAmount OVERDRAFT_LIMIT = MonetaryAmount.euros("-1000.00");
     private static final MonetaryAmount MINIMUM_NET_WORTH = MonetaryAmount.euros("100000.00");
+    /** Plazo desde que una cuenta de alto patrimonio cae bajo el patrimonio mínimo hasta que se revisa su segmento. */
     private static final Period SEGMENT_GRACE_PERIOD = Period.ofMonths(1);
+    /** Cada cuánto se vuelven a verificar los ingresos de un titular que conserva el segmento sin el saldo mínimo. */
+    private static final Period INCOME_REVIEW_PERIOD = Period.ofMonths(6);
     private final UUID id;
     private final AccountNumber accountNumber;
     private final AccountHolder primaryHolder;
     private final List<Transaction> transactions = new ArrayList<>();
     private MonetaryAmount currentBalance;
-    private Instant belowMinimumNetWorthSince;
+    private Instant nextSegmentReview;
 
     private CheckingAccount(AccountNumber accountNumber, 
                             AccountHolder primaryHolder, 
@@ -43,7 +46,10 @@ public class CheckingAccount {
         }
 
         CheckingAccount account = new CheckingAccount(accountNumber, primaryHolder, initialDeposit);
-        account.deposit(initialDeposit);
+        Transaction deposit = account.deposit(initialDeposit);
+        if (primaryHolder.isHighNetWorth() && !account.reachesMinimumNetWorth()) {
+            account.nextSegmentReview = after(deposit.occurredOn(), INCOME_REVIEW_PERIOD);
+        }
         return account;
     }
 
@@ -56,7 +62,7 @@ public class CheckingAccount {
         currentBalance = newBalance;
         if (reachesMinimumNetWorth()) {
             primaryHolder.promoteToHighNetWorth();
-            belowMinimumNetWorthSince = null;
+            nextSegmentReview = null;
         }
         return transaction;
     }
@@ -71,8 +77,8 @@ public class CheckingAccount {
         if (isAllowed(newBalance)) {
             transaction.approve();
             currentBalance = newBalance;
-            if (primaryHolder.isHighNetWorth() && !reachesMinimumNetWorth() && belowMinimumNetWorthSince == null) {
-                belowMinimumNetWorthSince = transaction.occurredOn();
+            if (primaryHolder.isHighNetWorth() && !reachesMinimumNetWorth() && nextSegmentReview == null) {
+                nextSegmentReview = after(transaction.occurredOn(), SEGMENT_GRACE_PERIOD);
             }
         } else {
             transaction.reject();
@@ -80,19 +86,31 @@ public class CheckingAccount {
         return transaction;
     }
 
-    /**
-     * Devuelve al titular a minorista si la cuenta lleva el periodo de gracia completo (un mes natural, en UTC) por
-     * debajo del patrimonio mínimo. No hace nada si el titular es minorista o si aún no se ha cumplido el plazo.
-     */
-    public void reviewSegment(Instant now) {
+    /** Si a {@code now} ya le toca revisión al segmento del titular. */
+    public boolean segmentReviewDue(Instant now) {
         Objects.requireNonNull(now, "El momento de la revisión es obligatorio");
-        if (belowMinimumNetWorthSince == null) {
-            return;
+        return nextSegmentReview != null && !now.isBefore(nextSegmentReview);
+    }
+
+    /**
+     * Resuelve una revisión vencida con el resultado de verificar de nuevo los ingresos del titular, que consulta quien
+     * llama (el dominio no conoce a la agencia tributaria). Si siguen siendo altos conserva el alto patrimonio y la
+     * siguiente revisión es seis meses después; si no, vuelve a minorista.
+     *
+     * @throws IllegalStateException si la revisión aún no está vencida
+     */
+    public void resolveSegmentReview(Instant now, boolean incomeStillHigh) {
+        if (!segmentReviewDue(now)) {
+            throw new IllegalStateException("La revisión del segmento aún no está vencida");
         }
-        Instant deadline = belowMinimumNetWorthSince.atZone(ZoneOffset.UTC).plus(SEGMENT_GRACE_PERIOD).toInstant();
-        if (!now.isBefore(deadline)) {
+        if (!primaryHolder.isHighNetWorth()) {
+            throw new IllegalStateException("Solo se revisa el segmento de un titular de alto patrimonio");
+        }
+        if (incomeStillHigh) {
+            nextSegmentReview = after(now, INCOME_REVIEW_PERIOD);
+        } else {
             primaryHolder.demoteToRetail();
-            belowMinimumNetWorthSince = null;
+            nextSegmentReview = null;
         }
     }
 
@@ -116,9 +134,12 @@ public class CheckingAccount {
         return currentBalance;
     }
 
-    /** Desde cuándo una cuenta de alto patrimonio está por debajo del patrimonio mínimo; vacío si no lo está. */
-    public Optional<Instant> belowMinimumNetWorthSince() {
-        return Optional.ofNullable(belowMinimumNetWorthSince);
+    /**
+     * Cuándo toca revisar el segmento del titular; vacío si no hay revisión pendiente. Solo la tiene una cuenta de alto
+     * patrimonio cuyo saldo está por debajo del patrimonio mínimo.
+     */
+    public Optional<Instant> nextSegmentReview() {
+        return Optional.ofNullable(nextSegmentReview);
     }
 
     private boolean isAllowed(MonetaryAmount newBalance) {
@@ -126,6 +147,11 @@ public class CheckingAccount {
             return true;
         }
         return primaryHolder.isHighNetWorth() && !newBalance.isLessThan(OVERDRAFT_LIMIT);
+    }
+
+    /** Plazos en meses naturales, en UTC. */
+    private static Instant after(Instant instant, Period period) {
+        return instant.atZone(ZoneOffset.UTC).plus(period).toInstant();
     }
 
     private boolean reachesMinimumNetWorth() {

@@ -106,7 +106,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
   - [x] `AccountHolderTests`: keeps the tax id and the given segment; null tax id or segment throws; equality by id still holds.
   - [x] The test for the old R21 ("se registra siempre como minorista") is replaced.
 
-### [ ] T5 — Segment review in the aggregate (~10 min)
+### [x] T5 — Segment review in the aggregate (~10 min)
 
 - **Layer:** domain
 - **Files:** `domain/model/CheckingAccount.java`, `CheckingAccountTests.java`, `application/CheckingAccountService.java` (call sites)
@@ -116,8 +116,8 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
   2. At opening, a high-net-worth holder whose balance is below the minimum gets the first review six months after the opening deposit (R26).
   3. In the service, keep today's behaviour until T7: `if (account.segmentReviewDue(now)) account.resolveSegmentReview(now, false)`.
 - **Acceptance criteria:**
-  - [ ] Tests for R22, R23, R25 and R26: review one month after the withdrawal; not due one second before; recovering the minimum cancels it; with high income the next review is six months later; without it the holder is retail and no review remains.
-  - [ ] `resolveSegmentReview` before it is due, or for a retail holder, throws `IllegalStateException`; a null `now` throws `NullPointerException`.
+  - [x] Tests for R22, R23, R25 and R26: review one month after the withdrawal; not due one second before; recovering the minimum cancels it; with high income the next review is six months later; without it the holder is retail and no review remains.
+  - [x] `resolveSegmentReview` before it is due, or for a retail holder, throws `IllegalStateException`; a null `now` throws `NullPointerException`.
 
 ### [ ] T6 — `integration` layer with the simulated tax agency (~10 min)
 

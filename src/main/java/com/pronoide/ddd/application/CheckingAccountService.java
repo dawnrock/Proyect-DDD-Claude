@@ -2,6 +2,7 @@ package com.pronoide.ddd.application;
 
 import java.math.BigDecimal;
 import java.time.Clock;
+import java.time.Instant;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
@@ -111,7 +112,7 @@ public class CheckingAccountService {
      */
     public TransactionSummary withdraw(Caller caller, WithdrawCommand command) {
         CheckingAccount account = loadFor(caller, command.accountId());
-        account.reviewSegment(clock.instant());
+        reviewSegment(account);
         Transaction transaction = account.tryWithdraw(toAmount(command.amount(), command.currency()));
         repository.save(account);
         return toTransaction(transaction);
@@ -133,7 +134,7 @@ public class CheckingAccountService {
         AccountNumber targetNumber = new AccountNumber(command.targetAccountNumber());
         CheckingAccount target = repository.findByAccountNumber(targetNumber)
                 .orElseThrow(() -> new TargetAccountNotFoundException(targetNumber.value()));
-        source.reviewSegment(clock.instant());
+        reviewSegment(source);
         Transaction withdrawal =
                 transferService.transfer(source, target, toAmount(command.amount(), command.currency()));
         repository.save(source);
@@ -160,13 +161,21 @@ public class CheckingAccountService {
         int demoted = 0;
         for (CheckingAccount account : repository.findAll()) {
             boolean wasHighNetWorth = account.primaryHolder().isHighNetWorth();
-            account.reviewSegment(clock.instant());
+            reviewSegment(account);
             if (wasHighNetWorth && !account.primaryHolder().isHighNetWorth()) {
                 repository.save(account);
                 demoted++;
             }
         }
         return demoted;
+    }
+
+    /** Resuelve la revisión del segmento de la cuenta si a esta hora ya le toca. */
+    private void reviewSegment(CheckingAccount account) {
+        Instant now = clock.instant();
+        if (account.segmentReviewDue(now)) {
+            account.resolveSegmentReview(now, false);
+        }
     }
 
     /** Carga la cuenta; una ajena (o sin propietario, para un usuario) se trata como inexistente. */
