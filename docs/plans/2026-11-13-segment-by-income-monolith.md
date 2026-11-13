@@ -132,7 +132,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
   - [x] `TaxAgencyClientTests` passes for the three demo tax ids, an unknown one and null.
   - [x] `LayeredArchitectureTests` fails with each deliberate break and passes after reverting.
 
-### [ ] T7 — The service asks the agency at opening and at review (~10 min)
+### [x] T7 — The service asks the agency at opening and at review (~10 min)
 
 - **Layer:** application
 - **Files:** `application/CheckingAccountService.java`, `CheckingAccountServiceTests.java`, `SegmentReviewJobTests.java`
@@ -142,8 +142,8 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
   2. Private `reviewSegment(account)`: if `account.segmentReviewDue(clock.instant())`, verify the holder's income and call `resolveSegmentReview`; save the account right away. Used before `withdraw`, before `transfer` (source) and by `reviewSegments()`, which keeps returning how many holders went back to retail.
   3. Javadoc of the service and of `SegmentReviewJob` updated to the new rule.
 - **Acceptance criteria:**
-  - [ ] Opening with `87654321X` and 5.000,00 € gives a high-net-worth holder with a review six months later; `12345678Z` with 1.000,00 € gives retail; `12345678Z` with 150.000,00 € gives high net worth by balance.
-  - [ ] With a clock moved forward: the agency is not asked when no review is due; Ada (low income) goes back to retail after a month; Grace (high income) keeps the segment and gets the next review six months later.
+  - [x] Opening with `87654321X` and 5.000,00 € gives a high-net-worth holder with a review six months later; `12345678Z` with 1.000,00 € gives retail; `12345678Z` with 150.000,00 € gives high net worth by balance.
+  - [x] With a clock moved forward: the agency is not asked when no review is due; Ada (low income) goes back to retail after a month; Grace (high income) keeps the segment and gets the next review six months later.
 
 ### [ ] T8 — Demo data aligned with `Hexagonal` (~5 min)
 

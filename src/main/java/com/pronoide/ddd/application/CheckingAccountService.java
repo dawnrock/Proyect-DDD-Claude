@@ -14,10 +14,12 @@ import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CustomerSegment;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
+import com.pronoide.ddd.domain.model.HighNetWorthIncome;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.domain.model.Transaction;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
+import com.pronoide.ddd.integration.TaxAgencyClient;
 import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
 
@@ -39,6 +41,7 @@ public class CheckingAccountService {
 
     private final InMemoryCheckingAccountRepository repository;
     private final InMemoryAccountOwnershipRepository ownership;
+    private final TaxAgencyClient taxAgency;
     private final Clock clock;
     private final MoneyTransferService transferService = new MoneyTransferService();
 
@@ -64,7 +67,8 @@ public class CheckingAccountService {
             throw new DuplicateAccountNumberException(accountNumber);
         });
 
-        AccountHolder holder = AccountHolder.register(command.holderName(), new TaxId(command.holderTaxId()), CustomerSegment.RETAIL);
+        TaxId taxId = new TaxId(command.holderTaxId());
+        AccountHolder holder = AccountHolder.register(command.holderName(), taxId, segmentFor(taxId));
         MonetaryAmount initialDeposit =
                 new MonetaryAmount(command.initialDeposit(), Currency.getInstance(command.currency()));
         CheckingAccount account = repository.save(CheckingAccount.open(accountNumber, holder, initialDeposit));
@@ -152,8 +156,9 @@ public class CheckingAccountService {
     }
 
     /**
-     * Revisa el segmento de todas las cuentas: devuelve a minorista a los titulares que llevan el periodo de gracia
-     * completo por debajo del patrimonio mínimo. Es un proceso interno, sin {@link Caller}.
+     * Revisa el segmento de todas las cuentas a las que les toca: vuelven a minorista los titulares cuyos ingresos
+     * verificados ya no son altos; los demás conservan el segmento hasta la siguiente revisión, seis meses después. Es
+     * un proceso interno, sin {@link Caller}.
      *
      * @return cuántos titulares han vuelto a minorista
      */
@@ -163,18 +168,33 @@ public class CheckingAccountService {
             boolean wasHighNetWorth = account.primaryHolder().isHighNetWorth();
             reviewSegment(account);
             if (wasHighNetWorth && !account.primaryHolder().isHighNetWorth()) {
-                repository.save(account);
                 demoted++;
             }
         }
         return demoted;
     }
 
-    /** Resuelve la revisión del segmento de la cuenta si a esta hora ya le toca. */
+    /** R24: el titular abre como alto patrimonio si sus ingresos verificados superan el umbral. */
+    private CustomerSegment segmentFor(TaxId taxId) {
+        return hasHighIncome(taxId) ? CustomerSegment.HIGH_NET_WORTH : CustomerSegment.RETAIL;
+    }
+
+    private boolean hasHighIncome(TaxId taxId) {
+        return HighNetWorthIncome.isMetBy(taxAgency.verifiedAnnualIncome(taxId));
+    }
+
+    /**
+     * Resuelve la revisión del segmento de la cuenta si a esta hora ya le toca: solo entonces verifica de nuevo los
+     * ingresos del titular en la agencia tributaria, y el agregado decide (R22, R25). La cuenta se guarda en el acto,
+     * para que la revisión no se pierda si el cargo que viene después falla. Es la orquestación que en la fase 2 hace
+     * el servicio de dominio {@code SegmentReviewService} con el puerto {@code IncomeVerifier}: aquí el dominio no
+     * conoce a la agencia (ADR 0004, ADR 0011).
+     */
     private void reviewSegment(CheckingAccount account) {
         Instant now = clock.instant();
         if (account.segmentReviewDue(now)) {
-            account.resolveSegmentReview(now, false);
+            account.resolveSegmentReview(now, hasHighIncome(account.primaryHolder().taxId()));
+            repository.save(account);
         }
     }
 
