@@ -139,12 +139,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The four tests pass; `./mvnw verify` green.
 
-### [ ] T10 — Runtime users: `CustomerRegistration` (~10 min)
+### [x] T10 — Runtime users: `CustomerRegistration` (~10 min)
 
 - **Side:** back · **Layer:** presentation · **Files:** `presentation/CustomerRegistration.java`, `SecuritySupport.java` + tests · **Depends on:** T7
 - **What to do:** expose the `InMemoryUserDetailsManager` bean; `register` rejects a taken username (`UsernameTakenException`) before opening anything, calls `signUp`, then creates the user with role `USER` and a BCrypt hash; if `signUp` fails no user exists.
 - **Acceptance criteria:**
-  - [ ] Tests: the new user can authenticate; taken username; failed sign-up leaves no user. `la_aplicacion_no_depende_de_spring_security` green.
+  - [x] Tests: the new user can authenticate; taken username; failed sign-up leaves no user. `la_aplicacion_no_depende_de_spring_security` green.
 
 ### [ ] T11 — REST: `POST /api/customers` (~10 min)
 

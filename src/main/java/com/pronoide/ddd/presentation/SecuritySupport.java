@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -38,7 +37,7 @@ public class SecuritySupport {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(SecurityUsersProperties properties, PasswordEncoder encoder,
+    public InMemoryUserDetailsManager userDetailsService(SecurityUsersProperties properties, PasswordEncoder encoder,
                                                  @Value("${APP_ADMIN_USERNAME:}") String adminUsername,
                                                  @Value("${APP_ADMIN_PASSWORD:}") String adminPassword) {
         List<UserDetails> users = new ArrayList<>();
