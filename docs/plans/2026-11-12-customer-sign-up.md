@@ -183,12 +183,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Tests for the three behaviours pass; the password never appears in the rendered HTML.
 
-### [ ] T16 — Sign-up step 3: account and confirmation (~10 min)
+### [x] T16 — Sign-up step 3: account and confirmation (~10 min)
 
 - **Side:** web · **Layer:** presentation (web) · **Files:** `SignUpController.java`, `templates/signup/account.html` + tests · **Depends on:** T15
 - **What to do:** initial deposit, summary, acceptance of conditions; on submit call `CustomerRegistration.register` (mocked). A duplicate customer goes back to step 1 with "Ya eres cliente de Mon-A Bank" and a link to `/login?form`; a taken username goes to step 2; other domain errors stay on step 3.
 - **Acceptance criteria:**
-  - [ ] Tests for success and the three error routes pass.
+  - [x] Tests for success and the three error routes pass.
 
 ### [ ] T17 — Signed in after signing up (~10 min)
 

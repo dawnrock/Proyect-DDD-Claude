@@ -1,7 +1,12 @@
 package com.pronoide.ddd.presentation.web;
 
+import java.math.BigDecimal;
+
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 import com.pronoide.ddd.application.OpenAccountCommandDef;
@@ -32,6 +37,10 @@ public class SignUpForm {
     public interface Access {
     }
 
+    /** Paso 3: depósito inicial y aceptación de las condiciones. */
+    public interface AccountData {
+    }
+
     @NotBlank(groups = PersonalData.class, message = "El nombre y apellidos son obligatorios")
     private String fullName;
 
@@ -58,6 +67,17 @@ public class SignUpForm {
     private String password;
 
     private String passwordRepetition;
+
+    @NotNull(groups = AccountData.class, message = "El depósito inicial es obligatorio")
+    @Positive(groups = AccountData.class, message = "El depósito inicial debe ser positivo")
+    private BigDecimal initialDeposit;
+
+    @Pattern(groups = AccountData.class, regexp = "[A-Z]{3}",
+            message = "La divisa debe ser un código de tres letras mayúsculas")
+    private String currency = "EUR";
+
+    @AssertTrue(groups = AccountData.class, message = "Debes aceptar las condiciones")
+    private boolean conditionsAccepted;
 
     @Setter(lombok.AccessLevel.NONE)
     private boolean personalDataDone;
