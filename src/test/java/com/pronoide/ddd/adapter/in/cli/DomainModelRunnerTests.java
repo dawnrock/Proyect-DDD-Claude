@@ -84,7 +84,7 @@ class DomainModelRunnerTests {
         new DomainModelRunner(commands).run(new DefaultApplicationArguments());
 
         assertThat(service.listAccounts(CallerDef.system())).extracting(AccountSummary::accountNumber)
-                .doesNotHaveDuplicates().allMatch(number -> number.startsWith("ES") && number.startsWith("2100", 4));
+                .doesNotHaveDuplicates().allMatch(number -> number.startsWith("ES") && number.startsWith("99990001", 4));
     }
 
     @Test

@@ -253,9 +253,11 @@ class CheckingAccountServiceTests {
             AccountSummary grace = service.openAccount(ADMIN, highNetWorthCommand().build());
             AccountSummary ada = service.openAccount(ADMIN, command().build());
 
+            // El orden lo decide el IBAN completo, dígitos de control incluidos, no el orden de apertura
             assertThat(service.listAccounts(ADMIN))
+                    .isSortedAccordingTo(java.util.Comparator.comparing(AccountSummary::accountNumber))
                     .extracting(AccountSummary::accountNumber, AccountSummary::holderName, AccountSummary::segment)
-                    .containsExactly(
+                    .containsExactlyInAnyOrder(
                             tuple(grace.accountNumber(), "Grace Hopper", "HIGH_NET_WORTH"),
                             tuple(ada.accountNumber(), "Ada Lovelace", "RETAIL"));
         }

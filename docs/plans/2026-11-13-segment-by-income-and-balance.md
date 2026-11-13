@@ -160,7 +160,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The ArchUnit rule fails when broken and passes when restored; the application starts without scheduling errors.
 
-### [ ] T11 — Mon-A Bank entity code in generated IBANs (~10 min)
+### [x] T11 — Mon-A Bank entity code in generated IBANs (~10 min)
 
 - **Layer:** adapter.out
 - **Files:** `adapter/out/persistence/InMemoryAccountNumberSequence.java`, `InMemoryAccountNumberSequenceTests.java`, tests and demo output that assert generated IBANs
@@ -169,7 +169,7 @@ Decisions taken in this plan:
   1. Failing test first: the first IBAN has entity `9999` and branch `0001`, valid Spanish control digits and a valid mod-97 check.
   2. Change the two constants; update the tests that compare against the old generated values (the IBANs typed by hand in other tests are arbitrary and stay).
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green; with the `demo` profile the three accounts start with `ES` + 2 digits + `99990001`.
+  - [x] `./mvnw verify` green; with the `demo` profile the three accounts start with `ES` + 2 digits + `99990001`.
 
 ### [ ] T12 — Documentation (~10 min)
 
