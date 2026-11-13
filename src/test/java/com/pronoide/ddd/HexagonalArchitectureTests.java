@@ -55,6 +55,7 @@ class HexagonalArchitectureTests {
             .adapter("cli", "..adapter.in.cli..")
             .adapter("rest", "..adapter.in.rest..")
             .adapter("web", "..adapter.in.web..")
+            .adapter("scheduler", "..adapter.in.scheduler..")
             .adapter("persistence", "..adapter.out.persistence..")
             .adapter("event", "..adapter.out.event..")
             .adapter("taxagency", "..adapter.out.taxagency..")
@@ -201,7 +202,8 @@ class HexagonalArchitectureTests {
     static final ArchRule el_soporte_de_adapter_in_no_conoce_a_los_adaptadores = noClasses()
             .that().resideInAPackage(ADAPTER_IN_SUPPORT)
             .should().dependOnClassesThat()
-            .resideInAnyPackage("..adapter.in.cli..", "..adapter.in.rest..", "..adapter.in.web..");
+            .resideInAnyPackage("..adapter.in.cli..", "..adapter.in.rest..", "..adapter.in.web..",
+                    "..adapter.in.scheduler..");
 
     /** #20: {@code config} construye el núcleo y nadie depende de ella. */
     @ArchTest

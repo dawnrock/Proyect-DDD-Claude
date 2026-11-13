@@ -149,7 +149,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The two tests pass; `los_puertos_de_entrada_son_interfaces` stays green.
 
-### [ ] T10 — Scheduler input adapter (~10 min)
+### [x] T10 — Scheduler input adapter (~10 min)
 
 - **Layer:** adapter.in · config · tests
 - **Files:** new `adapter/in/scheduler/SegmentReviewScheduler.java` + test, `config` (`@EnableScheduling`), `HexagonalArchitectureTests.java`
@@ -158,7 +158,7 @@ Decisions taken in this plan:
   1. Test first: the scheduler calls `CheckingAccountCommands.reviewSegments()` (port mocked) and logs the count.
   2. `@Scheduled(cron = "0 0 3 * * *")`; register the adapter `scheduler` in `las_dependencias_apuntan_hacia_el_hexagono` and validate the rule by breaking it (make the scheduler depend on `CheckingAccountService`) and restoring it.
 - **Acceptance criteria:**
-  - [ ] The ArchUnit rule fails when broken and passes when restored; the application starts without scheduling errors.
+  - [x] The ArchUnit rule fails when broken and passes when restored; the application starts without scheduling errors.
 
 ### [ ] T11 — Mon-A Bank entity code in generated IBANs (~10 min)
 
