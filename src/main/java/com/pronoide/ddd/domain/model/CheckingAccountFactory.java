@@ -25,7 +25,7 @@ public class CheckingAccountFactory {
 
     public CheckingAccount open(String holderName, TaxId taxId, MonetaryAmount initialDeposit) {
         Objects.requireNonNull(taxId, "El NIF del titular es obligatorio");
-        AccountHolder holder = AccountHolder.register(holderName, segmentFor(taxId));
+        AccountHolder holder = AccountHolder.register(holderName, taxId, segmentFor(taxId));
         return CheckingAccount.open(numbering.next(), holder, initialDeposit);
     }
 

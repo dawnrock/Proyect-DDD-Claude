@@ -82,4 +82,12 @@ class CheckingAccountFactoryTests {
         assertThatExceptionOfType(InsufficientInitialDepositException.class)
                 .isThrownBy(() -> factory.open("Grace Hopper", TAX_ID, MonetaryAmount.euros("49.99")));
     }
+
+    @Test
+    @DisplayName("El titular de la cuenta abierta conserva el NIF indicado")
+    void el_titular_de_la_cuenta_abierta_conserva_el_nif_indicado() {
+        CheckingAccount account = factoryWithIncome("40000.00").open("Ada Lovelace", TAX_ID, MonetaryAmount.euros("100.00"));
+
+        assertThat(account.primaryHolder().taxId()).isEqualTo(TAX_ID);
+    }
 }

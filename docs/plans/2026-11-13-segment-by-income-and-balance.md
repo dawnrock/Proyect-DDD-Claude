@@ -74,7 +74,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The two tests pass and fail when the promotion is removed.
 
-### [ ] T3 — The holder keeps its tax id (~10 min)
+### [x] T3 — The holder keeps its tax id (~10 min)
 
 - **Layer:** domain
 - **Files:** `AccountHolder.java`, `CheckingAccountFactory.java`, `AccountHolderTests.java`, `CheckingAccountFactoryTests.java`
@@ -83,7 +83,7 @@ Decisions taken in this plan:
   1. Failing tests first: a holder registered by the factory exposes the `TaxId` it was opened with; the tax id is mandatory; `demoteToRetail()` makes a high-net-worth holder retail.
   2. `AccountHolder.register(fullName, taxId, segment)` with the accessor `taxId()`; R20 stays in `CheckingAccountFactory`. Update `TestAccounts` / `TestCheckingAccounts` with a default tax id.
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest='AccountHolderTests,CheckingAccountFactoryTests'` passes; `./mvnw verify` green.
+  - [x] `./mvnw test -Dtest='AccountHolderTests,CheckingAccountFactoryTests'` passes; `./mvnw verify` green.
 
 ### [ ] T4 — The account remembers since when it is below the minimum (~10 min)
 
