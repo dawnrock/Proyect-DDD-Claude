@@ -90,12 +90,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] `./mvnw test -Dtest=EmailAddressTests` passes.
 
-### [ ] T3 — `Customer` aggregate and `DuplicateCustomerException` (~10 min)
+### [x] T3 — `Customer` aggregate and `DuplicateCustomerException` (~10 min)
 
 - **Side:** back · **Layer:** domain · **Files:** `domain/model/Customer.java`, `DuplicateCustomerException.java` + tests · **Depends on:** T1, T2
 - **What to do:** `Customer.register(fullName, taxId, email)` with private constructor, record-style accessors, equality by id; `DuplicateCustomerException(TaxId)` extends `DomainException` with "Ya eres cliente de Mon-A Bank: ya hay un cliente con el documento …".
 - **Acceptance criteria:**
-  - [ ] Tests for creation, null and blank checks and equality pass.
+  - [x] Tests for creation, null and blank checks and equality pass.
 
 ### [ ] T4 — Customer repository (~10 min)
 
