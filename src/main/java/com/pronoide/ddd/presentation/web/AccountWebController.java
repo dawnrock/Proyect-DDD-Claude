@@ -237,6 +237,7 @@ public class AccountWebController {
             return OpenAccountCommand.builder()
                     .accountNumber(form.getAccountNumber())
                     .holderName(form.getHolderName())
+                    .holderTaxId(form.getHolderTaxId())
                     .initialDeposit(form.getInitialDeposit())
                     .currency(form.getCurrency())
                     .ownerUsername(form.getOwnerUsername())

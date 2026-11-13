@@ -23,9 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 public class DemoDataLoader implements ApplicationRunner {
 
     private static final List<OpenAccountCommand> DEMO_ACCOUNTS = List.of(
-            account("ES9121000418450200051332", "Ada Lovelace", "1000.00", "ada"),
-            account("ES7921000813610123456789", "Grace Hopper", "150000.00", "grace"),
-            account("ES6000491500051234567892", "Alan Turing", "250.00", "alan"));
+            account("ES9121000418450200051332", "Ada Lovelace", "12345678Z", "1000.00", "ada"),
+            account("ES7921000813610123456789", "Grace Hopper", "87654321X", "150000.00", "grace"),
+            account("ES6000491500051234567892", "Alan Turing", "11111111H", "250.00", "alan"));
 
     private final CheckingAccountService service;
 
@@ -38,11 +38,12 @@ public class DemoDataLoader implements ApplicationRunner {
         });
     }
 
-    private static OpenAccountCommand account(String accountNumber, String holderName, String initialDeposit,
-                                              String owner) {
+    private static OpenAccountCommand account(String accountNumber, String holderName, String holderTaxId,
+                                              String initialDeposit, String owner) {
         return OpenAccountCommand.builder()
                 .accountNumber(accountNumber)
                 .holderName(holderName)
+                .holderTaxId(holderTaxId)
                 .initialDeposit(new BigDecimal(initialDeposit))
                 .ownerUsername(owner)
                 .build();

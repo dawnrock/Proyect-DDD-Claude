@@ -59,7 +59,7 @@ class AccountControllerTests {
     private static final UUID ID = UUID.fromString("11111111-2222-3333-4444-555555555555");
     private static final String IBAN = "ES9121000418450200051332";
     private static final String VALID_BODY = """
-            {"accountNumber": "es91 2100 0418 4502 0005 1332", "holderName": "Ada Lovelace",
+            {"accountNumber": "es91 2100 0418 4502 0005 1332", "holderName": "Ada Lovelace", "holderTaxId": "12345678Z",
              "initialDeposit": 100.00, "ownerUsername": "ada"}""";
 
     @Autowired
@@ -115,7 +115,7 @@ class AccountControllerTests {
             given(service.openAccount(any(Caller.class), any())).willReturn(summary());
 
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
-                    {"accountNumber": "ES9121000418450200051332", "holderName": "Ada Lovelace",
+                    {"accountNumber": "ES9121000418450200051332", "holderName": "Ada Lovelace", "holderTaxId": "12345678Z",
                      "initialDeposit": 100, "currency": "USD", "ownerUsername": "ada"}"""))
                     .andExpect(status().isCreated());
 
@@ -141,11 +141,12 @@ class AccountControllerTests {
         @DisplayName("Todos los campos mal formados aparecen en el mapa de errores")
         void todos_los_campos_mal_formados_aparecen_en_el_mapa_de_errores() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
-                    {"accountNumber": "ES12", "holderName": " ",
+                    {"accountNumber": "ES12", "holderName": " ", "holderTaxId": "1234",
                      "initialDeposit": -5, "currency": "eur", "ownerUsername": "Ada L"}"""))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.accountNumber").exists())
                     .andExpect(jsonPath("$.errors.holderName").exists())
+                    .andExpect(jsonPath("$.errors.holderTaxId").exists())
                     .andExpect(jsonPath("$.errors.initialDeposit").exists())
                     .andExpect(jsonPath("$.errors.currency").exists())
                     .andExpect(jsonPath("$.errors.ownerUsername").exists());
@@ -160,6 +161,7 @@ class AccountControllerTests {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.accountNumber").exists())
                     .andExpect(jsonPath("$.errors.holderName").exists())
+                    .andExpect(jsonPath("$.errors.holderTaxId").exists())
                     .andExpect(jsonPath("$.errors.segment").doesNotExist())
                     .andExpect(jsonPath("$.errors.initialDeposit").exists())
                     .andExpect(jsonPath("$.errors.ownerUsername").exists())
@@ -193,7 +195,7 @@ class AccountControllerTests {
         @DisplayName("Una divisa bien formada pero desconocida que escapa a la validación responde 400")
         void una_divisa_bien_formada_pero_desconocida_responde_400() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
-                    {"accountNumber": "ES9121000418450200051332", "holderName": "Ada Lovelace",
+                    {"accountNumber": "ES9121000418450200051332", "holderName": "Ada Lovelace", "holderTaxId": "12345678Z",
                      "initialDeposit": 100, "currency": "XYZ", "ownerUsername": "ada"}"""))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.title").value("Petición no válida"));

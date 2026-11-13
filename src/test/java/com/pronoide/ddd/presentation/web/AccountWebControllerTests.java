@@ -1050,6 +1050,7 @@ class AccountWebControllerTests {
             mvc.perform(post("/accounts/new")
                             .param("accountNumber", "es12 3456 7890 1234 5678 9012")
                             .param("holderName", "Ana Pérez")
+                            .param("holderTaxId", "12345678Z")
                             .param("ownerUsername", "ana")
                             .param("initialDeposit", "100.00")
                             .param("currency", "EUR"))
@@ -1060,6 +1061,7 @@ class AccountWebControllerTests {
             verify(service).openAccount(ADMIN, OpenAccountCommand.builder()
                     .accountNumber("es12 3456 7890 1234 5678 9012")
                     .holderName("Ana Pérez")
+                    .holderTaxId("12345678Z")
                     .initialDeposit(new BigDecimal("100.00"))
                     .currency("EUR")
                     .ownerUsername("ana")
@@ -1125,6 +1127,7 @@ class AccountWebControllerTests {
                     .param("accountNumber", accountNumber)
                     .param("ownerUsername", owner)
                     .param("holderName", holderName)
+                    .param("holderTaxId", "12345678Z")
                     .param("initialDeposit", deposit)
                     .param("currency", "EUR");
         }
@@ -1138,6 +1141,19 @@ class AccountWebControllerTests {
                     .andExpect(view().name("accounts/new"))
                     .andExpect(model().attributeHasFieldErrors("form", "holderName"))
                     .andExpect(content().string(containsString("El titular es obligatorio")));
+
+            verifyNoInteractions(service);
+        }
+
+        @Test
+        @DisplayName("Un NIF mal formado vuelve al formulario con el error del campo y sin llamar al servicio")
+        void un_nif_mal_formado_vuelve_al_formulario_con_el_error_del_campo_y_sin_llamar_al_servicio()
+                throws Exception {
+            mvc.perform(altaCon("ES1234567890123456789012", "Ana Lopez", "100.00").param("holderTaxId", "1234"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/new"))
+                    .andExpect(model().attributeHasFieldErrors("form", "holderTaxId"))
+                    .andExpect(content().string(containsString("El NIF del titular debe tener 8 dígitos y una letra")));
 
             verifyNoInteractions(service);
         }
@@ -1193,6 +1209,7 @@ class AccountWebControllerTests {
                             .param("accountNumber", "ES1234567890123456789012")
                             .param("ownerUsername", "ana")
                             .param("holderName", "Ana Lopez")
+                            .param("holderTaxId", "12345678Z")
                             .param("initialDeposit", "100.00")
                             .param("currency", "XYZ"))
                     .andExpect(status().isOk())

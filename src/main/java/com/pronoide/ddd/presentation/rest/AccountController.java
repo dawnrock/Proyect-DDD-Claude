@@ -44,6 +44,7 @@ public class AccountController {
         OpenAccountCommand.Builder command = OpenAccountCommand.builder()
                 .accountNumber(request.accountNumber())
                 .holderName(request.holderName())
+                .holderTaxId(request.holderTaxId())
                 .initialDeposit(request.initialDeposit())
                 .ownerUsername(request.ownerUsername());
         if (request.currency() != null) {

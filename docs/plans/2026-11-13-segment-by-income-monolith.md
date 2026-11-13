@@ -80,7 +80,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
 - **Acceptance criteria:**
   - [x] Tests pass: 100.000,01 € → true; exactly 100.000,00 €, less, or empty → false; null → `NullPointerException`.
 
-### [ ] T3 — Holder's tax id from the form and the REST body to the command (~10 min)
+### [x] T3 — Holder's tax id from the form and the REST body to the command (~10 min)
 
 - **Layer:** application · presentation (mechanical, end to end, so the build stays green)
 - **Files:** `application/OpenAccountCommandDef.java`, `application/DemoDataLoader.java`, `presentation/rest/OpenAccountRequest.java`, `presentation/rest/AccountController.java`, `presentation/web/OpenAccountForm.java`, `presentation/web/AccountWebController.java`, `templates/accounts/new.html`, and the tests that build these objects
@@ -90,8 +90,8 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
   2. Add the same field and pattern to `OpenAccountRequest` and `OpenAccountForm`, map it in both controllers, and add the "NIF del titular" input to `new.html` (as on `Hexagonal`).
   3. Give the demo accounts the `Hexagonal` tax ids (deposits change in T8). The service does not use the field yet.
 - **Acceptance criteria:**
-  - [ ] `OpenAccountCommandTests`: missing or malformed tax id is rejected; `" 12345678z "` is accepted.
-  - [ ] REST and web tests: a request without `holderTaxId` gets 400 / the form shows the field error.
+  - [x] `OpenAccountCommandTests`: missing or malformed tax id is rejected; `" 12345678z "` is accepted.
+  - [x] REST and web tests: a request without `holderTaxId` gets 400 / the form shows the field error.
 
 ### [ ] T4 — `AccountHolder` with tax id and given segment (~10 min)
 

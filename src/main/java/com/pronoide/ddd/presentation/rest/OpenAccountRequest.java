@@ -13,7 +13,8 @@ import jakarta.validation.constraints.Positive;
  * formulario web ("Shared presentation validation" del contrato), de modo que lo que acepta nunca hace
  * que el dominio lance {@code IllegalArgumentException}.
  *
- * <p>{@code currency} es opcional ({@code EUR}). El segmento no se pide: lo asigna el dominio según el saldo.
+ * <p>{@code currency} es opcional ({@code EUR}). El segmento no se pide: lo deciden los ingresos
+ * verificados del titular, que se identifica por su NIF ({@code holderTaxId}), y el saldo.
  */
 public record OpenAccountRequest(
         @NotBlank(message = "El número de cuenta es obligatorio")
@@ -23,6 +24,10 @@ public record OpenAccountRequest(
 
         @NotBlank(message = "El nombre del titular es obligatorio")
         String holderName,
+
+        @NotBlank(message = "El NIF del titular es obligatorio")
+        @Pattern(regexp = "^ *\\d{8} *[A-Za-z] *$", message = "El NIF del titular debe tener 8 dígitos y una letra")
+        String holderTaxId,
 
         @NotNull(message = "El depósito inicial es obligatorio")
         @Positive(message = "El depósito inicial debe ser positivo")

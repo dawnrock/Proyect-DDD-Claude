@@ -19,6 +19,7 @@ class OpenAccountCommandTests {
         return OpenAccountCommand.builder()
                 .accountNumber(IBAN)
                 .holderName("Ada Lovelace")
+                .holderTaxId("12345678Z")
                 .initialDeposit(new BigDecimal("100.00"));
     }
 
@@ -55,6 +56,21 @@ class OpenAccountCommandTests {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().holderName(holderName).build())
                 .withMessage("El nombre del titular es obligatorio");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "1234567Z", "123456789Z", "12345678", "12345678-Z"})
+    @DisplayName("El NIF del titular debe tener 8 dígitos y una letra")
+    void el_nif_del_titular_debe_tener_8_digitos_y_una_letra(String holderTaxId) {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> validCommand().holderTaxId(holderTaxId).build())
+                .withMessage("El NIF del titular debe tener 8 dígitos y una letra");
+    }
+
+    @Test
+    @DisplayName("Un NIF con espacios o en minúsculas se acepta: lo normaliza el dominio")
+    void un_nif_con_espacios_o_en_minusculas_se_acepta() {
+        assertThat(validCommand().holderTaxId(" 12345678 z ").build().holderTaxId()).isEqualTo(" 12345678 z ");
     }
 
     @ParameterizedTest

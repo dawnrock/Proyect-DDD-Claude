@@ -9,7 +9,8 @@ import org.immutables.value.Value;
  * antes de llegar al dominio.
  *
  * <p>{@code currency} es un código ISO 4217 ({@code EUR} por defecto). El segmento del titular no se indica: lo
- * decide el dominio según el saldo de la cuenta.
+ * deciden los ingresos verificados del titular, que se identifica por su NIF ({@code holderTaxId}), y el saldo de la
+ * cuenta.
  */
 @ApplicationValue
 @Value.Immutable
@@ -18,9 +19,15 @@ public interface OpenAccountCommandDef {
     /** Formato de un nombre de usuario: 3-30 minúsculas, dígitos, punto, guion o guion bajo. */
     String USERNAME_PATTERN = "[a-z0-9._-]{3,30}";
 
+    /** Formato de un NIF: 8 dígitos y una letra, con espacios alrededor o entre medias; lo normaliza {@code TaxId}. */
+    String TAX_ID_PATTERN = "^ *\\d{8} *[A-Za-z] *$";
+
     String accountNumber();
 
     String holderName();
+
+    /** NIF del titular, para verificar sus ingresos en la agencia tributaria; lo normaliza {@code TaxId}. */
+    String holderTaxId();
 
     BigDecimal initialDeposit();
 
@@ -45,6 +52,9 @@ public interface OpenAccountCommandDef {
         }
         if (holderName().isBlank()) {
             throw new IllegalArgumentException("El nombre del titular es obligatorio");
+        }
+        if (!holderTaxId().matches(TAX_ID_PATTERN)) {
+            throw new IllegalArgumentException("El NIF del titular debe tener 8 dígitos y una letra");
         }
         if (initialDeposit().signum() <= 0) {
             throw new IllegalArgumentException("El depósito inicial debe ser positivo");

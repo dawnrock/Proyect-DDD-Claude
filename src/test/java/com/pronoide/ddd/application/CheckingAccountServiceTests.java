@@ -56,6 +56,7 @@ class CheckingAccountServiceTests {
         return OpenAccountCommand.builder()
                 .accountNumber(accountNumber)
                 .holderName("Ada Lovelace")
+                .holderTaxId("12345678Z")
                 .initialDeposit(new BigDecimal("100"))
                 .ownerUsername("ada");
     }
