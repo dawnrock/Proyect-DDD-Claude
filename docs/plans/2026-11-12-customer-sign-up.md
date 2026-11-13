@@ -62,7 +62,7 @@ Decisions taken in this plan:
 
 ## Tasks
 
-### [ ] T0 — Contract (~15 min)
+### [x] T0 — Contract (~15 min)
 
 - **Side:** both
 - **Layer:** application · presentation · docs
@@ -72,7 +72,7 @@ Decisions taken in this plan:
   1. Write the contract: service methods; `SignUpCommand` (fullName, taxId, email, username, initialDeposit, currency); `OpenAnotherAccountCommand` (initialDeposit, currency); `CustomerRegistration.register(command, rawPassword)` returning `AccountSummary`; the future shape of `OpenAccountCommand` and `AccountDetails` (holder tax id and e-mail); shared validation per field (tax id pattern accepting NIE, e-mail, username, password ≥ 8, deposit); errors (duplicate customer, username taken, caller is not a customer, insufficient deposit) with what the web shows and the REST status; routes and OpenAPI fragment.
   2. Create only new types and stubs. backend-dev and web-dev review and agree; the lead merges their reviews.
 - **Acceptance criteria:**
-  - [ ] Contract agreed and frozen in a commit; `./mvnw verify` green against it.
+  - [x] Contract agreed and frozen in a commit; `./mvnw verify` green against it.
 
 ### Back (parallel with web; each depends only on T0 unless stated)
 

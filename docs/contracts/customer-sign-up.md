@@ -1,8 +1,8 @@
 # Contract: Mon-A Bank customer sign-up
 
 - **Issue:** [#95](https://github.com/dawnrock/Proyect-DDD-Claude/issues/95) · **Plan:** `docs/plans/2026-11-12-customer-sign-up.md`
-- **Status:** draft
-- **Agreed by:** backend-dev, web-dev (rounds: —)
+- **Status:** agreed
+- **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed on the signatures and asked only for clarifications, merged by the lead; the teammates cannot message each other)
 
 Builds on the frozen contracts of #5, #6, #7 and #50 (`open-query-list-accounts.md`, `deposits-withdrawals.md`, `money-transfers.md`, `login-roles.md`) and on #99 (`holderTaxId`, simulated tax agency). Business rules R27-R31 are new (glossary).
 
@@ -28,7 +28,11 @@ public class CustomerRegistration {                                             
 }
 ```
 
-`register` order: (1) username taken → `UsernameTakenException`, nothing opened; (2) password shorter than 8 → `IllegalArgumentException`; (3) `signUp`; (4) create the user. If (3) fails, no user exists.
+`register` order: (1) username taken → `UsernameTakenException`, nothing opened; (2) password shorter than 8 → `IllegalArgumentException`; (3) `signUp`; (4) create the user. If (3) fails, no user exists. Steps 1-4 run under one lock (`synchronized`), so two sign-ups with the same username cannot both pass step 1; if step 4 still finds the username taken, it is reported as `UsernameTakenException`. Residual risk (step 4 failing for another reason leaves a customer without a login) is recorded in ADR 0012.
+
+`signUp` is all or nothing: it builds the account first (the domain checks R1 and the currency) and only then saves the customer, the ownership and the account. A failed opening leaves no customer behind. The R29 check and the customer save are atomic (`putIfAbsent` or `synchronized`), so two simultaneous sign-ups with the same document cannot both pass.
+
+**Who is a customer (web):** a non-admin caller whose `listAccounts(caller)` is not empty. After T20 every account belongs to a registered customer, so this matches the back; `NotACustomerException` stays as the service's safety net.
 
 ## Commands (input)
 
@@ -36,7 +40,7 @@ public class CustomerRegistration {                                             
 | ---------------- | ----- | ---- | -------- | ----- |
 | `SignUpCommandDef` (new) | `fullName` | `String` | yes | not blank |
 | | `taxId` | `String` | yes | matches `OpenAccountCommandDef.TAX_ID_PATTERN` (DNI or NIE after T1); `TaxId` normalises it and checks the control letter (R27) |
-| | `email` | `String` | yes | matches `SignUpCommandDef.EMAIL_PATTERN`; `EmailAddress` normalises it to lower case (R28) |
+| | `email` | `String` | yes | matches `SignUpCommandDef.EMAIL_PATTERN`; `EmailAddress` trims it and normalises it to lower case (R28) |
 | | `username` | `String` | yes | `OpenAccountCommandDef.USERNAME_PATTERN` |
 | | `initialDeposit` | `BigDecimal` | yes | positive (the minimum, R1, is checked by the domain) |
 | | `currency` | `String` | no (`EUR`) | ISO 4217 |
@@ -78,9 +82,10 @@ Views never expose domain aggregates or entities.
 | Exception | When | Web (what the user sees) | REST (status + `ProblemDetail.title`) |
 | --------- | ---- | ------------------------ | ------------------------------------- |
 | `DuplicateCustomerException` (domain) | document already belongs to a customer (R29) | sign-up: back to step 1 with "Ya eres cliente de Mon-A Bank…" and a link to `/login?form`; admin form: field error on the document is **not** used (an existing customer is a valid case there) | 422 "Regla de negocio incumplida" |
-| `UsernameTakenException` (presentation) | username already exists | back to step 2 with the message | 422 "Regla de negocio incumplida" |
+| `UsernameTakenException` (presentation) | username already exists | back to step 2 with the message | 422 "Regla de negocio incumplida" | (own `@ExceptionHandler` in `RestExceptionHandler`: it is not a `DomainException`)
 | `InsufficientInitialDepositException` | deposit below 50,00 € | stays on step 3 (or the another-account / admin form) with the message | 422 |
-| `IllegalArgumentException` | wrong control letter; admin data that contradict an existing customer; short password | sign-up: step 1 (document) or the field concerned; admin form: global error | 400 "Petición no válida" |
+| `IllegalArgumentException` | wrong control letter; admin data that contradict an existing customer; short password | sign-up: raised by the final POST of step 3, the web always goes back to step 1 and shows the domain message as is (a short password cannot happen: step 2 already requires 8 characters); admin form: global error | 400 "Petición no válida" |
+| `CurrencyMismatchException` (domain) | a currency other than EUR in `signUp`, `openAnotherAccount` or `openAccount` | stays on step 3 (or the another-account / admin form) with the message | 422 "Regla de negocio incumplida" |
 | `NotACustomerException` | `openAnotherAccount` by an admin or a user without customer | 403 page | — (no REST endpoint) |
 | `ForbiddenOperationException` | `regenerateAccountNumber` by a customer | 403 page | 403 |
 | `AccountNotFoundException` | unknown id in `regenerateAccountNumber` | 404 page | 404 |
@@ -104,7 +109,8 @@ Views never expose domain aggregates or entities.
 | `GET\|POST /signup/access` | public, CSRF | group `Access` | step 2: username, password, repetition |
 | `GET\|POST /signup/account` | public, CSRF | `CustomerRegistration.register` | step 3: deposit, summary, acceptance of conditions, "Abrir mi cuenta"; then signed in and redirected to `/accounts/{id}` with "Te damos la bienvenida a Mon-A Bank. Tu IBAN es …" |
 | `GET\|POST /accounts/another` | `USER` | `openAnotherAccount` | deposit only; redirect to the new account with its IBAN |
-| `GET /` (list) | `USER` | as today | adds the "Abrir otra cuenta" button for customers |
+| `GET /` (list) | `USER` | as today | adds the "Abrir otra cuenta" button for customers (model attribute `customer`, rule above) |
+| `GET /accounts/{id}` (detail) | `USER` | as today | the same "Abrir otra cuenta" button for customers: a customer with a single account is redirected from the list to the detail and would never see the list |
 | `POST /accounts/{id}/account-number` | `ADMIN`, CSRF | `regenerateAccountNumber` | button "Generar nuevo IBAN" with an in-page confirmation on the detail; flash with the new IBAN |
 | `GET\|POST /accounts/new` (changed in T20) | `ADMIN` | `openAccount` | document and deposit; name, e-mail and username for a new customer; no IBAN field |
 | `GET /accounts/{id}` (changed in T20) | as today | `findAccount` | adds the holder's document and e-mail |
