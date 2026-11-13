@@ -83,12 +83,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] `./mvnw test -Dtest=TaxIdTests` passes; the three demo tax ids are valid; `check-domain.mjs` without errors.
 
-### [ ] T2 — `EmailAddress` value object (~5 min)
+### [x] T2 — `EmailAddress` value object (~5 min)
 
 - **Side:** back · **Layer:** domain · **Files:** `domain/model/EmailAddress.java` + test · **Depends on:** T0
 - **What to do:** tests first (valid, missing `@` or domain, blank, lower-case normalisation); implement as a record (R28).
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest=EmailAddressTests` passes.
+  - [x] `./mvnw test -Dtest=EmailAddressTests` passes.
 
 ### [ ] T3 — `Customer` aggregate and `DuplicateCustomerException` (~10 min)
 
