@@ -97,12 +97,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Tests for creation, null and blank checks and equality pass.
 
-### [ ] T4 — Customer repository (~10 min)
+### [x] T4 — Customer repository (~10 min)
 
 - **Side:** back · **Layer:** persistence · **Files:** `persistence/InMemoryCustomerRepository.java` + test · **Depends on:** T3
 - **What to do:** `save(customer, username)`, `findByTaxId`, `findByUsername`, thread-safe maps.
 - **Acceptance criteria:**
-  - [ ] Tests: find by tax id and by username; unknown values give empty. `la_persistencia_no_tiene_interfaces` stays green.
+  - [x] Tests: find by tax id and by username; unknown values give empty. `la_persistencia_no_tiene_interfaces` stays green.
 
 ### [ ] T5 — Account number sequence (~10 min)
 
