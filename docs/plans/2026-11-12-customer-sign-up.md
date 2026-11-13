@@ -204,12 +204,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Tests: button only for customers; deposit validation; success redirect; administrator → 403.
 
-### [ ] T19 — Account detail: new IBAN button (~10 min)
+### [x] T19 — Account detail: new IBAN button (~10 min)
 
 - **Side:** web · **Layer:** presentation (web) · **Files:** `templates/accounts/detail.html`, `AccountWebController.java` (`POST /accounts/{id}/account-number`), `WebSecurityConfig.java` + tests · **Depends on:** T0
 - **What to do:** the administrator sees "Generar nuevo IBAN" (with an in-page confirmation step) and the action calls `regenerateAccountNumber`; a customer neither sees it nor can post it (403).
 - **Acceptance criteria:**
-  - [ ] Tests: button only for the administrator; POST as customer → 403; success shows the flash with the new IBAN.
+  - [x] Tests: button only for the administrator; POST as customer → 403; success shows the flash with the new IBAN.
 
 ### Integration (lead, in order)
 

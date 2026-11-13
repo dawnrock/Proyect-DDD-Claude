@@ -1,6 +1,7 @@
 package com.pronoide.ddd.presentation.web;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,6 +25,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/login", "/signup/**", "/css/**", "/actuator/health", "/error", "/error/**").permitAll()
                         .requestMatchers("/accounts/another").hasRole("USER")
                         .requestMatchers("/accounts/new").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/accounts/*/account-number").hasRole("ADMIN")
                         // Consola H2: solo administradores; usa marcos del mismo origen y sus propios formularios sin CSRF
                         .requestMatchers("/h2-console/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
