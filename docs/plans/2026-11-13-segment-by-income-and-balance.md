@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-13 (revision 3: income verified again when the grace period ends and every six months after that)
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~115 min (13 tasks)
 
 ## Goal
@@ -54,7 +54,7 @@ Decisions taken in this plan:
 
 ## Tasks
 
-### [ ] T1 — The aggregate promotes the holder at the minimum net worth (~10 min)
+### [x] T1 — The aggregate promotes the holder at the minimum net worth (~10 min)
 
 - **Layer:** domain
 - **Files:** `domain/model/CheckingAccount.java`, `CheckingAccountTests.java`
@@ -63,7 +63,7 @@ Decisions taken in this plan:
   1. Failing tests first: a deposit that takes the balance to exactly 100.000,00 € promotes the holder (R22); one cent less does not; an account opened by a retail holder with 100.000,00 € is high net worth from the start (R23).
   2. Add `MINIMUM_NET_WORTH` and promote in the private `deposit(Transaction)` after updating the balance.
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest=CheckingAccountTests` passes; `./mvnw verify` green.
+  - [x] `./mvnw test -Dtest=CheckingAccountTests` passes; `./mvnw verify` green.
 
 ### [ ] T2 — An incoming transfer can promote the target holder (~5 min)
 

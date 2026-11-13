@@ -9,6 +9,7 @@ public class CheckingAccount {
 
     private static final MonetaryAmount MINIMUM_INITIAL_DEPOSIT = MonetaryAmount.euros("50.00");
     private static final MonetaryAmount OVERDRAFT_LIMIT = MonetaryAmount.euros("-1000.00");
+    private static final MonetaryAmount MINIMUM_NET_WORTH = MonetaryAmount.euros("100000.00");
     private final UUID id;
     private final AccountNumber accountNumber;
     private final AccountHolder primaryHolder;
@@ -64,6 +65,9 @@ public class CheckingAccount {
         transaction.approve();
         currentBalance = newBalance;
         record(new MoneyDeposited(id, transaction.id(), amount, transaction.occurredOn()));
+        if (reachesMinimumNetWorth()) {
+            primaryHolder.promoteToHighNetWorth();
+        }
         return transaction;
     }
 
@@ -153,6 +157,10 @@ public class CheckingAccount {
         Transaction deposit = deposit(initialDeposit);
         domainEvents.add(firstEvent, new CheckingAccountOpened(
                 id, accountNumber, primaryHolder.fullName(), initialDeposit, deposit.occurredOn()));
+    }
+
+    private boolean reachesMinimumNetWorth() {
+        return !currentBalance.isLessThan(MINIMUM_NET_WORTH);
     }
 
     private void record(DomainEvent event) {

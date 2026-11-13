@@ -299,4 +299,37 @@ class CheckingAccountTests {
             assertThat(cuenta.transactions()).hasSize(3).allSatisfy(t -> assertThat(t.counterpart()).isEmpty());
         }
     }
+
+    @Nested
+    @DisplayName("Alto patrimonio por saldo")
+    class HighNetWorthByBalance {
+
+        @Test
+        @DisplayName("Un ingreso que lleva el saldo al patrimonio mínimo convierte al titular en alto patrimonio")
+        void un_ingreso_que_alcanza_el_patrimonio_minimo_promociona_al_titular() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("99000.00").open();
+
+            cuenta.deposit(MonetaryAmount.euros("1000.00"));
+
+            assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Un céntimo por debajo del patrimonio mínimo el titular sigue siendo minorista")
+        void un_centimo_por_debajo_del_patrimonio_minimo_el_titular_sigue_siendo_minorista() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("99000.00").open();
+
+            cuenta.deposit(MonetaryAmount.euros("999.99"));
+
+            assertThat(cuenta.primaryHolder().segment()).isEqualTo(CustomerSegment.RETAIL);
+        }
+
+        @Test
+        @DisplayName("Una cuenta abierta con el patrimonio mínimo por un titular minorista nace como alto patrimonio")
+        void una_cuenta_abierta_con_el_patrimonio_minimo_nace_como_alto_patrimonio() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("100000.00").open();
+
+            assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+        }
+    }
 }
