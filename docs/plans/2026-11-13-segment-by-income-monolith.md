@@ -70,7 +70,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
 - **Acceptance criteria:**
   - [x] `TaxIdTests` passes: `" 87654321x "` normalises to `87654321X`; null and wrong formats throw with the Spanish messages.
 
-### [ ] T2 — `HighNetWorthIncome` (~5 min)
+### [x] T2 — `HighNetWorthIncome` (~5 min)
 
 - **Layer:** domain
 - **Files:** `domain/model/HighNetWorthIncome.java`, `domain/model/HighNetWorthIncomeTests.java`
@@ -78,7 +78,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
 - **What to do:**
   1. Copy `HighNetWorthIncome.isMetBy(Optional<MonetaryAmount>)` from `Hexagonal`, citing R24 instead of R20.
 - **Acceptance criteria:**
-  - [ ] Tests pass: 100.000,01 € → true; exactly 100.000,00 €, less, or empty → false; null → `NullPointerException`.
+  - [x] Tests pass: 100.000,01 € → true; exactly 100.000,00 €, less, or empty → false; null → `NullPointerException`.
 
 ### [ ] T3 — Holder's tax id from the form and the REST body to the command (~10 min)
 
