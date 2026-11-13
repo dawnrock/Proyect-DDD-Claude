@@ -145,7 +145,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
   - [x] Opening with `87654321X` and 5.000,00 € gives a high-net-worth holder with a review six months later; `12345678Z` with 1.000,00 € gives retail; `12345678Z` with 150.000,00 € gives high net worth by balance.
   - [x] With a clock moved forward: the agency is not asked when no review is due; Ada (low income) goes back to retail after a month; Grace (high income) keeps the segment and gets the next review six months later.
 
-### [ ] T8 — Demo data aligned with `Hexagonal` (~5 min)
+### [x] T8 — Demo data aligned with `Hexagonal` (~5 min)
 
 - **Layer:** application
 - **Files:** `application/DemoDataLoader.java`, `DemoDataLoaderTests.java`
@@ -153,7 +153,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
 - **What to do:**
   1. Deposits of `Hexagonal`: Ada 1.000,00 €, Grace 5.000,00 €, Alan 250,00 €. Javadoc explains that Grace is high net worth by verified income.
 - **Acceptance criteria:**
-  - [ ] `DemoDataLoaderTests`: Grace is `HIGH_NET_WORTH` with 5.000,00 €; Ada and Alan are `RETAIL`.
+  - [x] `DemoDataLoaderTests`: Grace is `HIGH_NET_WORTH` with 5.000,00 €; Ada and Alan are `RETAIL`.
 
 ### [ ] T9 — ADR 0011 and phase 1 architecture (~5 min)
 

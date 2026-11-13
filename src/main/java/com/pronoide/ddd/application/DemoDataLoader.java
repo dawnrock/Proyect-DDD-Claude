@@ -13,8 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Abre cuentas de demostración al arrancar, para poder probar la aplicación sin preparar datos. Usa el caso de uso
- * {@code openAccount}, nunca el repositorio, así que los datos cumplen las mismas reglas que los reales. Solo se activa
- * con el perfil {@code demo}, que {@code ./mvnw spring-boot:run} activa por defecto; los tests no lo cargan.
+ * {@code openAccount}, nunca el repositorio, así que los datos cumplen las mismas reglas que los reales. Los NIF son los
+ * de la tabla de la agencia tributaria simulada ({@code TaxAgencyClient}): Grace Hopper es de alto patrimonio por sus
+ * ingresos verificados, aunque su depósito no llegue al patrimonio mínimo. Solo se activa con el perfil {@code demo},
+ * que {@code ./mvnw spring-boot:run} activa por defecto; los tests no lo cargan.
  */
 @Slf4j
 @Component
@@ -24,7 +26,7 @@ public class DemoDataLoader implements ApplicationRunner {
 
     private static final List<OpenAccountCommand> DEMO_ACCOUNTS = List.of(
             account("ES9121000418450200051332", "Ada Lovelace", "12345678Z", "1000.00", "ada"),
-            account("ES7921000813610123456789", "Grace Hopper", "87654321X", "150000.00", "grace"),
+            account("ES7921000813610123456789", "Grace Hopper", "87654321X", "5000.00", "grace"),
             account("ES6000491500051234567892", "Alan Turing", "11111111H", "250.00", "alan"));
 
     private final CheckingAccountService service;
