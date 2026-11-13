@@ -19,11 +19,14 @@ public interface OpenAccountCommandDef {
     /** Formato de un nombre de usuario: 3-30 minúsculas, dígitos, punto, guion o guion bajo. */
     String USERNAME_PATTERN = "[a-z0-9._-]{3,30}";
 
-    /** Formato de un NIF: 8 dígitos y una letra, con espacios alrededor o entre medias; lo normaliza {@code TaxId}. */
-    String TAX_ID_PATTERN = "^ *\\d{8} *[A-Za-z] *$";
+    /**
+     * Formato de un DNI (8 dígitos y una letra) o un NIE (X, Y o Z, 7 dígitos y una letra), con espacios alrededor o
+     * entre medias; lo normaliza {@code TaxId}, que además comprueba la letra de control.
+     */
+    String TAX_ID_PATTERN = "^ *[XYZxyz0-9]\\d{7} *[A-Za-z] *$";
 
     /** Mensaje de un documento mal formado; lo comparten los commands, la API REST y la web. */
-    String TAX_ID_MESSAGE = "El NIF del titular debe tener 8 dígitos y una letra";
+    String TAX_ID_MESSAGE = "El documento debe ser un DNI o un NIE";
 
     String accountNumber();
 

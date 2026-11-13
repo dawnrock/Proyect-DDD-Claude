@@ -59,12 +59,18 @@ class OpenAccountCommandTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "1234567Z", "123456789Z", "12345678", "12345678-Z"})
-    @DisplayName("El NIF del titular debe tener 8 dígitos y una letra")
-    void el_nif_del_titular_debe_tener_8_digitos_y_una_letra(String holderTaxId) {
+    @ValueSource(strings = {"", "1234567Z", "123456789Z", "12345678", "12345678-Z", "W1234567L", "X123456L"})
+    @DisplayName("El documento del titular debe ser un DNI o un NIE")
+    void el_documento_del_titular_debe_ser_un_dni_o_un_nie(String holderTaxId) {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().holderTaxId(holderTaxId).build())
-                .withMessage("El NIF del titular debe tener 8 dígitos y una letra");
+                .withMessage("El documento debe ser un DNI o un NIE");
+    }
+
+    @Test
+    @DisplayName("Un NIE con el formato correcto se acepta")
+    void un_nie_con_el_formato_correcto_se_acepta() {
+        assertThat(validCommand().holderTaxId("x1234567l").build().holderTaxId()).isEqualTo("x1234567l");
     }
 
     @Test

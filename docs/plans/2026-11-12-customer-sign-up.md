@@ -76,12 +76,12 @@ Decisions taken in this plan:
 
 ### Back (parallel with web; each depends only on T0 unless stated)
 
-### [ ] T1 — `TaxId` accepts NIE and checks the control letter (~10 min)
+### [x] T1 — `TaxId` accepts NIE and checks the control letter (~10 min)
 
 - **Side:** back · **Layer:** domain · application · **Files:** `domain/model/TaxId.java`, `TaxIdTests.java`, `application/OpenAccountCommandDef.java` (`TAX_ID_PATTERN`), tests with invalid tax ids · **Depends on:** T0
 - **What to do:** tests first: valid DNI and NIE (`X1234567L`), wrong letter, wrong format, normalisation; implement the mod-23 letter (NIE: `X`/`Y`/`Z` → 0/1/2) (R27); keep `Locale.ROOT`. Widen `TAX_ID_PATTERN` and its message ("El documento debe ser un DNI o un NIE") so the REST request and the web form accept NIE. Fix any test fixture with a wrong letter.
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest=TaxIdTests` passes; the three demo tax ids are valid; `check-domain.mjs` without errors.
+  - [x] `./mvnw test -Dtest=TaxIdTests` passes; the three demo tax ids are valid; `check-domain.mjs` without errors.
 
 ### [ ] T2 — `EmailAddress` value object (~5 min)
 
