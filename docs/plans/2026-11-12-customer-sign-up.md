@@ -111,12 +111,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The first number is `ES` + valid check digits + `99990001` + control digits + `0000000001`; concurrent calls never repeat; `isMonABank()` false for the old demo IBANs.
 
-### [ ] T6 — The aggregate can change its account number (~5 min)
+### [x] T6 — The aggregate can change its account number (~5 min)
 
 - **Side:** back · **Layer:** domain · **Files:** `CheckingAccount.java`, `CheckingAccountTests.java` · **Depends on:** T5
 - **What to do:** `reassignAccountNumber(AccountNumber)` accepts only a Mon-A Bank number different from the current one (R31).
 - **Acceptance criteria:**
-  - [ ] Tests for success and both rejections pass.
+  - [x] Tests for success and both rejections pass.
 
 ### [ ] T7 — Sign-up use case (~10 min)
 

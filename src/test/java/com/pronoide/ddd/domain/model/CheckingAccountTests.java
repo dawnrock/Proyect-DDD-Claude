@@ -354,4 +354,53 @@ class CheckingAccountTests {
                     .withMessage("El momento de la revisión es obligatorio");
         }
     }
+
+    @Nested
+    @DisplayName("Sustituir el número de cuenta (R31)")
+    class ReassignAccountNumber {
+
+        private static final AccountNumber MON_A_BANK_IBAN = new AccountNumber("ES6699990001740000000001");
+        private static final AccountNumber OTHER_MON_A_BANK_IBAN = new AccountNumber("ES6699990001740000000002");
+
+        @Test
+        @DisplayName("Una cuenta acepta otro número de Mon-A Bank")
+        void una_cuenta_acepta_otro_numero_de_mon_a_bank() {
+            CheckingAccount cuenta = TestAccounts.anAccount().accountNumber(MON_A_BANK_IBAN.value()).open();
+
+            cuenta.reassignAccountNumber(OTHER_MON_A_BANK_IBAN);
+
+            assertThat(cuenta.accountNumber()).isEqualTo(OTHER_MON_A_BANK_IBAN);
+        }
+
+        @Test
+        @DisplayName("Una cuenta no acepta un número que no es de Mon-A Bank")
+        void una_cuenta_no_acepta_un_numero_que_no_es_de_mon_a_bank() {
+            CheckingAccount cuenta = TestAccounts.anAccount().accountNumber(MON_A_BANK_IBAN.value()).open();
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> cuenta.reassignAccountNumber(IBAN))
+                    .withMessage("El número de cuenta ES9121000418450200051332 no es de Mon-A Bank");
+            assertThat(cuenta.accountNumber()).isEqualTo(MON_A_BANK_IBAN);
+        }
+
+        @Test
+        @DisplayName("Una cuenta no acepta el mismo número que ya tiene")
+        void una_cuenta_no_acepta_el_mismo_numero_que_ya_tiene() {
+            CheckingAccount cuenta = TestAccounts.anAccount().accountNumber(MON_A_BANK_IBAN.value()).open();
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> cuenta.reassignAccountNumber(MON_A_BANK_IBAN))
+                    .withMessage("La cuenta ya tiene el número ES6699990001740000000001");
+        }
+
+        @Test
+        @DisplayName("El nuevo número es obligatorio")
+        void el_nuevo_numero_es_obligatorio() {
+            CheckingAccount cuenta = TestAccounts.anAccount().accountNumber(MON_A_BANK_IBAN.value()).open();
+
+            assertThatExceptionOfType(NullPointerException.class)
+                    .isThrownBy(() -> cuenta.reassignAccountNumber(null))
+                    .withMessage("El número de cuenta es obligatorio");
+        }
+    }
 }
