@@ -156,6 +156,41 @@ public class CheckingAccountService {
     }
 
     /**
+     * Da de alta a un cliente nuevo de Mon-A Bank y le abre su primera cuenta, a nombre de {@code command.username()},
+     * con un IBAN que asigna el banco. El segmento lo deciden sus ingresos verificados y el saldo (#99). Lo pide un
+     * visitante sin sesión a través de {@code CustomerRegistration}, que crea después su usuario. Contrato:
+     * {@code docs/contracts/customer-sign-up.md}.
+     *
+     * @throws com.pronoide.ddd.domain.model.DuplicateCustomerException si ya hay un cliente con ese documento (R29)
+     * @throws com.pronoide.ddd.domain.model.InsufficientInitialDepositException si el depósito no llega al mínimo
+     * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el depósito no está en euros
+     */
+    public AccountSummary signUp(SignUpCommand command) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
+    /**
+     * Abre otra cuenta al cliente que lo pide, indicando solo el depósito: el titular sale de sus datos de cliente.
+     *
+     * @throws NotACustomerException si quien lo pide no es un cliente registrado (también un administrador)
+     * @throws com.pronoide.ddd.domain.model.InsufficientInitialDepositException si el depósito no llega al mínimo
+     */
+    public AccountSummary openAnotherAccount(Caller caller, OpenAnotherAccountCommand command) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
+    /**
+     * Sustituye el IBAN de la cuenta por otro que genera el banco (R31). Solo un administrador.
+     *
+     * @return el resumen de la cuenta con el IBAN nuevo
+     * @throws ForbiddenOperationException si quien lo pide no es administrador
+     * @throws AccountNotFoundException si la cuenta no existe
+     */
+    public AccountSummary regenerateAccountNumber(Caller caller, UUID id) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
+    /**
      * Revisa el segmento de todas las cuentas a las que les toca: vuelven a minorista los titulares cuyos ingresos
      * verificados ya no son altos; los demás conservan el segmento hasta la siguiente revisión, seis meses después. Es
      * un proceso interno, sin {@link Caller}.
