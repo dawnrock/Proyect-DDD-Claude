@@ -16,6 +16,7 @@ com.pronoide.ddd
 │   ├── in
 │   │   ├── cli           DomainModelRunner
 │   │   ├── rest          REST API
+│   │   ├── scheduler     SegmentReviewScheduler (daily segment review)
 │   │   └── web           Thymeleaf
 │   └── out
 │       ├── event         SpringDomainEventPublisher
@@ -46,7 +47,7 @@ com.pronoide.ddd
   | Domain model (and output ports) | `domain.model` |
   | Domain services | `domain.service` |
   | Application services (input ports, ownership port, listeners) | `application` |
-  | Adapters, one per technology, that do not know each other | `adapter.in.cli`, `adapter.in.rest`, `adapter.in.web`, `adapter.out.persistence`, `adapter.out.event`, `adapter.out.taxagency` |
+  | Adapters, one per technology, that do not know each other | `adapter.in.cli`, `adapter.in.rest`, `adapter.in.web`, `adapter.in.scheduler`, `adapter.out.persistence`, `adapter.out.event`, `adapter.out.taxagency` |
 
   The shared security support in the root of `adapter.in`, `config` and the boot class sit outside the rings. Explicit rules complete the onion: output adapters only implement ports of the hexagon and know `application` only through interfaces; input ports (`*Commands`, `*Queries`) are interfaces and input adapters never use `CheckingAccountService`; input adapters only know `DomainException` from the domain; nobody outside `adapter.in` depends on it, and its shared security support does not know `cli`, `rest` or `web`; only `adapter.out` knows the output adapters; nobody depends on `config`; only adapters and `config` depend on Spring web, HTTP, MVC or data; the core does not depend on Spring (except `@EventListener` in `application.listener`); the domain only depends on the JDK (no `org.immutables`) and has no public setters; the ADR 0008 security rules; every class belongs to the hexagon, an adapter or `config`. `DomainIsolationTests` (both phases) and `AdapterTestIsolationTests` (test code, #21) complete them.
 
@@ -106,6 +107,10 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | `DomainModelRunner` | `adapter.in.cli` | Input adapter (CLI): with the `demo` profile, opens the demo accounts and runs a deposit, two withdrawals (approved and rejected) and a transfer through `CheckingAccountCommands`, with a `[demo]` trace per use case |
 | `CheckingAccount` | `domain.model` | Aggregate root; records its domain events (`pullDomainEvents`); `open` is package-private, used only by the factory |
 | `CheckingAccountFactory` | `domain.model` | Factory: number + segment from the verified income (R20); built in `config` |
+| `SegmentReviewService` | `domain.service` | Domain service (#98): when the segment review of an account is due, verifies the income again through the `IncomeVerifier` port and tells the aggregate the result; built in `config` |
+| `CustomerSegmentChanged` | `domain.model` | Domain event recorded by the aggregate on every promotion and demotion |
+| `SegmentReviewScheduler` | `adapter.in.scheduler` | Input adapter (scheduled task, #98): every day calls `CheckingAccountCommands.reviewSegments()`; here the clock is who calls the hexagon. Scheduling is enabled in `config.SchedulingConfiguration` |
+| `Clock` (bean in `config`) | `config` | The time the application gives to the domain (`SegmentReviewService.review(account, now)`); a JDK type, so no port is needed |
 | `AccountNumberSequence`, `IncomeVerifier` | `domain.model` | Output ports: account numbering and income verification |
 | `DomainEvent`, `CheckingAccountOpened`, `MoneyDeposited`, `MoneyWithdrawn`, `WithdrawalRejected` | `domain.model` | Domain events (`record`) |
 | `DomainEventPublisher` | `domain.model` | Output port: publishes domain events |

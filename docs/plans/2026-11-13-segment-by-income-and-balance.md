@@ -171,14 +171,14 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] `./mvnw verify` green; with the `demo` profile the three accounts start with `ES` + 2 digits + `99990001`.
 
-### [ ] T12 — Documentation (~10 min)
+### [x] T12 — Documentation (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`, `docs/contracts/account-factory.md`, `docs/dominio/glosario.md`, `docs/arquitectura/fase-2-hexagonal.md`, `docs/arquitectura/comparativa-capas-hexagonal.md`, `docs/analysis/functional-analysis.md`, `README.md`
 - **Depends on:** T10, T11
 - **What to do:** segment description in the details response and example IBANs; contract amendment; terms (minimum net worth, grace period, segment review, `CustomerSegmentChanged`, Mon-A Bank) and rules R22-R27 with their tests; the scheduler adapter and the `Clock` in the architecture documents; demo IBANs.
 - **Acceptance criteria:**
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors; every rule R22-R27 names an existing test.
+  - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors; every rule R22-R27 names an existing test.
 
 ### [ ] T13 — Project status (~5 min)
 
@@ -215,6 +215,8 @@ Decisions taken in this plan:
 - [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
+
+- **Deviations while implementing:** the aggregate keeps `nextSegmentReview` instead of `belowMinimumNetWorthSince` (T4); `docs/analysis/functional-analysis.md` and `README.md` were not changed in T12 (the analysis still describes phase 1 and neither mentions the generated IBANs); T11 also adapted two tests that depended on the old prefix and on the order of the generated IBANs.
 
 - **Six months after a favourable verification (decided by the user, 2026-11-13):** frequent enough to keep these customers under control, without asking the agency every month.
 - **A holder who is high net worth by income and opens below the minimum** (Grace Hopper, 5.000,00 €) is reviewed six months after the opening and every six months after that (R27, decided by the user on 2026-11-13).
