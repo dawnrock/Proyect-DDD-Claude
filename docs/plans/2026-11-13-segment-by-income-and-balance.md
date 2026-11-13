@@ -29,6 +29,7 @@ Combined rule (rule 4 as decided by the user on 2026-11-13). The tax agency is a
 2. Any approved credit that takes the balance to 100.000,00 € promotes the holder at once (R22, R23).
 3. An approved withdrawal that leaves the account of a high-net-worth holder below the minimum starts a countdown of one calendar month (UTC), whatever the reason the holder is high net worth; reaching the minimum again cancels it (R25).
 4. When the month ends and the balance is still below the minimum, the income is verified again. If it is still above 100.000,00 €, the holder stays high net worth and the next verification is six calendar months later, for as long as the balance stays below the minimum (R26); otherwise the holder goes back to retail (R24).
+5. A holder who opens as high net worth by income with a balance below the minimum gets a first review six calendar months after the opening, with the same outcome as rule 4 (R27).
 
 Decisions taken in this plan:
 
@@ -38,7 +39,7 @@ Decisions taken in this plan:
 - **Who triggers the review.** The service, before every withdrawal and outgoing transfer; and a daily scheduled task, which is a new input adapter (`adapter.in.scheduler`) calling a new method of the input port `CheckingAccountCommands`.
 - **Domain event** `CustomerSegmentChanged` (account, holder name, new segment, instant), recorded by the aggregate on every promotion and demotion; the audit and customer-notification listeners handle it.
 - **No input changes:** the segment is not an input here, so forms and requests stay as they are. It is not a team plan: `/implement-plan 98`.
-- **Rule numbers** differ between branches: here R22-R26; on `Monolithic` the balance rules are R20-R23.
+- **Rule numbers** differ between branches: here R22-R27; on `Monolithic` the balance rules are R20-R23.
 
 | Layer / package | File | Change |
 | --------------- | ---- | ------ |
@@ -90,10 +91,10 @@ Decisions taken in this plan:
 - **Files:** `CheckingAccount.java`, `CheckingAccountTests.java`
 - **Depends on:** T1, T3
 - **What to do:**
-  1. Failing tests first: an approved withdrawal that leaves a high-net-worth holder below the minimum records `belowMinimumNetWorthSince` (the withdrawal's `occurredOn`); a second withdrawal does not move it; a credit that reaches the minimum clears it (R25); a rejected withdrawal and a retail holder record nothing.
+  1. Failing tests first: an approved withdrawal that leaves a high-net-worth holder below the minimum records `belowMinimumNetWorthSince` (the withdrawal's `occurredOn`); a second withdrawal does not move it; a credit that reaches the minimum clears it (R25); a rejected withdrawal and a retail holder record nothing; an account opened below the minimum by a holder with verified high income schedules its first review six calendar months after the opening (R27), and a later withdrawal does not move that date.
   2. Add the field and the accessor (`Optional<Instant>`).
 - **Acceptance criteria:**
-  - [ ] The five tests pass; `./mvnw verify` green.
+  - [ ] The seven tests pass; `./mvnw verify` green.
 
 ### [ ] T5 — When the month ends: income verified again, or back to retail (~10 min)
 
@@ -175,9 +176,9 @@ Decisions taken in this plan:
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`, `docs/contracts/account-factory.md`, `docs/dominio/glosario.md`, `docs/arquitectura/fase-2-hexagonal.md`, `docs/arquitectura/comparativa-capas-hexagonal.md`, `docs/analysis/functional-analysis.md`, `README.md`
 - **Depends on:** T10, T11
-- **What to do:** segment description in the details response and example IBANs; contract amendment; terms (minimum net worth, grace period, segment review, `CustomerSegmentChanged`, Mon-A Bank) and rules R22-R26 with their tests; the scheduler adapter and the `Clock` in the architecture documents; demo IBANs.
+- **What to do:** segment description in the details response and example IBANs; contract amendment; terms (minimum net worth, grace period, segment review, `CustomerSegmentChanged`, Mon-A Bank) and rules R22-R27 with their tests; the scheduler adapter and the `Clock` in the architecture documents; demo IBANs.
 - **Acceptance criteria:**
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors; every rule R22-R26 names an existing test.
+  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors; every rule R22-R27 names an existing test.
 
 ### [ ] T13 — Project status (~5 min)
 
@@ -216,7 +217,7 @@ Decisions taken in this plan:
 ## Risks and open questions
 
 - **Six months after a favourable verification (decided by the user, 2026-11-13):** frequent enough to keep these customers under control, without asking the agency every month.
-- **A holder who is high net worth by income and opens below the minimum** (Grace Hopper, 5.000,00 €) has no countdown until an approved withdrawal starts one; her first review then finds her income still high.
+- **A holder who is high net worth by income and opens below the minimum** (Grace Hopper, 5.000,00 €) is reviewed six months after the opening and every six months after that (R27, decided by the user on 2026-11-13).
 - **Demo data:** the demo deposits stay as they are.
 - **Holders promoted by balance without a known income:** the fake agency only knows the three demo tax ids; anybody else is "unverified", which counts as not high.
 - **Entity code `9999`:** invented; not checked against the Banco de España registry.
