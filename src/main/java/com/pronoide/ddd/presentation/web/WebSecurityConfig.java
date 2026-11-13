@@ -11,7 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
  * la API). Inicio de sesión con formulario propio y sesión, CSRF activo, {@code /accounts/new} solo para
  * administradores y la página 403 propia.
  *
- * <p>Públicos: {@code /login}, los estilos, la salud del actuator y las páginas de error. El resto exige sesión.
+ * <p>Públicos: {@code /login}, el alta de cliente ({@code /signup/**}, con CSRF), los estilos, la salud del actuator y las páginas de error. El resto exige sesión.
  */
 @Configuration
 public class WebSecurityConfig {
@@ -21,7 +21,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain webSecurity(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/login", "/css/**", "/actuator/health", "/error", "/error/**").permitAll()
+                        .requestMatchers("/login", "/signup/**", "/css/**", "/actuator/health", "/error", "/error/**").permitAll()
                         .requestMatchers("/accounts/new").hasRole("ADMIN")
                         // Consola H2: solo administradores; usa marcos del mismo origen y sus propios formularios sin CSRF
                         .requestMatchers("/h2-console/**").hasRole("ADMIN")

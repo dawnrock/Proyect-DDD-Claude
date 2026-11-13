@@ -169,12 +169,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Tests: doors without form inputs; form with `?form`; error message with `?error`; both links present.
 
-### [ ] T14 — Sign-up step 1: personal data (~10 min)
+### [x] T14 — Sign-up step 1: personal data (~10 min)
 
 - **Side:** web · **Layer:** presentation (web) · **Files:** new `SignUpController.java`, `SignUpForm.java`, `templates/signup/data.html`; `WebSecurityConfig.java` (`/signup/**` public) + tests · **Depends on:** T0
 - **What to do:** session-scoped form; group `PersonalData` (name, document pattern with NIE, e-mail); progress bar fragment; a valid POST redirects to `/signup/access`.
 - **Acceptance criteria:**
-  - [ ] Tests: page is public; field errors stay on step 1; valid data redirects.
+  - [x] Tests: page is public; field errors stay on step 1; valid data redirects.
 
 ### [ ] T15 — Sign-up step 2: access (~10 min)
 
