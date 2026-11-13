@@ -155,7 +155,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
 - **Acceptance criteria:**
   - [x] `DemoDataLoaderTests`: Grace is `HIGH_NET_WORTH` with 5.000,00 €; Ada and Alan are `RETAIL`.
 
-### [ ] T9 — ADR 0011 and phase 1 architecture (~5 min)
+### [x] T9 — ADR 0011 and phase 1 architecture (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0011-integration-layer.md`, `docs/adr/README.md`, `docs/arquitectura/fase-1-capas.md`
@@ -164,7 +164,8 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
   1. ADR 0011: why the simulated agency lives in a new `integration` layer, the rejected alternatives and how it maps to `adapter.out.taxagency` on `Hexagonal`.
   2. Add the layer to the phase 1 diagram/text (grey scale; shown to the user before committing).
 - **Acceptance criteria:**
-  - [ ] ADR listed in the README; the phase 1 document names the four layers' allowed dependencies.
+  - [x] ADR listed in the README; the phase 1 document names the four layers' allowed dependencies.
+  - Deviation: the Mermaid diagram of `fase-1-capas.md` is not changed yet; the new diagram is shown to the user first (working agreement).
 
 ### [ ] T10 — OpenAPI and contract (~5 min)
 

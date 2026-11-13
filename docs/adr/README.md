@@ -12,5 +12,6 @@
 | [0008](0008-spring-security.md) | Authentication and roles with Spring Security | Accepted |
 | [0009](0009-domain-without-lombok.md) | No Lombok in the domain | Accepted |
 | [0010](0010-graphify-token-savings.md) | Graphify for dependency questions only, and a short project status | Accepted |
+| [0011](0011-integration-layer.md) | An `integration` layer for simulated external systems in phase 1 | Accepted |
 
 Formato: contexto, decisión, alternativas y consecuencias.
