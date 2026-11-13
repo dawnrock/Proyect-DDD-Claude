@@ -85,16 +85,16 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] `./mvnw test -Dtest='AccountHolderTests,CheckingAccountFactoryTests'` passes; `./mvnw verify` green.
 
-### [ ] T4 — The account remembers since when it is below the minimum (~10 min)
+### [x] T4 — The account remembers since when it is below the minimum (~10 min)
 
 - **Layer:** domain
 - **Files:** `CheckingAccount.java`, `CheckingAccountTests.java`
 - **Depends on:** T1, T3
 - **What to do:**
   1. Failing tests first: an approved withdrawal that leaves a high-net-worth holder below the minimum records `belowMinimumNetWorthSince` (the withdrawal's `occurredOn`); a second withdrawal does not move it; a credit that reaches the minimum clears it (R25); a rejected withdrawal and a retail holder record nothing; an account opened below the minimum by a holder with verified high income schedules its first review six calendar months after the opening (R27), and a later withdrawal does not move that date.
-  2. Add the field and the accessor (`Optional<Instant>`).
+  2. Add the field and the accessor (`Optional<Instant>`). Implemented as `nextSegmentReview` (the instant of the next review) instead of `belowMinimumNetWorthSince`, so that the one-month and six-month periods share one field.
 - **Acceptance criteria:**
-  - [ ] The seven tests pass; `./mvnw verify` green.
+  - [x] The seven tests pass; `./mvnw verify` green.
 
 ### [ ] T5 — When the month ends: income verified again, or back to retail (~10 min)
 

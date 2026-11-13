@@ -3,6 +3,8 @@ package com.pronoide.ddd.domain.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Currency;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -330,6 +332,91 @@ class CheckingAccountTests {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("100000.00").open();
 
             assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+        }
+    }
+
+    private static Instant mesesDespuesDe(Instant instante, int meses) {
+        return instante.atZone(ZoneOffset.UTC).plusMonths(meses).toInstant();
+    }
+
+    @Nested
+    @DisplayName("Próxima revisión del segmento")
+    class NextSegmentReview {
+
+        @Test
+        @DisplayName("Una retirada aprobada que deja una cuenta de alto patrimonio bajo el mínimo programa la revisión a un mes")
+        void una_retirada_que_deja_la_cuenta_bajo_el_minimo_programa_la_revision_a_un_mes() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+
+            Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
+
+            assertThat(cuenta.nextSegmentReview()).contains(mesesDespuesDe(retirada.occurredOn(), 1));
+            assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Una segunda retirada bajo el mínimo no mueve la revisión programada")
+        void una_segunda_retirada_bajo_el_minimo_no_mueve_la_revision() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+            Transaction primera = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
+
+            cuenta.tryWithdraw(MonetaryAmount.euros("10.00"));
+
+            assertThat(cuenta.nextSegmentReview()).contains(mesesDespuesDe(primera.occurredOn(), 1));
+        }
+
+        @Test
+        @DisplayName("Un ingreso que recupera el patrimonio mínimo cancela la revisión programada")
+        void un_ingreso_que_recupera_el_patrimonio_minimo_cancela_la_revision() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+            cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
+
+            cuenta.deposit(MonetaryAmount.euros("10000.00"));
+
+            assertThat(cuenta.nextSegmentReview()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Una retirada rechazada no programa ninguna revisión")
+        void una_retirada_rechazada_no_programa_ninguna_revision() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("100000.00").open();
+
+            Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("200000.00"));
+
+            assertThat(retirada.isRejected()).isTrue();
+            assertThat(cuenta.nextSegmentReview()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Una cuenta minorista no programa ninguna revisión al retirar")
+        void una_cuenta_minorista_no_programa_ninguna_revision_al_retirar() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+
+            cuenta.tryWithdraw(MonetaryAmount.euros("100.00"));
+
+            assertThat(cuenta.nextSegmentReview()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Un titular de alto patrimonio que abre bajo el mínimo tiene su primera revisión a los seis meses")
+        void un_titular_de_alto_patrimonio_que_abre_bajo_el_minimo_se_revisa_a_los_seis_meses() {
+            CheckingAccount cuenta = TestAccounts.anAccount()
+                    .segment(CustomerSegment.HIGH_NET_WORTH).initialDeposit("5000.00").open();
+
+            Instant apertura = cuenta.transactions().get(0).occurredOn();
+            assertThat(cuenta.nextSegmentReview()).contains(mesesDespuesDe(apertura, 6));
+        }
+
+        @Test
+        @DisplayName("Una retirada no adelanta la primera revisión semestral")
+        void una_retirada_no_adelanta_la_primera_revision_semestral() {
+            CheckingAccount cuenta = TestAccounts.anAccount()
+                    .segment(CustomerSegment.HIGH_NET_WORTH).initialDeposit("5000.00").open();
+            Instant apertura = cuenta.transactions().get(0).occurredOn();
+
+            cuenta.tryWithdraw(MonetaryAmount.euros("100.00"));
+
+            assertThat(cuenta.nextSegmentReview()).contains(mesesDespuesDe(apertura, 6));
         }
     }
 }
