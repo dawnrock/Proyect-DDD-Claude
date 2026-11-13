@@ -55,6 +55,12 @@ public class AccountController {
         return ResponseEntity.created(URI.create("/api/accounts/" + body.id())).body(body);
     }
 
+    /** Sustituye el IBAN de la cuenta por otro que genera el banco. Solo administradores (R31). */
+    @PostMapping("/{id}/account-number")
+    public AccountSummaryResponse regenerateAccountNumber(Authentication authentication, @PathVariable UUID id) {
+        return toResponse(service.regenerateAccountNumber(CurrentCaller.from(authentication), id));
+    }
+
     @GetMapping
     public List<AccountSummaryResponse> listAccounts(Authentication authentication) {
         return service.listAccounts(CurrentCaller.from(authentication)).stream().map(AccountController::toResponse).toList();

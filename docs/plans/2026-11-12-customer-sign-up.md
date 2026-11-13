@@ -153,12 +153,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] `curl -i -H 'Content-Type: application/json' -d '{"fullName":"Margaret Hamilton","taxId":"00000000T","email":"margaret@example.com","username":"margaret","password":"demo-1234","initialDeposit":100}' localhost:8080/api/customers` answers `201`, and `curl -u margaret:demo-1234 localhost:8080/api/accounts` lists one account; repeating the request answers `422`.
 
-### [ ] T12 — REST: `POST /api/accounts/{id}/account-number` (~5 min)
+### [x] T12 — REST: `POST /api/accounts/{id}/account-number` (~5 min)
 
 - **Side:** back · **Layer:** presentation (rest) · **Files:** `AccountController.java`, `ApiSecurityConfig.java` + tests · **Depends on:** T9
 - **What to do:** administrator only; `200` with the summary and the new IBAN; `403` for a customer; `404` for an unknown id.
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest=AccountControllerTests` passes with the three cases.
+  - [x] `./mvnw test -Dtest=AccountControllerTests` passes with the three cases.
 
 ### Web (parallel with back; each depends only on T0 unless stated)
 
