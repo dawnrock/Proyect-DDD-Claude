@@ -104,12 +104,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Tests: find by tax id and by username; unknown values give empty. `la_persistencia_no_tiene_interfaces` stays green.
 
-### [ ] T5 — Account number sequence (~10 min)
+### [x] T5 — Account number sequence (~10 min)
 
 - **Side:** back · **Layer:** domain · persistence · **Files:** `persistence/InMemoryAccountNumberSequence.java`, `domain/model/AccountNumber.java` + tests · **Depends on:** T0
 - **What to do:** copy the algorithm of `Hexagonal`'s `InMemoryAccountNumberSequence` into a concrete class (R30); add `AccountNumber.isMonABank()` (bank `9999`, branch `0001`).
 - **Acceptance criteria:**
-  - [ ] The first number is `ES` + valid check digits + `99990001` + control digits + `0000000001`; concurrent calls never repeat; `isMonABank()` false for the old demo IBANs.
+  - [x] The first number is `ES` + valid check digits + `99990001` + control digits + `0000000001`; concurrent calls never repeat; `isMonABank()` false for the old demo IBANs.
 
 ### [ ] T6 — The aggregate can change its account number (~5 min)
 
