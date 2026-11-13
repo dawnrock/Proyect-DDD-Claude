@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 import com.pronoide.ddd.domain.model.AccountHolder;
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
+import com.pronoide.ddd.domain.model.Customer;
+import com.pronoide.ddd.domain.model.DuplicateCustomerException;
+import com.pronoide.ddd.domain.model.EmailAddress;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.HighNetWorthIncome;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
@@ -19,8 +22,10 @@ import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.domain.model.Transaction;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
 import com.pronoide.ddd.integration.TaxAgencyClient;
+import com.pronoide.ddd.persistence.InMemoryAccountNumberSequence;
 import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
+import com.pronoide.ddd.persistence.InMemoryCustomerRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -40,6 +45,8 @@ public class CheckingAccountService {
 
     private final InMemoryCheckingAccountRepository repository;
     private final InMemoryAccountOwnershipRepository ownership;
+    private final InMemoryCustomerRepository customers;
+    private final InMemoryAccountNumberSequence accountNumbers;
     private final TaxAgencyClient taxAgency;
     private final Clock clock;
     private final MoneyTransferService transferService = new MoneyTransferService();
@@ -165,8 +172,22 @@ public class CheckingAccountService {
      * @throws com.pronoide.ddd.domain.model.InsufficientInitialDepositException si el depósito no llega al mínimo
      * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el depósito no está en euros
      */
-    public AccountSummary signUp(SignUpCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+    public synchronized AccountSummary signUp(SignUpCommand command) {
+        TaxId taxId = new TaxId(command.taxId());
+        EmailAddress email = new EmailAddress(command.email());
+        customers.findByTaxId(taxId).ifPresent(existing -> {
+            throw new DuplicateCustomerException(taxId);
+        });
+
+        // Todo o nada: la cuenta se construye antes de guardar nada, y el dominio comprueba R1 y la divisa.
+        Customer customer = Customer.register(command.fullName(), taxId, email);
+        MonetaryAmount initialDeposit = toAmount(command.initialDeposit(), command.currency());
+        CheckingAccount account = openFor(customer, initialDeposit);
+
+        customers.save(customer, command.username());
+        repository.save(account);
+        ownership.assign(account.id(), command.username());
+        return toSummary(account);
     }
 
     /**
@@ -176,7 +197,15 @@ public class CheckingAccountService {
      * @throws com.pronoide.ddd.domain.model.InsufficientInitialDepositException si el depósito no llega al mínimo
      */
     public AccountSummary openAnotherAccount(Caller caller, OpenAnotherAccountCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        if (caller.admin()) {
+            throw new NotACustomerException(caller.username());
+        }
+        Customer customer = customers.findByUsername(caller.username())
+                .orElseThrow(() -> new NotACustomerException(caller.username()));
+        CheckingAccount account = openFor(customer, toAmount(command.initialDeposit(), command.currency()));
+        repository.save(account);
+        ownership.assign(account.id(), caller.username());
+        return toSummary(account);
     }
 
     /**
@@ -187,7 +216,13 @@ public class CheckingAccountService {
      * @throws AccountNotFoundException si la cuenta no existe
      */
     public AccountSummary regenerateAccountNumber(Caller caller, UUID id) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        if (!caller.admin()) {
+            throw new ForbiddenOperationException("generar un nuevo número de cuenta");
+        }
+        CheckingAccount account = load(id);
+        account.reassignAccountNumber(accountNumbers.next());
+        repository.save(account);
+        return toSummary(account);
     }
 
     /**
@@ -223,6 +258,16 @@ public class CheckingAccountService {
                     HighNetWorthIncome.isMetBy(taxAgency.verifiedAnnualIncome(account.primaryHolder().taxId())));
             repository.save(account);
         }
+    }
+
+    /**
+     * Construye (sin guardar) una cuenta con un IBAN nuevo del banco para el cliente: el titular copia su nombre y su
+     * documento, y su segmento lo deciden los ingresos verificados en la agencia tributaria y el saldo (#99).
+     */
+    private CheckingAccount openFor(Customer customer, MonetaryAmount initialDeposit) {
+        AccountHolder holder = AccountHolder.register(customer.fullName(), customer.taxId(),
+                HighNetWorthIncome.segmentFor(taxAgency.verifiedAnnualIncome(customer.taxId())));
+        return CheckingAccount.open(accountNumbers.next(), holder, initialDeposit);
     }
 
     /** Carga la cuenta; una ajena (o sin propietario, para un usuario) se trata como inexistente. */

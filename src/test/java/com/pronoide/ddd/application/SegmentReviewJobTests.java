@@ -24,6 +24,8 @@ class SegmentReviewJobTests {
         MutableClock clock = new MutableClock();
         CheckingAccountService service = new CheckingAccountService(
                 new InMemoryCheckingAccountRepository(), new InMemoryAccountOwnershipRepository(),
+                new com.pronoide.ddd.persistence.InMemoryCustomerRepository(),
+                new com.pronoide.ddd.persistence.InMemoryAccountNumberSequence(),
                 new TaxAgencyClient(), clock);
         UUID id = service.openAccount(ADMIN, OpenAccountCommand.builder()
                 .accountNumber("ES9121000418450200051332").holderName("Ada Lovelace").holderTaxId("12345678Z")

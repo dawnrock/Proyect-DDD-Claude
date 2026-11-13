@@ -17,7 +17,9 @@ class DemoDataLoaderTests {
 
     private final InMemoryAccountOwnershipRepository ownership = new InMemoryAccountOwnershipRepository();
     private final CheckingAccountService service =
-            new CheckingAccountService(new InMemoryCheckingAccountRepository(), ownership, new TaxAgencyClient(),
+            new CheckingAccountService(new InMemoryCheckingAccountRepository(), ownership,
+                    new com.pronoide.ddd.persistence.InMemoryCustomerRepository(),
+                    new com.pronoide.ddd.persistence.InMemoryAccountNumberSequence(), new TaxAgencyClient(),
                 java.time.Clock.systemUTC());
 
     @Test

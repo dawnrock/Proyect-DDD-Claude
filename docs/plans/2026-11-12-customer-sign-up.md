@@ -76,89 +76,89 @@ Decisions taken in this plan:
 
 ### Back (parallel with web; each depends only on T0 unless stated)
 
-### [ ] T1 — `TaxId` accepts NIE and checks the control letter (~10 min)
+### [x] T1 — `TaxId` accepts NIE and checks the control letter (~10 min)
 
 - **Side:** back · **Layer:** domain · application · **Files:** `domain/model/TaxId.java`, `TaxIdTests.java`, `application/OpenAccountCommandDef.java` (`TAX_ID_PATTERN`), tests with invalid tax ids · **Depends on:** T0
 - **What to do:** tests first: valid DNI and NIE (`X1234567L`), wrong letter, wrong format, normalisation; implement the mod-23 letter (NIE: `X`/`Y`/`Z` → 0/1/2) (R27); keep `Locale.ROOT`. Widen `TAX_ID_PATTERN` and its message ("El documento debe ser un DNI o un NIE") so the REST request and the web form accept NIE. Fix any test fixture with a wrong letter.
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest=TaxIdTests` passes; the three demo tax ids are valid; `check-domain.mjs` without errors.
+  - [x] `./mvnw test -Dtest=TaxIdTests` passes; the three demo tax ids are valid; `check-domain.mjs` without errors.
 
-### [ ] T2 — `EmailAddress` value object (~5 min)
+### [x] T2 — `EmailAddress` value object (~5 min)
 
 - **Side:** back · **Layer:** domain · **Files:** `domain/model/EmailAddress.java` + test · **Depends on:** T0
 - **What to do:** tests first (valid, missing `@` or domain, blank, lower-case normalisation); implement as a record (R28).
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest=EmailAddressTests` passes.
+  - [x] `./mvnw test -Dtest=EmailAddressTests` passes.
 
-### [ ] T3 — `Customer` aggregate and `DuplicateCustomerException` (~10 min)
+### [x] T3 — `Customer` aggregate and `DuplicateCustomerException` (~10 min)
 
 - **Side:** back · **Layer:** domain · **Files:** `domain/model/Customer.java`, `DuplicateCustomerException.java` + tests · **Depends on:** T1, T2
 - **What to do:** `Customer.register(fullName, taxId, email)` with private constructor, record-style accessors, equality by id; `DuplicateCustomerException(TaxId)` extends `DomainException` with "Ya eres cliente de Mon-A Bank: ya hay un cliente con el documento …".
 - **Acceptance criteria:**
-  - [ ] Tests for creation, null and blank checks and equality pass.
+  - [x] Tests for creation, null and blank checks and equality pass.
 
-### [ ] T4 — Customer repository (~10 min)
+### [x] T4 — Customer repository (~10 min)
 
 - **Side:** back · **Layer:** persistence · **Files:** `persistence/InMemoryCustomerRepository.java` + test · **Depends on:** T3
 - **What to do:** `save(customer, username)`, `findByTaxId`, `findByUsername`, thread-safe maps.
 - **Acceptance criteria:**
-  - [ ] Tests: find by tax id and by username; unknown values give empty. `la_persistencia_no_tiene_interfaces` stays green.
+  - [x] Tests: find by tax id and by username; unknown values give empty. `la_persistencia_no_tiene_interfaces` stays green.
 
-### [ ] T5 — Account number sequence (~10 min)
+### [x] T5 — Account number sequence (~10 min)
 
 - **Side:** back · **Layer:** domain · persistence · **Files:** `persistence/InMemoryAccountNumberSequence.java`, `domain/model/AccountNumber.java` + tests · **Depends on:** T0
 - **What to do:** copy the algorithm of `Hexagonal`'s `InMemoryAccountNumberSequence` into a concrete class (R30); add `AccountNumber.isMonABank()` (bank `9999`, branch `0001`).
 - **Acceptance criteria:**
-  - [ ] The first number is `ES` + valid check digits + `99990001` + control digits + `0000000001`; concurrent calls never repeat; `isMonABank()` false for the old demo IBANs.
+  - [x] The first number is `ES` + valid check digits + `99990001` + control digits + `0000000001`; concurrent calls never repeat; `isMonABank()` false for the old demo IBANs.
 
-### [ ] T6 — The aggregate can change its account number (~5 min)
+### [x] T6 — The aggregate can change its account number (~5 min)
 
 - **Side:** back · **Layer:** domain · **Files:** `CheckingAccount.java`, `CheckingAccountTests.java` · **Depends on:** T5
 - **What to do:** `reassignAccountNumber(AccountNumber)` accepts only a Mon-A Bank number different from the current one (R31).
 - **Acceptance criteria:**
-  - [ ] Tests for success and both rejections pass.
+  - [x] Tests for success and both rejections pass.
 
-### [ ] T7 — Sign-up use case (~10 min)
+### [x] T7 — Sign-up use case (~10 min)
 
 - **Side:** back · **Layer:** application · **Files:** `CheckingAccountService.java`, `SignUpCommandDef.java` + tests · **Depends on:** T4, T5
 - **What to do:** tests first: `signUp` registers the customer, opens an account with a generated IBAN for the username and decides the segment with the tax agency (#99: `87654321X` → high net worth); an existing document throws `DuplicateCustomerException` (R29) even with another e-mail; a deposit below 50 € keeps R1; command validation.
 - **Acceptance criteria:**
-  - [ ] The tests pass; `./mvnw verify` green.
+  - [x] The tests pass; `./mvnw verify` green.
 
-### [ ] T8 — Open another account (~10 min)
+### [x] T8 — Open another account (~10 min)
 
 - **Side:** back · **Layer:** application · **Files:** `CheckingAccountService.java`, `OpenAnotherAccountCommandDef.java` + tests · **Depends on:** T7
 - **What to do:** `openAnotherAccount(caller, command)`: the caller's customer (by username) gets a new account with a generated IBAN, its name and tax id copied into the holder; a caller who is not a customer (administrator or a static user without customer) gets `OperationNotAllowedException`.
 - **Acceptance criteria:**
-  - [ ] Tests: the customer ends with two accounts with different IBANs, both listed; a non-customer is rejected.
+  - [x] Tests: the customer ends with two accounts with different IBANs, both listed; a non-customer is rejected.
 
-### [ ] T9 — The administrator regenerates an IBAN (~10 min)
+### [x] T9 — The administrator regenerates an IBAN (~10 min)
 
 - **Side:** back · **Layer:** application · persistence · **Files:** `CheckingAccountService.java`, `InMemoryCheckingAccountRepository.java` + tests · **Depends on:** T5, T6
 - **What to do:** `regenerateAccountNumber(caller, id)`: administrators only (`ForbiddenOperationException`), unknown id → `AccountNotFoundException`; the old IBAN stops resolving in `findByAccountNumber` and the new one resolves.
 - **Acceptance criteria:**
-  - [ ] The four tests pass; `./mvnw verify` green.
+  - [x] The four tests pass; `./mvnw verify` green.
 
-### [ ] T10 — Runtime users: `CustomerRegistration` (~10 min)
+### [x] T10 — Runtime users: `CustomerRegistration` (~10 min)
 
 - **Side:** back · **Layer:** presentation · **Files:** `presentation/CustomerRegistration.java`, `SecuritySupport.java` + tests · **Depends on:** T7
 - **What to do:** expose the `InMemoryUserDetailsManager` bean; `register` rejects a taken username (`UsernameTakenException`) before opening anything, calls `signUp`, then creates the user with role `USER` and a BCrypt hash; if `signUp` fails no user exists.
 - **Acceptance criteria:**
-  - [ ] Tests: the new user can authenticate; taken username; failed sign-up leaves no user. `la_aplicacion_no_depende_de_spring_security` green.
+  - [x] Tests: the new user can authenticate; taken username; failed sign-up leaves no user. `la_aplicacion_no_depende_de_spring_security` green.
 
-### [ ] T11 — REST: `POST /api/customers` (~10 min)
+### [x] T11 — REST: `POST /api/customers` (~10 min)
 
 - **Side:** back · **Layer:** presentation (rest) · **Files:** new `CustomerController.java`, `SignUpRequest.java`; `ApiSecurityConfig.java`, `RestExceptionHandler.java` + tests · **Depends on:** T10
 - **What to do:** public endpoint; `201` with `Location` and the account summary; `400` with field errors; `422` for duplicate customer, taken username and insufficient deposit.
 - **Acceptance criteria:**
-  - [ ] `curl -i -H 'Content-Type: application/json' -d '{"fullName":"Margaret Hamilton","taxId":"00000000T","email":"margaret@example.com","username":"margaret","password":"demo-1234","initialDeposit":100}' localhost:8080/api/customers` answers `201`, and `curl -u margaret:demo-1234 localhost:8080/api/accounts` lists one account; repeating the request answers `422`.
+  - [x] `curl -i -H 'Content-Type: application/json' -d '{"fullName":"Margaret Hamilton","taxId":"00000000T","email":"margaret@example.com","username":"margaret","password":"demo-1234","initialDeposit":100}' localhost:8080/api/customers` answers `201`, and `curl -u margaret:demo-1234 localhost:8080/api/accounts` lists one account; repeating the request answers `422`.
 
-### [ ] T12 — REST: `POST /api/accounts/{id}/account-number` (~5 min)
+### [x] T12 — REST: `POST /api/accounts/{id}/account-number` (~5 min)
 
 - **Side:** back · **Layer:** presentation (rest) · **Files:** `AccountController.java`, `ApiSecurityConfig.java` + tests · **Depends on:** T9
 - **What to do:** administrator only; `200` with the summary and the new IBAN; `403` for a customer; `404` for an unknown id.
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest=AccountControllerTests` passes with the three cases.
+  - [x] `./mvnw test -Dtest=AccountControllerTests` passes with the three cases.
 
 ### Web (parallel with back; each depends only on T0 unless stated)
 
