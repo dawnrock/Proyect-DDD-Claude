@@ -2,7 +2,7 @@
 
 > **Read it at the start of every session.** It is the entry point to carry on without depending on earlier conversations, and it is kept **short on purpose**: it is loaded in every session. **It is updated in every PR that closes an issue** (CI checks it).
 
-- **Last updated:** 2026-11-12 · PR #92 (#91, footer without the project name, `Hexagonal` part)
+- **Last updated:** 2026-11-13 · PR #100 (#98, segment by verified income and by balance)
 - **Active branch:** `Hexagonal`, the repository's default branch; phase 2 is marked by the `v2-hexagonal` tag and work continues on the branch. `Monolithic` frozen at the `v1-monolito` tag (exceptions authorised by the user: the Render deployment, #86, and the footer, #91); `master` frozen.
 
 ## Where we are
@@ -11,11 +11,14 @@
 | ----- | ---- | ----------- | ------- |
 | 1 · Layered monolith | Closed: #2-#8, #11-#13, #31, #48, #50, #54, #57 (details in the [history](historial.md)) | — | — |
 | 2 · Hexagonal | Closed: #14-#23, tag `v2-hexagonal` | — | — |
-| After phase 2 (no milestone) | #70 translation, #71 Graphify, #72 web, #77 review leftovers, #78 unit of work, #79 Claude Code configuration, #82 code leftovers, #85 and #86 deploy both branches on Render, #89 web footer | #91 footer without the project name (`Hexagonal` done; `Monolithic` PR next) | — |
+| After phase 2 (no milestone) | #70 translation, #71 Graphify, #72 web, #77 review leftovers, #78 unit of work, #79 Claude Code configuration, #82 code leftovers, #85 and #86 deploy both branches on Render, #89 and #91 web footer, #98 segment by verified income and by balance (Mon-A Bank IBAN, entity `9999`) | — | #99 align `Monolithic` with #98; #95 customer sign-up (`Monolithic` first, then its twin here) |
 
 ## Next step
 
-#91 on `Monolithic` (plan approved, T3-T4): footer `Fase 1 · arquitectura monolítica`, from a branch based on `origin/Monolithic`; then close #91 by hand. Both branches are live on Render (guide `docs/deploy/render.md`).
+1. #99 on `Monolithic`: add the verified-income rule and the income re-verification of #98 without changing its layered structure, so both branches behave the same (plan pending).
+2. #95, customer sign-up for Mon-A Bank: plan to be revised with the user's decisions of 2026-11-13 (second account, names shared with this branch, rule numbers); `Monolithic` first, then its twin issue here.
+
+Both branches are live on Render (guide `docs/deploy/render.md`).
 
 Phase 2 design: `docs/arquitectura/fase-2-hexagonal.md`; comparison with phase 1: `docs/arquitectura/comparativa-capas-hexagonal.md`.
 

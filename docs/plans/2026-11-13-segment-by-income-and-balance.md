@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-13 (revision 3: income verified again when the grace period ends and every six months after that)
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~115 min (13 tasks)
 
 ## Goal
@@ -180,39 +180,39 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors; every rule R22-R27 names an existing test.
 
-### [ ] T13 — Project status (~5 min)
+### [x] T13 — Project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
 - **Depends on:** T12
 - **What to do:** status and next step (#99, then #95); decision (combined rule, who triggers the review); pending warnings (two time sources, countdowns lost on restart).
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes.
+  - [x] The CI check of the project status passes.
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] A holder with verified income above 100.000,00 € opens as high net worth.
-- [ ] A retail holder becomes high net worth when the balance reaches 100.000,00 € (opening, deposit or incoming transfer), without asking the tax agency.
-- [ ] After one month below the minimum the income is verified again: the holder stays high net worth if it is still above the threshold and goes back to retail otherwise; recovering the balance in time cancels the review.
-- [ ] Every segment change is audited and notified through `CustomerSegmentChanged`.
-- [ ] Generated IBANs carry entity `9999` and branch `0001`.
-- [ ] The `IncomeVerifier` port is used in two places, the factory and `SegmentReviewService`, and nowhere else.
+- [x] A holder with verified income above 100.000,00 € opens as high net worth.
+- [x] A retail holder becomes high net worth when the balance reaches 100.000,00 € (opening, deposit or incoming transfer), without asking the tax agency.
+- [x] After one month below the minimum the income is verified again: the holder stays high net worth if it is still above the threshold and goes back to retail otherwise; recovering the balance in time cancels the review.
+- [x] Every segment change is audited and notified through `CustomerSegmentChanged`.
+- [x] Generated IBANs carry entity `9999` and branch `0001`.
+- [x] The `IncomeVerifier` port is used in two places, the factory and `SegmentReviewService`, and nowhere else.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones.
-- [ ] `docs/api/openapi.yaml` reflects the change and `npx @redocly/cli lint docs/api/openapi.yaml` has no errors.
-- [ ] Any new business term is in `docs/dominio/glosario.md`.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones.
+- [x] `docs/api/openapi.yaml` reflects the change and `npx @redocly/cli lint docs/api/openapi.yaml` has no errors.
+- [x] Any new business term is in `docs/dominio/glosario.md`.
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
