@@ -15,6 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,6 +48,8 @@ import com.pronoide.ddd.adapter.out.persistence.PersistenceTestAdapters;
 import com.pronoide.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.pronoide.ddd.domain.model.CheckingAccountFactory;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
+import com.pronoide.ddd.domain.service.SegmentReviewService;
+import com.pronoide.ddd.support.MutableClock;
 
 /** Casos de uso con el adaptador en memoria real detrás de los puertos: no hace falta simularlo. */
 class CheckingAccountServiceTests {
@@ -59,12 +62,16 @@ class CheckingAccountServiceTests {
     private DomainEventPublisher publisher;
     private CheckingAccountService service;
 
+    private MutableClock clock;
+
     @BeforeEach
     void setUp() {
+        clock = new MutableClock();
         repository = spy(PersistenceTestAdapters.accounts());
         publisher = mock(DomainEventPublisher.class);
         service = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(), publisher,
-                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(), PersistenceTestAdapters.unitOfWork());
+                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
+                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), clock, PersistenceTestAdapters.unitOfWork());
     }
 
     /** Eventos publicados en cada llamada a {@code publishAll}, en orden. */
@@ -136,7 +143,8 @@ class CheckingAccountServiceTests {
         void un_numero_generado_en_uso_se_rechaza() {
             String used = service.openAccount(ADMIN, command().build()).accountNumber();
             CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
-                    publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(), PersistenceTestAdapters.unitOfWork());
+                    publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
+                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), clock, PersistenceTestAdapters.unitOfWork());
 
             assertThatExceptionOfType(DuplicateAccountNumberException.class)
                     .isThrownBy(() -> faulty.openAccount(ADMIN, byTaxId("87654321X").build()))
@@ -429,7 +437,8 @@ class CheckingAccountServiceTests {
         void un_caso_de_uso_que_falla_antes_de_guardar_no_publica_nada() {
             String used = service.openAccount(ADMIN, command().build()).accountNumber();
             CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
-                    publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(), PersistenceTestAdapters.unitOfWork());
+                    publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
+                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), clock, PersistenceTestAdapters.unitOfWork());
             clearInvocations(publisher);
 
             assertThatExceptionOfType(DuplicateAccountNumberException.class)
@@ -647,7 +656,8 @@ class CheckingAccountServiceTests {
             };
             recorded = new CheckingAccountService(PersistenceTestAdapters.accounts(), PersistenceTestAdapters.ownership(),
                     recordingPublisher, new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(),
-                            TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(), unit);
+                            TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
+                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), clock, unit);
         }
 
         @Test
@@ -670,6 +680,67 @@ class CheckingAccountServiceTests {
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() ->
                     recorded.deposit(ADMIN, DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).build()));
             assertThat(publications).isZero();
+        }
+    }
+
+    @Nested
+    @DisplayName("Revisión del segmento antes de un cargo")
+    class SegmentReviewBeforeDebit {
+
+        /** Abre con el patrimonio mínimo (alto patrimonio por saldo) y retira hasta dejar la cuenta en descubierto. */
+        private UUID cuentaEnDescubierto(OpenAccountCommand.Builder command) {
+            UUID id = service.openAccount(ADMIN, command.initialDeposit(new BigDecimal("100000")).build()).id();
+            service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("100500")).build());
+            return id;
+        }
+
+        private TransactionSummary retirar(UUID id, String amount) {
+            return service.withdraw(ADMIN,
+                    WithdrawCommand.builder().accountId(id).amount(new BigDecimal(amount)).build());
+        }
+
+        @Test
+        @DisplayName("Tras un mes bajo el mínimo y sin ingresos altos, la retirada se evalúa ya como minorista")
+        void tras_un_mes_bajo_el_minimo_y_sin_ingresos_altos_la_retirada_se_evalua_como_minorista() {
+            UUID id = cuentaEnDescubierto(command());
+            clock.advance(Duration.ofDays(32));
+
+            assertThat(retirar(id, "10").status()).isEqualTo("REJECTED");
+            assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("RETAIL");
+        }
+
+        @Test
+        @DisplayName("Antes de un mes la retirada sigue contando con el descubierto de alto patrimonio")
+        void antes_de_un_mes_la_retirada_sigue_contando_con_el_descubierto() {
+            UUID id = cuentaEnDescubierto(command());
+            clock.advance(Duration.ofDays(20));
+
+            assertThat(retirar(id, "10").status()).isEqualTo("APPROVED");
+            assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("HIGH_NET_WORTH");
+        }
+
+        @Test
+        @DisplayName("Tras un mes bajo el mínimo, un titular con ingresos altos verificados conserva el segmento")
+        void tras_un_mes_bajo_el_minimo_un_titular_con_ingresos_altos_conserva_el_segmento() {
+            UUID id = cuentaEnDescubierto(highNetWorthCommand());
+            clock.advance(Duration.ofDays(32));
+
+            assertThat(retirar(id, "10").status()).isEqualTo("APPROVED");
+            assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("HIGH_NET_WORTH");
+        }
+
+        @Test
+        @DisplayName("Tras un mes bajo el mínimo y sin ingresos altos, la transferencia se evalúa ya como minorista")
+        void tras_un_mes_bajo_el_minimo_y_sin_ingresos_altos_la_transferencia_se_evalua_como_minorista() {
+            UUID id = cuentaEnDescubierto(command());
+            String target = service.openAccount(ADMIN, command().ownerUsername("grace").build()).accountNumber();
+            clock.advance(Duration.ofDays(32));
+
+            TransferSummary transferencia = service.transfer(ADMIN, TransferCommand.builder()
+                    .sourceAccountId(id).targetAccountNumber(target).amount(new BigDecimal("10")).build());
+
+            assertThat(transferencia.status()).isEqualTo("REJECTED");
+            assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("RETAIL");
         }
     }
 }

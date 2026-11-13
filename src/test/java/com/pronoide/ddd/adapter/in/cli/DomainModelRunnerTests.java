@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.mock;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,7 @@ import com.pronoide.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.pronoide.ddd.domain.model.DomainEventPublisher;
 import com.pronoide.ddd.domain.model.CheckingAccountFactory;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
+import com.pronoide.ddd.domain.service.SegmentReviewService;
 
 @ExtendWith(OutputCaptureExtension.class)
 class DomainModelRunnerTests {
@@ -33,7 +35,8 @@ class DomainModelRunnerTests {
     private final AccountOwnershipRepository ownership = PersistenceTestAdapters.ownership();
     private final CheckingAccountService service =
             new CheckingAccountService(PersistenceTestAdapters.accounts(), ownership, mock(DomainEventPublisher.class),
-                    new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(), PersistenceTestAdapters.unitOfWork());
+                    new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
+                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork());
     /** El runner solo recibe el puerto de commands; el servicio concreto se usa aquí solo para consultar. */
     private final CheckingAccountCommands commands = service;
 
@@ -66,7 +69,8 @@ class DomainModelRunnerTests {
     @DisplayName("El segmento lo decide la agencia tributaria: sin ingresos verificados las tres cuentas son minoristas")
     void el_segmento_lo_decide_la_agencia_tributaria() {
         CheckingAccountService withoutIncomes = new CheckingAccountService(PersistenceTestAdapters.accounts(), ownership,
-                mock(DomainEventPublisher.class), new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), taxId -> Optional.empty()), new MoneyTransferService(), PersistenceTestAdapters.unitOfWork());
+                mock(DomainEventPublisher.class), new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), taxId -> Optional.empty()), new MoneyTransferService(),
+                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork());
 
         new DomainModelRunner(withoutIncomes).run(new DefaultApplicationArguments());
 

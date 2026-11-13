@@ -127,7 +127,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The listener tests pass; `el_nucleo_no_depende_de_spring` stays green.
 
-### [ ] T8 — The service reviews the segment before every debit (~10 min)
+### [x] T8 — The service reviews the segment before every debit (~10 min)
 
 - **Layer:** application · config
 - **Files:** `CheckingAccountService.java`, `config/DomainConfiguration.java`, service tests, `DomainConfigurationTests.java`
@@ -136,7 +136,7 @@ Decisions taken in this plan:
   1. Failing tests first, with a clock that can be moved forward: after more than a month below the minimum, an overdraft withdrawal of a holder without high income is rejected and the detail shows `RETAIL`; the same for the source of a transfer; before the month it is still approved.
   2. Inject `Clock` and `SegmentReviewService` (beans in `config`); call `segmentReview.review(account, clock.instant())` before the withdrawal and before the transfer, inside the unit of work; the event is published with the others.
 - **Acceptance criteria:**
-  - [ ] The three tests pass; `./mvnw verify` green.
+  - [x] The three tests pass; `./mvnw verify` green.
 
 ### [ ] T9 — Input port `reviewSegments()` (~10 min)
 

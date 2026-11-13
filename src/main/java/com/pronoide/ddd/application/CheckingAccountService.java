@@ -1,6 +1,7 @@
 package com.pronoide.ddd.application;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
@@ -18,6 +19,7 @@ import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.domain.model.Transaction;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
+import com.pronoide.ddd.domain.service.SegmentReviewService;
 
 /**
  * Casos de uso de las cuentas corrientes: abrir, consultar, listar, ingresar, retirar y transferir. Carga y guarda el
@@ -45,17 +47,22 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     private final DomainEventPublisher publisher;
     private final CheckingAccountFactory factory;
     private final MoneyTransferService transferService;
+    private final SegmentReviewService segmentReview;
+    private final Clock clock;
     private final UnitOfWork unitOfWork;
 
     /** Recibe sus colaboradores ya construidos: los entrega {@code config.DomainConfiguration} (#20). */
     public CheckingAccountService(CheckingAccountRepository repository, AccountOwnershipRepository ownership,
                                   DomainEventPublisher publisher, CheckingAccountFactory factory,
-                                  MoneyTransferService transferService, UnitOfWork unitOfWork) {
+                                  MoneyTransferService transferService, SegmentReviewService segmentReview,
+                                  Clock clock, UnitOfWork unitOfWork) {
         this.repository = repository;
         this.ownership = ownership;
         this.publisher = publisher;
         this.factory = factory;
         this.transferService = transferService;
+        this.segmentReview = segmentReview;
+        this.clock = clock;
         this.unitOfWork = unitOfWork;
     }
 
@@ -115,6 +122,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     public TransactionSummary withdraw(Caller caller, WithdrawCommand command) {
         return inUnit(events -> {
             CheckingAccount account = loadFor(caller, command.accountId());
+            segmentReview.review(account, clock.instant());
             Transaction transaction = account.tryWithdraw(toAmount(command.amount(), command.currency()));
             save(account, events);
             return toTransaction(transaction);
@@ -131,6 +139,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         AccountNumber targetNumber = new AccountNumber(command.targetAccountNumber());
         CheckingAccount target = repository.findByAccountNumber(targetNumber)
                 .orElseThrow(() -> new TargetAccountNotFoundException(targetNumber.value()));
+        segmentReview.review(source, clock.instant());
         Transaction withdrawal =
                 transferService.transfer(source, target, toAmount(command.amount(), command.currency()));
         save(source, events);

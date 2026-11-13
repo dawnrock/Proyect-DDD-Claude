@@ -2,6 +2,7 @@ package com.pronoide.ddd.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Clock;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import com.pronoide.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.pronoide.ddd.domain.model.CheckingAccountFactory;
 import com.pronoide.ddd.domain.model.DomainEventPublisher;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
+import com.pronoide.ddd.domain.service.SegmentReviewService;
 
 /**
  * Operaciones simultáneas sobre las mismas cuentas (#78): el servicio real con los adaptadores en memoria, sin Spring.
@@ -39,7 +41,8 @@ class CheckingAccountServiceConcurrencyTests {
         DomainEventPublisher ignoreEvents = events -> { };
         return new CheckingAccountService(PersistenceTestAdapters.accounts(), PersistenceTestAdapters.ownership(),
                 ignoreEvents, new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(),
-                        TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(), PersistenceTestAdapters.unitOfWork());
+                        TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
+                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork());
     }
 
     private static AccountSummary open(CheckingAccountService service, String holder, String taxId, String owner) {
