@@ -119,7 +119,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
   - [x] Tests for R22, R23, R25 and R26: review one month after the withdrawal; not due one second before; recovering the minimum cancels it; with high income the next review is six months later; without it the holder is retail and no review remains.
   - [x] `resolveSegmentReview` before it is due, or for a retail holder, throws `IllegalStateException`; a null `now` throws `NullPointerException`.
 
-### [ ] T6 — `integration` layer with the simulated tax agency (~10 min)
+### [x] T6 — `integration` layer with the simulated tax agency (~10 min)
 
 - **Layer:** integration · tests
 - **Files:** `integration/TaxAgencyClient.java`, `integration/TaxAgencyClientTests.java`, `LayeredArchitectureTests.java`
@@ -129,8 +129,8 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
   2. Add the `Integration` layer to the layered rule (only accessed by `Application`), a rule "integration only depends on `java..` and `com.pronoide.ddd.domain..`" (plus Spring stereotypes) and extend "no interfaces" to it.
   3. Validate the new rules by breaking them temporarily (a controller using `TaxAgencyClient`; an interface in `integration`) and revert.
 - **Acceptance criteria:**
-  - [ ] `TaxAgencyClientTests` passes for the three demo tax ids, an unknown one and null.
-  - [ ] `LayeredArchitectureTests` fails with each deliberate break and passes after reverting.
+  - [x] `TaxAgencyClientTests` passes for the three demo tax ids, an unknown one and null.
+  - [x] `LayeredArchitectureTests` fails with each deliberate break and passes after reverting.
 
 ### [ ] T7 — The service asks the agency at opening and at review (~10 min)
 
