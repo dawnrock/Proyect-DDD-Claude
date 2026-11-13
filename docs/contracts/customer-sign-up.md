@@ -1,7 +1,7 @@
 # Contract: Mon-A Bank customer sign-up
 
 - **Issue:** [#95](https://github.com/dawnrock/Proyect-DDD-Claude/issues/95) · **Plan:** `docs/plans/2026-11-12-customer-sign-up.md`
-- **Status:** agreed
+- **Status:** frozen at `8ce0baa`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed on the signatures and asked only for clarifications, merged by the lead; the teammates cannot message each other)
 
 Builds on the frozen contracts of #5, #6, #7 and #50 (`open-query-list-accounts.md`, `deposits-withdrawals.md`, `money-transfers.md`, `login-roles.md`) and on #99 (`holderTaxId`, simulated tax agency). Business rules R27-R31 are new (glossary).
