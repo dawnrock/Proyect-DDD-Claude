@@ -65,14 +65,14 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] `./mvnw test -Dtest=CheckingAccountTests` passes; `./mvnw verify` green.
 
-### [ ] T2 — An incoming transfer can promote the target holder (~5 min)
+### [x] T2 — An incoming transfer can promote the target holder (~5 min)
 
 - **Layer:** domain (test only)
 - **Files:** `MoneyTransferServiceTests.java`
 - **Depends on:** T1
 - **What to do:** a retail target with 99.900,00 € receives 100,00 € and becomes high net worth; a rejected transfer promotes nobody. Validate by breaking the promotion temporarily.
 - **Acceptance criteria:**
-  - [ ] The two tests pass and fail when the promotion is removed.
+  - [x] The two tests pass and fail when the promotion is removed.
 
 ### [ ] T3 — The holder keeps its tax id (~10 min)
 
