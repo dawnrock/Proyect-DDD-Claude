@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 import com.pronoide.ddd.domain.model.AccountHolder;
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
+import com.pronoide.ddd.domain.model.CustomerSegment;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
+import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.domain.model.Transaction;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
 import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
@@ -61,7 +63,7 @@ public class CheckingAccountService {
             throw new DuplicateAccountNumberException(accountNumber);
         });
 
-        AccountHolder holder = AccountHolder.register(command.holderName());
+        AccountHolder holder = AccountHolder.register(command.holderName(), new TaxId(command.holderTaxId()), CustomerSegment.RETAIL);
         MonetaryAmount initialDeposit =
                 new MonetaryAmount(command.initialDeposit(), Currency.getInstance(command.currency()));
         CheckingAccount account = repository.save(CheckingAccount.open(accountNumber, holder, initialDeposit));

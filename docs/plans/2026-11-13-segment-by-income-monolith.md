@@ -93,7 +93,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
   - [x] `OpenAccountCommandTests`: missing or malformed tax id is rejected; `" 12345678z "` is accepted.
   - [x] REST and web tests: a request without `holderTaxId` gets 400 / the form shows the field error.
 
-### [ ] T4 — `AccountHolder` with tax id and given segment (~10 min)
+### [x] T4 — `AccountHolder` with tax id and given segment (~10 min)
 
 - **Layer:** domain
 - **Files:** `domain/model/AccountHolder.java`, `AccountHolderTests.java`, `support/TestAccounts.java`, `application/CheckingAccountService.java` (call site)
@@ -103,8 +103,8 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
   2. `TestAccounts` registers high-net-worth holders through the segment argument instead of calling `promoteToHighNetWorth()`; default tax id `12345678Z`.
   3. The service calls `register(name, new TaxId(command.holderTaxId()), RETAIL)` for now (T7 asks the agency).
 - **Acceptance criteria:**
-  - [ ] `AccountHolderTests`: keeps the tax id and the given segment; null tax id or segment throws; equality by id still holds.
-  - [ ] The test for the old R21 ("se registra siempre como minorista") is replaced.
+  - [x] `AccountHolderTests`: keeps the tax id and the given segment; null tax id or segment throws; equality by id still holds.
+  - [x] The test for the old R21 ("se registra siempre como minorista") is replaced.
 
 ### [ ] T5 — Segment review in the aggregate (~10 min)
 

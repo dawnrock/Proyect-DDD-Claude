@@ -20,7 +20,7 @@ class CheckingAccountTests {
     @Test
     @DisplayName("Una cuenta no puede abrirse por debajo del depósito inicial mínimo")
     void una_cuenta_no_puede_abrirse_por_debajo_del_deposito_minimo() {
-        AccountHolder titular = AccountHolder.register("Ada Lovelace");
+        AccountHolder titular = AccountHolder.register("Ada Lovelace", new TaxId("12345678Z"), CustomerSegment.RETAIL);
         
         assertThatExceptionOfType(InsufficientInitialDepositException.class)
                 .isThrownBy(() -> CheckingAccount.open(IBAN, titular, MonetaryAmount.euros("25.00")))
