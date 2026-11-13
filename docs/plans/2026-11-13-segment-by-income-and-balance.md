@@ -118,14 +118,14 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The three tests pass; the existing event tests stay green.
 
-### [ ] T7 — The listeners handle the segment change (~5 min)
+### [x] T7 — The listeners handle the segment change (~5 min)
 
 - **Layer:** application
 - **Files:** `application/listener/AuditLogListener.java`, `CustomerNotificationListener.java` + tests
 - **Depends on:** T6
 - **What to do:** one `@EventListener` in each; tests in the style of the existing listener tests.
 - **Acceptance criteria:**
-  - [ ] The listener tests pass; `el_nucleo_no_depende_de_spring` stays green.
+  - [x] The listener tests pass; `el_nucleo_no_depende_de_spring` stays green.
 
 ### [ ] T8 — The service reviews the segment before every debit (~10 min)
 
