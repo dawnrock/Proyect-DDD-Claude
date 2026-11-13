@@ -197,7 +197,15 @@ public class CheckingAccountService {
      * @throws com.pronoide.ddd.domain.model.InsufficientInitialDepositException si el depósito no llega al mínimo
      */
     public AccountSummary openAnotherAccount(Caller caller, OpenAnotherAccountCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        if (caller.admin()) {
+            throw new NotACustomerException(caller.username());
+        }
+        Customer customer = customers.findByUsername(caller.username())
+                .orElseThrow(() -> new NotACustomerException(caller.username()));
+        CheckingAccount account = openFor(customer, toAmount(command.initialDeposit(), command.currency()));
+        repository.save(account);
+        ownership.assign(account.id(), caller.username());
+        return toSummary(account);
     }
 
     /**

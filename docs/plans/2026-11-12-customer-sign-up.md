@@ -125,12 +125,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The tests pass; `./mvnw verify` green.
 
-### [ ] T8 — Open another account (~10 min)
+### [x] T8 — Open another account (~10 min)
 
 - **Side:** back · **Layer:** application · **Files:** `CheckingAccountService.java`, `OpenAnotherAccountCommandDef.java` + tests · **Depends on:** T7
 - **What to do:** `openAnotherAccount(caller, command)`: the caller's customer (by username) gets a new account with a generated IBAN, its name and tax id copied into the holder; a caller who is not a customer (administrator or a static user without customer) gets `OperationNotAllowedException`.
 - **Acceptance criteria:**
-  - [ ] Tests: the customer ends with two accounts with different IBANs, both listed; a non-customer is rejected.
+  - [x] Tests: the customer ends with two accounts with different IBANs, both listed; a non-customer is rejected.
 
 ### [ ] T9 — The administrator regenerates an IBAN (~10 min)
 
