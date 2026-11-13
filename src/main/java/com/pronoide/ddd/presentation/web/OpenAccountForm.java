@@ -30,6 +30,11 @@ public class OpenAccountForm {
     @NotBlank(message = "El titular es obligatorio")
     private String holderName;
 
+    @NotBlank(message = "El NIF del titular es obligatorio")
+    @Pattern(regexp = OpenAccountCommandDef.TAX_ID_PATTERN,
+            message = "El NIF del titular debe tener 8 dígitos y una letra")
+    private String holderTaxId;
+
     /** Usuario (cliente) que verá y operará la cuenta; mismo formato que el command (contrato login-roles). */
     @NotBlank(message = "El usuario del titular es obligatorio")
     @Pattern(regexp = OpenAccountCommandDef.USERNAME_PATTERN,

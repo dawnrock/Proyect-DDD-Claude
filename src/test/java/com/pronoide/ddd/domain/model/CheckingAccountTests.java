@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Currency;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -20,7 +21,7 @@ class CheckingAccountTests {
     @Test
     @DisplayName("Una cuenta no puede abrirse por debajo del depósito inicial mínimo")
     void una_cuenta_no_puede_abrirse_por_debajo_del_deposito_minimo() {
-        AccountHolder titular = AccountHolder.register("Ada Lovelace");
+        AccountHolder titular = AccountHolder.register("Ada Lovelace", new TaxId("12345678Z"), CustomerSegment.RETAIL);
         
         assertThatExceptionOfType(InsufficientInitialDepositException.class)
                 .isThrownBy(() -> CheckingAccount.open(IBAN, titular, MonetaryAmount.euros("25.00")))
@@ -172,144 +173,185 @@ class CheckingAccountTests {
         assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
     }
 
-    @Test
-    @DisplayName("Una retirada aprobada que deja una cuenta de alto patrimonio bajo el mínimo anota desde cuándo")
-    void una_retirada_que_deja_la_cuenta_bajo_el_patrimonio_minimo_anota_desde_cuando() {
-        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
-
-        Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
-
-        assertThat(cuenta.belowMinimumNetWorthSince()).contains(retirada.occurredOn());
-        assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+    private static Instant mesesDespuesDe(Instant instante, int meses) {
+        return instante.atZone(ZoneOffset.UTC).plusMonths(meses).toInstant();
     }
 
-    @Test
-    @DisplayName("Una segunda retirada bajo el mínimo no mueve la fecha anotada")
-    void una_segunda_retirada_bajo_el_minimo_no_mueve_la_fecha() {
-        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
-        Transaction primera = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
+    @Nested
+    @DisplayName("Próxima revisión del segmento")
+    class NextSegmentReview {
 
-        cuenta.tryWithdraw(MonetaryAmount.euros("10.00"));
+        @Test
+        @DisplayName("Una retirada aprobada que deja una cuenta de alto patrimonio bajo el mínimo programa la revisión a un mes")
+        void una_retirada_que_deja_la_cuenta_bajo_el_minimo_programa_la_revision_a_un_mes() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
 
-        assertThat(cuenta.belowMinimumNetWorthSince()).contains(primera.occurredOn());
+            Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
+
+            assertThat(cuenta.nextSegmentReview()).contains(mesesDespuesDe(retirada.occurredOn(), 1));
+            assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Una segunda retirada bajo el mínimo no mueve la revisión programada")
+        void una_segunda_retirada_bajo_el_minimo_no_mueve_la_revision() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+            Transaction primera = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
+
+            cuenta.tryWithdraw(MonetaryAmount.euros("10.00"));
+
+            assertThat(cuenta.nextSegmentReview()).contains(mesesDespuesDe(primera.occurredOn(), 1));
+        }
+
+        @Test
+        @DisplayName("Un ingreso que recupera el patrimonio mínimo cancela la revisión programada")
+        void un_ingreso_que_recupera_el_patrimonio_minimo_cancela_la_revision() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+            cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
+
+            cuenta.deposit(MonetaryAmount.euros("10000.00"));
+
+            assertThat(cuenta.nextSegmentReview()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Una retirada rechazada no programa ninguna revisión")
+        void una_retirada_rechazada_no_programa_ninguna_revision() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("100000.00").open();
+
+            Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("200000.00"));
+
+            assertThat(retirada.isRejected()).isTrue();
+            assertThat(cuenta.nextSegmentReview()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Una cuenta minorista no programa ninguna revisión al retirar")
+        void una_cuenta_minorista_no_programa_ninguna_revision_al_retirar() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+
+            cuenta.tryWithdraw(MonetaryAmount.euros("100.00"));
+
+            assertThat(cuenta.nextSegmentReview()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Un titular de alto patrimonio que abre bajo el mínimo tiene su primera revisión a los seis meses")
+        void un_titular_de_alto_patrimonio_que_abre_bajo_el_minimo_se_revisa_a_los_seis_meses() {
+            CheckingAccount cuenta = TestAccounts.anAccount()
+                    .segment(CustomerSegment.HIGH_NET_WORTH).initialDeposit("5000.00").open();
+
+            Instant apertura = cuenta.transactions().get(0).occurredOn();
+            assertThat(cuenta.nextSegmentReview()).contains(mesesDespuesDe(apertura, 6));
+        }
+
+        @Test
+        @DisplayName("Una retirada no adelanta la primera revisión semestral")
+        void una_retirada_no_adelanta_la_primera_revision_semestral() {
+            CheckingAccount cuenta = TestAccounts.anAccount()
+                    .segment(CustomerSegment.HIGH_NET_WORTH).initialDeposit("5000.00").open();
+            Instant apertura = cuenta.transactions().get(0).occurredOn();
+
+            cuenta.tryWithdraw(MonetaryAmount.euros("100.00"));
+
+            assertThat(cuenta.nextSegmentReview()).contains(mesesDespuesDe(apertura, 6));
+        }
     }
 
-    @Test
-    @DisplayName("Un ingreso que recupera el patrimonio mínimo borra la fecha anotada")
-    void un_ingreso_que_recupera_el_patrimonio_minimo_borra_la_fecha() {
-        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
-        cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
+    @Nested
+    @DisplayName("Revisión del segmento")
+    class SegmentReview {
 
-        cuenta.deposit(MonetaryAmount.euros("10000.00"));
+        private final CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+        private final Instant revision =
+                mesesDespuesDe(cuenta.tryWithdraw(MonetaryAmount.euros("60000.00")).occurredOn(), 1);
 
-        assertThat(cuenta.belowMinimumNetWorthSince()).isEmpty();
-    }
+        @Test
+        @DisplayName("Un segundo antes de cumplirse el mes la revisión aún no toca")
+        void un_segundo_antes_de_cumplirse_el_mes_la_revision_aun_no_toca() {
+            assertThat(cuenta.segmentReviewDue(revision.minusSeconds(1))).isFalse();
+            assertThat(cuenta.segmentReviewDue(revision)).isTrue();
+        }
 
-    @Test
-    @DisplayName("Una retirada rechazada no anota ninguna fecha")
-    void una_retirada_rechazada_no_anota_ninguna_fecha() {
-        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("100000.00").open();
+        @Test
+        @DisplayName("Sin ingresos altos, tras un mes bajo el patrimonio mínimo el titular vuelve a ser minorista")
+        void sin_ingresos_altos_tras_un_mes_bajo_el_minimo_el_titular_vuelve_a_ser_minorista() {
+            cuenta.resolveSegmentReview(revision, false);
 
-        Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("200000.00"));
+            assertThat(cuenta.primaryHolder().segment()).isEqualTo(CustomerSegment.RETAIL);
+            assertThat(cuenta.nextSegmentReview()).isEmpty();
+        }
 
-        assertThat(retirada.isRejected()).isTrue();
-        assertThat(cuenta.belowMinimumNetWorthSince()).isEmpty();
-    }
+        @Test
+        @DisplayName("Con ingresos altos conserva el alto patrimonio y se revisa de nuevo a los seis meses")
+        void con_ingresos_altos_conserva_el_alto_patrimonio_y_se_revisa_a_los_seis_meses() {
+            cuenta.resolveSegmentReview(revision, true);
 
-    @Test
-    @DisplayName("Una cuenta minorista no anota ninguna fecha al retirar")
-    void una_cuenta_minorista_no_anota_ninguna_fecha_al_retirar() {
-        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+            assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+            assertThat(cuenta.nextSegmentReview()).contains(mesesDespuesDe(revision, 6));
+        }
 
-        cuenta.tryWithdraw(MonetaryAmount.euros("100.00"));
+        @Test
+        @DisplayName("Recuperar el patrimonio mínimo antes de un mes cancela la vuelta a minorista")
+        void recuperar_el_patrimonio_minimo_cancela_la_vuelta_a_minorista() {
+            cuenta.deposit(MonetaryAmount.euros("10000.00"));
 
-        assertThat(cuenta.belowMinimumNetWorthSince()).isEmpty();
-    }
+            assertThat(cuenta.segmentReviewDue(mesesDespuesDe(revision, 12))).isFalse();
+            assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+        }
 
-    private static Instant unMesDespuesDe(Instant instante) {
-        return instante.atZone(ZoneOffset.UTC).plusMonths(1).toInstant();
-    }
+        @Test
+        @DisplayName("Una revisión que aún no toca no se puede resolver")
+        void una_revision_que_aun_no_toca_no_se_puede_resolver() {
+            assertThatExceptionOfType(IllegalStateException.class)
+                    .isThrownBy(() -> cuenta.resolveSegmentReview(revision.minusSeconds(1), false))
+                    .withMessage("La revisión del segmento aún no está vencida");
+            assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+        }
 
-    @Test
-    @DisplayName("Antes de cumplirse un mes bajo el mínimo el titular sigue siendo de alto patrimonio")
-    void antes_de_un_mes_bajo_el_minimo_el_titular_sigue_siendo_de_alto_patrimonio() {
-        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
-        Instant desde = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00")).occurredOn();
+        @Test
+        @DisplayName("Una cuenta minorista nunca tiene revisión pendiente")
+        void una_cuenta_minorista_nunca_tiene_revision_pendiente() {
+            CheckingAccount minorista = TestAccounts.anAccount().initialDeposit("500.00").open();
+            Instant dentroDeDiezAnos = mesesDespuesDe(Instant.now(), 120);
 
-        cuenta.reviewSegment(unMesDespuesDe(desde).minusSeconds(1));
+            assertThat(minorista.segmentReviewDue(dentroDeDiezAnos)).isFalse();
+            assertThatExceptionOfType(IllegalStateException.class)
+                    .isThrownBy(() -> minorista.resolveSegmentReview(dentroDeDiezAnos, true));
+        }
 
-        assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
-        assertThat(cuenta.belowMinimumNetWorthSince()).contains(desde);
-    }
+        @Test
+        @DisplayName("Un titular que vuelve a minorista en descubierto conserva la deuda y no puede retirar más")
+        void un_titular_que_vuelve_a_minorista_en_descubierto_conserva_la_deuda() {
+            CheckingAccount enDescubierto = TestAccounts.anAccount().initialDeposit("100000.00").open();
+            Instant vence = mesesDespuesDe(
+                    enDescubierto.tryWithdraw(MonetaryAmount.euros("100500.00")).occurredOn(), 1);
 
-    @Test
-    @DisplayName("Tras un mes bajo el patrimonio mínimo el titular vuelve a ser minorista")
-    void tras_un_mes_bajo_el_patrimonio_minimo_el_titular_vuelve_a_ser_minorista() {
-        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
-        Instant desde = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00")).occurredOn();
+            enDescubierto.resolveSegmentReview(vence, false);
+            Transaction retirada = enDescubierto.tryWithdraw(MonetaryAmount.euros("10.00"));
 
-        cuenta.reviewSegment(unMesDespuesDe(desde));
+            assertThat(enDescubierto.primaryHolder().segment()).isEqualTo(CustomerSegment.RETAIL);
+            assertThat(enDescubierto.currentBalance()).isEqualTo(MonetaryAmount.euros("-500.00"));
+            assertThat(retirada.isRejected()).isTrue();
+        }
 
-        assertThat(cuenta.primaryHolder().segment()).isEqualTo(CustomerSegment.RETAIL);
-        assertThat(cuenta.belowMinimumNetWorthSince()).isEmpty();
-    }
+        @Test
+        @DisplayName("Un titular que volvió a minorista recupera el alto patrimonio al alcanzar de nuevo el mínimo")
+        void un_titular_que_volvio_a_minorista_recupera_el_alto_patrimonio_al_alcanzar_de_nuevo_el_minimo() {
+            cuenta.resolveSegmentReview(revision, false);
 
-    @Test
-    @DisplayName("Recuperar el patrimonio mínimo antes de un mes cancela la vuelta a minorista")
-    void recuperar_el_patrimonio_minimo_cancela_la_vuelta_a_minorista() {
-        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
-        Instant desde = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00")).occurredOn();
-        cuenta.deposit(MonetaryAmount.euros("10000.00"));
+            cuenta.deposit(MonetaryAmount.euros("10000.00"));
 
-        cuenta.reviewSegment(unMesDespuesDe(desde));
+            assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+            assertThat(cuenta.nextSegmentReview()).isEmpty();
+        }
 
-        assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
-    }
-
-    @Test
-    @DisplayName("Revisar el segmento de una cuenta minorista no cambia nada")
-    void revisar_el_segmento_de_una_cuenta_minorista_no_cambia_nada() {
-        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
-
-        cuenta.reviewSegment(Instant.now().plusSeconds(10L * 365 * 24 * 3600));
-
-        assertThat(cuenta.primaryHolder().segment()).isEqualTo(CustomerSegment.RETAIL);
-    }
-
-    @Test
-    @DisplayName("Un titular que vuelve a minorista en descubierto conserva la deuda y no puede retirar más")
-    void un_titular_que_vuelve_a_minorista_en_descubierto_conserva_la_deuda() {
-        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("100000.00").open();
-        Instant desde = cuenta.tryWithdraw(MonetaryAmount.euros("100500.00")).occurredOn();
-
-        cuenta.reviewSegment(unMesDespuesDe(desde));
-        Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("10.00"));
-
-        assertThat(cuenta.primaryHolder().segment()).isEqualTo(CustomerSegment.RETAIL);
-        assertThat(cuenta.currentBalance()).isEqualTo(MonetaryAmount.euros("-500.00"));
-        assertThat(retirada.isRejected()).isTrue();
-    }
-
-    @Test
-    @DisplayName("Un titular que volvió a minorista recupera el alto patrimonio al alcanzar de nuevo el mínimo")
-    void un_titular_que_volvio_a_minorista_recupera_el_alto_patrimonio_al_alcanzar_de_nuevo_el_minimo() {
-        CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
-        Instant desde = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00")).occurredOn();
-        cuenta.reviewSegment(unMesDespuesDe(desde));
-
-        cuenta.deposit(MonetaryAmount.euros("10000.00"));
-
-        assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
-        assertThat(cuenta.belowMinimumNetWorthSince()).isEmpty();
-    }
-
-    @Test
-    @DisplayName("El segmento no se puede revisar sin indicar el momento")
-    void el_segmento_no_se_puede_revisar_sin_indicar_el_momento() {
-        CheckingAccount cuenta = TestAccounts.anAccount().open();
-
-        assertThatExceptionOfType(NullPointerException.class)
-                .isThrownBy(() -> cuenta.reviewSegment(null))
-                .withMessage("El momento de la revisión es obligatorio");
+        @Test
+        @DisplayName("El segmento no se puede revisar sin indicar el momento")
+        void el_segmento_no_se_puede_revisar_sin_indicar_el_momento() {
+            assertThatExceptionOfType(NullPointerException.class)
+                    .isThrownBy(() -> cuenta.segmentReviewDue(null))
+                    .withMessage("El momento de la revisión es obligatorio");
+        }
     }
 }

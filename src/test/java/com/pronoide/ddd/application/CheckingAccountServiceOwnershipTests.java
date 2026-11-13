@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import com.pronoide.ddd.integration.TaxAgencyClient;
 import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
 import com.pronoide.ddd.support.TestAccounts;
@@ -36,13 +37,15 @@ class CheckingAccountServiceOwnershipTests {
     void setUp() {
         accounts = new InMemoryCheckingAccountRepository();
         owners = new InMemoryAccountOwnershipRepository();
-        service = new CheckingAccountService(accounts, owners, java.time.Clock.systemUTC());
+        service = new CheckingAccountService(accounts, owners, new TaxAgencyClient(),
+                java.time.Clock.systemUTC());
     }
 
     private static OpenAccountCommand.Builder command(String accountNumber, String owner) {
         return OpenAccountCommand.builder()
                 .accountNumber(accountNumber)
                 .holderName("Titular")
+                .holderTaxId("12345678Z")
                 .initialDeposit(new BigDecimal("500"))
                 .ownerUsername(owner);
     }

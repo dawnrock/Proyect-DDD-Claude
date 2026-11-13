@@ -9,11 +9,13 @@ flowchart TD
     P["presentation<br/>web (Thymeleaf) · rest"] --> A["application<br/>application services, commands and views"]
     A --> D["domain<br/>model · service"]
     A --> R["persistence<br/>in-memory repositories"]
+    A --> I["integration<br/>simulated tax agency"]
     R --> D
+    I --> D
     P -. "domain exceptions only" .-> D
 ```
 
-Arrows show **who depends on whom**: always downwards. `domain` sits at the bottom and depends on nothing. The dotted arrow is the only dependency from `presentation` on the domain: the exceptions it translates to HTTP or to messages (D4).
+Arrows show **who depends on whom**: always downwards. `domain` sits at the bottom and depends on nothing. `persistence` and `integration` (ADR 0011) are siblings: only `application` uses them, and they only know the domain. The dotted arrow is the only dependency from `presentation` on the domain: the exceptions it translates to HTTP or to messages (D4).
 
 | Package | Responsibility | Contains |
 | ------- | -------------- | -------- |
@@ -21,9 +23,10 @@ Arrows show **who depends on whom**: always downwards. `domain` sits at the bott
 | `presentation.rest` | REST API: translates HTTP ↔ commands/views, and errors to `ProblemDetail` from a single place | `@RestController`, DTOs, `@RestControllerAdvice`, `ApiSecurityConfig` |
 | `presentation` (root) | What both channels share without knowing each other (D5) | `SecuritySupport`, `CurrentCaller`, `SecurityUsersProperties` |
 | `application` | Use cases: loads aggregates, calls the domain, saves. **No business rules**; decides account ownership with the `Caller` | `CheckingAccountService`, commands and views (Immutables, `@ApplicationValue`), application errors, `DemoDataLoader` |
-| `domain.model` | Model and business rules (R1-R19 of the glossary) | `CheckingAccount` aggregate, entities, value objects, domain exceptions |
+| `domain.model` | Model and business rules (R1-R26 of the glossary) | `CheckingAccount` aggregate, entities, value objects, domain exceptions |
 | `domain.service` | Rules that span several aggregates | `MoneyTransferService` |
 | `persistence` | Saving and loading aggregates | `InMemoryCheckingAccountRepository`, `InMemoryAccountOwnershipRepository` (concrete classes, simulated) |
+| `integration` | Clients of external systems (ADR 0011); only `application` uses them | `TaxAgencyClient`: simulated tax agency that verifies the holder's annual income (concrete class, demo table) |
 
 ## Dependencies
 
@@ -31,10 +34,11 @@ This table is the specification of [`LayeredArchitectureTests`](../../src/test/j
 
 | # | Source | May depend on | May not depend on |
 | - | ------ | ------------- | ----------------- |
-| D1 | `..domain..` | the JDK only | `..application..`, `..persistence..`, `..presentation..`, `org.springframework..`, `jakarta..`, `org.immutables..` |
+| D1 | `..domain..` | the JDK only | `..application..`, `..persistence..`, `..integration..`, `..presentation..`, `org.springframework..`, `jakarta..`, `org.immutables..` |
 | D2 | `..persistence..` | `..domain..` | `..application..`, `..presentation..` |
-| D3 | `..application..` | `..domain..`, `..persistence..` | `..presentation..` |
-| D4 | `..presentation..` | `..application..`; from `..domain.model..` **only** `DomainException` and its subclasses (to translate them to HTTP or messages) | `..persistence..`, `..domain.service..` and the rest of `..domain.model..` (aggregates, entities, value objects): presentation works with commands and views, not with the model |
+| D2b | `..integration..` | `..domain..` (and Spring stereotypes) | `..application..`, `..persistence..`, `..presentation..` |
+| D3 | `..application..` | `..domain..`, `..persistence..`, `..integration..` | `..presentation..` |
+| D4 | `..presentation..` | `..application..`; from `..domain.model..` **only** `DomainException` and its subclasses (to translate them to HTTP or messages) | `..persistence..`, `..integration..`, `..domain.service..` and the rest of `..domain.model..` (aggregates, entities, value objects): presentation works with commands and views, not with the model |
 | D5 | `..presentation.web..` | — | `..presentation.rest..` (and the other way round: web and REST do not know each other) |
 
 ## ArchUnit rules
@@ -43,16 +47,18 @@ Each rule was validated by breaking it on purpose (red) and reverting (green).
 
 | Rule | Covers | Issue |
 | ---- | ------ | ----- |
-| `las_capas_solo_dependen_hacia_abajo` (`layeredArchitecture()`) | D2, D3: nobody uses `presentation`, only `presentation` uses `application`, only `application` uses `persistence` | #12 |
+| `las_capas_solo_dependen_hacia_abajo` (`layeredArchitecture()`) | D2, D3: nobody uses `presentation`, only `presentation` uses `application`, only `application` uses `persistence` and `integration` (ADR 0011) | #12 |
 | `el_dominio_solo_depende_del_jdk` | D1 (includes Spring, `jakarta` and `org.immutables`) | #12 |
 | `la_presentacion_solo_conoce_las_excepciones_del_dominio` | D4 (from `domain`, only `DomainException` and its subclasses; no `domain.service`) | #12 |
 | `la_web_y_rest_no_se_conocen` (`slices()`) | D5, both ways | #12 |
 | `el_dominio_no_tiene_setters_publicos` | The domain only changes state through business methods | #12 |
 | `los_controladores_no_acceden_al_repositorio` | Classes with `@Controller` or `@RestController` (meta-annotation) do not use `persistence`; overlaps with the layer rule, but its message is clearer | #12 |
-| `toda_clase_pertenece_a_una_capa` | Only `DddLabApplication` lives outside the four layers: the layer rule ignores packages that are not layers, so a new package (`config`…) must be added as a layer first | #12 |
+| `toda_clase_pertenece_a_una_capa` | Only `DddLabApplication` lives outside the layers: the layer rule ignores packages that are not layers, so a new package (`config`…) must be added as a layer first | #12 |
 | `la_aplicacion_no_depende_de_spring_security` | ADR 0008: account ownership is decided with `Caller`, without Spring Security in `application` | #54 |
 | `nadie_usa_la_seguridad_por_metodos` | ADR 0008: no class or method uses `@PreAuthorize`, `@PostAuthorize` or `@Secured`, in any layer | #54 |
 | `la_persistencia_no_tiene_interfaces` | ADR 0004: concrete classes, no port interfaces in `persistence` (phase 1 only) | #54 |
+| `la_integracion_no_tiene_interfaces` | ADR 0011: concrete classes, no interfaces in `integration` | #99 |
+| `la_integracion_solo_conoce_el_dominio` | D2b: `integration` only depends on the JDK, the domain and Spring stereotypes | #99 |
 
 [`DomainIsolationTests`](../../src/test/java/com/pronoide/ddd/DomainIsolationTests.java) adds `el_dominio_no_depende_del_framework` and `el_estado_del_dominio_esta_encapsulado` (private state). They are the rules that survive both phases. Lombok in the domain (ADR 0009) is checked by `check-domain.mjs`, because ArchUnit cannot see `SOURCE`-retention annotations.
 

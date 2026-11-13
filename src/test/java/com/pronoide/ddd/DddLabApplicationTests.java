@@ -91,7 +91,7 @@ class DddLabApplicationTests {
 		@DisplayName("Una cuenta abierta por la API se consulta por su id y aparece en el listado web")
 		void una_cuenta_abierta_por_la_api_se_consulta_por_su_id_y_aparece_en_el_listado_web() throws Exception {
 			HttpResponse<String> created = post("/api/accounts", "application/json", """
-					{"accountNumber": "es91 2100 0418 4502 0005 1332", "holderName": "Ada Lovelace",
+					{"accountNumber": "es91 2100 0418 4502 0005 1332", "holderName": "Ada Lovelace", "holderTaxId": "12345678Z",
 					 "initialDeposit": 100.00, "ownerUsername": "ada"}""");
 
 			assertThat(created.statusCode()).isEqualTo(201);
@@ -109,7 +109,7 @@ class DddLabApplicationTests {
 		@DisplayName("Una cuenta abierta por la API con el patrimonio mínimo es de alto patrimonio sin indicar segmento")
 		void una_cuenta_abierta_por_la_api_con_el_patrimonio_minimo_es_de_alto_patrimonio() throws Exception {
 			HttpResponse<String> created = post("/api/accounts", "application/json", """
-					{"accountNumber": "ES0000000000000000009401", "holderName": "Grace Hopper",
+					{"accountNumber": "ES0000000000000000009401", "holderName": "Grace Hopper", "holderTaxId": "12345678Z",
 					 "initialDeposit": 100000.00, "ownerUsername": "grace"}""");
 
 			assertThat(created.statusCode()).isEqualTo(201);
@@ -151,7 +151,7 @@ class DddLabApplicationTests {
 		}
 
 		private HttpResponse<String> submitForm(String accountNumber, String currency) throws Exception {
-			String form = "accountNumber=%s&holderName=Grace+Hopper&ownerUsername=grace&initialDeposit=75.00&currency=%s"
+			String form = "accountNumber=%s&holderName=Grace+Hopper&holderTaxId=87654321X&ownerUsername=grace&initialDeposit=75.00&currency=%s"
 					.formatted(URLEncoder.encode(accountNumber, StandardCharsets.UTF_8), currency);
 			return submit("/accounts/new", form);
 		}
@@ -315,7 +315,7 @@ class DddLabApplicationTests {
 			String adas = idOf(openAccountFor("ES0000000000000000005004", "ada"));
 
 			HttpResponse<String> open = api("grace", "POST", "/api/accounts", """
-					{"accountNumber": "ES0000000000000000005005", "holderName": "Grace Hopper",
+					{"accountNumber": "ES0000000000000000005005", "holderName": "Grace Hopper", "holderTaxId": "12345678Z",
 					 "initialDeposit": 100.00, "ownerUsername": "grace"}""");
 			HttpResponse<String> foreign = api("grace", "GET", "/api/accounts/" + adas, null);
 			HttpResponse<String> transfer = api("grace", "POST", "/api/transfers", """
@@ -344,7 +344,7 @@ class DddLabApplicationTests {
 
 		private String openAccountFor(String accountNumber, String owner) throws Exception {
 			HttpResponse<String> created = post("/api/accounts", "application/json", """
-					{"accountNumber": "%s", "holderName": "Titular", "initialDeposit": 100.00,
+					{"accountNumber": "%s", "holderName": "Titular", "holderTaxId": "12345678Z", "initialDeposit": 100.00,
 					 "ownerUsername": "%s"}""".formatted(accountNumber, owner));
 			assertThat(created.statusCode()).isEqualTo(201);
 			return created.headers().firstValue("Location").orElseThrow();
@@ -401,7 +401,7 @@ class DddLabApplicationTests {
 	/** Abre una cuenta minorista con 100,00 € y devuelve su ruta de la API ({@code /api/accounts/{id}}). */
 	private String openAccount(String accountNumber) throws Exception {
 		HttpResponse<String> created = post("/api/accounts", "application/json", """
-				{"accountNumber": "%s", "holderName": "Grace Hopper", "initialDeposit": 100.00,
+				{"accountNumber": "%s", "holderName": "Grace Hopper", "holderTaxId": "12345678Z", "initialDeposit": 100.00,
 				 "ownerUsername": "ada"}"""
 				.formatted(accountNumber));
 		assertThat(created.statusCode()).isEqualTo(201);

@@ -26,7 +26,10 @@ import com.pronoide.ddd.domain.model.DomainException;
                 importOptions = ImportOption.DoNotIncludeTests.class)
 class LayeredArchitectureTests {
 
-    /** D2 y D3: nadie depende de {@code presentation}, ni de {@code application} desde abajo. */
+    /**
+     * D2 y D3: nadie depende de {@code presentation}, ni de {@code application} desde abajo. {@code persistence} e
+     * {@code integration} (ADR 0011) solo las usa {@code application}.
+     */
     @ArchTest
     static final ArchRule las_capas_solo_dependen_hacia_abajo = layeredArchitecture()
             .consideringOnlyDependenciesInLayers()
@@ -34,10 +37,12 @@ class LayeredArchitectureTests {
             .layer("Application").definedBy("..application..")
             .layer("Domain").definedBy("..domain..")
             .layer("Persistence").definedBy("..persistence..")
+            .layer("Integration").definedBy("..integration..")
             .whereLayer("Presentation").mayNotBeAccessedByAnyLayer()
             .whereLayer("Application").mayOnlyBeAccessedByLayers("Presentation")
             .whereLayer("Persistence").mayOnlyBeAccessedByLayers("Application")
-            .whereLayer("Domain").mayOnlyBeAccessedByLayers("Application", "Persistence", "Presentation");
+            .whereLayer("Integration").mayOnlyBeAccessedByLayers("Application")
+            .whereLayer("Domain").mayOnlyBeAccessedByLayers("Application", "Persistence", "Integration", "Presentation");
 
     /** D1: el dominio solo conoce el JDK (ni Spring, ni {@code jakarta}, ni {@code org.immutables}). */
     @ArchTest
@@ -109,11 +114,28 @@ class LayeredArchitectureTests {
             .should().beInterfaces();
 
     /**
+     * ADR 0011: la capa {@code integration} simula sistemas externos (la agencia tributaria) con clases concretas, sin
+     * interfaces, y solo conoce el dominio: ni la aplicación, ni la persistencia, ni la presentación.
+     */
+    @ArchTest
+    static final ArchRule la_integracion_no_tiene_interfaces = noClasses()
+            .that().resideInAPackage("..integration..")
+            .should().beInterfaces();
+
+    /** ADR 0011: la integración solo depende del JDK, del dominio y de los estereotipos de Spring. */
+    @ArchTest
+    static final ArchRule la_integracion_solo_conoce_el_dominio = classes()
+            .that().resideInAPackage("..integration..")
+            .should().onlyDependOnClassesThat().resideInAnyPackage(
+                    "java..", "com.pronoide.ddd.domain..", "org.springframework.stereotype..");
+
+    /**
      * Toda clase pertenece a una capa: la regla de capas solo mira dependencias entre capas, así que un paquete nuevo
      * fuera de ellas (por ejemplo {@code config}) quedaría sin vigilar. La única excepción es la clase de arranque.
      */
     @ArchTest
     static final ArchRule toda_clase_pertenece_a_una_capa = classes()
-            .that().resideOutsideOfPackages("..presentation..", "..application..", "..domain..", "..persistence..")
+            .that().resideOutsideOfPackages(
+                    "..presentation..", "..application..", "..domain..", "..persistence..", "..integration..")
             .should().haveFullyQualifiedName(DddLabApplication.class.getName());
 }

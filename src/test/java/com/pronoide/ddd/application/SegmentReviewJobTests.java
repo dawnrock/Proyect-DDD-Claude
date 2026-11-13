@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.pronoide.ddd.integration.TaxAgencyClient;
 import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
 import com.pronoide.ddd.support.MutableClock;
@@ -22,10 +23,11 @@ class SegmentReviewJobTests {
     void la_tarea_diaria_devuelve_a_minorista_a_quien_lleva_un_mes_bajo_el_minimo() {
         MutableClock clock = new MutableClock();
         CheckingAccountService service = new CheckingAccountService(
-                new InMemoryCheckingAccountRepository(), new InMemoryAccountOwnershipRepository(), clock);
+                new InMemoryCheckingAccountRepository(), new InMemoryAccountOwnershipRepository(),
+                new TaxAgencyClient(), clock);
         UUID id = service.openAccount(ADMIN, OpenAccountCommand.builder()
-                .accountNumber("ES9121000418450200051332").holderName("Grace Hopper")
-                .initialDeposit(new BigDecimal("100000")).ownerUsername("grace").build()).id();
+                .accountNumber("ES9121000418450200051332").holderName("Ada Lovelace").holderTaxId("12345678Z")
+                .initialDeposit(new BigDecimal("100000")).ownerUsername("ada").build()).id();
         service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("500")).build());
         clock.advance(Duration.ofDays(32));
 

@@ -12,6 +12,8 @@ import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +29,7 @@ import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
+import com.pronoide.ddd.integration.TaxAgencyClient;
 import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
 import com.pronoide.ddd.support.MutableClock;
@@ -43,19 +46,23 @@ class CheckingAccountServiceTests {
     private InMemoryCheckingAccountRepository repository;
     private CheckingAccountService service;
 
+    private TaxAgencyClient taxAgency;
+
     private MutableClock clock;
 
     @BeforeEach
     void setUp() {
         repository = spy(new InMemoryCheckingAccountRepository());
         clock = new MutableClock();
-        service = new CheckingAccountService(repository, new InMemoryAccountOwnershipRepository(), clock);
+        taxAgency = spy(new TaxAgencyClient());
+        service = new CheckingAccountService(repository, new InMemoryAccountOwnershipRepository(), taxAgency, clock);
     }
 
     private static OpenAccountCommand.Builder command(String accountNumber) {
         return OpenAccountCommand.builder()
                 .accountNumber(accountNumber)
                 .holderName("Ada Lovelace")
+                .holderTaxId("12345678Z")
                 .initialDeposit(new BigDecimal("100"))
                 .ownerUsername("ada");
     }
@@ -494,6 +501,95 @@ class CheckingAccountServiceTests {
 
             assertThat(service.reviewSegments()).isZero();
             assertThat(service.findAccount(ADMIN, belowMinimum).segment()).isEqualTo("HIGH_NET_WORTH");
+        }
+    }
+
+    @Nested
+    @DisplayName("Segmento por ingresos verificados")
+    class SegmentByVerifiedIncome {
+
+        private static final String GRACE = "87654321X";
+
+        private CheckingAccount account(UUID id) {
+            return repository.findById(id).orElseThrow();
+        }
+
+        private Instant sixMonthsAfter(Instant instant) {
+            return instant.atZone(ZoneOffset.UTC).plusMonths(6).toInstant();
+        }
+
+        @Test
+        @DisplayName("Con ingresos verificados altos la cuenta se abre como alto patrimonio y se revisa a los seis meses")
+        void con_ingresos_altos_se_abre_como_alto_patrimonio_y_se_revisa_a_los_seis_meses() {
+            UUID id = service.openAccount(ADMIN, command(IBAN).holderTaxId(GRACE)
+                    .initialDeposit(new BigDecimal("5000")).build()).id();
+
+            assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("HIGH_NET_WORTH");
+            Instant opening = account(id).transactions().get(0).occurredOn();
+            assertThat(account(id).nextSegmentReview()).contains(sixMonthsAfter(opening));
+        }
+
+        @Test
+        @DisplayName("Con ingresos verificados bajos la cuenta se abre como minorista")
+        void con_ingresos_bajos_se_abre_como_minorista() {
+            UUID id = service.openAccount(ADMIN, command(IBAN).initialDeposit(new BigDecimal("1000")).build()).id();
+
+            assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("RETAIL");
+        }
+
+        @Test
+        @DisplayName("Con ingresos bajos, abrir con el patrimonio mínimo da el alto patrimonio por saldo")
+        void con_ingresos_bajos_abrir_con_el_patrimonio_minimo_da_el_alto_patrimonio_por_saldo() {
+            UUID id = service.openAccount(ADMIN, command(IBAN).initialDeposit(new BigDecimal("150000")).build()).id();
+
+            assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("HIGH_NET_WORTH");
+            assertThat(account(id).nextSegmentReview()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Si no toca revisión no se consulta a la agencia tributaria")
+        void si_no_toca_revision_no_se_consulta_a_la_agencia() {
+            UUID id = service.openAccount(ADMIN, command(IBAN).initialDeposit(new BigDecimal("100000")).build()).id();
+            service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("500")).build());
+            clearInvocations(taxAgency);
+            clock.advance(Duration.ofDays(20));
+
+            service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("10")).build());
+            service.reviewSegments();
+
+            verify(taxAgency, never()).verifiedAnnualIncome(any());
+        }
+
+        @Test
+        @DisplayName("Con ingresos altos, la revisión conserva el alto patrimonio y programa la siguiente a seis meses")
+        void con_ingresos_altos_la_revision_conserva_el_alto_patrimonio() {
+            UUID id = service.openAccount(ADMIN, command(IBAN).holderTaxId(GRACE)
+                    .initialDeposit(new BigDecimal("150000")).build()).id();
+            service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("60000")).build());
+            clock.advance(Duration.ofDays(32));
+
+            assertThat(service.reviewSegments()).isZero();
+
+            assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("HIGH_NET_WORTH");
+            assertThat(account(id).nextSegmentReview()).contains(sixMonthsAfter(clock.instant()));
+            verify(taxAgency, times(2)).verifiedAnnualIncome(any());
+        }
+
+        @Test
+        @DisplayName("La revisión antes de un cargo se guarda aunque el cargo falle después")
+        void la_revision_antes_de_un_cargo_se_guarda_aunque_el_cargo_falle() {
+            UUID id = service.openAccount(ADMIN, command(IBAN).initialDeposit(new BigDecimal("100000")).build()).id();
+            service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("500")).build());
+            clock.advance(Duration.ofDays(32));
+            clearInvocations(repository);
+
+            WithdrawCommand dollars = WithdrawCommand.builder()
+                    .accountId(id).amount(new BigDecimal("10")).currency("USD").build();
+            assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> service.withdraw(ADMIN, dollars));
+
+            CheckingAccount reviewed = account(id);
+            verify(repository).save(reviewed);
+            assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("RETAIL");
         }
     }
 }

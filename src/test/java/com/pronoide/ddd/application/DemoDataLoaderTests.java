@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.DefaultApplicationArguments;
 
+import com.pronoide.ddd.integration.TaxAgencyClient;
 import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
 
@@ -16,7 +17,8 @@ class DemoDataLoaderTests {
 
     private final InMemoryAccountOwnershipRepository ownership = new InMemoryAccountOwnershipRepository();
     private final CheckingAccountService service =
-            new CheckingAccountService(new InMemoryCheckingAccountRepository(), ownership, java.time.Clock.systemUTC());
+            new CheckingAccountService(new InMemoryCheckingAccountRepository(), ownership, new TaxAgencyClient(),
+                java.time.Clock.systemUTC());
 
     @Test
     @DisplayName("Al arrancar abre tres cuentas de demostración con el caso de uso, una de ellas de alto patrimonio")
@@ -28,6 +30,21 @@ class DemoDataLoaderTests {
         assertThat(accounts)
                 .map(account -> service.findAccount(CallerDef.system(), account.id()).segment())
                 .containsExactlyInAnyOrder("RETAIL", "RETAIL", "HIGH_NET_WORTH");
+    }
+
+    @Test
+    @DisplayName("Grace Hopper es de alto patrimonio por sus ingresos verificados, con un depósito de 5.000,00 €")
+    void grace_hopper_es_de_alto_patrimonio_por_sus_ingresos_verificados() {
+        new DemoDataLoader(service).run(new DefaultApplicationArguments());
+
+        assertThat(service.listAccounts(CallerDef.system()))
+                .map(account -> service.findAccount(CallerDef.system(), account.id()))
+                .extracting(AccountDetails::holderName, AccountDetails::segment,
+                        details -> details.balance().toPlainString())
+                .containsExactlyInAnyOrder(
+                        tuple("Ada Lovelace", "RETAIL", "1000.00"),
+                        tuple("Grace Hopper", "HIGH_NET_WORTH", "5000.00"),
+                        tuple("Alan Turing", "RETAIL", "250.00"));
     }
 
     @Test

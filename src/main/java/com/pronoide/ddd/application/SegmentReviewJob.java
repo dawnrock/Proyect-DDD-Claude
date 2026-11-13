@@ -7,9 +7,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Revisa cada día el segmento de todas las cuentas: un titular de alto patrimonio que lleva un mes por debajo del
- * patrimonio mínimo vuelve a minorista. El servicio también lo revisa antes de cada cargo; esta tarea cubre las
- * cuentas sin movimientos.
+ * Revisa cada día el segmento de las cuentas a las que les toca: un titular de alto patrimonio que lleva un mes por
+ * debajo del patrimonio mínimo vuelve a minorista, salvo que sus ingresos verificados sigan siendo altos (entonces se
+ * revisa de nuevo a los seis meses). El servicio también lo revisa antes de cada cargo; esta tarea cubre las cuentas
+ * sin movimientos.
  */
 @Slf4j
 @Component
