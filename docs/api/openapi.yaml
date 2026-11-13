@@ -53,7 +53,10 @@ paths:
       tags: [accounts]
       operationId: openAccount
       summary: Open a checking account with its initial deposit (admin only)
-      description: The account belongs to `ownerUsername`, who will see and operate it. Only an admin opens accounts (403 otherwise).
+      description: |
+        The account belongs to `ownerUsername`, who will see and operate it. Only an admin opens accounts (403 otherwise).
+
+        **Incompatible change (#99):** the body requires `holderTaxId`. The segment is not an input: the holder is high net worth if the verified annual income is above 100,000.00 EUR or the balance reaches 100,000.00 EUR.
       requestBody:
         required: true
         content:
@@ -272,7 +275,7 @@ components:
           description: Status of the withdrawal in the source account.
     OpenAccountRequest:
       type: object
-      required: [accountNumber, holderName, initialDeposit, ownerUsername]
+      required: [accountNumber, holderName, holderTaxId, initialDeposit, ownerUsername]
       properties:
         ownerUsername:
           type: string
@@ -288,6 +291,11 @@ components:
           type: string
           minLength: 1
           example: Ada Lovelace
+        holderTaxId:
+          type: string
+          description: Spanish NIF (8 digits + a letter); spaces and lowercase are accepted. The control letter is not checked. The simulated tax agency verifies the holder's annual income with it.
+          pattern: '^ *\d{8} *[A-Za-z] *$'
+          example: 87654321X
         initialDeposit:
           type: number
           exclusiveMinimum: 0

@@ -22,12 +22,15 @@ public class CheckingAccountService {
 | ---------------- | ----- | ---- | -------- | ----- |
 | `OpenAccountCommandDef` | `accountNumber` | `String` | yes | not blank; the domain normalizes it (no spaces, uppercase) and rejects anything that is not `ES` + 22 digits |
 | | `holderName` | `String` | yes | not blank |
+| | `holderTaxId` | `String` | yes (#99) | matches `TAX_ID_PATTERN` (8 digits + a letter, spaces allowed); `TaxId` normalizes it |
 | | `initialDeposit` | `BigDecimal` | yes | positive |
 | | `currency` | `String` | no (default `EUR`) | ISO 4217 code |
 
 Violations of these rules throw `IllegalArgumentException` when the command is built (`@Value.Check`). Presentation validates the format first, so they should not reach the command.
 
 > **Amended by #94 (2026-11-12, requested by the user):** `segment` is no longer an input. The command, the REST request and the web form do not carry it; the domain assigns it from the account balance (rules R20-R23 of the glossary). `AccountDetails.segment` is unchanged.
+
+> **Amended by #99 (2026-11-13, requested by the user):** the command, the REST request and the web form carry `holderTaxId` (required). `CheckingAccountService.openAccount` asks the simulated tax agency (`integration.TaxAgencyClient`, ADR 0011) for the verified annual income: above 100.000,00 € the holder opens as `HIGH_NET_WORTH` (R24). Incompatible change in `POST /api/accounts`.
 
 ### Shared presentation validation
 
@@ -37,6 +40,7 @@ The REST request (`OpenAccountRequest`) and the web form (`OpenAccountForm`) app
 | ----- | ---------- | --- |
 | `accountNumber` | `@NotBlank` + `@Pattern(regexp = "^ *[Ee][Ss]( *\\d){22} *$")` | accepts spaces and lowercase, which `AccountNumber` normalizes; no tabs or other whitespace, because the domain only removes spaces. A malformed IBAN is an `IllegalArgumentException` in the domain, not a `DomainException` |
 | `holderName` | `@NotBlank` | |
+| `holderTaxId` | `@NotBlank` + `@Pattern(regexp = "^ *\d{8} *[A-Za-z] *$")` | same pattern as the command (`OpenAccountCommandDef.TAX_ID_PATTERN`); the web field is "NIF del titular" (#99) |
 | `initialDeposit` | `@NotNull` + `@Positive` | |
 | `currency` | `@Pattern(regexp = "[A-Z]{3}")`; `EUR` when absent | an unknown but well-formed code (`XYZ`) still reaches the command and gives 400 (safety net). The web offers a select (`EUR` by default) |
 

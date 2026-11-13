@@ -167,7 +167,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
   - [x] ADR listed in the README; the phase 1 document names the four layers' allowed dependencies.
   - Deviation: the Mermaid diagram of `fase-1-capas.md` is not changed yet; the new diagram is shown to the user first (working agreement).
 
-### [ ] T10 — OpenAPI and contract (~5 min)
+### [x] T10 — OpenAPI and contract (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`, `docs/contracts/open-query-list-accounts.md`
@@ -176,7 +176,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
   1. `holderTaxId` required in `OpenAccountRequest`, with the pattern and example `87654321X`; describe the incompatible change and that the segment is decided by verified income and balance.
   2. Amend the contract (ADR 0007): new command field and validation.
 - **Acceptance criteria:**
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` has no errors.
+  - [x] `npx @redocly/cli lint docs/api/openapi.yaml` has no errors.
 
 ### [ ] T11 — Glossary and project status (~10 min)
 
