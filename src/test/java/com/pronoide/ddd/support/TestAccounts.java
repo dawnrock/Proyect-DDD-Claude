@@ -7,6 +7,7 @@ import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CustomerSegment;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
+import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.domain.model.TestCheckingAccounts;
 
 import lombok.Builder;
@@ -18,6 +19,8 @@ import lombok.Builder;
 public final class TestAccounts {
 
     public static final String DEFAULT_ACCOUNT_NUMBER = "ES9121000418450200051332";
+
+    public static final String DEFAULT_TAX_ID = "12345678Z";
 
     private TestAccounts() {
     }
@@ -31,7 +34,7 @@ public final class TestAccounts {
         return TestCheckingAccounts.open(
                 new AccountNumber(Objects.requireNonNullElse(accountNumber, DEFAULT_ACCOUNT_NUMBER)),
                 AccountHolder.register(Objects.requireNonNullElse(holderName, "Ada Lovelace"),
-                        Objects.requireNonNullElse(segment, CustomerSegment.RETAIL)),
+                        new TaxId(DEFAULT_TAX_ID), Objects.requireNonNullElse(segment, CustomerSegment.RETAIL)),
                 MonetaryAmount.euros(Objects.requireNonNullElse(initialDeposit, "100.00")));
     }
 }

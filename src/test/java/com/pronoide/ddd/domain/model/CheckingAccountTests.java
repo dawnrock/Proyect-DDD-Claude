@@ -3,6 +3,8 @@ package com.pronoide.ddd.domain.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Currency;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,7 +21,7 @@ class CheckingAccountTests {
     @Test
     @DisplayName("Una cuenta no puede abrirse por debajo del depósito inicial mínimo")
     void una_cuenta_no_puede_abrirse_por_debajo_del_deposito_minimo() {
-        AccountHolder titular = AccountHolder.register("Ada Lovelace", CustomerSegment.RETAIL);
+        AccountHolder titular = AccountHolder.register("Ada Lovelace", new TaxId("12345678Z"), CustomerSegment.RETAIL);
         
         assertThatExceptionOfType(InsufficientInitialDepositException.class)
                 .isThrownBy(() -> CheckingAccount.open(IBAN, titular, MonetaryAmount.euros("25.00")))
@@ -150,7 +152,7 @@ class CheckingAccountTests {
         @Test
         @DisplayName("Abrir una cuenta registra el evento de cuenta abierta seguido del ingreso del depósito inicial")
         void abrir_una_cuenta_registra_cuenta_abierta_y_el_ingreso_del_deposito_inicial() {
-            AccountHolder titular = AccountHolder.register("Ada Lovelace", CustomerSegment.RETAIL);
+            AccountHolder titular = AccountHolder.register("Ada Lovelace", new TaxId("12345678Z"), CustomerSegment.RETAIL);
 
             CheckingAccount cuenta = CheckingAccount.open(IBAN, titular, MonetaryAmount.euros("500.00"));
 
@@ -297,6 +299,167 @@ class CheckingAccountTests {
             cuenta.tryWithdraw(MonetaryAmount.euros("5.00"));
 
             assertThat(cuenta.transactions()).hasSize(3).allSatisfy(t -> assertThat(t.counterpart()).isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("Alto patrimonio por saldo")
+    class HighNetWorthByBalance {
+
+        @Test
+        @DisplayName("Un ingreso que lleva el saldo al patrimonio mínimo convierte al titular en alto patrimonio")
+        void un_ingreso_que_alcanza_el_patrimonio_minimo_promociona_al_titular() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("99000.00").open();
+
+            cuenta.deposit(MonetaryAmount.euros("1000.00"));
+
+            assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Un céntimo por debajo del patrimonio mínimo el titular sigue siendo minorista")
+        void un_centimo_por_debajo_del_patrimonio_minimo_el_titular_sigue_siendo_minorista() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("99000.00").open();
+
+            cuenta.deposit(MonetaryAmount.euros("999.99"));
+
+            assertThat(cuenta.primaryHolder().segment()).isEqualTo(CustomerSegment.RETAIL);
+        }
+
+        @Test
+        @DisplayName("Una cuenta abierta con el patrimonio mínimo por un titular minorista nace como alto patrimonio")
+        void una_cuenta_abierta_con_el_patrimonio_minimo_nace_como_alto_patrimonio() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("100000.00").open();
+
+            assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+        }
+    }
+
+    private static Instant mesesDespuesDe(Instant instante, int meses) {
+        return instante.atZone(ZoneOffset.UTC).plusMonths(meses).toInstant();
+    }
+
+    @Nested
+    @DisplayName("Próxima revisión del segmento")
+    class NextSegmentReview {
+
+        @Test
+        @DisplayName("Una retirada aprobada que deja una cuenta de alto patrimonio bajo el mínimo programa la revisión a un mes")
+        void una_retirada_que_deja_la_cuenta_bajo_el_minimo_programa_la_revision_a_un_mes() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+
+            Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
+
+            assertThat(cuenta.nextSegmentReview()).contains(mesesDespuesDe(retirada.occurredOn(), 1));
+            assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Una segunda retirada bajo el mínimo no mueve la revisión programada")
+        void una_segunda_retirada_bajo_el_minimo_no_mueve_la_revision() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+            Transaction primera = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
+
+            cuenta.tryWithdraw(MonetaryAmount.euros("10.00"));
+
+            assertThat(cuenta.nextSegmentReview()).contains(mesesDespuesDe(primera.occurredOn(), 1));
+        }
+
+        @Test
+        @DisplayName("Un ingreso que recupera el patrimonio mínimo cancela la revisión programada")
+        void un_ingreso_que_recupera_el_patrimonio_minimo_cancela_la_revision() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+            cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
+
+            cuenta.deposit(MonetaryAmount.euros("10000.00"));
+
+            assertThat(cuenta.nextSegmentReview()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Una retirada rechazada no programa ninguna revisión")
+        void una_retirada_rechazada_no_programa_ninguna_revision() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("100000.00").open();
+
+            Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("200000.00"));
+
+            assertThat(retirada.isRejected()).isTrue();
+            assertThat(cuenta.nextSegmentReview()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Una cuenta minorista no programa ninguna revisión al retirar")
+        void una_cuenta_minorista_no_programa_ninguna_revision_al_retirar() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
+
+            cuenta.tryWithdraw(MonetaryAmount.euros("100.00"));
+
+            assertThat(cuenta.nextSegmentReview()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Un titular de alto patrimonio que abre bajo el mínimo tiene su primera revisión a los seis meses")
+        void un_titular_de_alto_patrimonio_que_abre_bajo_el_minimo_se_revisa_a_los_seis_meses() {
+            CheckingAccount cuenta = TestAccounts.anAccount()
+                    .segment(CustomerSegment.HIGH_NET_WORTH).initialDeposit("5000.00").open();
+
+            Instant apertura = cuenta.transactions().get(0).occurredOn();
+            assertThat(cuenta.nextSegmentReview()).contains(mesesDespuesDe(apertura, 6));
+        }
+
+        @Test
+        @DisplayName("Una retirada no adelanta la primera revisión semestral")
+        void una_retirada_no_adelanta_la_primera_revision_semestral() {
+            CheckingAccount cuenta = TestAccounts.anAccount()
+                    .segment(CustomerSegment.HIGH_NET_WORTH).initialDeposit("5000.00").open();
+            Instant apertura = cuenta.transactions().get(0).occurredOn();
+
+            cuenta.tryWithdraw(MonetaryAmount.euros("100.00"));
+
+            assertThat(cuenta.nextSegmentReview()).contains(mesesDespuesDe(apertura, 6));
+        }
+    }
+
+    @Nested
+    @DisplayName("Evento de cambio de segmento")
+    class SegmentChangedEvent {
+
+        @Test
+        @DisplayName("La promoción a alto patrimonio registra un evento con la cuenta, el titular y el nuevo segmento")
+        void la_promocion_registra_un_evento_de_cambio_de_segmento() {
+            CheckingAccount cuenta = TestAccounts.anAccount().holderName("Ada Lovelace").initialDeposit("99000.00").open();
+            cuenta.pullDomainEvents();
+
+            Transaction ingreso = cuenta.deposit(MonetaryAmount.euros("1000.00"));
+
+            assertThat(cuenta.pullDomainEvents()).filteredOn(CustomerSegmentChanged.class::isInstance)
+                    .containsExactly(new CustomerSegmentChanged(cuenta.id(), "Ada Lovelace",
+                            CustomerSegment.HIGH_NET_WORTH, ingreso.occurredOn()));
+        }
+
+        @Test
+        @DisplayName("La vuelta a minorista registra un evento con el momento de la revisión")
+        void la_vuelta_a_minorista_registra_un_evento_de_cambio_de_segmento() {
+            CheckingAccount cuenta = TestAccounts.anAccount().holderName("Ada Lovelace").initialDeposit("150000.00").open();
+            cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
+            Instant revision = cuenta.nextSegmentReview().orElseThrow();
+            cuenta.pullDomainEvents();
+
+            cuenta.resolveSegmentReview(revision, false);
+
+            assertThat(cuenta.pullDomainEvents()).containsExactly(
+                    new CustomerSegmentChanged(cuenta.id(), "Ada Lovelace", CustomerSegment.RETAIL, revision));
+        }
+
+        @Test
+        @DisplayName("Un ingreso a un titular que ya es de alto patrimonio no registra ningún cambio de segmento")
+        void un_ingreso_a_un_titular_que_ya_es_de_alto_patrimonio_no_registra_cambio_de_segmento() {
+            CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
+            cuenta.pullDomainEvents();
+
+            cuenta.deposit(MonetaryAmount.euros("1000.00"));
+
+            assertThat(cuenta.pullDomainEvents()).noneMatch(CustomerSegmentChanged.class::isInstance);
         }
     }
 }

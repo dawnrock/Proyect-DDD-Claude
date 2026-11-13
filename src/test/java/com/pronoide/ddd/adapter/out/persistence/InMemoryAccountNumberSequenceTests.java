@@ -25,13 +25,13 @@ class InMemoryAccountNumberSequenceTests extends AccountNumberSequenceContract {
     }
 
     @Test
-    @DisplayName("El IBAN generado es español y lleva el banco 2100 y la oficina 0418")
+    @DisplayName("El IBAN generado es español y lleva la entidad 9999 de Mon-A Bank y la oficina 0001")
     void el_iban_generado_lleva_banco_y_oficina() {
         String iban = sequence.next().value();
 
         assertThat(iban).startsWith("ES").hasSize(24);
-        assertThat(iban.substring(4, 8)).isEqualTo("2100");
-        assertThat(iban.substring(8, 12)).isEqualTo("0418");
+        assertThat(iban.substring(4, 8)).isEqualTo("9999");
+        assertThat(iban.substring(8, 12)).isEqualTo("0001");
     }
 
     @Test

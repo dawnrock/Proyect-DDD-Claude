@@ -6,17 +6,24 @@ import java.util.UUID;
 public class AccountHolder {
 
     private final UUID id;
+    private final TaxId taxId;
     private String fullName;
     private CustomerSegment segment;
 
-    private AccountHolder(UUID id, String fullName, CustomerSegment segment) {
+    private AccountHolder(UUID id, String fullName, TaxId taxId, CustomerSegment segment) {
         this.id = id;
         this.fullName = fullName;
+        this.taxId = taxId;
         this.segment = segment;
     }
 
-    public static AccountHolder register(String fullName, CustomerSegment segment) {
+    /**
+     * Da de alta a un titular. Conserva su NIF porque sus ingresos se vuelven a verificar con él cuando toca revisar
+     * su segmento.
+     */
+    public static AccountHolder register(String fullName, TaxId taxId, CustomerSegment segment) {
         return new AccountHolder(UUID.randomUUID(), requireName(fullName),
+                Objects.requireNonNull(taxId, "El NIF del titular es obligatorio"),
                 Objects.requireNonNull(segment, "El segmento del titular es obligatorio"));
     }
 
@@ -24,8 +31,13 @@ public class AccountHolder {
         this.fullName = requireName(fullName);
     }
 
-    public void promoteToHighNetWorth() {
+    /** Solo la cuenta decide el segmento (por saldo o tras una revisión): de ahí la visibilidad de paquete. */
+    void promoteToHighNetWorth() {
         this.segment = CustomerSegment.HIGH_NET_WORTH;
+    }
+
+    void demoteToRetail() {
+        this.segment = CustomerSegment.RETAIL;
     }
 
     public boolean isHighNetWorth() {
@@ -34,6 +46,10 @@ public class AccountHolder {
 
     public UUID id() {
         return id;
+    }
+
+    public TaxId taxId() {
+        return taxId;
     }
 
     public String fullName() {

@@ -99,6 +99,7 @@ sequenceDiagram
 | `persistence` | `adapter.out.persistence` | Moved; the in-memory repositories implement the ports and become package-private; new `InMemoryAccountNumberSequence` (generated IBANs) | #14, #15, #18 |
 | — | `adapter.out.event` | New: `SpringDomainEventPublisher` implements `DomainEventPublisher` | #17 |
 | — | `adapter.out.taxagency` | New: `FakeTaxAgencyIncomeVerifier` implements `IncomeVerifier` (simulated tax agency) | #18 |
+| `application.SegmentReviewJob` (#94) | `adapter.in.scheduler.SegmentReviewScheduler` + `domain.service.SegmentReviewService` | The daily segment review is an input adapter that only uses `CheckingAccountCommands`; the review itself is a domain service that asks the `IncomeVerifier` port again (#98). On `Monolithic` the balance alone decides until #99 | #98 |
 | — | `config` | New: `DomainConfiguration` builds the core and receives the adapters by their port types | #20 |
 | root (`DddLabApplication`) | root | Unchanged | — |
 

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.mock;
 
+import java.time.Clock;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -19,6 +20,7 @@ import com.pronoide.ddd.domain.model.CheckingAccountRepository;
 import com.pronoide.ddd.support.TestAccounts;
 import com.pronoide.ddd.domain.model.CheckingAccountFactory;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
+import com.pronoide.ddd.domain.service.SegmentReviewService;
 
 /**
  * Reglas de propiedad de las cuentas (#50): un administrador accede a todo; un usuario solo a sus cuentas, y una ajena
@@ -39,7 +41,8 @@ class CheckingAccountServiceOwnershipTests {
         accounts = PersistenceTestAdapters.accounts();
         owners = PersistenceTestAdapters.ownership();
         service = new CheckingAccountService(accounts, owners, mock(DomainEventPublisher.class),
-                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(), PersistenceTestAdapters.unitOfWork());
+                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
+                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork());
     }
 
     private static OpenAccountCommand.Builder command(String owner) {

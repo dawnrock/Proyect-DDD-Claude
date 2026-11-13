@@ -13,8 +13,6 @@ import java.util.Objects;
  */
 public class CheckingAccountFactory {
 
-    private static final MonetaryAmount HIGH_NET_WORTH_THRESHOLD = MonetaryAmount.euros("100000.00");
-
     private final AccountNumberSequence numbering;
     private final IncomeVerifier incomeVerifier;
 
@@ -25,14 +23,13 @@ public class CheckingAccountFactory {
 
     public CheckingAccount open(String holderName, TaxId taxId, MonetaryAmount initialDeposit) {
         Objects.requireNonNull(taxId, "El NIF del titular es obligatorio");
-        AccountHolder holder = AccountHolder.register(holderName, segmentFor(taxId));
+        AccountHolder holder = AccountHolder.register(holderName, taxId, segmentFor(taxId));
         return CheckingAccount.open(numbering.next(), holder, initialDeposit);
     }
 
     private CustomerSegment segmentFor(TaxId taxId) {
-        boolean aboveThreshold = incomeVerifier.verifiedAnnualIncome(taxId)
-                .map(income -> HIGH_NET_WORTH_THRESHOLD.isLessThan(income))
-                .orElse(false);
-        return aboveThreshold ? CustomerSegment.HIGH_NET_WORTH : CustomerSegment.RETAIL;
+        return HighNetWorthIncome.isMetBy(incomeVerifier.verifiedAnnualIncome(taxId))
+                ? CustomerSegment.HIGH_NET_WORTH
+                : CustomerSegment.RETAIL;
     }
 }

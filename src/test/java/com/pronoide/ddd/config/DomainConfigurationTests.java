@@ -46,6 +46,13 @@ class DomainConfigurationTests {
     }
 
     @Test
+    @DisplayName("Construye el servicio de revisión del segmento y el reloj en UTC")
+    void construye_el_servicio_de_revision_del_segmento_y_el_reloj() {
+        assertThat(configuration.segmentReviewService(taxId -> Optional.empty())).isNotNull();
+        assertThat(configuration.clock().getZone()).isEqualTo(java.time.ZoneOffset.UTC);
+    }
+
+    @Test
     @DisplayName("Construye el servicio de aplicación, que ofrece los dos puertos de entrada")
     void construye_el_servicio_de_aplicacion_con_los_dos_puertos_de_entrada() {
         CheckingAccountFactory factory = configuration.checkingAccountFactory(
@@ -53,7 +60,8 @@ class DomainConfigurationTests {
 
         Object service = configuration.checkingAccountService(PersistenceTestAdapters.accounts(),
                 PersistenceTestAdapters.ownership(), mock(DomainEventPublisher.class), factory,
-                configuration.moneyTransferService(), PersistenceTestAdapters.unitOfWork());
+                configuration.moneyTransferService(), configuration.segmentReviewService(taxId -> Optional.empty()),
+                configuration.clock(), PersistenceTestAdapters.unitOfWork());
 
         assertThat(service).isInstanceOf(CheckingAccountCommands.class).isInstanceOf(CheckingAccountQueries.class);
     }

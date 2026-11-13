@@ -11,6 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
+import com.pronoide.ddd.domain.model.CustomerSegment;
+import com.pronoide.ddd.domain.model.CustomerSegmentChanged;
 import com.pronoide.ddd.domain.model.MoneyDeposited;
 import com.pronoide.ddd.domain.model.MoneyWithdrawn;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
@@ -44,5 +46,21 @@ class CustomerNotificationListenerTests {
         listener.on(new WithdrawalRejected(accountId, UUID.randomUUID(), MonetaryAmount.euros("600.00"), Instant.now()));
 
         assertThat(output).contains("Aviso al cliente", accountId.toString(), "rechazado", "600.00 EUR");
+    }
+
+    @Test
+    @DisplayName("Avisa al cliente de que pasa a alto patrimonio")
+    void avisa_al_cliente_de_que_pasa_a_alto_patrimonio(CapturedOutput output) {
+        listener.on(new CustomerSegmentChanged(accountId, "Ada Lovelace", CustomerSegment.HIGH_NET_WORTH, Instant.now()));
+
+        assertThat(output).contains("Aviso al cliente", accountId.toString(), "Ada Lovelace", "alto patrimonio");
+    }
+
+    @Test
+    @DisplayName("Avisa al cliente de que vuelve a minorista")
+    void avisa_al_cliente_de_que_vuelve_a_minorista(CapturedOutput output) {
+        listener.on(new CustomerSegmentChanged(accountId, "Ada Lovelace", CustomerSegment.RETAIL, Instant.now()));
+
+        assertThat(output).contains("Aviso al cliente", accountId.toString(), "Ada Lovelace", "minorista");
     }
 }

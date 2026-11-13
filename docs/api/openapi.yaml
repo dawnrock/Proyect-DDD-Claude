@@ -62,6 +62,9 @@ paths:
 
         The IBAN is **generated** and the `segment` is **computed** from the holder's verified annual income
         (the holder is `HIGH_NET_WORTH` only above 100,000.00 EUR; an unknown tax id opens a `RETAIL` account).
+        Since #98 the balance also counts: a holder becomes `HIGH_NET_WORTH` as soon as the account balance reaches
+        100,000.00 EUR, and may go back to `RETAIL` after a review (see the `segment` property). Generated IBANs carry
+        the entity code `9999` and branch `0001` of Mon-A Bank.
 
         **Incompatible change (#18):** the body no longer carries `accountNumber` or `segment`; it carries `holderTaxId`.
       requestBody:
@@ -324,7 +327,11 @@ components:
         segment:
           type: string
           enum: [RETAIL, HIGH_NET_WORTH]
-          description: Computed by the factory from the holder's verified income (R20).
+          description: >-
+            Never sent by the client. Computed from the holder's verified income when the account is opened (R20)
+            and from the account balance afterwards: 100,000.00 EUR of balance promotes the holder (R22); after one
+            month below that amount the income is verified again and the holder keeps the segment only if it is still
+            above the threshold, with a new verification every six months (R24-R27).
         balance:
           type: number
           example: 100.00

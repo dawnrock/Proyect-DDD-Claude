@@ -12,15 +12,15 @@ import com.pronoide.ddd.domain.model.AccountNumberSequence;
  * Adaptador de salida en memoria (simulado) del puerto {@link AccountNumberSequence}: genera IBAN españoles válidos y
  * consecutivos. Es determinista y se reinicia con cada arranque.
  *
- * <p>Cada IBAN lleva el banco {@code 2100}, la oficina {@code 0418}, los dígitos de control nacionales calculados con
+ * <p>Cada IBAN lleva la entidad {@code 9999} de Mon-A Bank (inventada), la oficina {@code 0001}, los dígitos de control nacionales calculados con
  * el algoritmo del CCC español, un número de cuenta secuencial de 10 dígitos (desde {@code 0000000001}) y los dígitos
  * de control del IBAN (ISO 13616, módulo 97). Es seguro entre hilos.
  */
 @Component
 class InMemoryAccountNumberSequence implements AccountNumberSequence {
 
-    private static final String BANK = "2100";
-    private static final String BRANCH = "0418";
+    private static final String BANK = "9999";
+    private static final String BRANCH = "0001";
     private static final int[] CCC_WEIGHTS = {1, 2, 4, 8, 5, 10, 9, 7, 3, 6};
 
     private final AtomicLong counter = new AtomicLong();

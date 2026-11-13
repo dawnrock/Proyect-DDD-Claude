@@ -2,6 +2,8 @@ package com.pronoide.ddd.application.listener;
 
 import org.springframework.context.event.EventListener;
 
+import com.pronoide.ddd.domain.model.CustomerSegment;
+import com.pronoide.ddd.domain.model.CustomerSegmentChanged;
 import com.pronoide.ddd.domain.model.MoneyDeposited;
 import com.pronoide.ddd.domain.model.MoneyWithdrawn;
 import com.pronoide.ddd.domain.model.WithdrawalRejected;
@@ -32,5 +34,12 @@ public class CustomerNotificationListener {
     public void on(WithdrawalRejected event) {
         log.info("Aviso al cliente (simulado) · cuenta {}: se ha rechazado una retirada de {}", event.accountId(),
                 event.amount());
+    }
+
+    @EventListener
+    public void on(CustomerSegmentChanged event) {
+        String segment = event.segment() == CustomerSegment.HIGH_NET_WORTH ? "alto patrimonio" : "minorista";
+        log.info("Aviso al cliente (simulado) · cuenta {}: {}, su segmento pasa a ser {}", event.accountId(),
+                event.holderName(), segment);
     }
 }

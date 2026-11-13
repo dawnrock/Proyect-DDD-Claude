@@ -48,4 +48,13 @@ public interface CheckingAccountCommands {
      * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el importe no está en la divisa de las cuentas
      */
     TransferSummary transfer(Caller caller, TransferCommand command);
+
+    /**
+     * Revisa el segmento de todas las cuentas a las que les toca: vuelve a verificar los ingresos del titular y lo
+     * devuelve a minorista si ya no le corresponde el alto patrimonio. Es un proceso interno, sin {@link Caller}: lo
+     * dispara la tarea programada.
+     *
+     * @return cuántos titulares han vuelto a minorista
+     */
+    int reviewSegments();
 }
