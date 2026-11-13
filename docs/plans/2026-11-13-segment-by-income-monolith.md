@@ -165,7 +165,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
   2. Add the layer to the phase 1 diagram/text (grey scale; shown to the user before committing).
 - **Acceptance criteria:**
   - [x] ADR listed in the README; the phase 1 document names the four layers' allowed dependencies.
-  - Deviation: the Mermaid diagram of `fase-1-capas.md` is not changed yet; the new diagram is shown to the user first (working agreement).
+  - The Mermaid diagram of `fase-1-capas.md` was shown to the user first (working agreement) and updated once approved.
 
 ### [x] T10 — OpenAPI and contract (~5 min)
 

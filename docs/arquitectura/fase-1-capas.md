@@ -9,11 +9,13 @@ flowchart TD
     P["presentation<br/>web (Thymeleaf) · rest"] --> A["application<br/>application services, commands and views"]
     A --> D["domain<br/>model · service"]
     A --> R["persistence<br/>in-memory repositories"]
+    A --> I["integration<br/>simulated tax agency"]
     R --> D
+    I --> D
     P -. "domain exceptions only" .-> D
 ```
 
-Arrows show **who depends on whom**: always downwards. `domain` sits at the bottom and depends on nothing. The dotted arrow is the only dependency from `presentation` on the domain: the exceptions it translates to HTTP or to messages (D4).
+Arrows show **who depends on whom**: always downwards. `domain` sits at the bottom and depends on nothing. `persistence` and `integration` (ADR 0011) are siblings: only `application` uses them, and they only know the domain. The dotted arrow is the only dependency from `presentation` on the domain: the exceptions it translates to HTTP or to messages (D4).
 
 | Package | Responsibility | Contains |
 | ------- | -------------- | -------- |
