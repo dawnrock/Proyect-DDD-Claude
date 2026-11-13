@@ -162,12 +162,12 @@ Decisions taken in this plan:
 
 ### Web (parallel with back; each depends only on T0 unless stated)
 
-### [ ] T13 — Login page with two doors (~10 min)
+### [x] T13 — Login page with two doors (~10 min)
 
 - **Side:** web · **Layer:** presentation (web) · **Files:** `LoginController.java`, `templates/login.html`, `static/css/app.css` + tests · **Depends on:** T0
 - **What to do:** `GET /login` shows the two cards (and the logout notice); `GET /login?form` and `?error` show the current form with a link back. Styles `.doors` / `.door` with the existing tokens, as in mock-up C.
 - **Acceptance criteria:**
-  - [ ] Tests: doors without form inputs; form with `?form`; error message with `?error`; both links present.
+  - [x] Tests: doors without form inputs; form with `?form`; error message with `?error`; both links present.
 
 ### [ ] T14 — Sign-up step 1: personal data (~10 min)
 

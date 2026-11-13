@@ -45,7 +45,7 @@ class WebSecurityTests {
     @Test
     @DisplayName("La página de login es pública, lleva el token CSRF y el botón Entrar")
     void la_pagina_de_login_es_publica_lleva_el_token_csrf_y_el_boton_entrar() throws Exception {
-        mvc.perform(get("/login"))
+        mvc.perform(get("/login").param("form", ""))
                 .andExpect(status().isOk())
                 .andExpect(view().name("login"))
                 .andExpect(content().string(containsString("name=\"_csrf\"")))
