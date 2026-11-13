@@ -4,7 +4,7 @@
 - **Type:** feature
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
-- **Date:** 2026-11-13 (revision 2: income verified again when the grace period ends)
+- **Date:** 2026-11-13 (revision 3: income verified again when the grace period ends and every six months after that)
 - **Status:** draft
 - **Total estimate:** ~115 min (13 tasks)
 
@@ -23,12 +23,12 @@
 
 `CheckingAccountFactory.open` asks `IncomeVerifier` and registers the holder with its segment. Every credit goes through the private `CheckingAccount.deposit(Transaction)` (plain deposit, incoming transfer and opening deposit) and every debit through the private `tryWithdraw(Transaction)`, so the balance rules live there. The aggregate already records domain events, which the service publishes after the unit of work.
 
-Combined rule (rule 4 as decided by the user on 2026-11-13). The tax agency is asked only twice: when the account is opened and when a grace period ends. Promotions and the start of a countdown never ask it.
+Combined rule (rule 4 as decided by the user on 2026-11-13). The tax agency is asked only when the account is opened, when a grace period ends and, for holders kept by their income, every six months while the balance stays below the minimum. Promotions and the start of a countdown never ask it.
 
 1. Opening: high net worth if the verified annual income is above 100.000,00 € (R20, unchanged).
 2. Any approved credit that takes the balance to 100.000,00 € promotes the holder at once (R22, R23).
 3. An approved withdrawal that leaves the account of a high-net-worth holder below the minimum starts a countdown of one calendar month (UTC), whatever the reason the holder is high net worth; reaching the minimum again cancels it (R25).
-4. When the month ends and the balance is still below the minimum, the income is verified again. If it is still above 100.000,00 €, the holder stays high net worth and a new month starts (R26); otherwise the holder goes back to retail (R24).
+4. When the month ends and the balance is still below the minimum, the income is verified again. If it is still above 100.000,00 €, the holder stays high net worth and the next verification is six calendar months later, for as long as the balance stays below the minimum (R26); otherwise the holder goes back to retail (R24).
 
 Decisions taken in this plan:
 
@@ -101,8 +101,8 @@ Decisions taken in this plan:
 - **Files:** `CheckingAccount.java`, new `domain/service/SegmentReviewService.java`, `CheckingAccountTests.java`, new `SegmentReviewServiceTests.java`
 - **Depends on:** T4
 - **What to do:**
-  1. Failing tests first, with a fake `IncomeVerifier` that counts its calls: one second before the month nothing changes and the agency is not asked; at one month with income not above the threshold (or unverified) the holder is retail and the date is cleared (R24); at one month with income still above the threshold the holder stays high net worth, the agency was asked once and a new month starts from that instant (R26); recovering the minimum in between means the agency is never asked (R25); a retail account is never reviewed; a holder demoted in overdraft keeps the debt and its next withdrawal is rejected; after a demotion, reaching the minimum promotes again.
-  2. Aggregate: `segmentReviewDue(Instant now)` and `resolveSegmentReview(Instant now, boolean incomeStillHigh)` with `SEGMENT_GRACE_PERIOD` (one calendar month, UTC). Domain service: `review(account, now)` asks the port only when the review is due. Move the income threshold to one place shared with the factory.
+  1. Failing tests first, with a fake `IncomeVerifier` that counts its calls: one second before the month nothing changes and the agency is not asked; at one month with income not above the threshold (or unverified) the holder is retail and the date is cleared (R24); at one month with income still above the threshold the holder stays high net worth and the agency was asked once; it is not asked again until six months later, when a lower income demotes the holder (R26); recovering the minimum in between means the agency is never asked (R25); a retail account is never reviewed; a holder demoted in overdraft keeps the debt and its next withdrawal is rejected; after a demotion, reaching the minimum promotes again.
+  2. Aggregate: `segmentReviewDue(Instant now)` and `resolveSegmentReview(Instant now, boolean incomeStillHigh)` with `SEGMENT_GRACE_PERIOD` (one calendar month, UTC) and `INCOME_REVIEW_PERIOD` (six calendar months); the aggregate keeps the instant of its next review. Domain service: `review(account, now)` asks the port only when the review is due. Move the income threshold to one place shared with the factory.
 - **Acceptance criteria:**
   - [ ] The seven tests pass; `check-domain.mjs` without errors.
 
@@ -215,7 +215,7 @@ Decisions taken in this plan:
 
 ## Risks and open questions
 
-- **New month after a favourable verification (to confirm):** if the income is still high the countdown restarts, so the agency is asked again one month later while the balance stays below the minimum. The alternative is not to ask again until the balance recovers and falls once more.
+- **Six months after a favourable verification (decided by the user, 2026-11-13):** frequent enough to keep these customers under control, without asking the agency every month.
 - **A holder who is high net worth by income and opens below the minimum** (Grace Hopper, 5.000,00 €) has no countdown until an approved withdrawal starts one; her first review then finds her income still high.
 - **Demo data:** the demo deposits stay as they are.
 - **Holders promoted by balance without a known income:** the fake agency only knows the three demo tax ids; anybody else is "unverified", which counts as not high.
