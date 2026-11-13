@@ -178,7 +178,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
 - **Acceptance criteria:**
   - [x] `npx @redocly/cli lint docs/api/openapi.yaml` has no errors.
 
-### [ ] T11 — Glossary and project status (~10 min)
+### [x] T11 — Glossary and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/dominio/glosario.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -187,7 +187,7 @@ What changes on `Monolithic`, and why it differs from `Hexagonal`:
   1. Glossary: tax id (`TaxId`), verified annual income, tax agency (`TaxAgencyClient`), income review period, next segment review (replaces `belowMinimumNetWorthSince`). Rewrite R21 (the segment at opening comes from verified income or the opening balance) and R22 (the review checks the income again); add R24 (income above 100.000,00 € at opening), R25 (high income at review keeps the segment, next review in six months) and R26 (first review six months after opening).
   2. Status: #99 done, next step #95 (re-planned on top of this); decision about the `integration` layer; pending items updated (the in-memory review dates and the double time source still apply).
 - **Acceptance criteria:**
-  - [ ] Every rule R21-R26 cites a test that exists.
+  - [x] Every rule R21-R26 cites a test that exists.
 
 ## Global acceptance criteria
 
