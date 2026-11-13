@@ -216,7 +216,13 @@ public class CheckingAccountService {
      * @throws AccountNotFoundException si la cuenta no existe
      */
     public AccountSummary regenerateAccountNumber(Caller caller, UUID id) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        if (!caller.admin()) {
+            throw new ForbiddenOperationException("generar un nuevo número de cuenta");
+        }
+        CheckingAccount account = load(id);
+        account.reassignAccountNumber(accountNumbers.next());
+        repository.save(account);
+        return toSummary(account);
     }
 
     /**

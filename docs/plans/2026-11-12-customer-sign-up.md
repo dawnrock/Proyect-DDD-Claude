@@ -132,12 +132,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Tests: the customer ends with two accounts with different IBANs, both listed; a non-customer is rejected.
 
-### [ ] T9 — The administrator regenerates an IBAN (~10 min)
+### [x] T9 — The administrator regenerates an IBAN (~10 min)
 
 - **Side:** back · **Layer:** application · persistence · **Files:** `CheckingAccountService.java`, `InMemoryCheckingAccountRepository.java` + tests · **Depends on:** T5, T6
 - **What to do:** `regenerateAccountNumber(caller, id)`: administrators only (`ForbiddenOperationException`), unknown id → `AccountNotFoundException`; the old IBAN stops resolving in `findByAccountNumber` and the new one resolves.
 - **Acceptance criteria:**
-  - [ ] The four tests pass; `./mvnw verify` green.
+  - [x] The four tests pass; `./mvnw verify` green.
 
 ### [ ] T10 — Runtime users: `CustomerRegistration` (~10 min)
 
