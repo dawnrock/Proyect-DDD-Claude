@@ -146,12 +146,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Tests: the new user can authenticate; taken username; failed sign-up leaves no user. `la_aplicacion_no_depende_de_spring_security` green.
 
-### [ ] T11 — REST: `POST /api/customers` (~10 min)
+### [x] T11 — REST: `POST /api/customers` (~10 min)
 
 - **Side:** back · **Layer:** presentation (rest) · **Files:** new `CustomerController.java`, `SignUpRequest.java`; `ApiSecurityConfig.java`, `RestExceptionHandler.java` + tests · **Depends on:** T10
 - **What to do:** public endpoint; `201` with `Location` and the account summary; `400` with field errors; `422` for duplicate customer, taken username and insufficient deposit.
 - **Acceptance criteria:**
-  - [ ] `curl -i -H 'Content-Type: application/json' -d '{"fullName":"Margaret Hamilton","taxId":"00000000T","email":"margaret@example.com","username":"margaret","password":"demo-1234","initialDeposit":100}' localhost:8080/api/customers` answers `201`, and `curl -u margaret:demo-1234 localhost:8080/api/accounts` lists one account; repeating the request answers `422`.
+  - [x] `curl -i -H 'Content-Type: application/json' -d '{"fullName":"Margaret Hamilton","taxId":"00000000T","email":"margaret@example.com","username":"margaret","password":"demo-1234","initialDeposit":100}' localhost:8080/api/customers` answers `201`, and `curl -u margaret:demo-1234 localhost:8080/api/accounts` lists one account; repeating the request answers `422`.
 
 ### [ ] T12 — REST: `POST /api/accounts/{id}/account-number` (~5 min)
 
