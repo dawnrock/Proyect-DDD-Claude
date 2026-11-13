@@ -1,5 +1,7 @@
 package com.pronoide.ddd.presentation.web;
 
+import java.util.Objects;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -24,6 +26,10 @@ public class SignUpController {
 
     private static final String DATA_VIEW = "signup/data";
 
+    private static final String ACCESS_VIEW = "signup/access";
+
+    private static final String REDIRECT_DATA = "redirect:/signup";
+
     @ModelAttribute(FORM)
     public SignUpForm newForm() {
         return new SignUpForm();
@@ -43,5 +49,27 @@ public class SignUpController {
         }
         form.completePersonalData();
         return "redirect:/signup/access";
+    }
+
+    @GetMapping("/signup/access")
+    public String access(@ModelAttribute(FORM) SignUpForm form) {
+        return form.isPersonalDataDone() ? ACCESS_VIEW : REDIRECT_DATA;
+    }
+
+    @PostMapping("/signup/access")
+    public String submitAccess(@Validated(SignUpForm.Access.class) @ModelAttribute(FORM) SignUpForm form,
+                               BindingResult result) {
+        if (!form.isPersonalDataDone()) {
+            return REDIRECT_DATA;
+        }
+        if (!result.hasErrors() && !Objects.equals(form.getPassword(), form.getPasswordRepetition())) {
+            result.rejectValue("passwordRepetition", "mismatch", "Las contraseñas no coinciden");
+        }
+        if (result.hasErrors()) {
+            form.resetAccess();
+            return ACCESS_VIEW;
+        }
+        form.completeAccess();
+        return "redirect:/signup/account";
     }
 }

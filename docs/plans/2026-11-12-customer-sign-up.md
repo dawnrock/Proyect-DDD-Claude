@@ -176,12 +176,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Tests: page is public; field errors stay on step 1; valid data redirects.
 
-### [ ] T15 — Sign-up step 2: access (~10 min)
+### [x] T15 — Sign-up step 2: access (~10 min)
 
 - **Side:** web · **Layer:** presentation (web) · **Files:** `SignUpController.java`, `SignUpForm.java`, `templates/signup/access.html` + tests · **Depends on:** T14
 - **What to do:** group `Access` (username pattern, password of at least 8 characters, repetition equal); "Atrás" keeps step 1 data; entering step 2 without step 1 redirects to `/signup`.
 - **Acceptance criteria:**
-  - [ ] Tests for the three behaviours pass; the password never appears in the rendered HTML.
+  - [x] Tests for the three behaviours pass; the password never appears in the rendered HTML.
 
 ### [ ] T16 — Sign-up step 3: account and confirmation (~10 min)
 
