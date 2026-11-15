@@ -142,11 +142,11 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 - **Acceptance criteria:**
   - [x] 201 + `Location`; 400; 422 for duplicate customer, taken username and insufficient deposit.
 
-### [ ] T13 — REST `POST /api/accounts/{id}/account-number` (~5 min)
+### [x] T13 — REST `POST /api/accounts/{id}/account-number` (~5 min)
 
 - **Side:** back · **Layer:** adapter.in.rest · **Depends on:** T10
 - **Acceptance criteria:**
-  - [ ] 200 / 403 / 404.
+  - [x] 200 / 403 / 404.
 
 ### Web (parallel with back; each depends only on T0 unless stated)
 
