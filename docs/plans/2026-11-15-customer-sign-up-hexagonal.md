@@ -98,12 +98,12 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 - **Acceptance criteria:**
   - [x] Adapter tests pass, including the rejected username.
 
-### [ ] T6 — The account can change its number (~5 min)
+### [x] T6 — The account can change its number (~5 min)
 
 - **Side:** back · **Layer:** domain · **Depends on:** T0
 - **What to do:** `AccountNumber.isMonABank()` and `CheckingAccount.reassignAccountNumber` (R32).
 - **Acceptance criteria:**
-  - [ ] Tests for success and both rejections pass.
+  - [x] Tests for success and both rejections pass.
 
 ### [ ] T7 — Factory opens for a customer (~5 min)
 
