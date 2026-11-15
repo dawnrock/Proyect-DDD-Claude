@@ -208,10 +208,10 @@ Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@Mo
 - **Acceptance criteria:**
   - [x] New ports and adapters respect `HexagonalArchitectureTests`; one rule broken on purpose fails and passes when restored.
 
-### [ ] T24 — OpenAPI (~10 min) · **Side:** both · **Depends on:** T21
+### [x] T24 — OpenAPI (~10 min) · **Side:** both · **Depends on:** T21
 
 - **Acceptance criteria:**
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
+  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors. **Not run:** the session's permission classifier blocked `npx`; the YAML parses and its 16 `$ref` resolve (checked with a script). Pending for the user.
 
 ### [ ] T25 — ADR 0012 and architecture (~10 min) · **Side:** both
 
