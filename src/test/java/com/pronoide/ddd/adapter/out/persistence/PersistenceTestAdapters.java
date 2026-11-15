@@ -1,6 +1,7 @@
 package com.pronoide.ddd.adapter.out.persistence;
 
 import com.pronoide.ddd.application.AccountOwnershipRepository;
+import com.pronoide.ddd.application.CustomerOwnershipRepository;
 import com.pronoide.ddd.application.UnitOfWork;
 import com.pronoide.ddd.domain.model.AccountNumberSequence;
 import com.pronoide.ddd.domain.model.CheckingAccountRepository;
@@ -33,6 +34,11 @@ public final class PersistenceTestAdapters {
     /** Un repositorio de clientes en memoria, vacío. */
     public static CustomerRepository customers() {
         return new InMemoryCustomerRepository();
+    }
+
+    /** Un repositorio de usuarios de clientes en memoria, vacío. */
+    public static CustomerOwnershipRepository customerOwnership() {
+        return new InMemoryCustomerOwnershipRepository();
     }
 
     /** Un repositorio de propietarios de cuentas en memoria, vacío. */

@@ -91,12 +91,12 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 - **Acceptance criteria:**
   - [x] Adapter tests pass; `HexagonalArchitectureTests` green.
 
-### [ ] T5 — `CustomerOwnershipRepository` port and adapter (~10 min)
+### [x] T5 — `CustomerOwnershipRepository` port and adapter (~10 min)
 
 - **Side:** back · **Layer:** application · adapter.out · **Depends on:** T3
 - **What to do:** username ↔ customer; a username of another customer is rejected (R30).
 - **Acceptance criteria:**
-  - [ ] Adapter tests pass, including the rejected username.
+  - [x] Adapter tests pass, including the rejected username.
 
 ### [ ] T6 — The account can change its number (~5 min)
 
