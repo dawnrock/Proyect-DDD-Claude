@@ -213,12 +213,13 @@ Decisions taken in this plan:
 
 ### Integration (lead, in order)
 
-### [ ] T20 — Administrator opening: generated IBAN and existing customers (~15 min)
+### [x] T20 — Administrator opening: generated IBAN and existing customers (~15 min)
 
 - **Side:** both · **Layer:** application · presentation · **Files:** `OpenAccountCommandDef.java`, `AccountDetailsDef.java`, `CheckingAccountService.java`, `DemoDataLoader.java`, `OpenAccountRequest.java`, `AccountController.java`, response DTOs, `OpenAccountForm.java`, `AccountWebController.java`, `accounts/new.html`, `accounts/detail.html` + their tests · **Depends on:** T7, T12, T19
 - **What to do:** the command loses `accountNumber`; `openAccount` generates the IBAN, opens for the existing customer of `holderTaxId` or registers a new one (name, e-mail and username then required; given and different from the customer → 400); details and the detail page show the holder's tax id and the customer's e-mail; the demo accounts register Ada, Grace and Alan as customers (tax ids of #99, e-mails `ada@example.com`…); tests that used fixed IBANs read them from the response. Split in two commits if it exceeds 15 minutes (application first, then presentation).
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green; with the `demo` profile the three accounts have Mon-A Bank IBANs and the administrator can open a second account for `12345678Z` giving only document and deposit.
+  - [x] `./mvnw verify` green; with the `demo` profile the three accounts have Mon-A Bank IBANs and the administrator can open a second account for `12345678Z` giving only document and deposit.
+  - Deviation: one commit instead of two (the application change does not compile without its callers). `AccountDetails.holderTaxId` and `holderEmail` default to "" so the web tests that build views keep working; the service always fills them.
 
 ### [ ] T21 — Wire web to the real back (~5 min)
 

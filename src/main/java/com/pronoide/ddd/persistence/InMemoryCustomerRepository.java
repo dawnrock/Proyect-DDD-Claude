@@ -21,6 +21,7 @@ public class InMemoryCustomerRepository {
 
     private final Map<TaxId, Customer> byTaxId = new ConcurrentHashMap<>();
     private final Map<String, Customer> byUsername = new ConcurrentHashMap<>();
+    private final Map<TaxId, String> usernames = new ConcurrentHashMap<>();
 
     /**
      * Guarda al cliente y lo asocia al usuario con el que entra. Comprobar el documento y guardar es una sola
@@ -37,11 +38,18 @@ public class InMemoryCustomerRepository {
         }
         byTaxId.put(customer.taxId(), customer);
         byUsername.put(username, customer);
+        usernames.put(customer.taxId(), username);
     }
 
     public Optional<Customer> findByTaxId(TaxId taxId) {
         Objects.requireNonNull(taxId, "El documento es obligatorio");
         return Optional.ofNullable(byTaxId.get(taxId));
+    }
+
+    /** Usuario con el que entra el cliente del documento, si existe. */
+    public Optional<String> usernameOf(TaxId taxId) {
+        Objects.requireNonNull(taxId, "El documento es obligatorio");
+        return Optional.ofNullable(usernames.get(taxId));
     }
 
     public Optional<Customer> findByUsername(String username) {

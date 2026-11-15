@@ -5,12 +5,14 @@ import java.math.BigDecimal;
 import org.immutables.value.Value;
 
 /**
- * Orden de abrir una cuenta corriente. Valida sus campos al construirse ({@code IllegalArgumentException}),
- * antes de llegar al dominio.
+ * Orden del administrador de abrir una cuenta corriente. Valida sus campos al construirse
+ * ({@code IllegalArgumentException}), antes de llegar al dominio. Contrato: {@code docs/contracts/customer-sign-up.md}.
  *
- * <p>{@code currency} es un código ISO 4217 ({@code EUR} por defecto). El segmento del titular no se indica: lo
- * deciden los ingresos verificados del titular, que se identifica por su NIF ({@code holderTaxId}), y el saldo de la
- * cuenta.
+ * <p>El IBAN no se indica: lo asigna el banco (R30). El titular se identifica por su documento ({@code holderTaxId}):
+ * si ya es cliente, la cuenta se abre a su nombre y para su usuario, y {@code holderName}, {@code holderEmail} y
+ * {@code ownerUsername} van en blanco o coinciden con los suyos; si no lo es, esos tres campos son obligatorios y se
+ * registra como cliente. {@code currency} es un código ISO 4217 ({@code EUR} por defecto). El segmento no se indica:
+ * lo deciden los ingresos verificados del titular y el saldo de la cuenta.
  */
 @ApplicationValue
 @Value.Immutable
@@ -28,11 +30,7 @@ public interface OpenAccountCommandDef {
     /** Mensaje de un documento mal formado; lo comparten los commands, la API REST y la web. */
     String TAX_ID_MESSAGE = "El documento debe ser un DNI o un NIE";
 
-    String accountNumber();
-
-    String holderName();
-
-    /** NIF del titular, para verificar sus ingresos en la agencia tributaria; lo normaliza {@code TaxId}. */
+    /** Documento (DNI o NIE) del titular; lo normaliza {@code TaxId}. */
     String holderTaxId();
 
     BigDecimal initialDeposit();
@@ -42,9 +40,21 @@ public interface OpenAccountCommandDef {
         return "EUR";
     }
 
+    /** Nombre del titular; obligatorio solo si el documento aún no es de un cliente. */
+    @Value.Default
+    default String holderName() {
+        return "";
+    }
+
+    /** Correo del titular; obligatorio solo si el documento aún no es de un cliente. */
+    @Value.Default
+    default String holderEmail() {
+        return "";
+    }
+
     /**
-     * Usuario (cliente) propietario de la cuenta: solo él y los administradores podrán verla y operarla. Vacío por
-     * defecto en el command; {@code openAccount(Caller, ...)} lo exige.
+     * Usuario (cliente) propietario de la cuenta: solo él y los administradores podrán verla y operarla. Obligatorio
+     * solo si el documento aún no es de un cliente; si lo es, la cuenta es para su usuario.
      */
     @Value.Default
     default String ownerUsername() {
@@ -53,17 +63,14 @@ public interface OpenAccountCommandDef {
 
     @Value.Check
     default void validate() {
-        if (accountNumber().isBlank()) {
-            throw new IllegalArgumentException("El número de cuenta es obligatorio");
-        }
-        if (holderName().isBlank()) {
-            throw new IllegalArgumentException("El nombre del titular es obligatorio");
-        }
         if (!holderTaxId().matches(TAX_ID_PATTERN)) {
             throw new IllegalArgumentException(TAX_ID_MESSAGE);
         }
         if (initialDeposit().signum() <= 0) {
             throw new IllegalArgumentException("El depósito inicial debe ser positivo");
+        }
+        if (!holderEmail().isBlank() && !holderEmail().matches(SignUpCommandDef.EMAIL_PATTERN)) {
+            throw new IllegalArgumentException("El correo electrónico no es válido");
         }
         if (!ownerUsername().isEmpty() && !ownerUsername().matches(USERNAME_PATTERN)) {
             throw new IllegalArgumentException(

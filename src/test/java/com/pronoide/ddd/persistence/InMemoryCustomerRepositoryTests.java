@@ -38,6 +38,15 @@ class InMemoryCustomerRepositoryTests {
     }
 
     @Test
+    @DisplayName("El usuario de un cliente se encuentra por su documento")
+    void el_usuario_de_un_cliente_se_encuentra_por_su_documento() {
+        repository.save(ada(), "ada");
+
+        assertThat(repository.usernameOf(new TaxId("12345678Z"))).contains("ada");
+        assertThat(repository.usernameOf(new TaxId("87654321X"))).isEmpty();
+    }
+
+    @Test
     @DisplayName("Un documento o un usuario desconocidos no devuelven nada")
     void un_documento_o_un_usuario_desconocidos_no_devuelven_nada() {
         repository.save(ada(), "ada");

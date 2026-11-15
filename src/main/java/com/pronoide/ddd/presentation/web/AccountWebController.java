@@ -3,6 +3,7 @@ package com.pronoide.ddd.presentation.web;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -292,12 +293,12 @@ public class AccountWebController {
     private OpenAccountCommand toCommand(OpenAccountForm form, BindingResult result) {
         try {
             return OpenAccountCommand.builder()
-                    .accountNumber(form.getAccountNumber())
-                    .holderName(form.getHolderName())
                     .holderTaxId(form.getHolderTaxId())
                     .initialDeposit(form.getInitialDeposit())
                     .currency(form.getCurrency())
-                    .ownerUsername(form.getOwnerUsername())
+                    .holderName(Objects.requireNonNullElse(form.getHolderName(), ""))
+                    .holderEmail(Objects.requireNonNullElse(form.getHolderEmail(), ""))
+                    .ownerUsername(Objects.requireNonNullElse(form.getOwnerUsername(), ""))
                     .build();
         } catch (IllegalArgumentException e) {
             result.reject("invalid", e.getMessage());

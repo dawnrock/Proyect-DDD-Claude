@@ -5,6 +5,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Currency;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -15,7 +16,6 @@ import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.Customer;
 import com.pronoide.ddd.domain.model.DuplicateCustomerException;
 import com.pronoide.ddd.domain.model.EmailAddress;
-import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
 import com.pronoide.ddd.domain.model.HighNetWorthIncome;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.TaxId;
@@ -52,35 +52,66 @@ public class CheckingAccountService {
     private final MoneyTransferService transferService = new MoneyTransferService();
 
     /**
-     * Abre una cuenta con su depósito inicial para {@code command.ownerUsername()}, que será su propietario. Solo un
-     * administrador.
+     * Abre una cuenta con un IBAN que asigna el banco (R30). Solo un administrador. Si el documento ya es de un
+     * cliente, la cuenta se abre a su nombre y para su usuario; si no, se registra como cliente con los datos del
+     * command. Como el alta pública, es todo o nada: la cuenta se construye antes de guardar nada. Contrato:
+     * {@code docs/contracts/customer-sign-up.md}.
      *
      * @throws ForbiddenOperationException si quien lo pide no es administrador
-     * @throws IllegalArgumentException si el command no indica el usuario propietario
-     * @throws com.pronoide.ddd.domain.model.DuplicateAccountNumberException si el número de cuenta ya está en uso
+     * @throws IllegalArgumentException si falta un dato de un cliente nuevo, o si los datos indicados no coinciden con
+     *         los del cliente existente
      * @throws com.pronoide.ddd.domain.model.InsufficientInitialDepositException si el depósito no llega al mínimo
      * @throws com.pronoide.ddd.domain.model.CurrencyMismatchException si el depósito no está en euros
      */
-    public AccountSummary openAccount(Caller caller, OpenAccountCommand command) {
+    public synchronized AccountSummary openAccount(Caller caller, OpenAccountCommand command) {
         if (!caller.admin()) {
             throw new ForbiddenOperationException("abrir cuentas");
         }
-        if (command.ownerUsername().isEmpty()) {
-            throw new IllegalArgumentException("El usuario propietario de la cuenta es obligatorio");
-        }
-        AccountNumber accountNumber = new AccountNumber(command.accountNumber());
-        repository.findByAccountNumber(accountNumber).ifPresent(existing -> {
-            throw new DuplicateAccountNumberException(accountNumber);
-        });
-
         TaxId taxId = new TaxId(command.holderTaxId());
-        AccountHolder holder = AccountHolder.register(command.holderName(), taxId,
-                HighNetWorthIncome.segmentFor(taxAgency.verifiedAnnualIncome(taxId)));
-        MonetaryAmount initialDeposit =
-                new MonetaryAmount(command.initialDeposit(), Currency.getInstance(command.currency()));
-        CheckingAccount account = repository.save(CheckingAccount.open(accountNumber, holder, initialDeposit));
-        ownership.assign(account.id(), command.ownerUsername());
+        Optional<Customer> existing = customers.findByTaxId(taxId);
+        Customer customer = existing.orElseGet(() -> newCustomer(taxId, command));
+        String owner = existing.isPresent() ? ownerOfExisting(customer, command) : command.ownerUsername();
+
+        CheckingAccount account = openFor(customer, toAmount(command.initialDeposit(), command.currency()));
+
+        if (existing.isEmpty()) {
+            customers.save(customer, owner);
+        }
+        repository.save(account);
+        ownership.assign(account.id(), owner);
         return toSummary(account);
+    }
+
+    /** Un cliente nuevo desde el alta del administrador: nombre, correo y usuario son obligatorios. */
+    private static Customer newCustomer(TaxId taxId, OpenAccountCommand command) {
+        if (command.holderName().isBlank()) {
+            throw new IllegalArgumentException("El nombre del titular es obligatorio para un cliente nuevo");
+        }
+        if (command.holderEmail().isBlank()) {
+            throw new IllegalArgumentException("El correo del titular es obligatorio para un cliente nuevo");
+        }
+        if (command.ownerUsername().isEmpty()) {
+            throw new IllegalArgumentException("El usuario del titular es obligatorio para un cliente nuevo");
+        }
+        return Customer.register(command.holderName(), taxId, new EmailAddress(command.holderEmail()));
+    }
+
+    /**
+     * El usuario de un cliente existente. Los datos del command van en blanco o coinciden con los del cliente: unos
+     * distintos se rechazan en lugar de ignorarlos (decisión del usuario, 2026-11-13).
+     */
+    private String ownerOfExisting(Customer customer, OpenAccountCommand command) {
+        String username = customers.usernameOf(customer.taxId()).orElseThrow();
+        boolean nameMatches = command.holderName().isBlank()
+                || command.holderName().strip().equals(customer.fullName());
+        boolean emailMatches = command.holderEmail().isBlank()
+                || new EmailAddress(command.holderEmail()).equals(customer.email());
+        boolean usernameMatches = command.ownerUsername().isEmpty() || command.ownerUsername().equals(username);
+        if (!nameMatches || !emailMatches || !usernameMatches) {
+            throw new IllegalArgumentException(("El documento %s ya es de un cliente: deja en blanco nombre, correo y "
+                    + "usuario, o indica los suyos").formatted(customer.taxId()));
+        }
+        return username;
     }
 
     /** Todas las cuentas para un administrador; las suyas para un usuario. Ordenadas por número de cuenta. */
@@ -291,11 +322,14 @@ public class CheckingAccountService {
         return new MonetaryAmount(amount, Currency.getInstance(currency));
     }
 
-    private static AccountDetails toDetails(CheckingAccount account) {
+    private AccountDetails toDetails(CheckingAccount account) {
+        TaxId taxId = account.primaryHolder().taxId();
         return AccountDetails.builder()
                 .id(account.id())
                 .accountNumber(account.accountNumber().value())
                 .holderName(account.primaryHolder().fullName())
+                .holderTaxId(taxId.value())
+                .holderEmail(customers.findByTaxId(taxId).map(customer -> customer.email().value()).orElse(""))
                 .segment(account.primaryHolder().segment().name())
                 .balance(account.currentBalance().amount())
                 .currency(account.currentBalance().currency().getCurrencyCode())

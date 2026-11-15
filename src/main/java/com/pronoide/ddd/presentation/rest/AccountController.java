@@ -42,13 +42,19 @@ public class AccountController {
     public ResponseEntity<AccountSummaryResponse> openAccount(
             Authentication authentication, @Valid @RequestBody OpenAccountRequest request) {
         OpenAccountCommand.Builder command = OpenAccountCommand.builder()
-                .accountNumber(request.accountNumber())
-                .holderName(request.holderName())
                 .holderTaxId(request.holderTaxId())
-                .initialDeposit(request.initialDeposit())
-                .ownerUsername(request.ownerUsername());
+                .initialDeposit(request.initialDeposit());
         if (request.currency() != null) {
             command.currency(request.currency());
+        }
+        if (request.holderName() != null) {
+            command.holderName(request.holderName());
+        }
+        if (request.holderEmail() != null) {
+            command.holderEmail(request.holderEmail());
+        }
+        if (request.ownerUsername() != null) {
+            command.ownerUsername(request.ownerUsername());
         }
 
         AccountSummaryResponse body = toResponse(service.openAccount(CurrentCaller.from(authentication), command.build()));
@@ -106,6 +112,8 @@ public class AccountController {
                 .id(details.id())
                 .accountNumber(details.accountNumber())
                 .holderName(details.holderName())
+                .holderTaxId(details.holderTaxId())
+                .holderEmail(details.holderEmail())
                 .segment(details.segment())
                 .balance(details.balance())
                 .currency(details.currency())
