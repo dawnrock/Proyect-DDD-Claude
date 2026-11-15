@@ -217,10 +217,11 @@ Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@Mo
 
 - **Files:** `docs/adr/0012-customer-self-sign-up.md`, README of ADRs (0011 noted as phase-1 only), `fase-2-hexagonal.md`, `comparativa-capas-hexagonal.md`
 
-### [ ] T26 — Glossary and functional analysis (~10 min) · **Side:** both
+### [x] T26 — Glossary and functional analysis (~10 min) · **Side:** both
 
 - **Acceptance criteria:**
-  - [ ] R28-R32 cite existing tests; demo IBANs listed.
+  - [x] R28-R32 cite existing tests (checked with a script); demo IBANs listed.
+- **Deviation:** `docs/analysis/functional-analysis.md` on this branch is a snapshot of `Monolithic` after PR #51 and stays as a record (Spanish, not updated).
 
 ### [ ] T27 — README and deployment guide (~5 min) · **Side:** both
 
