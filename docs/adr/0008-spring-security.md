@@ -1,6 +1,6 @@
 # 0008 · Authentication and roles with Spring Security
 
-- **Status:** accepted · 2026-10-25 (issue #50)
+- **Status:** accepted · 2026-10-25 (issue #50) · extended by [ADR 0012](0012-customer-self-sign-up.md) (customer self sign-up)
 
 ## Context
 

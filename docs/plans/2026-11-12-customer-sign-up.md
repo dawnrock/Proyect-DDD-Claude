@@ -249,12 +249,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
 
-### [ ] T25 — ADR 0012 and architecture (~10 min)
+### [x] T25 — ADR 0012 and architecture (~10 min)
 
 - **Side:** both · **Layer:** docs · **Files:** `docs/adr/0012-customer-self-sign-up.md`, `docs/adr/README.md`, `docs/arquitectura/fase-1-capas.md` · **Depends on:** T22
 - **What to do:** public sign-up, customers and users created at runtime (users in `presentation`), accepted risks (no e-mail verification, no rate limit, data lost on restart, account and user created in two steps) and discarded alternatives.
 - **Acceptance criteria:**
-  - [ ] ADR listed in the index and linked from ADR 0008.
+  - [x] ADR listed in the index and linked from ADR 0008.
 
 ### [ ] T26 — Glossary and functional analysis (~10 min)
 
