@@ -1,14 +1,27 @@
 package com.pronoide.ddd.adapter.in.web;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.pronoide.ddd.adapter.in.CustomerRegistration;
+import com.pronoide.ddd.adapter.in.UsernameTakenException;
+import com.pronoide.ddd.application.AccountSummary;
+import com.pronoide.ddd.application.SignUpCommand;
+import com.pronoide.ddd.domain.model.DomainException;
+import com.pronoide.ddd.domain.model.DuplicateCustomerException;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * Alta de cliente de Mon-A Bank en tres pasos (#95, #103). El estado del asistente es un {@link SignUpForm} en la
@@ -16,6 +29,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
  * {@code docs/contracts/customer-sign-up.md}.
  */
 @Controller
+@RequiredArgsConstructor
 @SessionAttributes(SignUpController.FORM)
 public class SignUpController {
 
@@ -25,7 +39,13 @@ public class SignUpController {
 
     private static final String ACCESS_VIEW = "signup/access";
 
+    private static final String ACCOUNT_VIEW = "signup/account";
+
+    private static final List<String> CURRENCIES = List.of("EUR", "USD", "GBP");
+
     private static final String REDIRECT_DATA = "redirect:/signup";
+
+    private final CustomerRegistration registration;
 
     @ModelAttribute(FORM)
     public SignUpForm newForm() {
@@ -68,5 +88,71 @@ public class SignUpController {
         }
         form.completeAccess();
         return "redirect:/signup/account";
+    }
+
+    @GetMapping("/signup/account")
+    public String account(@ModelAttribute(FORM) SignUpForm form, Model model) {
+        if (!form.isAccessDone()) {
+            return REDIRECT_DATA;
+        }
+        model.addAttribute("currencies", CURRENCIES);
+        return ACCOUNT_VIEW;
+    }
+
+    @PostMapping("/signup/account")
+    public String submitAccount(@Validated(SignUpForm.AccountData.class) @ModelAttribute(FORM) SignUpForm form,
+                                BindingResult result, Model model, RedirectAttributes redirect,
+                                SessionStatus status) {
+        if (!form.isAccessDone()) {
+            return REDIRECT_DATA;
+        }
+        model.addAttribute("currencies", CURRENCIES);
+        if (result.hasErrors()) {
+            return ACCOUNT_VIEW;
+        }
+        SignUpCommand command;
+        try {
+            command = toCommand(form);
+        } catch (IllegalArgumentException e) {
+            return backToData(form, redirect, e.getMessage(), false);
+        }
+        try {
+            AccountSummary account = registration.register(command, form.getPassword());
+            status.setComplete();
+            redirect.addFlashAttribute("message",
+                    "Te damos la bienvenida a Mon-A Bank. Tu IBAN es " + account.accountNumber());
+            return "redirect:/accounts/" + account.id();
+        } catch (DuplicateCustomerException e) {
+            return backToData(form, redirect, e.getMessage(), true);
+        } catch (UsernameTakenException e) {
+            form.resetAccess();
+            redirect.addFlashAttribute("signUpError", e.getMessage());
+            return "redirect:/signup/access";
+        } catch (IllegalArgumentException e) {
+            return backToData(form, redirect, e.getMessage(), false);
+        } catch (DomainException e) {
+            result.reject("domain", e.getMessage());
+            return ACCOUNT_VIEW;
+        }
+    }
+
+    /** Vuelve al paso 1 con el mensaje (PRG); el paso 1 pinta el enlace para entrar si el cliente ya existe. */
+    private static String backToData(SignUpForm form, RedirectAttributes redirect, String message, boolean duplicate) {
+        form.resetProgress();
+        form.clearPassword();
+        redirect.addFlashAttribute("signUpError", message);
+        redirect.addFlashAttribute("duplicateCustomer", duplicate);
+        return REDIRECT_DATA;
+    }
+
+    private static SignUpCommand toCommand(SignUpForm form) {
+        return SignUpCommand.builder()
+                .fullName(form.getFullName())
+                .taxId(form.getTaxId())
+                .email(form.getEmail())
+                .username(form.getUsername())
+                .initialDeposit(form.getInitialDeposit())
+                .currency(form.getCurrency())
+                .build();
     }
 }

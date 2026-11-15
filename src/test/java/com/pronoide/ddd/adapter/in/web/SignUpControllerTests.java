@@ -240,4 +240,168 @@ class SignUpControllerTests {
                     .andExpect(content().string(containsString("value=\"Margaret Hamilton\"")));
         }
     }
+
+    /** Sesión con los pasos 1 y 2 completados. */
+    private MockHttpSession sessionAfterStep2() throws Exception {
+        MockHttpSession session = sessionAfterStep1();
+        mvc.perform(validStep2(post("/signup/access")).session(session)).andExpect(redirectedUrl("/signup/account"));
+        return session;
+    }
+
+    private static MockHttpServletRequestBuilder validStep3(MockHttpServletRequestBuilder request) {
+        return request.param("initialDeposit", "100.00").param("currency", "EUR").param("conditionsAccepted", "true");
+    }
+
+    private static AccountSummary openedAccount(UUID id) {
+        return AccountSummary.builder().id(id).accountNumber("ES2199990001220000000001")
+                .holderName("Margaret Hamilton").segment("RETAIL").balance(new BigDecimal("100.00"))
+                .currency("EUR").build();
+    }
+
+    @Nested
+    @DisplayName("Paso 3: cuenta y confirmación")
+    class Paso3 {
+
+        @Test
+        @DisplayName("Sin haber completado los pasos anteriores, el paso 3 redirige a /signup")
+        void sin_haber_completado_los_pasos_anteriores_el_paso_3_redirige_a_signup() throws Exception {
+            mvc.perform(get("/signup/account"))
+                    .andExpect(redirectedUrl("/signup"));
+            mvc.perform(get("/signup/account").session(sessionAfterStep1()))
+                    .andExpect(redirectedUrl("/signup"));
+            mvc.perform(validStep3(post("/signup/account")).session(sessionAfterStep1()))
+                    .andExpect(redirectedUrl("/signup"));
+            verifyNoInteractions(registration);
+        }
+
+        @Test
+        @DisplayName("La página muestra el resumen, pide el depósito y la aceptación, y no pinta la contraseña")
+        void la_pagina_muestra_el_resumen_pide_el_deposito_y_la_aceptacion() throws Exception {
+            mvc.perform(get("/signup/account").session(sessionAfterStep2()))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("signup/account"))
+                    .andExpect(content().string(containsString("Paso 3 de 3")))
+                    .andExpect(content().string(containsString("Margaret Hamilton")))
+                    .andExpect(content().string(containsString("12345678Z")))
+                    .andExpect(content().string(containsString("margaret@example.com")))
+                    .andExpect(content().string(containsString("margaret")))
+                    .andExpect(content().string(containsString("name=\"initialDeposit\"")))
+                    .andExpect(content().string(containsString("name=\"conditionsAccepted\"")))
+                    .andExpect(content().string(containsString("Abrir mi cuenta")))
+                    .andExpect(content().string(containsString("name=\"_csrf\"")))
+                    .andExpect(content().string(not(containsString("clave-secreta-1"))));
+        }
+
+        @Test
+        @DisplayName("Sin depósito ni aceptación, los errores se quedan en el paso 3 y no se llama al alta")
+        void sin_deposito_ni_aceptacion_los_errores_se_quedan_en_el_paso_3() throws Exception {
+            mvc.perform(post("/signup/account").session(sessionAfterStep2()))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("signup/account"))
+                    .andExpect(content().string(containsString("El depósito inicial es obligatorio")))
+                    .andExpect(content().string(containsString("Debes aceptar las condiciones")));
+            verifyNoInteractions(registration);
+        }
+
+        @Test
+        @DisplayName("Un depósito no positivo se queda en el paso 3")
+        void un_deposito_no_positivo_se_queda_en_el_paso_3() throws Exception {
+            mvc.perform(post("/signup/account").session(sessionAfterStep2()).param("initialDeposit", "0")
+                            .param("conditionsAccepted", "true"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("El depósito inicial debe ser positivo")));
+            verifyNoInteractions(registration);
+        }
+
+        @Test
+        @DisplayName("Con todo correcto da de alta con los datos de los tres pasos y redirige a la cuenta con la bienvenida")
+        void con_todo_correcto_da_de_alta_y_redirige_a_la_cuenta_con_la_bienvenida() throws Exception {
+            UUID id = UUID.randomUUID();
+            when(registration.register(any(SignUpCommand.class), eq("clave-secreta-1"))).thenReturn(openedAccount(id));
+
+            mvc.perform(validStep3(post("/signup/account")).session(sessionAfterStep2()))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/accounts/" + id))
+                    .andExpect(flash().attribute("message",
+                            "Te damos la bienvenida a Mon-A Bank. Tu IBAN es ES2199990001220000000001"));
+
+            ArgumentCaptor<SignUpCommand> command = ArgumentCaptor.forClass(SignUpCommand.class);
+            verify(registration).register(command.capture(), eq("clave-secreta-1"));
+            assertThat(command.getValue().fullName()).isEqualTo("Margaret Hamilton");
+            assertThat(command.getValue().taxId()).isEqualTo("12345678Z");
+            assertThat(command.getValue().email()).isEqualTo("margaret@example.com");
+            assertThat(command.getValue().username()).isEqualTo("margaret");
+            assertThat(command.getValue().initialDeposit()).isEqualByComparingTo("100.00");
+            assertThat(command.getValue().currency()).isEqualTo("EUR");
+        }
+
+        @Test
+        @DisplayName("Un cliente que ya existe vuelve al paso 1 con el mensaje y el enlace para entrar")
+        void un_cliente_que_ya_existe_vuelve_al_paso_1_con_el_mensaje_y_el_enlace_para_entrar() throws Exception {
+            var error = new DuplicateCustomerException(new TaxId("12345678Z"));
+            when(registration.register(any(SignUpCommand.class), any())).thenThrow(error);
+            MockHttpSession session = sessionAfterStep2();
+
+            mvc.perform(validStep3(post("/signup/account")).session(session))
+                    .andExpect(redirectedUrl("/signup"))
+                    .andExpect(flash().attribute("signUpError", error.getMessage()))
+                    .andExpect(flash().attribute("duplicateCustomer", true));
+
+            mvc.perform(get("/signup").session(session).flashAttr("signUpError", error.getMessage())
+                            .flashAttr("duplicateCustomer", true))
+                    .andExpect(content().string(containsString("Ya eres cliente de Mon-A Bank")))
+                    .andExpect(content().string(containsString("href=\"/login?form\"")));
+        }
+
+        @Test
+        @DisplayName("Un usuario ocupado vuelve al paso 2 con el mensaje")
+        void un_usuario_ocupado_vuelve_al_paso_2_con_el_mensaje() throws Exception {
+            var error = new UsernameTakenException("margaret");
+            when(registration.register(any(SignUpCommand.class), any())).thenThrow(error);
+            MockHttpSession session = sessionAfterStep2();
+
+            mvc.perform(validStep3(post("/signup/account")).session(session))
+                    .andExpect(redirectedUrl("/signup/access"))
+                    .andExpect(flash().attribute("signUpError", error.getMessage()));
+
+            mvc.perform(get("/signup/access").session(session).flashAttr("signUpError", error.getMessage()))
+                    .andExpect(content().string(containsString("El usuario margaret ya existe")));
+        }
+
+        @Test
+        @DisplayName("Un documento con la letra de control mal (IllegalArgumentException) vuelve al paso 1 con el mensaje del dominio")
+        void un_documento_con_la_letra_mal_vuelve_al_paso_1_con_el_mensaje_del_dominio() throws Exception {
+            when(registration.register(any(SignUpCommand.class), any()))
+                    .thenThrow(new IllegalArgumentException("La letra del documento no es correcta"));
+
+            mvc.perform(validStep3(post("/signup/account")).session(sessionAfterStep2()))
+                    .andExpect(redirectedUrl("/signup"))
+                    .andExpect(flash().attribute("signUpError", "La letra del documento no es correcta"))
+                    .andExpect(flash().attribute("duplicateCustomer", false));
+        }
+
+        @Test
+        @DisplayName("Un depósito insuficiente o una divisa distinta del euro se quedan en el paso 3 con el mensaje del dominio")
+        void un_deposito_insuficiente_o_una_divisa_distinta_se_quedan_en_el_paso_3() throws Exception {
+            MockHttpSession session = sessionAfterStep2();
+            var insufficient = new InsufficientInitialDepositException(
+                    MonetaryAmount.euros("10.00"), MonetaryAmount.euros("50.00"));
+            when(registration.register(any(SignUpCommand.class), any())).thenThrow(insufficient);
+
+            mvc.perform(post("/signup/account").session(session).param("initialDeposit", "10.00")
+                            .param("conditionsAccepted", "true"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("signup/account"))
+                    .andExpect(content().string(containsString("no alcanza el mínimo exigido")))
+                    .andExpect(content().string(containsString("value=\"10.00\"")));
+
+            when(registration.register(any(SignUpCommand.class), any())).thenThrow(
+                    new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD")));
+
+            mvc.perform(post("/signup/account").session(session).param("initialDeposit", "100.00")
+                            .param("currency", "USD").param("conditionsAccepted", "true"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("signup/account"));
+        }
+    }
 }

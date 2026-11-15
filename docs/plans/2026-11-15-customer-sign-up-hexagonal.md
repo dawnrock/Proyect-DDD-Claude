@@ -167,10 +167,10 @@ Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@Mo
 - **Acceptance criteria:**
   - [x] Password ≥ 8 and repeated, never rendered; step 1 required.
 
-### [ ] T17 — Sign-up step 3 (~10 min) · **Side:** web · **Depends on:** T16
+### [x] T17 — Sign-up step 3 (~10 min) · **Side:** web · **Depends on:** T16
 
 - **Acceptance criteria:**
-  - [ ] Duplicate customer → step 1 with "Ya eres cliente"; taken username → step 2; `IllegalArgumentException` → step 1; domain errors stay.
+  - [x] Duplicate customer → step 1 with "Ya eres cliente"; taken username → step 2; `IllegalArgumentException` → step 1; domain errors stay.
 
 ### [ ] T18 — Signed in after signing up (~10 min) · **Side:** web · **Depends on:** T17
 
