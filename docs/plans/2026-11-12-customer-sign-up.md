@@ -235,12 +235,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The new tests pass with real beans (no mocks).
 
-### [ ] T23 — ArchUnit: credentials stay in presentation (~5 min)
+### [x] T23 — ArchUnit: credentials stay in presentation (~5 min)
 
 - **Side:** both · **Layer:** tests · **Files:** `LayeredArchitectureTests.java` · **Depends on:** T10
 - **What to do:** confirm the existing rules cover `CustomerRegistration` and the new persistence classes; validate by breaking one (inject the user manager into `CheckingAccountService`) and seeing it fail.
 - **Acceptance criteria:**
-  - [ ] The rule fails when broken and passes when restored.
+  - [x] The rule fails when broken and passes when restored.
 
 ### [ ] T24 — OpenAPI (~10 min)
 
