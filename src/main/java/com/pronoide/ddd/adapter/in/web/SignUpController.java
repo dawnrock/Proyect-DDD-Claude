@@ -3,6 +3,16 @@ package com.pronoide.ddd.adapter.in.web;
 import java.util.List;
 import java.util.Objects;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -46,6 +56,8 @@ public class SignUpController {
     private static final String REDIRECT_DATA = "redirect:/signup";
 
     private final CustomerRegistration registration;
+
+    private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
     @ModelAttribute(FORM)
     public SignUpForm newForm() {
@@ -102,7 +114,7 @@ public class SignUpController {
     @PostMapping("/signup/account")
     public String submitAccount(@Validated(SignUpForm.AccountData.class) @ModelAttribute(FORM) SignUpForm form,
                                 BindingResult result, Model model, RedirectAttributes redirect,
-                                SessionStatus status) {
+                                HttpServletRequest request, HttpServletResponse response, SessionStatus status) {
         if (!form.isAccessDone()) {
             return REDIRECT_DATA;
         }
@@ -118,7 +130,9 @@ public class SignUpController {
         }
         try {
             AccountSummary account = registration.register(command, form.getPassword());
+            String username = form.getUsername();
             status.setComplete();
+            signIn(username, request, response);
             redirect.addFlashAttribute("message",
                     "Te damos la bienvenida a Mon-A Bank. Tu IBAN es " + account.accountNumber());
             return "redirect:/accounts/" + account.id();
@@ -134,6 +148,23 @@ public class SignUpController {
             result.reject("domain", e.getMessage());
             return ACCOUNT_VIEW;
         }
+    }
+
+    /**
+     * Deja al cliente recién dado de alta con la sesión iniciada: autentica al usuario (rol {@code USER}) y guarda el
+     * contexto en la sesión, porque Spring Security 7 no lo hace solo con una autenticación programática. Cambia el
+     * identificador de sesión contra la fijación de sesión.
+     */
+    private void signIn(String username, HttpServletRequest request, HttpServletResponse response) {
+        if (request.getSession(false) != null) {
+            request.changeSessionId();
+        }
+        Authentication authentication = UsernamePasswordAuthenticationToken.authenticated(
+                username, null, AuthorityUtils.createAuthorityList("ROLE_USER"));
+        SecurityContext context = SecurityContextHolder.getContextHolderStrategy().createEmptyContext();
+        context.setAuthentication(authentication);
+        SecurityContextHolder.getContextHolderStrategy().setContext(context);
+        securityContextRepository.saveContext(context, request, response);
     }
 
     /** Vuelve al paso 1 con el mensaje (PRG); el paso 1 pinta el enlace para entrar si el cliente ya existe. */

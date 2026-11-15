@@ -172,10 +172,10 @@ Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@Mo
 - **Acceptance criteria:**
   - [x] Duplicate customer → step 1 with "Ya eres cliente"; taken username → step 2; `IllegalArgumentException` → step 1; domain errors stay.
 
-### [ ] T18 — Signed in after signing up (~10 min) · **Side:** web · **Depends on:** T17
+### [x] T18 — Signed in after signing up (~10 min) · **Side:** web · **Depends on:** T17
 
 - **Acceptance criteria:**
-  - [ ] Same session reaches `/accounts/{id}` with the welcome flash.
+  - [x] Same session reaches `/accounts/{id}` with the welcome flash.
 
 ### [ ] T19 — "Abrir otra cuenta" (~10 min) · **Side:** web · **Depends on:** T0
 

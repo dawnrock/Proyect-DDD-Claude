@@ -404,4 +404,74 @@ class SignUpControllerTests {
                     .andExpect(view().name("signup/account"));
         }
     }
+
+    @Nested
+    @DisplayName("Sesión iniciada tras el alta")
+    class SesionTrasElAlta {
+
+        private AccountDetails details(UUID id) {
+            return AccountDetails.builder().id(id).accountNumber("ES2199990001220000000001")
+                    .holderName("Margaret Hamilton").segment("RETAIL").balance(new BigDecimal("100.00"))
+                    .currency("EUR").build();
+        }
+
+        @Test
+        @DisplayName("Antes de terminar el alta, la cuenta pide iniciar sesión")
+        void antes_de_terminar_el_alta_la_cuenta_pide_iniciar_sesion() throws Exception {
+            mvc.perform(get("/accounts/" + UUID.randomUUID()).session(sessionAfterStep2()))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/login"));
+        }
+
+        @Test
+        @DisplayName("Tras el POST final, la misma sesión abre el detalle como el cliente nuevo y ve la bienvenida")
+        void tras_el_post_final_la_misma_sesion_abre_el_detalle_como_el_cliente_nuevo() throws Exception {
+            UUID id = UUID.randomUUID();
+            when(registration.register(any(SignUpCommand.class), any())).thenReturn(openedAccount(id));
+            when(queries.findAccount(any(Caller.class), eq(id))).thenReturn(details(id));
+            when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(openedAccount(id)));
+            MockHttpSession session = sessionAfterStep2();
+
+            mvc.perform(validStep3(post("/signup/account")).session(session))
+                    .andExpect(redirectedUrl("/accounts/" + id));
+
+            mvc.perform(get("/accounts/" + id).session(session))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail"))
+                    .andExpect(content().string(containsString("Te damos la bienvenida a Mon-A Bank. Tu IBAN es ES2199990001220000000001")))
+                    .andExpect(content().string(containsString("margaret")));
+
+            ArgumentCaptor<Caller> caller = ArgumentCaptor.forClass(Caller.class);
+            verify(queries).findAccount(caller.capture(), eq(id));
+            assertThat(caller.getValue().username()).isEqualTo("margaret");
+            assertThat(caller.getValue().admin()).isFalse();
+        }
+
+        @Test
+        @DisplayName("Terminado el alta se borra el asistente: no quedan datos ni contraseña en la sesión")
+        void terminado_el_alta_se_borra_el_asistente() throws Exception {
+            UUID id = UUID.randomUUID();
+            when(registration.register(any(SignUpCommand.class), any())).thenReturn(openedAccount(id));
+            MockHttpSession session = sessionAfterStep2();
+
+            mvc.perform(validStep3(post("/signup/account")).session(session))
+                    .andExpect(redirectedUrl("/accounts/" + id));
+
+            assertThat(session.getAttribute("signUpForm")).isNull();
+        }
+
+        @Test
+        @DisplayName("Si el alta falla, la sesión no queda iniciada")
+        void si_el_alta_falla_la_sesion_no_queda_iniciada() throws Exception {
+            when(registration.register(any(SignUpCommand.class), any()))
+                    .thenThrow(new UsernameTakenException("margaret"));
+            MockHttpSession session = sessionAfterStep2();
+
+            mvc.perform(validStep3(post("/signup/account")).session(session))
+                    .andExpect(redirectedUrl("/signup/access"));
+
+            mvc.perform(get("/accounts/" + UUID.randomUUID()).session(session))
+                    .andExpect(redirectedUrl("/login"));
+        }
+    }
 }
