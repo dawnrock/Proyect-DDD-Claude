@@ -2,22 +2,21 @@
 
 > **Léelo al empezar cada sesión.** Es el punto de entrada para continuar sin depender de conversaciones anteriores, y se mantiene **corto a propósito**: se carga en cada sesión. **Se actualiza en cada PR que cierra una issue** (lo comprueba el CI).
 
-- **Última actualización:** 2026-11-13 · PR #101 (#99, segmento por ingresos verificados)
-- **Rama activa:** `Hexagonal` (fase 2), rama por defecto del repositorio. `Monolithic` congelada en la etiqueta `v1-monolito`, con excepciones autorizadas por el usuario: el despliegue en Render (#86), que no toca el código, el pie de la web (#91), el segmento automático (#94), su alineación con `Hexagonal` (#99) y el alta de cliente (#95, pendiente); `master` congelada.
+- **Última actualización:** 2026-11-15 · PR #102 (#95, alta de cliente de Mon-A Bank)
+- **Rama activa:** `Hexagonal` (fase 2), rama por defecto del repositorio. `Monolithic` congelada en la etiqueta `v1-monolito`, con excepciones autorizadas por el usuario: el despliegue en Render (#86), que no toca el código, el pie de la web (#91), el segmento automático (#94), su alineación con `Hexagonal` (#99) y el alta de cliente (#95); `master` congelada.
 
 ## Dónde estamos
 
 | Fase | Hecho | En curso | Pendiente |
 | ---- | ----- | -------- | --------- |
-| 1 · Monolito en capas | Cerrada: #2-#8, #11-#13, #31, #48, #50, #54, #57 (detalle en el [historial](historial.md)); después, #86 despliegue en Render, #91 pie de la web, #94 segmento automático y #99 segmento también por ingresos verificados (capa `integration`, ADR 0011) | — | #95 alta de cliente de Mon-A Bank (plan revisado en `docs/plans/2026-11-12-customer-sign-up.md`, pendiente de aprobar) |
+| 1 · Monolito en capas | Cerrada: #2-#8, #11-#13, #31, #48, #50, #54, #57 (detalle en el [historial](historial.md)); después, #86 despliegue en Render, #91 pie de la web, #94 segmento automático, #99 segmento también por ingresos verificados (capa `integration`, ADR 0011) y #95 alta de cliente de Mon-A Bank (ADR 0012) | — | Gemela de la #95 en `Hexagonal` |
 | 2 · Hexagonal | En la rama `Hexagonal` (su estado está allí) | — | — |
 
 ## Siguiente paso
 
-1. Cerrar las preguntas abiertas del plan de la #95 (revisión 3, que parte de la #99) y, con el plan aprobado, implementarlo con `/implement-plan-team 95`.
-2. Después, crear y planificar la gemela de la #95 en `Hexagonal` (allí ya existen el NIF y el IBAN generado).
+1. Crear y planificar la gemela de la #95 en `Hexagonal` (allí ya existen el NIF y el IBAN generado; falta el cliente, el alta pública, el NIE con letra de control y `Locale.ROOT` en `TaxId`).
 
-Fuera de esas dos issues la rama sigue congelada. El resto del trabajo continúa en `Hexagonal` (léase su `docs/ia/estado-del-proyecto.md`). El usuario crea el servicio de Render con la [guía](../deploy/render.md).
+Fuera de las excepciones autorizadas la rama sigue congelada. El resto del trabajo continúa en `Hexagonal` (léase su `docs/ia/estado-del-proyecto.md`). El usuario crea el servicio de Render con la [guía](../deploy/render.md).
 
 Diseño objetivo de la fase 2: `docs/arquitectura/fase-2-hexagonal.md`; las issues, en el milestone "Fase 2 · Arquitectura hexagonal".
 

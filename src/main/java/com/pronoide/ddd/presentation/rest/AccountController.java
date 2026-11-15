@@ -42,17 +42,29 @@ public class AccountController {
     public ResponseEntity<AccountSummaryResponse> openAccount(
             Authentication authentication, @Valid @RequestBody OpenAccountRequest request) {
         OpenAccountCommand.Builder command = OpenAccountCommand.builder()
-                .accountNumber(request.accountNumber())
-                .holderName(request.holderName())
                 .holderTaxId(request.holderTaxId())
-                .initialDeposit(request.initialDeposit())
-                .ownerUsername(request.ownerUsername());
+                .initialDeposit(request.initialDeposit());
         if (request.currency() != null) {
             command.currency(request.currency());
+        }
+        if (request.holderName() != null) {
+            command.holderName(request.holderName());
+        }
+        if (request.holderEmail() != null) {
+            command.holderEmail(request.holderEmail());
+        }
+        if (request.ownerUsername() != null) {
+            command.ownerUsername(request.ownerUsername());
         }
 
         AccountSummaryResponse body = toResponse(service.openAccount(CurrentCaller.from(authentication), command.build()));
         return ResponseEntity.created(URI.create("/api/accounts/" + body.id())).body(body);
+    }
+
+    /** Sustituye el IBAN de la cuenta por otro que genera el banco. Solo administradores (R31). */
+    @PostMapping("/{id}/account-number")
+    public AccountSummaryResponse regenerateAccountNumber(Authentication authentication, @PathVariable UUID id) {
+        return toResponse(service.regenerateAccountNumber(CurrentCaller.from(authentication), id));
     }
 
     @GetMapping
@@ -85,7 +97,7 @@ public class AccountController {
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(service.withdraw(CurrentCaller.from(authentication), command.build())));
     }
 
-    private static AccountSummaryResponse toResponse(AccountSummary summary) {
+    static AccountSummaryResponse toResponse(AccountSummary summary) {
         return AccountSummaryResponse.builder()
                 .id(summary.id())
                 .accountNumber(summary.accountNumber())
@@ -100,6 +112,8 @@ public class AccountController {
                 .id(details.id())
                 .accountNumber(details.accountNumber())
                 .holderName(details.holderName())
+                .holderTaxId(details.holderTaxId())
+                .holderEmail(details.holderEmail())
                 .segment(details.segment())
                 .balance(details.balance())
                 .currency(details.currency())

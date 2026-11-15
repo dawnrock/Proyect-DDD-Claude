@@ -2,6 +2,7 @@ package com.pronoide.ddd.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
@@ -14,6 +15,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -26,24 +28,34 @@ import org.junit.jupiter.params.provider.CsvSource;
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CurrencyMismatchException;
-import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
+import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
 import com.pronoide.ddd.integration.TaxAgencyClient;
+import com.pronoide.ddd.persistence.InMemoryAccountNumberSequence;
 import com.pronoide.ddd.persistence.InMemoryAccountOwnershipRepository;
 import com.pronoide.ddd.persistence.InMemoryCheckingAccountRepository;
+import com.pronoide.ddd.persistence.InMemoryCustomerRepository;
 import com.pronoide.ddd.support.MutableClock;
 
 /** Casos de uso con el repositorio en memoria real: es concreto y no hace falta simularlo. */
 class CheckingAccountServiceTests {
 
-    private static final String IBAN = "ES9121000418450200051332";
-    private static final String OTHER_IBAN = "ES7921000813610123456789";
+    /** IBAN de la primera y la segunda cuenta que abre cada test: la numeración empieza de cero con cada servicio. */
+    private static final String IBAN;
+    private static final String OTHER_IBAN;
+
+    static {
+        InMemoryAccountNumberSequence sequence = new InMemoryAccountNumberSequence();
+        IBAN = sequence.next().value();
+        OTHER_IBAN = sequence.next().value();
+    }
 
     /** Los casos de uso se piden como administrador; la propiedad se prueba en CheckingAccountServiceOwnershipTests. */
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
 
     private InMemoryCheckingAccountRepository repository;
+    private InMemoryCustomerRepository customers;
     private CheckingAccountService service;
 
     private TaxAgencyClient taxAgency;
@@ -55,16 +67,39 @@ class CheckingAccountServiceTests {
         repository = spy(new InMemoryCheckingAccountRepository());
         clock = new MutableClock();
         taxAgency = spy(new TaxAgencyClient());
-        service = new CheckingAccountService(repository, new InMemoryAccountOwnershipRepository(), taxAgency, clock);
+        customers = new InMemoryCustomerRepository();
+        service = new CheckingAccountService(repository, new InMemoryAccountOwnershipRepository(), customers,
+                new InMemoryAccountNumberSequence(), taxAgency, clock);
     }
 
-    private static OpenAccountCommand.Builder command(String accountNumber) {
+    /** Ada Lovelace, ingresos bajos: la primera vez la registra como cliente; después le abre otra cuenta. */
+    private static OpenAccountCommand.Builder command() {
         return OpenAccountCommand.builder()
-                .accountNumber(accountNumber)
                 .holderName("Ada Lovelace")
                 .holderTaxId("12345678Z")
+                .holderEmail("ada@example.com")
                 .initialDeposit(new BigDecimal("100"))
                 .ownerUsername("ada");
+    }
+
+    /** Otra clienta con ingresos bajos (Alan Turing en la agencia simulada). */
+    private static OpenAccountCommand.Builder other() {
+        return OpenAccountCommand.builder()
+                .holderName("Alan Turing")
+                .holderTaxId("11111111H")
+                .holderEmail("alan@example.com")
+                .initialDeposit(new BigDecimal("100"))
+                .ownerUsername("alan");
+    }
+
+    /** Un tercer cliente, sin ingresos verificados. */
+    private static OpenAccountCommand.Builder third() {
+        return OpenAccountCommand.builder()
+                .holderName("Margaret Hamilton")
+                .holderTaxId("00000000T")
+                .holderEmail("margaret@example.com")
+                .initialDeposit(new BigDecimal("100"))
+                .ownerUsername("margaret");
     }
 
     @Nested
@@ -74,9 +109,9 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Un depósito válido abre la cuenta, la guarda y devuelve su resumen")
         void un_deposito_valido_abre_la_cuenta_la_guarda_y_devuelve_su_resumen() {
-            AccountSummary summary = service.openAccount(ADMIN, command("es91 2100 0418 4502 0005 1332").build());
+            AccountSummary summary = service.openAccount(ADMIN, command().build());
 
-            assertThat(summary.accountNumber()).isEqualTo(IBAN);
+            assertThat(summary.accountNumber()).isEqualTo(IBAN).startsWith("ES").contains("99990001");
             assertThat(summary.holderName()).isEqualTo("Ada Lovelace");
             assertThat(summary.balance()).isEqualByComparingTo("100.00");
             assertThat(summary.balance().scale()).isEqualTo(2);
@@ -87,7 +122,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Un depósito por debajo del mínimo se rechaza y no se guarda")
         void un_deposito_por_debajo_del_minimo_se_rechaza_y_no_se_guarda() {
-            OpenAccountCommand tooLow = command(IBAN).initialDeposit(new BigDecimal("49.99")).build();
+            OpenAccountCommand tooLow = command().initialDeposit(new BigDecimal("49.99")).build();
 
             assertThatExceptionOfType(InsufficientInitialDepositException.class)
                     .isThrownBy(() -> service.openAccount(ADMIN, tooLow));
@@ -97,7 +132,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Un depósito en otra divisa se rechaza y no se guarda")
         void un_deposito_en_otra_divisa_se_rechaza_y_no_se_guarda() {
-            OpenAccountCommand inDollars = command(IBAN).currency("USD").build();
+            OpenAccountCommand inDollars = command().currency("USD").build();
 
             assertThatExceptionOfType(CurrencyMismatchException.class)
                     .isThrownBy(() -> service.openAccount(ADMIN, inDollars));
@@ -105,24 +140,133 @@ class CheckingAccountServiceTests {
         }
 
         @Test
-        @DisplayName("Un número de cuenta en uso se rechaza aunque venga con espacios o en minúsculas")
-        void un_numero_de_cuenta_en_uso_se_rechaza_aunque_venga_con_espacios_o_en_minusculas() {
-            service.openAccount(ADMIN, command(IBAN).build());
-            OpenAccountCommand duplicate = command("es91 2100 0418 4502 0005 1332").holderName("Grace Hopper").build();
+        @DisplayName("Cada cuenta recibe un IBAN nuevo de Mon-A Bank, sin repetir")
+        void cada_cuenta_recibe_un_iban_nuevo_de_mon_a_bank() {
+            AccountSummary first = service.openAccount(ADMIN, command().build());
+            AccountSummary second = service.openAccount(ADMIN, other().build());
 
-            assertThatExceptionOfType(DuplicateAccountNumberException.class)
-                    .isThrownBy(() -> service.openAccount(ADMIN, duplicate))
-                    .withMessageContaining(IBAN);
+            assertThat(first.accountNumber()).isEqualTo(IBAN);
+            assertThat(second.accountNumber()).isEqualTo(OTHER_IBAN);
+        }
+
+        @Test
+        @DisplayName("Un documento nuevo registra al cliente con su correo y su usuario")
+        void un_documento_nuevo_registra_al_cliente() {
+            AccountSummary summary = service.openAccount(ADMIN, command().build());
+
+            assertThat(customers.findByTaxId(new TaxId("12345678Z"))).hasValueSatisfying(customer ->
+                    assertThat(customer.email().value()).isEqualTo("ada@example.com"));
+            assertThat(customers.usernameOf(new TaxId("12345678Z"))).contains("ada");
+            AccountDetails details = service.findAccount(ADMIN, summary.id());
+            assertThat(details.holderTaxId()).isEqualTo("12345678Z");
+            assertThat(details.holderEmail()).isEqualTo("ada@example.com");
+        }
+
+        @Test
+        @DisplayName("A un cliente existente se le abre otra cuenta indicando solo su documento")
+        void a_un_cliente_existente_se_le_abre_otra_cuenta_con_solo_su_documento() {
+            service.openAccount(ADMIN, command().build());
+
+            AccountSummary second = service.openAccount(ADMIN, OpenAccountCommand.builder()
+                    .holderTaxId(" 12345678 z ").initialDeposit(new BigDecimal("75")).build());
+
+            assertThat(second.holderName()).isEqualTo("Ada Lovelace");
+            assertThat(second.accountNumber()).isEqualTo(OTHER_IBAN);
+            Caller ada = Caller.builder().username("ada").admin(false).build();
+            assertThat(service.listAccounts(ada)).hasSize(2);
+        }
+
+        @ParameterizedTest(name = "{0}")
+        @CsvSource({"nombre, Ada Byron, ada@example.com, ada",
+                "correo, Ada Lovelace, ada@otro.example, ada",
+                "usuario, Ada Lovelace, ada@example.com, grace"})
+        @DisplayName("Unos datos distintos de los del cliente existente se rechazan y no se abre nada")
+        void unos_datos_distintos_de_los_del_cliente_existente_se_rechazan(String field, String name, String email,
+                                                                             String username) {
+            service.openAccount(ADMIN, command().build());
+            OpenAccountCommand contradicting = command()
+                    .holderName(name).holderEmail(email).ownerUsername(username).build();
+
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> service.openAccount(ADMIN, contradicting))
+                    .withMessageContaining("ya es de un cliente");
             assertThat(repository.findAll()).hasSize(1);
-            assertThat(repository.findByAccountNumber(new AccountNumber(IBAN)).orElseThrow().primaryHolder().fullName())
-                    .isEqualTo("Ada Lovelace");
+        }
+
+        @ParameterizedTest(name = "sin {0}")
+        @CsvSource({"nombre, '', ada@example.com, ada, El nombre del titular es obligatorio para un cliente nuevo",
+                "correo, Ada Lovelace, '', ada, El correo del titular es obligatorio para un cliente nuevo",
+                "usuario, Ada Lovelace, ada@example.com, '', El usuario del titular es obligatorio para un cliente nuevo"})
+        @DisplayName("A un cliente nuevo le faltan datos: se rechaza sin registrar ni abrir nada")
+        void a_un_cliente_nuevo_le_faltan_datos(String field, String name, String email, String username,
+                                                String message) {
+            OpenAccountCommand incomplete = command()
+                    .holderName(name).holderEmail(email).ownerUsername(username).build();
+
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> service.openAccount(ADMIN, incomplete))
+                    .withMessage(message);
+            assertThat(repository.findAll()).isEmpty();
+            assertThat(customers.findByTaxId(new TaxId("12345678Z"))).isEmpty();
+        }
+
+        @Test
+        @DisplayName("El usuario de otro cliente no se asigna a un cliente nuevo y no se abre nada")
+        void el_usuario_de_otro_cliente_no_se_asigna_a_un_cliente_nuevo() {
+            service.openAccount(ADMIN, command().build());
+            OpenAccountCommand stealing = other().ownerUsername("ada").build();
+
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> service.openAccount(ADMIN, stealing))
+                    .withMessage("El usuario ada ya es de otro cliente");
+            assertThat(repository.findAll()).hasSize(1);
+            assertThat(customers.findByUsername("ada")).hasValueSatisfying(customer ->
+                    assertThat(customer.taxId()).isEqualTo(new TaxId("12345678Z")));
+        }
+
+        @Test
+        @DisplayName("El alta pública no puede usar el usuario de otro cliente")
+        void el_alta_publica_no_puede_usar_el_usuario_de_otro_cliente() {
+            service.openAccount(ADMIN, command().build());
+            SignUpCommand signUp = SignUpCommand.builder().fullName("Margaret Hamilton").taxId("00000000T")
+                    .email("margaret@example.com").username("ada").initialDeposit(new BigDecimal("100")).build();
+
+            assertThat(service.isUsernameTaken("ada")).isTrue();
+            assertThat(service.isUsernameTaken("margaret")).isFalse();
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> service.signUp(signUp))
+                    .withMessage("El usuario ada ya es de otro cliente");
+            assertThat(customers.findByTaxId(new TaxId("00000000T"))).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Un depósito insuficiente no deja registrado al cliente nuevo")
+        void un_deposito_insuficiente_no_deja_registrado_al_cliente_nuevo() {
+            OpenAccountCommand tooLow = command().initialDeposit(new BigDecimal("10")).build();
+
+            assertThatExceptionOfType(InsufficientInitialDepositException.class)
+                    .isThrownBy(() -> service.openAccount(ADMIN, tooLow));
+            assertThat(customers.findByTaxId(new TaxId("12345678Z"))).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Un cliente abierto por el administrador puede abrir otra cuenta él mismo")
+        void un_cliente_abierto_por_el_administrador_puede_abrir_otra_cuenta() {
+            service.openAccount(ADMIN, command().build());
+            Caller ada = Caller.builder().username("ada").admin(false).build();
+
+            AccountSummary another = service.openAnotherAccount(ada,
+                    OpenAnotherAccountCommand.builder().initialDeposit(new BigDecimal("60")).build());
+
+            assertThat(another.holderName()).isEqualTo("Ada Lovelace");
+            assertThat(service.listAccounts(ada)).hasSize(2);
         }
 
         @Test
         @DisplayName("Una cuenta abierta con el patrimonio mínimo es de alto patrimonio")
         void una_cuenta_abierta_con_el_patrimonio_minimo_es_de_alto_patrimonio() {
             AccountSummary summary = service.openAccount(ADMIN,
-                    command(IBAN).initialDeposit(new BigDecimal("100000")).build());
+                    command().initialDeposit(new BigDecimal("100000")).build());
 
             assertThat(repository.findById(summary.id()).orElseThrow().primaryHolder().isHighNetWorth()).isTrue();
         }
@@ -135,7 +279,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Una cuenta existente se devuelve con el depósito inicial entre sus movimientos")
         void una_cuenta_existente_se_devuelve_con_el_deposito_inicial_entre_sus_movimientos() {
-            AccountSummary opened = service.openAccount(ADMIN, command(IBAN).build());
+            AccountSummary opened = service.openAccount(ADMIN, command().build());
 
             AccountDetails details = service.findAccount(ADMIN, opened.id());
 
@@ -178,14 +322,14 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Varias cuentas se devuelven ordenadas por número de cuenta")
         void varias_cuentas_se_devuelven_ordenadas_por_numero_de_cuenta() {
-            service.openAccount(ADMIN, command(OTHER_IBAN).holderName("Grace Hopper").build());
-            service.openAccount(ADMIN, command(IBAN).build());
+            service.openAccount(ADMIN, other().build());
+            service.openAccount(ADMIN, command().build());
 
-            assertThat(service.listAccounts(ADMIN))
-                    .extracting(AccountSummary::accountNumber, AccountSummary::holderName)
-                    .containsExactly(
-                            tuple(OTHER_IBAN, "Grace Hopper"),
-                            tuple(IBAN, "Ada Lovelace"));
+            List<AccountSummary> accounts = service.listAccounts(ADMIN);
+
+            assertThat(accounts).extracting(AccountSummary::accountNumber).isSorted();
+            assertThat(accounts).extracting(AccountSummary::accountNumber, AccountSummary::holderName)
+                    .containsExactlyInAnyOrder(tuple(IBAN, "Alan Turing"), tuple(OTHER_IBAN, "Ada Lovelace"));
         }
     }
 
@@ -196,7 +340,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Un ingreso aprobado actualiza el saldo y aparece entre los movimientos")
         void un_ingreso_aprobado_actualiza_el_saldo_y_aparece_entre_los_movimientos() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).build()).id();
+            UUID id = service.openAccount(ADMIN, command().build()).id();
 
             TransactionSummary transaction = service.deposit(ADMIN, 
                     DepositCommand.builder().accountId(id).amount(new BigDecimal("25.50")).build());
@@ -225,7 +369,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Un ingreso en otra divisa lanza CurrencyMismatchException y no cambia el saldo")
         void un_ingreso_en_otra_divisa_lanza_currency_mismatch_exception_y_no_cambia_el_saldo() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).build()).id();
+            UUID id = service.openAccount(ADMIN, command().build()).id();
             DepositCommand dollars =
                     DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).currency("USD").build();
 
@@ -254,7 +398,7 @@ class CheckingAccountServiceTests {
         void las_retiradas_en_el_limite_del_descubierto_dependen_del_segmento(
                 String initialDeposit, String amount, String status, String finalBalance) {
             UUID id = service.openAccount(ADMIN,
-                    command(IBAN).initialDeposit(new BigDecimal(initialDeposit)).build()).id();
+                    command().initialDeposit(new BigDecimal(initialDeposit)).build()).id();
 
             TransactionSummary transaction = service.withdraw(ADMIN, 
                     WithdrawCommand.builder().accountId(id).amount(new BigDecimal(amount)).build());
@@ -268,7 +412,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Una retirada rechazada no cambia el saldo pero queda registrada")
         void una_retirada_rechazada_no_cambia_el_saldo_pero_queda_registrada() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).build()).id();
+            UUID id = service.openAccount(ADMIN, command().build()).id();
 
             TransactionSummary transaction = service.withdraw(ADMIN, 
                     WithdrawCommand.builder().accountId(id).amount(new BigDecimal("500")).build());
@@ -297,7 +441,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Una retirada en otra divisa lanza CurrencyMismatchException y no cambia el saldo")
         void una_retirada_en_otra_divisa_lanza_currency_mismatch_exception_y_no_cambia_el_saldo() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).build()).id();
+            UUID id = service.openAccount(ADMIN, command().build()).id();
             WithdrawCommand dollars =
                     WithdrawCommand.builder().accountId(id).amount(BigDecimal.TEN).currency("USD").build();
 
@@ -318,8 +462,8 @@ class CheckingAccountServiceTests {
 
         @BeforeEach
         void openAccounts() {
-            sourceId = service.openAccount(ADMIN, command(IBAN).initialDeposit(new BigDecimal("500")).build()).id();
-            targetId = service.openAccount(ADMIN, command(OTHER_IBAN).initialDeposit(new BigDecimal("100")).build()).id();
+            sourceId = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("500")).build()).id();
+            targetId = service.openAccount(ADMIN, other().initialDeposit(new BigDecimal("100")).build()).id();
             clearInvocations(repository);
         }
 
@@ -422,7 +566,7 @@ class CheckingAccountServiceTests {
 
         @BeforeEach
         void unaCuentaDeAltoPatrimonioEnDescubierto() {
-            id = service.openAccount(ADMIN, command(IBAN).initialDeposit(new BigDecimal("100000")).build()).id();
+            id = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("100000")).build()).id();
             service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("100500")).build());
         }
 
@@ -453,7 +597,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Tras un mes bajo el patrimonio mínimo la transferencia se evalúa ya como minorista")
         void tras_un_mes_bajo_el_patrimonio_minimo_la_transferencia_se_evalua_como_minorista() {
-            service.openAccount(ADMIN, command(OTHER_IBAN).build());
+            service.openAccount(ADMIN, other().build());
             clock.advance(Duration.ofDays(32));
 
             TransferSummary transferencia = service.transfer(ADMIN, TransferCommand.builder()
@@ -474,11 +618,11 @@ class CheckingAccountServiceTests {
 
         @BeforeEach
         void tresCuentas() {
-            belowMinimum = service.openAccount(ADMIN, command(IBAN).initialDeposit(new BigDecimal("100000")).build()).id();
+            belowMinimum = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("100000")).build()).id();
             service.withdraw(ADMIN, WithdrawCommand.builder().accountId(belowMinimum).amount(new BigDecimal("500")).build());
             aboveMinimum = service.openAccount(ADMIN,
-                    command(OTHER_IBAN).initialDeposit(new BigDecimal("100000")).build()).id();
-            retail = service.openAccount(ADMIN, command("ES6000491500051234567892").build()).id();
+                    other().initialDeposit(new BigDecimal("100000")).build()).id();
+            retail = service.openAccount(ADMIN, third().build()).id();
         }
 
         @Test
@@ -521,7 +665,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Con ingresos verificados altos la cuenta se abre como alto patrimonio y se revisa a los seis meses")
         void con_ingresos_altos_se_abre_como_alto_patrimonio_y_se_revisa_a_los_seis_meses() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).holderTaxId(GRACE)
+            UUID id = service.openAccount(ADMIN, command().holderTaxId(GRACE)
                     .initialDeposit(new BigDecimal("5000")).build()).id();
 
             assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("HIGH_NET_WORTH");
@@ -532,7 +676,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Con ingresos verificados bajos la cuenta se abre como minorista")
         void con_ingresos_bajos_se_abre_como_minorista() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).initialDeposit(new BigDecimal("1000")).build()).id();
+            UUID id = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("1000")).build()).id();
 
             assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("RETAIL");
         }
@@ -540,7 +684,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Con ingresos bajos, abrir con el patrimonio mínimo da el alto patrimonio por saldo")
         void con_ingresos_bajos_abrir_con_el_patrimonio_minimo_da_el_alto_patrimonio_por_saldo() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).initialDeposit(new BigDecimal("150000")).build()).id();
+            UUID id = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("150000")).build()).id();
 
             assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("HIGH_NET_WORTH");
             assertThat(account(id).nextSegmentReview()).isEmpty();
@@ -549,7 +693,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Si no toca revisión no se consulta a la agencia tributaria")
         void si_no_toca_revision_no_se_consulta_a_la_agencia() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).initialDeposit(new BigDecimal("100000")).build()).id();
+            UUID id = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("100000")).build()).id();
             service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("500")).build());
             clearInvocations(taxAgency);
             clock.advance(Duration.ofDays(20));
@@ -563,7 +707,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("Con ingresos altos, la revisión conserva el alto patrimonio y programa la siguiente a seis meses")
         void con_ingresos_altos_la_revision_conserva_el_alto_patrimonio() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).holderTaxId(GRACE)
+            UUID id = service.openAccount(ADMIN, command().holderTaxId(GRACE)
                     .initialDeposit(new BigDecimal("150000")).build()).id();
             service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("60000")).build());
             clock.advance(Duration.ofDays(32));
@@ -578,7 +722,7 @@ class CheckingAccountServiceTests {
         @Test
         @DisplayName("La revisión antes de un cargo se guarda aunque el cargo falle después")
         void la_revision_antes_de_un_cargo_se_guarda_aunque_el_cargo_falle() {
-            UUID id = service.openAccount(ADMIN, command(IBAN).initialDeposit(new BigDecimal("100000")).build()).id();
+            UUID id = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("100000")).build()).id();
             service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("500")).build());
             clock.advance(Duration.ofDays(32));
             clearInvocations(repository);

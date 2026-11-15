@@ -22,6 +22,10 @@ public interface AccountDetailsResponseDef {
 
     String holderName();
 
+    String holderTaxId();
+
+    String holderEmail();
+
     String segment();
 
     BigDecimal balance();

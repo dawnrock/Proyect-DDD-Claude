@@ -13,25 +13,23 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class OpenAccountCommandTests {
 
-    private static final String IBAN = "ES9121000418450200051332";
-
     private static OpenAccountCommand.Builder validCommand() {
         return OpenAccountCommand.builder()
-                .accountNumber(IBAN)
-                .holderName("Ada Lovelace")
                 .holderTaxId("12345678Z")
                 .initialDeposit(new BigDecimal("100.00"));
     }
 
     @Test
-    @DisplayName("Una orden con todos los campos válidos se construye y usa EUR por defecto")
-    void una_orden_con_todos_los_campos_validos_se_construye_y_usa_eur_por_defecto() {
+    @DisplayName("Basta el documento y el depósito: nombre, correo y usuario quedan en blanco y la divisa es EUR")
+    void basta_el_documento_y_el_deposito() {
         OpenAccountCommand command = validCommand().build();
 
-        assertThat(command.accountNumber()).isEqualTo(IBAN);
-        assertThat(command.holderName()).isEqualTo("Ada Lovelace");
+        assertThat(command.holderTaxId()).isEqualTo("12345678Z");
         assertThat(command.initialDeposit()).isEqualByComparingTo("100.00");
         assertThat(command.currency()).isEqualTo("EUR");
+        assertThat(command.holderName()).isEmpty();
+        assertThat(command.holderEmail()).isEmpty();
+        assertThat(command.ownerUsername()).isEmpty();
     }
 
     @Test
@@ -41,30 +39,36 @@ class OpenAccountCommandTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "   "})
-    @DisplayName("El número de cuenta no puede estar en blanco")
-    void el_numero_de_cuenta_no_puede_estar_en_blanco(String accountNumber) {
+    @ValueSource(strings = {"ada", "ada@", "ada@example", "ada @example.com"})
+    @DisplayName("Un correo indicado debe tener un formato válido")
+    void un_correo_indicado_debe_tener_un_formato_valido(String email) {
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> validCommand().accountNumber(accountNumber).build())
-                .withMessage("El número de cuenta es obligatorio");
+                .isThrownBy(() -> validCommand().holderEmail(email).build())
+                .withMessage("El correo electrónico no es válido");
+    }
+
+    @Test
+    @DisplayName("Los datos de un cliente nuevo se aceptan junto al documento")
+    void los_datos_de_un_cliente_nuevo_se_aceptan() {
+        OpenAccountCommand command = validCommand()
+                .holderName("Ada Lovelace").holderEmail("ada@example.com").ownerUsername("ada").build();
+
+        assertThat(command.holderEmail()).isEqualTo("ada@example.com");
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "   "})
-    @DisplayName("El nombre del titular no puede estar en blanco")
-    void el_nombre_del_titular_no_puede_estar_en_blanco(String holderName) {
-        assertThatIllegalArgumentException()
-                .isThrownBy(() -> validCommand().holderName(holderName).build())
-                .withMessage("El nombre del titular es obligatorio");
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"", "1234567Z", "123456789Z", "12345678", "12345678-Z"})
-    @DisplayName("El NIF del titular debe tener 8 dígitos y una letra")
-    void el_nif_del_titular_debe_tener_8_digitos_y_una_letra(String holderTaxId) {
+    @ValueSource(strings = {"", "1234567Z", "123456789Z", "12345678", "12345678-Z", "W1234567L", "X123456L"})
+    @DisplayName("El documento del titular debe ser un DNI o un NIE")
+    void el_documento_del_titular_debe_ser_un_dni_o_un_nie(String holderTaxId) {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().holderTaxId(holderTaxId).build())
-                .withMessage("El NIF del titular debe tener 8 dígitos y una letra");
+                .withMessage("El documento debe ser un DNI o un NIE");
+    }
+
+    @Test
+    @DisplayName("Un NIE con el formato correcto se acepta")
+    void un_nie_con_el_formato_correcto_se_acepta() {
+        assertThat(validCommand().holderTaxId("x1234567l").build().holderTaxId()).isEqualTo("x1234567l");
     }
 
     @Test

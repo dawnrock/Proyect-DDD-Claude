@@ -17,6 +17,18 @@ public interface AccountDetailsDef {
 
     String holderName();
 
+    /** Documento (DNI o NIE) normalizado del titular. Vacío por defecto: el servicio lo rellena siempre. */
+    @Value.Default
+    default String holderTaxId() {
+        return "";
+    }
+
+    /** Correo del cliente titular; vacío si la cuenta no es de un cliente registrado. */
+    @Value.Default
+    default String holderEmail() {
+        return "";
+    }
+
     /** {@code RETAIL} o {@code HIGH_NET_WORTH}. */
     String segment();
 

@@ -21,11 +21,11 @@ Arrows show **who depends on whom**: always downwards. `domain` sits at the bott
 | ------- | -------------- | -------- |
 | `presentation.web` | Screens and forms: takes the input, calls a use case and renders the view | Spring MVC controllers, Thymeleaf templates, `WebSecurityConfig` |
 | `presentation.rest` | REST API: translates HTTP ↔ commands/views, and errors to `ProblemDetail` from a single place | `@RestController`, DTOs, `@RestControllerAdvice`, `ApiSecurityConfig` |
-| `presentation` (root) | What both channels share without knowing each other (D5) | `SecuritySupport`, `CurrentCaller`, `SecurityUsersProperties` |
+| `presentation` (root) | What both channels share without knowing each other (D5) | `SecuritySupport`, `CurrentCaller`, `SecurityUsersProperties`, `CustomerRegistration` (sign-up: creates the user after the use case, ADR 0012) |
 | `application` | Use cases: loads aggregates, calls the domain, saves. **No business rules**; decides account ownership with the `Caller` | `CheckingAccountService`, commands and views (Immutables, `@ApplicationValue`), application errors, `DemoDataLoader` |
-| `domain.model` | Model and business rules (R1-R26 of the glossary) | `CheckingAccount` aggregate, entities, value objects, domain exceptions |
+| `domain.model` | Model and business rules (R1-R31 of the glossary) | `CheckingAccount` and `Customer` aggregates, entities, value objects, domain exceptions |
 | `domain.service` | Rules that span several aggregates | `MoneyTransferService` |
-| `persistence` | Saving and loading aggregates | `InMemoryCheckingAccountRepository`, `InMemoryAccountOwnershipRepository` (concrete classes, simulated) |
+| `persistence` | Saving and loading aggregates | `InMemoryCheckingAccountRepository`, `InMemoryAccountOwnershipRepository`, `InMemoryCustomerRepository`, `InMemoryAccountNumberSequence` (Mon-A Bank IBANs) (concrete classes, simulated) |
 | `integration` | Clients of external systems (ADR 0011); only `application` uses them | `TaxAgencyClient`: simulated tax agency that verifies the holder's annual income (concrete class, demo table) |
 
 ## Dependencies

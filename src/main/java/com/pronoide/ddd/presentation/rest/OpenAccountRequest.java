@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 
 import com.pronoide.ddd.application.OpenAccountCommandDef;
+import com.pronoide.ddd.application.SignUpCommandDef;
 
 /**
  * Cuerpo de {@code POST /api/accounts}. Es un {@code record} y no un DTO de Immutables porque Hibernate
@@ -15,21 +16,13 @@ import com.pronoide.ddd.application.OpenAccountCommandDef;
  * formulario web ("Shared presentation validation" del contrato), de modo que lo que acepta nunca hace
  * que el dominio lance {@code IllegalArgumentException}.
  *
- * <p>{@code currency} es opcional ({@code EUR}). El segmento no se pide: lo deciden los ingresos
- * verificados del titular, que se identifica por su NIF ({@code holderTaxId}), y el saldo.
+ * <p>El IBAN no se pide: lo asigna el banco. El titular se identifica por su documento ({@code holderTaxId}); para un
+ * cliente nuevo hacen falta nombre, correo y usuario. {@code currency} es opcional ({@code EUR}). El segmento no se
+ * pide: lo deciden los ingresos verificados del titular y el saldo.
  */
 public record OpenAccountRequest(
-        @NotBlank(message = "El número de cuenta es obligatorio")
-        @Pattern(regexp = "^ *[Ee][Ss]( *\\d){22} *$",
-                message = "El número de cuenta debe ser un IBAN español: ES y 22 dígitos")
-        String accountNumber,
-
-        @NotBlank(message = "El nombre del titular es obligatorio")
-        String holderName,
-
-        @NotBlank(message = "El NIF del titular es obligatorio")
-        @Pattern(regexp = OpenAccountCommandDef.TAX_ID_PATTERN,
-                message = "El NIF del titular debe tener 8 dígitos y una letra")
+        @NotBlank(message = "El documento del titular es obligatorio")
+        @Pattern(regexp = OpenAccountCommandDef.TAX_ID_PATTERN, message = OpenAccountCommandDef.TAX_ID_MESSAGE)
         String holderTaxId,
 
         @NotNull(message = "El depósito inicial es obligatorio")
@@ -39,8 +32,13 @@ public record OpenAccountRequest(
         @Pattern(regexp = "[A-Z]{3}", message = "La divisa debe ser un código ISO 4217 de tres letras mayúsculas")
         String currency,
 
-        @NotBlank(message = "El usuario propietario es obligatorio")
-        @Pattern(regexp = "[a-z0-9._-]{3,30}",
+        /** Obligatorio solo para un cliente nuevo; para uno existente, en blanco o igual al suyo. */
+        String holderName,
+
+        @Pattern(regexp = "^$|" + SignUpCommandDef.EMAIL_PATTERN, message = "El correo electrónico no es válido")
+        String holderEmail,
+
+        @Pattern(regexp = "^$|" + OpenAccountCommandDef.USERNAME_PATTERN,
                 message = "El usuario debe tener de 3 a 30 minúsculas, dígitos, puntos o guiones")
         String ownerUsername) {
 }
