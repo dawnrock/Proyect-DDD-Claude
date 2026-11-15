@@ -5,8 +5,8 @@
 - **Phase:** 1 · Layered monolith
 - **Base branch:** `Monolithic` (frozen; `src/` exception authorised by the user on 2026-11-12; the `v1-monolito` tag does not move)
 - **Date:** 2026-11-13 (revision 3: customer with several accounts, built on #99, names shared with `Hexagonal`; open questions answered by the user the same day)
-- **Status:** in progress
-- **Total estimate:** ~275 min (29 tasks; back and web in parallel after T0)
+- **Status:** done
+- **Total estimate:** ~290 min (30 tasks with T29 from the review; back and web in parallel after T0)
 - **Requires:** #99 merged (`TaxId` on the holder, simulated tax agency in the `integration` layer, `holderTaxId` in the administrator's opening, rules up to R26, ADR 0011)
 
 ## Goal
@@ -270,12 +270,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] No document still tells the administrator to type an IBAN.
 
-### [ ] T28 — Project status (~5 min)
+### [x] T28 — Project status (~5 min)
 
 - **Side:** both · **Layer:** docs · **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md` · **Depends on:** T24-T27
 - **What to do:** status and next step (twin issue on `Hexagonal`); decisions (customer aggregate, runtime users in presentation, IBAN sequence, document per customer); remove the pending item "Sin gestión de usuarios (alta…)" and the R21-R24 numbering warning; add the new accepted risks.
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes.
+  - [x] The CI check of the project status passes.
 
 ### [x] T29 — Fixes from the `revisor-ddd` review (~15 min)
 
@@ -294,28 +294,28 @@ Decisions taken in this plan:
 
 **Specific:**
 
-- [ ] `/login` shows two doors; "Quiero ser cliente" completes in three steps and ends on the account detail with the session open.
-- [ ] Every new account, whoever opens it, has a valid Mon-A Bank IBAN (`9999` `0001`); no form or request accepts a typed IBAN for opening.
-- [ ] A customer can hold several accounts: "Abrir otra cuenta" asks only for the deposit, and the administrator can open one giving the document.
-- [ ] A second sign-up with an existing document is rejected on web and REST ("ya eres cliente"), whatever the e-mail; a taken username too.
-- [ ] The administrator can replace the IBAN of an account with a generated one, and a customer cannot.
-- [ ] `POST /api/customers` works without credentials and the new user can use the API with HTTP Basic.
-- [ ] The segment at sign-up follows #99 (verified income and balance).
-- [ ] The `v1-monolito` tag is not moved.
+- [x] `/login` shows two doors; "Quiero ser cliente" completes in three steps and ends on the account detail with the session open.
+- [x] Every new account, whoever opens it, has a valid Mon-A Bank IBAN (`9999` `0001`); no form or request accepts a typed IBAN for opening.
+- [x] A customer can hold several accounts: "Abrir otra cuenta" asks only for the deposit, and the administrator can open one giving the document.
+- [x] A second sign-up with an existing document is rejected on web and REST ("ya eres cliente"), whatever the e-mail; a taken username too.
+- [x] The administrator can replace the IBAN of an account with a generated one, and a customer cannot.
+- [x] `POST /api/customers` works without credentials and the new user can use the API with HTTP Basic.
+- [x] The segment at sign-up follows #99 (verified income and balance).
+- [x] The `v1-monolito` tag is not moved.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (layers: each layer only uses the one below), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones.
-- [ ] `docs/api/openapi.yaml` reflects the change and `npx @redocly/cli lint docs/api/openapi.yaml` has no errors.
-- [ ] Any new business term is in `docs/dominio/glosario.md`.
-- [ ] Documentation written or changed by this plan is in English (`docs/analysis` stays in Spanish).
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (layers: each layer only uses the one below), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones.
+- [x] `docs/api/openapi.yaml` reflects the change and `npx @redocly/cli lint docs/api/openapi.yaml` has no errors.
+- [x] Any new business term is in `docs/dominio/glosario.md`.
+- [x] Documentation written or changed by this plan is in English (`docs/analysis` stays in Spanish).
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
