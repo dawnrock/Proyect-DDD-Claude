@@ -111,12 +111,12 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 - **Acceptance criteria:**
   - [x] `CheckingAccountFactoryTests`: holder copies name and document; segment by verified income.
 
-### [ ] T8 — Sign-up use case and `isUsernameTaken` (~10 min)
+### [x] T8 — Sign-up use case and `isUsernameTaken` (~10 min)
 
 - **Side:** back · **Layer:** application · config · **Depends on:** T4, T5, T7
 - **What to do:** `signUp` in the unit of work (all or nothing; R30 on document and username); `isUsernameTaken`; wire the new ports in `DomainConfiguration`.
 - **Acceptance criteria:**
-  - [ ] Service tests as in `CheckingAccountServiceSignUpTests` of #95 pass.
+  - [x] Service tests as in `CheckingAccountServiceSignUpTests` of #95 pass.
 
 ### [ ] T9 — Open another account (~10 min)
 

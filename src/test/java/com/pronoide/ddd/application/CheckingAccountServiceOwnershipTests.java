@@ -42,7 +42,8 @@ class CheckingAccountServiceOwnershipTests {
         owners = PersistenceTestAdapters.ownership();
         service = new CheckingAccountService(accounts, owners, mock(DomainEventPublisher.class),
                 new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork());
+                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(),
+                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
     }
 
     private static OpenAccountCommand.Builder command(String owner) {

@@ -73,7 +73,8 @@ class CheckingAccountServiceTests {
         publisher = mock(DomainEventPublisher.class);
         service = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(), publisher,
                 new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), clock, PersistenceTestAdapters.unitOfWork());
+                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), clock, PersistenceTestAdapters.unitOfWork(),
+                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
     }
 
     /** Eventos publicados en cada llamada a {@code publishAll}, en orden. */
@@ -146,7 +147,8 @@ class CheckingAccountServiceTests {
             String used = service.openAccount(ADMIN, command().build()).accountNumber();
             CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
                     publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), clock, PersistenceTestAdapters.unitOfWork());
+                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), clock, PersistenceTestAdapters.unitOfWork(),
+                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
 
             assertThatExceptionOfType(DuplicateAccountNumberException.class)
                     .isThrownBy(() -> faulty.openAccount(ADMIN, byTaxId("87654321X").build()))
@@ -442,7 +444,8 @@ class CheckingAccountServiceTests {
             String used = service.openAccount(ADMIN, command().build()).accountNumber();
             CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
                     publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), clock, PersistenceTestAdapters.unitOfWork());
+                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), clock, PersistenceTestAdapters.unitOfWork(),
+                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
             clearInvocations(publisher);
 
             assertThatExceptionOfType(DuplicateAccountNumberException.class)
@@ -661,7 +664,8 @@ class CheckingAccountServiceTests {
             recorded = new CheckingAccountService(PersistenceTestAdapters.accounts(), PersistenceTestAdapters.ownership(),
                     recordingPublisher, new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(),
                             TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), clock, unit);
+                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), clock, unit,
+                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
         }
 
         @Test
