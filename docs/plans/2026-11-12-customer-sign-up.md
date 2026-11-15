@@ -242,12 +242,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The rule fails when broken and passes when restored.
 
-### [ ] T24 — OpenAPI (~10 min)
+### [x] T24 — OpenAPI (~10 min)
 
 - **Side:** both · **Layer:** docs · **Files:** `docs/api/openapi.yaml` · **Depends on:** T20
 - **What to do:** add `/api/customers` (no security) and `/api/accounts/{id}/account-number`; update the open-account request (no `accountNumber`, conditional customer fields) and the details response; describe the incompatible change.
 - **Acceptance criteria:**
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
+  - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors.
 
 ### [ ] T25 — ADR 0012 and architecture (~10 min)
 
