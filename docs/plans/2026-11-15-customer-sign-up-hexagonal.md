@@ -105,11 +105,11 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 - **Acceptance criteria:**
   - [x] Tests for success and both rejections pass.
 
-### [ ] T7 — Factory opens for a customer (~5 min)
+### [x] T7 — Factory opens for a customer (~5 min)
 
 - **Side:** back · **Layer:** domain · **Depends on:** T3
 - **Acceptance criteria:**
-  - [ ] `CheckingAccountFactoryTests`: holder copies name and document; segment by verified income.
+  - [x] `CheckingAccountFactoryTests`: holder copies name and document; segment by verified income.
 
 ### [ ] T8 — Sign-up use case and `isUsernameTaken` (~10 min)
 
