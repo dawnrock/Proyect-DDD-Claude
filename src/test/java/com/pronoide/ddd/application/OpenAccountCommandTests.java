@@ -70,16 +70,16 @@ class OpenAccountCommandTests {
     void el_nif_del_titular_es_obligatorio(String taxId) {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().holderTaxId(taxId).build())
-                .withMessage("El NIF debe tener 8 dígitos y una letra");
+                .withMessage("El documento debe ser un DNI o un NIE");
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"1234567Z", "123456789", "ABCDEFGHZ", "12345678-Z"})
-    @DisplayName("El NIF debe tener 8 dígitos y una letra")
+    @DisplayName("El documento debe ser un DNI o un NIE")
     void el_nif_debe_tener_8_digitos_y_una_letra(String taxId) {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().holderTaxId(taxId).build())
-                .withMessage("El NIF debe tener 8 dígitos y una letra");
+                .withMessage("El documento debe ser un DNI o un NIE");
     }
 
     @Test

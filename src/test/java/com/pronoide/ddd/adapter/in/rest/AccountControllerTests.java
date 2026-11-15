@@ -166,7 +166,7 @@ class AccountControllerTests {
                      "initialDeposit": -5, "currency": "eur", "ownerUsername": "Ada L"}"""))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.holderName").exists())
-                    .andExpect(jsonPath("$.errors.holderTaxId").value("El NIF debe tener 8 dígitos y una letra"))
+                    .andExpect(jsonPath("$.errors.holderTaxId").value("El documento debe ser un DNI o un NIE"))
                     .andExpect(jsonPath("$.errors.initialDeposit").exists())
                     .andExpect(jsonPath("$.errors.currency").exists())
                     .andExpect(jsonPath("$.errors.ownerUsername").exists());

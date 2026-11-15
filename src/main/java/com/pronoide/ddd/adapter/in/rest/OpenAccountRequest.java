@@ -24,7 +24,7 @@ public record OpenAccountRequest(
         String holderName,
 
         @NotBlank(message = "El NIF es obligatorio")
-        @Pattern(regexp = OpenAccountCommandDef.TAX_ID_PATTERN, message = "El NIF debe tener 8 dígitos y una letra")
+        @Pattern(regexp = OpenAccountCommandDef.TAX_ID_PATTERN, message = OpenAccountCommandDef.TAX_ID_MESSAGE)
         String holderTaxId,
 
         @NotNull(message = "El depósito inicial es obligatorio")

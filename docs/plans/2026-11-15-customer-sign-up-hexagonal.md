@@ -64,12 +64,12 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 
 ### Back (parallel with web; each depends only on T0 unless stated)
 
-### [ ] T1 — `TaxId`: NIE, control letter and `Locale.ROOT` (~10 min)
+### [x] T1 — `TaxId`: NIE, control letter and `Locale.ROOT` (~10 min)
 
 - **Side:** back · **Layer:** domain · application · **Depends on:** T0
 - **What to do:** as T1 of #95 (R28); widen `TAX_ID_PATTERN` and add `TAX_ID_MESSAGE` in `OpenAccountCommandDef`; fix fixtures with wrong letters.
 - **Acceptance criteria:**
-  - [ ] `TaxIdTests` (valid DNI/NIE, wrong letter, Turkish locale) pass; `check-domain.mjs` clean.
+  - [x] `TaxIdTests` (valid DNI/NIE, wrong letter, Turkish locale) pass; `check-domain.mjs` clean.
 
 ### [ ] T2 — `EmailAddress` (~5 min)
 
