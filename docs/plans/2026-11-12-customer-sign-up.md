@@ -221,19 +221,19 @@ Decisions taken in this plan:
   - [x] `./mvnw verify` green; with the `demo` profile the three accounts have Mon-A Bank IBANs and the administrator can open a second account for `12345678Z` giving only document and deposit.
   - Deviation: one commit instead of two (the application change does not compile without its callers). `AccountDetails.holderTaxId` and `holderEmail` default to "" so the web tests that build views keep working; the service always fills them.
 
-### [ ] T21 — Wire web to the real back (~5 min)
+### [x] T21 — Wire web to the real back (~5 min)
 
 - **Side:** both · **Layer:** presentation (web) · **Files:** web tests that mocked the stubs · **Depends on:** T8, T10, T17, T18, T20
 - **What to do:** remove stubs left from T0, check the web uses the real `CustomerRegistration` and service methods.
 - **Acceptance criteria:**
-  - [ ] No `UnsupportedOperationException` remains in `src/main`.
+  - [x] No `UnsupportedOperationException` remains in `src/main`.
 
-### [ ] T22 — End-to-end tests (~10 min)
+### [x] T22 — End-to-end tests (~10 min)
 
 - **Side:** both · **Layer:** tests · **Files:** `DddLabApplicationTests.java` · **Depends on:** T21
 - **What to do:** web: doors → three steps → detail with the session open → "Abrir otra cuenta" → two accounts → logout → login with the new credentials. REST: sign up, list the account, transfer to a demo account. A second sign-up with the same document is rejected on both sides, also with a different e-mail.
 - **Acceptance criteria:**
-  - [ ] The new tests pass with real beans (no mocks).
+  - [x] The new tests pass with real beans (no mocks).
 
 ### [ ] T23 — ArchUnit: credentials stay in presentation (~5 min)
 
