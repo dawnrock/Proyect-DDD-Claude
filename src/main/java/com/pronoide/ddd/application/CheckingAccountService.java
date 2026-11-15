@@ -132,7 +132,25 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
 
     @Override
     public AccountSummary openAnotherAccount(Caller caller, OpenAnotherAccountCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        return inUnit(events -> {
+            Customer customer = customerOf(caller);
+            CheckingAccount opened =
+                    factory.open(customer, toAmount(command.initialDeposit(), command.currency()));
+            requireUnused(opened.accountNumber());
+            CheckingAccount account = save(opened, events);
+            ownership.assign(account.id(), caller.username());
+            return toSummary(account);
+        });
+    }
+
+    /** El cliente de quien lo pide; un administrador, aunque su usuario coincida con el de un cliente, no lo es. */
+    private Customer customerOf(Caller caller) {
+        if (caller.admin()) {
+            throw new NotACustomerException(caller.username());
+        }
+        return customerOwnership.customerOf(caller.username())
+                .flatMap(customers::findByTaxId)
+                .orElseThrow(() -> new NotACustomerException(caller.username()));
     }
 
     @Override

@@ -118,11 +118,11 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 - **Acceptance criteria:**
   - [x] Service tests as in `CheckingAccountServiceSignUpTests` of #95 pass.
 
-### [ ] T9 — Open another account (~10 min)
+### [x] T9 — Open another account (~10 min)
 
 - **Side:** back · **Layer:** application · **Depends on:** T8
 - **Acceptance criteria:**
-  - [ ] Two accounts with different IBANs; an admin or a user without customer gets `NotACustomerException`.
+  - [x] Two accounts with different IBANs; an admin or a user without customer gets `NotACustomerException`.
 
 ### [ ] T10 — Regenerate an IBAN (~10 min)
 
