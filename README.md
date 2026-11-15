@@ -24,9 +24,11 @@ Technologies: Java 21, Spring Boot 4.1, Spring Security, JUnit 5, ArchUnit, Lomb
 
 On Windows, `mvnw.cmd`. Requires Java 21.
 
-`spring-boot:run` starts with the `demo` profile: the command-line adapter opens three demo accounts (two retail and one high net worth) through the use cases, then deposits, makes two withdrawals (one approved, one rejected) and a transfer, with a `[demo]` line in the log for each. To start without data: `./mvnw spring-boot:run -Dspring-boot.run.profiles=default`. Tests and `java -jar` do not load the demo data.
+`spring-boot:run` starts with the `demo` profile: the command-line adapter registers three demo customers of Mon-A Bank and opens their accounts through the use cases (two retail and one high net worth by verified income; the bank assigns the IBANs `ES80 9999 0001 45 0000000001`, `…0002`, `…0003`), then deposits, makes two withdrawals (one approved, one rejected) and a transfer, with a `[demo]` line in the log for each. To start without data: `./mvnw spring-boot:run -Dspring-boot.run.profiles=default`. Tests and `java -jar` do not load the demo data.
 
-**Login (#50).** You must sign in. With the `demo` profile: `admin` (sees every account and opens accounts) and `ada`, `grace` and `alan` (each one only sees their own account), all with password `demo` (local practice data: `application-demo.properties` only holds its BCrypt hash). The API uses HTTP Basic: `curl -u admin:demo http://localhost:8080/api/accounts`. Without the `demo` profile there are no users; an administrator can be created with the `APP_ADMIN_USERNAME` and `APP_ADMIN_PASSWORD` environment variables.
+**Customer sign-up (#103, twin of #95 on `Monolithic`).** On `/login`, "Quiero ser cliente" opens a three-step sign-up (personal data, access, account): the visitor becomes a Mon-A Bank customer with a bank-assigned IBAN and stays signed in. The API offers the same with `POST /api/customers` (public). Customers and users created this way live in memory and disappear on restart.
+
+**Login (#50).** You must sign in. With the `demo` profile: `admin` (sees every account, opens accounts for new or existing customers by their document and can replace an IBAN with a generated one) and `ada`, `grace` and `alan` (each one only sees their own account), all with password `demo` (local practice data: `application-demo.properties` only holds its BCrypt hash). The API uses HTTP Basic: `curl -u admin:demo http://localhost:8080/api/accounts`. Without the `demo` profile there are no users; an administrator can be created with the `APP_ADMIN_USERNAME` and `APP_ADMIN_PASSWORD` environment variables.
 
 ## Deploy
 

@@ -66,7 +66,7 @@ The result starts with `$2y$10$` or `$2b$10$` and is about 60 characters long. R
    ```
 
    - **All twelve are needed.** Spring Boot replaces the whole user list when a variable sets any part of it: with only the hashes the users would have no name and the application would not start.
-   - **Keep the four user names.** The demo accounts belong to `admin`, `ada`, `grace` and `alan`; with other names the customers would see no account. Each user may have a different hash.
+   - **Keep the four user names.** (Customers who sign up on the site get their own runtime user and need no variable.) The demo accounts belong to `admin`, `ada`, `grace` and `alan`; with other names the customers would see no account. Each user may have a different hash.
    - Optional: `APP_ADMIN_USERNAME` and `APP_ADMIN_PASSWORD` add one more administrator (the password in plain text, stored in Render).
 
 5. **Create Web Service.** The first build takes a few minutes (Maven downloads the dependencies); the service is live when the health check answers `UP`.
@@ -88,7 +88,7 @@ The first answers `{"status":"UP",...}`; the second lists the three demo account
 Render's free conditions change from time to time: check the current plan on its website. At the time of writing:
 
 - **Sleep.** After about 15 minutes without requests the service sleeps; the next request wakes it up, which takes about a minute.
-- **Data in memory.** Every start rebuilds the demo data, so accounts opened or operations made on the site disappear when the service sleeps or is redeployed. This is a practice project with simulated persistence.
+- **Data in memory.** Every start rebuilds the demo data, so accounts opened, customers and users who signed up on the site, and operations made there disappear when the service sleeps or is redeployed. This is a practice project with simulated persistence.
 - **Monthly hours.** The free instance hours are shared by every free service of the account; two services that sleep when idle fit in them.
 
 ## Redeploy and stop

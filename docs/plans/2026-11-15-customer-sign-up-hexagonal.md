@@ -223,7 +223,7 @@ Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@Mo
   - [x] R28-R32 cite existing tests (checked with a script); demo IBANs listed.
 - **Deviation:** `docs/analysis/functional-analysis.md` on this branch is a snapshot of `Monolithic` after PR #51 and stays as a record (Spanish, not updated).
 
-### [ ] T27 — README and deployment guide (~5 min) · **Side:** both
+### [x] T27 — README and deployment guide (~5 min) · **Side:** both
 
 ### [ ] T28 — Review and project status (~15 min) · **Side:** both
 
