@@ -83,6 +83,14 @@ public class AccountWebController {
         return renderDetail(id, CurrentCaller.from(authentication), model);
     }
 
+    @PostMapping("/accounts/{id}/account-number")
+    public String regenerateAccountNumber(@PathVariable UUID id, RedirectAttributes redirect,
+                                          Authentication authentication) {
+        AccountSummary account = commands.regenerateAccountNumber(CurrentCaller.from(authentication), id);
+        redirect.addFlashAttribute("message", "Nuevo IBAN asignado: " + account.accountNumber());
+        return redirectToDetail(id);
+    }
+
     @PostMapping("/accounts/{id}/deposits")
     public String deposit(@PathVariable UUID id, @Valid @ModelAttribute("depositForm") MovementForm form,
                           BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication) {

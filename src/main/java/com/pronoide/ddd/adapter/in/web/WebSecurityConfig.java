@@ -3,6 +3,7 @@ package com.pronoide.ddd.adapter.in.web;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -24,6 +25,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/login", "/signup/**", "/css/**", "/actuator/health", "/error", "/error/**").permitAll()
                         // /accounts/another: cualquier sesión; el administrador recibe 403 del propio controlador
                         .requestMatchers("/accounts/new").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/accounts/*/account-number").hasRole("ADMIN")
                         // Consola H2: solo administradores; usa marcos del mismo origen y sus propios formularios sin CSRF
                         .requestMatchers("/h2-console/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

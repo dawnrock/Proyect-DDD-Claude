@@ -182,10 +182,10 @@ Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@Mo
 - **Acceptance criteria:**
   - [x] Button on list and detail for customers; admin → 403.
 
-### [ ] T20 — "Generar nuevo IBAN" (~10 min) · **Side:** web · **Depends on:** T0
+### [x] T20 — "Generar nuevo IBAN" (~10 min) · **Side:** web · **Depends on:** T0
 
 - **Acceptance criteria:**
-  - [ ] Admin only, with confirmation; customer → 403.
+  - [x] Admin only, with confirmation; customer → 403.
 
 ### Integration (lead, in order)
 
