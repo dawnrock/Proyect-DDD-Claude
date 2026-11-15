@@ -71,11 +71,11 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 - **Acceptance criteria:**
   - [x] `TaxIdTests` (valid DNI/NIE, wrong letter, Turkish locale) pass; `check-domain.mjs` clean.
 
-### [ ] T2 — `EmailAddress` (~5 min)
+### [x] T2 — `EmailAddress` (~5 min)
 
 - **Side:** back · **Layer:** domain · **Depends on:** T0
 - **Acceptance criteria:**
-  - [ ] `EmailAddressTests` pass (R29).
+  - [x] `EmailAddressTests` pass (R29).
 
 ### [ ] T3 — `Customer` aggregate (~10 min)
 
