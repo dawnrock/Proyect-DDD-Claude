@@ -358,7 +358,7 @@ class DddLabApplicationTests {
 		private HttpClient loginAs(String username) throws Exception {
 			HttpClient client = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
 			java.util.regex.Matcher csrf = java.util.regex.Pattern.compile("name=\"_csrf\" value=\"([^\"]+)\"")
-					.matcher(send(client, "/login").body());
+					.matcher(send(client, "/login?form").body());
 			assertThat(csrf.find()).isTrue();
 			HttpResponse<String> login = client.send(HttpRequest.newBuilder(URI.create(url("/login")))
 					.header("Content-Type", "application/x-www-form-urlencoded")
@@ -434,7 +434,7 @@ class DddLabApplicationTests {
 	/** Token CSRF: la página de login lo lleva siempre, también con la sesión iniciada. */
 	private String csrfToken() throws Exception {
 		java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("name=\"_csrf\" value=\"([^\"]+)\"")
-				.matcher(rawBrowse("/login").body());
+				.matcher(rawBrowse("/login?form").body());
 		assertThat(matcher.find()).as("la página de login lleva un token CSRF").isTrue();
 		return matcher.group(1);
 	}

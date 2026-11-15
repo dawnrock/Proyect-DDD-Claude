@@ -162,54 +162,54 @@ Decisions taken in this plan:
 
 ### Web (parallel with back; each depends only on T0 unless stated)
 
-### [ ] T13 — Login page with two doors (~10 min)
+### [x] T13 — Login page with two doors (~10 min)
 
 - **Side:** web · **Layer:** presentation (web) · **Files:** `LoginController.java`, `templates/login.html`, `static/css/app.css` + tests · **Depends on:** T0
 - **What to do:** `GET /login` shows the two cards (and the logout notice); `GET /login?form` and `?error` show the current form with a link back. Styles `.doors` / `.door` with the existing tokens, as in mock-up C.
 - **Acceptance criteria:**
-  - [ ] Tests: doors without form inputs; form with `?form`; error message with `?error`; both links present.
+  - [x] Tests: doors without form inputs; form with `?form`; error message with `?error`; both links present.
 
-### [ ] T14 — Sign-up step 1: personal data (~10 min)
+### [x] T14 — Sign-up step 1: personal data (~10 min)
 
 - **Side:** web · **Layer:** presentation (web) · **Files:** new `SignUpController.java`, `SignUpForm.java`, `templates/signup/data.html`; `WebSecurityConfig.java` (`/signup/**` public) + tests · **Depends on:** T0
 - **What to do:** session-scoped form; group `PersonalData` (name, document pattern with NIE, e-mail); progress bar fragment; a valid POST redirects to `/signup/access`.
 - **Acceptance criteria:**
-  - [ ] Tests: page is public; field errors stay on step 1; valid data redirects.
+  - [x] Tests: page is public; field errors stay on step 1; valid data redirects.
 
-### [ ] T15 — Sign-up step 2: access (~10 min)
+### [x] T15 — Sign-up step 2: access (~10 min)
 
 - **Side:** web · **Layer:** presentation (web) · **Files:** `SignUpController.java`, `SignUpForm.java`, `templates/signup/access.html` + tests · **Depends on:** T14
 - **What to do:** group `Access` (username pattern, password of at least 8 characters, repetition equal); "Atrás" keeps step 1 data; entering step 2 without step 1 redirects to `/signup`.
 - **Acceptance criteria:**
-  - [ ] Tests for the three behaviours pass; the password never appears in the rendered HTML.
+  - [x] Tests for the three behaviours pass; the password never appears in the rendered HTML.
 
-### [ ] T16 — Sign-up step 3: account and confirmation (~10 min)
+### [x] T16 — Sign-up step 3: account and confirmation (~10 min)
 
 - **Side:** web · **Layer:** presentation (web) · **Files:** `SignUpController.java`, `templates/signup/account.html` + tests · **Depends on:** T15
 - **What to do:** initial deposit, summary, acceptance of conditions; on submit call `CustomerRegistration.register` (mocked). A duplicate customer goes back to step 1 with "Ya eres cliente de Mon-A Bank" and a link to `/login?form`; a taken username goes to step 2; other domain errors stay on step 3.
 - **Acceptance criteria:**
-  - [ ] Tests for success and the three error routes pass.
+  - [x] Tests for success and the three error routes pass.
 
-### [ ] T17 — Signed in after signing up (~10 min)
+### [x] T17 — Signed in after signing up (~10 min)
 
 - **Side:** web · **Layer:** presentation (web) · **Files:** `SignUpController.java` + tests · **Depends on:** T16
 - **What to do:** after a successful registration, authenticate the new user in the session, clear the wizard (`SessionStatus.setComplete()`) and redirect to `/accounts/{id}` with the flash "Te damos la bienvenida a Mon-A Bank. Tu IBAN es …".
 - **Acceptance criteria:**
-  - [ ] Test: after the final POST, `GET /accounts/{id}` with the same session answers `200`.
+  - [x] Test: after the final POST, `GET /accounts/{id}` with the same session answers `200`.
 
-### [ ] T18 — "Abrir otra cuenta" for customers (~10 min)
+### [x] T18 — "Abrir otra cuenta" for customers (~10 min)
 
 - **Side:** web · **Layer:** presentation (web) · **Files:** new `AnotherAccountForm.java`, `templates/accounts/another.html`; `AccountWebController.java`, `accounts/list.html`, `WebSecurityConfig.java` + tests · **Depends on:** T0
 - **What to do:** a customer sees "Abrir otra cuenta" on the list; the page asks only for the deposit and calls `openAnotherAccount` (mocked); success redirects to the new account with its IBAN; the administrator does not see the button and gets 403 on the route.
 - **Acceptance criteria:**
-  - [ ] Tests: button only for customers; deposit validation; success redirect; administrator → 403.
+  - [x] Tests: button only for customers; deposit validation; success redirect; administrator → 403.
 
-### [ ] T19 — Account detail: new IBAN button (~10 min)
+### [x] T19 — Account detail: new IBAN button (~10 min)
 
 - **Side:** web · **Layer:** presentation (web) · **Files:** `templates/accounts/detail.html`, `AccountWebController.java` (`POST /accounts/{id}/account-number`), `WebSecurityConfig.java` + tests · **Depends on:** T0
 - **What to do:** the administrator sees "Generar nuevo IBAN" (with an in-page confirmation step) and the action calls `regenerateAccountNumber`; a customer neither sees it nor can post it (403).
 - **Acceptance criteria:**
-  - [ ] Tests: button only for the administrator; POST as customer → 403; success shows the flash with the new IBAN.
+  - [x] Tests: button only for the administrator; POST as customer → 403; success shows the flash with the new IBAN.
 
 ### Integration (lead, in order)
 
