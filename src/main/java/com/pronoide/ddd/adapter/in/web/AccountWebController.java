@@ -25,7 +25,9 @@ import com.pronoide.ddd.application.Caller;
 import com.pronoide.ddd.application.CheckingAccountCommands;
 import com.pronoide.ddd.application.CheckingAccountQueries;
 import com.pronoide.ddd.application.DepositCommand;
+import com.pronoide.ddd.application.NotACustomerException;
 import com.pronoide.ddd.application.OpenAccountCommand;
+import com.pronoide.ddd.application.OpenAnotherAccountCommand;
 import com.pronoide.ddd.application.TargetAccountNotFoundException;
 import com.pronoide.ddd.application.TransactionSummary;
 import com.pronoide.ddd.application.TransferCommand;
@@ -46,6 +48,8 @@ public class AccountWebController {
 
     private static final String DETAIL_VIEW = "accounts/detail";
 
+    private static final String ANOTHER_VIEW = "accounts/another";
+
     private static final List<String> CURRENCIES = List.of("EUR", "USD", "GBP");
 
     private final CheckingAccountCommands commands;
@@ -62,6 +66,7 @@ public class AccountWebController {
             return redirectToDetail(accounts.get(0).id());
         }
         model.addAttribute("admin", caller.admin());
+        model.addAttribute("customer", isCustomer(caller, accounts));
         model.addAttribute("accounts", accounts);
         model.addAttribute("totals", totalsByCurrency(accounts));
         return "accounts/list";
@@ -76,6 +81,14 @@ public class AccountWebController {
     @GetMapping("/accounts/{id}")
     public String detail(@PathVariable UUID id, Authentication authentication, Model model) {
         return renderDetail(id, CurrentCaller.from(authentication), model);
+    }
+
+    @PostMapping("/accounts/{id}/account-number")
+    public String regenerateAccountNumber(@PathVariable UUID id, RedirectAttributes redirect,
+                                          Authentication authentication) {
+        AccountSummary account = commands.regenerateAccountNumber(CurrentCaller.from(authentication), id);
+        redirect.addFlashAttribute("message", "Nuevo IBAN asignado: " + account.accountNumber());
+        return redirectToDetail(id);
     }
 
     @PostMapping("/accounts/{id}/deposits")
@@ -189,13 +202,17 @@ public class AccountWebController {
         }
         // Primero la cuenta: una ajena es un 404 sin consultar nada más
         AccountDetails account = queries.findAccount(caller, id);
+        // Una consulta más al listado para saber si es cliente (contrato customer-sign-up): el administrador no la hace
+        List<AccountSummary> own = caller.admin() ? List.of() : queries.listAccounts(caller);
         model.addAttribute("account", account);
         // application devuelve los movimientos del más antiguo al más reciente; la web los pinta al revés. Se invierte
         // una copia, sin ordenar por fecha: dos movimientos pueden compartir instante.
         List<TransactionSummary> newestFirst = new ArrayList<>(List.copyOf(account.transactions()));
         Collections.reverse(newestFirst);
         model.addAttribute("transactions", newestFirst);
-        model.addAttribute("backLabel", backLabel(caller));
+        model.addAttribute("admin", caller.admin());
+        model.addAttribute("backLabel", backLabel(caller, own));
+        model.addAttribute("customer", isCustomer(caller, own));
         model.addAttribute("currencies", CURRENCIES);
         return DETAIL_VIEW;
     }
@@ -204,15 +221,60 @@ public class AccountWebController {
      * Texto del enlace de vuelta al inicio: «Cuentas» para el administrador, «Mis cuentas» para un usuario con varias
      * cuentas y ninguno con una sola (su inicio es este mismo detalle).
      */
-    private String backLabel(Caller caller) {
+    private String backLabel(Caller caller, List<AccountSummary> own) {
         if (caller.admin()) {
             return "Cuentas";
         }
-        return queries.listAccounts(caller).size() > 1 ? "Mis cuentas" : null;
+        return own.size() > 1 ? "Mis cuentas" : null;
+    }
+
+    /** Un cliente es quien no es administrador y tiene alguna cuenta (contrato customer-sign-up). */
+    private static boolean isCustomer(Caller caller, List<AccountSummary> accounts) {
+        return !caller.admin() && !accounts.isEmpty();
     }
 
     private static String redirectToDetail(UUID id) {
         return "redirect:/accounts/" + id;
+    }
+
+    @GetMapping("/accounts/another")
+    public String anotherAccountForm(Model model, Authentication authentication) {
+        Caller caller = CurrentCaller.from(authentication);
+        if (!isCustomer(caller, caller.admin() ? List.of() : queries.listAccounts(caller))) {
+            throw new NotACustomerException(caller.username());
+        }
+        model.addAttribute("form", new AnotherAccountForm());
+        addFormOptions(model);
+        return ANOTHER_VIEW;
+    }
+
+    @PostMapping("/accounts/another")
+    public String openAnotherAccount(@Valid @ModelAttribute("form") AnotherAccountForm form, BindingResult result,
+                                     Model model, RedirectAttributes redirect, Authentication authentication) {
+        Caller caller = CurrentCaller.from(authentication);
+        if (caller.admin()) {
+            throw new NotACustomerException(caller.username());
+        }
+        OpenAnotherAccountCommand command = null;
+        if (!result.hasErrors()) {
+            try {
+                command = OpenAnotherAccountCommand.builder()
+                        .initialDeposit(form.getInitialDeposit()).currency(form.getCurrency()).build();
+            } catch (IllegalArgumentException e) {
+                result.reject("invalid", e.getMessage());
+            }
+        }
+        if (command != null) {
+            try {
+                AccountSummary account = commands.openAnotherAccount(caller, command);
+                redirect.addFlashAttribute("message", "Nueva cuenta abierta. Tu IBAN es " + account.accountNumber());
+                return redirectToDetail(account.id());
+            } catch (DomainException e) {
+                result.reject("domain", e.getMessage());
+            }
+        }
+        addFormOptions(model);
+        return ANOTHER_VIEW;
     }
 
     @GetMapping("/accounts/new")

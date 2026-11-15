@@ -130,7 +130,7 @@ class DemoProfileTests {
 	private String webGetAs(String username, String path) throws Exception {
 		HttpClient browser = HttpClient.newBuilder().cookieHandler(new CookieManager())
 				.followRedirects(HttpClient.Redirect.NORMAL).build();
-		String loginPage = browser.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/login")).GET().build(),
+		String loginPage = browser.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/login?form")).GET().build(),
 				HttpResponse.BodyHandlers.ofString()).body();
 		Matcher csrf = Pattern.compile("name=\"_csrf\"[^>]*value=\"([^\"]+)\"").matcher(loginPage);
 		assertThat(csrf.find()).as("token CSRF en /login").isTrue();

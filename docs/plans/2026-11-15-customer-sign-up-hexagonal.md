@@ -152,40 +152,40 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 
 Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@MockitoBean` on the input ports and `CustomerRegistration`.
 
-### [ ] T14 — Login with two doors (~10 min) · **Side:** web
+### [x] T14 — Login with two doors (~10 min) · **Side:** web
 
 - **Acceptance criteria:**
-  - [ ] Doors at `/login`, form at `/login?form` and `?error`; existing login tests updated to `/login?form`.
+  - [x] Doors at `/login`, form at `/login?form` and `?error`; existing login tests updated to `/login?form`.
 
-### [ ] T15 — Sign-up step 1 (~10 min) · **Side:** web · **Depends on:** T0
-
-- **Acceptance criteria:**
-  - [ ] Public, CSRF, field errors, redirect to step 2.
-
-### [ ] T16 — Sign-up step 2 (~10 min) · **Side:** web · **Depends on:** T15
+### [x] T15 — Sign-up step 1 (~10 min) · **Side:** web · **Depends on:** T0
 
 - **Acceptance criteria:**
-  - [ ] Password ≥ 8 and repeated, never rendered; step 1 required.
+  - [x] Public, CSRF, field errors, redirect to step 2.
 
-### [ ] T17 — Sign-up step 3 (~10 min) · **Side:** web · **Depends on:** T16
-
-- **Acceptance criteria:**
-  - [ ] Duplicate customer → step 1 with "Ya eres cliente"; taken username → step 2; `IllegalArgumentException` → step 1; domain errors stay.
-
-### [ ] T18 — Signed in after signing up (~10 min) · **Side:** web · **Depends on:** T17
+### [x] T16 — Sign-up step 2 (~10 min) · **Side:** web · **Depends on:** T15
 
 - **Acceptance criteria:**
-  - [ ] Same session reaches `/accounts/{id}` with the welcome flash.
+  - [x] Password ≥ 8 and repeated, never rendered; step 1 required.
 
-### [ ] T19 — "Abrir otra cuenta" (~10 min) · **Side:** web · **Depends on:** T0
-
-- **Acceptance criteria:**
-  - [ ] Button on list and detail for customers; admin → 403.
-
-### [ ] T20 — "Generar nuevo IBAN" (~10 min) · **Side:** web · **Depends on:** T0
+### [x] T17 — Sign-up step 3 (~10 min) · **Side:** web · **Depends on:** T16
 
 - **Acceptance criteria:**
-  - [ ] Admin only, with confirmation; customer → 403.
+  - [x] Duplicate customer → step 1 with "Ya eres cliente"; taken username → step 2; `IllegalArgumentException` → step 1; domain errors stay.
+
+### [x] T18 — Signed in after signing up (~10 min) · **Side:** web · **Depends on:** T17
+
+- **Acceptance criteria:**
+  - [x] Same session reaches `/accounts/{id}` with the welcome flash.
+
+### [x] T19 — "Abrir otra cuenta" (~10 min) · **Side:** web · **Depends on:** T0
+
+- **Acceptance criteria:**
+  - [x] Button on list and detail for customers; admin → 403.
+
+### [x] T20 — "Generar nuevo IBAN" (~10 min) · **Side:** web · **Depends on:** T0
+
+- **Acceptance criteria:**
+  - [x] Admin only, with confirmation; customer → 403.
 
 ### Integration (lead, in order)
 

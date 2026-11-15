@@ -15,6 +15,14 @@
     </div>
 
     <div class="actions">
+        <details id="regenerate-action" th:if="${admin}">
+            <summary>⟳ Generar nuevo IBAN</summary>
+            <form class="action-panel" th:action="@{/accounts/{id}/account-number(id=${account.id()})}" method="post">
+                <p>Se sustituirá el IBAN actual por otro generado por Mon-A Bank. El IBAN anterior dejará de funcionar.</p>
+                <button class="button" type="submit">Confirmar</button>
+            </form>
+        </details>
+        <a class="pill pill-secondary" id="another-account" th:if="${customer}" th:href="@{/accounts/another}">+ Abrir otra cuenta</a>
         <details id="deposit-action" th:object="${depositForm}" th:open="${#fields.hasAnyErrors()}">
             <summary>↓ Ingresar</summary>
             <form class="action-panel" th:action="@{/accounts/{id}/deposits(id=${account.id()})}" th:object="${depositForm}" method="post" novalidate>
