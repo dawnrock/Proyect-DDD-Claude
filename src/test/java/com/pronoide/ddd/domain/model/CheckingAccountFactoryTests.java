@@ -92,6 +92,12 @@ class CheckingAccountFactoryTests {
         assertThat(account.primaryHolder().taxId()).isEqualTo(TAX_ID);
     }
 
+    @Test
+    @DisplayName("La factoría ofrece un número de cuenta nuevo de la numeración")
+    void la_factoria_ofrece_un_numero_de_cuenta_nuevo() {
+        assertThat(factoryWithIncome(null).nextAccountNumber()).isEqualTo(GENERATED);
+    }
+
     @Nested
     @DisplayName("Abrir una cuenta para un cliente")
     class OpenForCustomer {

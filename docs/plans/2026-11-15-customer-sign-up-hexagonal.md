@@ -124,11 +124,11 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 - **Acceptance criteria:**
   - [x] Two accounts with different IBANs; an admin or a user without customer gets `NotACustomerException`.
 
-### [ ] T10 — Regenerate an IBAN (~10 min)
+### [x] T10 — Regenerate an IBAN (~10 min)
 
 - **Side:** back · **Layer:** application · adapter.out · **Depends on:** T6
 - **Acceptance criteria:**
-  - [ ] Admin only; unknown id → 404; the old IBAN stops resolving and the new one resolves.
+  - [x] Admin only; unknown id → 404; the old IBAN stops resolving and the new one resolves.
 
 ### [ ] T11 — `CustomerRegistration` (~10 min)
 

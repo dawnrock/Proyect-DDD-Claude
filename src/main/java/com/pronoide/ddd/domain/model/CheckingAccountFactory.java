@@ -33,6 +33,11 @@ public class CheckingAccountFactory {
         return open(customer.fullName(), customer.taxId(), initialDeposit);
     }
 
+    /** Un número de cuenta nuevo de Mon-A Bank, para sustituir el de una cuenta existente (R32). */
+    public AccountNumber nextAccountNumber() {
+        return numbering.next();
+    }
+
     private CustomerSegment segmentFor(TaxId taxId) {
         return HighNetWorthIncome.isMetBy(incomeVerifier.verifiedAnnualIncome(taxId))
                 ? CustomerSegment.HIGH_NET_WORTH

@@ -155,7 +155,16 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
 
     @Override
     public AccountSummary regenerateAccountNumber(Caller caller, UUID id) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        if (!caller.admin()) {
+            throw new ForbiddenOperationException("generar un nuevo número de cuenta");
+        }
+        return inUnit(events -> {
+            CheckingAccount account = load(id);
+            AccountNumber generated = factory.nextAccountNumber();
+            requireUnused(generated);
+            account.reassignAccountNumber(generated);
+            return toSummary(save(account, events));
+        });
     }
 
     @Override
