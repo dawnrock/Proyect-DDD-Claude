@@ -24,6 +24,12 @@ class CustomerTests {
         assertThat(customer.email()).isEqualTo(EMAIL);
     }
 
+    @Test
+    @DisplayName("El nombre del cliente se guarda sin espacios alrededor")
+    void el_nombre_del_cliente_se_guarda_sin_espacios_alrededor() {
+        assertThat(Customer.register("  Ada Lovelace ", TAX_ID, EMAIL).fullName()).isEqualTo("Ada Lovelace");
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"", "   "})
     @DisplayName("El nombre de un cliente no puede estar en blanco")

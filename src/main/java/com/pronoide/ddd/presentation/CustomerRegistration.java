@@ -39,7 +39,7 @@ public class CustomerRegistration {
      * @throws IllegalArgumentException si la contraseña tiene menos de {@value #MINIMUM_PASSWORD_LENGTH} caracteres
      */
     public synchronized AccountSummary register(SignUpCommand command, String rawPassword) {
-        if (users.userExists(command.username())) {
+        if (users.userExists(command.username()) || service.isUsernameTaken(command.username())) {
             throw new UsernameTakenException(command.username());
         }
         if (rawPassword == null || rawPassword.length() < MINIMUM_PASSWORD_LENGTH) {
@@ -53,7 +53,7 @@ public class CustomerRegistration {
                     .roles("USER")
                     .build());
         } catch (IllegalArgumentException e) {
-            if (users.userExists(command.username())) {
+            if (users.userExists(command.username()) || service.isUsernameTaken(command.username())) {
                 throw new UsernameTakenException(command.username());
             }
             throw e;

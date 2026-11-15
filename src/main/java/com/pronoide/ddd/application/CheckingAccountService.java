@@ -71,6 +71,9 @@ public class CheckingAccountService {
         Optional<Customer> existing = customers.findByTaxId(taxId);
         Customer customer = existing.orElseGet(() -> newCustomer(taxId, command));
         String owner = existing.isPresent() ? ownerOfExisting(customer, command) : command.ownerUsername();
+        if (existing.isEmpty()) {
+            requireFreeUsername(owner);
+        }
 
         CheckingAccount account = openFor(customer, toAmount(command.initialDeposit(), command.currency()));
 
@@ -80,6 +83,20 @@ public class CheckingAccountService {
         repository.save(account);
         ownership.assign(account.id(), owner);
         return toSummary(account);
+    }
+
+    /**
+     * Si el usuario ya es de un cliente. Un usuario es de un único cliente: el alta pública lo consulta (junto con los
+     * usuarios que ya pueden entrar) para no dar a un visitante el usuario que el administrador asignó a otro cliente.
+     */
+    public boolean isUsernameTaken(String username) {
+        return customers.findByUsername(username).isPresent();
+    }
+
+    private void requireFreeUsername(String username) {
+        if (isUsernameTaken(username)) {
+            throw new IllegalArgumentException("El usuario %s ya es de otro cliente".formatted(username));
+        }
     }
 
     /** Un cliente nuevo desde el alta del administrador: nombre, correo y usuario son obligatorios. */
@@ -209,6 +226,7 @@ public class CheckingAccountService {
         customers.findByTaxId(taxId).ifPresent(existing -> {
             throw new DuplicateCustomerException(taxId);
         });
+        requireFreeUsername(command.username());
 
         // Todo o nada: la cuenta se construye antes de guardar nada, y el dominio comprueba R1 y la divisa.
         Customer customer = Customer.register(command.fullName(), taxId, email);

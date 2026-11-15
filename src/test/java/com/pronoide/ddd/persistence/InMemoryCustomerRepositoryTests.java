@@ -69,6 +69,20 @@ class InMemoryCustomerRepositoryTests {
     }
 
     @Test
+    @DisplayName("Guardar otro cliente con el usuario de un cliente se rechaza y no pisa al primero")
+    void guardar_otro_cliente_con_el_mismo_usuario_se_rechaza() {
+        Customer ada = ada();
+        repository.save(ada, "ada");
+        Customer other = Customer.register("Alan Turing", new TaxId("11111111H"), new EmailAddress("alan@example.com"));
+
+        assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(() -> repository.save(other, "ada"))
+                .withMessage("El usuario ada ya es de otro cliente");
+        assertThat(repository.findByUsername("ada")).contains(ada);
+        assertThat(repository.findByTaxId(new TaxId("11111111H"))).isEmpty();
+    }
+
+    @Test
     @DisplayName("Guardar de nuevo al mismo cliente no es un duplicado")
     void guardar_de_nuevo_al_mismo_cliente_no_es_un_duplicado() {
         Customer ada = ada();

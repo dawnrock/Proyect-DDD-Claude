@@ -119,4 +119,4 @@ Entering a later step without the previous ones redirects to `/signup`. The pass
 
 ## Changes
 
-- —
+- 2026-11-15 (lead, after the `revisor-ddd` review): `CheckingAccountService.isUsernameTaken(String)` added. A username belongs to one customer: `openAccount` (new customer) and `signUp` reject a username that is already a customer's (`IllegalArgumentException`, 400), and `CustomerRegistration.register` treats it as taken (`UsernameTakenException`), so a visitor cannot take the username the administrator gave to a customer who has no login yet. No signature of the frozen contract changes.

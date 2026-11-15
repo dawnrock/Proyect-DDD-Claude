@@ -28,6 +28,8 @@ public class InMemoryCustomerRepository {
      * operación atómica (R29).
      *
      * @throws DuplicateCustomerException si otro cliente ya tiene ese documento
+     * @throws IllegalStateException si el usuario ya es de otro cliente (un usuario no se comparte, como un índice
+     *         único): el caso de uso lo comprueba antes con un mensaje propio
      */
     public synchronized void save(Customer customer, String username) {
         Objects.requireNonNull(customer, "El cliente a guardar es obligatorio");
@@ -35,6 +37,10 @@ public class InMemoryCustomerRepository {
         Customer existing = byTaxId.get(customer.taxId());
         if (existing != null && !existing.equals(customer)) {
             throw new DuplicateCustomerException(customer.taxId());
+        }
+        Customer owner = byUsername.get(username);
+        if (owner != null && !owner.equals(customer)) {
+            throw new IllegalStateException("El usuario %s ya es de otro cliente".formatted(username));
         }
         byTaxId.put(customer.taxId(), customer);
         byUsername.put(username, customer);

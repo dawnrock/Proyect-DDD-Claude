@@ -277,6 +277,19 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [ ] The CI check of the project status passes.
 
+### [x] T29 — Fixes from the `revisor-ddd` review (~15 min)
+
+- **Side:** both · **Layer:** domain · application · persistence · presentation · docs
+- **Files:** `InMemoryCustomerRepository.java`, `CheckingAccountService.java`, `CustomerRegistration.java`, `Customer.java`, their tests, `docs/contracts/customer-sign-up.md`
+- **Depends on:** T20-T28
+- **What to do:**
+  1. A username belongs to one customer: the repository rejects it for another customer, the service checks it in `openAccount` and `signUp` (400) and `CustomerRegistration` reports it as taken. Closes the hole where a visitor could take the username the administrator gave to a customer without a login yet.
+  2. `Customer.register` strips the full name, so an existing customer's data compare correctly.
+  3. Record in `pendientes.md` the accepted risks: customer saved before the account, `reassignAccountNumber` before the repository check, `DuplicateAccountNumberException` no longer thrown.
+- **Acceptance criteria:**
+  - [x] New tests were red and are green: `CustomerRegistrationTests#el_usuario_de_un_cliente_sin_login_no_se_puede_tomar_en_el_alta`, `CheckingAccountServiceTests#el_usuario_de_otro_cliente_no_se_asigna_a_un_cliente_nuevo`, `CheckingAccountServiceTests#el_alta_publica_no_puede_usar_el_usuario_de_otro_cliente`, `InMemoryCustomerRepositoryTests#guardar_otro_cliente_con_el_mismo_usuario_se_rechaza`, `CustomerTests#el_nombre_del_cliente_se_guarda_sin_espacios_alrededor`.
+  - [x] Contract change recorded in its "Changes" section.
+
 ## Global acceptance criteria
 
 **Specific:**

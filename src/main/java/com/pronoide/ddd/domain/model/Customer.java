@@ -27,7 +27,7 @@ public class Customer {
         if (fullName.isBlank()) {
             throw new IllegalArgumentException("El nombre del cliente no puede estar vacío");
         }
-        return new Customer(UUID.randomUUID(), fullName,
+        return new Customer(UUID.randomUUID(), fullName.strip(),
                 Objects.requireNonNull(taxId, "El documento del cliente es obligatorio"),
                 Objects.requireNonNull(email, "El correo del cliente es obligatorio"));
     }

@@ -25,7 +25,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 import com.pronoide.ddd.application.AccountSummary;
+import com.pronoide.ddd.application.CallerDef;
 import com.pronoide.ddd.application.CheckingAccountService;
+import com.pronoide.ddd.application.OpenAccountCommand;
 import com.pronoide.ddd.application.SignUpCommand;
 import com.pronoide.ddd.domain.model.DuplicateCustomerException;
 import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
@@ -44,6 +46,7 @@ class CustomerRegistrationTests {
     private InMemoryCheckingAccountRepository accounts;
     private InMemoryUserDetailsManager users;
     private CustomerRegistration registration;
+    private CheckingAccountService service;
 
     @BeforeEach
     void setUp() {
@@ -53,7 +56,7 @@ class CustomerRegistrationTests {
     }
 
     private CustomerRegistration registrationWith(InMemoryUserDetailsManager manager) {
-        CheckingAccountService service = new CheckingAccountService(accounts, new InMemoryAccountOwnershipRepository(),
+        service = new CheckingAccountService(accounts, new InMemoryAccountOwnershipRepository(),
                 new InMemoryCustomerRepository(), new InMemoryAccountNumberSequence(), new TaxAgencyClient(),
                 Clock.systemUTC());
         return new CustomerRegistration(service, manager, encoder);
@@ -104,6 +107,19 @@ class CustomerRegistrationTests {
                 .isThrownBy(() -> registration.register(other, PASSWORD))
                 .withMessage("El usuario margaret ya existe: elige otro");
         assertThat(accounts.findAll()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("El usuario que el administrador dio a un cliente no se puede tomar en el alta, aunque aún no pueda entrar")
+    void el_usuario_de_un_cliente_sin_login_no_se_puede_tomar_en_el_alta() {
+        service.openAccount(CallerDef.system(), OpenAccountCommand.builder()
+                .holderTaxId("12345678Z").holderName("Ada Lovelace").holderEmail("ada@example.com")
+                .ownerUsername("margaret").initialDeposit(new BigDecimal("100")).build());
+
+        assertThatExceptionOfType(UsernameTakenException.class)
+                .isThrownBy(() -> registration.register(signUp().build(), PASSWORD));
+        assertThat(accounts.findAll()).hasSize(1);
+        assertThat(users.userExists("margaret")).isFalse();
     }
 
     @Test

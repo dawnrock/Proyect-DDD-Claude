@@ -211,6 +211,35 @@ class CheckingAccountServiceTests {
         }
 
         @Test
+        @DisplayName("El usuario de otro cliente no se asigna a un cliente nuevo y no se abre nada")
+        void el_usuario_de_otro_cliente_no_se_asigna_a_un_cliente_nuevo() {
+            service.openAccount(ADMIN, command().build());
+            OpenAccountCommand stealing = other().ownerUsername("ada").build();
+
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> service.openAccount(ADMIN, stealing))
+                    .withMessage("El usuario ada ya es de otro cliente");
+            assertThat(repository.findAll()).hasSize(1);
+            assertThat(customers.findByUsername("ada")).hasValueSatisfying(customer ->
+                    assertThat(customer.taxId()).isEqualTo(new TaxId("12345678Z")));
+        }
+
+        @Test
+        @DisplayName("El alta pública no puede usar el usuario de otro cliente")
+        void el_alta_publica_no_puede_usar_el_usuario_de_otro_cliente() {
+            service.openAccount(ADMIN, command().build());
+            SignUpCommand signUp = SignUpCommand.builder().fullName("Margaret Hamilton").taxId("00000000T")
+                    .email("margaret@example.com").username("ada").initialDeposit(new BigDecimal("100")).build();
+
+            assertThat(service.isUsernameTaken("ada")).isTrue();
+            assertThat(service.isUsernameTaken("margaret")).isFalse();
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> service.signUp(signUp))
+                    .withMessage("El usuario ada ya es de otro cliente");
+            assertThat(customers.findByTaxId(new TaxId("00000000T"))).isEmpty();
+        }
+
+        @Test
         @DisplayName("Un depósito insuficiente no deja registrado al cliente nuevo")
         void un_deposito_insuficiente_no_deja_registrado_al_cliente_nuevo() {
             OpenAccountCommand tooLow = command().initialDeposit(new BigDecimal("10")).build();
