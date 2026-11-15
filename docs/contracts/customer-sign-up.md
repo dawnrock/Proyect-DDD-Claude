@@ -2,8 +2,8 @@
 
 - **Issue:** [#103](https://github.com/dawnrock/Proyect-DDD-Claude/issues/103) · **Plan:** `docs/plans/2026-11-15-customer-sign-up-hexagonal.md`
 - **Twin of:** the contract of #95 on `Monolithic` (`docs/contracts/customer-sign-up.md` there, frozen at `8ce0baa`, plus its change of 2026-11-15). Same behaviour, adapted to ports and adapters.
-- **Status:** draft
-- **Agreed by:** pending
+- **Status:** agreed
+- **Agreed by:** backend-dev, web-dev (rounds: 1; both accepted the signatures and asked only for clarifications, merged by the lead, since the teammates cannot message each other). Web-dev's question on `DomainException` in `adapter.in.web`: already allowed by D4 in `HexagonalArchitectureTests`.
 
 Builds on the frozen contracts `open-query-list-accounts.md`, `deposits-withdrawals.md`, `money-transfers.md`, `login-roles.md` and `account-factory.md`. Business rules R28-R32 are new (glossary). Mapping with `Monolithic`: R28 ↔ R27, R29 ↔ R28, R30 ↔ R29 (+ the username of the 2026-11-15 change), R31 ↔ R30, R32 ↔ R31.
 
@@ -25,12 +25,12 @@ public interface CheckingAccountCommands {
 }
 
 public interface CheckingAccountQueries {
-    boolean isUsernameTaken(String username);                                       // new: the username already belongs to a customer (R30)
+    boolean isUsernameTaken(String username);                                       // new: the username already belongs to a customer or owns an account (R30)
     AccountDetails findAccount(Caller caller, UUID id);                             // changed in T21: adds holderTaxId and holderEmail
 }
 ```
 
-Every command runs in the `UnitOfWork`: `signUp` and `openAccount` (new customer) are all or nothing. The account is built first (the domain checks R1 and the currency) and only then are the customer, both ownerships and the account saved. A failed opening leaves no customer, no customer ownership and no account ownership behind. R30 on the document is atomic in the customer adapter (`putIfAbsent`), and R30 on the username is atomic in the ownership adapter.
+Every command runs in the `UnitOfWork`. `InMemoryUnitOfWork` gives mutual exclusion but **no rollback**, so "all or nothing" for `signUp` and `openAccount` (new customer) comes from the order of the operations: (1) build the account with the factory (the domain checks R1 and the currency); (2) check that the document is free (`CustomerRepository.findByTaxId`) and the username is free (`CustomerOwnershipRepository.customerOf`, and for `signUp` also `isUsernameTaken`); (3) only then save the customer, `assign` the customer ownership, save the account and assign the account ownership. A failure in (1) or (2) leaves nothing behind. Under the global lock the checks in (2) have no races; the `putIfAbsent` of the adapters (R30 on the document and on the username) stays as a safety net.
 
 ### Output ports (back only; the web never sees them)
 
@@ -49,7 +49,7 @@ public interface CustomerOwnershipRepository {
 }
 ```
 
-`CustomerOwnershipRepository` is in this commit (interface only); `CustomerRepository`, `Customer`, `EmailAddress` are backend-dev's (T2-T4). Both adapters live in `adapter.out.persistence` and are wired in `config.DomainConfiguration`.
+The demo profile (`DomainModelRunner`, T21) registers the demo customers with an e-mail and links them to their usernames. `CustomerOwnershipRepository` is in this commit (interface only); `CustomerRepository`, `Customer`, `EmailAddress` are backend-dev's (T2-T4). Both adapters live in `adapter.out.persistence` and are wired in `config.DomainConfiguration`.
 
 ### Credentials: `adapter.in.CustomerRegistration`
 
@@ -61,10 +61,10 @@ public class CustomerRegistration {
     public static final int MINIMUM_PASSWORD_LENGTH = 8;
     public AccountSummary register(SignUpCommand command, String rawPassword);    // checks the username, calls signUp, then creates the USER with a BCrypt hash
 }
-public class UsernameTakenException extends RuntimeException { UsernameTakenException(String username); }
+public class UsernameTakenException extends RuntimeException { public UsernameTakenException(String username); }  // public: web and REST tests throw it from mocks
 ```
 
-`register` order: (1) username taken (exists as a Spring Security user **or** `isUsernameTaken`) → `UsernameTakenException`, nothing opened; (2) password shorter than 8 → `IllegalArgumentException`; (3) `signUp`; (4) create the user. If (3) fails, no user exists. Steps 1-4 run under one lock (`synchronized`); if step 4 still finds the username taken it is reported as `UsernameTakenException`. Residual risk (step 4 failing for another reason leaves a customer without a login) is recorded in ADR 0012. `SecuritySupport` exposes the in-memory user store as a `UserDetailsManager` so `CustomerRegistration` can create users.
+`register` order: (1) username taken (exists as a Spring Security user **or** `isUsernameTaken`) → `UsernameTakenException`, nothing opened; (2) password shorter than 8 → `IllegalArgumentException`; (3) `signUp`; (4) create the user. If (3) fails, no user exists. Steps 1-4 run under one lock (`synchronized`); if step 4 still finds the username taken it is reported as `UsernameTakenException`. Residual risk (step 4 failing for another reason leaves a customer without a login) is recorded in ADR 0012. The short-password `IllegalArgumentException` of step (2) never reaches the web in practice: step 2 of the form already requires 8 characters. `isUsernameTaken` is true when the username belongs to a customer (`CustomerOwnershipRepository`) **or** already owns an account (`AccountOwnershipRepository`, e.g. demo data). `SecuritySupport` changes the return type of its user-store bean to `UserDetailsManager` (still a `UserDetailsService`) so `CustomerRegistration` can create users; web and REST tests do not build it and mock `CustomerRegistration` with `@MockitoBean`.
 
 **Who is a customer (web):** a non-admin caller whose `listAccounts(caller)` is not empty. After T21 every account belongs to a registered customer, so this matches the back; `NotACustomerException` stays as the service's safety net.
 
@@ -86,7 +86,7 @@ public class UsernameTakenException extends RuntimeException { UsernameTakenExce
 
 There is no `accountNumber` in `OpenAccountCommandDef` on this branch already (the factory generates it).
 
-`TAX_ID_PATTERN` and `TAX_ID_MESSAGE` live in `OpenAccountCommandDef` and are reused by every command, `OpenAccountRequest`, `SignUpRequest`, `OpenAccountForm` and `SignUpForm`. T1 widens them to NIE (`[XYZxyz0-9]` + 7 digits + letter, spaces allowed) with the message "El documento debe ser un DNI o un NIE"; T1 also gives `TaxId` `Locale.ROOT`.
+`TAX_ID_PATTERN` and `TAX_ID_MESSAGE` live in `OpenAccountCommandDef` and are reused by every command, `OpenAccountRequest`, `SignUpRequest`, `OpenAccountForm` and `SignUpForm`. T1 widens them to NIE (`[XYZxyz0-9]` + 7 digits + letter, spaces allowed) with the message "El documento debe ser un DNI o un NIE"; T1 also gives `TaxId` `Locale.ROOT`. Existing tests that compare the old text ("8 dígitos y una letra") are updated in T1.
 
 ### Shared input-adapter validation
 
@@ -110,7 +110,7 @@ The control letter of the document is checked by the domain, not by the pattern:
 | `AccountDetailsDef` (changed in T21) | `holderTaxId` | `String` | normalised document; `@Value.Default ""` |
 | | `holderEmail` | `String` | the customer's e-mail; `@Value.Default ""` |
 
-The defaults let web stubs keep building `AccountDetails` without the new fields until T21. Views never expose domain aggregates or entities.
+`findAccount` resolves `holderEmail` with `CustomerRepository.findByTaxId`; without a customer it stays `""`. The defaults let web stubs keep building `AccountDetails` without the new fields until T21. Views never expose domain aggregates or entities.
 
 ## Errors
 
@@ -149,10 +149,11 @@ Same routes, templates, texts and behaviour as `Monolithic` after PR #102 (`pres
 | `GET\|POST /signup/account` | public, CSRF | `CustomerRegistration.register` | step 3: deposit, summary, acceptance of conditions, "Abrir mi cuenta"; then signed in and redirected to `/accounts/{id}` with "Te damos la bienvenida a Mon-A Bank. Tu IBAN es …" |
 | `GET\|POST /accounts/another` | `USER` | `openAnotherAccount` | deposit only; redirect to the new account with its IBAN |
 | `GET /` (list) | `USER` | as today | adds the "Abrir otra cuenta" button for customers (model attribute `customer`, rule above) |
-| `GET /accounts/{id}` (detail) | `USER` | as today | the same "Abrir otra cuenta" button for customers |
+| `GET /accounts/{id}` (detail) | `USER` | as today | the same "Abrir otra cuenta" button for customers (one extra `listAccounts` call, accepted); from T21 also the holder's document and e-mail, rows hidden when empty |
 | `POST /accounts/{id}/account-number` | `ADMIN`, CSRF | `regenerateAccountNumber` | button "Generar nuevo IBAN" with an in-page confirmation on the detail; flash with the new IBAN |
 | `GET\|POST /accounts/new` (changed in T21) | `ADMIN` | `openAccount` | document and deposit; name, e-mail and username for a new customer |
-| `GET /accounts/{id}` (changed in T21) | as today | `findAccount` | adds the holder's document and e-mail |
+
+`WebSecurityConfig` (web-dev): `/signup/**` public with CSRF; `/accounts/another` authenticated, non-admin checked by the controller/service (403); `POST /accounts/*/account-number` `ADMIN`. `ApiSecurityConfig` (backend-dev): `POST /api/customers` public; `POST /api/accounts/*/account-number` `ADMIN`. Signing in after the sign-up stores a `ROLE_USER` authentication in the `SecurityContextRepository`, as on `Monolithic`.
 
 Entering a later step without the previous ones redirects to `/signup`. The password is kept only in the server session between steps 2 and 3 and never rendered. Web tests mock `CheckingAccountCommands`, `CheckingAccountQueries` and `CustomerRegistration` with `@MockitoBean`.
 

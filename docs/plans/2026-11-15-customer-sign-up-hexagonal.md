@@ -53,14 +53,14 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 
 ## Tasks
 
-### [ ] T0 — Contract (~15 min)
+### [x] T0 — Contract (~15 min)
 
 - **Side:** both · **Layer:** application · adapter.in · docs
 - **Files:** `docs/contracts/customer-sign-up.md` (adapted from `Monolithic`), new port methods as stubs, `SignUpCommandDef`, `OpenAnotherAccountCommandDef`, `NotACustomerException`, `DuplicateCustomerException`, `CustomerRegistration` and `UsernameTakenException` stubs, OpenAPI fragment
 - **Depends on:** —
 - **What to do:** write the contract with the ports' signatures, commands, future `OpenAccountCommand`/`AccountDetails` shape, errors (web and REST), routes, and the clarifications agreed on #95 (atomicity, who is a customer on the web, button on list and detail, errors back to step 1/2/3, currency mismatch, own REST handler for `UsernameTakenException`, `isUsernameTaken`). backend-dev and web-dev review it.
 - **Acceptance criteria:**
-  - [ ] Contract agreed and frozen in a commit; `./mvnw verify` green.
+  - [x] Contract agreed and frozen in a commit; `./mvnw verify` green.
 
 ### Back (parallel with web; each depends only on T0 unless stated)
 
