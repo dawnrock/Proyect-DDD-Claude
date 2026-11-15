@@ -57,6 +57,12 @@ public class AccountController {
         return ResponseEntity.created(URI.create("/api/accounts/" + body.id())).body(body);
     }
 
+    /** Sustituye el IBAN de la cuenta por otro que genera el banco. Solo administradores (R32). */
+    @PostMapping("/{id}/account-number")
+    public AccountSummaryResponse regenerateAccountNumber(Authentication authentication, @PathVariable UUID id) {
+        return toResponse(commands.regenerateAccountNumber(CurrentCaller.from(authentication), id));
+    }
+
     @GetMapping
     public List<AccountSummaryResponse> listAccounts(Authentication authentication) {
         return queries.listAccounts(CurrentCaller.from(authentication)).stream().map(AccountController::toResponse).toList();
@@ -87,7 +93,7 @@ public class AccountController {
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(commands.withdraw(CurrentCaller.from(authentication), command.build())));
     }
 
-    private static AccountSummaryResponse toResponse(AccountSummary summary) {
+    static AccountSummaryResponse toResponse(AccountSummary summary) {
         return AccountSummaryResponse.builder()
                 .id(summary.id())
                 .accountNumber(summary.accountNumber())

@@ -36,7 +36,8 @@ class DomainModelRunnerTests {
     private final CheckingAccountService service =
             new CheckingAccountService(PersistenceTestAdapters.accounts(), ownership, mock(DomainEventPublisher.class),
                     new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork());
+                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(),
+                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
     /** El runner solo recibe el puerto de commands; el servicio concreto se usa aquí solo para consultar. */
     private final CheckingAccountCommands commands = service;
 
@@ -70,7 +71,8 @@ class DomainModelRunnerTests {
     void el_segmento_lo_decide_la_agencia_tributaria() {
         CheckingAccountService withoutIncomes = new CheckingAccountService(PersistenceTestAdapters.accounts(), ownership,
                 mock(DomainEventPublisher.class), new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), taxId -> Optional.empty()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork());
+                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(),
+                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
 
         new DomainModelRunner(withoutIncomes).run(new DefaultApplicationArguments());
 

@@ -27,6 +27,17 @@ public class CheckingAccountFactory {
         return CheckingAccount.open(numbering.next(), holder, initialDeposit);
     }
 
+    /** Abre una cuenta para un cliente registrado: el titular copia su nombre y su documento. */
+    public CheckingAccount open(Customer customer, MonetaryAmount initialDeposit) {
+        Objects.requireNonNull(customer, "El cliente es obligatorio");
+        return open(customer.fullName(), customer.taxId(), initialDeposit);
+    }
+
+    /** Un número de cuenta nuevo de Mon-A Bank, para sustituir el de una cuenta existente (R32). */
+    public AccountNumber nextAccountNumber() {
+        return numbering.next();
+    }
+
     private CustomerSegment segmentFor(TaxId taxId) {
         return HighNetWorthIncome.isMetBy(incomeVerifier.verifiedAnnualIncome(taxId))
                 ? CustomerSegment.HIGH_NET_WORTH

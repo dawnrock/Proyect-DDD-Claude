@@ -61,7 +61,8 @@ class DomainConfigurationTests {
         Object service = configuration.checkingAccountService(PersistenceTestAdapters.accounts(),
                 PersistenceTestAdapters.ownership(), mock(DomainEventPublisher.class), factory,
                 configuration.moneyTransferService(), configuration.segmentReviewService(taxId -> Optional.empty()),
-                configuration.clock(), PersistenceTestAdapters.unitOfWork());
+                configuration.clock(), PersistenceTestAdapters.unitOfWork(), PersistenceTestAdapters.customers(),
+                PersistenceTestAdapters.customerOwnership());
 
         assertThat(service).isInstanceOf(CheckingAccountCommands.class).isInstanceOf(CheckingAccountQueries.class);
     }

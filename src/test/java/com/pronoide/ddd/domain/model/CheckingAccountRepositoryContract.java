@@ -167,4 +167,19 @@ public abstract class CheckingAccountRepositoryContract {
             assertThat(repository.findAll()).hasSize(1);
         }
     }
+
+    @Test
+    @DisplayName("Tras cambiar el número de una cuenta, el antiguo no se resuelve y el nuevo sí (R32)")
+    void tras_cambiar_el_numero_de_una_cuenta_el_antiguo_no_se_resuelve_y_el_nuevo_si() {
+        AccountNumber old = new AccountNumber("ES9121000418450200051332");
+        AccountNumber replacement = new AccountNumber("ES6699990001740000000001");
+        CheckingAccount cuenta = repository.save(TestAccounts.anAccount().accountNumber(old.value()).open());
+        cuenta.reassignAccountNumber(replacement);
+
+        repository.save(cuenta);
+
+        assertThat(repository.findByAccountNumber(old)).isEmpty();
+        assertThat(repository.findByAccountNumber(replacement)).containsSame(cuenta);
+        assertThat(repository.findAll()).containsExactly(cuenta);
+    }
 }

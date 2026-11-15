@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class CheckingAccountFactoryTests {
@@ -89,5 +90,56 @@ class CheckingAccountFactoryTests {
         CheckingAccount account = factoryWithIncome("40000.00").open("Ada Lovelace", TAX_ID, MonetaryAmount.euros("100.00"));
 
         assertThat(account.primaryHolder().taxId()).isEqualTo(TAX_ID);
+    }
+
+    @Test
+    @DisplayName("La factoría ofrece un número de cuenta nuevo de la numeración")
+    void la_factoria_ofrece_un_numero_de_cuenta_nuevo() {
+        assertThat(factoryWithIncome(null).nextAccountNumber()).isEqualTo(GENERATED);
+    }
+
+    @Nested
+    @DisplayName("Abrir una cuenta para un cliente")
+    class OpenForCustomer {
+
+        private final Customer ada =
+                Customer.register("Ada Lovelace", TAX_ID, new EmailAddress("ada@example.com"));
+
+        @Test
+        @DisplayName("El titular copia el nombre y el documento del cliente")
+        void el_titular_copia_el_nombre_y_el_documento_del_cliente() {
+            CheckingAccount account = factoryWithIncome("40000.00").open(ada, MonetaryAmount.euros("100.00"));
+
+            assertThat(account.accountNumber()).isEqualTo(GENERATED);
+            assertThat(account.primaryHolder().fullName()).isEqualTo("Ada Lovelace");
+            assertThat(account.primaryHolder().taxId()).isEqualTo(TAX_ID);
+            assertThat(account.currentBalance()).isEqualTo(MonetaryAmount.euros("100.00"));
+        }
+
+        @Test
+        @DisplayName("El segmento del titular sale de los ingresos verificados del cliente")
+        void el_segmento_sale_de_los_ingresos_verificados() {
+            assertThat(factoryWithIncome("100000.01").open(ada, MonetaryAmount.euros("100.00"))
+                    .primaryHolder().segment()).isEqualTo(CustomerSegment.HIGH_NET_WORTH);
+            assertThat(factoryWithIncome("100000.00").open(ada, MonetaryAmount.euros("100.00"))
+                    .primaryHolder().segment()).isEqualTo(CustomerSegment.RETAIL);
+            assertThat(factoryWithIncome(null).open(ada, MonetaryAmount.euros("100.00"))
+                    .primaryHolder().segment()).isEqualTo(CustomerSegment.RETAIL);
+        }
+
+        @Test
+        @DisplayName("El depósito mínimo sigue aplicándose")
+        void el_deposito_minimo_sigue_aplicandose() {
+            assertThatExceptionOfType(InsufficientInitialDepositException.class)
+                    .isThrownBy(() -> factoryWithIncome("40000.00").open(ada, MonetaryAmount.euros("49.99")));
+        }
+
+        @Test
+        @DisplayName("El cliente es obligatorio")
+        void el_cliente_es_obligatorio() {
+            assertThatExceptionOfType(NullPointerException.class)
+                    .isThrownBy(() -> factoryWithIncome(null).open((Customer) null, MonetaryAmount.euros("100.00")))
+                    .withMessage("El cliente es obligatorio");
+        }
     }
 }

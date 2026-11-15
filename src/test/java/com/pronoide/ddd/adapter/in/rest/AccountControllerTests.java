@@ -166,7 +166,7 @@ class AccountControllerTests {
                      "initialDeposit": -5, "currency": "eur", "ownerUsername": "Ada L"}"""))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.holderName").exists())
-                    .andExpect(jsonPath("$.errors.holderTaxId").value("El NIF debe tener 8 dígitos y una letra"))
+                    .andExpect(jsonPath("$.errors.holderTaxId").value("El documento debe ser un DNI o un NIE"))
                     .andExpect(jsonPath("$.errors.initialDeposit").exists())
                     .andExpect(jsonPath("$.errors.currency").exists())
                     .andExpect(jsonPath("$.errors.ownerUsername").exists());
@@ -617,6 +617,71 @@ class AccountControllerTests {
                     .content("{\"amount\": 10, \"currency\": \"XYZ\"}"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.title").value("Petición no válida"));
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/accounts/{id}/account-number")
+    class RegenerateAccountNumber {
+
+        private static final String NEW_IBAN = "ES6699990001740000000001";
+        private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+
+        @Test
+        @DisplayName("Un administrador recibe 200 con el resumen y el IBAN nuevo")
+        void un_administrador_recibe_200_con_el_resumen_y_el_iban_nuevo() throws Exception {
+            given(commands.regenerateAccountNumber(ADMIN, ID)).willReturn(
+                    AccountSummary.builder().id(ID).accountNumber(NEW_IBAN).holderName("Ada Lovelace")
+                            .segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build());
+
+            mvc.perform(post("/api/accounts/{id}/account-number", ID))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(ID.toString()))
+                    .andExpect(jsonPath("$.accountNumber").value(NEW_IBAN));
+        }
+
+        @Test
+        @DisplayName("Un cliente recibe 403 Acceso denegado y no se llama al puerto")
+        @WithMockUser(username = "ada", roles = "USER")
+        void un_cliente_recibe_403_acceso_denegado() throws Exception {
+            mvc.perform(post("/api/accounts/{id}/account-number", ID))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.title").value("Acceso denegado"))
+                    .andExpect(jsonPath("$.detail").value("Solo un administrador puede generar un nuevo número de cuenta"));
+
+            verifyNoInteractions(commands);
+        }
+
+        @Test
+        @DisplayName("Sin credenciales responde 401 No autenticado")
+        @WithAnonymousUser
+        void sin_credenciales_responde_401() throws Exception {
+            mvc.perform(post("/api/accounts/{id}/account-number", ID))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.title").value("No autenticado"));
+
+            verifyNoInteractions(commands);
+        }
+
+        @Test
+        @DisplayName("Si el puerto lanza ForbiddenOperationException la respuesta es 403")
+        void si_el_puerto_lanza_forbidden_operation_exception_la_respuesta_es_403() throws Exception {
+            given(commands.regenerateAccountNumber(any(Caller.class), any()))
+                    .willThrow(new ForbiddenOperationException("generar un nuevo número de cuenta"));
+
+            mvc.perform(post("/api/accounts/{id}/account-number", ID))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.title").value("Acceso denegado"));
+        }
+
+        @Test
+        @DisplayName("Una cuenta desconocida responde 404 Recurso inexistente")
+        void una_cuenta_desconocida_responde_404() throws Exception {
+            given(commands.regenerateAccountNumber(any(Caller.class), any())).willThrow(new AccountNotFoundException(ID));
+
+            mvc.perform(post("/api/accounts/{id}/account-number", ID))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.title").value("Recurso inexistente"));
         }
     }
 }

@@ -12,9 +12,13 @@ import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CheckingAccountFactory;
 import com.pronoide.ddd.domain.model.CheckingAccountRepository;
+import com.pronoide.ddd.domain.model.Customer;
+import com.pronoide.ddd.domain.model.CustomerRepository;
 import com.pronoide.ddd.domain.model.DomainEvent;
 import com.pronoide.ddd.domain.model.DomainEventPublisher;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
+import com.pronoide.ddd.domain.model.DuplicateCustomerException;
+import com.pronoide.ddd.domain.model.EmailAddress;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.domain.model.Transaction;
@@ -50,12 +54,15 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     private final SegmentReviewService segmentReview;
     private final Clock clock;
     private final UnitOfWork unitOfWork;
+    private final CustomerRepository customers;
+    private final CustomerOwnershipRepository customerOwnership;
 
     /** Recibe sus colaboradores ya construidos: los entrega {@code config.DomainConfiguration} (#20). */
     public CheckingAccountService(CheckingAccountRepository repository, AccountOwnershipRepository ownership,
                                   DomainEventPublisher publisher, CheckingAccountFactory factory,
                                   MoneyTransferService transferService, SegmentReviewService segmentReview,
-                                  Clock clock, UnitOfWork unitOfWork) {
+                                  Clock clock, UnitOfWork unitOfWork, CustomerRepository customers,
+                                  CustomerOwnershipRepository customerOwnership) {
         this.repository = repository;
         this.ownership = ownership;
         this.publisher = publisher;
@@ -64,6 +71,8 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         this.segmentReview = segmentReview;
         this.clock = clock;
         this.unitOfWork = unitOfWork;
+        this.customers = customers;
+        this.customerOwnership = customerOwnership;
     }
 
     @Override
@@ -95,24 +104,77 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         });
     }
 
+    /**
+     * Todo o nada sin deshacer: la unidad de trabajo no tiene rollback, así que primero se construye la cuenta (el
+     * dominio comprueba R1 y la divisa), luego se comprueba que el documento y el usuario estén libres (R30) y solo
+     * entonces se guarda. Un fallo antes de guardar no deja ni cliente, ni propiedad, ni cuenta.
+     */
     @Override
     public AccountSummary signUp(SignUpCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        return inUnit(events -> {
+            TaxId taxId = new TaxId(command.taxId());
+            Customer customer = Customer.register(command.fullName(), taxId, new EmailAddress(command.email()));
+            CheckingAccount opened = factory.open(customer, toAmount(command.initialDeposit(), command.currency()));
+            requireUnused(opened.accountNumber());
+            customers.findByTaxId(taxId).ifPresent(existing -> {
+                throw new DuplicateCustomerException(taxId);
+            });
+            if (usernameTaken(command.username())) {
+                throw new IllegalArgumentException("El usuario %s ya es de otro cliente".formatted(command.username()));
+            }
+            customers.save(customer);
+            customerOwnership.assign(taxId, command.username());
+            CheckingAccount account = save(opened, events);
+            ownership.assign(account.id(), command.username());
+            return toSummary(account);
+        });
     }
 
     @Override
     public AccountSummary openAnotherAccount(Caller caller, OpenAnotherAccountCommand command) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        return inUnit(events -> {
+            Customer customer = customerOf(caller);
+            CheckingAccount opened =
+                    factory.open(customer, toAmount(command.initialDeposit(), command.currency()));
+            requireUnused(opened.accountNumber());
+            CheckingAccount account = save(opened, events);
+            ownership.assign(account.id(), caller.username());
+            return toSummary(account);
+        });
+    }
+
+    /** El cliente de quien lo pide; un administrador, aunque su usuario coincida con el de un cliente, no lo es. */
+    private Customer customerOf(Caller caller) {
+        if (caller.admin()) {
+            throw new NotACustomerException(caller.username());
+        }
+        return customerOwnership.customerOf(caller.username())
+                .flatMap(customers::findByTaxId)
+                .orElseThrow(() -> new NotACustomerException(caller.username()));
     }
 
     @Override
     public AccountSummary regenerateAccountNumber(Caller caller, UUID id) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        if (!caller.admin()) {
+            throw new ForbiddenOperationException("generar un nuevo número de cuenta");
+        }
+        return inUnit(events -> {
+            CheckingAccount account = load(id);
+            AccountNumber generated = factory.nextAccountNumber();
+            requireUnused(generated);
+            account.reassignAccountNumber(generated);
+            return toSummary(save(account, events));
+        });
     }
 
     @Override
     public boolean isUsernameTaken(String username) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        return unitOfWork.execute(() -> usernameTaken(username));
+    }
+
+    /** Un usuario está tomado si es de un cliente o ya es propietario de alguna cuenta (R30). */
+    private boolean usernameTaken(String username) {
+        return customerOwnership.customerOf(username).isPresent() || !ownership.accountsOf(username).isEmpty();
     }
 
     @Override

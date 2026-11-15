@@ -64,89 +64,89 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 
 ### Back (parallel with web; each depends only on T0 unless stated)
 
-### [ ] T1 — `TaxId`: NIE, control letter and `Locale.ROOT` (~10 min)
+### [x] T1 — `TaxId`: NIE, control letter and `Locale.ROOT` (~10 min)
 
 - **Side:** back · **Layer:** domain · application · **Depends on:** T0
 - **What to do:** as T1 of #95 (R28); widen `TAX_ID_PATTERN` and add `TAX_ID_MESSAGE` in `OpenAccountCommandDef`; fix fixtures with wrong letters.
 - **Acceptance criteria:**
-  - [ ] `TaxIdTests` (valid DNI/NIE, wrong letter, Turkish locale) pass; `check-domain.mjs` clean.
+  - [x] `TaxIdTests` (valid DNI/NIE, wrong letter, Turkish locale) pass; `check-domain.mjs` clean.
 
-### [ ] T2 — `EmailAddress` (~5 min)
+### [x] T2 — `EmailAddress` (~5 min)
 
 - **Side:** back · **Layer:** domain · **Depends on:** T0
 - **Acceptance criteria:**
-  - [ ] `EmailAddressTests` pass (R29).
+  - [x] `EmailAddressTests` pass (R29).
 
-### [ ] T3 — `Customer` aggregate (~10 min)
+### [x] T3 — `Customer` aggregate (~10 min)
 
 - **Side:** back · **Layer:** domain · **Depends on:** T1, T2
 - **What to do:** `Customer.register(fullName, taxId, email)` (name stripped), equality by id; `DuplicateCustomerException` test.
 - **Acceptance criteria:**
-  - [ ] `CustomerTests` pass.
+  - [x] `CustomerTests` pass.
 
-### [ ] T4 — `CustomerRepository` port and adapter (~10 min)
+### [x] T4 — `CustomerRepository` port and adapter (~10 min)
 
 - **Side:** back · **Layer:** domain · adapter.out · **Depends on:** T3
 - **What to do:** port in `domain.model`; `InMemoryCustomerRepository` rejects a document of another customer atomically (R30).
 - **Acceptance criteria:**
-  - [ ] Adapter tests pass; `HexagonalArchitectureTests` green.
+  - [x] Adapter tests pass; `HexagonalArchitectureTests` green.
 
-### [ ] T5 — `CustomerOwnershipRepository` port and adapter (~10 min)
+### [x] T5 — `CustomerOwnershipRepository` port and adapter (~10 min)
 
 - **Side:** back · **Layer:** application · adapter.out · **Depends on:** T3
 - **What to do:** username ↔ customer; a username of another customer is rejected (R30).
 - **Acceptance criteria:**
-  - [ ] Adapter tests pass, including the rejected username.
+  - [x] Adapter tests pass, including the rejected username.
 
-### [ ] T6 — The account can change its number (~5 min)
+### [x] T6 — The account can change its number (~5 min)
 
 - **Side:** back · **Layer:** domain · **Depends on:** T0
 - **What to do:** `AccountNumber.isMonABank()` and `CheckingAccount.reassignAccountNumber` (R32).
 - **Acceptance criteria:**
-  - [ ] Tests for success and both rejections pass.
+  - [x] Tests for success and both rejections pass.
 
-### [ ] T7 — Factory opens for a customer (~5 min)
+### [x] T7 — Factory opens for a customer (~5 min)
 
 - **Side:** back · **Layer:** domain · **Depends on:** T3
 - **Acceptance criteria:**
-  - [ ] `CheckingAccountFactoryTests`: holder copies name and document; segment by verified income.
+  - [x] `CheckingAccountFactoryTests`: holder copies name and document; segment by verified income.
 
-### [ ] T8 — Sign-up use case and `isUsernameTaken` (~10 min)
+### [x] T8 — Sign-up use case and `isUsernameTaken` (~10 min)
 
 - **Side:** back · **Layer:** application · config · **Depends on:** T4, T5, T7
 - **What to do:** `signUp` in the unit of work (all or nothing; R30 on document and username); `isUsernameTaken`; wire the new ports in `DomainConfiguration`.
 - **Acceptance criteria:**
-  - [ ] Service tests as in `CheckingAccountServiceSignUpTests` of #95 pass.
+  - [x] Service tests as in `CheckingAccountServiceSignUpTests` of #95 pass.
 
-### [ ] T9 — Open another account (~10 min)
+### [x] T9 — Open another account (~10 min)
 
 - **Side:** back · **Layer:** application · **Depends on:** T8
 - **Acceptance criteria:**
-  - [ ] Two accounts with different IBANs; an admin or a user without customer gets `NotACustomerException`.
+  - [x] Two accounts with different IBANs; an admin or a user without customer gets `NotACustomerException`.
 
-### [ ] T10 — Regenerate an IBAN (~10 min)
+### [x] T10 — Regenerate an IBAN (~10 min)
 
 - **Side:** back · **Layer:** application · adapter.out · **Depends on:** T6
 - **Acceptance criteria:**
-  - [ ] Admin only; unknown id → 404; the old IBAN stops resolving and the new one resolves.
+  - [x] Admin only; unknown id → 404; the old IBAN stops resolving and the new one resolves.
 
-### [ ] T11 — `CustomerRegistration` (~10 min)
+### [x] T11 — `CustomerRegistration` (~10 min)
 
 - **Side:** back · **Layer:** adapter.in · **Depends on:** T8
 - **Acceptance criteria:**
-  - [ ] Tests of #95 pass, including "a username the administrator gave to a customer cannot be taken"; `la_aplicacion_no_depende_de_spring_security` green.
+  - [x] Tests of #95 pass, including "a username the administrator gave to a customer cannot be taken"; `la_aplicacion_no_depende_de_spring_security` green.
 
-### [ ] T12 — REST `POST /api/customers` (~10 min)
+### [x] T12 — REST `POST /api/customers` (~10 min)
 
 - **Side:** back · **Layer:** adapter.in.rest · **Depends on:** T11
 - **Acceptance criteria:**
-  - [ ] 201 + `Location`; 400; 422 for duplicate customer, taken username and insufficient deposit.
+  - [x] 201 + `Location`; 400; 422 for duplicate customer, taken username and insufficient deposit.
 
-### [ ] T13 — REST `POST /api/accounts/{id}/account-number` (~5 min)
+### [x] T13 — REST `POST /api/accounts/{id}/account-number` (~5 min)
 
 - **Side:** back · **Layer:** adapter.in.rest · **Depends on:** T10
 - **Acceptance criteria:**
-  - [ ] 200 / 403 / 404.
+  - [x] 200 / 403 / 404.
 
 ### Web (parallel with back; each depends only on T0 unless stated)
 
