@@ -130,11 +130,11 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 - **Acceptance criteria:**
   - [x] Admin only; unknown id → 404; the old IBAN stops resolving and the new one resolves.
 
-### [ ] T11 — `CustomerRegistration` (~10 min)
+### [x] T11 — `CustomerRegistration` (~10 min)
 
 - **Side:** back · **Layer:** adapter.in · **Depends on:** T8
 - **Acceptance criteria:**
-  - [ ] Tests of #95 pass, including "a username the administrator gave to a customer cannot be taken"; `la_aplicacion_no_depende_de_spring_security` green.
+  - [x] Tests of #95 pass, including "a username the administrator gave to a customer cannot be taken"; `la_aplicacion_no_depende_de_spring_security` green.
 
 ### [ ] T12 — REST `POST /api/customers` (~10 min)
 
