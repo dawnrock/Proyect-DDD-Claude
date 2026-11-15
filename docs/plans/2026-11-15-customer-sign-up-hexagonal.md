@@ -202,11 +202,11 @@ Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@Mo
 - **Acceptance criteria:**
   - [x] Web and REST journeys of #95 pass with real beans; checked by breaking user creation.
 
-### [ ] T23 — ArchUnit (~5 min)
+### [x] T23 — ArchUnit (~5 min)
 
 - **Side:** both · **Depends on:** T11
 - **Acceptance criteria:**
-  - [ ] New ports and adapters respect `HexagonalArchitectureTests`; one rule broken on purpose fails and passes when restored.
+  - [x] New ports and adapters respect `HexagonalArchitectureTests`; one rule broken on purpose fails and passes when restored.
 
 ### [ ] T24 — OpenAPI (~10 min) · **Side:** both · **Depends on:** T21
 
