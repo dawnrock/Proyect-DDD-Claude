@@ -152,10 +152,10 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 
 Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@MockitoBean` on the input ports and `CustomerRegistration`.
 
-### [ ] T14 — Login with two doors (~10 min) · **Side:** web
+### [x] T14 — Login with two doors (~10 min) · **Side:** web
 
 - **Acceptance criteria:**
-  - [ ] Doors at `/login`, form at `/login?form` and `?error`; existing login tests updated to `/login?form`.
+  - [x] Doors at `/login`, form at `/login?form` and `?error`; existing login tests updated to `/login?form`.
 
 ### [ ] T15 — Sign-up step 1 (~10 min) · **Side:** web · **Depends on:** T0
 

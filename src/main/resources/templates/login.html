@@ -4,10 +4,22 @@
 <body>
 <header th:replace="~{fragments/layout :: header}"></header>
 <main>
-    <h1>Acceso</h1>
-    <form class="panel" th:action="@{/login}" method="post">
+    <h1 th:text="${showForm} ? 'Acceso' : 'Bienvenido a Mon-A Bank'">Acceso</h1>
+    <p class="flash flash-success" role="status" th:if="${param.logout}">Has cerrado la sesión</p>
+
+    <div class="doors" th:unless="${showForm}">
+        <a class="door" th:href="@{/login(form)}">
+            <span class="door-title">Ya soy cliente</span>
+            <span class="door-text">Entra con tu usuario y tu contraseña.</span>
+        </a>
+        <a class="door" th:href="@{/signup}">
+            <span class="door-title">Quiero ser cliente</span>
+            <span class="door-text">Abre tu cuenta en tres pasos.</span>
+        </a>
+    </div>
+
+    <form class="panel" th:if="${showForm}" th:action="@{/login}" method="post">
         <p class="flash flash-error" role="alert" th:if="${param.error}">Usuario o contraseña incorrectos</p>
-        <p class="flash flash-success" role="status" th:if="${param.logout}">Has cerrado la sesión</p>
 
         <div class="field">
             <label for="username">Usuario</label>
@@ -21,6 +33,7 @@
 
         <div class="form-actions">
             <button class="button" type="submit">Entrar</button>
+            <a th:href="@{/login}">← Volver</a>
         </div>
     </form>
 </main>
