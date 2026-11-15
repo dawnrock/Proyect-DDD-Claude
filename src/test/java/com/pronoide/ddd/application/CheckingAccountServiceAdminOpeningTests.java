@@ -19,8 +19,10 @@ import com.pronoide.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.pronoide.ddd.domain.model.CheckingAccountFactory;
 import com.pronoide.ddd.domain.model.CheckingAccountRepository;
 import com.pronoide.ddd.domain.model.CurrencyMismatchException;
+import com.pronoide.ddd.domain.model.Customer;
 import com.pronoide.ddd.domain.model.CustomerRepository;
 import com.pronoide.ddd.domain.model.DomainEventPublisher;
+import com.pronoide.ddd.domain.model.EmailAddress;
 import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
 import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
@@ -165,6 +167,19 @@ class CheckingAccountServiceAdminOpeningTests {
         assertThat(service.isUsernameTaken("ada")).isTrue();
         assertThatIllegalArgumentException().isThrownBy(() -> service.signUp(signUp));
         assertThat(customers.findByTaxId(new TaxId("00000000T"))).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Un cliente existente sin usuario asignado da un error de petición y no un error interno")
+    void un_cliente_existente_sin_usuario_da_un_error_de_peticion() {
+        customers.save(Customer.register("Ada Lovelace", new TaxId("12345678Z"),
+                new EmailAddress("ada@example.com")));
+
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> service.openAccount(ADMIN, OpenAccountCommand.builder()
+                        .holderTaxId("12345678Z").initialDeposit(new BigDecimal("75")).build()))
+                .withMessageContaining("no tiene usuario");
+        assertThat(accounts.findAll()).isEmpty();
     }
 
     @Test

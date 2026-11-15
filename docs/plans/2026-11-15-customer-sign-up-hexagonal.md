@@ -225,31 +225,32 @@ Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@Mo
 
 ### [x] T27 — README and deployment guide (~5 min) · **Side:** both
 
-### [ ] T28 — Review and project status (~15 min) · **Side:** both
+### [x] T28 — Review and project status (~15 min) · **Side:** both
 
 - **What to do:** `revisor-ddd` review and fixes; `estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`.
+- **Review:** fixed the 500 for an existing customer without a username (now 400, test added) and documented that `assign` replaces a customer's username; the other notes (no shared lock between sign-up and admin opening beyond the unit of work, a user creation failure after `signUp`, admin usernames that exist only in Spring Security) went to `pendientes.md`.
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] Same behaviour as `Monolithic` after PR #102 (web, REST, demo IBANs `ES8099990001450000000001`, `…0002`, `…0003`).
-- [ ] A username and a document belong to one customer; a visitor cannot take the username the administrator gave to a customer.
-- [ ] The dependencies point to the hexagon (ArchUnit).
+- [x] Same behaviour as `Monolithic` after PR #102 (web, REST, demo IBANs `ES8099990001450000000001`, `…0002`, `…0003`).
+- [x] A username and a document belong to one customer; a visitor cannot take the username the administrator gave to a customer.
+- [x] The dependencies point to the hexagon (ArchUnit).
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones.
-- [ ] `docs/api/openapi.yaml` reflects the change and `npx @redocly/cli lint` has no errors.
-- [ ] Any new business term is in `docs/dominio/glosario.md`.
-- [ ] Documentation written or changed by this plan is in English (`docs/analysis` in Spanish).
-- [ ] Project status updated (`estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`).
+- [ ] All tasks and their criteria are checked. **All but the lint of T24.**
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones.
+- [ ] `docs/api/openapi.yaml` reflects the change and `npx @redocly/cli lint` has no errors. **Reflects the change; the lint is pending** (blocked in the session, see T24).
+- [x] Any new business term is in `docs/dominio/glosario.md`.
+- [x] Documentation written or changed by this plan is in English (`docs/analysis` in Spanish).
+- [x] Project status updated (`estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`).
 
 ## Risks and open questions
 

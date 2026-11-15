@@ -13,7 +13,8 @@ import com.pronoide.ddd.domain.model.TaxId;
 public interface CustomerOwnershipRepository {
 
     /**
-     * Asigna el usuario al cliente. Asignar de nuevo el mismo par no cambia nada.
+     * Asigna el usuario al cliente. Asignar de nuevo el mismo par no cambia nada; asignar otro usuario al mismo
+     * cliente sustituye al anterior (los casos de uso solo asignan un usuario a un cliente nuevo).
      *
      * @throws IllegalArgumentException si el usuario ya es de otro cliente (R30)
      * @throws NullPointerException si el documento o el usuario son nulos

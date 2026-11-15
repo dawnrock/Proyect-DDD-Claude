@@ -123,7 +123,9 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
      * distintos se rechazan en lugar de ignorarlos (como en {@code Monolithic}, decisión del usuario de 2026-11-13).
      */
     private String ownerOfExisting(Customer customer, OpenAccountCommand command) {
-        String username = customerOwnership.usernameOf(customer.taxId()).orElseThrow();
+        String username = customerOwnership.usernameOf(customer.taxId()).orElseThrow(() ->
+                new IllegalArgumentException("El cliente %s no tiene usuario asignado: no se le puede abrir otra cuenta"
+                        .formatted(customer.taxId())));
         boolean nameMatches = command.holderName().isBlank()
                 || command.holderName().strip().equals(customer.fullName());
         boolean emailMatches = command.holderEmail().isBlank()
