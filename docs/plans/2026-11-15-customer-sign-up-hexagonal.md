@@ -196,11 +196,11 @@ Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@Mo
 - **Acceptance criteria:**
   - [x] `./mvnw verify` green; with `demo` the admin opens a second account for `12345678Z` with only document and deposit.
 
-### [ ] T22 — End-to-end tests (~10 min)
+### [x] T22 — End-to-end tests (~10 min)
 
 - **Side:** both · **Depends on:** T21
 - **Acceptance criteria:**
-  - [ ] Web and REST journeys of #95 pass with real beans; checked by breaking user creation.
+  - [x] Web and REST journeys of #95 pass with real beans; checked by breaking user creation.
 
 ### [ ] T23 — ArchUnit (~5 min)
 

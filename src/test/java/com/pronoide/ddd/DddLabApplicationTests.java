@@ -455,6 +455,170 @@ class DddLabApplicationTests {
 		}
 	}
 
+	@Nested
+	@DisplayName("Alta de cliente de Mon-A Bank con el servicio real (#103)")
+	class CustomerSignUp {
+
+		/** NIE válido que no usa ningún otro test del contexto compartido. */
+		private static final String WEB_DOCUMENT = "X1234567L";
+		private static final String REST_DOCUMENT = "Y7654321G";
+		private static final String NEW_PASSWORD = "clave-segura-1";
+
+		@Test
+		@DisplayName("Por la web: dos puertas, alta en tres pasos, sesión iniciada, otra cuenta y de nuevo a entrar")
+		void por_la_web_el_alta_en_tres_pasos_deja_la_sesion_iniciada_y_permite_abrir_otra_cuenta() throws Exception {
+			HttpClient visitor = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
+			assertThat(send(visitor, "/login").body()).contains("Quiero ser cliente").contains("Ya soy cliente");
+
+			HttpResponse<String> done = signUp(visitor, WEB_DOCUMENT, "margaret");
+
+			assertThat(done.statusCode()).isEqualTo(302);
+			String firstAccount = done.headers().firstValue("Location").orElseThrow();
+			assertThat(firstAccount).contains("/accounts/").doesNotContain("login");
+			HttpResponse<String> detail = send(visitor, path(firstAccount));
+			assertThat(detail.statusCode()).isEqualTo(200);
+			assertThat(detail.body()).contains("Te damos la bienvenida a Mon-A Bank")
+					.containsPattern("ES\\d{2}99990001\\d{12}");
+
+			HttpResponse<String> another = postForm(visitor, "/accounts/another", "initialDeposit=60.00&currency=EUR");
+			assertThat(another.statusCode()).isEqualTo(302);
+			assertThat(send(visitor, path(another.headers().firstValue("Location").orElseThrow())).body())
+					.contains("Nueva cuenta abierta");
+			HttpResponse<String> list = send(visitor, "/");
+			assertThat(list.statusCode()).isEqualTo(200);
+			assertThat(list.body()).contains("Margaret Hamilton").contains("Abrir otra cuenta");
+
+			assertThat(postForm(visitor, "/logout", "").headers().firstValue("Location"))
+					.hasValueSatisfying(location -> assertThat(location).endsWith("/login?logout"));
+			assertThat(login("margaret", NEW_PASSWORD).headers().firstValue("Location"))
+					.hasValueSatisfying(location -> assertThat(location).doesNotContain("error"));
+		}
+
+		@Test
+		@DisplayName("Por la web, un documento que ya es de un cliente vuelve al paso 1 con «Ya eres cliente»")
+		void por_la_web_un_documento_de_cliente_vuelve_al_paso_1() throws Exception {
+			signUp(HttpClient.newBuilder().cookieHandler(new CookieManager()).build(), "Z7654321H", "dorothy");
+			HttpClient again = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
+
+			HttpResponse<String> duplicate = signUp(again, "Z7654321H", "dorothy2");
+
+			assertThat(duplicate.statusCode()).isEqualTo(302);
+			assertThat(duplicate.headers().firstValue("Location"))
+					.hasValueSatisfying(location -> assertThat(location).endsWith("/signup"));
+			assertThat(send(again, "/signup").body()).contains("Ya eres cliente de Mon-A Bank");
+			assertThat(login("dorothy2", NEW_PASSWORD).headers().firstValue("Location"))
+					.as("el alta rechazada no crea el usuario")
+					.hasValueSatisfying(location -> assertThat(location).contains("error"));
+		}
+
+		@Test
+		@DisplayName("Por la API: alta pública, el cliente ve su cuenta, transfiere y no puede darse de alta dos veces")
+		void por_la_api_el_alta_publica_crea_cliente_cuenta_y_usuario() throws Exception {
+			HttpResponse<String> created = publicSignUp(REST_DOCUMENT, "katherine.johnson@example.com", "katherine");
+
+			assertThat(created.statusCode()).isEqualTo(201);
+			String location = created.headers().firstValue("Location").orElseThrow();
+			assertThat(location).startsWith("/api/accounts/");
+			HttpResponse<String> mine = basic("katherine", "GET", "/api/accounts", null);
+			assertThat(mine.statusCode()).isEqualTo(200);
+			assertThat(mine.body()).contains("Katherine Johnson").containsPattern("ES\\d{2}99990001\\d{12}");
+
+			String target = openAccount();
+			HttpResponse<String> transfer = basic("katherine", "POST", "/api/transfers", """
+					{"sourceAccountId": "%s", "targetAccountNumber": "%s", "amount": 25}"""
+					.formatted(location.substring(location.lastIndexOf('/') + 1), ibanOf(target)));
+			assertThat(transfer.statusCode()).isEqualTo(201);
+			assertThat(transfer.body()).contains("\"status\":\"APPROVED\"");
+
+			HttpResponse<String> duplicate = publicSignUp(REST_DOCUMENT, "otra.direccion@example.com", "katherine2");
+			assertThat(duplicate.statusCode()).isEqualTo(422);
+			assertThat(duplicate.body()).contains("Ya eres cliente de Mon-A Bank");
+		}
+
+		@Test
+		@DisplayName("Por la API, el administrador abre otra cuenta a un cliente existente indicando solo su documento")
+		void por_la_api_el_administrador_abre_otra_cuenta_a_un_cliente_existente_con_solo_su_documento()
+				throws Exception {
+			openAccount();
+
+			HttpResponse<String> second = post("/api/accounts", "application/json", """
+					{"holderTaxId": "12345678z", "initialDeposit": 75.00}""");
+
+			assertThat(second.statusCode()).isEqualTo(201);
+			assertThat(second.body()).contains("\"holderName\":\"Ada Lovelace\"");
+			String detail = get(second.headers().firstValue("Location").orElseThrow(), "application/json").body();
+			assertThat(detail).contains("\"holderTaxId\":\"12345678Z\"").contains("\"holderEmail\":\"ada@example.com\"");
+		}
+
+		/** Recorre los tres pasos del alta con un navegador y devuelve la respuesta del envío final. */
+		private HttpResponse<String> signUp(HttpClient client, String document, String username) throws Exception {
+			assertThat(postForm(client, "/signup", "fullName=Margaret+Hamilton&taxId=%s&email=%s%%40example.com"
+					.formatted(document, username)).headers().firstValue("Location"))
+					.hasValueSatisfying(location -> assertThat(location).endsWith("/signup/access"));
+			assertThat(postForm(client, "/signup/access", "username=%s&password=%s&passwordRepetition=%s"
+					.formatted(username, NEW_PASSWORD, NEW_PASSWORD)).headers().firstValue("Location"))
+					.hasValueSatisfying(location -> assertThat(location).endsWith("/signup/account"));
+			return postForm(client, "/signup/account", "initialDeposit=100.00&currency=EUR&conditionsAccepted=true");
+		}
+
+		/** Envía un formulario con el token CSRF de la página que lo muestra (o de la de login, para salir). */
+		private HttpResponse<String> postForm(HttpClient client, String path, String form) throws Exception {
+			String page = path.equals("/logout") ? "/" : path;
+			java.util.regex.Matcher csrf = java.util.regex.Pattern.compile("name=\"_csrf\" value=\"([^\"]+)\"")
+					.matcher(send(client, page).body());
+			assertThat(csrf.find()).as("la página %s lleva un token CSRF", page).isTrue();
+			String body = (form.isEmpty() ? "" : form + "&") + "_csrf=" + csrf.group(1);
+			return client.send(HttpRequest.newBuilder(URI.create(url(path)))
+					.header("Content-Type", "application/x-www-form-urlencoded")
+					.POST(HttpRequest.BodyPublishers.ofString(body))
+					.build(), HttpResponse.BodyHandlers.ofString());
+		}
+
+		private HttpResponse<String> login(String username, String password) throws Exception {
+			HttpClient client = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
+			java.util.regex.Matcher csrf = java.util.regex.Pattern.compile("name=\"_csrf\" value=\"([^\"]+)\"")
+					.matcher(send(client, "/login?form").body());
+			assertThat(csrf.find()).isTrue();
+			return client.send(HttpRequest.newBuilder(URI.create(url("/login")))
+					.header("Content-Type", "application/x-www-form-urlencoded")
+					.POST(HttpRequest.BodyPublishers.ofString("username=%s&password=%s&_csrf=%s"
+							.formatted(username, password, csrf.group(1))))
+					.build(), HttpResponse.BodyHandlers.ofString());
+		}
+
+		private HttpResponse<String> publicSignUp(String document, String email, String username) throws Exception {
+			return http.send(HttpRequest.newBuilder(URI.create(url("/api/customers")))
+					.header("Content-Type", "application/json")
+					.header("Accept", "application/json")
+					.POST(HttpRequest.BodyPublishers.ofString("""
+							{"fullName": "Katherine Johnson", "taxId": "%s", "email": "%s", "username": "%s",
+							 "password": "%s", "initialDeposit": 100.00}""".formatted(document, email, username, NEW_PASSWORD)))
+					.build(), HttpResponse.BodyHandlers.ofString());
+		}
+
+		private HttpResponse<String> basic(String username, String method, String path, String json) throws Exception {
+			String credentials = java.util.Base64.getEncoder()
+					.encodeToString((username + ":" + NEW_PASSWORD).getBytes(StandardCharsets.UTF_8));
+			HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(url(path)))
+					.header("Authorization", "Basic " + credentials)
+					.header("Accept", "application/json");
+			request = json == null ? request.GET() : request.header("Content-Type", "application/json")
+					.method(method, HttpRequest.BodyPublishers.ofString(json));
+			return http.send(request.build(), HttpResponse.BodyHandlers.ofString());
+		}
+
+		private HttpResponse<String> send(HttpClient client, String path) throws Exception {
+			return client.send(HttpRequest.newBuilder(URI.create(url(path))).header("Accept", "text/html").GET().build(),
+					HttpResponse.BodyHandlers.ofString());
+		}
+
+		/** Ruta de una cabecera Location, absoluta o relativa. */
+		private String path(String location) {
+			return location.replaceFirst("^https?://[^/]+", "");
+		}
+	}
+
+
 	private String url(String path) {
 		return "http://localhost:" + port + path;
 	}
