@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -309,11 +310,12 @@ public class AccountWebController {
     private OpenAccountCommand toCommand(OpenAccountForm form, BindingResult result) {
         try {
             return OpenAccountCommand.builder()
-                    .holderName(form.getHolderName())
                     .holderTaxId(form.getHolderTaxId())
+                    .holderName(Objects.requireNonNullElse(form.getHolderName(), ""))
+                    .holderEmail(Objects.requireNonNullElse(form.getHolderEmail(), ""))
                     .initialDeposit(form.getInitialDeposit())
                     .currency(form.getCurrency())
-                    .ownerUsername(form.getOwnerUsername())
+                    .ownerUsername(Objects.requireNonNullElse(form.getOwnerUsername(), ""))
                     .build();
         } catch (IllegalArgumentException e) {
             result.reject("invalid", e.getMessage());

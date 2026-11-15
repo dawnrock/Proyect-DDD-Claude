@@ -2,6 +2,7 @@ package com.pronoide.ddd.adapter.in.rest;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -45,10 +46,11 @@ public class AccountController {
     public ResponseEntity<AccountSummaryResponse> openAccount(
             Authentication authentication, @Valid @RequestBody OpenAccountRequest request) {
         OpenAccountCommand.Builder command = OpenAccountCommand.builder()
-                .holderName(request.holderName())
                 .holderTaxId(request.holderTaxId())
+                .holderName(Objects.requireNonNullElse(request.holderName(), ""))
+                .holderEmail(Objects.requireNonNullElse(request.holderEmail(), ""))
                 .initialDeposit(request.initialDeposit())
-                .ownerUsername(request.ownerUsername());
+                .ownerUsername(Objects.requireNonNullElse(request.ownerUsername(), ""));
         if (request.currency() != null) {
             command.currency(request.currency());
         }
@@ -109,6 +111,8 @@ public class AccountController {
                 .id(details.id())
                 .accountNumber(details.accountNumber())
                 .holderName(details.holderName())
+                .holderTaxId(details.holderTaxId())
+                .holderEmail(details.holderEmail())
                 .segment(details.segment())
                 .balance(details.balance())
                 .currency(details.currency())

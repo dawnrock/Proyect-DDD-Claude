@@ -121,7 +121,7 @@ class CustomerRegistrationTests {
     @DisplayName("El usuario que el administrador dio a un cliente no se puede tomar en el alta, aunque aún no pueda entrar")
     void el_usuario_de_un_cliente_sin_login_no_se_puede_tomar_en_el_alta() {
         service.openAccount(ADMIN, OpenAccountCommand.builder()
-                .holderTaxId("12345678Z").holderName("Ada Lovelace")
+                .holderTaxId("12345678Z").holderName("Ada Lovelace").holderEmail("ada@example.com")
                 .ownerUsername("margaret").initialDeposit(new BigDecimal("100")).build());
 
         assertThatExceptionOfType(UsernameTakenException.class)

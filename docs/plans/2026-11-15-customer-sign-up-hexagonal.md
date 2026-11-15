@@ -189,12 +189,12 @@ Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@Mo
 
 ### Integration (lead, in order)
 
-### [ ] T21 — Administrator opening for new or existing customers (~15 min)
+### [x] T21 — Administrator opening for new or existing customers (~15 min)
 
 - **Side:** both · **Depends on:** T8, T13, T20
 - **What to do:** command, REST request, web form, details (document and e-mail), `DomainModelRunner` with e-mails, tests (as T20 of #95).
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green; with `demo` the admin opens a second account for `12345678Z` with only document and deposit.
+  - [x] `./mvnw verify` green; with `demo` the admin opens a second account for `12345678Z` with only document and deposit.
 
 ### [ ] T22 — End-to-end tests (~10 min)
 

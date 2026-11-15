@@ -1120,6 +1120,7 @@ class AccountWebControllerTests {
             return post("/accounts/new")
                     .param("holderName", "Ana Pérez")
                     .param("holderTaxId", "12345678z")
+                    .param("holderEmail", "ana@example.com")
                     .param("ownerUsername", "ana")
                     .param("initialDeposit", "100.00")
                     .param("currency", "EUR");
@@ -1132,6 +1133,8 @@ class AccountWebControllerTests {
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("name=\"holderName\"")))
                     .andExpect(content().string(containsString("name=\"holderTaxId\"")))
+                    .andExpect(content().string(containsString("name=\"holderEmail\"")))
+                    .andExpect(content().string(containsString("deja en blanco nombre, correo y usuario")))
                     .andExpect(content().string(containsString("name=\"initialDeposit\"")))
                     .andExpect(content().string(containsString("se genera automáticamente")))
                     .andExpect(content().string(containsString("ingresos verificados")))
@@ -1154,6 +1157,7 @@ class AccountWebControllerTests {
             verify(commands).openAccount(ADMIN, OpenAccountCommand.builder()
                     .holderName("Ana Pérez")
                     .holderTaxId("12345678z")
+                    .holderEmail("ana@example.com")
                     .initialDeposit(new BigDecimal("100.00"))
                     .currency("EUR")
                     .ownerUsername("ana")
@@ -1204,17 +1208,32 @@ class AccountWebControllerTests {
     class ErroresDelAlta {
 
         private MockHttpServletRequestBuilder altaCon(String taxId, String holderName, String deposit) {
-            return altaDe(taxId, holderName, deposit, "ana");
+            return altaDe(taxId, holderName, deposit, "ana").param("holderEmail", "ana@example.com");
         }
 
         @Test
-        @DisplayName("Un usuario del titular ausente vuelve al formulario con el error del campo y sin llamar al servicio")
-        void un_usuario_del_titular_ausente_vuelve_al_formulario_con_el_error_del_campo() throws Exception {
-            mvc.perform(altaDe("12345678Z", "Ana Lopez", "100.00", ""))
+        @DisplayName("Sin nombre, correo ni usuario el formulario llega al servicio: es él quien sabe si el cliente existe")
+        void sin_datos_del_cliente_el_formulario_llega_al_servicio() throws Exception {
+            when(commands.openAccount(any(Caller.class), any())).thenThrow(new IllegalArgumentException(
+                    "El usuario del titular es obligatorio para un cliente nuevo"));
+
+            mvc.perform(altaDe("12345678Z", "", "100.00", ""))
                     .andExpect(status().isOk())
                     .andExpect(view().name("accounts/new"))
-                    .andExpect(model().attributeHasFieldErrors("form", "ownerUsername"))
-                    .andExpect(content().string(containsString("El usuario del titular es obligatorio")));
+                    .andExpect(model().attributeHasErrors("form"))
+                    .andExpect(content().string(containsString("obligatorio para un cliente nuevo")));
+
+            verify(commands).openAccount(ADMIN, OpenAccountCommand.builder()
+                    .holderTaxId("12345678Z").initialDeposit(new BigDecimal("100.00")).currency("EUR").build());
+        }
+
+        @Test
+        @DisplayName("Un correo mal formado vuelve al formulario con el error del campo y sin llamar al servicio")
+        void un_correo_mal_formado_vuelve_al_formulario() throws Exception {
+            mvc.perform(altaDe("12345678Z", "Ana Lopez", "100.00", "ana").param("holderEmail", "ana@"))
+                    .andExpect(status().isOk())
+                    .andExpect(model().attributeHasFieldErrors("form", "holderEmail"))
+                    .andExpect(content().string(containsString("El correo electrónico no es válido")));
 
             verifyNoInteractions(commands, queries);
         }
@@ -1232,15 +1251,16 @@ class AccountWebControllerTests {
         }
 
         @Test
-        @DisplayName("Un error de formato que solo detecta el servicio vuelve al formulario con su mensaje")
-        void un_error_de_formato_que_solo_detecta_el_servicio_vuelve_al_formulario() throws Exception {
-            when(commands.openAccount(any(Caller.class), any())).thenThrow(new IllegalArgumentException("Dato inválido"));
+        @DisplayName("Unos datos que contradicen al cliente existente vuelven al formulario con el mensaje del servicio")
+        void unos_datos_que_contradicen_al_cliente_existente_vuelven_al_formulario() throws Exception {
+            when(commands.openAccount(any(Caller.class), any())).thenThrow(new IllegalArgumentException(
+                    "El documento 12345678Z ya es de un cliente: deja en blanco nombre, correo y usuario, o indica los suyos"));
 
             mvc.perform(altaCon("12345678Z", "Ana Lopez", "100.00"))
                     .andExpect(status().isOk())
                     .andExpect(view().name("accounts/new"))
                     .andExpect(model().attributeHasErrors("form"))
-                    .andExpect(content().string(containsString("Dato inválido")));
+                    .andExpect(content().string(containsString("ya es de un cliente")));
         }
 
         private MockHttpServletRequestBuilder altaDe(String taxId, String holderName, String deposit,
@@ -1254,26 +1274,13 @@ class AccountWebControllerTests {
         }
 
         @Test
-        @DisplayName("Un titular en blanco vuelve al formulario con el error del campo y sin llamar al servicio")
-        void un_titular_en_blanco_vuelve_al_formulario_con_el_error_del_campo_y_sin_llamar_al_servicio()
-                throws Exception {
-            mvc.perform(altaCon("ES1234567890123456789012", "  ", "100.00"))
-                    .andExpect(status().isOk())
-                    .andExpect(view().name("accounts/new"))
-                    .andExpect(model().attributeHasFieldErrors("form", "holderName"))
-                    .andExpect(content().string(containsString("El titular es obligatorio")));
-
-            verifyNoInteractions(commands, queries);
-        }
-
-        @Test
-        @DisplayName("Un NIF mal formado vuelve al formulario con el error del campo y conserva los datos")
-        void un_nif_mal_formado_vuelve_al_formulario_con_el_error_del_campo_y_conserva_los_datos()
+        @DisplayName("Un documento mal formado vuelve al formulario con el error del campo y conserva los datos")
+        void un_documento_mal_formado_vuelve_al_formulario_con_el_error_del_campo_y_conserva_los_datos()
                 throws Exception {
             mvc.perform(altaCon("1234-Z", "Ana Lopez", "100.00"))
                     .andExpect(status().isOk())
                     .andExpect(model().attributeHasFieldErrors("form", "holderTaxId"))
-                    .andExpect(content().string(containsString("El NIF debe tener 8 dígitos y una letra")))
+                    .andExpect(content().string(containsString("El documento debe ser un DNI o un NIE")))
                     .andExpect(content().string(containsString("1234-Z")))
                     .andExpect(content().string(containsString("Ana Lopez")));
 

@@ -22,6 +22,12 @@ public interface AccountDetailsResponseDef {
 
     String holderName();
 
+    /** Documento (DNI o NIE) normalizado del titular. */
+    String holderTaxId();
+
+    /** Correo del cliente titular; vacío si la cuenta no es de un cliente registrado. */
+    String holderEmail();
+
     String segment();
 
     BigDecimal balance();

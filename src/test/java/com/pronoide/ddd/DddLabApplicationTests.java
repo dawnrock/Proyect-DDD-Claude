@@ -83,6 +83,7 @@ class DddLabApplicationTests {
 		UUID accountId = commands.openAccount(admin, OpenAccountCommand.builder()
 				.holderName("Ada Lovelace")
 				.holderTaxId("12345678Z")
+				.holderEmail("ada@example.com")
 				.initialDeposit(new BigDecimal("100"))
 				.ownerUsername("ada")
 				.build()).id();
@@ -134,7 +135,7 @@ class DddLabApplicationTests {
 		@DisplayName("Una cuenta abierta por la API se consulta por su id y aparece en el listado web")
 		void una_cuenta_abierta_por_la_api_se_consulta_por_su_id_y_aparece_en_el_listado_web() throws Exception {
 			HttpResponse<String> created = post("/api/accounts", "application/json", """
-					{"holderName": "Ada Lovelace", "holderTaxId": "12345678Z",
+					{"holderName": "Ada Lovelace", "holderTaxId": "12345678Z", "holderEmail": "ada@example.com",
 					 "initialDeposit": 100.00, "ownerUsername": "ada"}""");
 
 			assertThat(created.statusCode()).isEqualTo(201);
@@ -174,11 +175,11 @@ class DddLabApplicationTests {
 		@DisplayName("Por la API, la factoría decide el segmento con los ingresos que verifica la agencia tributaria")
 		void por_la_api_la_factoria_decide_el_segmento_con_los_ingresos_verificados() throws Exception {
 			HttpResponse<String> highIncome = post("/api/accounts", "application/json", """
-					{"holderName": "Grace Hopper", "holderTaxId": "87654321X",
+					{"holderName": "Grace Hopper", "holderTaxId": "87654321X", "holderEmail": "grace@example.com",
 					 "initialDeposit": 100.00, "ownerUsername": "grace"}""");
 			HttpResponse<String> unknown = post("/api/accounts", "application/json", """
-					{"holderName": "Sin Verificar", "holderTaxId": "99999999R",
-					 "initialDeposit": 100.00, "ownerUsername": "ada"}""");
+					{"holderName": "Sin Verificar", "holderTaxId": "99999999R", "holderEmail": "sin@example.com",
+					 "initialDeposit": 100.00, "ownerUsername": "sinverificar"}""");
 
 			assertThat(highIncome.statusCode()).isEqualTo(201);
 			assertThat(highIncome.body()).contains("\"segment\":\"HIGH_NET_WORTH\"");
@@ -191,14 +192,16 @@ class DddLabApplicationTests {
 		@Test
 		@DisplayName("Desde la web, el aviso del alta muestra el IBAN generado y el segmento calculado")
 		void desde_la_web_el_aviso_del_alta_muestra_el_iban_generado_y_el_segmento() throws Exception {
-			String form = "holderName=Grace+Hopper&holderTaxId=87654321X&ownerUsername=grace&initialDeposit=75.00&currency=EUR";
+			String form = "holderName=Grace+Hopper&holderTaxId=87654321X&holderEmail=grace%40example.com&ownerUsername=grace"
+					+ "&initialDeposit=75.00&currency=EUR";
 			assertThat(submit("/accounts/new", form).statusCode()).isEqualTo(302);
 
 			assertThat(browse("/")).containsPattern("Cuenta ES\\d{22} abierta correctamente como Alto patrimonio");
 		}
 
 		private HttpResponse<String> submitForm(String currency) throws Exception {
-			String form = "holderName=Grace+Hopper&holderTaxId=12345678Z&ownerUsername=grace&initialDeposit=75.00&currency=%s"
+			String form = "holderName=Grace+Hopper&holderTaxId=87654321X&holderEmail=grace%40example.com&ownerUsername=grace"
+					+ "&initialDeposit=75.00&currency=%s"
 					.formatted(currency);
 			return submit("/accounts/new", form);
 		}
@@ -370,7 +373,7 @@ class DddLabApplicationTests {
 			String adas = idOf(adasPath);
 
 			HttpResponse<String> open = api("grace", "POST", "/api/accounts", """
-					{"holderName": "Grace Hopper", "holderTaxId": "12345678Z",
+					{"holderName": "Grace Hopper", "holderTaxId": "87654321X", "holderEmail": "grace@example.com",
 					 "initialDeposit": 100.00, "ownerUsername": "grace"}""");
 			HttpResponse<String> foreign = api("grace", "GET", "/api/accounts/" + adas, null);
 			HttpResponse<String> transfer = api("grace", "POST", "/api/transfers", """
@@ -397,10 +400,16 @@ class DddLabApplicationTests {
 			assertThat(health.body()).contains("\"status\":\"UP\"").doesNotContain("components", "diskSpace");
 		}
 
+		/** Un cliente por usuario (R30): cada propietario tiene su documento. */
 		private String openAccountFor(String owner) throws Exception {
+			String[] holder = switch (owner) {
+				case "ada" -> new String[] {"Ada Lovelace", "12345678Z"};
+				case "grace" -> new String[] {"Grace Hopper", "87654321X"};
+				default -> new String[] {"Alan Turing", "11111111H"};
+			};
 			HttpResponse<String> created = post("/api/accounts", "application/json", """
-					{"holderName": "Titular", "holderTaxId": "12345678Z", "initialDeposit": 100.00,
-					 "ownerUsername": "%s"}""".formatted(owner));
+					{"holderName": "%s", "holderTaxId": "%s", "holderEmail": "%s@example.com",
+					 "initialDeposit": 100.00, "ownerUsername": "%s"}""".formatted(holder[0], holder[1], owner, owner));
 			assertThat(created.statusCode()).isEqualTo(201);
 			return created.headers().firstValue("Location").orElseThrow();
 		}
@@ -456,8 +465,8 @@ class DddLabApplicationTests {
 	/** Abre una cuenta minorista con 100,00 € y devuelve su ruta de la API ({@code /api/accounts/{id}}). */
 	private String openAccount() throws Exception {
 		HttpResponse<String> created = post("/api/accounts", "application/json", """
-				{"holderName": "Grace Hopper", "holderTaxId": "12345678Z", "initialDeposit": 100.00,
-				 "ownerUsername": "ada"}""");
+				{"holderName": "Ada Lovelace", "holderTaxId": "12345678Z", "holderEmail": "ada@example.com",
+				 "initialDeposit": 100.00, "ownerUsername": "ada"}""");
 		assertThat(created.statusCode()).isEqualTo(201);
 		return created.headers().firstValue("Location").orElseThrow();
 	}

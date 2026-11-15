@@ -90,13 +90,15 @@ class CheckingAccountServiceTests {
         return OpenAccountCommand.builder()
                 .holderName("Ada Lovelace")
                 .holderTaxId("12345678Z")
+                .holderEmail("ada@example.com")
                 .initialDeposit(new BigDecimal("100"))
                 .ownerUsername("ada");
     }
 
     /** Titular de alto patrimonio por NIF (250.000 € verificados). */
     private static OpenAccountCommand.Builder highNetWorthCommand() {
-        return command().holderName("Grace Hopper").holderTaxId("87654321X");
+        return command().holderName("Grace Hopper").holderTaxId("87654321X").holderEmail("grace@example.com")
+                .ownerUsername("grace");
     }
 
     @Test
@@ -113,6 +115,7 @@ class CheckingAccountServiceTests {
             return OpenAccountCommand.builder()
                     .holderName("Grace Hopper")
                     .holderTaxId(taxId)
+                    .holderEmail("grace@example.com")
                     .initialDeposit(new BigDecimal("100"))
                     .ownerUsername("grace");
         }
@@ -138,7 +141,8 @@ class CheckingAccountServiceTests {
         @DisplayName("Con ingresos bajos o un NIF desconocido el resumen es minorista")
         void con_ingresos_bajos_o_nif_desconocido_el_resumen_es_minorista() {
             assertThat(service.openAccount(ADMIN, byTaxId("12345678Z").build()).segment()).isEqualTo("RETAIL");
-            assertThat(service.openAccount(ADMIN, byTaxId("99999999R").build()).segment()).isEqualTo("RETAIL");
+            assertThat(service.openAccount(ADMIN, byTaxId("99999999R").holderName("Alan Turing")
+                    .holderEmail("alan@example.com").ownerUsername("alan").build()).segment()).isEqualTo("RETAIL");
         }
 
         @Test
@@ -741,7 +745,7 @@ class CheckingAccountServiceTests {
         @DisplayName("Tras un mes bajo el mínimo y sin ingresos altos, la transferencia se evalúa ya como minorista")
         void tras_un_mes_bajo_el_minimo_y_sin_ingresos_altos_la_transferencia_se_evalua_como_minorista() {
             UUID id = cuentaEnDescubierto(command());
-            String target = service.openAccount(ADMIN, command().ownerUsername("grace").build()).accountNumber();
+            String target = service.openAccount(ADMIN, highNetWorthCommand().build()).accountNumber();
             clock.advance(Duration.ofDays(32));
 
             TransferSummary transferencia = service.transfer(ADMIN, TransferCommand.builder()

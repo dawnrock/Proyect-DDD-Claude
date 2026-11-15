@@ -5,6 +5,7 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -84,17 +85,55 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         if (!caller.admin()) {
             throw new ForbiddenOperationException("abrir cuentas");
         }
-        if (command.ownerUsername().isEmpty()) {
-            throw new IllegalArgumentException("El usuario propietario de la cuenta es obligatorio");
-        }
-        MonetaryAmount initialDeposit =
-                new MonetaryAmount(command.initialDeposit(), Currency.getInstance(command.currency()));
-        CheckingAccount opened =
-                factory.open(command.holderName(), new TaxId(command.holderTaxId()), initialDeposit);
+        TaxId taxId = new TaxId(command.holderTaxId());
+        Optional<Customer> existing = customers.findByTaxId(taxId);
+        Customer customer = existing.orElseGet(() -> newCustomer(taxId, command));
+        String owner = existing.isPresent() ? ownerOfExisting(customer, command) : command.ownerUsername();
+
+        CheckingAccount opened = factory.open(customer, toAmount(command.initialDeposit(), command.currency()));
         requireUnused(opened.accountNumber());
+        if (existing.isEmpty()) {
+            if (usernameTaken(owner)) {
+                throw new IllegalArgumentException("El usuario %s ya es de otro cliente".formatted(owner));
+            }
+            customers.save(customer);
+            customerOwnership.assign(taxId, owner);
+        }
         CheckingAccount account = save(opened, events);
-        ownership.assign(account.id(), command.ownerUsername());
+        ownership.assign(account.id(), owner);
         return toSummary(account);
+    }
+
+    /** Un cliente nuevo desde el alta del administrador: nombre, correo y usuario son obligatorios. */
+    private static Customer newCustomer(TaxId taxId, OpenAccountCommand command) {
+        if (command.holderName().isBlank()) {
+            throw new IllegalArgumentException("El nombre del titular es obligatorio para un cliente nuevo");
+        }
+        if (command.holderEmail().isBlank()) {
+            throw new IllegalArgumentException("El correo del titular es obligatorio para un cliente nuevo");
+        }
+        if (command.ownerUsername().isEmpty()) {
+            throw new IllegalArgumentException("El usuario del titular es obligatorio para un cliente nuevo");
+        }
+        return Customer.register(command.holderName(), taxId, new EmailAddress(command.holderEmail()));
+    }
+
+    /**
+     * El usuario de un cliente existente. Los datos del command van en blanco o coinciden con los del cliente: unos
+     * distintos se rechazan en lugar de ignorarlos (como en {@code Monolithic}, decisión del usuario de 2026-11-13).
+     */
+    private String ownerOfExisting(Customer customer, OpenAccountCommand command) {
+        String username = customerOwnership.usernameOf(customer.taxId()).orElseThrow();
+        boolean nameMatches = command.holderName().isBlank()
+                || command.holderName().strip().equals(customer.fullName());
+        boolean emailMatches = command.holderEmail().isBlank()
+                || new EmailAddress(command.holderEmail()).equals(customer.email());
+        boolean usernameMatches = command.ownerUsername().isEmpty() || command.ownerUsername().equals(username);
+        if (!nameMatches || !emailMatches || !usernameMatches) {
+            throw new IllegalArgumentException(("El documento %s ya es de un cliente: deja en blanco nombre, correo y "
+                    + "usuario, o indica los suyos").formatted(customer.taxId()));
+        }
+        return username;
     }
 
     /** R16: con la numeración generada es solo una red de seguridad ante un generador defectuoso. */
@@ -315,11 +354,14 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         return new MonetaryAmount(amount, Currency.getInstance(currency));
     }
 
-    private static AccountDetails toDetails(CheckingAccount account) {
+    private AccountDetails toDetails(CheckingAccount account) {
+        TaxId taxId = account.primaryHolder().taxId();
         return AccountDetails.builder()
                 .id(account.id())
                 .accountNumber(account.accountNumber().value())
                 .holderName(account.primaryHolder().fullName())
+                .holderTaxId(taxId.value())
+                .holderEmail(customers.findByTaxId(taxId).map(customer -> customer.email().value()).orElse(""))
                 .segment(account.primaryHolder().segment().name())
                 .balance(account.currentBalance().amount())
                 .currency(account.currentBalance().currency().getCurrencyCode())

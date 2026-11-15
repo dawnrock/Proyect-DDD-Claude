@@ -48,7 +48,7 @@ class CheckingAccountServiceConcurrencyTests {
 
     private static AccountSummary open(CheckingAccountService service, String holder, String taxId, String owner) {
         return service.openAccount(ADMIN, OpenAccountCommand.builder().holderName(holder).holderTaxId(taxId)
-                .initialDeposit(INITIAL).ownerUsername(owner).build());
+                .holderEmail(owner + "@example.com").initialDeposit(INITIAL).ownerUsername(owner).build());
     }
 
     @Test

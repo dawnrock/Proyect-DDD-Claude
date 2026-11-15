@@ -46,10 +46,12 @@ class CheckingAccountServiceOwnershipTests {
                 PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
     }
 
+    /** Un cliente por propietario: cada usuario es de un único cliente (R30). */
     private static OpenAccountCommand.Builder command(String owner) {
         return OpenAccountCommand.builder()
                 .holderName("Titular")
-                .holderTaxId("12345678Z")
+                .holderTaxId("grace".equals(owner) ? "87654321X" : "12345678Z")
+                .holderEmail("titular@example.com")
                 .initialDeposit(new BigDecimal("500"))
                 .ownerUsername(owner);
     }
@@ -94,7 +96,7 @@ class CheckingAccountServiceOwnershipTests {
 
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> service.openAccount(ADMIN, withoutOwner))
-                    .withMessageContaining("propietario");
+                    .withMessageContaining("usuario del titular es obligatorio");
             assertThat(accounts.findAll()).isEmpty();
         }
 

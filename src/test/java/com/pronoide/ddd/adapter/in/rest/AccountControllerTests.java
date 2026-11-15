@@ -60,7 +60,7 @@ class AccountControllerTests {
     private static final UUID ID = UUID.fromString("11111111-2222-3333-4444-555555555555");
     private static final String IBAN = "ES9121000418450200051332";
     private static final String VALID_BODY = """
-            {"holderName": "Ada Lovelace", "holderTaxId": "12345678Z",
+            {"holderTaxId": "12345678Z", "holderName": "Ada Lovelace", "holderEmail": "ada@example.com",
              "initialDeposit": 100.00, "ownerUsername": "ada"}""";
 
     @Autowired
@@ -146,26 +146,53 @@ class AccountControllerTests {
         }
 
         @Test
-        @DisplayName("Sin titular responde 400 con el error del campo y no llama al servicio")
-        void sin_titular_responde_400_con_el_error_del_campo_y_no_llama_al_servicio() throws Exception {
+        @DisplayName("Sin documento del titular responde 400 con el error del campo y no llama al servicio")
+        void sin_documento_responde_400_con_el_error_del_campo_y_no_llama_al_servicio() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
-                    {"holderTaxId": "12345678Z", "initialDeposit": 100, "ownerUsername": "ada"}"""))
+                    {"holderName": "Ada Lovelace", "initialDeposit": 100, "ownerUsername": "ada"}"""))
                     .andExpect(status().isBadRequest())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                     .andExpect(jsonPath("$.title").value("Petición no válida"))
-                    .andExpect(jsonPath("$.errors.holderName").exists());
+                    .andExpect(jsonPath("$.errors.holderTaxId").exists());
 
             verifyNoInteractions(commands, queries);
+        }
+
+        @Test
+        @DisplayName("Para un cliente existente basta el documento: nombre, correo y usuario llegan en blanco")
+        void para_un_cliente_existente_basta_el_documento() throws Exception {
+            given(commands.openAccount(any(Caller.class), any())).willReturn(summary());
+
+            mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
+                    {"holderTaxId": "12345678Z", "initialDeposit": 75}"""))
+                    .andExpect(status().isCreated());
+
+            ArgumentCaptor<OpenAccountCommand> captor = ArgumentCaptor.forClass(OpenAccountCommand.class);
+            verify(commands).openAccount(any(Caller.class), captor.capture());
+            assertThat(captor.getValue().holderName()).isEmpty();
+            assertThat(captor.getValue().holderEmail()).isEmpty();
+            assertThat(captor.getValue().ownerUsername()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Unos datos que contradicen al cliente existente responden 400 con el mensaje del servicio")
+        void unos_datos_que_contradicen_al_cliente_existente_responden_400() throws Exception {
+            given(commands.openAccount(any(Caller.class), any())).willThrow(new IllegalArgumentException(
+                    "El documento 12345678Z ya es de un cliente: deja en blanco nombre, correo y usuario, o indica los suyos"));
+
+            mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("ya es de un cliente")));
         }
 
         @Test
         @DisplayName("Todos los campos mal formados aparecen en el mapa de errores")
         void todos_los_campos_mal_formados_aparecen_en_el_mapa_de_errores() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
-                    {"holderName": " ", "holderTaxId": "1234",
+                    {"holderTaxId": "1234", "holderEmail": "ada@",
                      "initialDeposit": -5, "currency": "eur", "ownerUsername": "Ada L"}"""))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errors.holderName").exists())
+                    .andExpect(jsonPath("$.errors.holderEmail").exists())
                     .andExpect(jsonPath("$.errors.holderTaxId").value("El documento debe ser un DNI o un NIE"))
                     .andExpect(jsonPath("$.errors.initialDeposit").exists())
                     .andExpect(jsonPath("$.errors.currency").exists())
@@ -175,27 +202,28 @@ class AccountControllerTests {
         }
 
         @Test
-        @DisplayName("Un cuerpo vacío responde 400 con un error por cada campo obligatorio")
-        void un_cuerpo_vacio_responde_400_con_un_error_por_cada_campo_obligatorio() throws Exception {
+        @DisplayName("Un cuerpo vacío responde 400 solo con los campos siempre obligatorios")
+        void un_cuerpo_vacio_responde_400_solo_con_los_campos_siempre_obligatorios() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("{}"))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errors.holderName").exists())
                     .andExpect(jsonPath("$.errors.holderTaxId").exists())
                     .andExpect(jsonPath("$.errors.initialDeposit").exists())
-                    .andExpect(jsonPath("$.errors.ownerUsername").exists())
+                    .andExpect(jsonPath("$.errors.holderName").doesNotExist())
+                    .andExpect(jsonPath("$.errors.holderEmail").doesNotExist())
+                    .andExpect(jsonPath("$.errors.ownerUsername").doesNotExist())
                     .andExpect(jsonPath("$.errors.accountNumber").doesNotExist())
                     .andExpect(jsonPath("$.errors.segment").doesNotExist())
                     .andExpect(jsonPath("$.errors.currency").doesNotExist());
         }
 
         @Test
-        @DisplayName("El cuerpo antiguo con IBAN y segmento pero sin NIF responde 400 con el error del NIF")
+        @DisplayName("El cuerpo antiguo con IBAN y segmento pero sin documento responde 400 con el error del documento")
         void el_cuerpo_antiguo_sin_nif_responde_400() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
                     {"accountNumber": "ES9121000418450200051332", "holderName": "Ada Lovelace",
                      "segment": "RETAIL", "initialDeposit": 100, "ownerUsername": "ada"}"""))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errors.holderTaxId").value("El NIF es obligatorio"));
+                    .andExpect(jsonPath("$.errors.holderTaxId").value("El documento del titular es obligatorio"));
 
             verifyNoInteractions(commands, queries);
         }
@@ -353,7 +381,8 @@ class AccountControllerTests {
         void responde_200_con_el_detalle_y_sus_movimientos() throws Exception {
             UUID transactionId = UUID.fromString("66666666-7777-8888-9999-000000000000");
             given(queries.findAccount(any(Caller.class), eq(ID))).willReturn(AccountDetails.builder()
-                    .id(ID).accountNumber(IBAN).holderName("Ada Lovelace").segment("RETAIL")
+                    .id(ID).accountNumber(IBAN).holderName("Ada Lovelace").holderTaxId("12345678Z")
+                    .holderEmail("ada@example.com").segment("RETAIL")
                     .balance(new BigDecimal("100.00")).currency("EUR")
                     .addTransactions(TransactionSummary.builder().id(transactionId).type("DEPOSIT")
                             .amount(new BigDecimal("100.00")).currency("EUR")
@@ -364,6 +393,8 @@ class AccountControllerTests {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(ID.toString()))
                     .andExpect(jsonPath("$.segment").value("RETAIL"))
+                    .andExpect(jsonPath("$.holderTaxId").value("12345678Z"))
+                    .andExpect(jsonPath("$.holderEmail").value("ada@example.com"))
                     .andExpect(jsonPath("$.transactions.length()").value(1))
                     .andExpect(jsonPath("$.transactions[0].id").value(transactionId.toString()))
                     .andExpect(jsonPath("$.transactions[0].type").value("DEPOSIT"))
