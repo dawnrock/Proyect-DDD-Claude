@@ -145,4 +145,99 @@ class SignUpControllerTests {
                     .andExpect(content().string(not(containsString("field-error"))));
         }
     }
+
+    /** Sesión con el paso 1 ya completado. */
+    private MockHttpSession sessionAfterStep1() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        mvc.perform(validStep1(post("/signup")).session(session)).andExpect(redirectedUrl("/signup/access"));
+        return session;
+    }
+
+    private static MockHttpServletRequestBuilder validStep2(MockHttpServletRequestBuilder request) {
+        return request.param("username", "margaret").param("password", "clave-secreta-1")
+                .param("passwordRepetition", "clave-secreta-1");
+    }
+
+    @Nested
+    @DisplayName("Paso 2: acceso")
+    class Paso2 {
+
+        @Test
+        @DisplayName("Entrar en el paso 2 sin haber hecho el 1 redirige a /signup")
+        void entrar_en_el_paso_2_sin_haber_hecho_el_1_redirige_a_signup() throws Exception {
+            mvc.perform(get("/signup/access"))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/signup"));
+            mvc.perform(validStep2(post("/signup/access")))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/signup"));
+        }
+
+        @Test
+        @DisplayName("Tras el paso 1, la página pide usuario, contraseña y repetición, y deja volver atrás")
+        void tras_el_paso_1_la_pagina_pide_usuario_contrasena_y_repeticion() throws Exception {
+            mvc.perform(get("/signup/access").session(sessionAfterStep1()))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("signup/access"))
+                    .andExpect(content().string(containsString("name=\"_csrf\"")))
+                    .andExpect(content().string(containsString("name=\"username\"")))
+                    .andExpect(content().string(containsString("name=\"password\"")))
+                    .andExpect(content().string(containsString("name=\"passwordRepetition\"")))
+                    .andExpect(content().string(containsString("Paso 2 de 3")))
+                    .andExpect(content().string(containsString("href=\"/signup\"")));
+        }
+
+        @Test
+        @DisplayName("Un usuario mal formado, una contraseña corta o una repetición distinta se quedan en el paso 2")
+        void los_errores_de_campo_se_quedan_en_el_paso_2() throws Exception {
+            MockHttpSession session = sessionAfterStep1();
+
+            mvc.perform(post("/signup/access").session(session).param("username", "Ab")
+                            .param("password", "corta").param("passwordRepetition", "corta"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("signup/access"))
+                    .andExpect(content().string(containsString("El usuario debe tener de 3 a 30")))
+                    .andExpect(content().string(containsString("al menos 8 caracteres")));
+
+            mvc.perform(post("/signup/access").session(session).param("username", "margaret")
+                            .param("password", "clave-secreta-1").param("passwordRepetition", "otra-clave-22"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("signup/access"))
+                    .andExpect(content().string(containsString("Las contraseñas no coinciden")));
+        }
+
+        @Test
+        @DisplayName("Con datos válidos redirige al paso 3")
+        void con_datos_validos_redirige_al_paso_3() throws Exception {
+            mvc.perform(validStep2(post("/signup/access")).session(sessionAfterStep1()))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/signup/account"));
+        }
+
+        @Test
+        @DisplayName("La contraseña no aparece nunca en el HTML, ni tras un error ni al volver al paso 2")
+        void la_contrasena_no_aparece_nunca_en_el_html() throws Exception {
+            MockHttpSession session = sessionAfterStep1();
+
+            mvc.perform(post("/signup/access").session(session).param("username", "margaret")
+                            .param("password", "clave-secreta-1").param("passwordRepetition", "otra-clave-22"))
+                    .andExpect(content().string(not(containsString("clave-secreta-1"))))
+                    .andExpect(content().string(not(containsString("otra-clave-22"))));
+
+            mvc.perform(validStep2(post("/signup/access")).session(session))
+                    .andExpect(redirectedUrl("/signup/account"));
+            mvc.perform(get("/signup/access").session(session))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("value=\"margaret\"")))
+                    .andExpect(content().string(not(containsString("clave-secreta-1"))));
+        }
+
+        @Test
+        @DisplayName("Volver al paso 1 desde el 2 conserva los datos personales")
+        void volver_al_paso_1_desde_el_2_conserva_los_datos_personales() throws Exception {
+            MockHttpSession session = sessionAfterStep1();
+            mvc.perform(get("/signup").session(session))
+                    .andExpect(content().string(containsString("value=\"Margaret Hamilton\"")));
+        }
+    }
 }

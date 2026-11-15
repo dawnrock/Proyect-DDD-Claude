@@ -162,10 +162,10 @@ Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@Mo
 - **Acceptance criteria:**
   - [x] Public, CSRF, field errors, redirect to step 2.
 
-### [ ] T16 — Sign-up step 2 (~10 min) · **Side:** web · **Depends on:** T15
+### [x] T16 — Sign-up step 2 (~10 min) · **Side:** web · **Depends on:** T15
 
 - **Acceptance criteria:**
-  - [ ] Password ≥ 8 and repeated, never rendered; step 1 required.
+  - [x] Password ≥ 8 and repeated, never rendered; step 1 required.
 
 ### [ ] T17 — Sign-up step 3 (~10 min) · **Side:** web · **Depends on:** T16
 
