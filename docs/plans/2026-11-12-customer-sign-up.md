@@ -256,12 +256,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] ADR listed in the index and linked from ADR 0008.
 
-### [ ] T26 — Glossary and functional analysis (~10 min)
+### [x] T26 — Glossary and functional analysis (~10 min)
 
 - **Side:** both · **Layer:** docs · **Files:** `docs/dominio/glosario.md`, `docs/analysis/functional-analysis.md` · **Depends on:** T22
 - **What to do:** terms (customer, e-mail address, Mon-A Bank account number, customer sign-up, another account, duplicate customer); `TaxId` now covers NIE; rules R27-R31 with their tests; demo data table with the new IBANs. (`docs/analysis` stays in Spanish.)
 - **Acceptance criteria:**
-  - [ ] Every rule R27-R31 names an existing test.
+  - [x] Every rule R27-R31 names an existing test.
 
 ### [ ] T27 — README and deployment guide (~5 min)
 
