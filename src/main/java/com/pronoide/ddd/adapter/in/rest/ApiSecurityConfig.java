@@ -20,7 +20,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Seguridad de la API REST ({@code /api/**}, ADR 0008): HTTP Basic, sin sesión y sin CSRF. Va antes que la de la web.
- * Todo exige autenticación y {@code POST /api/accounts} (abrir una cuenta) solo la permite a los administradores; la
+ * Todo exige autenticación salvo {@code POST /api/customers} (el alta pública de un cliente); {@code POST /api/accounts}
+ * (abrir una cuenta) solo la permite a los administradores; la
  * propiedad de cada cuenta la comprueba la capa de aplicación. Sin credenciales responde 401 y sin el rol 403, ambos
  * como {@code ProblemDetail} (RFC 9457) igual que {@link RestExceptionHandler}. Contrato:
  * {@code docs/contracts/login-roles.md}.
@@ -44,6 +45,7 @@ public class ApiSecurityConfig {
         return http
                 .securityMatcher("/api/**")
                 .authorizeHttpRequests(requests -> requests
+                        .requestMatchers(HttpMethod.POST, "/api/customers").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/accounts").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .httpBasic(basic -> basic.authenticationEntryPoint(unauthenticated))

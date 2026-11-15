@@ -87,7 +87,7 @@ public class AccountController {
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(commands.withdraw(CurrentCaller.from(authentication), command.build())));
     }
 
-    private static AccountSummaryResponse toResponse(AccountSummary summary) {
+    static AccountSummaryResponse toResponse(AccountSummary summary) {
         return AccountSummaryResponse.builder()
                 .id(summary.id())
                 .accountNumber(summary.accountNumber())

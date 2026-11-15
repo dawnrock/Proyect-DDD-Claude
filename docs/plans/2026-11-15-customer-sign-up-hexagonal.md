@@ -136,11 +136,11 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 - **Acceptance criteria:**
   - [x] Tests of #95 pass, including "a username the administrator gave to a customer cannot be taken"; `la_aplicacion_no_depende_de_spring_security` green.
 
-### [ ] T12 — REST `POST /api/customers` (~10 min)
+### [x] T12 — REST `POST /api/customers` (~10 min)
 
 - **Side:** back · **Layer:** adapter.in.rest · **Depends on:** T11
 - **Acceptance criteria:**
-  - [ ] 201 + `Location`; 400; 422 for duplicate customer, taken username and insufficient deposit.
+  - [x] 201 + `Location`; 400; 422 for duplicate customer, taken username and insufficient deposit.
 
 ### [ ] T13 — REST `POST /api/accounts/{id}/account-number` (~5 min)
 

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.pronoide.ddd.adapter.in.UsernameTakenException;
 import com.pronoide.ddd.application.NotFoundException;
 import com.pronoide.ddd.application.OperationNotAllowedException;
 import com.pronoide.ddd.domain.model.DomainException;
@@ -36,6 +37,15 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(DomainException.class)
     ProblemDetail handleBusinessRule(DomainException exception) {
+        return problem(HttpStatus.UNPROCESSABLE_CONTENT, BUSINESS_RULE_TITLE, exception.getMessage());
+    }
+
+    /**
+     * El usuario elegido en el alta ya existe. No es un {@code DomainException} (la identidad no llega al dominio),
+     * pero para quien llama es una regla de negocio incumplida: 422.
+     */
+    @ExceptionHandler(UsernameTakenException.class)
+    ProblemDetail handleUsernameTaken(UsernameTakenException exception) {
         return problem(HttpStatus.UNPROCESSABLE_CONTENT, BUSINESS_RULE_TITLE, exception.getMessage());
     }
 
