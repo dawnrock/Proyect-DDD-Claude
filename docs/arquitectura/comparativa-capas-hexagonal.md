@@ -100,6 +100,7 @@ sequenceDiagram
 | — | `adapter.out.event` | New: `SpringDomainEventPublisher` implements `DomainEventPublisher` | #17 |
 | — | `adapter.out.taxagency` | New: `FakeTaxAgencyIncomeVerifier` implements `IncomeVerifier` (simulated tax agency) | #18 |
 | `application.SegmentReviewJob` (#94) | `adapter.in.scheduler.SegmentReviewScheduler` + `domain.service.SegmentReviewService` | The daily segment review is an input adapter that only uses `CheckingAccountCommands`; the review itself is a domain service that asks the `IncomeVerifier` port again (#98). On `Monolithic` the balance alone decides until #99 | #98 |
+| `presentation.CustomerRegistration`, `persistence.InMemoryCustomerRepository` (#95) | `adapter.in.CustomerRegistration`, `adapter.out.persistence.InMemoryCustomerRepository` + `InMemoryCustomerOwnershipRepository` | Customer sign-up (ADR 0012): the same behaviour on both branches. On `Monolithic` the customer repository also keeps the customer → username relation; here it is a separate application output port (`CustomerOwnershipRepository`), because identity does not reach the domain. `CustomerRegistration` only uses the input ports | #103 |
 | — | `config` | New: `DomainConfiguration` builds the core and receives the adapters by their port types | #20 |
 | root (`DddLabApplication`) | root | Unchanged | — |
 
