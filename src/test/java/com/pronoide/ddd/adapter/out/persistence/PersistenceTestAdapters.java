@@ -4,6 +4,7 @@ import com.pronoide.ddd.application.AccountOwnershipRepository;
 import com.pronoide.ddd.application.UnitOfWork;
 import com.pronoide.ddd.domain.model.AccountNumberSequence;
 import com.pronoide.ddd.domain.model.CheckingAccountRepository;
+import com.pronoide.ddd.domain.model.CustomerRepository;
 
 /**
  * Adaptadores de persistencia en memoria para los tests de otros paquetes. Los adaptadores son package-private: fuera
@@ -27,6 +28,11 @@ public final class PersistenceTestAdapters {
     /** La unidad de trabajo en memoria (un cerrojo para todos los casos de uso, #78). */
     public static UnitOfWork unitOfWork() {
         return new InMemoryUnitOfWork();
+    }
+
+    /** Un repositorio de clientes en memoria, vacío. */
+    public static CustomerRepository customers() {
+        return new InMemoryCustomerRepository();
     }
 
     /** Un repositorio de propietarios de cuentas en memoria, vacío. */

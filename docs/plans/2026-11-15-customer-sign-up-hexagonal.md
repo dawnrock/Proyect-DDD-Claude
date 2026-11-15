@@ -84,12 +84,12 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 - **Acceptance criteria:**
   - [x] `CustomerTests` pass.
 
-### [ ] T4 — `CustomerRepository` port and adapter (~10 min)
+### [x] T4 — `CustomerRepository` port and adapter (~10 min)
 
 - **Side:** back · **Layer:** domain · adapter.out · **Depends on:** T3
 - **What to do:** port in `domain.model`; `InMemoryCustomerRepository` rejects a document of another customer atomically (R30).
 - **Acceptance criteria:**
-  - [ ] Adapter tests pass; `HexagonalArchitectureTests` green.
+  - [x] Adapter tests pass; `HexagonalArchitectureTests` green.
 
 ### [ ] T5 — `CustomerOwnershipRepository` port and adapter (~10 min)
 
