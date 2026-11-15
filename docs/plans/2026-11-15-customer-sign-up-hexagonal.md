@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-15
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~280 min (30 tasks; back and web in parallel after T0)
 - **Twin of:** #95, implemented on `Monolithic` in PR #102 (branch `feat/customer-sign-up`). Both branches must behave the same.
 
@@ -252,8 +252,8 @@ Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@Mo
 
 ## Risks and open questions
 
-- **Where the customer ↔ username relation lives:** proposed as an application port (`CustomerOwnershipRepository`), like accounts; alternative: inside the customer adapter as on `Monolithic`. Confirm.
-- **Domain events:** `Hexagonal` publishes events (notifications, audit). A `CustomerRegistered` or `AccountNumberReassigned` event is left out; confirm whether the notification listener should announce them.
-- **PR #102 not merged yet:** the web port copies its code; if the review of #102 changes something, apply it here too.
+- **Where the customer ↔ username relation lives:** decided by the user on 2026-11-15: application port `CustomerOwnershipRepository`.
+- **Domain events:** decided by the user on 2026-11-15: no new events (`CustomerRegistered`, `AccountNumberReassigned` stay out).
+- **PR #102:** merged on 2026-11-15; the web port copies its merged code (`origin/Monolithic`).
 - **Incompatible REST change** in `POST /api/accounts` (optional customer fields, new `holderEmail`).
 - Accepted risks of ADR 0012 and the review notes of #95 (customer saved before the account, reassign before the uniqueness check) apply as well; with the unit of work they may already be covered.

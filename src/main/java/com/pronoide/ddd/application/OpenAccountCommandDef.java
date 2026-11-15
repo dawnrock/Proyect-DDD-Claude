@@ -21,6 +21,9 @@ public interface OpenAccountCommandDef {
     /** Formato de un NIF: 8 dígitos y una letra; se admiten espacios y minúsculas. No se comprueba la letra. */
     String TAX_ID_PATTERN = "^ *\\d{8} *[A-Za-z] *$";
 
+    /** Mensaje de un documento mal formado; lo comparten los commands, la API REST y la web. */
+    String TAX_ID_MESSAGE = "El NIF debe tener 8 dígitos y una letra";
+
     String holderName();
 
     /** NIF del titular, para verificar sus ingresos; lo normaliza {@code TaxId}. */
@@ -45,7 +48,7 @@ public interface OpenAccountCommandDef {
     @Value.Check
     default void validate() {
         if (!holderTaxId().matches(TAX_ID_PATTERN)) {
-            throw new IllegalArgumentException("El NIF debe tener 8 dígitos y una letra");
+            throw new IllegalArgumentException(TAX_ID_MESSAGE);
         }
         if (holderName().isBlank()) {
             throw new IllegalArgumentException("El nombre del titular es obligatorio");

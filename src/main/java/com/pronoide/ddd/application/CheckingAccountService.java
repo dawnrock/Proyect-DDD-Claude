@@ -96,6 +96,26 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     }
 
     @Override
+    public AccountSummary signUp(SignUpCommand command) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
+    @Override
+    public AccountSummary openAnotherAccount(Caller caller, OpenAnotherAccountCommand command) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
+    @Override
+    public AccountSummary regenerateAccountNumber(Caller caller, UUID id) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
+    @Override
+    public boolean isUsernameTaken(String username) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
+    @Override
     public List<AccountSummary> listAccounts(Caller caller) {
         return unitOfWork.execute(() -> repository.findAll().stream()
                 .filter(account -> canAccess(caller, account.id()))
