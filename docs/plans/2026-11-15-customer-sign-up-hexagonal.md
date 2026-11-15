@@ -157,10 +157,10 @@ Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@Mo
 - **Acceptance criteria:**
   - [x] Doors at `/login`, form at `/login?form` and `?error`; existing login tests updated to `/login?form`.
 
-### [ ] T15 — Sign-up step 1 (~10 min) · **Side:** web · **Depends on:** T0
+### [x] T15 — Sign-up step 1 (~10 min) · **Side:** web · **Depends on:** T0
 
 - **Acceptance criteria:**
-  - [ ] Public, CSRF, field errors, redirect to step 2.
+  - [x] Public, CSRF, field errors, redirect to step 2.
 
 ### [ ] T16 — Sign-up step 2 (~10 min) · **Side:** web · **Depends on:** T15
 
