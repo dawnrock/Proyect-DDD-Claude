@@ -7,6 +7,7 @@
     <div class="page-head">
         <h1 th:text="${admin} ? 'Cuentas' : 'Mis cuentas'">Cuentas</h1>
         <a class="pill pill-primary" th:if="${admin}" th:href="@{/accounts/new}">+ Abrir cuenta</a>
+        <a class="pill pill-primary" th:if="${customer}" th:href="@{/accounts/another}">Abrir otra cuenta</a>
     </div>
     <p th:if="${message}" class="flash flash-success" role="status" th:text="${message}"></p>
 

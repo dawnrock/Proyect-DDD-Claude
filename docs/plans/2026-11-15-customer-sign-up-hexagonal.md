@@ -177,10 +177,10 @@ Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@Mo
 - **Acceptance criteria:**
   - [x] Same session reaches `/accounts/{id}` with the welcome flash.
 
-### [ ] T19 — "Abrir otra cuenta" (~10 min) · **Side:** web · **Depends on:** T0
+### [x] T19 — "Abrir otra cuenta" (~10 min) · **Side:** web · **Depends on:** T0
 
 - **Acceptance criteria:**
-  - [ ] Button on list and detail for customers; admin → 403.
+  - [x] Button on list and detail for customers; admin → 403.
 
 ### [ ] T20 — "Generar nuevo IBAN" (~10 min) · **Side:** web · **Depends on:** T0
 
