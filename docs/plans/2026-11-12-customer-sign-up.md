@@ -263,12 +263,12 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Every rule R27-R31 names an existing test.
 
-### [ ] T27 — README and deployment guide (~5 min)
+### [x] T27 — README and deployment guide (~5 min)
 
 - **Side:** both · **Layer:** docs · **Files:** `README.md`, `docs/deploy/render.md` · **Depends on:** T22
 - **What to do:** mention the sign-up, the new demo IBANs and that customers created on the site disappear on restart.
 - **Acceptance criteria:**
-  - [ ] No document still tells the administrator to type an IBAN.
+  - [x] No document still tells the administrator to type an IBAN.
 
 ### [ ] T28 — Project status (~5 min)
 
