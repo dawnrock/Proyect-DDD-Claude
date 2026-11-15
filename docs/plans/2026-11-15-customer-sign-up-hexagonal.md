@@ -77,12 +77,12 @@ Decisions taken in this plan (behaviour fixed by #95; design adapted to ports):
 - **Acceptance criteria:**
   - [x] `EmailAddressTests` pass (R29).
 
-### [ ] T3 — `Customer` aggregate (~10 min)
+### [x] T3 — `Customer` aggregate (~10 min)
 
 - **Side:** back · **Layer:** domain · **Depends on:** T1, T2
 - **What to do:** `Customer.register(fullName, taxId, email)` (name stripped), equality by id; `DuplicateCustomerException` test.
 - **Acceptance criteria:**
-  - [ ] `CustomerTests` pass.
+  - [x] `CustomerTests` pass.
 
 ### [ ] T4 — `CustomerRepository` port and adapter (~10 min)
 
