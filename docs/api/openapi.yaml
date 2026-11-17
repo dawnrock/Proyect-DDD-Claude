@@ -30,6 +30,8 @@ info:
     name: Practice project
     identifier: MIT
 servers:
+  - url: /
+    description: The server that serves this document (Swagger UI at `/api-docs`, in local or on Render)
   - url: http://localhost:8080
     description: Local development
   - url: https://proyect-ddd-claude.onrender.com

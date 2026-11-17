@@ -12,7 +12,7 @@ Render runs Java only through Docker, so the repository has a [`Dockerfile`](../
 | H2 console | image (`SPRING_H2_CONSOLE_ENABLED=false`) | Off: on a public URL it could run code on the server |
 | Users and passwords | you, in Render (`APP_SECURITY_USERS_*`) | Your own password instead of `demo` |
 
-**Live services** (given by the user, 2026-11-17): `Hexagonal` at <https://proyect-ddd-claude.onrender.com> (also in the `servers` of `docs/api/openapi.yaml`) and `Monolithic` at <https://mon-e-bank-monolithic.onrender.com>. On the free plan they sleep when idle, so the first request may take about a minute.
+**Live services** (given by the user, 2026-11-17): `Hexagonal` at <https://proyect-ddd-claude.onrender.com> (also in the `servers` of `docs/api/openapi.yaml`) and `Monolithic` at <https://mon-e-bank-monolithic.onrender.com>. On the free plan they sleep when idle, so the first request may take about a minute. The image also serves the API documentation: Swagger UI at `/api-docs` over the contract at `/openapi.yaml` (#111; the `Dockerfile` copies `docs/api/openapi.yaml` into the build).
 
 ## 1. Choose a password and get its hash
 

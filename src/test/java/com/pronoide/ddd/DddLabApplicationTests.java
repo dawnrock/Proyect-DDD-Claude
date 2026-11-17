@@ -665,6 +665,45 @@ class DddLabApplicationTests {
 		}
 	}
 
+	/** La documentación de la API sale del contrato escrito a mano (#111). */
+	@Nested
+	@DisplayName("Documentación de la API (#111)")
+	class ApiDocumentation {
+
+		@Test
+		@DisplayName("El contrato OpenAPI se sirve sin credenciales en /openapi.yaml")
+		void el_contrato_openapi_se_sirve_sin_credenciales() throws Exception {
+			HttpResponse<String> response = http.send(HttpRequest.newBuilder(URI.create(url("/openapi.yaml"))).GET().build(),
+					HttpResponse.BodyHandlers.ofString());
+
+			assertThat(response.statusCode()).isEqualTo(200);
+			assertThat(response.body()).startsWith("openapi: 3.1.0");
+		}
+
+		@Test
+		@DisplayName("/api-docs lleva sin credenciales hasta la página de Swagger UI")
+		void api_docs_lleva_sin_credenciales_hasta_la_pagina() throws Exception {
+			HttpClient following = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
+
+			HttpResponse<String> response = following.send(HttpRequest.newBuilder(URI.create(url("/api-docs"))).GET().build(),
+					HttpResponse.BodyHandlers.ofString());
+
+			assertThat(response.statusCode()).isEqualTo(200);
+			assertThat(response.uri().getPath()).isEqualTo("/api-docs/index.html");
+			assertThat(response.body()).contains("SwaggerUIBundle");
+		}
+
+		@Test
+		@DisplayName("La página de Swagger UI se sirve sin credenciales y carga el contrato escrito a mano")
+		void la_pagina_de_swagger_ui_se_sirve_sin_credenciales() throws Exception {
+			HttpResponse<String> response = http.send(HttpRequest.newBuilder(URI.create(url("/api-docs/index.html"))).GET().build(),
+					HttpResponse.BodyHandlers.ofString());
+
+			assertThat(response.statusCode()).isEqualTo(200);
+			assertThat(response.body()).contains("SwaggerUIBundle", "url: '/openapi.yaml'", "integrity=\"sha384-");
+		}
+	}
+
 	private String url(String path) {
 		return "http://localhost:" + port + path;
 	}
