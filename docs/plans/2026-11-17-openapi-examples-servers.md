@@ -90,7 +90,7 @@ Named examples:
 - **Acceptance criteria:**
   - [x] Redocly clean (examples valid against their schemas).
 
-### [ ] T5 — Movement, transfer and business-rule examples (~10 min)
+### [x] T5 — Movement, transfer and business-rule examples (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`
@@ -99,7 +99,7 @@ Named examples:
   1. Named examples of `deposit`, `withdraw`, `transfer` and the shared `UnprocessableContent` (its single `example` becomes `examples`).
   2. Redocly and the contract tests.
 - **Acceptance criteria:**
-  - [ ] Redocly clean; contract tests pass.
+  - [x] Redocly clean; contract tests pass.
 
 ### [ ] T6 — Project status (~5 min)
 

@@ -309,6 +309,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transaction'
+              examples:
+                approved:
+                  summary: A deposit, always approved
+                  value:
+                    id: "a5d790c3-d569-4947-bc8d-af3788473db1"
+                    type: "DEPOSIT"
+                    amount: 25.00
+                    currency: "EUR"
+                    occurredOn: "2026-11-17T15:45:20.882Z"
+                    status: "APPROVED"
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -342,6 +352,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transaction'
+              examples:
+                approved:
+                  summary: "The overdraft rules allow it: the balance goes down"
+                  value:
+                    id: "3b9e1f20-7c4d-4a5e-9f8b-6d2c1a0e9b87"
+                    type: "WITHDRAWAL"
+                    amount: 50.00
+                    currency: "EUR"
+                    occurredOn: "2026-11-17T15:45:20.931Z"
+                    status: "APPROVED"
+                rejected:
+                  summary: "The overdraft rules do not allow it: recorded as rejected, the balance does not change (still 201)"
+                  value:
+                    id: "8972c0ea-daa5-4001-8b78-e1aa5815dbc2"
+                    type: "WITHDRAWAL"
+                    amount: 5000.00
+                    currency: "EUR"
+                    occurredOn: "2026-11-17T15:45:20.964Z"
+                    status: "REJECTED"
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -378,6 +407,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transfer'
+              examples:
+                approved:
+                  summary: The withdrawal in the source is approved and the amount reaches the target
+                  value:
+                    sourceAccountId: "8016d0d2-d7cf-44cf-bf9f-aa62a253892e"
+                    sourceAccountNumber: "ES8099990001450000000001"
+                    targetAccountNumber: "ES8899990001440000000003"
+                    amount: 50.00
+                    currency: "EUR"
+                    occurredOn: "2026-11-17T15:45:21.049Z"
+                    status: "APPROVED"
+                rejected:
+                  summary: "The source overdraft rules do not allow it: nothing reaches the target (still 201)"
+                  value:
+                    sourceAccountId: "acb47102-7688-44bb-a6ba-e05b56f0e8cd"
+                    sourceAccountNumber: "ES8899990001440000000003"
+                    targetAccountNumber: "ES8099990001450000000001"
+                    amount: 9000.00
+                    currency: "EUR"
+                    occurredOn: "2026-11-17T15:45:21.140Z"
+                    status: "REJECTED"
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -702,11 +752,35 @@ components:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/ProblemDetail'
-          example:
-            type: about:blank
-            title: Regla de negocio incumplida
-            status: 422
-            detail: El depósito inicial de 10.00 EUR no alcanza el mínimo exigido de 50.00 EUR
+          examples:
+            minimumInitialDeposit:
+              summary: Initial deposit below the minimum (R1)
+              value:
+                type: about:blank
+                title: Regla de negocio incumplida
+                status: 422
+                detail: El depósito inicial de 10.00 EUR no alcanza el mínimo exigido de 50.00 EUR
+            currencyMismatch:
+              summary: A currency other than the account's
+              value:
+                type: about:blank
+                title: Regla de negocio incumplida
+                status: 422
+                detail: La operación esperaba importes en EUR, pero ha recibido USD
+            sameAccount:
+              summary: A transfer to the same account (R17)
+              value:
+                type: about:blank
+                title: Regla de negocio incumplida
+                status: 422
+                detail: 'No se puede transferir a la misma cuenta: ES8099990001450000000001'
+            duplicateDocument:
+              summary: Signing up with a document that already belongs to a customer (R29)
+              value:
+                type: about:blank
+                title: Regla de negocio incumplida
+                status: 422
+                detail: 'Ya eres cliente de Mon-A Bank: ya hay un cliente con el documento 12345678Z. Entra con tu usuario'
     UnsupportedMediaType:
       description: The request body is not JSON.
       content:
