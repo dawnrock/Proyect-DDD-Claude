@@ -92,7 +92,7 @@ No new DDD building block: the limit is a format check of the input, so it lives
 - **Acceptance criteria:**
   - [x] 400 with `errors.initialDeposit` for both limits; the port is never called.
 
-### [ ] T5 — Wrong credentials on the public sign-up are a 401 (~5 min)
+### [x] T5 — Wrong credentials on the public sign-up are a 401 (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `CustomerControllerTests.java` (or the existing security test of `ApiSecurityConfig`)
@@ -100,7 +100,7 @@ No new DDD building block: the limit is a format check of the input, so it lives
 - **What to do:**
   1. Characterisation test: `POST /api/customers` with a valid body and HTTP Basic credentials that do not exist answers 401 `ProblemDetail` ("No autenticado"); without credentials it reaches the port.
 - **Acceptance criteria:**
-  - [ ] The test fixes the current behaviour that T7 documents.
+  - [x] The test fixes the current behaviour that T7 documents.
 
 ### [ ] T6 — Undeclared `QUERY` method answers 405 (~10 min)
 
