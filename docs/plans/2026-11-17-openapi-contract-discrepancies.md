@@ -6,7 +6,7 @@
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-17
 - **Status:** in progress
-- **Total estimate:** ~70 min (8 tasks)
+- **Total estimate:** ~75 min (9 tasks)
 
 ## Goal
 
@@ -143,6 +143,16 @@ No new DDD building block: the limit is a format check of the input, so it lives
   3. Record in `pendientes.md` whatever Schemathesis still reports (see risks), for #107.
 - **Acceptance criteria:**
   - [x] No failures left of classes ST108, ST201, ST103 or ST204; any ST202 left is a 422 for a business rule (see risks).
+
+### [x] T9 — Review fixes (~5 min)
+
+- **Layer:** application
+- **Files:** `CommandValidation.java`, `MovementCommandsTests.java`, `OpenAccountCommandTests.java`
+- **Depends on:** T8
+- **What to do:**
+  1. `revisor-ddd` found that the REST `@DecimalMax` rejected `999999999.994` while the commands rounded it to `999999999.99` and accepted it, so REST, web and CLI had different limits. The commands now compare the maximum on the amount as received (not rounded), like the REST DTOs and the contract's `maximum`; the minimum keeps the rounding.
+- **Acceptance criteria:**
+  - [x] `999999999.991` is rejected and `999999999.990` accepted by the commands (tests red before, green after).
 
 ## Global acceptance criteria
 

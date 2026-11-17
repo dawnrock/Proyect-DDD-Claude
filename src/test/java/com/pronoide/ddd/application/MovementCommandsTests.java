@@ -122,8 +122,8 @@ class MovementCommandsTests {
     }
 
     @ParameterizedTest
-    @CsvSource({"999999999.99", "999999999.994"})
-    @DisplayName("Un importe que no supera el máximo de 999.999.999,99 después de redondear se acepta")
+    @CsvSource({"999999999.99", "999999999.990"})
+    @DisplayName("Un importe que no supera el máximo de 999.999.999,99 se acepta")
     void un_importe_que_no_supera_el_maximo_se_acepta(String amount) {
         assertThat(deposit(amount, null).amount()).isEqualByComparingTo(amount);
         assertThat(withdraw(amount, null).amount()).isEqualByComparingTo(amount);
@@ -131,8 +131,8 @@ class MovementCommandsTests {
     }
 
     @ParameterizedTest
-    @CsvSource({"1000000000.00", "999999999.995", "1.7976931348623155E+308"})
-    @DisplayName("Un importe que supera el máximo de 999.999.999,99 después de redondear se rechaza")
+    @CsvSource({"999999999.991", "1000000000.00", "1.7976931348623155E+308"})
+    @DisplayName("Un importe que supera el máximo de 999.999.999,99, aunque sea en una fracción de céntimo, se rechaza")
     void un_importe_que_supera_el_maximo_se_rechaza(String amount) {
         String message = "El importe no puede superar 999999999.99";
 

@@ -26,8 +26,9 @@ final class CommandValidation {
     }
 
     /**
-     * Exige una divisa ISO 4217 válida y un importe positivo y no mayor que {@link #MAX_AMOUNT} después de
-     * redondearlo (HALF_UP) a los decimales de esa divisa, igual que hace {@code MonetaryAmount}.
+     * Exige una divisa ISO 4217 válida y un importe positivo después de redondearlo (HALF_UP) a los decimales de esa
+     * divisa, igual que hace {@code MonetaryAmount}, y no mayor que {@link #MAX_AMOUNT} tal como llega (sin redondear,
+     * igual que el {@code @DecimalMax} de la API y el {@code maximum} del contrato).
      */
     static void requireValidMovement(BigDecimal amount, String currency) {
         if (!isIsoCurrency(currency)) {
@@ -50,7 +51,7 @@ final class CommandValidation {
         if (rounded.signum() <= 0) {
             throw new IllegalArgumentException(subject + " debe ser positivo");
         }
-        if (rounded.compareTo(MAX_AMOUNT) > 0) {
+        if (amount.compareTo(MAX_AMOUNT) > 0) {
             throw new IllegalArgumentException(subject + " no puede superar " + MAX_AMOUNT.toPlainString());
         }
     }

@@ -130,7 +130,7 @@ class OpenAccountCommandTests {
         }
 
         @ParameterizedTest
-        @ValueSource(strings = {"1000000000.00", "999999999.995"})
+        @ValueSource(strings = {"999999999.991", "1000000000.00"})
         @DisplayName("Un depósito inicial que supera el máximo de 999.999.999,99 se rechaza")
         void un_deposito_inicial_que_supera_el_maximo_se_rechaza(String deposit) {
             for (Function<String, Object> opening : List.of(OPEN, SIGN_UP, ANOTHER)) {
