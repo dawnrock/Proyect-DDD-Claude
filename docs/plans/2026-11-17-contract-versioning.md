@@ -86,7 +86,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **Acceptance criteria:**
   - [x] Both files consistent with ADR 0014.
 
-### [ ] T5 — Project status (~5 min)
+### [x] T5 — Project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/decisiones.md`, `docs/ia/arquitectura-ia.md`
@@ -94,7 +94,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **What to do:**
   1. `decisiones.md`: the policy and the check; `arquitectura-ia.md`: the CI row mentions it.
 - **Acceptance criteria:**
-  - [ ] Annexes updated.
+  - [x] Annexes updated.
 
 ## Global acceptance criteria
 
