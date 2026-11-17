@@ -1,10 +1,9 @@
 # Pruebas de contrato (#107, ADR 0013): Schemathesis comprueba que la API REST cumple docs/api/openapi.yaml.
 # Se ejecuta con `node scripts/contract-test.mjs`, que arranca el jar con el perfil demo y pasa la URL.
 
-# Ejecución determinista: el CI no debe ponerse en rojo porque aparezca un caso aleatorio nuevo.
-# Para explorar casos nuevos, se cambia la semilla a propósito y lo que salga se trata en su propia issue.
-seed = 108113
-
+# Generación determinista (en este modo Schemathesis no usa semilla): el CI no se pone en rojo porque aparezca un
+# caso aleatorio nuevo. Para explorar casos nuevos, se ejecuta a mano quitando `deterministic = true` (sin subir
+# el cambio) y lo que salga se trata en su propia issue.
 [generation]
 deterministic = true
 max-examples = 40

@@ -22,7 +22,7 @@ Nothing checks today that the implementation keeps to the contract; #108 and #11
 
 | Layer / package | File | Change |
 | --------------- | ---- | ------ |
-| build (test config) | `schemathesis.toml` (root, new) | Seed, deterministic generation, examples per operation, HTTP Basic `admin`/`demo`, and the statuses that are legitimate for schema-valid data |
+| build (test config) | `schemathesis.toml` (root, new) | Deterministic generation, examples per operation, HTTP Basic `admin`/`demo`, and the statuses that are legitimate for schema-valid data |
 | scripts | `scripts/contract-test.mjs` (new), `scripts/README.md` | Starts the built jar with the `demo` profile, waits for `/actuator/health`, runs Schemathesis, stops the app, returns Schemathesis' exit code |
 | CI | `.github/workflows/ci.yml` | After `./mvnw verify`: Python, `pip install schemathesis==4.33.4`, `node scripts/contract-test.mjs` |
 | docs | `docs/adr/0013-contract-tests-schemathesis.md`, `docs/adr/README.md` | Why black-box contract tests at hexagon level, with Schemathesis in the CI and not as a Maven dependency |
@@ -31,7 +31,7 @@ Nothing checks today that the implementation keeps to the contract; #108 and #11
 Decisions taken while planning (clear and reversible, so not asked):
 
 - **Legitimate rejections are declared, not disabled.** `positive_data_acceptance` keeps running with its default statuses plus `422` (business rules the schema cannot express); only `openAccount` also accepts `400` (the #103 cross-field rule: an existing customer's document with different data). Every other check stays on with its defaults.
-- **Deterministic run** (`seed` + `generation.deterministic`): the CI must not turn red because a new random case appeared; new cases are explored by changing the seed on purpose. `max-examples = 40`, about a minute.
+- **Deterministic run** (`generation.deterministic`): the CI must not turn red because a new random case appeared; new cases are explored by changing the seed on purpose. `max-examples = 40`, about a minute.
 - **Schemathesis is a CI tool, like Redocly**: installed with `pip` at a fixed version, not added to `pom.xml`.
 
 ## Tasks
@@ -43,7 +43,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **Depends on:** —
 - **Deviation:** the first run still reported a `ST202` on `signUp`: a DNI/NIE with a wrong control letter (mod 23) answers 400, a rule a regex cannot check and the contract documents in text. Declared like `openAccount`'s 400. Result: 0 failures in two runs (872 and 870 cases); two warnings left (transfers test data, `signUp` mostly rejected generated data, because random documents rarely have a valid letter).
 - **What to do:**
-  1. Write `schemathesis.toml`: `seed`, `[generation] deterministic = true, max-examples = 40`, `[auth.basic]` with `admin`/`demo` (practice password, already public in the README), `[checks.positive_data_acceptance] expected-statuses` = defaults + `422`, and an `[[operations]]` entry for `include-operation-id = "openAccount"` adding `400`. A comment in Spanish per decision.
+  1. Write `schemathesis.toml`: `[generation] deterministic = true, max-examples = 40`, `[auth.basic]` with `admin`/`demo` (practice password, already public in the README), `[checks.positive_data_acceptance] expected-statuses` = defaults + `422`, and an `[[operations]]` entry for `include-operation-id = "openAccount"` adding `400`. A comment in Spanish per decision.
   2. Run it by hand against the app with the `demo` profile.
 - **Acceptance criteria:**
   - [x] Schemathesis ends with no failures (`ST202` for 422 and the #103 400 no longer reported) and the same result in two runs.
@@ -68,7 +68,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **What to do:**
   1. After "Build y tests": `actions/setup-python@v5` (3.12), `pip install schemathesis==4.33.4`, step "Contrato frente a la implementación (Schemathesis)" running `node scripts/contract-test.mjs`. The Telegram failure notice already covers it.
 - **Acceptance criteria:**
-  - [ ] The PR's `verify` job runs the step and passes (checked on the PR).
+  - [x] The PR's `verify` job runs the step and passes (PR #117: 872 generated, 872 passed). The CI log showed `Seed: not used in the deterministic mode`, so the `seed` was removed from `schemathesis.toml` and the docs.
 
 ### [x] T4 — ADR 0013 (~10 min)
 
@@ -137,5 +137,5 @@ Decisions taken while planning (clear and reversible, so not asked):
 ## Risks and open questions
 
 - **CI time:** about one more minute per PR (start the jar, ~600 cases).
-- **Deterministic seed:** it will not find new random cases by itself; changing the seed is a deliberate act, and a new finding is fixed (or declared) in its own issue.
+- **Deterministic generation:** it will not find new random cases by itself; a manual run without deterministic mode is a deliberate act, and a new finding is fixed (or declared) in its own issue.
 - **Demo data:** the run creates accounts and customers in the in-memory app it starts; nothing persists.
