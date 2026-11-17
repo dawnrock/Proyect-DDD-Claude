@@ -1,6 +1,6 @@
 # Contract: Mon-A Bank customer sign-up (Hexagonal)
 
-- **Issue:** [#103](https://github.com/dawnrock/Proyect-DDD-Claude/issues/103) · **Plan:** `docs/plans/2026-11-15-customer-sign-up-hexagonal.md`
+- **Issue:** [#103](https://github.com/dawnrock/Proyect-DDD-Claude/issues/103) · **Plan:** in a comment on [#103](https://github.com/dawnrock/Proyect-DDD-Claude/issues/103) and in the git history (`docs/plans/2026-11-15-customer-sign-up-hexagonal.md`)
 - **Twin of:** the contract of #95 on `Monolithic` (`docs/contracts/customer-sign-up.md` there, frozen at `8ce0baa`, plus its change of 2026-11-15). Same behaviour, adapted to ports and adapters.
 - **Status:** frozen at `51c280f`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both accepted the signatures and asked only for clarifications, merged by the lead, since the teammates cannot message each other). Web-dev's question on `DomainException` in `adapter.in.web`: already allowed by D4 in `HexagonalArchitectureTests`.
