@@ -74,7 +74,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **What to do:**
   1. On pull requests, after the Redocly lint: `actions/setup-go@v5` (Go 1.27 after the review), `go install github.com/oasdiff/oasdiff@v1.35.0`, and `node scripts/check-contract-version.mjs` with `BASE_REF`.
 - **Acceptance criteria:**
-  - [ ] The PR's `verify` job runs the step and passes (checked on the PR).
+  - [x] The PR's `verify` job runs the step and passes (PR #121: `go install` of oasdiff in about 20 s, then `✅ Versión del contrato correcta: 0.1.0 → 1.0.0.`).
 
 ### [x] T4 — `plan-feature` asks for the bump (~5 min)
 
