@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-17
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~40 min (5 tasks)
 
 ## Goal
@@ -44,7 +44,7 @@ No Java change, no new dependency (Redocly already runs with `npx` at a fixed ve
 
 ## Tasks
 
-### [ ] T1 — Rules the contract already meets (~10 min)
+### [x] T1 — Rules the contract already meets (~10 min)
 
 - **Layer:** docs
 - **Files:** `redocly.yaml`
@@ -53,7 +53,7 @@ No Java change, no new dependency (Redocly already runs with `npx` at a fixed ve
   1. Raise the four built-in rules to `error` and add `rule/operation-id-camel-case`, `rule/one-tag`, `rule/request-body-required` and `rule/errors-are-problem-details`, each with a message in English.
   2. Validate each one by sabotage on a temporary copy of the contract (a snake_case `operationId`, a second tag, `required: false`, an error response in `application/json`, an operation without a 4XX), then lint the real contract.
 - **Acceptance criteria:**
-  - [ ] Each rule fails on its sabotage; the real contract lints without errors.
+  - [x] Each rule fails on its sabotage; the real contract lints without errors.
 
 ### [ ] T2 — `info.contact` and its rule (~5 min)
 
