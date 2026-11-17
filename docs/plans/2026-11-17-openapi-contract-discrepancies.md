@@ -116,7 +116,7 @@ No new DDD building block: the limit is a format check of the input, so it lives
   - [x] `curl -X QUERY -u admin:demo localhost:8080/api/accounts` → 405 with `Allow`.
   - [x] `PUT`/`DELETE` still answer 405 as before.
 
-### [ ] T7 — Update `openapi.yaml` (~10 min)
+### [x] T7 — Update `openapi.yaml` (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`
@@ -128,8 +128,8 @@ No new DDD building block: the limit is a format check of the input, so it lives
   4. `signUp`: add the `401` response (`$ref: '#/components/responses/Unauthorized'`) with a description: only when wrong credentials are sent; no credentials are needed.
   5. `npx @redocly/cli@2.71.0 lint docs/api/openapi.yaml`.
 - **Acceptance criteria:**
-  - [ ] Redocly without errors.
-  - [ ] The contract matches cases 1-6 of the goal.
+  - [x] Redocly without errors.
+  - [x] The contract matches cases 1-6 of the goal.
 
 ### [ ] T8 — Verify with Schemathesis and update the project status (~5 min)
 
