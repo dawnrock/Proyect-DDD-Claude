@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-15
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~280 min (30 tasks; back and web in parallel after T0)
 - **Twin of:** #95, implemented on `Monolithic` in PR #102 (branch `feat/customer-sign-up`). Both branches must behave the same.
 
@@ -208,10 +208,10 @@ Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@Mo
 - **Acceptance criteria:**
   - [x] New ports and adapters respect `HexagonalArchitectureTests`; one rule broken on purpose fails and passes when restored.
 
-### [ ] T24 — OpenAPI (~10 min) · **Side:** both · **Depends on:** T21
+### [x] T24 — OpenAPI (~10 min) · **Side:** both · **Depends on:** T21
 
 - **Acceptance criteria:**
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors. **Not run:** the session's permission classifier blocked `npx`; the YAML parses and its 16 `$ref` resolve (checked with a script). Pending for the user.
+  - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors (run on 2026-11-17 once the user allowed `npx`: valid, no warnings).
 
 ### [x] T25 — ADR 0012 and architecture (~10 min) · **Side:** both
 
@@ -240,14 +240,14 @@ Port each task from PR #102 (`presentation.web` → `adapter.in.web`), with `@Mo
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked. **All but the lint of T24.**
+- [x] All tasks and their criteria are checked.
 - [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
 - [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
 - [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
 - [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`check-domain.mjs` without errors).
 - [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
 - [x] No dependencies added beyond the planned ones.
-- [ ] `docs/api/openapi.yaml` reflects the change and `npx @redocly/cli lint` has no errors. **Reflects the change; the lint is pending** (blocked in the session, see T24).
+- [x] `docs/api/openapi.yaml` reflects the change and `npx @redocly/cli lint` has no errors.
 - [x] Any new business term is in `docs/dominio/glosario.md`.
 - [x] Documentation written or changed by this plan is in English (`docs/analysis` in Spanish).
 - [x] Project status updated (`estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`).

@@ -16,7 +16,6 @@
 ## Next step
 
 1. No issue is planned: the user chooses the next one. Both branches behave the same (segment by income and balance, customer sign-up).
-2. Pending checks of #103: `npx @redocly/cli lint docs/api/openapi.yaml` could not run in the session (see [`pendientes.md`](pendientes.md)).
 
 Both branches are live on Render (guide `docs/deploy/render.md`).
 
