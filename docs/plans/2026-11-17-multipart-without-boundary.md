@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-17
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~15 min (2 tasks)
 
 ## Goal
@@ -35,7 +35,7 @@ No change to the domain, the ports or the adapters' code; no new dependency; no 
 
 ## Tasks
 
-### [ ] T1 — Reproduce the 500 and turn multipart resolution off (~10 min)
+### [x] T1 — Reproduce the 500 and turn multipart resolution off (~10 min)
 
 - **Layer:** config · tests
 - **Files:** `src/test/java/com/pronoide/ddd/DddLabApplicationTests.java`, `src/main/resources/application.properties`
@@ -48,8 +48,8 @@ No change to the domain, the ports or the adapters' code; no new dependency; no 
   2. Run it and confirm it fails with 500 for the expected reason.
   3. Add `spring.servlet.multipart.enabled=false` to `application.properties` with a short Spanish comment (nothing in the application accepts multipart; with it on, a malformed multipart request failed with 500 before reaching any controller).
 - **Acceptance criteria:**
-  - [ ] The three checks fail with 500 before the property and pass after it.
-  - [ ] `./mvnw verify` green (web forms, H2 console and every existing test unaffected).
+  - [x] The three checks fail with 500 before the property and pass after it.
+  - [x] `./mvnw verify` green (web forms, H2 console and every existing test unaffected).
 
 ### [ ] T2 — Verify with Schemathesis and update the project status (~5 min)
 

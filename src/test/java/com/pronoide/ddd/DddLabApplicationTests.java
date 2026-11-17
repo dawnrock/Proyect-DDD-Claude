@@ -619,6 +619,53 @@ class DddLabApplicationTests {
 	}
 
 
+	/** Una petición que anuncia multipart sin delimitador no debe llegar a un 500 (#113). */
+	@Nested
+	@DisplayName("Peticiones multipart sin delimitador (#113)")
+	class MultipartWithoutBoundary {
+
+		private static final String MULTIPART = "multipart/form-data";
+
+		@Test
+		@DisplayName("Un GET de la API con Content-Type multipart sin delimitador responde 200")
+		void un_get_de_la_api_con_multipart_sin_delimitador_responde_200() throws Exception {
+			assertThat(multipart("GET", "/api/accounts", null, "application/json").statusCode()).isEqualTo(200);
+		}
+
+		@Test
+		@DisplayName("Un POST de la API con Content-Type multipart sin delimitador responde 415 ProblemDetail")
+		void un_post_de_la_api_con_multipart_sin_delimitador_responde_415() throws Exception {
+			String deposits = openAccount().replaceFirst("^https?://[^/]+", "") + "/deposits";
+
+			HttpResponse<String> response = multipart("POST", deposits, "{\"amount\": 10.00}", "application/json");
+
+			assertThat(response.statusCode()).isEqualTo(415);
+			assertThat(response.headers().firstValue("Content-Type")).hasValueSatisfying(
+					type -> assertThat(type).startsWith("application/problem+json"));
+		}
+
+		@Test
+		@DisplayName("Una página de la web con Content-Type multipart sin delimitador responde 200")
+		void una_pagina_de_la_web_con_multipart_sin_delimitador_responde_200() throws Exception {
+			HttpResponse<String> response = http.send(HttpRequest.newBuilder(URI.create(url("/login")))
+					.header("Content-Type", MULTIPART).header("Accept", "text/html")
+					.method("GET", HttpRequest.BodyPublishers.noBody()).build(), HttpResponse.BodyHandlers.ofString());
+
+			assertThat(response.statusCode()).isEqualTo(200);
+		}
+
+		private HttpResponse<String> multipart(String method, String path, String body, String accept) throws Exception {
+			String credentials = java.util.Base64.getEncoder()
+					.encodeToString(("admin:" + PASSWORD).getBytes(StandardCharsets.UTF_8));
+			return http.send(HttpRequest.newBuilder(URI.create(url(path)))
+					.header("Authorization", "Basic " + credentials)
+					.header("Content-Type", MULTIPART)
+					.header("Accept", accept)
+					.method(method, body == null ? HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofString(body))
+					.build(), HttpResponse.BodyHandlers.ofString());
+		}
+	}
+
 	private String url(String path) {
 		return "http://localhost:" + port + path;
 	}
