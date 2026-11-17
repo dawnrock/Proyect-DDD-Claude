@@ -92,7 +92,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **Acceptance criteria:**
   - [x] The three files mention the command consistently.
 
-### [ ] T6 — Project status (~5 min)
+### [x] T6 — Project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/decisiones.md`, `docs/ia/pendientes.md`, `docs/ia/arquitectura-ia.md`
@@ -102,7 +102,7 @@ Decisions taken while planning (clear and reversible, so not asked):
   2. `pendientes.md`: replace the #107 note with what is left (transfers test data; adapter-level validation as an optional step).
   3. `arquitectura-ia.md`: the CI row mentions the contract tests.
 - **Acceptance criteria:**
-  - [ ] Annexes updated.
+  - [x] Annexes updated.
 
 ## Global acceptance criteria
 

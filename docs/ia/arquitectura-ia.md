@@ -39,7 +39,7 @@ flowchart LR
 | Deterministic scripts | `scripts/seed-issues.mjs`, `scripts/notify.mjs` | 9.2.2, 14 | Create the backlog; send notifications. |
 | Memory between sessions | `docs/ia/estado-del-proyecto.md` + annexes `decisiones.md`, `pendientes.md`, `historial.md` + `scripts/check-project-status.mjs` | 6.2, 12, 14 | Entry point of every session (cited by `CLAUDE.md`), short on purpose; the annexes are only read when needed (ADR 0010). Updated by `implement-plan` / `implement-plan-team`, required by the plan template, checked by `revisor-ddd`, and CI fails if a PR that closes an issue does not touch it. |
 | Code graph | Graphify (`graphifyy`) + `scripts/graphify.mjs` + `.graphifyignore` | 10.3 | Local graph of the Java code (`graphify-out/`, no tokens, one per worktree). `buscador-referencias` and `plan-feature` only use it for dependency questions (`affected`, `path`), where it saves tokens (−27 % in phase 1, −32 % in phase 2, #71); questions about methods go straight to Grep (#79); no hook (ADR 0010). `scripts/measure-graphify.mjs` repeats the measurement. |
-| CI/CD | `.github/workflows/ci.yml` | 14 | The deterministic part (build, tests, ArchUnit, domain rules, project status, OpenAPI lint) without AI. |
+| CI/CD | `.github/workflows/ci.yml` | 14 | The deterministic part (build, tests, ArchUnit, domain rules, project status, OpenAPI lint and, since #107, the contract tests with Schemathesis against the running jar, ADR 0013) without AI. |
 | CI/CD with AI | `.github/workflows/claude.yml`, `claude-code-review.yml` | 14 | `@claude` on issues/PRs and an automatic review of every PR. |
 | Agent teams | `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | 13.2 | Enabled for research or review tasks in parallel. |
 
