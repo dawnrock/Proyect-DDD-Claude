@@ -49,7 +49,7 @@ jobs:
       - uses: actions/setup-go@v5
         if: github.event_name == 'pull_request'
         with:
-          go-version: '1.26'
+          go-version: '1.27'
           cache: false
 
       - name: Versión del contrato (oasdiff)

@@ -6,7 +6,7 @@
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-17
 - **Status:** in progress
-- **Total estimate:** ~45 min (5 tasks)
+- **Total estimate:** ~55 min (6 tasks)
 
 ## Goal
 
@@ -72,7 +72,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **Files:** `.github/workflows/ci.yml`
 - **Depends on:** T2
 - **What to do:**
-  1. On pull requests, after the Redocly lint: `actions/setup-go@v5` (Go 1.26), `go install github.com/oasdiff/oasdiff@v1.35.0`, and `node scripts/check-contract-version.mjs` with `BASE_REF`.
+  1. On pull requests, after the Redocly lint: `actions/setup-go@v5` (Go 1.27 after the review), `go install github.com/oasdiff/oasdiff@v1.35.0`, and `node scripts/check-contract-version.mjs` with `BASE_REF`.
 - **Acceptance criteria:**
   - [ ] The PR's `verify` job runs the step and passes (checked on the PR).
 
@@ -95,6 +95,16 @@ Decisions taken while planning (clear and reversible, so not asked):
   1. `decisiones.md`: the policy and the check; `arquitectura-ia.md`: the CI row mentions it.
 - **Acceptance criteria:**
   - [x] Annexes updated.
+
+### [x] T6 — Review fixes (~10 min)
+
+- **Layer:** build · docs
+- **Files:** `scripts/check-contract-version.mjs`, `scripts/README.md`, `.github/workflows/ci.yml`, ADR 0014
+- **Depends on:** T5
+- **What to do:**
+  1. `revisor-ddd` (no blocking finding). Applied: only oasdiff's exit code 1 means "incompatible changes"; any other (102 when it cannot load a contract, or a signal) fails with 2 instead of passing or being taken for a breaking change; a base branch that does not exist fails with 2 instead of skipping the check; the temporary directory is removed on exit; `info.version` is read inside the `info:` block only; `setup-go` 1.27, the toolchain oasdiff's module asks for (it avoids a second download). The script still checks the major bump only (plus "every change bumps"), as ADR 0014 promises.
+- **Acceptance criteria:**
+  - [x] Eight cases give the expected exit code: unchanged 0, changed without bump 1, breaking with minor 1, breaking with major 0, docs with patch 0, invalid contract 2, unknown base branch 2, this PR (0.1.0 → 1.0.0) 0.
 
 ## Global acceptance criteria
 
