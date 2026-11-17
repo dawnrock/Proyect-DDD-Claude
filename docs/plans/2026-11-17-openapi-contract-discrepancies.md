@@ -102,18 +102,19 @@ No new DDD building block: the limit is a format check of the input, so it lives
 - **Acceptance criteria:**
   - [x] The test fixes the current behaviour that T7 documents.
 
-### [ ] T6 — Undeclared `QUERY` method answers 405 (~10 min)
+### [x] T6 — Undeclared `QUERY` method answers 405 (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `ApiSecurityConfig.java`, its test
 - **Depends on:** —
+- **Deviation:** the firewall bean went to `adapter.in.SecuritySupport` (what both security chains share) instead of `ApiSecurityConfig`. Undeclared methods (`PUT`, `DELETE`) answer 405 with `Allow` but **without** a `ProblemDetail` body (Spring answers before any controller advice applies), so `QUERY` now matches them: 405 + `Allow`, no `ProblemDetail`. Test: `AccountControllerTests.UndeclaredMethods`.
 - **What to do:**
   1. Test first (`fix`: reproduce): `QUERY /api/accounts` with valid credentials answers 405 with the `Allow` header and a `ProblemDetail` body (today: 400).
   2. Declare a `StrictHttpFirewall` bean that allows the standard methods plus `QUERY` (Spring Security picks it up for every filter chain, so the web is covered too).
   3. Confirm the cause first: if the 400 does not come from the firewall, stop and update the plan.
 - **Acceptance criteria:**
-  - [ ] `curl -X QUERY -u admin:demo localhost:8080/api/accounts` → 405 with `Allow`.
-  - [ ] `PUT`/`DELETE` still answer 405 as before.
+  - [x] `curl -X QUERY -u admin:demo localhost:8080/api/accounts` → 405 with `Allow`.
+  - [x] `PUT`/`DELETE` still answer 405 as before.
 
 ### [ ] T7 — Update `openapi.yaml` (~10 min)
 

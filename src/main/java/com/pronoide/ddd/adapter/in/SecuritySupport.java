@@ -14,11 +14,14 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 import com.pronoide.ddd.application.OpenAccountCommandDef;
 
 /**
- * Lo que comparten las dos cadenas de seguridad (web y API, ADR 0008): el cifrado de contraseñas y los usuarios.
+ * Lo que comparten las dos cadenas de seguridad (web y API, ADR 0008): el cifrado de contraseñas, los usuarios y el
+ * cortafuegos HTTP.
  *
  * <p>Los usuarios salen de {@link SecurityUsersProperties} y, si están definidas, de las variables de entorno
  * {@code APP_ADMIN_USERNAME} y {@code APP_ADMIN_PASSWORD} (un administrador). Sin perfil {@code demo} ni variables no
@@ -35,6 +38,18 @@ public class SecuritySupport {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * El cortafuegos estricto de Spring Security, con sus comprobaciones por defecto, que además deja pasar el método
+     * {@code QUERY} (estandarizado en 2026). Sin él, {@code QUERY} se rechazaba con un 400 antes de llegar a Spring MVC;
+     * así responde 405 con la cabecera {@code Allow}, como cualquier otro método no declarado (#108).
+     */
+    @Bean
+    public HttpFirewall httpFirewall() {
+        StrictHttpFirewall firewall = new StrictHttpFirewall();
+        firewall.setAllowedHttpMethods(List.of("DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "QUERY"));
+        return firewall;
     }
 
     @Bean

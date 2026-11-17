@@ -1,5 +1,6 @@
 package com.pronoide.ddd.adapter.in.rest;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -7,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -28,6 +30,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -272,6 +275,22 @@ class AccountControllerTests {
                      "initialDeposit": 100, "currency": "XYZ", "ownerUsername": "ada"}"""))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.title").value("Petición no válida"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Métodos no declarados en el contrato")
+    class UndeclaredMethods {
+
+        @ParameterizedTest(name = "{0} /api/accounts")
+        @ValueSource(strings = {"QUERY", "PUT", "DELETE"})
+        @DisplayName("Un método no declarado, también QUERY, responde 405 con la cabecera Allow")
+        void un_metodo_no_declarado_responde_405_con_la_cabecera_allow(String method) throws Exception {
+            mvc.perform(request(HttpMethod.valueOf(method), "/api/accounts"))
+                    .andExpect(status().isMethodNotAllowed())
+                    .andExpect(header().string("Allow", containsString("GET")));
+
+            verifyNoInteractions(commands, queries);
         }
     }
 
