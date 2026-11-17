@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-17
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~70 min (8 tasks)
 
 ## Goal
@@ -46,7 +46,7 @@ No new DDD building block: the limit is a format check of the input, so it lives
 
 ## Tasks
 
-### [ ] T1 — Maximum amount in movement commands (~10 min)
+### [x] T1 — Maximum amount in movement commands (~10 min)
 
 - **Layer:** application
 - **Files:** `src/main/java/com/pronoide/ddd/application/CommandValidation.java`, `src/test/java/com/pronoide/ddd/application/MovementCommandsTests.java`
@@ -55,8 +55,8 @@ No new DDD building block: the limit is a format check of the input, so it lives
   1. Test first (`@ParameterizedTest` + `@CsvSource`): a deposit, a withdrawal and a transfer of `999999999.99` are built; `1000000000.00` and `999999999.995` (rounds up to 1,000,000,000.00) throw `IllegalArgumentException` with a message in Spanish naming the maximum.
   2. Add `MAX_AMOUNT` and the check after rounding in `requireValidMovement`.
 - **Acceptance criteria:**
-  - [ ] The new tests fail before the change and pass after it.
-  - [ ] Existing amount tests still pass (minimum unchanged).
+  - [x] The new tests fail before the change and pass after it.
+  - [x] Existing amount tests still pass (minimum unchanged).
 
 ### [ ] T2 — Initial deposit uses the same amount check (~10 min)
 
