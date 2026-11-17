@@ -7,12 +7,14 @@ import org.springframework.context.annotation.Configuration;
 
 import com.pronoide.ddd.application.AccountOwnershipRepository;
 import com.pronoide.ddd.application.CheckingAccountService;
+import com.pronoide.ddd.application.CustomerOwnershipRepository;
 import com.pronoide.ddd.application.UnitOfWork;
 import com.pronoide.ddd.application.listener.AuditLogListener;
 import com.pronoide.ddd.application.listener.CustomerNotificationListener;
 import com.pronoide.ddd.domain.model.AccountNumberSequence;
 import com.pronoide.ddd.domain.model.CheckingAccountFactory;
 import com.pronoide.ddd.domain.model.CheckingAccountRepository;
+import com.pronoide.ddd.domain.model.CustomerRepository;
 import com.pronoide.ddd.domain.model.DomainEventPublisher;
 import com.pronoide.ddd.domain.model.IncomeVerifier;
 import com.pronoide.ddd.domain.service.MoneyTransferService;
@@ -56,9 +58,10 @@ public class DomainConfiguration {
                                                          DomainEventPublisher publisher, CheckingAccountFactory factory,
                                                          MoneyTransferService transferService,
                                                          SegmentReviewService segmentReview, Clock clock,
-                                                         UnitOfWork unitOfWork) {
+                                                         UnitOfWork unitOfWork, CustomerRepository customers,
+                                                         CustomerOwnershipRepository customerOwnership) {
         return new CheckingAccountService(repository, ownership, publisher, factory, transferService, segmentReview,
-                clock, unitOfWork);
+                clock, unitOfWork, customers, customerOwnership);
     }
 
     /** Consumidores de los eventos de dominio: Spring les entrega cada evento por su {@code @EventListener}. */

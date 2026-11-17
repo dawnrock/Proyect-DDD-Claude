@@ -20,7 +20,8 @@ com.pronoide.ddd
 │   │   └── web           Thymeleaf
 │   └── out
 │       ├── event         SpringDomainEventPublisher
-│       ├── persistence   InMemoryCheckingAccountRepository, InMemoryAccountOwnershipRepository, InMemoryAccountNumberSequence
+│       ├── persistence   InMemoryCheckingAccountRepository, InMemoryAccountOwnershipRepository, InMemoryAccountNumberSequence,
+│       │                 InMemoryCustomerRepository, InMemoryCustomerOwnershipRepository
 │       └── taxagency     FakeTaxAgencyIncomeVerifier
 ├── application           application services and input ports
 │   └── listener          domain event consumers
@@ -86,6 +87,9 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | `OpenAccountRequest`, `MovementRequest`, `TransferRequest`, `*ResponseDef` | `adapter.in.rest` | REST DTOs (records with Bean Validation, Immutables responses); the open-account request carries the holder's NIF |
 | `ApiSecurityConfig` | `adapter.in.rest` | Input adapter: security chain of `/api/**` (HTTP Basic) |
 | `AccountWebController`, `LoginController`, `AccessDeniedController` | `adapter.in.web` | Input adapter (web): screens and forms; uses the input ports only |
+| `SignUpController`, `SignUpForm`, `AnotherAccountForm` | `adapter.in.web` | Input adapter (web, #103): `/login` with two doors, the three-step public sign-up (`/signup`), signing in after it, and "Abrir otra cuenta" |
+| `CustomerController`, `SignUpRequest` | `adapter.in.rest` | Input adapter (REST, #103): public `POST /api/customers` |
+| `CustomerRegistration`, `UsernameTakenException` | `adapter.in` | Support shared by the input adapters (#103, ADR 0012): checks the username, calls `signUp` and creates the `USER` in the `UserDetailsManager`; credentials never reach the core |
 | `MovementForm`, `OpenAccountForm`, `TransferForm` | `adapter.in.web` | Web forms; the open-account form asks for the holder's NIF |
 | `WebExceptionHandler`, `WebModelAdvice`, `WebFormat` | `adapter.in.web` | Web support: 404 page, common model attributes, formatting (amounts, shortened IBAN, segment label) |
 | `WebSecurityConfig` | `adapter.in.web` | Input adapter: fallback security chain (form login) |
@@ -96,17 +100,21 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | `InMemoryAccountNumberSequence` | `adapter.out.persistence` | Output adapter (simulated, package-private): implements `AccountNumberSequence`, valid consecutive Spanish IBANs |
 | `FakeTaxAgencyIncomeVerifier` | `adapter.out.taxagency` | Output adapter (simulated, package-private): implements `IncomeVerifier` with a fixed table |
 | `InMemoryAccountOwnershipRepository` | `adapter.out.persistence` | Output adapter (package-private): implements `AccountOwnershipRepository`, which user owns each account (ADR 0008) |
+| `InMemoryCustomerRepository` | `adapter.out.persistence` | Output adapter (package-private, #103): implements `CustomerRepository`, one customer per document (R30) |
+| `InMemoryCustomerOwnershipRepository` | `adapter.out.persistence` | Output adapter (package-private, #103): implements `CustomerOwnershipRepository`, one username per customer (R30) |
 | `InMemoryUnitOfWork` | `adapter.out.persistence` | Output adapter (simulated, package-private): implements `UnitOfWork` with one fair lock for every use case (#78) |
 | `CheckingAccountService` | `application` | Application service: implements `CheckingAccountCommands` and `CheckingAccountQueries` (use cases and account ownership); uses the output ports only, opens accounts through `CheckingAccountFactory` and runs every use case inside a `UnitOfWork` and publishes the domain events of the saved accounts once the unit has finished (#78). Keeps its name (not `CheckingAccountApplicationService`): nobody outside `application` sees it. No Spring annotations: built in `config` |
-| `CheckingAccountCommands`, `CheckingAccountQueries` | `application` | Input ports: use cases that change accounts (open, deposit, withdraw, transfer) and that query them (list, detail) |
+| `CheckingAccountCommands`, `CheckingAccountQueries` | `application` | Input ports: use cases that change accounts (open, sign up, open another account, regenerate an IBAN, deposit, withdraw, transfer) and that query them (list, detail, is a username taken) |
 | `AccountOwnershipRepository` | `application` | Output port: account ownership. In `application`, not `domain.model`, because the user's identity never reaches the domain (ADR 0008) |
+| `CustomerOwnershipRepository` | `application` | Output port (#103): customer ↔ username, in `application` for the same reason (ADR 0012) |
 | `UnitOfWork` | `application` | Output port: runs a use case as one unit (load, change, save); in `application` because the boundary of a use case is an application concern (#78) |
 | `*CommandDef`, `*SummaryDef`, `AccountDetailsDef`, `CallerDef`, `ApplicationValue`, `CommandValidation` | `application` | Commands, views and `Caller` (Immutables) and their validation |
 | `AuditLogListener`, `CustomerNotificationListener` | `application.listener` | Domain event consumers: audit log and simulated customer notification. Declared in `config`; they keep `@EventListener`, the only Spring dependency allowed in the core (events reach them through Spring) |
-| `NotFoundException`, `AccountNotFoundException`, `TargetAccountNotFoundException`, `ForbiddenOperationException`, `OperationNotAllowedException` | `application` | Application errors |
+| `NotFoundException`, `AccountNotFoundException`, `TargetAccountNotFoundException`, `ForbiddenOperationException`, `OperationNotAllowedException`, `NotACustomerException` | `application` | Application errors |
 | `DomainModelRunner` | `adapter.in.cli` | Input adapter (CLI): with the `demo` profile, opens the demo accounts and runs a deposit, two withdrawals (approved and rejected) and a transfer through `CheckingAccountCommands`, with a `[demo]` trace per use case |
 | `CheckingAccount` | `domain.model` | Aggregate root; records its domain events (`pullDomainEvents`); `open` is package-private, used only by the factory |
-| `CheckingAccountFactory` | `domain.model` | Factory: number + segment from the verified income (R20); built in `config` |
+| `CheckingAccountFactory` | `domain.model` | Factory: number + segment from the verified income (R20), also for a registered customer (#103); built in `config` |
+| `Customer` | `domain.model` | Aggregate (#103): a Mon-A Bank customer, identified by their document, with name and e-mail |
 | `SegmentReviewService` | `domain.service` | Domain service (#98): when the segment review of an account is due, verifies the income again through the `IncomeVerifier` port and tells the aggregate the result; built in `config` |
 | `CustomerSegmentChanged` | `domain.model` | Domain event recorded by the aggregate on every promotion and demotion |
 | `SegmentReviewScheduler` | `adapter.in.scheduler` | Input adapter (scheduled task, #98): every day calls `CheckingAccountCommands.reviewSegments()`; here the clock is who calls the hexagon. Scheduling is enabled in `config.SchedulingConfiguration` |
@@ -115,10 +123,11 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | `DomainEvent`, `CheckingAccountOpened`, `MoneyDeposited`, `MoneyWithdrawn`, `WithdrawalRejected` | `domain.model` | Domain events (`record`) |
 | `DomainEventPublisher` | `domain.model` | Output port: publishes domain events |
 | `CheckingAccountRepository` | `domain.model` | Output port: repository of the aggregate |
+| `CustomerRepository` | `domain.model` | Output port (#103): repository of customers |
 | `AccountHolder`, `Transaction` | `domain.model` | Entities |
-| `AccountNumber`, `MonetaryAmount`, `TaxId` | `domain.model` | Value objects |
+| `AccountNumber`, `MonetaryAmount`, `TaxId`, `EmailAddress` | `domain.model` | Value objects; `TaxId` is a DNI or NIE with its control letter checked (R28) |
 | `CustomerSegment`, `TransactionStatus`, `TransactionType` | `domain.model` | Domain enumerations; the segment is decided by the factory |
-| `DomainException` and its subclasses (`CurrencyMismatchException`, `DuplicateAccountNumberException`, `InsufficientInitialDepositException`, `SameAccountTransferException`) | `domain.model` | Business rule violations (422) |
+| `DomainException` and its subclasses (`CurrencyMismatchException`, `DuplicateAccountNumberException`, `DuplicateCustomerException`, `InsufficientInitialDepositException`, `SameAccountTransferException`) | `domain.model` | Business rule violations (422) |
 | `MoneyTransferService` | `domain.service` | Domain service (transfers, R17-R19); built in `config` |
 | `DomainConfiguration` | `config` | `@Configuration` that builds the core (`MoneyTransferService`, `CheckingAccountFactory`, `CheckingAccountService`, the listeners) and hands it the output adapters by their ports |
 | `DddLabApplication` | root | Spring Boot entry point |
@@ -137,5 +146,7 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | #21 | Adapter tests without the hexagon | #68 |
 | #22 | ArchUnit rules for the hexagonal architecture | #69 |
 | #23 | Close phase 2: layers vs hexagonal comparison and `v2-hexagonal` tag | #73 |
+
+After the phase (no milestone), among others: #98 segment by verified income and by balance (PR #100) and #103 customer sign-up, twin of #95 on `Monolithic` (back + web, *team*, ADR 0012).
 
 Issues marked *team* were implemented with `/implement-plan-team` (contract first, ADR 0007).

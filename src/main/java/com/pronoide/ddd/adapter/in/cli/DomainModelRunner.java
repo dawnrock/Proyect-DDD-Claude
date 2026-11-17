@@ -37,9 +37,9 @@ import lombok.extern.slf4j.Slf4j;
 public class DomainModelRunner implements ApplicationRunner {
 
     private static final List<OpenAccountCommand> DEMO_ACCOUNTS = List.of(
-            account("Ada Lovelace", "12345678Z", "1000.00", "ada"),
-            account("Grace Hopper", "87654321X", "5000.00", "grace"),
-            account("Alan Turing", "11111111H", "250.00", "alan"));
+            account("Ada Lovelace", "12345678Z", "ada@example.com", "1000.00", "ada"),
+            account("Grace Hopper", "87654321X", "grace@example.com", "5000.00", "grace"),
+            account("Alan Turing", "11111111H", "alan@example.com", "250.00", "alan"));
 
     private final CheckingAccountCommands commands;
 
@@ -95,11 +95,12 @@ public class DomainModelRunner implements ApplicationRunner {
                 transfer.approved() ? "aprobada" : "rechazada");
     }
 
-    private static OpenAccountCommand account(String holderName, String holderTaxId, String initialDeposit,
-                                              String owner) {
+    private static OpenAccountCommand account(String holderName, String holderTaxId, String holderEmail,
+                                              String initialDeposit, String owner) {
         return OpenAccountCommand.builder()
                 .holderName(holderName)
                 .holderTaxId(holderTaxId)
+                .holderEmail(holderEmail)
                 .initialDeposit(new BigDecimal(initialDeposit))
                 .ownerUsername(owner)
                 .build();

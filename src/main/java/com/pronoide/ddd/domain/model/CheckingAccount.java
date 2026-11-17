@@ -19,7 +19,7 @@ public class CheckingAccount {
     /** Cada cuánto se vuelven a verificar los ingresos de un titular que conserva el segmento sin el saldo mínimo. */
     private static final Period INCOME_REVIEW_PERIOD = Period.ofMonths(6);
     private final UUID id;
-    private final AccountNumber accountNumber;
+    private AccountNumber accountNumber;
     private final AccountHolder primaryHolder;
     private final List<Transaction> transactions = new ArrayList<>();
     private final List<DomainEvent> domainEvents = new ArrayList<>();
@@ -169,6 +169,22 @@ public class CheckingAccount {
 
     public UUID id() {
         return id;
+    }
+
+    /**
+     * Sustituye el número de cuenta por otro que haya generado Mon-A Bank y que sea distinto del actual (R32). Que no
+     * lo use otra cuenta no lo sabe el agregado: lo comprueba el repositorio al guardar.
+     */
+    public void reassignAccountNumber(AccountNumber newAccountNumber) {
+        Objects.requireNonNull(newAccountNumber, "El número de cuenta es obligatorio");
+        if (!newAccountNumber.isMonABank()) {
+            throw new IllegalArgumentException(
+                    "El número de cuenta %s no es de Mon-A Bank".formatted(newAccountNumber));
+        }
+        if (newAccountNumber.equals(accountNumber)) {
+            throw new IllegalArgumentException("La cuenta ya tiene el número %s".formatted(accountNumber));
+        }
+        this.accountNumber = newAccountNumber;
     }
 
     public AccountNumber accountNumber() {

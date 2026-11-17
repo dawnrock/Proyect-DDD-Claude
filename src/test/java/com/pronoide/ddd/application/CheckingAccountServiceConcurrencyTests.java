@@ -42,12 +42,13 @@ class CheckingAccountServiceConcurrencyTests {
         return new CheckingAccountService(PersistenceTestAdapters.accounts(), PersistenceTestAdapters.ownership(),
                 ignoreEvents, new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(),
                         TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork());
+                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(),
+                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
     }
 
     private static AccountSummary open(CheckingAccountService service, String holder, String taxId, String owner) {
         return service.openAccount(ADMIN, OpenAccountCommand.builder().holderName(holder).holderTaxId(taxId)
-                .initialDeposit(INITIAL).ownerUsername(owner).build());
+                .holderEmail(owner + "@example.com").initialDeposit(INITIAL).ownerUsername(owner).build());
     }
 
     @Test

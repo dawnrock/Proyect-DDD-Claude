@@ -5,6 +5,7 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -12,9 +13,13 @@ import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CheckingAccountFactory;
 import com.pronoide.ddd.domain.model.CheckingAccountRepository;
+import com.pronoide.ddd.domain.model.Customer;
+import com.pronoide.ddd.domain.model.CustomerRepository;
 import com.pronoide.ddd.domain.model.DomainEvent;
 import com.pronoide.ddd.domain.model.DomainEventPublisher;
 import com.pronoide.ddd.domain.model.DuplicateAccountNumberException;
+import com.pronoide.ddd.domain.model.DuplicateCustomerException;
+import com.pronoide.ddd.domain.model.EmailAddress;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.domain.model.Transaction;
@@ -50,12 +55,15 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     private final SegmentReviewService segmentReview;
     private final Clock clock;
     private final UnitOfWork unitOfWork;
+    private final CustomerRepository customers;
+    private final CustomerOwnershipRepository customerOwnership;
 
     /** Recibe sus colaboradores ya construidos: los entrega {@code config.DomainConfiguration} (#20). */
     public CheckingAccountService(CheckingAccountRepository repository, AccountOwnershipRepository ownership,
                                   DomainEventPublisher publisher, CheckingAccountFactory factory,
                                   MoneyTransferService transferService, SegmentReviewService segmentReview,
-                                  Clock clock, UnitOfWork unitOfWork) {
+                                  Clock clock, UnitOfWork unitOfWork, CustomerRepository customers,
+                                  CustomerOwnershipRepository customerOwnership) {
         this.repository = repository;
         this.ownership = ownership;
         this.publisher = publisher;
@@ -64,6 +72,8 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         this.segmentReview = segmentReview;
         this.clock = clock;
         this.unitOfWork = unitOfWork;
+        this.customers = customers;
+        this.customerOwnership = customerOwnership;
     }
 
     @Override
@@ -75,17 +85,57 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         if (!caller.admin()) {
             throw new ForbiddenOperationException("abrir cuentas");
         }
-        if (command.ownerUsername().isEmpty()) {
-            throw new IllegalArgumentException("El usuario propietario de la cuenta es obligatorio");
-        }
-        MonetaryAmount initialDeposit =
-                new MonetaryAmount(command.initialDeposit(), Currency.getInstance(command.currency()));
-        CheckingAccount opened =
-                factory.open(command.holderName(), new TaxId(command.holderTaxId()), initialDeposit);
+        TaxId taxId = new TaxId(command.holderTaxId());
+        Optional<Customer> existing = customers.findByTaxId(taxId);
+        Customer customer = existing.orElseGet(() -> newCustomer(taxId, command));
+        String owner = existing.isPresent() ? ownerOfExisting(customer, command) : command.ownerUsername();
+
+        CheckingAccount opened = factory.open(customer, toAmount(command.initialDeposit(), command.currency()));
         requireUnused(opened.accountNumber());
+        if (existing.isEmpty()) {
+            if (usernameTaken(owner)) {
+                throw new IllegalArgumentException("El usuario %s ya es de otro cliente".formatted(owner));
+            }
+            customers.save(customer);
+            customerOwnership.assign(taxId, owner);
+        }
         CheckingAccount account = save(opened, events);
-        ownership.assign(account.id(), command.ownerUsername());
+        ownership.assign(account.id(), owner);
         return toSummary(account);
+    }
+
+    /** Un cliente nuevo desde el alta del administrador: nombre, correo y usuario son obligatorios. */
+    private static Customer newCustomer(TaxId taxId, OpenAccountCommand command) {
+        if (command.holderName().isBlank()) {
+            throw new IllegalArgumentException("El nombre del titular es obligatorio para un cliente nuevo");
+        }
+        if (command.holderEmail().isBlank()) {
+            throw new IllegalArgumentException("El correo del titular es obligatorio para un cliente nuevo");
+        }
+        if (command.ownerUsername().isEmpty()) {
+            throw new IllegalArgumentException("El usuario del titular es obligatorio para un cliente nuevo");
+        }
+        return Customer.register(command.holderName(), taxId, new EmailAddress(command.holderEmail()));
+    }
+
+    /**
+     * El usuario de un cliente existente. Los datos del command van en blanco o coinciden con los del cliente: unos
+     * distintos se rechazan en lugar de ignorarlos (como en {@code Monolithic}, decisión del usuario de 2026-11-13).
+     */
+    private String ownerOfExisting(Customer customer, OpenAccountCommand command) {
+        String username = customerOwnership.usernameOf(customer.taxId()).orElseThrow(() ->
+                new IllegalArgumentException("El cliente %s no tiene usuario asignado: no se le puede abrir otra cuenta"
+                        .formatted(customer.taxId())));
+        boolean nameMatches = command.holderName().isBlank()
+                || command.holderName().strip().equals(customer.fullName());
+        boolean emailMatches = command.holderEmail().isBlank()
+                || new EmailAddress(command.holderEmail()).equals(customer.email());
+        boolean usernameMatches = command.ownerUsername().isEmpty() || command.ownerUsername().equals(username);
+        if (!nameMatches || !emailMatches || !usernameMatches) {
+            throw new IllegalArgumentException(("El documento %s ya es de un cliente: deja en blanco nombre, correo y "
+                    + "usuario, o indica los suyos").formatted(customer.taxId()));
+        }
+        return username;
     }
 
     /** R16: con la numeración generada es solo una red de seguridad ante un generador defectuoso. */
@@ -93,6 +143,79 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         repository.findByAccountNumber(accountNumber).ifPresent(existing -> {
             throw new DuplicateAccountNumberException(accountNumber);
         });
+    }
+
+    /**
+     * Todo o nada sin deshacer: la unidad de trabajo no tiene rollback, así que primero se construye la cuenta (el
+     * dominio comprueba R1 y la divisa), luego se comprueba que el documento y el usuario estén libres (R30) y solo
+     * entonces se guarda. Un fallo antes de guardar no deja ni cliente, ni propiedad, ni cuenta.
+     */
+    @Override
+    public AccountSummary signUp(SignUpCommand command) {
+        return inUnit(events -> {
+            TaxId taxId = new TaxId(command.taxId());
+            Customer customer = Customer.register(command.fullName(), taxId, new EmailAddress(command.email()));
+            CheckingAccount opened = factory.open(customer, toAmount(command.initialDeposit(), command.currency()));
+            requireUnused(opened.accountNumber());
+            customers.findByTaxId(taxId).ifPresent(existing -> {
+                throw new DuplicateCustomerException(taxId);
+            });
+            if (usernameTaken(command.username())) {
+                throw new IllegalArgumentException("El usuario %s ya es de otro cliente".formatted(command.username()));
+            }
+            customers.save(customer);
+            customerOwnership.assign(taxId, command.username());
+            CheckingAccount account = save(opened, events);
+            ownership.assign(account.id(), command.username());
+            return toSummary(account);
+        });
+    }
+
+    @Override
+    public AccountSummary openAnotherAccount(Caller caller, OpenAnotherAccountCommand command) {
+        return inUnit(events -> {
+            Customer customer = customerOf(caller);
+            CheckingAccount opened =
+                    factory.open(customer, toAmount(command.initialDeposit(), command.currency()));
+            requireUnused(opened.accountNumber());
+            CheckingAccount account = save(opened, events);
+            ownership.assign(account.id(), caller.username());
+            return toSummary(account);
+        });
+    }
+
+    /** El cliente de quien lo pide; un administrador, aunque su usuario coincida con el de un cliente, no lo es. */
+    private Customer customerOf(Caller caller) {
+        if (caller.admin()) {
+            throw new NotACustomerException(caller.username());
+        }
+        return customerOwnership.customerOf(caller.username())
+                .flatMap(customers::findByTaxId)
+                .orElseThrow(() -> new NotACustomerException(caller.username()));
+    }
+
+    @Override
+    public AccountSummary regenerateAccountNumber(Caller caller, UUID id) {
+        if (!caller.admin()) {
+            throw new ForbiddenOperationException("generar un nuevo número de cuenta");
+        }
+        return inUnit(events -> {
+            CheckingAccount account = load(id);
+            AccountNumber generated = factory.nextAccountNumber();
+            requireUnused(generated);
+            account.reassignAccountNumber(generated);
+            return toSummary(save(account, events));
+        });
+    }
+
+    @Override
+    public boolean isUsernameTaken(String username) {
+        return unitOfWork.execute(() -> usernameTaken(username));
+    }
+
+    /** Un usuario está tomado si es de un cliente o ya es propietario de alguna cuenta (R30). */
+    private boolean usernameTaken(String username) {
+        return customerOwnership.customerOf(username).isPresent() || !ownership.accountsOf(username).isEmpty();
     }
 
     @Override
@@ -233,11 +356,14 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         return new MonetaryAmount(amount, Currency.getInstance(currency));
     }
 
-    private static AccountDetails toDetails(CheckingAccount account) {
+    private AccountDetails toDetails(CheckingAccount account) {
+        TaxId taxId = account.primaryHolder().taxId();
         return AccountDetails.builder()
                 .id(account.id())
                 .accountNumber(account.accountNumber().value())
                 .holderName(account.primaryHolder().fullName())
+                .holderTaxId(taxId.value())
+                .holderEmail(customers.findByTaxId(taxId).map(customer -> customer.email().value()).orElse(""))
                 .segment(account.primaryHolder().segment().name())
                 .balance(account.currentBalance().amount())
                 .currency(account.currentBalance().currency().getCurrencyCode())

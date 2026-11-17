@@ -15,18 +15,19 @@ class OpenAccountCommandTests {
 
     private static OpenAccountCommand.Builder validCommand() {
         return OpenAccountCommand.builder()
-                .holderName("Ada Lovelace")
                 .holderTaxId("12345678Z")
                 .initialDeposit(new BigDecimal("100.00"));
     }
 
     @Test
-    @DisplayName("Una orden con todos los campos válidos se construye y usa EUR por defecto")
-    void una_orden_con_todos_los_campos_validos_se_construye_y_usa_eur_por_defecto() {
+    @DisplayName("Basta el documento y el depósito: nombre, correo y usuario quedan en blanco y la divisa es EUR")
+    void basta_el_documento_y_el_deposito() {
         OpenAccountCommand command = validCommand().build();
 
-        assertThat(command.holderName()).isEqualTo("Ada Lovelace");
         assertThat(command.holderTaxId()).isEqualTo("12345678Z");
+        assertThat(command.holderName()).isEmpty();
+        assertThat(command.holderEmail()).isEmpty();
+        assertThat(command.ownerUsername()).isEmpty();
         assertThat(command.initialDeposit()).isEqualByComparingTo("100.00");
         assertThat(command.currency()).isEqualTo("EUR");
     }
@@ -37,13 +38,23 @@ class OpenAccountCommandTests {
         assertThat(validCommand().currency("USD").build().currency()).isEqualTo("USD");
     }
 
+    @Test
+    @DisplayName("Los datos de un cliente nuevo se aceptan junto al documento")
+    void los_datos_de_un_cliente_nuevo_se_aceptan() {
+        OpenAccountCommand command = validCommand()
+                .holderName("Ada Lovelace").holderEmail("ada@example.com").ownerUsername("ada").build();
+
+        assertThat(command.holderName()).isEqualTo("Ada Lovelace");
+        assertThat(command.holderEmail()).isEqualTo("ada@example.com");
+    }
+
     @ParameterizedTest
-    @ValueSource(strings = {"", "   "})
-    @DisplayName("El nombre del titular no puede estar en blanco")
-    void el_nombre_del_titular_no_puede_estar_en_blanco(String holderName) {
+    @ValueSource(strings = {"ada", "ada@", "ada@example", "ada @example.com"})
+    @DisplayName("Un correo indicado debe tener un formato válido")
+    void un_correo_indicado_debe_tener_un_formato_valido(String email) {
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> validCommand().holderName(holderName).build())
-                .withMessage("El nombre del titular es obligatorio");
+                .isThrownBy(() -> validCommand().holderEmail(email).build())
+                .withMessage("El correo electrónico no es válido");
     }
 
     @ParameterizedTest
@@ -70,16 +81,16 @@ class OpenAccountCommandTests {
     void el_nif_del_titular_es_obligatorio(String taxId) {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().holderTaxId(taxId).build())
-                .withMessage("El NIF debe tener 8 dígitos y una letra");
+                .withMessage("El documento debe ser un DNI o un NIE");
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"1234567Z", "123456789", "ABCDEFGHZ", "12345678-Z"})
-    @DisplayName("El NIF debe tener 8 dígitos y una letra")
+    @DisplayName("El documento debe ser un DNI o un NIE")
     void el_nif_debe_tener_8_digitos_y_una_letra(String taxId) {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().holderTaxId(taxId).build())
-                .withMessage("El NIF debe tener 8 dígitos y una letra");
+                .withMessage("El documento debe ser un DNI o un NIE");
     }
 
     @Test
