@@ -45,6 +45,21 @@ jobs:
       - name: Contrato OpenAPI (Redocly)
         run: npx --yes @redocly/cli@2.71.0 lint docs/api/openapi.yaml
 
+      # Versionado del contrato (#112, ADR 0014): si cambia, sube info.version; si es incompatible, la mayor.
+      - uses: actions/setup-go@v5
+        if: github.event_name == 'pull_request'
+        with:
+          go-version: '1.26'
+          cache: false
+
+      - name: Versión del contrato (oasdiff)
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          go install github.com/oasdiff/oasdiff@v1.35.0
+          OASDIFF="$(go env GOPATH)/bin/oasdiff" node scripts/check-contract-version.mjs
+
       - name: Build y tests (JUnit + ArchUnit)
         run: ./mvnw -B verify
 

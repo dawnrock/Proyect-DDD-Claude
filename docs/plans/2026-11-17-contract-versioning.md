@@ -66,7 +66,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **Acceptance criteria:**
   - [x] Each case gives the expected exit code; this PR's own change (0.1.0 → 1.0.0) passes.
 
-### [ ] T3 — Run it in the CI (~5 min)
+### [x] T3 — Run it in the CI (~5 min)
 
 - **Layer:** build
 - **Files:** `.github/workflows/ci.yml`
