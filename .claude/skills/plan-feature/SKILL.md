@@ -43,7 +43,7 @@ Cada tarea debe poder hacerse en **5-10 minutos**:
 - `fix`: la primera tarea es un test que reproduce el error. `refactor`: la primera fija el comportamiento actual (tests de caracterización).
 - Todo comportamiento nuevo lleva su test JUnit en la misma tarea (TDD, ver `src/test/CLAUDE.md`).
 - Si cambia la arquitectura, incluye la tarea de la regla de ArchUnit y su validación rompiéndola.
-- Si toca la API, añade una tarea de capa `docs` tras la última de REST: actualizar `docs/api/openapi.yaml` y validarlo con `npx @redocly/cli lint docs/api/openapi.yaml`.
+- Si toca la API, añade una tarea de capa `docs` tras la última de REST: actualizar `docs/api/openapi.yaml`, subir su `info.version` según ADR 0014 (mayor si `oasdiff breaking` encuentra cambios incompatibles, menor si solo añade, parche si solo documenta), añadir la entrada en `docs/api/CHANGELOG.md` y validarlo con `npx @redocly/cli lint docs/api/openapi.yaml`. El CI comprueba la subida de versión (`scripts/check-contract-version.mjs`).
 - **Si la issue toca back y web** (etiquetas `lado:back` y `lado:web`, o `equipo`), el plan se implementará en equipo con `implement-plan-team`:
   - La primera tarea es **T0 · Contract** (`Side: both`): servicio de aplicación, commands, vistas, errores y fragmento de OpenAPI, según `.claude/skills/implement-plan-team/assets/contract-template.md`. Las demás dependen de T0.
   - Cada tarea indica `**Side:** back | web | both`. Las de `back` y `web` no deben depender entre sí (solo del contrato), para poder hacerse en paralelo; las de `both` (integración, test de extremo a extremo) van al final.

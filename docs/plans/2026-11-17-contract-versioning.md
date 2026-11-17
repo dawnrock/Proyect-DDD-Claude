@@ -76,7 +76,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **Acceptance criteria:**
   - [ ] The PR's `verify` job runs the step and passes (checked on the PR).
 
-### [ ] T4 — `plan-feature` asks for the bump (~5 min)
+### [x] T4 — `plan-feature` asks for the bump (~5 min)
 
 - **Layer:** docs
 - **Files:** `.claude/skills/plan-feature/SKILL.md`, `.claude/skills/plan-feature/assets/template.md`
@@ -84,7 +84,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **What to do:**
   1. The API task of a plan also bumps `info.version` following ADR 0014 and adds a `docs/api/CHANGELOG.md` entry; the template's fixed API criterion says so.
 - **Acceptance criteria:**
-  - [ ] Both files consistent with ADR 0014.
+  - [x] Both files consistent with ADR 0014.
 
 ### [ ] T5 — Project status (~5 min)
 
