@@ -58,7 +58,7 @@ Named examples:
 - **Acceptance criteria:**
   - [x] Red before, green after; `./mvnw verify` green.
 
-### [ ] T2 — Document 415 (~5 min)
+### [x] T2 — Document 415 (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`
@@ -66,7 +66,7 @@ Named examples:
 - **What to do:**
   1. `components.responses.UnsupportedMediaType` (ProblemDetail, real example) referenced from `openAccount`, `signUp`, `deposit`, `withdraw` and `transfer`; one row in the error table of `info.description`.
 - **Acceptance criteria:**
-  - [ ] Redocly clean; `node scripts/contract-test.mjs` passes.
+  - [x] Redocly clean; `node scripts/contract-test.mjs` passes.
 
 ### [ ] T3 — Render server and deploy guide (~5 min)
 

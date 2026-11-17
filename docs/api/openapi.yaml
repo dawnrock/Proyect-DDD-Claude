@@ -21,6 +21,7 @@ info:
     | 401 | Not authenticated (HTTP Basic) or invalid credentials | No autenticado |
     | 403 | Authenticated, but without the required role (only an administrator opens accounts or replaces an IBAN) | Acceso denegado |
     | 404 | The requested resource does not exist, or it is another customer's account (its existence is not revealed) | Recurso inexistente |
+    | 415 | The request body is not JSON (operations with a body) | Tipo de contenido no admitido |
     | 422 | A domain business rule is violated | Regla de negocio incumplida |
   contact:
     name: Proyect-DDD-Claude
@@ -105,6 +106,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '422':
           $ref: '#/components/responses/UnprocessableContent'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
   /api/accounts/{id}:
     get:
       tags: [accounts]
@@ -190,6 +193,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '422':
           $ref: '#/components/responses/UnprocessableContent'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
   /api/accounts/{id}/deposits:
     post:
       tags: [accounts]
@@ -218,6 +223,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/UnprocessableContent'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
   /api/accounts/{id}/withdrawals:
     post:
       tags: [accounts]
@@ -249,6 +256,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/UnprocessableContent'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
   /api/transfers:
     post:
       tags: [transfers]
@@ -283,6 +292,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/UnprocessableContent'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 components:
   parameters:
     AccountId:
@@ -604,3 +615,14 @@ components:
             title: Regla de negocio incumplida
             status: 422
             detail: El depósito inicial de 10.00 EUR no alcanza el mínimo exigido de 50.00 EUR
+    UnsupportedMediaType:
+      description: The request body is not JSON.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: Tipo de contenido no admitido
+            status: 415
+            detail: 'El tipo de contenido text/plain no está admitido: envía application/json'
