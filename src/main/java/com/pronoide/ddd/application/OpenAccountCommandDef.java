@@ -67,9 +67,6 @@ public interface OpenAccountCommandDef {
         if (!holderTaxId().matches(TAX_ID_PATTERN)) {
             throw new IllegalArgumentException(TAX_ID_MESSAGE);
         }
-        if (initialDeposit().signum() <= 0) {
-            throw new IllegalArgumentException("El depósito inicial debe ser positivo");
-        }
         if (!holderEmail().isBlank() && !holderEmail().matches(SignUpCommandDef.EMAIL_PATTERN)) {
             throw new IllegalArgumentException("El correo electrónico no es válido");
         }
@@ -80,5 +77,6 @@ public interface OpenAccountCommandDef {
         if (!CommandValidation.isIsoCurrency(currency())) {
             throw new IllegalArgumentException("La divisa %s no es un código ISO 4217 válido".formatted(currency()));
         }
+        CommandValidation.requireValidInitialDeposit(initialDeposit(), currency());
     }
 }

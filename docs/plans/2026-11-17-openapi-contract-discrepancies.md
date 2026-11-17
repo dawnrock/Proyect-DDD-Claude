@@ -58,7 +58,7 @@ No new DDD building block: the limit is a format check of the input, so it lives
   - [x] The new tests fail before the change and pass after it.
   - [x] Existing amount tests still pass (minimum unchanged).
 
-### [ ] T2 — Initial deposit uses the same amount check (~10 min)
+### [x] T2 — Initial deposit uses the same amount check (~10 min)
 
 - **Layer:** application
 - **Files:** `CommandValidation.java`, `OpenAccountCommandDef.java`, `SignUpCommandDef.java`, `OpenAnotherAccountCommandDef.java`, `src/test/java/com/pronoide/ddd/application/OpenAccountCommandTests.java`
@@ -67,8 +67,8 @@ No new DDD building block: the limit is a format check of the input, so it lives
   1. Test first: an opening, a sign-up and another-account command with an initial deposit of `0.004` (rounds to 0.00) or `1000000000.00` throw `IllegalArgumentException` in the command itself; `0.005` is built (the domain will then answer 422 for the minimum deposit, R1).
   2. Extract the amount part of `requireValidMovement` into a method used by the three initial-deposit commands instead of `signum() <= 0`.
 - **Acceptance criteria:**
-  - [ ] `0.004` no longer reaches the domain (the command rejects it).
-  - [ ] `CheckingAccountService*Tests` still pass.
+  - [x] `0.004` no longer reaches the domain (the command rejects it).
+  - [x] `CheckingAccountService*Tests` still pass.
 
 ### [ ] T3 — REST movement and transfer DTOs validate the limits (~10 min)
 

@@ -33,13 +33,25 @@ final class CommandValidation {
         if (!isIsoCurrency(currency)) {
             throw new IllegalArgumentException("La divisa %s no es un código ISO 4217 válido".formatted(currency));
         }
+        requireValidAmount(amount, currency, "El importe");
+    }
+
+    /**
+     * Mismas reglas de importe para el depósito inicial de una apertura. La divisa ya debe ser un código ISO 4217
+     * válido: cada command la comprueba antes con su propio mensaje.
+     */
+    static void requireValidInitialDeposit(BigDecimal amount, String currency) {
+        requireValidAmount(amount, currency, "El depósito inicial");
+    }
+
+    private static void requireValidAmount(BigDecimal amount, String currency, String subject) {
         int digits = Currency.getInstance(currency).getDefaultFractionDigits();
         BigDecimal rounded = amount.setScale(digits, RoundingMode.HALF_UP);
         if (rounded.signum() <= 0) {
-            throw new IllegalArgumentException("El importe debe ser positivo");
+            throw new IllegalArgumentException(subject + " debe ser positivo");
         }
         if (rounded.compareTo(MAX_AMOUNT) > 0) {
-            throw new IllegalArgumentException("El importe no puede superar " + MAX_AMOUNT.toPlainString());
+            throw new IllegalArgumentException(subject + " no puede superar " + MAX_AMOUNT.toPlainString());
         }
     }
 }
