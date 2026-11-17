@@ -70,7 +70,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **Acceptance criteria:**
   - [ ] The PR's `verify` job runs the step and passes (checked on the PR).
 
-### [ ] T4 — ADR 0013 (~10 min)
+### [x] T4 — ADR 0013 (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0013-contract-tests-schemathesis.md`, `docs/adr/README.md`
@@ -78,7 +78,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **What to do:**
   1. Context (#108/#113 drifts, course chapter 9), decision (black box at hexagon level, Schemathesis in the CI, config in `schemathesis.toml`, legitimate statuses declared per check and operation, deterministic), alternatives (adapter level with `swagger-request-validator`; Prism proxy; Schemathesis via Docker), consequences (one more minute of CI, Python in the runner, the contract cannot express business rules).
 - **Acceptance criteria:**
-  - [ ] ADR in English, listed in the ADR index.
+  - [x] ADR in English, listed in the ADR index.
 
 ### [ ] T5 — `CLAUDE.md` and skills (~5 min)
 
