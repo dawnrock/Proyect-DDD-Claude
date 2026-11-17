@@ -131,17 +131,18 @@ No new DDD building block: the limit is a format check of the input, so it lives
   - [x] Redocly without errors.
   - [x] The contract matches cases 1-6 of the goal.
 
-### [ ] T8 — Verify with Schemathesis and update the project status (~5 min)
+### [x] T8 — Verify with Schemathesis and update the project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
 - **Depends on:** T7
+- **Result (2026-11-17, 1001 cases, seed 208349402245699064421614649288872267315):** no ST108, ST201, ST103 or ST204 left. Left, agreed with the user: `ST202` for 422 business rules **and** for the 400 of #103 (document of an existing customer with different data), both legitimate and noted for #107; `ST102`, a pre-existing 500 for `multipart/form-data` without a boundary, out of scope and opened as #113.
 - **What to do:**
   1. Start the app with the `demo` profile and run `schemathesis run docs/api/openapi.yaml --url http://localhost:8080 --auth admin:demo` (version 4.33.4, outside the repository; it is not added to the build yet, that is #107).
   2. Record in `decisiones.md`: 999,999,999.99 technical limit in the commands; 401 on the public sign-up documented; `QUERY` allowed in the firewall; `enum: [EUR]`.
   3. Record in `pendientes.md` whatever Schemathesis still reports (see risks), for #107.
 - **Acceptance criteria:**
-  - [ ] No failures left of classes ST108, ST201, ST103 or ST204; any ST202 left is a 422 for a business rule (see risks).
+  - [x] No failures left of classes ST108, ST201, ST103 or ST204; any ST202 left is a 422 for a business rule (see risks).
 
 ## Global acceptance criteria
 
