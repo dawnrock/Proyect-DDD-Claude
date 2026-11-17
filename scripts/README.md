@@ -79,3 +79,14 @@ CONTRACT_TEST_PORT=18080 SCHEMATHESIS=~/.venvs/st/bin/schemathesis node scripts/
 | -------- | ----------- | ----------- |
 | `CONTRACT_TEST_PORT` | `8080` | Puerto en el que arranca la aplicación |
 | `SCHEMATHESIS` | `schemathesis` | Ejecutable de Schemathesis (por ejemplo, el de un entorno virtual) |
+
+## check-contract-version.mjs
+
+Versionado del contrato (#112, [ADR 0014](../docs/adr/0014-contract-versioning.md)). Lo ejecuta el CI en cada PR: compara `docs/api/openapi.yaml` con el de la rama base. Si cambia, `info.version` debe subir; si [oasdiff](https://github.com/oasdiff/oasdiff) encuentra cambios incompatibles, debe subir la versión mayor. Sale con 1 si se incumple una regla y con 2 si falta algo para comprobarlo.
+
+Requisitos: `git` con la rama base descargada y oasdiff (`go install github.com/oasdiff/oasdiff@v1.35.0`, Go 1.26 o posterior). Sale con 2 si la rama base no existe o si oasdiff no puede cargar un contrato (código 102), para que la comprobación nunca se salte en silencio.
+
+```bash
+BASE_REF=Hexagonal node scripts/check-contract-version.mjs
+OASDIFF=~/go/bin/oasdiff node scripts/check-contract-version.mjs base.yaml nuevo.yaml   # dos ficheros, sin git
+```
