@@ -2,7 +2,7 @@
 
 > **Read it at the start of every session.** It is the entry point to carry on without depending on earlier conversations, and it is kept **short on purpose**: it is loaded in every session. **It is updated in every PR that closes an issue** (CI checks it).
 
-- **Last updated:** 2026-11-15 · PR #PRNUM (#103, Mon-A Bank customer sign-up, twin of #95)
+- **Last updated:** 2026-11-15 · PR #104 (#103, Mon-A Bank customer sign-up, twin of #95)
 - **Active branch:** `Hexagonal`, the repository's default branch; phase 2 is marked by the `v2-hexagonal` tag and work continues on the branch. `Monolithic` frozen at the `v1-monolito` tag (exceptions authorised by the user: the Render deployment, #86, the footer, #91, and the twins #99 and #95); `master` frozen.
 
 ## Where we are
