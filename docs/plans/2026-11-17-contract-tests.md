@@ -60,7 +60,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **Acceptance criteria:**
   - [x] `node scripts/contract-test.mjs` exits 0 on the current code and non-zero with the sabotage; the app is stopped in both cases.
 
-### [ ] T3 — Run it in the CI (~5 min)
+### [x] T3 — Run it in the CI (~5 min)
 
 - **Layer:** build
 - **Files:** `.github/workflows/ci.yml`

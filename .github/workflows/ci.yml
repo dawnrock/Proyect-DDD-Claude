@@ -44,6 +44,17 @@ jobs:
       - name: Build y tests (JUnit + ArchUnit)
         run: ./mvnw -B verify
 
+      # Pruebas de contrato (#107, ADR 0013): la API real, con el perfil demo, frente a docs/api/openapi.yaml.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar Schemathesis
+        run: pip install schemathesis==4.33.4
+
+      - name: Contrato frente a la implementación (Schemathesis)
+        run: node scripts/contract-test.mjs
+
       - name: Aviso por Telegram si falla
         if: failure()
         env:
