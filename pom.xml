@@ -125,6 +125,19 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <!-- El contrato escrito a mano se sirve tal cual en /openapi.yaml para Swagger UI (#111): una sola copia -->
+            <resource>
+                <directory>docs/api</directory>
+                <includes>
+                    <include>openapi.yaml</include>
+                </includes>
+                <targetPath>static</targetPath>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

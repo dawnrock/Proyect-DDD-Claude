@@ -665,6 +665,22 @@ class DddLabApplicationTests {
 		}
 	}
 
+	/** La documentación de la API sale del contrato escrito a mano (#111). */
+	@Nested
+	@DisplayName("Documentación de la API (#111)")
+	class ApiDocumentation {
+
+		@Test
+		@DisplayName("El contrato OpenAPI se sirve sin credenciales en /openapi.yaml")
+		void el_contrato_openapi_se_sirve_sin_credenciales() throws Exception {
+			HttpResponse<String> response = http.send(HttpRequest.newBuilder(URI.create(url("/openapi.yaml"))).GET().build(),
+					HttpResponse.BodyHandlers.ofString());
+
+			assertThat(response.statusCode()).isEqualTo(200);
+			assertThat(response.body()).startsWith("openapi: 3.1.0");
+		}
+	}
+
 	private String url(String path) {
 		return "http://localhost:" + port + path;
 	}

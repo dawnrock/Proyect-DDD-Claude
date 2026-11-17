@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-17
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~45 min (5 tasks)
 
 ## Goal
@@ -39,7 +39,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 
 ## Tasks
 
-### [ ] T1 — The contract is served at `/openapi.yaml` (~10 min)
+### [x] T1 — The contract is served at `/openapi.yaml` (~10 min)
 
 - **Layer:** build · adapter.in
 - **Files:** `pom.xml`, `WebSecurityConfig.java`, `DddLabApplicationTests.java`
@@ -48,7 +48,7 @@ Decisions taken while planning (clear and reversible, so not asked):
   1. Test first (full context, real server): an anonymous `GET /openapi.yaml` answers 200 and its body starts with `openapi: 3.1.0` (today: redirect to `/login`).
   2. `pom.xml`: a second `<resource>` (`docs/api`, include `openapi.yaml`, `targetPath` `static`) next to the default one; `WebSecurityConfig`: `permitAll` for `/openapi.yaml`.
 - **Acceptance criteria:**
-  - [ ] Red before, green after; the YAML in the jar is the same file as `docs/api/openapi.yaml`.
+  - [x] Red before, green after; the YAML in the jar is the same file as `docs/api/openapi.yaml`.
 
 ### [ ] T2 — Swagger UI page at `/api-docs` (~10 min)
 
