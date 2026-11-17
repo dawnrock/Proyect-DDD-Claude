@@ -32,6 +32,8 @@ info:
 servers:
   - url: http://localhost:8080
     description: Local development
+  - url: https://proyect-ddd-claude.onrender.com
+    description: Render deployment of the `Hexagonal` branch (free plan, the first request may take about a minute while it wakes up)
 # Every operation needs HTTP Basic credentials (#50). An admin sees every account; a user only their own.
 security:
   - basicAuth: []

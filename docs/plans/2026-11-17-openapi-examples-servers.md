@@ -68,7 +68,7 @@ Named examples:
 - **Acceptance criteria:**
   - [x] Redocly clean; `node scripts/contract-test.mjs` passes.
 
-### [ ] T3 — Render server and deploy guide (~5 min)
+### [x] T3 — Render server and deploy guide (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`, `docs/deploy/render.md`
@@ -77,7 +77,7 @@ Named examples:
   1. `servers`: add `https://proyect-ddd-claude.onrender.com` ("Render deployment of `Hexagonal`; free plan, the first request may take a minute while it wakes up"). `name` is OpenAPI 3.2, so only `description`.
   2. `render.md`: the two real URLs.
 - **Acceptance criteria:**
-  - [ ] Redocly clean (the `no-server-example.com` rule stays off only for `localhost`).
+  - [x] Redocly clean (the `no-server-example.com` rule stays off only for `localhost`).
 
 ### [ ] T4 — Account examples (~10 min)
 

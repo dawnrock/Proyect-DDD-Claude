@@ -3,7 +3,7 @@ extends:
 
 # Guía de estilo del contrato (#109, docs/api/style-guide.md). La comprueba el paso de Redocly del CI.
 rules:
-  # Proyecto de práctica: la aplicación solo se ejecuta en local.
+  # El contrato incluye http://localhost:8080 para el desarrollo local (además del servidor de Render).
   no-server-example.com: off
 
   # Reglas de Redocly que pasan de aviso a error.
