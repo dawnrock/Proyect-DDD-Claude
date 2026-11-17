@@ -3,10 +3,11 @@ package com.pronoide.ddd.adapter.in.rest;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
 
 /**
  * Cuerpo de {@code POST /api/transfers} (esquema {@code TransferRequest} del OpenAPI). Es un {@code record} por la
@@ -23,7 +24,8 @@ public record TransferRequest(
         String targetAccountNumber,
 
         @NotNull(message = "El importe es obligatorio")
-        @Positive(message = "El importe debe ser positivo")
+        @DecimalMin(value = "0.005", message = "El importe debe ser positivo")
+        @DecimalMax(value = "999999999.99", message = "El importe no puede superar 999999999.99")
         BigDecimal amount,
 
         @Pattern(regexp = "[A-Z]{3}", message = "La divisa debe ser un código ISO 4217 de tres letras mayúsculas")

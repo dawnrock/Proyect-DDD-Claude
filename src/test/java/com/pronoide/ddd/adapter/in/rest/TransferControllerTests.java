@@ -129,6 +129,20 @@ class TransferControllerTests {
         assertThat(captor.getValue().currency()).isEqualTo("EUR");
     }
 
+    @ParameterizedTest(name = "importe {0}")
+    @DisplayName("Un importe que redondea a cero o supera el máximo responde 400 con el error del campo")
+    @ValueSource(strings = {"0.004", "1000000000.00", "1.7976931348623155E+308"})
+    void un_importe_fuera_de_los_limites_responde_400_con_el_error_del_campo(String amount) throws Exception {
+        mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"sourceAccountId\": \"11111111-2222-3333-4444-555555555555\","
+                        + " \"targetAccountNumber\": \"ES7921000813610123456789\", \"amount\": " + amount + "}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Petición no válida"))
+                .andExpect(jsonPath("$.errors.amount").exists());
+
+        verifyNoInteractions(commands);
+    }
+
     @ParameterizedTest(name = "cuerpo {0}")
     @DisplayName("Ids ausentes o un importe cero o negativo responden 400 con los errores de campo")
     @ValueSource(strings = {

@@ -496,6 +496,19 @@ class AccountControllerTests {
         }
 
         @ParameterizedTest(name = "importe {0}")
+        @DisplayName("Un importe que redondea a cero o supera el máximo responde 400 con el error del campo")
+        @ValueSource(strings = {"0.004", "1000000000.00", "1.7976931348623155E+308"})
+        void un_importe_fuera_de_los_limites_responde_400_con_el_error_del_campo(String amount) throws Exception {
+            mvc.perform(post("/api/accounts/{id}/deposits", ID).contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"amount\": " + amount + "}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Petición no válida"))
+                    .andExpect(jsonPath("$.errors.amount").exists());
+
+            verifyNoInteractions(commands, queries);
+        }
+
+        @ParameterizedTest(name = "importe {0}")
         @DisplayName("Un importe cero o negativo responde 400 con el error del campo")
         @ValueSource(strings = {"0", "-5"})
         void un_importe_cero_o_negativo_responde_400_con_el_error_del_campo(String amount) throws Exception {
@@ -593,6 +606,19 @@ class AccountControllerTests {
                     .content(BODY))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.status").value("REJECTED"));
+        }
+
+        @ParameterizedTest(name = "importe {0}")
+        @DisplayName("Un importe que redondea a cero o supera el máximo responde 400 con el error del campo")
+        @ValueSource(strings = {"0.004", "1000000000.00", "1.7976931348623155E+308"})
+        void un_importe_fuera_de_los_limites_responde_400_con_el_error_del_campo(String amount) throws Exception {
+            mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"amount\": " + amount + "}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Petición no válida"))
+                    .andExpect(jsonPath("$.errors.amount").exists());
+
+            verifyNoInteractions(commands, queries);
         }
 
         @ParameterizedTest(name = "importe {0}")

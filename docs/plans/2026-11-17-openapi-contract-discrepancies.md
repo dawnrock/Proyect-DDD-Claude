@@ -70,7 +70,7 @@ No new DDD building block: the limit is a format check of the input, so it lives
   - [x] `0.004` no longer reaches the domain (the command rejects it).
   - [x] `CheckingAccountService*Tests` still pass.
 
-### [ ] T3 — REST movement and transfer DTOs validate the limits (~10 min)
+### [x] T3 — REST movement and transfer DTOs validate the limits (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `MovementRequest.java`, `TransferRequest.java`, `AccountControllerTests.java`, `TransferControllerTests.java`
@@ -79,7 +79,7 @@ No new DDD building block: the limit is a format check of the input, so it lives
   1. Tests first (`@WebMvcTest`, port mocked): `amount` `0.004` and `1000000000.00` on deposits, withdrawals and transfers answer 400 with the field in `errors`, and the port is never called.
   2. Replace `@Positive` with `@DecimalMin(value = "0.005")` and add `@DecimalMax("999999999.99")`, messages in Spanish.
 - **Acceptance criteria:**
-  - [ ] 400 `ValidationProblemDetail` with `errors.amount` for both limits.
+  - [x] 400 `ValidationProblemDetail` with `errors.amount` for both limits.
 
 ### [ ] T4 — REST opening and sign-up DTOs validate the limits (~10 min)
 
