@@ -111,4 +111,22 @@ class RestExceptionHandlerTests {
                     .andExpect(jsonPath("$.title").value("Petición no válida"));
         }
     }
+
+    @Nested
+    @DisplayName("Tipo de contenido no admitido")
+    class UnsupportedMediaType {
+
+        @Test
+        @DisplayName("Un cuerpo que no es JSON se traduce en un 415 con el título y el detalle en español")
+        void un_cuerpo_que_no_es_json_se_traduce_en_un_415_en_espanol() throws Exception {
+            mvc.perform(post("/test/errors/validation")
+                            .contentType(MediaType.TEXT_PLAIN)
+                            .content("hola"))
+                    .andExpect(status().isUnsupportedMediaType())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                    .andExpect(jsonPath("$.title").value("Tipo de contenido no admitido"))
+                    .andExpect(jsonPath("$.detail").value(
+                            "El tipo de contenido text/plain no está admitido: envía application/json"));
+        }
+    }
 }

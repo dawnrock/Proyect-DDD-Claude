@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-17
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~50 min (6 tasks)
 
 ## Goal
@@ -47,7 +47,7 @@ Named examples:
 
 ## Tasks
 
-### [ ] T1 — 415 in Spanish (~10 min)
+### [x] T1 — 415 in Spanish (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `RestExceptionHandler.java`, `RestExceptionHandlerTests.java` (or `AccountControllerTests.java`)
@@ -56,7 +56,7 @@ Named examples:
   1. Test first: `POST /api/accounts/{id}/deposits` with `Content-Type: text/plain` answers 415 `application/problem+json` with `title` "Tipo de contenido no admitido" and a Spanish `detail` (today: "Unsupported Media Type").
   2. Override `handleHttpMediaTypeNotSupported` (keep the `Accept` header Spring adds).
 - **Acceptance criteria:**
-  - [ ] Red before, green after; `./mvnw verify` green.
+  - [x] Red before, green after; `./mvnw verify` green.
 
 ### [ ] T2 — Document 415 (~5 min)
 
