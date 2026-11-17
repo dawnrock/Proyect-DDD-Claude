@@ -55,7 +55,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **Acceptance criteria:**
   - [x] Redocly clean; ADR listed in the index.
 
-### [ ] T2 — `check-contract-version.mjs` (~15 min)
+### [x] T2 — `check-contract-version.mjs` (~15 min)
 
 - **Layer:** build
 - **Files:** `scripts/check-contract-version.mjs`, `scripts/README.md`
@@ -64,7 +64,7 @@ Decisions taken while planning (clear and reversible, so not asked):
   1. Node script without npm dependencies: reads the base contract with `git show origin/<BASE_REF>:docs/api/openapi.yaml` and the head's from disk, compares `info.version` (SemVer), runs `${OASDIFF:-oasdiff} breaking <base> <head> --fail-on ERR`, and exits non-zero with a clear message in Spanish when a rule is broken.
   2. Validate the four cases with temporary contracts: unchanged contract → pass; changed contract, same version → fail; incompatible change with a minor bump → fail; incompatible change with a major bump → pass; documentation change with a patch bump → pass.
 - **Acceptance criteria:**
-  - [ ] Each case gives the expected exit code; this PR's own change (0.1.0 → 1.0.0) passes.
+  - [x] Each case gives the expected exit code; this PR's own change (0.1.0 → 1.0.0) passes.
 
 ### [ ] T3 — Run it in the CI (~5 min)
 
