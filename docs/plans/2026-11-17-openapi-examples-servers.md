@@ -101,7 +101,7 @@ Named examples:
 - **Acceptance criteria:**
   - [x] Redocly clean; contract tests pass.
 
-### [ ] T6 — Project status (~5 min)
+### [x] T6 — Project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/decisiones.md`, `docs/ia/pendientes.md`
@@ -109,7 +109,7 @@ Named examples:
 - **What to do:**
   1. `decisiones.md`: 415 in Spanish; examples are real responses. `pendientes.md`: remove the 415 note.
 - **Acceptance criteria:**
-  - [ ] Annexes updated.
+  - [x] Annexes updated.
 
 ## Global acceptance criteria
 
