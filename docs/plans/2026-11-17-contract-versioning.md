@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-17
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~55 min (6 tasks)
 
 ## Goal
@@ -110,21 +110,21 @@ Decisions taken while planning (clear and reversible, so not asked):
 
 **Specific:**
 
-- [ ] A PR that changes the contract without the right version bump fails in the CI.
+- [x] A PR that changes the contract without the right version bump fails in the CI.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish) (n/a: no JUnit tests; the script is validated case by case).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): `pom.xml` unchanged; oasdiff is a CI tool justified in ADR 0014.
-- [ ] If the API changes: `docs/api/openapi.yaml` reflects it, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes (the API does not change; the contract document does: both are run).
-- [ ] Any new business term is in `docs/dominio/glosario.md` (n/a).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish) (n/a: no JUnit tests; the script is validated case by case).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): `pom.xml` unchanged; oasdiff is a CI tool justified in ADR 0014.
+- [x] If the API changes: `docs/api/openapi.yaml` reflects it, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes (the API does not change; the contract document does: both are run).
+- [x] Any new business term is in `docs/dominio/glosario.md` (n/a).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
