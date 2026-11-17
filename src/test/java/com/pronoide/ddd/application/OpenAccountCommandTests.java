@@ -5,7 +5,11 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 
 import java.math.BigDecimal;
 
+import java.util.List;
+import java.util.function.Function;
+
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -97,5 +101,52 @@ class OpenAccountCommandTests {
     @DisplayName("El NIF admite espacios y minúsculas, que normaliza el dominio")
     void el_nif_admite_espacios_y_minusculas() {
         assertThat(validCommand().holderTaxId(" 12345678 z ").build().holderTaxId()).isEqualTo(" 12345678 z ");
+    }
+
+    /** El depósito inicial de las tres formas de abrir una cuenta se valida igual que el importe de un movimiento. */
+    @Nested
+    @DisplayName("Depósito inicial de cualquier apertura")
+    class InitialDepositOfEveryOpening {
+
+        private static final Function<String, Object> OPEN = deposit ->
+                validCommand().initialDeposit(new BigDecimal(deposit)).build();
+
+        private static final Function<String, Object> SIGN_UP = deposit -> SignUpCommand.builder()
+                .fullName("Margaret Hamilton").taxId("X1234567L").email("margaret@example.com")
+                .username("margaret").initialDeposit(new BigDecimal(deposit)).build();
+
+        private static final Function<String, Object> ANOTHER = deposit -> OpenAnotherAccountCommand.builder()
+                .initialDeposit(new BigDecimal(deposit)).build();
+
+        @ParameterizedTest
+        @ValueSource(strings = {"0.001", "0.004"})
+        @DisplayName("Un depósito inicial que redondea a cero se rechaza en el command, antes de llegar al dominio")
+        void un_deposito_inicial_que_redondea_a_cero_se_rechaza(String deposit) {
+            for (Function<String, Object> opening : List.of(OPEN, SIGN_UP, ANOTHER)) {
+                assertThatIllegalArgumentException()
+                        .isThrownBy(() -> opening.apply(deposit))
+                        .withMessage("El depósito inicial debe ser positivo");
+            }
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"999999999.991", "1000000000.00"})
+        @DisplayName("Un depósito inicial que supera el máximo de 999.999.999,99 se rechaza")
+        void un_deposito_inicial_que_supera_el_maximo_se_rechaza(String deposit) {
+            for (Function<String, Object> opening : List.of(OPEN, SIGN_UP, ANOTHER)) {
+                assertThatIllegalArgumentException()
+                        .isThrownBy(() -> opening.apply(deposit))
+                        .withMessage("El depósito inicial no puede superar 999999999.99");
+            }
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"0.005", "999999999.99"})
+        @DisplayName("Un depósito inicial entre el mínimo redondeado y el máximo se acepta: el mínimo de 50 EUR lo exige el dominio")
+        void un_deposito_inicial_entre_los_limites_se_acepta(String deposit) {
+            for (Function<String, Object> opening : List.of(OPEN, SIGN_UP, ANOTHER)) {
+                assertThat(opening.apply(deposit)).isNotNull();
+            }
+        }
     }
 }

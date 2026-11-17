@@ -121,6 +121,26 @@ class MovementCommandsTests {
         assertThat(withdraw("0.005", null).amount()).isEqualByComparingTo("0.005");
     }
 
+    @ParameterizedTest
+    @CsvSource({"999999999.99", "999999999.990"})
+    @DisplayName("Un importe que no supera el máximo de 999.999.999,99 se acepta")
+    void un_importe_que_no_supera_el_maximo_se_acepta(String amount) {
+        assertThat(deposit(amount, null).amount()).isEqualByComparingTo(amount);
+        assertThat(withdraw(amount, null).amount()).isEqualByComparingTo(amount);
+        assertThat(transfer(amount, null).amount()).isEqualByComparingTo(amount);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"999999999.991", "1000000000.00", "1.7976931348623155E+308"})
+    @DisplayName("Un importe que supera el máximo de 999.999.999,99, aunque sea en una fracción de céntimo, se rechaza")
+    void un_importe_que_supera_el_maximo_se_rechaza(String amount) {
+        String message = "El importe no puede superar 999999999.99";
+
+        assertThatIllegalArgumentException().isThrownBy(() -> deposit(amount, null)).withMessage(message);
+        assertThatIllegalArgumentException().isThrownBy(() -> withdraw(amount, null)).withMessage(message);
+        assertThatIllegalArgumentException().isThrownBy(() -> transfer(amount, null)).withMessage(message);
+    }
+
     @Test
     @DisplayName("Los decimales mínimos dependen de la divisa: 0.4 JPY se rechaza y 0.5 JPY se acepta")
     void los_decimales_minimos_dependen_de_la_divisa() {

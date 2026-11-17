@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -128,6 +129,28 @@ class CustomerControllerTests {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Petición no válida"))
                 .andExpect(jsonPath("$.errors." + errorField).exists());
+        verifyNoInteractions(registration);
+    }
+
+    @Test
+    @DisplayName("Con credenciales HTTP Basic erróneas el alta pública responde 401 y no llama al caso de uso")
+    void con_credenciales_erroneas_el_alta_publica_responde_401() throws Exception {
+        mvc.perform(post("/api/customers").with(httpBasic("nadie", "incorrecta"))
+                        .contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.title").value("No autenticado"));
+        verifyNoInteractions(registration);
+    }
+
+    @ParameterizedTest(name = "depósito inicial {0}")
+    @CsvSource({"0.004", "1000000000.00", "1.7976931348623155E+308"})
+    @DisplayName("Un depósito inicial que redondea a cero o supera el máximo responde 400 con el error del campo")
+    void un_deposito_inicial_fuera_de_los_limites_responde_400(String deposit) throws Exception {
+        mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_BODY.replace("\"initialDeposit\": 100.00", "\"initialDeposit\": " + deposit)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Petición no válida"))
+                .andExpect(jsonPath("$.errors.initialDeposit").exists());
         verifyNoInteractions(registration);
     }
 

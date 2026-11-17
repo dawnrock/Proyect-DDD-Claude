@@ -1,5 +1,6 @@
 package com.pronoide.ddd.adapter.in.rest;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -7,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -28,6 +30,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -228,6 +231,19 @@ class AccountControllerTests {
             verifyNoInteractions(commands, queries);
         }
 
+        @ParameterizedTest(name = "depósito inicial {0}")
+        @DisplayName("Un depósito inicial que redondea a cero o supera el máximo responde 400 con el error del campo")
+        @ValueSource(strings = {"0.004", "1000000000.00", "1.7976931348623155E+308"})
+        void un_deposito_inicial_fuera_de_los_limites_responde_400(String deposit) throws Exception {
+            mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON)
+                            .content(VALID_BODY.replace("\"initialDeposit\": 100.00", "\"initialDeposit\": " + deposit)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Petición no válida"))
+                    .andExpect(jsonPath("$.errors.initialDeposit").exists());
+
+            verifyNoInteractions(commands, queries);
+        }
+
         @Test
         @DisplayName("Un depósito insuficiente responde 422 con el mensaje del dominio")
         void un_deposito_insuficiente_responde_422_con_el_mensaje_del_dominio() throws Exception {
@@ -259,6 +275,22 @@ class AccountControllerTests {
                      "initialDeposit": 100, "currency": "XYZ", "ownerUsername": "ada"}"""))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.title").value("Petición no válida"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Métodos no declarados en el contrato")
+    class UndeclaredMethods {
+
+        @ParameterizedTest(name = "{0} /api/accounts")
+        @ValueSource(strings = {"QUERY", "PUT", "DELETE"})
+        @DisplayName("Un método no declarado, también QUERY, responde 405 con la cabecera Allow")
+        void un_metodo_no_declarado_responde_405_con_la_cabecera_allow(String method) throws Exception {
+            mvc.perform(request(HttpMethod.valueOf(method), "/api/accounts"))
+                    .andExpect(status().isMethodNotAllowed())
+                    .andExpect(header().string("Allow", containsString("GET")));
+
+            verifyNoInteractions(commands, queries);
         }
     }
 
@@ -496,6 +528,19 @@ class AccountControllerTests {
         }
 
         @ParameterizedTest(name = "importe {0}")
+        @DisplayName("Un importe que redondea a cero o supera el máximo responde 400 con el error del campo")
+        @ValueSource(strings = {"0.004", "1000000000.00", "1.7976931348623155E+308"})
+        void un_importe_fuera_de_los_limites_responde_400_con_el_error_del_campo(String amount) throws Exception {
+            mvc.perform(post("/api/accounts/{id}/deposits", ID).contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"amount\": " + amount + "}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Petición no válida"))
+                    .andExpect(jsonPath("$.errors.amount").exists());
+
+            verifyNoInteractions(commands, queries);
+        }
+
+        @ParameterizedTest(name = "importe {0}")
         @DisplayName("Un importe cero o negativo responde 400 con el error del campo")
         @ValueSource(strings = {"0", "-5"})
         void un_importe_cero_o_negativo_responde_400_con_el_error_del_campo(String amount) throws Exception {
@@ -593,6 +638,19 @@ class AccountControllerTests {
                     .content(BODY))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.status").value("REJECTED"));
+        }
+
+        @ParameterizedTest(name = "importe {0}")
+        @DisplayName("Un importe que redondea a cero o supera el máximo responde 400 con el error del campo")
+        @ValueSource(strings = {"0.004", "1000000000.00", "1.7976931348623155E+308"})
+        void un_importe_fuera_de_los_limites_responde_400_con_el_error_del_campo(String amount) throws Exception {
+            mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"amount\": " + amount + "}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Petición no válida"))
+                    .andExpect(jsonPath("$.errors.amount").exists());
+
+            verifyNoInteractions(commands, queries);
         }
 
         @ParameterizedTest(name = "importe {0}")

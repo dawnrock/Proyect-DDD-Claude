@@ -49,11 +49,9 @@ public interface SignUpCommandDef {
             throw new IllegalArgumentException(
                     "El usuario debe tener de 3 a 30 minúsculas, dígitos, puntos o guiones");
         }
-        if (initialDeposit().signum() <= 0) {
-            throw new IllegalArgumentException("El depósito inicial debe ser positivo");
-        }
         if (!CommandValidation.isIsoCurrency(currency())) {
             throw new IllegalArgumentException("La divisa %s no es un código ISO 4217 válido".formatted(currency()));
         }
+        CommandValidation.requireValidInitialDeposit(initialDeposit(), currency());
     }
 }

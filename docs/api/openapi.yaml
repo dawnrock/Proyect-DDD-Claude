@@ -167,6 +167,9 @@ paths:
             schema:
               $ref: '#/components/schemas/SignUpRequest'
       responses:
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Only when wrong HTTP Basic credentials are sent; the operation needs none.
         '201':
           description: Customer registered and first account opened.
           headers:
@@ -293,13 +296,15 @@ components:
       properties:
         amount:
           type: number
-          exclusiveMinimum: 0
+          minimum: 0.005
+          maximum: 999999999.99
+          description: "Rounded half-up to the currency's two decimals: from 0.005 (rounded to 0.01) to 999,999,999.99; outside that range the request fails with 400."
           example: 25.00
         currency:
-          type: string
-          pattern: '^[A-Z]{3}$'
+          type: [string, 'null']
+          enum: [EUR, null]
           default: EUR
-          description: ISO 4217 code. A currency other than the account's fails with 422.
+          description: Every account is in EUR. Absent or `null` means EUR; another ISO 4217 currency fails with 422 and an invalid code with 400.
     TransferRequest:
       type: object
       required: [sourceAccountId, targetAccountNumber, amount]
@@ -315,13 +320,15 @@ components:
           example: ES79 2100 0813 6101 2345 6789
         amount:
           type: number
-          exclusiveMinimum: 0
+          minimum: 0.005
+          maximum: 999999999.99
+          description: "Rounded half-up to the currency's two decimals: from 0.005 (rounded to 0.01) to 999,999,999.99; outside that range the request fails with 400."
           example: 25.00
         currency:
-          type: string
-          pattern: '^[A-Z]{3}$'
+          type: [string, 'null']
+          enum: [EUR, null]
           default: EUR
-          description: ISO 4217 code. A currency other than the accounts' fails with 422.
+          description: Every account is in EUR. Absent or `null` means EUR; another ISO 4217 currency fails with 422 and an invalid code with 400.
     Transfer:
       type: object
       required: [sourceAccountId, sourceAccountNumber, targetAccountNumber, amount, currency, occurredOn, status]
@@ -358,25 +365,26 @@ components:
           example: 87654321X
         initialDeposit:
           type: number
-          exclusiveMinimum: 0
-          description: Must reach the minimum initial deposit (50.00 EUR) or the request fails with 422.
+          minimum: 0.005
+          maximum: 999999999.99
+          description: "Rounded half-up to the currency's two decimals: from 0.005 (rounded to 0.01) to 999,999,999.99; outside that range the request fails with 400. Below the minimum initial deposit (50.00 EUR) it fails with 422."
           example: 100.00
         currency:
-          type: string
-          pattern: '^[A-Z]{3}$'
+          type: [string, 'null']
+          enum: [EUR, null]
           default: EUR
-          description: ISO 4217 code. A currency other than EUR fails with 422.
+          description: Absent or `null` means EUR; another ISO 4217 currency fails with 422 and an invalid code with 400.
         holderName:
-          type: string
+          type: [string, 'null']
           description: Required for a new customer; for an existing one, absent, blank or equal to theirs.
           example: Grace Hopper
         holderEmail:
-          type: string
+          type: [string, 'null']
           description: Required for a new customer; for an existing one, absent, blank or equal to theirs.
           pattern: '^$|^ *[^@\s]+@[^@\s]+\.[^@\s]+ *$'
           example: grace@example.com
         ownerUsername:
-          type: string
+          type: [string, 'null']
           description: User of a new customer, who will see and operate the account; for an existing customer, absent, blank or equal to theirs.
           pattern: '^$|^[a-z0-9._-]{3,30}$'
           example: grace
@@ -409,13 +417,15 @@ components:
           example: demo-1234
         initialDeposit:
           type: number
-          exclusiveMinimum: 0
-          description: Must reach the minimum initial deposit (50.00 EUR) or the request fails with 422.
+          minimum: 0.005
+          maximum: 999999999.99
+          description: "Rounded half-up to the currency's two decimals: from 0.005 (rounded to 0.01) to 999,999,999.99; outside that range the request fails with 400. Below the minimum initial deposit (50.00 EUR) it fails with 422."
           example: 100.00
         currency:
-          type: string
-          pattern: '^[A-Z]{3}$'
+          type: [string, 'null']
+          enum: [EUR, null]
           default: EUR
+          description: Absent or `null` means EUR; another ISO 4217 currency fails with 422 and an invalid code with 400.
     AccountSummary:
       type: object
       required: [id, accountNumber, holderName, segment, balance, currency]

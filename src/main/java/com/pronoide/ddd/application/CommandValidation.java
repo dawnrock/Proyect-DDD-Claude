@@ -7,6 +7,12 @@ import java.util.Currency;
 /** Comprobaciones de formato que comparten los commands antes de llegar al dominio. */
 final class CommandValidation {
 
+    /**
+     * Importe máximo de una operación (ingreso, retirada, transferencia o depósito inicial). Es un límite técnico de
+     * la entrada, no una regla de negocio: evita importes absurdos como {@code 1e308} (#108).
+     */
+    static final BigDecimal MAX_AMOUNT = new BigDecimal("999999999.99");
+
     private CommandValidation() {
     }
 
@@ -20,16 +26,33 @@ final class CommandValidation {
     }
 
     /**
-     * Exige una divisa ISO 4217 válida y un importe positivo después de redondearlo (HALF_UP) a los
-     * decimales de esa divisa, igual que hace {@code MonetaryAmount}.
+     * Exige una divisa ISO 4217 válida y un importe positivo después de redondearlo (HALF_UP) a los decimales de esa
+     * divisa, igual que hace {@code MonetaryAmount}, y no mayor que {@link #MAX_AMOUNT} tal como llega (sin redondear,
+     * igual que el {@code @DecimalMax} de la API y el {@code maximum} del contrato).
      */
     static void requireValidMovement(BigDecimal amount, String currency) {
         if (!isIsoCurrency(currency)) {
             throw new IllegalArgumentException("La divisa %s no es un código ISO 4217 válido".formatted(currency));
         }
+        requireValidAmount(amount, currency, "El importe");
+    }
+
+    /**
+     * Mismas reglas de importe para el depósito inicial de una apertura. La divisa ya debe ser un código ISO 4217
+     * válido: cada command la comprueba antes con su propio mensaje.
+     */
+    static void requireValidInitialDeposit(BigDecimal amount, String currency) {
+        requireValidAmount(amount, currency, "El depósito inicial");
+    }
+
+    private static void requireValidAmount(BigDecimal amount, String currency, String subject) {
         int digits = Currency.getInstance(currency).getDefaultFractionDigits();
-        if (amount.setScale(digits, RoundingMode.HALF_UP).signum() <= 0) {
-            throw new IllegalArgumentException("El importe debe ser positivo");
+        BigDecimal rounded = amount.setScale(digits, RoundingMode.HALF_UP);
+        if (rounded.signum() <= 0) {
+            throw new IllegalArgumentException(subject + " debe ser positivo");
+        }
+        if (amount.compareTo(MAX_AMOUNT) > 0) {
+            throw new IllegalArgumentException(subject + " no puede superar " + MAX_AMOUNT.toPlainString());
         }
     }
 }
