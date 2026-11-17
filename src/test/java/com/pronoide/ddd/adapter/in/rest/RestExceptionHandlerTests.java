@@ -3,6 +3,7 @@ package com.pronoide.ddd.adapter.in.rest;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -123,6 +124,7 @@ class RestExceptionHandlerTests {
                             .contentType(MediaType.TEXT_PLAIN)
                             .content("hola"))
                     .andExpect(status().isUnsupportedMediaType())
+                    .andExpect(header().exists("Accept"))
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                     .andExpect(jsonPath("$.title").value("Tipo de contenido no admitido"))
                     .andExpect(jsonPath("$.detail").value(

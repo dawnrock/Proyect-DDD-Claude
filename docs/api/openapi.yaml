@@ -132,7 +132,7 @@ paths:
                   summary: A holder whose verified income is not above 100,000.00 EUR
                   value:
                     id: "5b1f3c2e-9a7d-4e8b-b1c4-2f6a8d9e0c11"
-                    accountNumber: "ES5099990001480000000006"
+                    accountNumber: "ES9699990001430000000005"
                     holderName: "Katherine Johnson"
                     segment: "RETAIL"
                     balance: 150.00
@@ -141,7 +141,7 @@ paths:
                   summary: A holder whose verified income is above 100,000.00 EUR
                   value:
                     id: "7c2d4e6f-1a3b-4c5d-8e9f-0a1b2c3d4e5f"
-                    accountNumber: "ES2399990001400000000004"
+                    accountNumber: "ES4299990001490000000004"
                     holderName: "Grace Hopper"
                     segment: "HIGH_NET_WORTH"
                     balance: 500.00
@@ -150,10 +150,10 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '403':
           $ref: '#/components/responses/Forbidden'
-        '422':
-          $ref: '#/components/responses/UnprocessableContent'
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
   /api/accounts/{id}:
     get:
       tags: [accounts]
@@ -283,10 +283,10 @@ paths:
                     currency: "EUR"
         '400':
           $ref: '#/components/responses/BadRequest'
-        '422':
-          $ref: '#/components/responses/UnprocessableContent'
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
   /api/accounts/{id}/deposits:
     post:
       tags: [accounts]
@@ -323,10 +323,10 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableContent'
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
   /api/accounts/{id}/withdrawals:
     post:
       tags: [accounts]
@@ -375,10 +375,10 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableContent'
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
   /api/transfers:
     post:
       tags: [transfers]
@@ -432,10 +432,10 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableContent'
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
 components:
   parameters:
     AccountId:
@@ -775,7 +775,7 @@ components:
                 status: 422
                 detail: 'No se puede transferir a la misma cuenta: ES8099990001450000000001'
             duplicateDocument:
-              summary: Signing up with a document that already belongs to a customer (R29)
+              summary: Signing up with a document that already belongs to a customer (R30)
               value:
                 type: about:blank
                 title: Regla de negocio incumplida

@@ -6,9 +6,9 @@ import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.MediaType;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -94,9 +94,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException exception,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         MediaType received = exception.getContentType();
-        String type = received == null ? "recibido" : received.getType() + "/" + received.getSubtype();
-        ProblemDetail problem = problem(HttpStatus.UNSUPPORTED_MEDIA_TYPE, UNSUPPORTED_MEDIA_TYPE_TITLE,
-                "El tipo de contenido %s no está admitido: envía application/json".formatted(type));
+        String detail = received == null
+                ? "Falta el tipo de contenido: envía application/json"
+                : "El tipo de contenido %s/%s no está admitido: envía application/json"
+                        .formatted(received.getType(), received.getSubtype());
+        ProblemDetail problem = problem(HttpStatus.UNSUPPORTED_MEDIA_TYPE, UNSUPPORTED_MEDIA_TYPE_TITLE, detail);
         return handleExceptionInternal(exception, problem, headers, status, request);
     }
 

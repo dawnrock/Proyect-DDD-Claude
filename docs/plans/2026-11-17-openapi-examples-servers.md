@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-17
-- **Status:** in progress
-- **Total estimate:** ~50 min (6 tasks)
+- **Status:** done
+- **Total estimate:** ~60 min (7 tasks)
 
 ## Goal
 
@@ -111,26 +111,36 @@ Named examples:
 - **Acceptance criteria:**
   - [x] Annexes updated.
 
+### [x] T7 — Review fixes (~10 min)
+
+- **Layer:** adapter.in · docs
+- **Files:** `RestExceptionHandler.java`, `RestExceptionHandlerTests.java`, `docs/api/openapi.yaml`, `docs/api/style-guide.md`, `docs/ia/decisiones.md`, `docs/ia/historial.md`
+- **Depends on:** T6
+- **What to do:**
+  1. `revisor-ddd` (no blocking finding). Applied: the opening examples had illustrative ids and a repeated IBAN, while the docs called every example a real response: valid, distinct IBANs (`ES42…0004`, `ES96…0005`, check digits computed like the bank's) and the docs now say the examples are *based on* real responses; `415` placed before `422`; import order; a clearer `detail` when no `Content-Type` arrives; the test also checks the `Accept` header; the duplicate-document example cites R30 (it said R29); the guide says "media type example".
+- **Acceptance criteria:**
+  - [x] Redocly clean; `./mvnw verify` green.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] Every success response has at least one example, and the interesting cases have named ones.
-- [ ] The API answers every documented error in Spanish, 415 included.
+- [x] Every success response has at least one example, and the interesting cases have named ones.
+- [x] The API answers every documented error in Spanish, 415 included.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: `docs/api/openapi.yaml` reflects it, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes.
-- [ ] Any new business term is in `docs/dominio/glosario.md` (n/a).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: `docs/api/openapi.yaml` reflects it, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes.
+- [x] Any new business term is in `docs/dominio/glosario.md` (n/a).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
