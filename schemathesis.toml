@@ -1,0 +1,50 @@
+# Pruebas de contrato (#107, ADR 0013): Schemathesis comprueba que la API REST cumple docs/api/openapi.yaml.
+# Se ejecuta con `node scripts/contract-test.mjs`, que arranca el jar con el perfil demo y pasa la URL.
+
+# Generación determinista (en este modo Schemathesis no usa semilla): el CI no se pone en rojo porque aparezca un
+# caso aleatorio nuevo. Para explorar casos nuevos, se ejecuta a mano quitando `deterministic = true` (sin subir
+# el cambio) y lo que salga se trata en su propia issue.
+[generation]
+deterministic = true
+max-examples = 40
+
+# Usuario administrador del perfil demo (contraseña de práctica, ya pública en el README).
+[auth.basic]
+username = "admin"
+password = "demo"
+
+# Rechazos legítimos con datos que el esquema da por válidos. Se declaran solo en las operaciones que los
+# documentan; la comprobación sigue activa para todo lo demás, y el resto de operaciones usa los estados por
+# defecto de Schemathesis (2xx, 3xx, 401, 403, 404, 409, 429 y 5xx).
+#
+# - 422: reglas de negocio que el contrato no puede expresar (depósito inicial mínimo, divisa distinta de la de
+#   la cuenta, transferencia a la misma cuenta, documento o usuario repetidos).
+# - 400 (abrir cuenta y darse de alta): reglas que un patrón no puede comprobar y que el contrato documenta en
+#   texto, la letra de control del DNI/NIE (módulo 23) y la regla de la #103 (el documento ya es de un cliente y
+#   llegan datos distintos). Punto ciego asumido (ADR 0013): en estas dos operaciones, un 400 de validación que
+#   no case con el contrato tampoco se detecta; lo cubren los tests del adaptador REST.
+
+[[operations]]
+include-operation-id = "openAccount"
+[operations.checks.positive_data_acceptance]
+expected-statuses = ["2xx", "3xx", 400, 401, 403, 404, 409, 422, 429, "5xx"]
+
+[[operations]]
+include-operation-id = "signUp"
+[operations.checks.positive_data_acceptance]
+expected-statuses = ["2xx", "3xx", 400, 401, 403, 404, 409, 422, 429, "5xx"]
+
+[[operations]]
+include-operation-id = "deposit"
+[operations.checks.positive_data_acceptance]
+expected-statuses = ["2xx", "3xx", 401, 403, 404, 409, 422, 429, "5xx"]
+
+[[operations]]
+include-operation-id = "withdraw"
+[operations.checks.positive_data_acceptance]
+expected-statuses = ["2xx", "3xx", 401, 403, 404, 409, 422, 429, "5xx"]
+
+[[operations]]
+include-operation-id = "transfer"
+[operations.checks.positive_data_acceptance]
+expected-statuses = ["2xx", "3xx", 401, 403, 404, 409, 422, 429, "5xx"]

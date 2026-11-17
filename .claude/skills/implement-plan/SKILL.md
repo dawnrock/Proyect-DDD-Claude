@@ -64,7 +64,7 @@ Si un test no se puede poner en verde sin salirte del plan o un criterio no se p
 
 ### 6. Criterios globales
 
-1. Comprueba cada criterio global: `./mvnw verify`; arranque con `./mvnw spring-boot:run` en segundo plano + `curl -s localhost:8080/actuator/health` (detén el proceso al acabar); `check-domain.mjs`; `git diff origin/<rama-base>... -- pom.xml` para las dependencias; OpenAPI si aplica.
+1. Comprueba cada criterio global: `./mvnw verify`; arranque con `./mvnw spring-boot:run` en segundo plano + `curl -s localhost:8080/actuator/health` (detén el proceso al acabar); `check-domain.mjs`; `git diff origin/<rama-base>... -- pom.xml` para las dependencias; OpenAPI si aplica y, si el plan toca la API, `node scripts/contract-test.mjs` (pruebas de contrato con Schemathesis, ADR 0013; si no está instalado: `pip install schemathesis==4.33.4`).
 2. Márcalos. Si alguno falla, trátalo como en el paso 5.
 3. **Actualiza el estado del proyecto** (obligatorio: el CI falla si una PR con `Closes #n` no toca `docs/ia/estado-del-proyecto.md`):
    - `estado-del-proyecto.md`: escribe el estado como quedará tras fusionar la PR: la issue en "Done" con su número de PR y el "Next step" apuntando a la próxima issue; cambia la fecha de "Last updated". Mantenlo corto: se lee en cada sesión, así que no le añadas detalle.
