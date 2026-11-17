@@ -28,6 +28,10 @@ jobs:
         with:
           node-version: '22'
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Estado del proyecto actualizado (PR que cierra una issue)
         if: github.event_name == 'pull_request'
         env:
@@ -45,10 +49,6 @@ jobs:
         run: ./mvnw -B verify
 
       # Pruebas de contrato (#107, ADR 0013): la API real, con el perfil demo, frente a docs/api/openapi.yaml.
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
       - name: Instalar Schemathesis
         run: pip install schemathesis==4.33.4
 

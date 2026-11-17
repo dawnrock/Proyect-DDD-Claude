@@ -6,7 +6,7 @@
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-17
 - **Status:** in progress
-- **Total estimate:** ~45 min (6 tasks)
+- **Total estimate:** ~55 min (7 tasks)
 
 ## Goal
 
@@ -103,6 +103,16 @@ Decisions taken while planning (clear and reversible, so not asked):
   3. `arquitectura-ia.md`: the CI row mentions the contract tests.
 - **Acceptance criteria:**
   - [x] Annexes updated.
+
+### [x] T7 — Review fixes (~10 min)
+
+- **Layer:** build · docs
+- **Files:** `scripts/contract-test.mjs`, `schemathesis.toml`, `.github/workflows/ci.yml`, `.gitignore`, ADR 0013, `docs/ia/decisiones.md`
+- **Depends on:** T6
+- **What to do:**
+  1. `revisor-ddd` (no blocking technical finding). Applied: the script works from any directory (repo root as `cwd`), refuses a port that already answers, handles `SIGTERM`/`SIGHUP`, a missing `java`, waits for the app to stop (SIGKILL after 10 s), picks the newest jar and reports an app that died mid-run; `422` declared only on the operations that document it; the ADR states the accepted blind spot of the `400` on `openAccount`/`signUp`; `.schemathesis/` ignored; `setup-python` next to the other `setup-*`. Not applied: a global time limit (the CI job has one) and a pip cache (needs a requirements file).
+- **Acceptance criteria:**
+  - [x] From `/tmp`: 872 cases, 0 failures, app stopped; with the port busy: exit 2 and a clear message.
 
 ## Global acceptance criteria
 
