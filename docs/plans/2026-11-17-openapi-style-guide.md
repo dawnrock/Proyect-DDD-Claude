@@ -87,7 +87,7 @@ No Java change, no new dependency (Redocly already runs with `npx` at a fixed ve
 - **Acceptance criteria:**
   - [x] Guide written and linked from the contract; Redocly without errors.
 
-### [ ] T5 — Project status (~5 min)
+### [x] T5 — Project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/decisiones.md`, `docs/ia/pendientes.md`
@@ -95,7 +95,7 @@ No Java change, no new dependency (Redocly already runs with `npx` at a fixed ve
 - **What to do:**
   1. `decisiones.md`: the style guide and where it is enforced. `pendientes.md`: keep the 415 note, now for #110.
 - **Acceptance criteria:**
-  - [ ] Annexes updated.
+  - [x] Annexes updated.
 
 ## Global acceptance criteria
 
