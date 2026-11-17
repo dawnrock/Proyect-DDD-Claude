@@ -24,7 +24,7 @@ Phase 2 design: `docs/arquitectura/fase-2-hexagonal.md`; comparison with phase 1
 ## Working agreements with the user
 
 - **Always plan before implementing** (`/plan-feature`) and the user approves the plan.
-- **The user decides the merges.** No PR is merged without their "yes". **Once merged, all its branches and worktrees are deleted** (local and remote, also the team's `-back`/`-web` ones), after checking they are contained in the base branch (2026-11-03).
+- **Merges:** a PR the user asked for (with `/implement-plan`, `/implement-plan-team` or by asking for a PR) is merged by Claude as soon as all its checks are green, with no blocking review finding and no conflict, never against `master` (step 7 bis of `implement-plan`, 2026-11-17). Any other PR is not merged without the user's "yes". **Once merged, all its branches and worktrees are deleted** (local and remote, also the team's `-back`/`-web` ones), after checking they are contained in the base branch (2026-11-03).
 - **`CLAUDE.md` and the `.claude/` configuration** only change with their explicit approval, never at an agent's request.
 - **Diagrams are shown to the user before they are committed.** Diagram style: grayscale, no colours.
 - The user may follow the session from the phone (Remote Control). **Telegram notices are on** (the user turned them back on on 2026-10-30): the skills run `scripts/notify.mjs` when they say so.

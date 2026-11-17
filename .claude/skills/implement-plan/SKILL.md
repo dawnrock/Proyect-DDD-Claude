@@ -2,7 +2,7 @@
 name: implement-plan
 description: Implementa el plan de una issue de GitHub (generado con plan-feature) en un git worktree aislado, tarea a tarea, con TDD estricto (JUnit + ArchUnit, ./mvnw). Cada tarea terminada se commitea y se marca en el plan; al cumplir los criterios globales abre una PR contra la rama de la fase (Monolithic o Hexagonal, nunca master) y avisa por Telegram. Úsala cuando se pida implementar, ejecutar o llevar a cabo un plan o una issue.
 argument-hint: <número de issue de GitHub>
-allowed-tools: Read, Grep, Glob, Edit, Write, AskUserQuestion, Bash(git:*), Bash(./mvnw:*), Bash(mvnw.cmd:*), Bash(node:*), Bash(npx @redocly/cli:*), Bash(curl:*), Bash(ls:*), Bash(cp:*), Bash(gh issue view:*), Bash(gh pr create:*), Bash(gh pr view:*)
+allowed-tools: Read, Grep, Glob, Edit, Write, AskUserQuestion, Bash(git:*), Bash(./mvnw:*), Bash(mvnw.cmd:*), Bash(node:*), Bash(npx @redocly/cli:*), Bash(curl:*), Bash(ls:*), Bash(cp:*), Bash(gh issue view:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh pr checks:*), Bash(gh pr merge:*)
 ---
 
 Implementa el plan indicado siguiendo el proceso de abajo. El plan es la fuente de verdad: no añadas trabajo que no esté en él ni te saltes tareas.
@@ -83,6 +83,24 @@ Si un test no se puede poner en verde sin salirte del plan o un criterio no se p
    Cuerpo en español: objetivo, tareas completadas, desviaciones, ruta del plan, resultado de la revisión `revisor-ddd` y `Closes #<número>`.
 3. No crees la PR si la implementación se detuvo a medias o algún criterio global no se cumple.
 
+### 7 bis. Fusión automática con los checks en verde
+
+Decisión del usuario (2026-11-17): **cuando el usuario pide una PR** (al lanzar `/implement-plan` o `/implement-plan-team`, o al pedir expresamente "haz/abre una PR"), la fusionas tú en cuanto sus checks pasen en verde, sin volver a preguntar. Una PR que abras por tu cuenta, sin que él la pida, no se fusiona sin su "sí".
+
+1. Al abrirla, suscríbete a su actividad (o, sin esa herramienta, vuelve a mirar los checks cuando acaben) y espera a que terminen. No hagas sondeo con `sleep`.
+2. Fusiona solo si se cumple **todo**:
+   - todos los checks del commit de cabeza han terminado con `success` (`verify`, `claude-review` y los que haya);
+   - la revisión automática no deja hallazgos bloqueantes sin resolver;
+   - no hay conflictos con la rama base;
+   - la base es `Hexagonal` o, si la issue es una excepción autorizada, `Monolithic`; **nunca `master`**.
+3. Fusiona igual que el botón **Merge pull request** de GitHub con su opción por defecto, **Create a merge commit** (no «Squash and merge» ni «Rebase and merge»), fijando la cabeza esperada para no fusionar un commit que no has visto en verde: `gh pr merge <n> --merge --match-head-commit <sha>` (o `expectedHeadSha` con el SHA completo en la herramienta de GitHub).
+4. Si un check falla o hay un hallazgo bloqueante, **no fusiones**: arregla la causa en la misma rama, sube el arreglo y vuelve a esperar. Nunca desactives un test para ponerlo en verde.
+5. No fusiones si el usuario dice que la deje abierta, si la PR es un borrador o si en el informe quedó algo pendiente de su decisión.
+6. Después de fusionar: deja de seguir la PR, borra sus ramas y worktrees como en el paso 9 y avisa por Telegram:
+   ```bash
+   node scripts/notify.mjs "🔀 PR fusionada con los checks en verde: <título> · <URL de la PR> · #<número>"
+   ```
+
 ### 8. Avisar por Telegram
 
 ```bash
@@ -93,4 +111,4 @@ No avises si no hay PR. Si falla o no está configurado, menciónalo en el infor
 
 ### 9. Informar
 
-Issue, rama, worktree, URL de la PR, `git log --oneline origin/<rama-base>..HEAD`, tareas y criterios (con desviaciones y validaciones por sabotaje) y si se avisó por Telegram. No hagas merge: lo decide el usuario. Cuando confirme que la PR está fusionada, borra el worktree y las ramas de la PR, local y remota, tras comprobar que están contenidas en la rama base (`git merge-base --is-ancestor`); nunca `master`, `Monolithic` ni `Hexagonal`.
+Issue, rama, worktree, URL de la PR, `git log --oneline origin/<rama-base>..HEAD`, tareas y criterios (con desviaciones y validaciones por sabotaje), si se avisó por Telegram y si la PR se fusionó (paso 7 bis) o qué la frena. Una vez fusionada (por ti con los checks en verde o por el usuario), borra el worktree y las ramas de la PR, local y remota, tras comprobar que están contenidas en la rama base (`git merge-base --is-ancestor`); nunca `master`, `Monolithic` ni `Hexagonal`.
