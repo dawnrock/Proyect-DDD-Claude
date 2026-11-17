@@ -30,6 +30,8 @@ On Windows, `mvnw.cmd`. Requires Java 21.
 
 **Login (#50).** You must sign in. With the `demo` profile: `admin` (sees every account, opens accounts for new or existing customers by their document and can replace an IBAN with a generated one) and `ada`, `grace` and `alan` (each one only sees their own account), all with password `demo` (local practice data: `application-demo.properties` only holds its BCrypt hash). The API uses HTTP Basic: `curl -u admin:demo http://localhost:8080/api/accounts`. Without the `demo` profile there are no users; an administrator can be created with the `APP_ADMIN_USERNAME` and `APP_ADMIN_PASSWORD` environment variables.
 
+**API documentation (#111).** Swagger UI at `/api-docs` (<http://localhost:8080/api-docs>, and on Render <https://proyect-ddd-claude.onrender.com/api-docs>) shows the hand-written contract, served as-is at `/openapi.yaml`. It is public; to use "Try it out", press **Authorize** and sign in with HTTP Basic (for example `admin`/`demo` in local). The page loads Swagger UI from jsDelivr, so the browser needs internet access.
+
 ## Deploy
 
 Each branch can be published as its own web service on Render's free plan, built with the [`Dockerfile`](Dockerfile): [deployment guide](docs/deploy/render.md). On a public URL, replace the `demo` password with your own through environment variables (the guide explains how); the image turns the H2 console off.

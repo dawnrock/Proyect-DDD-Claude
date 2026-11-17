@@ -74,7 +74,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **Acceptance criteria:**
   - [x] The image's jar contains `BOOT-INF/classes/static/openapi.yaml`.
 
-### [ ] T4 — Documentation (~5 min)
+### [x] T4 — Documentation (~5 min)
 
 - **Layer:** docs
 - **Files:** `README.md`, `docs/deploy/render.md`
@@ -82,7 +82,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **What to do:**
   1. README: `/api-docs` in local and on Render; deploy guide: the documentation is served by the image.
 - **Acceptance criteria:**
-  - [ ] Links and URLs correct.
+  - [x] Links and URLs correct.
 
 ### [ ] T5 — Project status (~5 min)
 
