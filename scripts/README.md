@@ -1,6 +1,6 @@
 # scripts/
 
-Scripts deterministas que usan las skills y los hooks. Solo necesitan Node 16+ (sin dependencias npm) y `gh` para las issues.
+Scripts deterministas que usan las skills, los hooks y el CI. Solo necesitan Node 18+ (sin dependencias npm), `gh` para las issues y, para `contract-test.mjs`, Java 21 y Schemathesis.
 
 ## seed-issues.mjs
 
@@ -63,3 +63,19 @@ node scripts/graphify.mjs path "TransferController" "CheckingAccount" # cómo se
 ```
 
 Busca `graphify` en el PATH y, si no está, `py -m graphify` (Windows) o `python3 -m graphify`. Fuerza `GRAPHIFY_BACKEND=none`. Códigos de salida: 0 con respuesta, 3 si el nombre es ambiguo (lista los candidatos), 4 si no hay nodo y 1 si Graphify no está instalado (quien lo llama sigue con Grep). Instalación: `py -m pip install --user graphifyy` o `pip install graphifyy`.
+
+## contract-test.mjs
+
+Pruebas de contrato (#107, [ADR 0013](../docs/adr/0013-contract-tests-schemathesis.md)): arranca el jar de `target/` con el perfil `demo`, espera a `/actuator/health`, ejecuta [Schemathesis](https://schemathesis.readthedocs.io/) contra `docs/api/openapi.yaml` con la configuración de `schemathesis.toml` y detiene la aplicación. Sale con el código de Schemathesis; lo ejecuta el CI tras `./mvnw verify`.
+
+Requisitos: Java 21, el jar construido (`./mvnw verify` o `./mvnw package`) y Schemathesis (`pip install schemathesis==4.33.4`, Python 3.10+).
+
+```bash
+node scripts/contract-test.mjs
+CONTRACT_TEST_PORT=18080 SCHEMATHESIS=~/.venvs/st/bin/schemathesis node scripts/contract-test.mjs
+```
+
+| Variable | Por defecto | Descripción |
+| -------- | ----------- | ----------- |
+| `CONTRACT_TEST_PORT` | `8080` | Puerto en el que arranca la aplicación |
+| `SCHEMATHESIS` | `schemathesis` | Ejecutable de Schemathesis (por ejemplo, el de un entorno virtual) |

@@ -48,7 +48,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **Acceptance criteria:**
   - [x] Schemathesis ends with no failures (`ST202` for 422 and the #103 400 no longer reported) and the same result in two runs.
 
-### [ ] T2 — `contract-test.mjs` script (~10 min)
+### [x] T2 — `contract-test.mjs` script (~10 min)
 
 - **Layer:** build
 - **Files:** `scripts/contract-test.mjs`, `scripts/README.md`
@@ -58,7 +58,7 @@ Decisions taken while planning (clear and reversible, so not asked):
   2. Document it in `scripts/README.md` (requirements: Java 21, built jar, `pip install schemathesis==4.33.4`).
   3. Check it can fail: temporarily put `exclusiveMinimum: 0` back on `MovementRequest.amount` in the contract, see it fail (`ST202`, `0.001` → 400), revert.
 - **Acceptance criteria:**
-  - [ ] `node scripts/contract-test.mjs` exits 0 on the current code and non-zero with the sabotage; the app is stopped in both cases.
+  - [x] `node scripts/contract-test.mjs` exits 0 on the current code and non-zero with the sabotage; the app is stopped in both cases.
 
 ### [ ] T3 — Run it in the CI (~5 min)
 
