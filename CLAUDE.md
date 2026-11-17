@@ -20,6 +20,7 @@ Antes de tocar código, comprueba en qué rama estás (`git branch --show-curren
 ./mvnw test -Dtest='CheckingAccountTests#nombre*'    # un método
 ./mvnw spring-boot:run             # arranca en :8080 con el perfil demo (tres cuentas y sus operaciones); GET /actuator/health → {"status":"UP"}
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=default   # arranca sin datos de demostración
+node scripts/contract-test.mjs                       # pruebas de contrato (Schemathesis) contra el jar; requiere ./mvnw verify y schemathesis instalado (ADR 0013)
 node scripts/graphify.mjs update .                   # regenera el grafo del código (local, sin tokens)
 node scripts/graphify.mjs affected "<Clase>"         # quién depende de una clase (ADR 0010)
 ```

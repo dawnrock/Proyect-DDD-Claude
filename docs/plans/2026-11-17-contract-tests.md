@@ -80,7 +80,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **Acceptance criteria:**
   - [x] ADR in English, listed in the ADR index.
 
-### [ ] T5 — `CLAUDE.md` and skills (~5 min)
+### [x] T5 — `CLAUDE.md` and skills (~5 min)
 
 - **Layer:** docs
 - **Files:** `CLAUDE.md`, `.claude/skills/implement-plan/SKILL.md`, `.claude/skills/plan-feature/assets/template.md`
@@ -90,7 +90,7 @@ Decisions taken while planning (clear and reversible, so not asked):
   2. `implement-plan`, step 6.1: if the plan touches the API, also `node scripts/contract-test.mjs`.
   3. Plan template, fixed API criterion: add the contract test.
 - **Acceptance criteria:**
-  - [ ] The three files mention the command consistently.
+  - [x] The three files mention the command consistently.
 
 ### [ ] T6 — Project status (~5 min)
 
