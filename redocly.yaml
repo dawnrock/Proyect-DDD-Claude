@@ -35,6 +35,15 @@ rules:
   rule/request-body-required:
     subject:
       type: RequestBody
+    assertions:
+      required:
+        - required
+    severity: error
+    message: A request body declares `required` (OpenAPI defaults it to false).
+
+  rule/request-body-required-true:
+    subject:
+      type: RequestBody
       property: required
     assertions:
       const: true

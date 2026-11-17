@@ -4,14 +4,16 @@ Conventions for `docs/api/openapi.yaml` (#109). Most of them are rules in [`redo
 
 ## Checked by Redocly
 
+Rules named `rule/…` are the project's own assertions; the others are Redocly built-in rules raised to `error`.
+
 | Convention | Rule |
 | ---------- | ---- |
 | Every operation has a `summary` | `operation-summary` (error) |
 | Every operation has exactly one tag, declared in the root `tags` | `rule/one-tag`, `operation-tag-defined` (error) |
 | `operationId` in camelCase (`openAccount`, `listAccounts`) | `rule/operation-id-camel-case` |
 | Every operation documents a success (2XX) and at least one error (4XX) | `operation-2xx-response`, `operation-4xx-response` (error) |
-| Errors (4XX) are `ProblemDetail` (RFC 9457) as `application/problem+json`, never `application/json` | `rule/errors-are-problem-details` |
-| A request body is always `required: true` | `rule/request-body-required` |
+| Errors (4XX) with a body are `ProblemDetail` (RFC 9457) as `application/problem+json`, never `application/json` | `rule/errors-are-problem-details` |
+| A request body always declares `required: true` (OpenAPI defaults it to `false`) | `rule/request-body-required`, `rule/request-body-required-true` |
 | `info.contact` says who is responsible for the API | `rule/contact-required` |
 | Inside schemas, examples go in `examples` (a list); `example` is deprecated there since OpenAPI 3.1 | `rule/no-schema-example` |
 | Plus Redocly's `recommended` set (valid structure, resolvable `$ref`, path parameters declared, unique `operationId`, license…) | `extends: recommended` |

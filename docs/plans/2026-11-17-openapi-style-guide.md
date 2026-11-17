@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-17
-- **Status:** in progress
-- **Total estimate:** ~40 min (5 tasks)
+- **Status:** done
+- **Total estimate:** ~45 min (6 tasks)
 
 ## Goal
 
@@ -97,25 +97,35 @@ No Java change, no new dependency (Redocly already runs with `npx` at a fixed ve
 - **Acceptance criteria:**
   - [x] Annexes updated.
 
+### [x] T6 — Review fixes (~5 min)
+
+- **Layer:** docs
+- **Files:** `redocly.yaml`, `docs/api/style-guide.md`
+- **Depends on:** T5
+- **What to do:**
+  1. `revisor-ddd` (no blocking finding) showed that `rule/request-body-required` only failed on `required: false`, not on a missing `required` (OpenAPI's default is `false`, the likeliest mistake). Split into `rule/request-body-required` (the key must be present) and `rule/request-body-required-true` (it must be `true`). The guide now says that 4XX responses are checked when they have a body and tells built-in rules from `rule/*`. Not applied: dropping `minLength: 1` from `rule/one-tag` (it catches `tags: []`).
+- **Acceptance criteria:**
+  - [x] Removing `required` from the 5 request bodies → 5 errors; `required: false` → 5 errors; the real contract lints clean.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] A contract change that breaks a convention of the guide fails the CI's existing Redocly step.
+- [x] A contract change that breaks a convention of the guide fails the CI's existing Redocly step.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish) (n/a: no JUnit tests).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: `docs/api/openapi.yaml` reflects it, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes (the API does not change, but the contract document does: both are run).
-- [ ] Any new business term is in `docs/dominio/glosario.md` (n/a).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish) (n/a: no JUnit tests).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: `docs/api/openapi.yaml` reflects it, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes (the API does not change, but the contract document does: both are run).
+- [x] Any new business term is in `docs/dominio/glosario.md` (n/a).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
