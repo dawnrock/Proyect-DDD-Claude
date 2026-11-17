@@ -79,15 +79,16 @@ Named examples:
 - **Acceptance criteria:**
   - [x] Redocly clean (the `no-server-example.com` rule stays off only for `localhost`).
 
-### [ ] T4 — Account examples (~10 min)
+### [x] T4 — Account examples (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`
 - **Depends on:** T2
+- **Deviation:** Redocly's `no-invalid-media-type-examples` only warned (a `balance: "mucho"` sabotage passed the lint), so it was raised to `error` in `redocly.yaml` and added to the style guide; with it the sabotage fails.
 - **What to do:**
   1. Named examples of `listAccounts`, `openAccount`, `findAccount`, `regenerateAccountNumber` and `signUp` from the table.
 - **Acceptance criteria:**
-  - [ ] Redocly clean (examples valid against their schemas).
+  - [x] Redocly clean (examples valid against their schemas).
 
 ### [ ] T5 — Movement, transfer and business-rule examples (~10 min)
 

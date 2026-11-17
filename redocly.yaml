@@ -11,6 +11,7 @@ rules:
   operation-4xx-response: error
   operation-summary: error
   operation-tag-defined: error
+  no-invalid-media-type-examples: error
 
   rule/operation-id-camel-case:
     subject:

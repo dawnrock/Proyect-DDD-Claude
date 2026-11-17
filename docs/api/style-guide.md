@@ -16,6 +16,7 @@ Rules named `rule/…` are the project's own assertions; the others are Redocly 
 | A request body always declares `required: true` (OpenAPI defaults it to `false`) | `rule/request-body-required`, `rule/request-body-required-true` |
 | `info.contact` says who is responsible for the API | `rule/contact-required` |
 | Inside schemas, examples go in `examples` (a list); `example` is deprecated there since OpenAPI 3.1 | `rule/no-schema-example` |
+| Every request and response example is valid against its schema (#110) | `no-invalid-media-type-examples` (error) |
 | Plus Redocly's `recommended` set (valid structure, resolvable `$ref`, path parameters declared, unique `operationId`, license…) | `extends: recommended` |
 
 ## Checked by people
