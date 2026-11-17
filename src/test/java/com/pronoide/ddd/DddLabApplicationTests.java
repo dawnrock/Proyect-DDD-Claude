@@ -681,6 +681,19 @@ class DddLabApplicationTests {
 		}
 
 		@Test
+		@DisplayName("/api-docs lleva sin credenciales hasta la página de Swagger UI")
+		void api_docs_lleva_sin_credenciales_hasta_la_pagina() throws Exception {
+			HttpClient following = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
+
+			HttpResponse<String> response = following.send(HttpRequest.newBuilder(URI.create(url("/api-docs"))).GET().build(),
+					HttpResponse.BodyHandlers.ofString());
+
+			assertThat(response.statusCode()).isEqualTo(200);
+			assertThat(response.uri().getPath()).isEqualTo("/api-docs/index.html");
+			assertThat(response.body()).contains("SwaggerUIBundle");
+		}
+
+		@Test
 		@DisplayName("La página de Swagger UI se sirve sin credenciales y carga el contrato escrito a mano")
 		void la_pagina_de_swagger_ui_se_sirve_sin_credenciales() throws Exception {
 			HttpResponse<String> response = http.send(HttpRequest.newBuilder(URI.create(url("/api-docs/index.html"))).GET().build(),

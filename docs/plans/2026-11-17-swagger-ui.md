@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-17
-- **Status:** in progress
-- **Total estimate:** ~45 min (5 tasks)
+- **Status:** done
+- **Total estimate:** ~50 min (6 tasks)
 
 ## Goal
 
@@ -94,25 +94,35 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **Acceptance criteria:**
   - [x] Annexes updated.
 
+### [x] T6 — Review fixes (~5 min)
+
+- **Layer:** build · tests
+- **Files:** `pom.xml`, `DddLabApplicationTests.java`
+- **Depends on:** T5
+- **What to do:**
+  1. `revisor-ddd` (no blocking finding). Applied: declaring `<resources>` replaced the Spring Boot parent's, which filters `application*.properties`/`yml` with `@...@`; the parent's two resources are repeated next to the contract (harmless today, a silent trap later). A test follows the redirect from `/api-docs` to the page. Not applied: a Content-Security-Policy for `/api-docs/**` (the page runs a third-party script, covered by SRI and the pinned version; recorded as a consequence of option A in `pendientes.md`).
+- **Acceptance criteria:**
+  - [x] `./mvnw clean verify` green; `target/classes` keeps the properties, templates, static files and `static/openapi.yaml`.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] `/api-docs` shows the hand-written contract, in local and in the Docker image, without any new dependency.
+- [x] `/api-docs` shows the hand-written contract, in local and in the Docker image, without any new dependency.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: `docs/api/openapi.yaml` reflects it, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes (the API does not change; the contract gets a relative server: both are run).
-- [ ] Any new business term is in `docs/dominio/glosario.md` (n/a).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: `docs/api/openapi.yaml` reflects it, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes (the API does not change; the contract gets a relative server: both are run).
+- [x] Any new business term is in `docs/dominio/glosario.md` (n/a).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
