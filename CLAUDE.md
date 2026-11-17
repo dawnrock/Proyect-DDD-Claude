@@ -55,7 +55,7 @@ ArchUnit no ve las anotaciones de Lombok (retención `SOURCE`): lo comprueba `no
 ## Flujo de trabajo con issues
 
 1. Las tareas son issues de GitHub (fuente de verdad), agrupadas por milestone de fase.
-2. `/plan-feature <n>` genera el plan en `docs/plans/` y lo publica en la issue. No se implementa sin plan aprobado. En `docs/plans/` solo quedan los 5 planes más recientes; los anteriores están en el historial de git y en su issue.
+2. `/plan-feature <n>` genera el plan en `docs/plans/` y lo publica en la issue. No se implementa sin plan aprobado, salvo con `/advance-issues`: avanza por las issues abiertas en el orden más coherente sin esperar confirmación entre pasos y solo pregunta (con `AskUserQuestion` y opciones) cuando hace falta una decisión del usuario. En `docs/plans/` solo quedan los 5 planes más recientes; los anteriores están en el historial de git y en su issue.
 3. `/implement-plan <n>` lo implementa en un worktree con TDD, un commit por tarea, y abre la PR contra la rama de la fase (`Monolithic` o `Hexagonal`), nunca contra `master`. Cuando el usuario pide una PR, Claude la fusiona en cuanto todos sus checks pasan en verde (paso 7 bis de `implement-plan`).
 4. Commits con `/commit` (Conventional Commits en español).
 5. **Back + web en la misma issue** (etiqueta `equipo`): `/implement-plan-team <n>`. Primero se acuerda el **contrato** (`docs/contracts/<slug>.md`: servicio, commands y vistas de `application`, errores y fragmento de OpenAPI) entre los agentes `backend-dev` y `web-dev`; se congela en un commit y cada uno implementa su lado en paralelo en su worktree. Nadie cambia el contrato por su cuenta (ADR 0007).

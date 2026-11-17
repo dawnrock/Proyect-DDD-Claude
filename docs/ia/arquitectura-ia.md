@@ -26,6 +26,7 @@ flowchart LR
 | Command | `.claude/commands/commit.md` | 8.4 | Conventional Commits in Spanish; refuses to commit on `master`. |
 | Skill | `.claude/skills/plan-feature/` | 9, 9.2.3 | Issue → plan with 5-10 min tasks and criteria, following `assets/template.md`. |
 | Skill | `.claude/skills/implement-plan/` | 9, 13.1 | Plan → worktree → TDD → commits → PR against the phase branch. |
+| Skill | `.claude/skills/advance-issues/` | 9 | Autonomous loop over the open issues (2026-11-17): picks the most coherent order (blockers and dependencies first), then `plan-feature` → `implement-plan`/`implement-plan-team` → merge with green checks, without waiting for approval between steps; it only stops to ask the user for a concrete decision (`AskUserQuestion` with options). |
 | Skill with supporting material | `.claude/skills/ddd-building-block/` | 9.2 | `references/` (DDD rules, Lombok/Immutables), `templates/` (VO, entity, test) and `scripts/check-domain.mjs`. |
 | Phase 2 skill | `.claude/skills/hexagonal-adapter/` | 9.2 | Templates for port, adapter and adapter test. |
 | Subagent | `.claude/agents/revisor-ddd.md` | 10.2 | DDD and architecture review, without edit rights, with Sonnet. |

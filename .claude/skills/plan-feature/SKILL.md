@@ -80,4 +80,4 @@ Si responde que no está configurado o falla, continúa y menciónalo en el resu
 
 ### 9. Presentarlo
 
-Resume objetivo, tareas con estimación, ruta del archivo, URL del comentario, si se avisó por Telegram y las preguntas abiertas. Pregunta si quiere ajustar algo o implementarlo con `/implement-plan <número>` (o `/implement-plan-team <número>` si el plan tiene T0 · Contract). No empieces a implementar sin su confirmación.
+Resume objetivo, tareas con estimación, ruta del archivo, URL del comentario, si se avisó por Telegram y las preguntas abiertas. Pregunta si quiere ajustar algo o implementarlo con `/implement-plan <número>` (o `/implement-plan-team <número>` si el plan tiene T0 · Contract). No empieces a implementar sin su confirmación, **salvo** que te haya lanzado `advance-issues`: entonces resume el plan en dos líneas y sigue con la implementación sin esperar (las decisiones que necesite se preguntan antes, en el paso 2, con `AskUserQuestion`).

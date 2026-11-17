@@ -85,7 +85,7 @@ Si un test no se puede poner en verde sin salirte del plan o un criterio no se p
 
 ### 7 bis. Fusión automática con los checks en verde
 
-Decisión del usuario (2026-11-17): **cuando el usuario pide una PR** (al lanzar `/implement-plan` o `/implement-plan-team`, o al pedir expresamente "haz/abre una PR"), la fusionas tú en cuanto sus checks pasen en verde, sin volver a preguntar. Una PR que abras por tu cuenta, sin que él la pida, no se fusiona sin su "sí".
+Decisión del usuario (2026-11-17): **cuando el usuario pide una PR** (al lanzar `/implement-plan`, `/implement-plan-team` o `/advance-issues`, o al pedir expresamente "haz/abre una PR"), la fusionas tú en cuanto sus checks pasen en verde, sin volver a preguntar. Una PR que abras por tu cuenta, sin que él la pida, no se fusiona sin su "sí".
 
 1. Al abrirla, suscríbete a su actividad (o, sin esa herramienta, vuelve a mirar los checks cuando acaben) y espera a que terminen. No hagas sondeo con `sleep`.
 2. Fusiona solo si se cumple **todo**:
