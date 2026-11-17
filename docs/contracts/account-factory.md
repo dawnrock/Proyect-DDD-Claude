@@ -1,6 +1,6 @@
 # Contract: open an account through the factory
 
-- **Issue:** [#18](https://github.com/dawnrock/Proyect-DDD-Claude/issues/18) · **Plan:** `docs/plans/2026-11-03-account-factory.md`
+- **Issue:** [#18](https://github.com/dawnrock/Proyect-DDD-Claude/issues/18) · **Plan:** on the issue (removed from `docs/plans/`; in the git history)
 - **Status:** frozen at `bc31fa7`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed with clarifications, merged by the lead)
 

@@ -80,7 +80,7 @@ A contract change during implementation is requested from the lead, agreed with 
 
 ## Usage log
 
-When each phase closes, it adds here which plans and PRs these pieces produced and which adjustments were needed.
+When each phase closes, it adds here which plans and PRs these pieces produced and which adjustments were needed. Only the five most recent plans stay in `docs/plans/`; the plans named below are in the git history and as a comment on their issue.
 
 ### Phase 1 · Layered monolith (tag `v1-monolito`)
 
@@ -88,21 +88,21 @@ Every functional issue went through `/plan-feature` → plan approved by the use
 
 | Issue | Plan | Implemented with | PR |
 | ----- | ---- | ---------------- | -- |
-| #2 | [configure-lombok-immutables](../plans/2026-10-23-configure-lombok-immutables.md) | `implement-plan` | #24 |
-| #3 | [document-glossary-layered-architecture](../plans/2026-10-23-document-glossary-layered-architecture.md) | `implement-plan` | #33, #34 |
-| #4 | [in-memory-account-repository](../plans/2026-10-23-in-memory-account-repository.md) | `implement-plan` | #35 |
-| #8 | [rest-web-foundation](../plans/2026-10-23-rest-web-foundation.md) | `implement-plan` | #36 |
-| #31 | [team-contract-first](../plans/2026-10-23-team-contract-first.md) | `implement-plan` (its last task, the first team issue, was #5) | #32, #39 |
-| #5 | [open-query-list-accounts](../plans/2026-10-23-open-query-list-accounts.md) | `implement-plan-team` | #39 |
-| #6 | [deposits-withdrawals](../plans/2026-10-23-deposits-withdrawals.md) | `implement-plan-team` | #41 |
-| #7 | [money-transfers](../plans/2026-10-25-money-transfers.md) | `implement-plan-team` | #43 |
-| #11 | [demo-data](../plans/2026-10-25-demo-data.md) | `implement-plan` | #45 |
-| #12 | [layered-architecture-rules](../plans/2026-10-25-layered-architecture-rules.md) | `implement-plan` | #47 |
-| #48 | [dark-minimal-web-redesign](../plans/2026-10-25-dark-minimal-web-redesign.md) | `implement-plan` | #49 |
-| #50 | [login-roles](../plans/2026-10-25-login-roles.md) | `implement-plan-team` | #51 |
-| #54 | [pending-adr-archunit-rules](../plans/2026-10-26-pending-adr-archunit-rules.md) | `implement-plan` | #56 |
-| #57 | [graphify-token-savings](../plans/2026-10-30-graphify-token-savings.md) | `implement-plan` | #58 |
-| #13 | [close-phase-1](../plans/2026-10-30-close-phase-1.md) | `implement-plan` | #60 |
+| #2 | `configure-lombok-immutables` | `implement-plan` | #24 |
+| #3 | `document-glossary-layered-architecture` | `implement-plan` | #33, #34 |
+| #4 | `in-memory-account-repository` | `implement-plan` | #35 |
+| #8 | `rest-web-foundation` | `implement-plan` | #36 |
+| #31 | `team-contract-first` | `implement-plan` (its last task, the first team issue, was #5) | #32, #39 |
+| #5 | `open-query-list-accounts` | `implement-plan-team` | #39 |
+| #6 | `deposits-withdrawals` | `implement-plan-team` | #41 |
+| #7 | `money-transfers` | `implement-plan-team` | #43 |
+| #11 | `demo-data` | `implement-plan` | #45 |
+| #12 | `layered-architecture-rules` | `implement-plan` | #47 |
+| #48 | `dark-minimal-web-redesign` | `implement-plan` | #49 |
+| #50 | `login-roles` | `implement-plan-team` | #51 |
+| #54 | `pending-adr-archunit-rules` | `implement-plan` | #56 |
+| #57 | `graphify-token-savings` | `implement-plan` | #58 |
+| #13 | `close-phase-1` | `implement-plan` | #60 |
 
 #9 and #10 (web-only issues) were folded into the team issues #5 and #6 when the backlog was reorganised (#32).
 
@@ -123,16 +123,16 @@ Same flow as phase 1, now against `Hexagonal`: `/plan-feature` → plan approved
 
 | Issue | Plan | Implemented with | PR |
 | ----- | ---- | ---------------- | -- |
-| #14 | [hexagonal-packages](../plans/2026-10-30-hexagonal-packages.md) | `implement-plan` | #61 |
-| #15 | [account-repository-ports](../plans/2026-10-30-account-repository-ports.md) | `implement-plan` | #62 |
-| #16 | [input-ports](../plans/2026-10-30-input-ports.md) | `implement-plan` | #63 |
-| #17 | [domain-events](../plans/2026-11-03-domain-events.md) | `implement-plan` | #64 |
-| #18 | [account-factory](../plans/2026-11-03-account-factory.md) | `implement-plan-team` | #65 |
-| #19 | [cli-input-adapter](../plans/2026-11-03-cli-input-adapter.md) | `implement-plan` | #66 |
-| #20 | [wire-core-in-config](../plans/2026-11-04-wire-core-in-config.md) | `implement-plan` | #67 |
-| #21 | [adapter-tests](../plans/2026-11-04-adapter-tests.md) | `implement-plan` | #68 |
-| #22 | [hexagonal-architecture-rules](../plans/2026-11-04-hexagonal-architecture-rules.md) | `implement-plan` | #69 |
-| #23 | [close-phase-2](../plans/2026-11-04-close-phase-2.md) | `implement-plan` | #73 |
+| #14 | `hexagonal-packages` | `implement-plan` | #61 |
+| #15 | `account-repository-ports` | `implement-plan` | #62 |
+| #16 | `input-ports` | `implement-plan` | #63 |
+| #17 | `domain-events` | `implement-plan` | #64 |
+| #18 | `account-factory` | `implement-plan-team` | #65 |
+| #19 | `cli-input-adapter` | `implement-plan` | #66 |
+| #20 | `wire-core-in-config` | `implement-plan` | #67 |
+| #21 | `adapter-tests` | `implement-plan` | #68 |
+| #22 | `hexagonal-architecture-rules` | `implement-plan` | #69 |
+| #23 | `close-phase-2` | `implement-plan` | #73 |
 
 **Adjustments made during the phase**
 

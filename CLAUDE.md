@@ -37,7 +37,7 @@ En ambas fases el dominio no depende de Spring ni de `jakarta` y su estado es pr
 
 ## Convenciones
 
-- Código (clases, métodos, variables) y **documentación** (`docs/`: planes, contratos, ADR, arquitectura, glosario, OpenAPI; y las plantillas que los generan) en **inglés**. Toda la documentación está ya en inglés (#70); las únicas excepciones son `docs/analysis/` y los cinco primeros planes de la fase 1, que se quedan en español como registro.
+- Código (clases, métodos, variables) y **documentación** (`docs/`: planes, contratos, ADR, arquitectura, glosario, OpenAPI; y las plantillas que los generan) en **inglés**. Toda la documentación está ya en inglés (#70); la única excepción es `docs/analysis/`, que se queda en español.
 - La conversación con el usuario, los mensajes de error del dominio, los commits y los `@DisplayName` siguen en español.
 - Accesores estilo record (`id()`, `currentBalance()`), nunca `getX()`/`setX()` en el dominio.
 - Los agregados se crean con métodos factoría estáticos (`CheckingAccount.open(...)`) y constructor privado; solo cambian de estado mediante métodos de negocio.
@@ -55,7 +55,7 @@ ArchUnit no ve las anotaciones de Lombok (retención `SOURCE`): lo comprueba `no
 ## Flujo de trabajo con issues
 
 1. Las tareas son issues de GitHub (fuente de verdad), agrupadas por milestone de fase.
-2. `/plan-feature <n>` genera el plan en `docs/plans/` y lo publica en la issue. No se implementa sin plan aprobado.
+2. `/plan-feature <n>` genera el plan en `docs/plans/` y lo publica en la issue. No se implementa sin plan aprobado. En `docs/plans/` solo quedan los 5 planes más recientes; los anteriores están en el historial de git y en su issue.
 3. `/implement-plan <n>` lo implementa en un worktree con TDD, un commit por tarea, y abre la PR contra la rama de la fase (`Monolithic` o `Hexagonal`), nunca contra `master`.
 4. Commits con `/commit` (Conventional Commits en español).
 5. **Back + web en la misma issue** (etiqueta `equipo`): `/implement-plan-team <n>`. Primero se acuerda el **contrato** (`docs/contracts/<slug>.md`: servicio, commands y vistas de `application`, errores y fragmento de OpenAPI) entre los agentes `backend-dev` y `web-dev`; se congela en un commit y cada uno implementa su lado en paralelo en su worktree. Nadie cambia el contrato por su cuenta (ADR 0007).
