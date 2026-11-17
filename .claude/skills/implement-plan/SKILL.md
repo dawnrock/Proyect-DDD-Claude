@@ -93,7 +93,7 @@ Decisión del usuario (2026-11-17): **cuando el usuario pide una PR** (al lanzar
    - la revisión automática no deja hallazgos bloqueantes sin resolver;
    - no hay conflictos con la rama base;
    - la base es `Hexagonal` o, si la issue es una excepción autorizada, `Monolithic`; **nunca `master`**.
-3. Fusión con merge commit (no squash ni rebase), fijando la cabeza esperada para no fusionar un commit que no has visto en verde: `gh pr merge <n> --merge --match-head-commit <sha>` (o `expectedHeadSha` con el SHA completo en la herramienta de GitHub).
+3. Fusiona igual que el botón **Merge pull request** de GitHub con su opción por defecto, **Create a merge commit** (no «Squash and merge» ni «Rebase and merge»), fijando la cabeza esperada para no fusionar un commit que no has visto en verde: `gh pr merge <n> --merge --match-head-commit <sha>` (o `expectedHeadSha` con el SHA completo en la herramienta de GitHub).
 4. Si un check falla o hay un hallazgo bloqueante, **no fusiones**: arregla la causa en la misma rama, sube el arreglo y vuelve a esperar. Nunca desactives un test para ponerlo en verde.
 5. No fusiones si el usuario dice que la deje abierta, si la PR es un borrador o si en el informe quedó algo pendiente de su decisión.
 6. Después de fusionar: deja de seguir la PR, borra sus ramas y worktrees como en el paso 9 y avisa por Telegram:
