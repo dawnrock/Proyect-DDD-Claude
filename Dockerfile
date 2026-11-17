@@ -8,6 +8,8 @@ WORKDIR /workspace
 COPY pom.xml lombok.config ./
 RUN mvn -q -B dependency:go-offline
 COPY src ./src
+# El contrato escrito a mano se copia al jar para Swagger UI (/openapi.yaml, #111)
+COPY docs/api/openapi.yaml ./docs/api/
 RUN mvn -q -B -DskipTests package \
     && cp target/ddd-lab-*.jar target/app.jar
 

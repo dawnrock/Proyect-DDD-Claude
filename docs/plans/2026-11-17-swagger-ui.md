@@ -62,16 +62,17 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **Acceptance criteria:**
   - [x] Tests red before, green after; Redocly clean; the page loads in a browser (checked with Playwright: the operations of the contract are listed).
 
-### [ ] T3 — Docker image includes the contract (~10 min)
+### [x] T3 — Docker image includes the contract (~10 min)
 
 - **Layer:** build
 - **Files:** `Dockerfile`, `.dockerignore`
 - **Depends on:** T1
+- **Deviation:** there is no Docker daemon in this session, so the image could not be built. The build context was emulated (`pom.xml`, `lombok.config`, `src/` and, with the change, `docs/api/openapi.yaml`) and built with Maven: without the file the jar has no `static/openapi.yaml` (Maven skips the missing resource directory silently), with it the jar does. The `.dockerignore` exception (`!docs/api/openapi.yaml` after `docs/`) is checked on the next Render deploy: `GET https://proyect-ddd-claude.onrender.com/openapi.yaml` must answer 200.
 - **What to do:**
   1. `.dockerignore`: keep excluding `docs/` but allow `docs/api/openapi.yaml`; `Dockerfile`: `COPY docs/api/openapi.yaml ./docs/api/` before `mvn package`.
   2. Build the image and check `openapi.yaml` is inside the jar (if the registry cannot be reached from this session, check the jar of a Maven build from a copy of the build context instead and say so).
 - **Acceptance criteria:**
-  - [ ] The image's jar contains `BOOT-INF/classes/static/openapi.yaml`.
+  - [x] The image's jar contains `BOOT-INF/classes/static/openapi.yaml`.
 
 ### [ ] T4 — Documentation (~5 min)
 

@@ -1,4 +1,4 @@
-# Only pom.xml, lombok.config and src/ are needed to build the image.
+# Only pom.xml, lombok.config, src/ and the OpenAPI contract (served at /openapi.yaml, #111) are needed to build the image.
 target/
 .git/
 .github/
@@ -7,6 +7,7 @@ target/
 graphify-out/
 graphify-out.*/
 docs/
+!docs/api/openapi.yaml
 scripts/
 node_modules/
 .idea/
