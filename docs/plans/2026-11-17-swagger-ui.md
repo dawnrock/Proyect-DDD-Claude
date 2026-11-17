@@ -84,7 +84,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **Acceptance criteria:**
   - [x] Links and URLs correct.
 
-### [ ] T5 — Project status (~5 min)
+### [x] T5 — Project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/decisiones.md`, `docs/ia/pendientes.md`
@@ -92,7 +92,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **What to do:**
   1. `decisiones.md`: Swagger UI from the hand-written contract, option A, version and SRI, relative server, Docker context. `pendientes.md`: the CDN needs internet in the browser.
 - **Acceptance criteria:**
-  - [ ] Annexes updated.
+  - [x] Annexes updated.
 
 ## Global acceptance criteria
 
