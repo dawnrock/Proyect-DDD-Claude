@@ -58,6 +58,7 @@ Cada tarea debe poder hacerse en **5-10 minutos**:
 
 - Rellena [template.md](assets/template.md) respetando sus secciones y quita los comentarios `<!-- -->`.
 - Guárdalo en `docs/plans/AAAA-MM-DD-<slug>.md` (slug en inglés, kebab-case).
+- **En `docs/plans/` solo quedan los 5 planes más recientes, contando el nuevo.** Borra con `git rm` los más antiguos en el mismo commit del plan: su contenido sigue en el historial de git y en el comentario de su issue. Si un documento enlaza un plan borrado, cambia el enlace por la issue.
 - Cabecera: issue con número y URL, fase y rama base.
 - Plan en inglés (es documentación, ver `CLAUDE.md`), igual que los nombres de archivos, clases y código. El resumen al usuario, en español.
 

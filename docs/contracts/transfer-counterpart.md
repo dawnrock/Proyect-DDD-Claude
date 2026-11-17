@@ -1,6 +1,6 @@
 # Contract: transfers show their counterpart account
 
-- **Issue:** [#72](https://github.com/dawnrock/Proyect-DDD-Claude/issues/72) · **Plan:** `docs/plans/2026-11-05-web-pending-items.md`
+- **Issue:** [#72](https://github.com/dawnrock/Proyect-DDD-Claude/issues/72) · **Plan:** on the issue (removed from `docs/plans/`; in the git history)
 - **Status:** frozen at `4d12b7c`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed with clarifications, merged by the lead)
 

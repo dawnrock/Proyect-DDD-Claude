@@ -1,6 +1,6 @@
 # Contract: deposits and withdrawals with account details
 
-- **Issue:** [#6](https://github.com/dawnrock/Proyect-DDD-Claude/issues/6) · **Plan:** `docs/plans/2026-10-23-deposits-withdrawals.md`
+- **Issue:** [#6](https://github.com/dawnrock/Proyect-DDD-Claude/issues/6) · **Plan:** on the issue (removed from `docs/plans/`; in the git history)
 - **Status:** frozen at `dbc59e5`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed, clarifications merged by the lead)
 

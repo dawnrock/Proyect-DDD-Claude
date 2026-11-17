@@ -18,7 +18,7 @@ Issue indicada por el usuario: $ARGUMENTS
 - **Rama base** según la fase de la issue: `fase:1-monolito` → `Monolithic`, `fase:2-hexagonal` → `Hexagonal`. Si la rama base no existe en `origin`, detente: la fase 2 no empieza hasta que se cierre la fase 1. **Nunca** uses `master`.
 - Localiza el plan:
   1. En `docs/plans/` de la rama base, el plan cuyo `**Issue:**` sea `#<número>`.
-  2. Si no está, el comentario más reciente de la issue que empiece por `# Plan:`; guárdalo en `docs/plans/AAAA-MM-DD-<slug>.md`.
+  2. Si no está, el comentario más reciente de la issue que empiece por `# Plan:`; guárdalo en `docs/plans/AAAA-MM-DD-<slug>.md` (con la regla de `plan-feature`: solo quedan los 5 planes más recientes).
   3. Si no hay plan, detente y sugiere `/plan-feature <número>`.
 - Lee el plan completo, `CLAUDE.md` y `src/test/CLAUDE.md`. Resuelve con el usuario las preguntas abiertas que bloqueen alguna tarea **antes** de crear el worktree.
 

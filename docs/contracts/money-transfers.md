@@ -1,6 +1,6 @@
 # Contract: transfers between accounts
 
-- **Issue:** [#7](https://github.com/dawnrock/Proyect-DDD-Claude/issues/7) · **Plan:** `docs/plans/2026-10-25-money-transfers.md`
+- **Issue:** [#7](https://github.com/dawnrock/Proyect-DDD-Claude/issues/7) · **Plan:** on the issue (removed from `docs/plans/`; in the git history)
 - **Status:** frozen at `0bdd261`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed with minor changes; the teammates could not message each other, so the lead merged both reviews)
 
