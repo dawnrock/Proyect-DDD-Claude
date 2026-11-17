@@ -6,7 +6,7 @@
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-17
 - **Status:** in progress
-- **Total estimate:** ~15 min (2 tasks)
+- **Total estimate:** ~17 min (3 tasks)
 
 ## Goal
 
@@ -64,6 +64,16 @@ No change to the domain, the ports or the adapters' code; no new dependency; no 
 - **Acceptance criteria:**
   - [x] Schemathesis reports no `ST102`; anything left is only the `ST202` cases already accepted for #107.
   - [x] `curl -i -u admin:demo -H 'Content-Type: multipart/form-data' localhost:8080/api/accounts` → 200.
+
+### [x] T3 — Review fixes (~2 min)
+
+- **Layer:** tests
+- **Files:** `DddLabApplicationTests.java`
+- **Depends on:** T2
+- **What to do:**
+  1. `revisor-ddd`: no multipart use breaks (no `enctype`, no `MultipartFile`, the H2 console has its own servlet). Removed a double blank line before the new `@Nested`. Not applied: reusing a Basic-auth helper (the file already builds it inline in each nested class). Its "blocking" item, the project status, is the closing step of this plan.
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green.
 
 ## Global acceptance criteria
 

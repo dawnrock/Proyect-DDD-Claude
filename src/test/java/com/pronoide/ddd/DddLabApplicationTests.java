@@ -618,7 +618,6 @@ class DddLabApplicationTests {
 		}
 	}
 
-
 	/** Una petición que anuncia multipart sin delimitador no debe llegar a un 500 (#113). */
 	@Nested
 	@DisplayName("Peticiones multipart sin delimitador (#113)")
