@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-17
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~45 min (6 tasks)
 
 ## Goal
@@ -36,16 +36,17 @@ Decisions taken while planning (clear and reversible, so not asked):
 
 ## Tasks
 
-### [ ] T1 — Schemathesis configuration (~10 min)
+### [x] T1 — Schemathesis configuration (~10 min)
 
 - **Layer:** build
 - **Files:** `schemathesis.toml`
 - **Depends on:** —
+- **Deviation:** the first run still reported a `ST202` on `signUp`: a DNI/NIE with a wrong control letter (mod 23) answers 400, a rule a regex cannot check and the contract documents in text. Declared like `openAccount`'s 400. Result: 0 failures in two runs (872 and 870 cases); two warnings left (transfers test data, `signUp` mostly rejected generated data, because random documents rarely have a valid letter).
 - **What to do:**
   1. Write `schemathesis.toml`: `seed`, `[generation] deterministic = true, max-examples = 40`, `[auth.basic]` with `admin`/`demo` (practice password, already public in the README), `[checks.positive_data_acceptance] expected-statuses` = defaults + `422`, and an `[[operations]]` entry for `include-operation-id = "openAccount"` adding `400`. A comment in Spanish per decision.
   2. Run it by hand against the app with the `demo` profile.
 - **Acceptance criteria:**
-  - [ ] Schemathesis ends with no failures (`ST202` for 422 and the #103 400 no longer reported) and the same result in two runs.
+  - [x] Schemathesis ends with no failures (`ST202` for 422 and the #103 400 no longer reported) and the same result in two runs.
 
 ### [ ] T2 — `contract-test.mjs` script (~10 min)
 
