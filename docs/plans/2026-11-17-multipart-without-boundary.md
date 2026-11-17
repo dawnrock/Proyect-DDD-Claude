@@ -51,18 +51,19 @@ No change to the domain, the ports or the adapters' code; no new dependency; no 
   - [x] The three checks fail with 500 before the property and pass after it.
   - [x] `./mvnw verify` green (web forms, H2 console and every existing test unaffected).
 
-### [ ] T2 — Verify with Schemathesis and update the project status (~5 min)
+### [x] T2 — Verify with Schemathesis and update the project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/decisiones.md`, `docs/ia/pendientes.md`, `docs/ia/estado-del-proyecto.md`, `docs/ia/historial.md`
 - **Depends on:** T1
+- **Result (2026-11-17):** Schemathesis 4.33.4 reports no `ST102`; only three `ST202` left, all accepted for #107 (the #103 400 for an existing customer's document with different data, and two 422 business rules: minimum initial deposit, username taken).
 - **What to do:**
   1. Start the app with the `demo` profile and run Schemathesis 4.33.4 as in #108 (`schemathesis run docs/api/openapi.yaml --url http://localhost:8080 --auth admin:demo`).
   2. `decisiones.md`: multipart resolution is off; an endpoint that ever needs uploads must turn it back on and handle `MultipartException`.
   3. `pendientes.md`: remove the `ST102`/#113 item from the #107 note (keep the `ST202` and test-data items); add the English `title` of 415 for #109/#110.
 - **Acceptance criteria:**
-  - [ ] Schemathesis reports no `ST102`; anything left is only the `ST202` cases already accepted for #107.
-  - [ ] `curl -i -u admin:demo -H 'Content-Type: multipart/form-data' localhost:8080/api/accounts` → 200.
+  - [x] Schemathesis reports no `ST102`; anything left is only the `ST202` cases already accepted for #107.
+  - [x] `curl -i -u admin:demo -H 'Content-Type: multipart/form-data' localhost:8080/api/accounts` → 200.
 
 ## Global acceptance criteria
 
