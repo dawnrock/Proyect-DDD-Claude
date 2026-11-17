@@ -77,7 +77,7 @@ No Java change, no new dependency (Redocly already runs with `npx` at a fixed ve
 - **Acceptance criteria:**
   - [x] Redocly without errors; contract tests pass.
 
-### [ ] T4 — Style guide document (~10 min)
+### [x] T4 — Style guide document (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/style-guide.md`, `docs/api/openapi.yaml` (one line in `info.description` pointing to it)
@@ -85,7 +85,7 @@ No Java change, no new dependency (Redocly already runs with `npx` at a fixed ve
 - **What to do:**
   1. A short guide in English: resources in plural and nouns, `operationId` camelCase, one tag, errors as `ProblemDetail` with the Spanish `title` values, `201` + `Location` on creation, examples in `examples`, contact, and the table "convention → rule in `redocly.yaml`", plus the conventions no rule checks (reviewed by people, as the course says).
 - **Acceptance criteria:**
-  - [ ] Guide written and linked from the contract; Redocly without errors.
+  - [x] Guide written and linked from the contract; Redocly without errors.
 
 ### [ ] T5 — Project status (~5 min)
 

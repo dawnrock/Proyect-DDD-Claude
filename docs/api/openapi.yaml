@@ -5,7 +5,8 @@ info:
   description: |
     REST API of the project (the same in both phases: in phase 1 it lives in `presentation.rest`,
     in phase 2 in the `adapter.in.rest` input adapter). Hand-written contract: each feature adds
-    its operations here (see `docs/contracts/`).
+    its operations here (see `docs/contracts/`). It follows the style guide in
+    `docs/api/style-guide.md`, checked by `redocly.yaml`.
 
     Errors of this API's operations use the `ProblemDetail` format (RFC 9457) and are translated
     in a single place (`RestExceptionHandler`). A path that does not exist (`/api/...` with no
