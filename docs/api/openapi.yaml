@@ -1,8 +1,10 @@
 openapi: 3.1.0
 info:
   title: Proyect-DDD-Claude · Checking accounts API
-  version: 0.1.0
+  version: 1.0.0
   description: |
+    Versioned with SemVer (ADR 0014); the changes are in `docs/api/CHANGELOG.md`.
+
     REST API of the project (the same in both phases: in phase 1 it lives in `presentation.rest`,
     in phase 2 in the `adapter.in.rest` input adapter). Hand-written contract: each feature adds
     its operations here (see `docs/contracts/`). It follows the style guide in
@@ -104,10 +106,6 @@ paths:
         Since #98 the balance also counts: a holder becomes `HIGH_NET_WORTH` as soon as the account balance reaches
         100,000.00 EUR, and may go back to `RETAIL` after a review (see the `segment` property). Generated IBANs carry
         the entity code `9999` and branch `0001` of Mon-A Bank.
-
-        **Incompatible change (#18):** the body no longer carries `accountNumber` or `segment`; it carries `holderTaxId`.
-
-        **Incompatible change (#103):** `holderTaxId` accepts a DNI or a NIE and its control letter is checked; `holderName` and `ownerUsername` are only required for a new customer, together with the new `holderEmail`. For an existing customer (same document) they are absent, blank or equal to theirs; different data fail with 400.
       requestBody:
         required: true
         content:

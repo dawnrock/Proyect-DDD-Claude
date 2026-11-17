@@ -14,6 +14,7 @@
 | [0010](0010-graphify-token-savings.md) | Graphify for dependency questions only, and a short project status | Accepted |
 | [0012](0012-customer-self-sign-up.md) | Customer self sign-up at Mon-A Bank (extends 0008) | Accepted |
 | [0013](0013-contract-tests-schemathesis.md) | Contract tests with Schemathesis, at hexagon level | Accepted |
+| [0014](0014-contract-versioning.md) | Semantic versioning of the OpenAPI contract | Accepted |
 
 ADR 0011 (the `integration` layer) only exists on `Monolithic`: it applies to phase 1.
 

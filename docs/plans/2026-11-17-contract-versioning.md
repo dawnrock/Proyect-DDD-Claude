@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-17
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~45 min (5 tasks)
 
 ## Goal
@@ -44,7 +44,7 @@ Decisions taken while planning (clear and reversible, so not asked):
 
 ## Tasks
 
-### [ ] T1 — Policy, baseline and changelog (~10 min)
+### [x] T1 — Policy, baseline and changelog (~10 min)
 
 - **Layer:** docs
 - **Files:** ADR 0014, `docs/adr/README.md`, `docs/api/openapi.yaml`, `docs/api/CHANGELOG.md`, `docs/api/style-guide.md`
@@ -53,7 +53,7 @@ Decisions taken while planning (clear and reversible, so not asked):
   1. ADR 0014 with the policy above, alternatives (no version check; version in the URL; Redocly or another diff tool) and consequences.
   2. `info.version: 1.0.0`; move the two "Incompatible change" notes of `openAccount` to the changelog; the changelog lists 1.0.0 with what the contract holds and the incompatible changes that led to it (#18, #103, #108); the style guide's "incompatible changes" line points to ADR 0014.
 - **Acceptance criteria:**
-  - [ ] Redocly clean; ADR listed in the index.
+  - [x] Redocly clean; ADR listed in the index.
 
 ### [ ] T2 — `check-contract-version.mjs` (~15 min)
 

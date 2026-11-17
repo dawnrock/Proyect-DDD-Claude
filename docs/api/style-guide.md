@@ -26,5 +26,5 @@ Rules named `rule/…` are the project's own assertions; the others are Redocly 
 - **Errors in Spanish:** the `title` and `detail` values are the real ones the API returns, in Spanish, and they are not translated in the contract or its examples (`Petición no válida`, `Regla de negocio incumplida`…).
 - **Reuse:** responses, parameters and schemas used more than once live in `components` and are referenced with `$ref`.
 - **Precise schemas:** formats (`uuid`, `date-time`), ranges, patterns and `enum` whenever the API enforces them, so the contract tests and any mock can rely on them; a rule a schema cannot express (a control letter, a business rule) is described in the `description` and its status is declared in `schemathesis.toml`.
-- **Incompatible changes** are announced in the operation's `description` until the versioning policy of #112 replaces that.
+- **Versioning:** every change bumps `info.version` following [ADR 0014](../adr/0014-contract-versioning.md) (major if `oasdiff breaking` reports it, minor for an addition, patch for documentation) and adds an entry to [`CHANGELOG.md`](CHANGELOG.md); the CI checks it. Descriptions do not carry "incompatible change" notes.
 - **Language:** the contract is documentation, so its texts are in English, except the API's own error messages.
