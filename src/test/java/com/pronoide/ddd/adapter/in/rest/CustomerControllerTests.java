@@ -131,6 +131,18 @@ class CustomerControllerTests {
         verifyNoInteractions(registration);
     }
 
+    @ParameterizedTest(name = "depósito inicial {0}")
+    @CsvSource({"0.004", "1000000000.00", "1.7976931348623155E+308"})
+    @DisplayName("Un depósito inicial que redondea a cero o supera el máximo responde 400 con el error del campo")
+    void un_deposito_inicial_fuera_de_los_limites_responde_400(String deposit) throws Exception {
+        mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_BODY.replace("\"initialDeposit\": 100.00", "\"initialDeposit\": " + deposit)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Petición no válida"))
+                .andExpect(jsonPath("$.errors.initialDeposit").exists());
+        verifyNoInteractions(registration);
+    }
+
     @Test
     @DisplayName("Un depósito ausente o no positivo responde 400")
     void un_deposito_ausente_o_no_positivo_responde_400() throws Exception {

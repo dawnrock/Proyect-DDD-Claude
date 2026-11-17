@@ -2,10 +2,11 @@ package com.pronoide.ddd.adapter.in.rest;
 
 import java.math.BigDecimal;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 import com.pronoide.ddd.application.OpenAccountCommandDef;
@@ -42,7 +43,8 @@ public record SignUpRequest(
         String password,
 
         @NotNull(message = "El depósito inicial es obligatorio")
-        @Positive(message = "El depósito inicial debe ser positivo")
+        @DecimalMin(value = "0.005", message = "El depósito inicial debe ser positivo")
+        @DecimalMax(value = "999999999.99", message = "El depósito inicial no puede superar 999999999.99")
         BigDecimal initialDeposit,
 
         @Pattern(regexp = "[A-Z]{3}", message = "La divisa debe ser un código ISO 4217 de tres letras mayúsculas")

@@ -81,7 +81,7 @@ No new DDD building block: the limit is a format check of the input, so it lives
 - **Acceptance criteria:**
   - [x] 400 `ValidationProblemDetail` with `errors.amount` for both limits.
 
-### [ ] T4 — REST opening and sign-up DTOs validate the limits (~10 min)
+### [x] T4 — REST opening and sign-up DTOs validate the limits (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `OpenAccountRequest.java`, `SignUpRequest.java`, `AccountControllerTests.java`, `CustomerControllerTests.java`
@@ -90,7 +90,7 @@ No new DDD building block: the limit is a format check of the input, so it lives
   1. Tests first: `initialDeposit` `0.004` and `1000000000.00` answer 400 with `errors.initialDeposit`.
   2. Same annotations as T3.
 - **Acceptance criteria:**
-  - [ ] 400 with `errors.initialDeposit` for both limits; the port is never called.
+  - [x] 400 with `errors.initialDeposit` for both limits; the port is never called.
 
 ### [ ] T5 — Wrong credentials on the public sign-up are a 401 (~5 min)
 

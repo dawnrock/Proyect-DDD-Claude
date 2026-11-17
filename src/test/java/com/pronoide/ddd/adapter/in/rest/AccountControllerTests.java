@@ -228,6 +228,19 @@ class AccountControllerTests {
             verifyNoInteractions(commands, queries);
         }
 
+        @ParameterizedTest(name = "depósito inicial {0}")
+        @DisplayName("Un depósito inicial que redondea a cero o supera el máximo responde 400 con el error del campo")
+        @ValueSource(strings = {"0.004", "1000000000.00", "1.7976931348623155E+308"})
+        void un_deposito_inicial_fuera_de_los_limites_responde_400(String deposit) throws Exception {
+            mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON)
+                            .content(VALID_BODY.replace("\"initialDeposit\": 100.00", "\"initialDeposit\": " + deposit)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Petición no válida"))
+                    .andExpect(jsonPath("$.errors.initialDeposit").exists());
+
+            verifyNoInteractions(commands, queries);
+        }
+
         @Test
         @DisplayName("Un depósito insuficiente responde 422 con el mensaje del dominio")
         void un_deposito_insuficiente_responde_422_con_el_mensaje_del_dominio() throws Exception {
