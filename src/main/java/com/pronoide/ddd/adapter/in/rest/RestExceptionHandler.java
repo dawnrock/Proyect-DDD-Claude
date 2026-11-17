@@ -6,8 +6,10 @@ import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +36,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     static final String BUSINESS_RULE_TITLE = "Regla de negocio incumplida";
     static final String NOT_FOUND_TITLE = "Recurso inexistente";
     static final String BAD_REQUEST_TITLE = "Petición no válida";
+    static final String UNSUPPORTED_MEDIA_TYPE_TITLE = "Tipo de contenido no admitido";
 
     @ExceptionHandler(DomainException.class)
     ProblemDetail handleBusinessRule(DomainException exception) {
@@ -81,6 +84,22 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             problem.setTitle(BAD_REQUEST_TITLE);
         }
         return response;
+    }
+
+    /**
+     * Un cuerpo que no es JSON (#110): 415 con el título y el detalle en español, como el resto de errores. Spring
+     * añade la cabecera {@code Accept} con los tipos admitidos; se conserva.
+     */
+    @Override
+    protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException exception,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        MediaType received = exception.getContentType();
+        String detail = received == null
+                ? "Falta el tipo de contenido: envía application/json"
+                : "El tipo de contenido %s/%s no está admitido: envía application/json"
+                        .formatted(received.getType(), received.getSubtype());
+        ProblemDetail problem = problem(HttpStatus.UNSUPPORTED_MEDIA_TYPE, UNSUPPORTED_MEDIA_TYPE_TITLE, detail);
+        return handleExceptionInternal(exception, problem, headers, status, request);
     }
 
     @Override

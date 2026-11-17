@@ -21,6 +21,7 @@ info:
     | 401 | Not authenticated (HTTP Basic) or invalid credentials | No autenticado |
     | 403 | Authenticated, but without the required role (only an administrator opens accounts or replaces an IBAN) | Acceso denegado |
     | 404 | The requested resource does not exist, or it is another customer's account (its existence is not revealed) | Recurso inexistente |
+    | 415 | The request body is not JSON (operations with a body) | Tipo de contenido no admitido |
     | 422 | A domain business rule is violated | Regla de negocio incumplida |
   contact:
     name: Proyect-DDD-Claude
@@ -31,6 +32,8 @@ info:
 servers:
   - url: http://localhost:8080
     description: Local development
+  - url: https://proyect-ddd-claude.onrender.com
+    description: Render deployment of the `Hexagonal` branch (free plan, the first request may take about a minute while it wakes up)
 # Every operation needs HTTP Basic credentials (#50). An admin sees every account; a user only their own.
 security:
   - basicAuth: []
@@ -59,6 +62,31 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AccountSummary'
+              examples:
+                several:
+                  summary: The three accounts of the demo profile, as an admin sees them
+                  value:
+                    - id: "e0b82ea0-6811-46c9-9f77-431e4b6ff72d"
+                      accountNumber: "ES1099990001410000000002"
+                      holderName: "Grace Hopper"
+                      segment: "HIGH_NET_WORTH"
+                      balance: 4700.00
+                      currency: "EUR"
+                    - id: "8016d0d2-d7cf-44cf-bf9f-aa62a253892e"
+                      accountNumber: "ES8099990001450000000001"
+                      holderName: "Ada Lovelace"
+                      segment: "RETAIL"
+                      balance: 1500.00
+                      currency: "EUR"
+                    - id: "acb47102-7688-44bb-a6ba-e05b56f0e8cd"
+                      accountNumber: "ES8899990001440000000003"
+                      holderName: "Alan Turing"
+                      segment: "RETAIL"
+                      balance: 200.00
+                      currency: "EUR"
+                empty:
+                  summary: No accounts (or a user who has none)
+                  value: []
     post:
       tags: [accounts]
       operationId: openAccount
@@ -99,10 +127,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountSummary'
+              examples:
+                retail:
+                  summary: A holder whose verified income is not above 100,000.00 EUR
+                  value:
+                    id: "5b1f3c2e-9a7d-4e8b-b1c4-2f6a8d9e0c11"
+                    accountNumber: "ES9699990001430000000005"
+                    holderName: "Katherine Johnson"
+                    segment: "RETAIL"
+                    balance: 150.00
+                    currency: "EUR"
+                highNetWorth:
+                  summary: A holder whose verified income is above 100,000.00 EUR
+                  value:
+                    id: "7c2d4e6f-1a3b-4c5d-8e9f-0a1b2c3d4e5f"
+                    accountNumber: "ES4299990001490000000004"
+                    holderName: "Grace Hopper"
+                    segment: "HIGH_NET_WORTH"
+                    balance: 500.00
+                    currency: "EUR"
         '400':
           $ref: '#/components/responses/BadRequest'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
         '422':
           $ref: '#/components/responses/UnprocessableContent'
   /api/accounts/{id}:
@@ -126,6 +175,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountDetails'
+              examples:
+                withTransfer:
+                  summary: An opening deposit and a transfer withdrawal (with the target account as counterpart)
+                  value:
+                    id: "e0b82ea0-6811-46c9-9f77-431e4b6ff72d"
+                    accountNumber: "ES1099990001410000000002"
+                    holderName: "Grace Hopper"
+                    segment: "HIGH_NET_WORTH"
+                    balance: 4700.00
+                    currency: "EUR"
+                    holderTaxId: "87654321X"
+                    holderEmail: "grace@example.com"
+                    transactions:
+                      - id: "185fcd64-d242-4951-9be4-16f3c36601dd"
+                        type: "DEPOSIT"
+                        amount: 5000.00
+                        currency: "EUR"
+                        occurredOn: "2026-11-17T15:45:11.883Z"
+                        status: "APPROVED"
+                      - id: "7ed8bbfc-df88-4781-a908-99d39246b8c8"
+                        type: "WITHDRAWAL"
+                        amount: 300.00
+                        currency: "EUR"
+                        occurredOn: "2026-11-17T15:45:11.892Z"
+                        status: "APPROVED"
+                        counterpartAccountNumber: "ES8099990001450000000001"
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -147,6 +222,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountSummary'
+              examples:
+                newIban:
+                  summary: The same account with an IBAN generated by the bank
+                  value:
+                    id: "acb47102-7688-44bb-a6ba-e05b56f0e8cd"
+                    accountNumber: "ES0799990001420000000007"
+                    holderName: "Alan Turing"
+                    segment: "RETAIL"
+                    balance: 200.00
+                    currency: "EUR"
         '400':
           $ref: '#/components/responses/BadRequest'
         '403':
@@ -186,8 +271,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountSummary'
+              examples:
+                newCustomer:
+                  summary: A new customer and their first account
+                  value:
+                    id: "c3335c5d-b16a-4076-8cde-c27ddbdf2b3d"
+                    accountNumber: "ES5099990001480000000006"
+                    holderName: "Margaret Hamilton"
+                    segment: "RETAIL"
+                    balance: 100.00
+                    currency: "EUR"
         '400':
           $ref: '#/components/responses/BadRequest'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
         '422':
           $ref: '#/components/responses/UnprocessableContent'
   /api/accounts/{id}/deposits:
@@ -212,10 +309,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transaction'
+              examples:
+                approved:
+                  summary: A deposit, always approved
+                  value:
+                    id: "a5d790c3-d569-4947-bc8d-af3788473db1"
+                    type: "DEPOSIT"
+                    amount: 25.00
+                    currency: "EUR"
+                    occurredOn: "2026-11-17T15:45:20.882Z"
+                    status: "APPROVED"
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
         '422':
           $ref: '#/components/responses/UnprocessableContent'
   /api/accounts/{id}/withdrawals:
@@ -243,10 +352,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transaction'
+              examples:
+                approved:
+                  summary: "The overdraft rules allow it: the balance goes down"
+                  value:
+                    id: "3b9e1f20-7c4d-4a5e-9f8b-6d2c1a0e9b87"
+                    type: "WITHDRAWAL"
+                    amount: 50.00
+                    currency: "EUR"
+                    occurredOn: "2026-11-17T15:45:20.931Z"
+                    status: "APPROVED"
+                rejected:
+                  summary: "The overdraft rules do not allow it: recorded as rejected, the balance does not change (still 201)"
+                  value:
+                    id: "8972c0ea-daa5-4001-8b78-e1aa5815dbc2"
+                    type: "WITHDRAWAL"
+                    amount: 5000.00
+                    currency: "EUR"
+                    occurredOn: "2026-11-17T15:45:20.964Z"
+                    status: "REJECTED"
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
         '422':
           $ref: '#/components/responses/UnprocessableContent'
   /api/transfers:
@@ -277,10 +407,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transfer'
+              examples:
+                approved:
+                  summary: The withdrawal in the source is approved and the amount reaches the target
+                  value:
+                    sourceAccountId: "8016d0d2-d7cf-44cf-bf9f-aa62a253892e"
+                    sourceAccountNumber: "ES8099990001450000000001"
+                    targetAccountNumber: "ES8899990001440000000003"
+                    amount: 50.00
+                    currency: "EUR"
+                    occurredOn: "2026-11-17T15:45:21.049Z"
+                    status: "APPROVED"
+                rejected:
+                  summary: "The source overdraft rules do not allow it: nothing reaches the target (still 201)"
+                  value:
+                    sourceAccountId: "acb47102-7688-44bb-a6ba-e05b56f0e8cd"
+                    sourceAccountNumber: "ES8899990001440000000003"
+                    targetAccountNumber: "ES8099990001450000000001"
+                    amount: 9000.00
+                    currency: "EUR"
+                    occurredOn: "2026-11-17T15:45:21.140Z"
+                    status: "REJECTED"
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
         '422':
           $ref: '#/components/responses/UnprocessableContent'
 components:
@@ -599,8 +752,43 @@ components:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/ProblemDetail'
+          examples:
+            minimumInitialDeposit:
+              summary: Initial deposit below the minimum (R1)
+              value:
+                type: about:blank
+                title: Regla de negocio incumplida
+                status: 422
+                detail: El depósito inicial de 10.00 EUR no alcanza el mínimo exigido de 50.00 EUR
+            currencyMismatch:
+              summary: A currency other than the account's
+              value:
+                type: about:blank
+                title: Regla de negocio incumplida
+                status: 422
+                detail: La operación esperaba importes en EUR, pero ha recibido USD
+            sameAccount:
+              summary: A transfer to the same account (R17)
+              value:
+                type: about:blank
+                title: Regla de negocio incumplida
+                status: 422
+                detail: 'No se puede transferir a la misma cuenta: ES8099990001450000000001'
+            duplicateDocument:
+              summary: Signing up with a document that already belongs to a customer (R30)
+              value:
+                type: about:blank
+                title: Regla de negocio incumplida
+                status: 422
+                detail: 'Ya eres cliente de Mon-A Bank: ya hay un cliente con el documento 12345678Z. Entra con tu usuario'
+    UnsupportedMediaType:
+      description: The request body is not JSON.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
           example:
             type: about:blank
-            title: Regla de negocio incumplida
-            status: 422
-            detail: El depósito inicial de 10.00 EUR no alcanza el mínimo exigido de 50.00 EUR
+            title: Tipo de contenido no admitido
+            status: 415
+            detail: 'El tipo de contenido text/plain no está admitido: envía application/json'
