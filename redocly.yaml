@@ -1,6 +1,86 @@
 extends:
   - recommended
 
+# Guía de estilo del contrato (#109, docs/api/style-guide.md). La comprueba el paso de Redocly del CI.
 rules:
   # Proyecto de práctica: la aplicación solo se ejecuta en local.
   no-server-example.com: off
+
+  # Reglas de Redocly que pasan de aviso a error.
+  operation-2xx-response: error
+  operation-4xx-response: error
+  operation-summary: error
+  operation-tag-defined: error
+
+  rule/operation-id-camel-case:
+    subject:
+      type: Operation
+      property: operationId
+    assertions:
+      casing: camelCase
+    severity: error
+    message: The operationId must be camelCase.
+
+  rule/one-tag:
+    subject:
+      type: Operation
+      property: tags
+    assertions:
+      defined: true
+      minLength: 1
+      maxLength: 1
+    severity: error
+    message: Every operation has exactly one tag.
+
+  rule/request-body-required:
+    subject:
+      type: RequestBody
+    assertions:
+      required:
+        - required
+    severity: error
+    message: A request body declares `required` (OpenAPI defaults it to false).
+
+  rule/request-body-required-true:
+    subject:
+      type: RequestBody
+      property: required
+    assertions:
+      const: true
+    severity: error
+    message: A request body is always declared as required.
+
+  rule/errors-are-problem-details:
+    subject:
+      type: MediaTypesMap
+    where:
+      - subject:
+          type: Response
+          matchParentKeys: /^4/
+        assertions:
+          defined: true
+    assertions:
+      required:
+        - application/problem+json
+      disallowed:
+        - application/json
+    severity: error
+    message: Error responses (4XX) use application/problem+json (RFC 9457), never application/json.
+
+  rule/contact-required:
+    subject:
+      type: Info
+      property: contact
+    assertions:
+      defined: true
+    severity: error
+    message: The API must say who is responsible for it (info.contact).
+
+  rule/no-schema-example:
+    subject:
+      type: Schema
+      property: example
+    assertions:
+      defined: false
+    severity: error
+    message: Use `examples` (a list) inside schemas; `example` is deprecated there since OpenAPI 3.1.
