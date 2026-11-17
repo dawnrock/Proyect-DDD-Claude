@@ -50,16 +50,17 @@ Decisions taken while planning (clear and reversible, so not asked):
 - **Acceptance criteria:**
   - [x] Red before, green after; the YAML in the jar is the same file as `docs/api/openapi.yaml`.
 
-### [ ] T2 — Swagger UI page at `/api-docs` (~10 min)
+### [x] T2 — Swagger UI page at `/api-docs` (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `ApiDocsController.java`, its `@WebMvcTest`, `static/api-docs/index.html`, `WebSecurityConfig.java`, `DddLabApplicationTests.java`, `docs/api/openapi.yaml`
 - **Depends on:** T1
+- **Deviation:** jsDelivr is not reachable from this session's network, so the browser check served the two CDN URLs from the files of the `swagger-ui-dist@5.34.1` npm package (the same bytes jsDelivr serves): SRI accepted, 8 operations and 3 servers listed, no console error, and `Try it out` on `GET /api/accounts` with `admin`/`demo` answered 200 through the relative server.
 - **What to do:**
   1. Tests first: `GET /api-docs` redirects to `/api-docs/index.html` (`@WebMvcTest`); an anonymous `GET /api-docs/index.html` answers 200 with the Swagger UI bootstrap pointing to `/openapi.yaml` (full context).
   2. Controller, page (pinned version, SRI, `url: '/openapi.yaml'`, `persistAuthorization: false`), `permitAll` for `/api-docs/**`, and the relative server in the contract (Redocly clean).
 - **Acceptance criteria:**
-  - [ ] Tests red before, green after; Redocly clean; the page loads in a browser (checked with Playwright: the operations of the contract are listed).
+  - [x] Tests red before, green after; Redocly clean; the page loads in a browser (checked with Playwright: the operations of the contract are listed).
 
 ### [ ] T3 — Docker image includes the contract (~10 min)
 

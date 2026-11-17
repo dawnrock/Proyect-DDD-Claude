@@ -23,7 +23,7 @@ public class WebSecurityConfig {
         return http
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/login", "/signup/**", "/css/**", "/actuator/health", "/error", "/error/**",
-                                "/openapi.yaml").permitAll()
+                                "/openapi.yaml", "/api-docs", "/api-docs/**").permitAll()
                         // /accounts/another: cualquier sesión; el administrador recibe 403 del propio controlador
                         .requestMatchers("/accounts/new").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/accounts/*/account-number").hasRole("ADMIN")
