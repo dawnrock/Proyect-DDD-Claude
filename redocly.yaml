@@ -57,3 +57,12 @@ rules:
         - application/json
     severity: error
     message: Error responses (4XX) use application/problem+json (RFC 9457), never application/json.
+
+  rule/contact-required:
+    subject:
+      type: Info
+      property: contact
+    assertions:
+      defined: true
+    severity: error
+    message: The API must say who is responsible for it (info.contact).

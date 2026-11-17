@@ -55,7 +55,7 @@ No Java change, no new dependency (Redocly already runs with `npx` at a fixed ve
 - **Acceptance criteria:**
   - [x] Each rule fails on its sabotage; the real contract lints without errors.
 
-### [ ] T2 — `info.contact` and its rule (~5 min)
+### [x] T2 — `info.contact` and its rule (~5 min)
 
 - **Layer:** docs
 - **Files:** `redocly.yaml`, `docs/api/openapi.yaml`
@@ -63,7 +63,7 @@ No Java change, no new dependency (Redocly already runs with `npx` at a fixed ve
 - **What to do:**
   1. Add `rule/contact-required` (fails today: red) and `info.contact` (`name`, `url`) to the contract (green).
 - **Acceptance criteria:**
-  - [ ] Red before the contact, green after it.
+  - [x] Red before the contact, green after it.
 
 ### [ ] T3 — `examples` instead of `example` in schemas (~10 min)
 

@@ -21,6 +21,9 @@ info:
     | 403 | Authenticated, but without the required role (only an administrator opens accounts or replaces an IBAN) | Acceso denegado |
     | 404 | The requested resource does not exist, or it is another customer's account (its existence is not revealed) | Recurso inexistente |
     | 422 | A domain business rule is violated | Regla de negocio incumplida |
+  contact:
+    name: Proyect-DDD-Claude
+    url: https://github.com/dawnrock/Proyect-DDD-Claude/issues
   license:
     name: Practice project
     identifier: MIT
