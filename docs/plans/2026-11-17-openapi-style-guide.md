@@ -65,7 +65,7 @@ No Java change, no new dependency (Redocly already runs with `npx` at a fixed ve
 - **Acceptance criteria:**
   - [x] Red before the contact, green after it.
 
-### [ ] T3 — `examples` instead of `example` in schemas (~10 min)
+### [x] T3 — `examples` instead of `example` in schemas (~10 min)
 
 - **Layer:** docs
 - **Files:** `redocly.yaml`, `docs/api/openapi.yaml`
@@ -75,7 +75,7 @@ No Java change, no new dependency (Redocly already runs with `npx` at a fixed ve
   2. Turn each `example: <value>` inside a schema into `examples: [<value>]` (the `example` of media types and responses stays, it is not deprecated there).
   3. Lint (green) and run `node scripts/contract-test.mjs`: Schemathesis uses schema examples in its examples phase.
 - **Acceptance criteria:**
-  - [ ] Redocly without errors; contract tests pass.
+  - [x] Redocly without errors; contract tests pass.
 
 ### [ ] T4 — Style guide document (~10 min)
 

@@ -302,7 +302,7 @@ components:
           minimum: 0.005
           maximum: 999999999.99
           description: "Rounded half-up to the currency's two decimals: from 0.005 (rounded to 0.01) to 999,999,999.99; outside that range the request fails with 400."
-          example: 25.00
+          examples: [25.00]
         currency:
           type: [string, 'null']
           enum: [EUR, null]
@@ -320,13 +320,13 @@ components:
           type: string
           description: Spanish IBAN of any existing account (404 if none); spaces and lowercase are accepted. Must be a different account from the source (422 otherwise). Replaces `targetAccountId` (#50).
           pattern: '^ *[Ee][Ss]( *\d){22} *$'
-          example: ES79 2100 0813 6101 2345 6789
+          examples: [ES79 2100 0813 6101 2345 6789]
         amount:
           type: number
           minimum: 0.005
           maximum: 999999999.99
           description: "Rounded half-up to the currency's two decimals: from 0.005 (rounded to 0.01) to 999,999,999.99; outside that range the request fails with 400."
-          example: 25.00
+          examples: [25.00]
         currency:
           type: [string, 'null']
           enum: [EUR, null]
@@ -341,10 +341,10 @@ components:
           format: uuid
         sourceAccountNumber:
           type: string
-          example: ES9121000418450200051332
+          examples: [ES9121000418450200051332]
         targetAccountNumber:
           type: string
-          example: ES7921000813610123456789
+          examples: [ES7921000813610123456789]
         amount:
           type: number
           description: Amount of the withdrawal in the source, rounded to the currency's digits.
@@ -365,13 +365,13 @@ components:
           type: string
           description: Spanish DNI (8 digits + letter) or NIE (X, Y or Z + 7 digits + letter); spaces and lowercase are accepted. The control letter is checked (400 if wrong). The simulated tax agency verifies the holder's annual income with it.
           pattern: '^ *[XYZxyz0-9]\d{7} *[A-Za-z] *$'
-          example: 87654321X
+          examples: [87654321X]
         initialDeposit:
           type: number
           minimum: 0.005
           maximum: 999999999.99
           description: "Rounded half-up to the currency's two decimals: from 0.005 (rounded to 0.01) to 999,999,999.99; outside that range the request fails with 400. Below the minimum initial deposit (50.00 EUR) it fails with 422."
-          example: 100.00
+          examples: [100.00]
         currency:
           type: [string, 'null']
           enum: [EUR, null]
@@ -380,17 +380,17 @@ components:
         holderName:
           type: [string, 'null']
           description: Required for a new customer; for an existing one, absent, blank or equal to theirs.
-          example: Grace Hopper
+          examples: [Grace Hopper]
         holderEmail:
           type: [string, 'null']
           description: Required for a new customer; for an existing one, absent, blank or equal to theirs.
           pattern: '^$|^ *[^@\s]+@[^@\s]+\.[^@\s]+ *$'
-          example: grace@example.com
+          examples: [grace@example.com]
         ownerUsername:
           type: [string, 'null']
           description: User of a new customer, who will see and operate the account; for an existing customer, absent, blank or equal to theirs.
           pattern: '^$|^[a-z0-9._-]{3,30}$'
-          example: grace
+          examples: [grace]
     SignUpRequest:
       type: object
       required: [fullName, taxId, email, username, password, initialDeposit]
@@ -398,32 +398,32 @@ components:
         fullName:
           type: string
           minLength: 1
-          example: Margaret Hamilton
+          examples: [Margaret Hamilton]
         taxId:
           type: string
           description: DNI or NIE, as in `OpenAccountRequest.holderTaxId`.
           pattern: '^ *[XYZxyz0-9]\d{7} *[A-Za-z] *$'
-          example: X1234567L
+          examples: [X1234567L]
         email:
           type: string
           pattern: '^ *[^@\s]+@[^@\s]+\.[^@\s]+ *$'
-          example: margaret@example.com
+          examples: [margaret@example.com]
         username:
           type: string
           description: Must be free (422 otherwise).
           pattern: '^[a-z0-9._-]{3,30}$'
-          example: margaret
+          examples: [margaret]
         password:
           type: string
           minLength: 8
           writeOnly: true
-          example: demo-1234
+          examples: [demo-1234]
         initialDeposit:
           type: number
           minimum: 0.005
           maximum: 999999999.99
           description: "Rounded half-up to the currency's two decimals: from 0.005 (rounded to 0.01) to 999,999,999.99; outside that range the request fails with 400. Below the minimum initial deposit (50.00 EUR) it fails with 422."
-          example: 100.00
+          examples: [100.00]
         currency:
           type: [string, 'null']
           enum: [EUR, null]
@@ -439,7 +439,7 @@ components:
         accountNumber:
           type: string
           description: Normalized IBAN, always assigned by the bank (Mon-A Bank, entity 9999, branch 0001).
-          example: ES8099990001450000000001
+          examples: [ES8099990001450000000001]
         holderName:
           type: string
         segment:
@@ -452,10 +452,10 @@ components:
             above the threshold, with a new verification every six months (R24-R27).
         balance:
           type: number
-          example: 100.00
+          examples: [100.00]
         currency:
           type: string
-          example: EUR
+          examples: [EUR]
     AccountDetails:
       allOf:
         - $ref: '#/components/schemas/AccountSummary'
@@ -465,11 +465,11 @@ components:
             holderTaxId:
               type: string
               description: Normalized document (DNI or NIE) of the holder.
-              example: 12345678Z
+              examples: [12345678Z]
             holderEmail:
               type: string
               description: E-mail of the customer who holds the account; empty if the holder is not a registered customer.
-              example: ada@example.com
+              examples: [ada@example.com]
             transactions:
               type: array
               items:
@@ -499,7 +499,7 @@ components:
           description: >-
             Normalised IBAN of the other account when the transaction belongs to a transfer
             (target on the source's withdrawal, source on the target's deposit). Omitted otherwise.
-          example: ES7921000418450200051332
+          examples: [ES7921000418450200051332]
     ProblemDetail:
       type: object
       description: Error in RFC 9457 format.

@@ -66,3 +66,12 @@ rules:
       defined: true
     severity: error
     message: The API must say who is responsible for it (info.contact).
+
+  rule/no-schema-example:
+    subject:
+      type: Schema
+      property: example
+    assertions:
+      defined: false
+    severity: error
+    message: Use `examples` (a list) inside schemas; `example` is deprecated there since OpenAPI 3.1.
