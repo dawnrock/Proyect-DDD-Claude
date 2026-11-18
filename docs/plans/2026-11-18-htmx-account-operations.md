@@ -74,7 +74,7 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
 - **Acceptance criteria:**
   - [x] Tests green with and without htmx.
 
-### [ ] T4 — Transfer, including an unknown target IBAN (~10 min)
+### [x] T4 — Transfer, including an unknown target IBAN (~10 min)
 
 - **Layer:** adapter.in.web
 - **Files:** `AccountWebController`, `AccountWebControllerTests`
@@ -83,7 +83,7 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
   1. Tests with htmx: approved and rejected transfers; `TargetAccountNotFoundException` answers the fragment with the field error on `targetAccountNumber` and `transfer-action` open; a foreign source account still answers 404.
   2. Use the helper of T2.
 - **Acceptance criteria:**
-  - [ ] Tests green with and without htmx.
+  - [x] Tests green with and without htmx.
 
 ### [ ] T5 — New IBAN through htmx (~5 min)
 

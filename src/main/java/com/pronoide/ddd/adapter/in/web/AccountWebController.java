@@ -158,7 +158,8 @@ public class AccountWebController {
 
     @PostMapping("/accounts/{id}/transfers")
     public String transfer(@PathVariable UUID id, @Valid @ModelAttribute("transferForm") TransferForm form,
-                           BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication) {
+                           BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication,
+                           @RequestHeader(name = HX_REQUEST, defaultValue = "false") boolean htmx) {
         if (!result.hasErrors()) {
             TransferCommand command = null;
             try {
@@ -178,14 +179,13 @@ public class AccountWebController {
                     String amount = fmt.money(transfer.amount(), transfer.currency());
                     String target = fmt.maskedIban(transfer.targetAccountNumber());
                     if (transfer.rejected()) {
-                        redirect.addFlashAttribute("rejection",
+                        return notice(id, htmx, "rejection",
                                 ("Transferencia de %s a %s rechazada: el saldo resultante no está permitido "
-                                        + "para la cuenta de origen").formatted(amount, target));
-                    } else {
-                        redirect.addFlashAttribute("message", "Transferencia de %s a %s aprobada"
-                                .formatted(amount, target));
+                                        + "para la cuenta de origen").formatted(amount, target),
+                                CurrentCaller.from(authentication), model, redirect);
                     }
-                    return redirectToDetail(id);
+                    return notice(id, htmx, "message", "Transferencia de %s a %s aprobada".formatted(amount, target),
+                            CurrentCaller.from(authentication), model, redirect);
                 } catch (TargetAccountNotFoundException e) {
                     // El IBAN de destino lo ha escrito el usuario: se avisa en el formulario, no con la página 404.
                     // Va antes que cualquier NotFoundException: una cuenta de origen inexistente o ajena sí es 404.
@@ -195,7 +195,7 @@ public class AccountWebController {
                 }
             }
         }
-        return renderDetail(id, CurrentCaller.from(authentication), model, false);
+        return renderDetail(id, CurrentCaller.from(authentication), model, htmx);
     }
 
     /**
