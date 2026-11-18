@@ -63,7 +63,7 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
 - **Acceptance criteria:**
   - [x] New tests green; the existing deposit tests (redirect + flash) unchanged and green.
 
-### [ ] T3 — Withdrawal: approved and rejected (~5 min)
+### [x] T3 — Withdrawal: approved and rejected (~5 min)
 
 - **Layer:** adapter.in.web
 - **Files:** `AccountWebController`, `AccountWebControllerTests`
@@ -72,7 +72,7 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
   1. Tests with htmx: an approved withdrawal puts `message` in the model; a rejected one puts `rejection` and the fragment shows `alert alert-warning`; a validation error opens `withdrawal-action`.
   2. Use the helper of T2.
 - **Acceptance criteria:**
-  - [ ] Tests green with and without htmx.
+  - [x] Tests green with and without htmx.
 
 ### [ ] T4 — Transfer, including an unknown target IBAN (~10 min)
 

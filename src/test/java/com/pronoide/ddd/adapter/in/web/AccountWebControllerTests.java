@@ -874,6 +874,56 @@ class AccountWebControllerTests {
     private static final String TARGET_IBAN = "ES9876543210987654321098";
 
     @Nested
+    @DisplayName("Retiradas con htmx (#125)")
+    class RetiradasConHtmx {
+
+        @BeforeEach
+        void cuenta() {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+        }
+
+        private MockHttpServletRequestBuilder retirada(String amount) {
+            return htmx(post("/accounts/" + ACCOUNT_ID + "/withdrawals").param("amount", amount).param("currency", "EUR"));
+        }
+
+        @Test
+        @DisplayName("Una retirada aprobada responde con el panel y el mensaje de éxito")
+        void una_retirada_aprobada_responde_con_el_panel_y_el_mensaje() throws Exception {
+            when(commands.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "30.00", "APPROVED"));
+
+            mvc.perform(retirada("30.00"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail :: panel"))
+                    .andExpect(model().attribute("message", "Retirada de 30,00 € aprobada"))
+                    .andExpect(flash().attributeCount(0));
+        }
+
+        @Test
+        @DisplayName("Una retirada rechazada responde con el panel y el aviso de advertencia")
+        void una_retirada_rechazada_responde_con_el_panel_y_el_aviso() throws Exception {
+            when(commands.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "500.00", "REJECTED"));
+
+            mvc.perform(retirada("500.00"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail :: panel"))
+                    .andExpect(model().attributeExists("rejection"))
+                    .andExpect(content().string(containsString("alert alert-warning")))
+                    .andExpect(content().string(containsString("Retirada de 500,00 € rechazada")));
+        }
+
+        @Test
+        @DisplayName("Un importe vacío responde con el panel y el formulario de retirada abierto")
+        void un_importe_vacio_responde_con_el_panel_y_el_formulario_abierto() throws Exception {
+            mvc.perform(retirada(""))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail :: panel"))
+                    .andExpect(content().string(containsString("<details id=\"withdrawal-action\" open=\"open\">")));
+
+            verifyNoInteractions(commands);
+        }
+    }
+
+    @Nested
     @DisplayName("Formulario de transferencia")
     class FormularioDeTransferencia {
 

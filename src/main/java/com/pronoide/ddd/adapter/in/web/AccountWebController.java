@@ -127,7 +127,8 @@ public class AccountWebController {
 
     @PostMapping("/accounts/{id}/withdrawals")
     public String withdraw(@PathVariable UUID id, @Valid @ModelAttribute("withdrawalForm") MovementForm form,
-                           BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication) {
+                           BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication,
+                           @RequestHeader(name = HX_REQUEST, defaultValue = "false") boolean htmx) {
         if (!result.hasErrors()) {
             WithdrawCommand command = null;
             try {
@@ -141,19 +142,18 @@ public class AccountWebController {
                     TransactionSummary withdrawal = commands.withdraw(CurrentCaller.from(authentication), command);
                     String amount = fmt.money(withdrawal.amount(), withdrawal.currency());
                     if (withdrawal.rejected()) {
-                        redirect.addFlashAttribute("rejection",
+                        return notice(id, htmx, "rejection",
                                 "Retirada de %s rechazada: el saldo resultante no está permitido para esta cuenta"
-                                        .formatted(amount));
-                    } else {
-                        redirect.addFlashAttribute("message", "Retirada de %s aprobada".formatted(amount));
+                                        .formatted(amount), CurrentCaller.from(authentication), model, redirect);
                     }
-                    return redirectToDetail(id);
+                    return notice(id, htmx, "message", "Retirada de %s aprobada".formatted(amount),
+                            CurrentCaller.from(authentication), model, redirect);
                 } catch (DomainException e) {
                     result.reject("domain", e.getMessage());
                 }
             }
         }
-        return renderDetail(id, CurrentCaller.from(authentication), model, false);
+        return renderDetail(id, CurrentCaller.from(authentication), model, htmx);
     }
 
     @PostMapping("/accounts/{id}/transfers")
