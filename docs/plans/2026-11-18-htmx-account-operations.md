@@ -85,7 +85,7 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
 - **Acceptance criteria:**
   - [x] Tests green with and without htmx.
 
-### [ ] T5 — New IBAN through htmx (~5 min)
+### [x] T5 — New IBAN through htmx (~5 min)
 
 - **Layer:** adapter.in.web
 - **Files:** `AccountWebController`, `RegenerateAccountNumberWebTests`
@@ -94,7 +94,7 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
   1. Test with htmx: the administrator gets the panel with "Nuevo IBAN asignado: …" and the new IBAN in the heading; a non-administrator still gets 403.
   2. Use the helper of T2.
 - **Acceptance criteria:**
-  - [ ] Tests green with and without htmx.
+  - [x] Tests green with and without htmx.
 
 ### [ ] T6 — Expired session and CSRF on htmx requests (~10 min)
 

@@ -92,11 +92,12 @@ public class AccountWebController {
     }
 
     @PostMapping("/accounts/{id}/account-number")
-    public String regenerateAccountNumber(@PathVariable UUID id, RedirectAttributes redirect,
-                                          Authentication authentication) {
-        AccountSummary account = commands.regenerateAccountNumber(CurrentCaller.from(authentication), id);
-        redirect.addFlashAttribute("message", "Nuevo IBAN asignado: " + account.accountNumber());
-        return redirectToDetail(id);
+    public String regenerateAccountNumber(@PathVariable UUID id, Model model, RedirectAttributes redirect,
+                                          Authentication authentication,
+                                          @RequestHeader(name = HX_REQUEST, defaultValue = "false") boolean htmx) {
+        Caller caller = CurrentCaller.from(authentication);
+        AccountSummary account = commands.regenerateAccountNumber(caller, id);
+        return notice(id, htmx, "message", "Nuevo IBAN asignado: " + account.accountNumber(), caller, model, redirect);
     }
 
     @PostMapping("/accounts/{id}/deposits")
