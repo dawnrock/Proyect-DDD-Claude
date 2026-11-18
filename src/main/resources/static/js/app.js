@@ -28,6 +28,45 @@
         }
     });
 
+    // Operaciones de cuenta con htmx (#125): el servidor responde el panel de la cuenta (#account-panel) y htmx lo
+    // sustituye dentro de una transición de vista. Con movimiento reducido no hay transición ni animaciones.
+    document.addEventListener('htmx:beforeTransition', (event) => {
+        if (reducedMotion) {
+            event.preventDefault();
+        }
+    });
+
+    // Tras una operación (el panel trae un aviso de éxito o de rechazo), Motion resalta el saldo y el movimiento nuevo.
+    document.addEventListener('htmx:afterSettle', (event) => {
+        const panel = document.getElementById('account-panel');
+        if (reducedMotion || !window.Motion || !panel || !panel.contains(event.detail.elt)) {
+            return;
+        }
+        if (!panel.querySelector('.alert-success, .alert-warning')) {
+            return;
+        }
+        const balance = panel.querySelector('.display-5');
+        if (balance) {
+            Motion.animate(balance, { scale: [0.92, 1], opacity: [0.4, 1] }, { duration: 0.4, ease: 'easeOut' });
+        }
+        const newest = panel.querySelector('.list-group-item');
+        if (newest) {
+            Motion.animate(newest, { opacity: [0, 1], x: [-12, 0] }, { duration: 0.35, delay: 0.1, ease: 'easeOut' });
+        }
+    });
+
+    // htmx no pinta las respuestas de error. Las páginas de error propias (403, 404) sustituyen entonces al contenido
+    // de la página, como si se hubiese navegado a ella, en vez de dejar el clic sin respuesta. El resto de errores
+    // siguen sin pintarse: no hay una página nuestra que mostrar.
+    document.addEventListener('htmx:beforeSwap', (event) => {
+        const { xhr } = event.detail;
+        if ((xhr.status === 403 || xhr.status === 404) && /<html/i.test(xhr.responseText)) {
+            event.detail.shouldSwap = true;
+            event.detail.target = document.body;
+            event.detail.swapOverride = 'innerHTML';
+        }
+    });
+
     // Acciones del detalle de cuenta: los <details> se abren solos sin JavaScript; con Alpine, abrir uno cierra los demás.
     document.addEventListener('alpine:init', () => {
         Alpine.data('actionPanels', () => ({

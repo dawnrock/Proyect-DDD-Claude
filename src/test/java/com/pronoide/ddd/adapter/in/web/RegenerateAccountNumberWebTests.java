@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -119,6 +120,34 @@ class RegenerateAccountNumberWebTests {
                 .andExpect(flash().attribute("message", "Nuevo IBAN asignado: ES6499990001810000000002"));
 
         verify(commands).regenerateAccountNumber(ADMIN, ID);
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    @DisplayName("Con htmx, el administrador recibe el panel con el aviso y el IBAN nuevo, sin redirigir (#125)")
+    void con_htmx_el_administrador_recibe_el_panel_con_el_iban_nuevo() throws Exception {
+        String newIban = "ES6499990001810000000002";
+        when(commands.regenerateAccountNumber(ADMIN, ID)).thenReturn(AccountSummary.builder().id(ID)
+                .accountNumber(newIban).holderName("Ada Lovelace")
+                .segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build());
+        when(queries.findAccount(ADMIN, ID)).thenReturn(AccountDetails.builder().id(ID).accountNumber(newIban)
+                .holderName("Ada Lovelace").segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build());
+
+        mvc.perform(post("/accounts/" + ID + "/account-number").with(csrf()).header("HX-Request", "true"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("accounts/detail :: panel"))
+                .andExpect(model().attribute("message", "Nuevo IBAN asignado: " + newIban))
+                .andExpect(content().string(containsString("<span class=\"text-nowrap\">" + newIban + "</span>")));
+    }
+
+    @Test
+    @WithMockUser(username = "ada", roles = "USER")
+    @DisplayName("Con htmx, un cliente que envía el cambio sigue recibiendo 403 (#125)")
+    void con_htmx_un_cliente_sigue_recibiendo_403() throws Exception {
+        mvc.perform(post("/accounts/" + ID + "/account-number").with(csrf()).header("HX-Request", "true"))
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(commands, queries);
     }
 
     @Test

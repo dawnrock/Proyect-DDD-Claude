@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.pronoide.ddd.application.AccountDetails;
@@ -48,6 +49,15 @@ public class AccountWebController {
     private static final String FORM_VIEW = "accounts/new";
 
     private static final String DETAIL_VIEW = "accounts/detail";
+
+    /** Fragmento del detalle que htmx sustituye tras cada operación (#125). */
+    private static final String DETAIL_PANEL = DETAIL_VIEW + " :: panel";
+
+    /** Aviso de una operación aprobada (alerta de éxito en la plantilla). */
+    private static final String MESSAGE = "message";
+
+    /** Aviso de una operación rechazada (alerta de advertencia en la plantilla). */
+    private static final String REJECTION = "rejection";
 
     private static final String ANOTHER_VIEW = "accounts/another";
 
@@ -81,20 +91,23 @@ public class AccountWebController {
 
     @GetMapping("/accounts/{id}")
     public String detail(@PathVariable UUID id, Authentication authentication, Model model) {
-        return renderDetail(id, CurrentCaller.from(authentication), model);
+        return renderDetail(id, CurrentCaller.from(authentication), model, false);
     }
 
     @PostMapping("/accounts/{id}/account-number")
-    public String regenerateAccountNumber(@PathVariable UUID id, RedirectAttributes redirect,
-                                          Authentication authentication) {
-        AccountSummary account = commands.regenerateAccountNumber(CurrentCaller.from(authentication), id);
-        redirect.addFlashAttribute("message", "Nuevo IBAN asignado: " + account.accountNumber());
-        return redirectToDetail(id);
+    public String regenerateAccountNumber(@PathVariable UUID id, Model model, RedirectAttributes redirect,
+                                          Authentication authentication,
+                                          @RequestHeader(name = HtmxLoginRedirect.HX_REQUEST, defaultValue = "false") boolean htmx) {
+        Caller caller = CurrentCaller.from(authentication);
+        AccountSummary account = commands.regenerateAccountNumber(caller, id);
+        return notice(id, htmx, MESSAGE, "Nuevo IBAN asignado: " + account.accountNumber(), caller, model, redirect);
     }
 
     @PostMapping("/accounts/{id}/deposits")
     public String deposit(@PathVariable UUID id, @Valid @ModelAttribute("depositForm") MovementForm form,
-                          BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication) {
+                          BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication,
+                          @RequestHeader(name = HtmxLoginRedirect.HX_REQUEST, defaultValue = "false") boolean htmx) {
+        Caller caller = CurrentCaller.from(authentication);
         if (!result.hasErrors()) {
             DepositCommand command = null;
             try {
@@ -105,21 +118,23 @@ public class AccountWebController {
             }
             if (command != null) {
                 try {
-                    TransactionSummary deposit = commands.deposit(CurrentCaller.from(authentication), command);
-                    redirect.addFlashAttribute("message",
-                            "Ingreso de %s aprobado".formatted(fmt.money(deposit.amount(), deposit.currency())));
-                    return redirectToDetail(id);
+                    TransactionSummary deposit = commands.deposit(caller, command);
+                    return notice(id, htmx, MESSAGE,
+                            "Ingreso de %s aprobado".formatted(fmt.money(deposit.amount(), deposit.currency())),
+                            caller, model, redirect);
                 } catch (DomainException e) {
                     result.reject("domain", e.getMessage());
                 }
             }
         }
-        return renderDetail(id, CurrentCaller.from(authentication), model);
+        return renderDetail(id, caller, model, htmx);
     }
 
     @PostMapping("/accounts/{id}/withdrawals")
     public String withdraw(@PathVariable UUID id, @Valid @ModelAttribute("withdrawalForm") MovementForm form,
-                           BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication) {
+                           BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication,
+                           @RequestHeader(name = HtmxLoginRedirect.HX_REQUEST, defaultValue = "false") boolean htmx) {
+        Caller caller = CurrentCaller.from(authentication);
         if (!result.hasErrors()) {
             WithdrawCommand command = null;
             try {
@@ -130,27 +145,28 @@ public class AccountWebController {
             }
             if (command != null) {
                 try {
-                    TransactionSummary withdrawal = commands.withdraw(CurrentCaller.from(authentication), command);
+                    TransactionSummary withdrawal = commands.withdraw(caller, command);
                     String amount = fmt.money(withdrawal.amount(), withdrawal.currency());
                     if (withdrawal.rejected()) {
-                        redirect.addFlashAttribute("rejection",
+                        return notice(id, htmx, REJECTION,
                                 "Retirada de %s rechazada: el saldo resultante no está permitido para esta cuenta"
-                                        .formatted(amount));
-                    } else {
-                        redirect.addFlashAttribute("message", "Retirada de %s aprobada".formatted(amount));
+                                        .formatted(amount), caller, model, redirect);
                     }
-                    return redirectToDetail(id);
+                    return notice(id, htmx, MESSAGE, "Retirada de %s aprobada".formatted(amount),
+                            caller, model, redirect);
                 } catch (DomainException e) {
                     result.reject("domain", e.getMessage());
                 }
             }
         }
-        return renderDetail(id, CurrentCaller.from(authentication), model);
+        return renderDetail(id, caller, model, htmx);
     }
 
     @PostMapping("/accounts/{id}/transfers")
     public String transfer(@PathVariable UUID id, @Valid @ModelAttribute("transferForm") TransferForm form,
-                           BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication) {
+                           BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication,
+                           @RequestHeader(name = HtmxLoginRedirect.HX_REQUEST, defaultValue = "false") boolean htmx) {
+        Caller caller = CurrentCaller.from(authentication);
         if (!result.hasErrors()) {
             TransferCommand command = null;
             try {
@@ -166,18 +182,17 @@ public class AccountWebController {
             }
             if (command != null) {
                 try {
-                    TransferSummary transfer = commands.transfer(CurrentCaller.from(authentication), command);
+                    TransferSummary transfer = commands.transfer(caller, command);
                     String amount = fmt.money(transfer.amount(), transfer.currency());
                     String target = fmt.maskedIban(transfer.targetAccountNumber());
                     if (transfer.rejected()) {
-                        redirect.addFlashAttribute("rejection",
+                        return notice(id, htmx, REJECTION,
                                 ("Transferencia de %s a %s rechazada: el saldo resultante no está permitido "
-                                        + "para la cuenta de origen").formatted(amount, target));
-                    } else {
-                        redirect.addFlashAttribute("message", "Transferencia de %s a %s aprobada"
-                                .formatted(amount, target));
+                                        + "para la cuenta de origen").formatted(amount, target),
+                                caller, model, redirect);
                     }
-                    return redirectToDetail(id);
+                    return notice(id, htmx, MESSAGE, "Transferencia de %s a %s aprobada".formatted(amount, target),
+                            caller, model, redirect);
                 } catch (TargetAccountNotFoundException e) {
                     // El IBAN de destino lo ha escrito el usuario: se avisa en el formulario, no con la página 404.
                     // Va antes que cualquier NotFoundException: una cuenta de origen inexistente o ajena sí es 404.
@@ -187,11 +202,33 @@ public class AccountWebController {
                 }
             }
         }
-        return renderDetail(id, CurrentCaller.from(authentication), model);
+        return renderDetail(id, caller, model, htmx);
     }
 
-    /** Pinta el detalle; los formularios que no vienen del envío actual se crean vacíos. */
-    private String renderDetail(UUID id, Caller caller, Model model) {
+    /**
+     * Resultado de una operación correcta (#125). A htmx se le responde el panel con el aviso en el modelo y los
+     * formularios vacíos; sin htmx, el aviso va como atributo flash y se redirige al detalle (Post/Redirect/Get).
+     */
+    private String notice(UUID id, boolean htmx, String kind, String text, Caller caller, Model model,
+                          RedirectAttributes redirect) {
+        if (!htmx) {
+            redirect.addFlashAttribute(kind, text);
+            return redirectToDetail(id);
+        }
+        // El formulario enviado y su BindingResult repintarían los valores escritos: se quitan para empezar de cero
+        for (String form : List.of("depositForm", "withdrawalForm", "transferForm")) {
+            model.asMap().remove(form);
+            model.asMap().remove(BindingResult.MODEL_KEY_PREFIX + form);
+        }
+        model.addAttribute(kind, text);
+        return renderDetail(id, caller, model, true);
+    }
+
+    /**
+     * Pinta el detalle; los formularios que no vienen del envío actual se crean vacíos. A htmx solo se le devuelve el
+     * panel de la cuenta, que sustituye al que tiene la página (#125).
+     */
+    private String renderDetail(UUID id, Caller caller, Model model, boolean htmx) {
         if (!model.containsAttribute("depositForm")) {
             model.addAttribute("depositForm", new MovementForm());
         }
@@ -215,7 +252,7 @@ public class AccountWebController {
         model.addAttribute("backLabel", backLabel(caller, own));
         model.addAttribute("customer", isCustomer(caller, own));
         model.addAttribute("currencies", CURRENCIES);
-        return DETAIL_VIEW;
+        return htmx ? DETAIL_PANEL : DETAIL_VIEW;
     }
 
     /**

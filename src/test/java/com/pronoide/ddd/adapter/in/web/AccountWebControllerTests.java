@@ -502,6 +502,23 @@ class AccountWebControllerTests {
         }
 
         @Test
+        @DisplayName("El panel de la cuenta es el destino de htmx y cada formulario lo envía con hx-post sin perder action ni CSRF (#125)")
+        void el_panel_de_la_cuenta_es_el_destino_de_htmx() throws Exception {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+
+            String base = "/accounts/" + ACCOUNT_ID;
+            mvc.perform(get(base))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString(
+                            "<div id=\"account-panel\" hx-target=\"#account-panel\" hx-swap=\"outerHTML transition:true\">")))
+                    .andExpect(content().string(containsString("action=\"" + base + "/deposits\" hx-post=\"" + base + "/deposits\"")))
+                    .andExpect(content().string(containsString("action=\"" + base + "/withdrawals\" hx-post=\"" + base + "/withdrawals\"")))
+                    .andExpect(content().string(containsString("action=\"" + base + "/transfers\" hx-post=\"" + base + "/transfers\"")))
+                    .andExpect(content().string(containsString("action=\"" + base + "/account-number\" hx-post=\"" + base + "/account-number\"")))
+                    .andExpect(content().string(matchesPattern("(?s)(.*name=\"_csrf\"){4}.*")));
+        }
+
+        @Test
         @DisplayName("El detalle enlaza de vuelta al listado")
         void el_detalle_enlaza_de_vuelta_al_listado() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
@@ -680,6 +697,56 @@ class AccountWebControllerTests {
     }
 
     @Nested
+    @DisplayName("Ingresos con htmx (#125)")
+    class IngresosConHtmx {
+
+        @BeforeEach
+        void cuenta() {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+        }
+
+        @Test
+        @DisplayName("Un ingreso aprobado responde con el panel y el mensaje en el modelo, sin redirigir ni usar flash")
+        void un_ingreso_aprobado_responde_con_el_panel_y_el_mensaje() throws Exception {
+            when(commands.deposit(any(Caller.class), any())).thenReturn(transaction("DEPOSIT", "50.00", "APPROVED"));
+
+            mvc.perform(htmx(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "50.00").param("currency", "EUR")))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail :: panel"))
+                    .andExpect(model().attribute("message", "Ingreso de 50,00 € aprobado"))
+                    .andExpect(flash().attributeCount(0))
+                    .andExpect(content().string(containsString("<div id=\"account-panel\"")))
+                    .andExpect(content().string(containsString("Ingreso de 50,00 € aprobado")))
+                    .andExpect(content().string(not(containsString("value=\"50.00\""))))
+                    .andExpect(content().string(not(containsString("<html"))));
+        }
+
+        @Test
+        @DisplayName("Un importe de cero responde con el panel, el formulario de ingreso abierto y su error")
+        void un_importe_de_cero_responde_con_el_panel_y_el_formulario_abierto() throws Exception {
+            mvc.perform(htmx(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "0").param("currency", "EUR")))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail :: panel"))
+                    .andExpect(content().string(containsString("<details id=\"deposit-action\" open=\"open\">")))
+                    .andExpect(content().string(containsString("class=\"invalid-feedback\"")));
+
+            verifyNoInteractions(commands);
+        }
+
+        @Test
+        @DisplayName("Un error del dominio responde con el panel y el mensaje del dominio en el formulario")
+        void un_error_del_dominio_responde_con_el_panel_y_su_mensaje() throws Exception {
+            var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD"));
+            when(commands.deposit(any(Caller.class), any())).thenThrow(error);
+
+            mvc.perform(htmx(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "10.00").param("currency", "USD")))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail :: panel"))
+                    .andExpect(content().string(containsString(error.getMessage())));
+        }
+    }
+
+    @Nested
     @DisplayName("Retiradas")
     class Retiradas {
 
@@ -805,6 +872,56 @@ class AccountWebControllerTests {
     private static final UUID OTHER_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
     private static final String TARGET_IBAN = "ES9876543210987654321098";
+
+    @Nested
+    @DisplayName("Retiradas con htmx (#125)")
+    class RetiradasConHtmx {
+
+        @BeforeEach
+        void cuenta() {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+        }
+
+        private MockHttpServletRequestBuilder retirada(String amount) {
+            return htmx(post("/accounts/" + ACCOUNT_ID + "/withdrawals").param("amount", amount).param("currency", "EUR"));
+        }
+
+        @Test
+        @DisplayName("Una retirada aprobada responde con el panel y el mensaje de éxito")
+        void una_retirada_aprobada_responde_con_el_panel_y_el_mensaje() throws Exception {
+            when(commands.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "30.00", "APPROVED"));
+
+            mvc.perform(retirada("30.00"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail :: panel"))
+                    .andExpect(model().attribute("message", "Retirada de 30,00 € aprobada"))
+                    .andExpect(flash().attributeCount(0));
+        }
+
+        @Test
+        @DisplayName("Una retirada rechazada responde con el panel y el aviso de advertencia")
+        void una_retirada_rechazada_responde_con_el_panel_y_el_aviso() throws Exception {
+            when(commands.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "500.00", "REJECTED"));
+
+            mvc.perform(retirada("500.00"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail :: panel"))
+                    .andExpect(model().attributeExists("rejection"))
+                    .andExpect(content().string(containsString("alert alert-warning")))
+                    .andExpect(content().string(containsString("Retirada de 500,00 € rechazada")));
+        }
+
+        @Test
+        @DisplayName("Un importe vacío responde con el panel y el formulario de retirada abierto")
+        void un_importe_vacio_responde_con_el_panel_y_el_formulario_abierto() throws Exception {
+            mvc.perform(retirada(""))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail :: panel"))
+                    .andExpect(content().string(containsString("<details id=\"withdrawal-action\" open=\"open\">")));
+
+            verifyNoInteractions(commands);
+        }
+    }
 
     @Nested
     @DisplayName("Formulario de transferencia")
@@ -1081,6 +1198,69 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString(amount)));
 
             verify(commands, never()).transfer(any(Caller.class), any());
+        }
+    }
+
+    @Nested
+    @DisplayName("Transferencias con htmx (#125)")
+    class TransferenciasConHtmx {
+
+        @BeforeEach
+        void cuenta() {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+        }
+
+        private MockHttpServletRequestBuilder transferencia(String amount) {
+            return htmx(post("/accounts/" + ACCOUNT_ID + "/transfers")
+                    .param("targetAccountNumber", TARGET_IBAN).param("amount", amount).param("currency", "EUR"));
+        }
+
+        @Test
+        @DisplayName("Una transferencia aprobada responde con el panel, el mensaje y el formulario vacío")
+        void una_transferencia_aprobada_responde_con_el_panel_y_el_mensaje() throws Exception {
+            when(commands.transfer(any(Caller.class), any())).thenReturn(transfer("25.00", "APPROVED"));
+
+            mvc.perform(transferencia("25.00"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail :: panel"))
+                    .andExpect(model().attribute("message", "Transferencia de 25,00 € a ES98\u00A0••••\u00A01098 aprobada"))
+                    .andExpect(content().string(not(containsString("value=\"" + TARGET_IBAN + "\""))));
+        }
+
+        @Test
+        @DisplayName("Una transferencia rechazada responde con el panel y el aviso de advertencia")
+        void una_transferencia_rechazada_responde_con_el_panel_y_el_aviso() throws Exception {
+            when(commands.transfer(any(Caller.class), any())).thenReturn(transfer("900.00", "REJECTED"));
+
+            mvc.perform(transferencia("900.00"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail :: panel"))
+                    .andExpect(model().attributeExists("rejection"))
+                    .andExpect(content().string(containsString("alert alert-warning")));
+        }
+
+        @Test
+        @DisplayName("Un IBAN de destino que no existe responde con el panel y el error en su campo")
+        void un_iban_de_destino_que_no_existe_responde_con_el_panel_y_el_error_en_su_campo() throws Exception {
+            var error = new TargetAccountNotFoundException(TARGET_IBAN);
+            when(commands.transfer(any(Caller.class), any())).thenThrow(error);
+
+            mvc.perform(transferencia("25.00"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail :: panel"))
+                    .andExpect(model().attributeHasFieldErrors("transferForm", "targetAccountNumber"))
+                    .andExpect(content().string(containsString("<details id=\"transfer-action\" open=\"open\">")))
+                    .andExpect(content().string(containsString(error.getMessage())));
+        }
+
+        @Test
+        @DisplayName("Una cuenta de origen ajena sigue respondiendo la página 404, también a htmx")
+        void una_cuenta_de_origen_ajena_sigue_respondiendo_404() throws Exception {
+            when(commands.transfer(any(Caller.class), any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
+
+            mvc.perform(transferencia("25.00"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(view().name("error/404"));
         }
     }
 
@@ -1385,6 +1565,11 @@ class AccountWebControllerTests {
 
             verifyNoInteractions(commands, queries);
         }
+    }
+
+    /** Petición como la envía htmx: con la cabecera HX-Request. */
+    private static MockHttpServletRequestBuilder htmx(MockHttpServletRequestBuilder request) {
+        return request.header("HX-Request", "true");
     }
 
     /** Atributo que apunta a un recurso propio con el hash de su contenido en el nombre (/js/app-<md5>.js). */
