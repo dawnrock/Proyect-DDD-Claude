@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.pronoide.ddd.application.AccountDetails;
@@ -48,6 +49,12 @@ public class AccountWebController {
     private static final String FORM_VIEW = "accounts/new";
 
     private static final String DETAIL_VIEW = "accounts/detail";
+
+    /** Fragmento del detalle que htmx sustituye tras cada operación (#125). */
+    private static final String DETAIL_PANEL = DETAIL_VIEW + " :: panel";
+
+    /** Cabecera con la que htmx marca sus peticiones. */
+    private static final String HX_REQUEST = "HX-Request";
 
     private static final String ANOTHER_VIEW = "accounts/another";
 
@@ -81,7 +88,7 @@ public class AccountWebController {
 
     @GetMapping("/accounts/{id}")
     public String detail(@PathVariable UUID id, Authentication authentication, Model model) {
-        return renderDetail(id, CurrentCaller.from(authentication), model);
+        return renderDetail(id, CurrentCaller.from(authentication), model, false);
     }
 
     @PostMapping("/accounts/{id}/account-number")
@@ -94,7 +101,8 @@ public class AccountWebController {
 
     @PostMapping("/accounts/{id}/deposits")
     public String deposit(@PathVariable UUID id, @Valid @ModelAttribute("depositForm") MovementForm form,
-                          BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication) {
+                          BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication,
+                          @RequestHeader(name = HX_REQUEST, defaultValue = "false") boolean htmx) {
         if (!result.hasErrors()) {
             DepositCommand command = null;
             try {
@@ -106,15 +114,15 @@ public class AccountWebController {
             if (command != null) {
                 try {
                     TransactionSummary deposit = commands.deposit(CurrentCaller.from(authentication), command);
-                    redirect.addFlashAttribute("message",
-                            "Ingreso de %s aprobado".formatted(fmt.money(deposit.amount(), deposit.currency())));
-                    return redirectToDetail(id);
+                    return notice(id, htmx, "message",
+                            "Ingreso de %s aprobado".formatted(fmt.money(deposit.amount(), deposit.currency())),
+                            CurrentCaller.from(authentication), model, redirect);
                 } catch (DomainException e) {
                     result.reject("domain", e.getMessage());
                 }
             }
         }
-        return renderDetail(id, CurrentCaller.from(authentication), model);
+        return renderDetail(id, CurrentCaller.from(authentication), model, htmx);
     }
 
     @PostMapping("/accounts/{id}/withdrawals")
@@ -145,7 +153,7 @@ public class AccountWebController {
                 }
             }
         }
-        return renderDetail(id, CurrentCaller.from(authentication), model);
+        return renderDetail(id, CurrentCaller.from(authentication), model, false);
     }
 
     @PostMapping("/accounts/{id}/transfers")
@@ -187,11 +195,33 @@ public class AccountWebController {
                 }
             }
         }
-        return renderDetail(id, CurrentCaller.from(authentication), model);
+        return renderDetail(id, CurrentCaller.from(authentication), model, false);
     }
 
-    /** Pinta el detalle; los formularios que no vienen del envío actual se crean vacíos. */
-    private String renderDetail(UUID id, Caller caller, Model model) {
+    /**
+     * Resultado de una operación correcta (#125). A htmx se le responde el panel con el aviso en el modelo y los
+     * formularios vacíos; sin htmx, el aviso va como atributo flash y se redirige al detalle (Post/Redirect/Get).
+     */
+    private String notice(UUID id, boolean htmx, String kind, String text, Caller caller, Model model,
+                          RedirectAttributes redirect) {
+        if (!htmx) {
+            redirect.addFlashAttribute(kind, text);
+            return redirectToDetail(id);
+        }
+        // El formulario enviado y su BindingResult repintarían los valores escritos: se quitan para empezar de cero
+        for (String form : List.of("depositForm", "withdrawalForm", "transferForm")) {
+            model.asMap().remove(form);
+            model.asMap().remove(BindingResult.MODEL_KEY_PREFIX + form);
+        }
+        model.addAttribute(kind, text);
+        return renderDetail(id, caller, model, true);
+    }
+
+    /**
+     * Pinta el detalle; los formularios que no vienen del envío actual se crean vacíos. A htmx solo se le devuelve el
+     * panel de la cuenta, que sustituye al que tiene la página (#125).
+     */
+    private String renderDetail(UUID id, Caller caller, Model model, boolean htmx) {
         if (!model.containsAttribute("depositForm")) {
             model.addAttribute("depositForm", new MovementForm());
         }
@@ -215,7 +245,7 @@ public class AccountWebController {
         model.addAttribute("backLabel", backLabel(caller, own));
         model.addAttribute("customer", isCustomer(caller, own));
         model.addAttribute("currencies", CURRENCIES);
-        return DETAIL_VIEW;
+        return htmx ? DETAIL_PANEL : DETAIL_VIEW;
     }
 
     /**

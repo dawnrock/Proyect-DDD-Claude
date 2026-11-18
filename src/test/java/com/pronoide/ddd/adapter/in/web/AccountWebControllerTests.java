@@ -697,6 +697,56 @@ class AccountWebControllerTests {
     }
 
     @Nested
+    @DisplayName("Ingresos con htmx (#125)")
+    class IngresosConHtmx {
+
+        @BeforeEach
+        void cuenta() {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+        }
+
+        @Test
+        @DisplayName("Un ingreso aprobado responde con el panel y el mensaje en el modelo, sin redirigir ni usar flash")
+        void un_ingreso_aprobado_responde_con_el_panel_y_el_mensaje() throws Exception {
+            when(commands.deposit(any(Caller.class), any())).thenReturn(transaction("DEPOSIT", "50.00", "APPROVED"));
+
+            mvc.perform(htmx(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "50.00").param("currency", "EUR")))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail :: panel"))
+                    .andExpect(model().attribute("message", "Ingreso de 50,00 € aprobado"))
+                    .andExpect(flash().attributeCount(0))
+                    .andExpect(content().string(containsString("<div id=\"account-panel\"")))
+                    .andExpect(content().string(containsString("Ingreso de 50,00 € aprobado")))
+                    .andExpect(content().string(not(containsString("value=\"50.00\""))))
+                    .andExpect(content().string(not(containsString("<html"))));
+        }
+
+        @Test
+        @DisplayName("Un importe de cero responde con el panel, el formulario de ingreso abierto y su error")
+        void un_importe_de_cero_responde_con_el_panel_y_el_formulario_abierto() throws Exception {
+            mvc.perform(htmx(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "0").param("currency", "EUR")))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail :: panel"))
+                    .andExpect(content().string(containsString("<details id=\"deposit-action\" open=\"open\">")))
+                    .andExpect(content().string(containsString("class=\"invalid-feedback\"")));
+
+            verifyNoInteractions(commands);
+        }
+
+        @Test
+        @DisplayName("Un error del dominio responde con el panel y el mensaje del dominio en el formulario")
+        void un_error_del_dominio_responde_con_el_panel_y_su_mensaje() throws Exception {
+            var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD"));
+            when(commands.deposit(any(Caller.class), any())).thenThrow(error);
+
+            mvc.perform(htmx(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "10.00").param("currency", "USD")))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("accounts/detail :: panel"))
+                    .andExpect(content().string(containsString(error.getMessage())));
+        }
+    }
+
+    @Nested
     @DisplayName("Retiradas")
     class Retiradas {
 
@@ -1402,6 +1452,11 @@ class AccountWebControllerTests {
 
             verifyNoInteractions(commands, queries);
         }
+    }
+
+    /** Petición como la envía htmx: con la cabecera HX-Request. */
+    private static MockHttpServletRequestBuilder htmx(MockHttpServletRequestBuilder request) {
+        return request.header("HX-Request", "true");
     }
 
     /** Atributo que apunta a un recurso propio con el hash de su contenido en el nombre (/js/app-<md5>.js). */

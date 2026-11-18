@@ -52,7 +52,7 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
 - **Acceptance criteria:**
   - [x] New test green; the existing detail tests unchanged and green.
 
-### [ ] T2 — Deposit answers the panel fragment to htmx (~10 min)
+### [x] T2 — Deposit answers the panel fragment to htmx (~10 min)
 
 - **Layer:** adapter.in.web
 - **Files:** `AccountWebController`, `AccountWebControllerTests`
@@ -61,7 +61,7 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
   1. Tests first, with `header("HX-Request", "true")`: an approved deposit answers 200 with view `accounts/detail :: panel`, the model's `message` "Ingreso de 50,00 € aprobado" and no flash attribute; an amount of 0 answers the fragment with `<details id="deposit-action" open="open">` and the error; a domain error (currency mismatch) shows its message in the fragment.
   2. Private helper `done(...)`: with htmx, add the notice to the model and render the panel; without it, add the flash attribute and redirect. `renderDetail` returns the panel when the request is htmx.
 - **Acceptance criteria:**
-  - [ ] New tests green; the existing deposit tests (redirect + flash) unchanged and green.
+  - [x] New tests green; the existing deposit tests (redirect + flash) unchanged and green.
 
 ### [ ] T3 — Withdrawal: approved and rejected (~5 min)
 
