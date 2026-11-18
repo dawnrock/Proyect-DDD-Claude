@@ -85,7 +85,8 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | `AccountController`, `TransferController` | `adapter.in.rest` | Input adapter (REST): HTTP ↔ commands and views; uses the input ports only |
 | `RestExceptionHandler` | `adapter.in.rest` | Input adapter: domain and application errors → `ProblemDetail` |
 | `OpenAccountRequest`, `MovementRequest`, `TransferRequest`, `*ResponseDef` | `adapter.in.rest` | REST DTOs (records with Bean Validation, Immutables responses); the open-account request carries the holder's NIF |
-| `ApiSecurityConfig` | `adapter.in.rest` | Input adapter: security chain of `/api/**` (HTTP Basic) |
+| `ApiSecurityConfig` | `adapter.in.rest` | Input adapter: security chain of `/api/**` (JWT Bearer tokens since #122, ADR 0015; HTTP Basic before) |
+| `TokenController`, `AccessTokenIssuer`, `JwtSupport`, `JwtProperties` | `adapter.in.rest` | Input adapter (REST, #122): public `POST /api/auth/token` checks the credentials and issues an HS256 JWT; the decoder validates it on every call |
 | `AccountWebController`, `LoginController`, `AccessDeniedController` | `adapter.in.web` | Input adapter (web): screens and forms; uses the input ports only |
 | `SignUpController`, `SignUpForm`, `AnotherAccountForm` | `adapter.in.web` | Input adapter (web, #103): `/login` with two doors, the three-step public sign-up (`/signup`), signing in after it, and "Abrir otra cuenta" |
 | `CustomerController`, `SignUpRequest` | `adapter.in.rest` | Input adapter (REST, #103): public `POST /api/customers` |

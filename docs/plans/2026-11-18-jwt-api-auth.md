@@ -140,7 +140,7 @@ The resource server support of Spring Security validates the Bearer token (`oaut
   - [x] `node scripts/contract-test.mjs` passes locally (694 cases; the CI runs it on the PR).
   - *Deviation:* the first run found that an undeclared method (`QUERY`) on the two public paths answered 401 instead of 405. Before, Schemathesis sent Basic on every request, so this was hidden. Both paths are now public for any method, so Spring MVC answers 405; there are tests for it in `TokenControllerTests` and `CustomerControllerTests`. No change of `expected-statuses` was needed.
 
-### [ ] T8 — Documentation and project status (~10 min)
+### [x] T8 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `README.md`, `docs/deploy/render.md`, `docs/contracts/login-roles.md` (note pointing to ADR 0015), `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -150,7 +150,7 @@ The resource server support of Spring Security validates the Bearer token (`oaut
   2. `render.md`: the `APP_JWT_SECRET` variable (32 bytes or more, for example `openssl rand -base64 48`) on the Hexagonal service.
   3. Status files: decision (Bearer only on `/api`, HS256, 15 min), pending items (no revocation, no refresh, no attempt limit on the token endpoint), history row.
 - **Acceptance criteria:**
-  - [ ] The README `curl` example works against `./mvnw spring-boot:run`.
+  - [x] The README `curl` example works against `./mvnw spring-boot:run`.
 
 ## Global acceptance criteria
 
