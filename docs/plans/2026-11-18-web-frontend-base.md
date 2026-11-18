@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-18
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~75 min (9 tasks)
 
 ## Goal
@@ -45,7 +45,7 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
 
 ## Tasks
 
-### [ ] T1 — Add the WebJars and Motion, and make the static paths public (~10 min)
+### [x] T1 — Add the WebJars and Motion, and make the static paths public (~10 min)
 
 - **Layer:** build · adapter.in.web
 - **Files:** `pom.xml`, `src/main/resources/static/vendor/motion/{motion.js,LICENSE,README.md}`, `WebSecurityConfig`, `WebSecurityTests`
@@ -56,8 +56,8 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
   3. Download `motion@14.14.0` from the npm registry, check its `integrity` (sha512), and copy `dist/motion.js` and `LICENSE`.
   4. Add `/webjars/**`, `/vendor/**` and `/js/**` to the public matchers.
 - **Acceptance criteria:**
-  - [ ] The new tests pass, and an authenticated page still needs a login (existing tests green).
-  - [ ] `./mvnw verify` green.
+  - [x] The new tests pass, and an authenticated page still needs a login (existing tests green).
+  - [x] `./mvnw verify` green.
 
 ### [ ] T2 — ADR 0016: frontend libraries for the web (~5 min)
 
