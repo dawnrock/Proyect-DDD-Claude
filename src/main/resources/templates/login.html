@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Acceso')}"></head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 <header th:replace="~{fragments/layout :: header}"></header>
-<main>
+<main class="app-container mx-auto w-100 px-3 pb-5">
     <h1 th:text="${showForm} ? 'Acceso' : 'Bienvenido a Mon-A Bank'">Acceso</h1>
     <p class="flash flash-success" role="status" th:if="${param.logout}">Has cerrado la sesión</p>
 

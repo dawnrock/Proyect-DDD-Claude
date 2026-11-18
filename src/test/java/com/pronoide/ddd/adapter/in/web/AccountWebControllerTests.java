@@ -25,7 +25,9 @@ import java.time.Instant;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -87,6 +89,24 @@ class AccountWebControllerTests {
     @Nested
     @DisplayName("Listado de cuentas")
     class Listado {
+
+        @Test
+        @DisplayName("La página usa el tema oscuro de Bootstrap y carga htmx, Alpine.js, Motion y app.js desde la propia aplicación (#124)")
+        void la_pagina_usa_el_tema_oscuro_de_bootstrap_y_carga_las_librerias_del_frontend() throws Exception {
+            when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
+
+            // Spring reescribe las rutas de los WebJars con su versión (/webjars/bootstrap/5.3.8/...): sirve de cache busting
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("data-bs-theme=\"dark\"")))
+                    .andExpect(content().string(webjar("href", "bootstrap", "css/bootstrap.min.css")))
+                    .andExpect(content().string(webjar("src", "bootstrap", "js/bootstrap.bundle.min.js")))
+                    .andExpect(content().string(webjar("src", "htmx.org", "dist/htmx.min.js")))
+                    .andExpect(content().string(webjar("src", "alpinejs", "dist/cdn.min.js")))
+                    .andExpect(content().string(containsString("src=\"/vendor/motion/motion.js\"")))
+                    .andExpect(content().string(containsString("src=\"/js/app.js\"")))
+                    .andExpect(content().string(not(containsString("https://"))));
+        }
 
         @Test
         @DisplayName("Con cuentas, el listado muestra el saldo total y cada cuenta con iniciales, IBAN abreviado y saldo")
@@ -1335,5 +1355,11 @@ class AccountWebControllerTests {
 
             verifyNoInteractions(commands, queries);
         }
+    }
+
+    /** Atributo que apunta a un fichero de un WebJar, con la versión que añada Spring a la ruta. */
+    private static Matcher<String> webjar(String attribute, String webjar, String file) {
+        return matchesPattern("(?s).*" + attribute + "=\"/webjars/" + Pattern.quote(webjar)
+                + "/[^/\"]+/" + Pattern.quote(file) + "\".*");
     }
 }

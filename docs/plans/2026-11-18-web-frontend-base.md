@@ -69,7 +69,7 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
 - **Acceptance criteria:**
   - [x] The ADR is listed in the index and written in English.
 
-### [ ] T3 — Layout, icon fragment and `app.js` (~10 min)
+### [x] T3 — Layout, icon fragment and `app.js` (~10 min)
 
 - **Layer:** adapter.in.web (templates and static)
 - **Files:** `fragments/layout.html`, `fragments/icons.html`, `static/js/app.js`, `static/css/app.css`, `AccountWebControllerTests`
@@ -81,7 +81,7 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
   4. `app.js`: `Motion.animate` fades `main` in and moves it up slightly on load; nothing happens when `matchMedia('(prefers-reduced-motion: reduce)')` matches.
   5. `@view-transition { navigation: auto; }` in `app.css`, disabled under reduced motion.
 - **Acceptance criteria:**
-  - [ ] Test green. `./mvnw spring-boot:run`: the browser console shows no 404s and no script errors.
+  - [x] Test green. `./mvnw spring-boot:run`: the browser console shows no 404s and no script errors.
 
 ### [ ] T4 — Login, entry doors and error pages (~5 min)
 

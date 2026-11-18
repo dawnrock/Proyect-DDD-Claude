@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Cuentas')}"></head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 <header th:replace="~{fragments/layout :: header}"></header>
-<main>
+<main class="app-container mx-auto w-100 px-3 pb-5">
     <div class="page-head">
         <h1 th:text="${admin} ? 'Cuentas' : 'Mis cuentas'">Cuentas</h1>
         <a class="pill pill-primary" th:if="${admin}" th:href="@{/accounts/new}">+ Abrir cuenta</a>

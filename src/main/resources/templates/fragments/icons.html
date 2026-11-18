@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/* Icono de Lucide desde el sprite SVG del WebJar lucide-static (ADR 0016): sin JavaScript, sirve también dentro de los
+     fragmentos que intercambie htmx. name es el id del icono (https://lucide.dev/icons). Decorativo: el texto va al lado. */-->
+<svg th:fragment="icon(name)" class="icon" aria-hidden="true" focusable="false" fill="none" stroke="currentColor"
+     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use th:href="@{/webjars/lucide-static/sprite.svg} + '#' + ${name}"></use></svg>
+</body>
+</html>

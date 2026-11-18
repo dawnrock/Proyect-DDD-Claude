@@ -1,3 +1,16 @@
+/* Ajustes sobre Bootstrap 5.3 en modo oscuro (ADR 0016). */
+
+/* Transiciones entre páginas con la View Transitions API; los navegadores sin soporte las ignoran. */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) {
+    @view-transition { navigation: none; }
+}
+
+.app-container { max-width: 720px; }
+
+/* Iconos de Lucide (fragmento fragments/icons :: icon): del tamaño del texto que acompañan. */
+.icon { width: 1.15em; height: 1.15em; flex: none; vertical-align: -0.2em; }
+
 /* Tema oscuro y minimalista (#48): fondo casi negro, superficies un punto más claras, separadores finos,
    dos tonos de texto y solo dos colores con significado (abonos y rechazos). */
 :root {

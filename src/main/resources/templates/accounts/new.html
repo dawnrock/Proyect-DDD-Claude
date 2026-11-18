@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Abrir cuenta')}"></head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 <header th:replace="~{fragments/layout :: header}"></header>
-<main>
+<main class="app-container mx-auto w-100 px-3 pb-5">
     <a class="back" th:href="@{/}">← Cuentas</a>
     <h1>Abrir cuenta</h1>
     <form class="panel" th:action="@{/accounts/new}" th:object="${form}" method="post" novalidate>
