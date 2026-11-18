@@ -69,6 +69,11 @@ class WebSecurityTests {
                 .andExpect(header().string("Cache-Control", "max-age=31536000, public"));
         mvc.perform(get("/login"))
                 .andExpect(header().string("Cache-Control", containsString("no-store")));
+        String css = mvc.perform(get("/login")).andReturn().getResponse().getContentAsString()
+                .replaceAll("(?s).*href=\"(/css/app-[0-9a-f]{32}\\.css)\".*", "$1");
+        mvc.perform(get(css))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", "max-age=31536000, public"));
     }
 
     @Test

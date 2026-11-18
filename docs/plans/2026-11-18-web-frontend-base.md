@@ -6,7 +6,7 @@
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-18
 - **Status:** in progress
-- **Total estimate:** ~75 min (9 tasks)
+- **Total estimate:** ~85 min (10 tasks)
 
 ## Goal
 
@@ -153,6 +153,20 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
   1. Decision: frontend libraries (ADR 0016) and progressive enhancement. Pending items: htmx 4, CSP, a WebJar for Motion if one is published, jar size. Next step: #125.
 - **Acceptance criteria:**
   - [x] The CI status-file check passes.
+
+### [x] T10 — Review fixes (~10 min)
+
+- **Layer:** adapter.in.web (tests)
+- **Files:** `AccountWebControllerTests`, `SignUpControllerTests`, `WebSecurityTests`, `WebSecurityConfig`
+- **Depends on:** T1-T9
+- **What to do:** findings of the `revisor-ddd` review (none blocking):
+  1. The "back" link assertions check the `href="/"` again, not only the icon and the text.
+  2. New test: the password fields of step 2, which set `is-invalid` by hand (no `th:field`), mark only the field with the error. Checked by removing the `th:classappend` (red) and restoring it.
+  3. The hashed `/css/app-<md5>.css` is served without a session and with the one-year cache.
+  4. Javadoc line of `WebSecurityConfig` wrapped.
+  - Not changed: `/vendor/**` also serves Motion's `README.md` and `LICENSE.md`, which are public anyway; the negative `#arrow-left"` assertion depends on the header not using that icon (documented in the review, correct today).
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green.
 
 ## Global acceptance criteria
 

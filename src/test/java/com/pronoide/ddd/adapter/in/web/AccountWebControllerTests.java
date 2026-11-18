@@ -235,7 +235,7 @@ class AccountWebControllerTests {
                     ownAccount(UUID.randomUUID(), "ES9876543210987654321098", "Ada Lovelace")));
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
-                    .andExpect(content().string(containsString("#arrow-left\"></use></svg>Mis cuentas</a>")));
+                    .andExpect(content().string(matchesPattern("(?s).*<a [^>]*href=\"/\"><svg [^>]*><use href=\"[^\"]*#arrow-left\"></use></svg>Mis cuentas</a>.*")));
         }
 
         @Test
@@ -508,7 +508,7 @@ class AccountWebControllerTests {
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("#arrow-left\"></use></svg>Cuentas</a>")));
+                    .andExpect(content().string(matchesPattern("(?s).*<a [^>]*href=\"/\"><svg [^>]*><use href=\"[^\"]*#arrow-left\"></use></svg>Cuentas</a>.*")));
         }
 
         @Test

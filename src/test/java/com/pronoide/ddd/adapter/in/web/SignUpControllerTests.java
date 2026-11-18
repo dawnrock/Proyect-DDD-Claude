@@ -217,6 +217,21 @@ class SignUpControllerTests {
         }
 
         @Test
+        @DisplayName("Una repetición distinta marca como inválida solo la repetición, y una contraseña corta la contraseña (#124)")
+        void los_campos_de_contrasena_con_error_se_marcan_como_invalidos() throws Exception {
+            MockHttpSession session = sessionAfterStep1();
+
+            mvc.perform(post("/signup/access").session(session).param("username", "margaret")
+                            .param("password", "clave-secreta-1").param("passwordRepetition", "otra-clave-22"))
+                    .andExpect(content().string(containsString("<input class=\"form-control is-invalid\" type=\"password\" id=\"passwordRepetition\"")))
+                    .andExpect(content().string(containsString("<input class=\"form-control\" type=\"password\" id=\"password\"")));
+
+            mvc.perform(post("/signup/access").session(session).param("username", "margaret")
+                            .param("password", "corta").param("passwordRepetition", "corta"))
+                    .andExpect(content().string(containsString("<input class=\"form-control is-invalid\" type=\"password\" id=\"password\"")));
+        }
+
+        @Test
         @DisplayName("Con datos válidos redirige al paso 3")
         void con_datos_validos_redirige_al_paso_3() throws Exception {
             mvc.perform(validStep2(post("/signup/access")).session(sessionAfterStep1()))
