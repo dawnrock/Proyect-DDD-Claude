@@ -37,7 +37,7 @@ The resource server support of Spring Security validates the Bearer token (`oaut
 | `adapter.in` | `SecuritySupport.java` | `AuthenticationManager` bean (DAO provider over the existing users) |
 | resources | `application.properties`, `application-demo.properties` | `app.jwt.ttl`, demo secret |
 | tests | `DddLabApplicationTests`, `DemoProfileTests`, `CustomerControllerTests`, new `ApiSecurityTests`, `TokenControllerTests`, `JwtSupportTests` | Bearer instead of Basic |
-| contract tests | `schemathesis.toml`, `scripts/schemathesis_hooks.py` (new), `scripts/contract-test.mjs` | Get a token before testing |
+| contract tests | `schemathesis.toml` | Dynamic Bearer auth instead of Basic |
 | docs | `docs/adr/0015-jwt-bearer-api.md`, `openapi.yaml` 2.0.0, `CHANGELOG.md`, README, `render.md`, status files | — |
 
 ## Tasks
@@ -119,12 +119,21 @@ The resource server support of Spring Security validates the Bearer token (`oaut
 ### [ ] T7 — Contract tests with a token (~10 min)
 
 - **Layer:** build
-- **Files:** `schemathesis.toml`, `scripts/schemathesis_hooks.py`, `scripts/contract-test.mjs`
+- **Files:** `schemathesis.toml` (no Python hooks: Schemathesis 4.33.4 fetches tokens declaratively)
 - **Depends on:** T6
 - **What to do:**
-  1. Remove `[auth.basic]`. Add a Schemathesis auth hook (`@schemathesis.auth()`) that asks `/api/auth/token` as `admin`/`demo` and caches the token while it is valid.
-  2. `contract-test.mjs` passes `SCHEMATHESIS_HOOKS=scripts.schemathesis_hooks` (or the equivalent for 4.33.4) when it starts Schemathesis.
-  3. Exclude `issueToken` from the auth hook (public); adjust its `expected-statuses` if the checks need it.
+  1. Replace `[auth.basic]` with the OpenAPI-aware dynamic auth of the `bearerAuth` scheme:
+
+     ```toml
+     [auth.dynamic.openapi.bearerAuth]
+     path = "/api/auth/token"
+     payload = { username = "admin", password = "demo" }
+     extract_selector = "/accessToken"
+     ```
+
+     The defaults are `method = "post"`, `payload_content_type = "application/json"`, `extract_from = "body"` and `retry_on = [401]`, so the token is fetched again after a 401. Operations with `security: []` (`issueToken`, `signUp`) get no token, because the auth follows the contract's schemes.
+  2. Adjust the `expected-statuses` of `issueToken` if the checks need it (401 for random credentials).
+  3. Fallback only if the dynamic auth falls short: a hooks file `scripts/schemathesis_hooks.py` with `@schemathesis.auth(refresh_interval=600).skip_for(operation_id=["issueToken", "signUp"])` (class `ApiTokenAuth` with `get`/`set`), loaded with `hooks = "scripts/schemathesis_hooks.py"` in `schemathesis.toml`.
 - **Acceptance criteria:**
   - [ ] `node scripts/contract-test.mjs` passes locally and in the CI.
 
@@ -170,4 +179,6 @@ The resource server support of Spring Security validates the Bearer token (`oaut
 - **Render deployment:** without `APP_JWT_SECRET` the service starts with a random key, so tokens become invalid after every restart or sleep of the free plan. The variable must be set before the merge is deployed.
 - **No revocation:** a stolen token is valid until it expires (15 min). This is accepted and recorded in `pendientes.md`.
 - **The token endpoint has no limit on attempts**, like the web login: it is a brute-force target on the public deployment.
-- **Schemathesis auth hook:** check the hooks API of version 4.33.4 (module name and `SCHEMATHESIS_HOOKS`). If it gets in the way, use a fixed token generated before the run, passed with `-H "Authorization: Bearer ..."`.
+- **Schemathesis auth:** decided on 2026-11-18. Use `[auth.dynamic.openapi.bearerAuth]` in `schemathesis.toml` (checked against the 4.33.4 config classes), with the hooks file as a fallback (T7).
+- **Lifetime:** confirmed with the user, 15 min (`app.jwt.ttl=PT15M`).
+- **Secret generation:** `openssl rand -base64 48` (64 characters, 48 random bytes). The application uses the UTF-8 bytes of the value as the HMAC key (at least 32 bytes), so any long random string works. Documented in the README and `render.md` (T8).
