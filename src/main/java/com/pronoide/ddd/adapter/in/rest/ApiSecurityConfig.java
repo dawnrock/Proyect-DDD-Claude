@@ -47,7 +47,7 @@ public class ApiSecurityConfig {
         return http
                 .securityMatcher("/api/**")
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers(HttpMethod.POST, "/api/customers").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/customers", "/api/auth/token").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/accounts").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/accounts/*/account-number").hasRole("ADMIN")
                         .anyRequest().authenticated())

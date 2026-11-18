@@ -66,7 +66,7 @@ The resource server support of Spring Security validates the Bearer token (`oaut
   - [x] A token encoded with the key decodes with its claims; one signed with another key, expired, or with another issuer is rejected.
   - [x] A short secret fails at startup with a clear message.
 
-### [ ] T3 — `POST /api/auth/token` (~10 min)
+### [x] T3 — `POST /api/auth/token` (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/SecuritySupport.java` (`AuthenticationManager`), `adapter/in/rest/AccessTokenIssuer.java`, `adapter/in/rest/TokenController.java`, `TokenRequestDef`, `TokenResponseDef`, test `TokenControllerTests`
@@ -75,8 +75,9 @@ The resource server support of Spring Security validates the Bearer token (`oaut
   1. `AuthenticationManager` with a `DaoAuthenticationProvider` over the existing `UserDetailsManager` and `PasswordEncoder` (so signed-up customers can get a token too).
   2. `AccessTokenIssuer.issue(Authentication)` → claims `sub`, `roles`, `iat`, `exp`, `iss`.
   3. The controller validates the body (`@NotBlank`), authenticates and answers 200 with `accessToken`, `tokenType`, `expiresIn`. A `BadCredentialsException` gives 401 `ProblemDetail` "No autenticado" with the same body as today.
+  - *Deviation:* `AccessTokenIssuer` builds its own `ProviderManager` instead of publishing an `AuthenticationManager` bean in `SecuritySupport`, so the web login keeps the manager it had. The `permitAll` of `/api/auth/token` moved here from T4, because the endpoint has to be reachable for its tests.
 - **Acceptance criteria:**
-  - [ ] Valid credentials → 200 and a token whose `sub`/`roles` match; wrong password or unknown user → 401 with the same message; missing fields → 400.
+  - [x] Valid credentials → 200 and a token whose `sub`/`roles` match; wrong password or unknown user → 401 with the same message; missing fields → 400.
 
 ### [ ] T4 — The API chain accepts only Bearer (~10 min)
 
