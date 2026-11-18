@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Proyect-DDD-Claude · Checking accounts API
-  version: 1.0.0
+  version: 2.0.0
   description: |
     Versioned with SemVer (ADR 0014); the changes are in `docs/api/CHANGELOG.md`.
 
@@ -14,13 +14,17 @@ info:
     in a single place (`RestExceptionHandler`). A path that does not exist (`/api/...` with no
     operation) is answered by Spring Boot with its standard JSON error, not with `ProblemDetail`.
 
+    Authentication (ADR 0015): ask for a JWT with `POST /api/auth/token` and send it on every other
+    call as `Authorization: Bearer <token>`. It lasts 15 minutes; when it expires, ask for a new one.
+    HTTP Basic is not accepted.
+
     The API answers in Spanish: the `title` and `detail` values below and in the examples are the
     real ones and are not translated.
 
     | Code | When | `title` |
     | ---- | ---- | ------- |
     | 400 | Invalid request (format, validation or an argument the domain rejects) | Petición no válida |
-    | 401 | Not authenticated (HTTP Basic) or invalid credentials | No autenticado |
+    | 401 | No Bearer token, an invalid or expired one, or wrong credentials when asking for a token | No autenticado |
     | 403 | Authenticated, but without the required role (only an administrator opens accounts or replaces an IBAN) | Acceso denegado |
     | 404 | The requested resource does not exist, or it is another customer's account (its existence is not revealed) | Recurso inexistente |
     | 415 | The request body is not JSON (operations with a body) | Tipo de contenido no admitido |
@@ -38,9 +42,10 @@ servers:
     description: Local development
   - url: https://proyect-ddd-claude.onrender.com
     description: Render deployment of the `Hexagonal` branch (free plan, the first request may take about a minute while it wakes up)
-# Every operation needs HTTP Basic credentials (#50). An admin sees every account; a user only their own.
+# Every operation needs a Bearer token (#122) except asking for one and signing up. An admin sees every account;
+# a user only their own.
 security:
-  - basicAuth: []
+  - bearerAuth: []
 tags:
   - name: accounts
     description: Checking accounts (#5).
@@ -48,7 +53,62 @@ tags:
     description: Transfers between accounts (#7).
   - name: customers
     description: Mon-A Bank customer sign-up (#95).
+  - name: auth
+    description: Access tokens for the API (#122).
 paths:
+  /api/auth/token:
+    post:
+      tags: [auth]
+      operationId: issueToken
+      summary: Get an access token (public)
+      description: |
+        Exchanges the credentials of a user (the same ones as the web login, customers who signed up included) for a
+        JWT signed with HS256 that lasts 15 minutes. Send it on the other operations as `Authorization: Bearer
+        <token>`. Its claims are `iss`, `sub` (the username), `roles` (`ADMIN` or `USER`), `iat` and `exp`. The
+        answer is 200, not 201: a token is not a resource with its own URL. Wrong credentials give 401 without saying
+        whether the user or the password failed.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+            examples:
+              admin:
+                summary: The demo administrator
+                value:
+                  username: admin
+                  password: demo
+      responses:
+        '200':
+          description: Credentials accepted; the token and how long it lasts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessToken'
+              examples:
+                token:
+                  summary: A token for the administrator
+                  value:
+                    accessToken: "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJkZGQtbGFiIiwic3ViIjoiYWRtaW4iLCJyb2xlcyI6WyJBRE1JTiJdfQ.c2lnbmF0dXJl"
+                    tokenType: Bearer
+                    expiresIn: 900
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Wrong username or password.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: about:blank
+                title: No autenticado
+                status: 401
+                detail: Usuario o contraseña incorrectos
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
   /api/accounts:
     get:
       tags: [accounts]
@@ -246,7 +306,7 @@ paths:
       description: |
         Registers the customer, opens their first account with an IBAN assigned by the bank and creates their user
         (role USER), all at once and without administrator approval. No credentials are needed. The new user can then
-        use the API with HTTP Basic. A document is unique per customer (R29): signing up again with it fails with 422,
+        ask for a token with `POST /api/auth/token` and use the API. A document is unique per customer (R29): signing up again with it fails with 422,
         whatever the e-mail.
       security: []
       requestBody:
@@ -258,7 +318,7 @@ paths:
       responses:
         '401':
           $ref: '#/components/responses/Unauthorized'
-          description: Only when wrong HTTP Basic credentials are sent; the operation needs none.
+          description: Only when an invalid or expired Bearer token is sent; the operation needs none.
         '201':
           description: Customer registered and first account opened.
           headers:
@@ -583,6 +643,34 @@ components:
           enum: [EUR, null]
           default: EUR
           description: Absent or `null` means EUR; another ISO 4217 currency fails with 422 and an invalid code with 400.
+    TokenRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          minLength: 1
+          examples: [admin]
+        password:
+          type: string
+          minLength: 1
+          writeOnly: true
+          examples: [demo]
+    AccessToken:
+      type: object
+      required: [accessToken, tokenType, expiresIn]
+      properties:
+        accessToken:
+          type: string
+          description: "The signed JWT, for the `Authorization: Bearer` header."
+        tokenType:
+          type: string
+          const: Bearer
+        expiresIn:
+          type: integer
+          minimum: 1
+          description: Seconds until the token expires (900 by default).
+          examples: [900]
     AccountSummary:
       type: object
       required: [id, accountNumber, holderName, segment, balance, currency]
@@ -685,22 +773,38 @@ components:
               additionalProperties:
                 type: string
   securitySchemes:
-    basicAuth:
+    bearerAuth:
       type: http
-      scheme: basic
-      description: Username and password of a configured user (demo profile users are in the README).
+      scheme: bearer
+      bearerFormat: JWT
+      description: A token from `POST /api/auth/token` (demo profile users are in the README). It lasts 15 minutes.
   responses:
     Unauthorized:
-      description: Not authenticated.
+      description: Not authenticated, with a `WWW-Authenticate` header that asks for a Bearer token.
+      headers:
+        WWW-Authenticate:
+          description: '`Bearer`, or `Bearer error="invalid_token", ...` when the token sent is invalid or expired.'
+          schema:
+            type: string
       content:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/ProblemDetail'
-          example:
-            type: about:blank
-            title: No autenticado
-            status: 401
-            detail: Hace falta autenticarse para usar la API
+          examples:
+            missingToken:
+              summary: No token
+              value:
+                type: about:blank
+                title: No autenticado
+                status: 401
+                detail: 'Hace falta autenticarse para usar la API: pide un token en POST /api/auth/token y envíalo como Bearer'
+            invalidToken:
+              summary: Invalid or expired token
+              value:
+                type: about:blank
+                title: No autenticado
+                status: 401
+                detail: El token no es válido o ha caducado
     Forbidden:
       description: Access denied.
       content:

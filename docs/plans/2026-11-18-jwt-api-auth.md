@@ -105,7 +105,7 @@ The resource server support of Spring Security validates the Bearer token (`oaut
 - **Acceptance criteria:**
   - [x] `./mvnw verify` green with no Basic left in the API tests (`grep -rn httpBasic src/test` empty for `/api`).
 
-### [ ] T6 — OpenAPI contract 2.0.0 (~10 min)
+### [x] T6 — OpenAPI contract 2.0.0 (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`, `docs/api/CHANGELOG.md`
@@ -116,7 +116,7 @@ The resource server support of Spring Security validates the Bearer token (`oaut
   3. Update the 401 descriptions (no Bearer, invalid or expired token) and the 401 of `signUp`, which now only happens with an invalid Bearer token.
   4. `info.version: 2.0.0` and a CHANGELOG entry that lists the incompatible change. Run `redocly lint` and `oasdiff breaking` (it must report the change, which is why the version is a major one).
 - **Acceptance criteria:**
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` with no errors; `scripts/check-contract-version.mjs` accepts the bump.
+  - [x] `npx @redocly/cli lint docs/api/openapi.yaml` with no errors; `scripts/check-contract-version.mjs` accepts the bump (`oasdiff` reports 7 incompatible changes, 1.0.0 → 2.0.0).
 
 ### [ ] T7 — Contract tests with a token (~10 min)
 
