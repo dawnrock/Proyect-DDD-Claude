@@ -210,3 +210,6 @@ a.row:hover .row-title { text-decoration: underline; }
 
 /* Movimiento rechazado: no cambió el saldo, así que su importe va tachado. */
 .row-rejected .row-amount { color: var(--bs-secondary-color); text-decoration: line-through; }
+
+/* Barra de progreso del alta de cliente (#95): fina, como una línea. */
+.signup-progress { height: 0.375rem; }

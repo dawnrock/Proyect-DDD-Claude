@@ -123,7 +123,7 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
   - Static resources were served with Spring Security's `Cache-Control: no-store`, so every navigation downloaded Bootstrap, the scripts and the 556 KB sprite again, and the new page often showed before its resources were ready, losing the view transition. `application.properties` now versions `/css`, `/js` and `/vendor` URLs with a content hash (WebJars already carry their version) and caches static resources for a year; pages stay `no-store`. Test in `WebSecurityTests`, checked by removing the setting (red) and restoring it.
   - With JavaScript disabled, `@view-transition` sometimes left Chromium ignoring clicks after a navigation (4 of 5 runs). The rule now only applies under `@media (scripting: enabled) and (prefers-reduced-motion: no-preference)`.
 
-### [ ] T7 — Customer sign-up in three steps (~10 min)
+### [x] T7 — Customer sign-up in three steps (~10 min)
 
 - **Layer:** adapter.in.web (templates)
 - **Files:** `signup/data.html`, `signup/access.html`, `signup/account.html`, `signup/progress.html`, `SignUpControllerTests`
@@ -131,7 +131,7 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
 - **What to do:**
   1. Progress as a Bootstrap `progress` bar (`aria-valuenow`) with "Paso n de 3"; summary as a `dl` in a card; forms as in T5.
 - **Acceptance criteria:**
-  - [ ] Sign-up tests green; the duplicate-customer flow still shows its link.
+  - [x] Sign-up tests green; the duplicate-customer flow still shows its link.
 
 ### [ ] T8 — Trim `app.css` and check no old classes are left (~5 min)
 

@@ -4,37 +4,37 @@
 <body class="d-flex flex-column min-vh-100">
 <header th:replace="~{fragments/layout :: header}"></header>
 <main class="app-container mx-auto w-100 px-3 pb-5">
-    <a class="back" th:href="@{/login}">← Volver</a>
-    <h1>Hazte cliente de Mon-A Bank</h1>
+    <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1 mb-3" th:href="@{/login}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg>Volver</a>
+    <h1 class="h3 fw-semibold mb-3">Hazte cliente de Mon-A Bank</h1>
     <nav th:replace="~{signup/progress :: progress(1)}"></nav>
 
-    <form class="panel" th:action="@{/signup}" th:object="${signUpForm}" method="post" novalidate>
-        <div class="flash flash-error" role="alert" th:if="${signUpError}">
-            <p th:text="${signUpError}"></p>
-            <p th:if="${duplicateCustomer}"><a th:href="@{/login(form)}">Entrar con mi usuario</a></p>
+    <form class="card card-body" th:action="@{/signup}" th:object="${signUpForm}" method="post" novalidate>
+        <div class="alert alert-danger" role="alert" th:if="${signUpError}">
+            <p class="d-flex align-items-center gap-2 mb-0"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${signUpError}">Error</span></p>
+            <p class="mt-2 mb-0" th:if="${duplicateCustomer}"><a class="alert-link" th:href="@{/login(form)}">Entrar con mi usuario</a></p>
         </div>
 
-        <div class="field">
-            <label for="fullName">Nombre y apellidos</label>
-            <input type="text" id="fullName" autocomplete="name" autofocus th:field="*{fullName}">
-            <p class="field-error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></p>
+        <div class="mb-3">
+            <label class="form-label" for="fullName">Nombre y apellidos</label>
+            <input class="form-control" type="text" id="fullName" autocomplete="name" autofocus th:field="*{fullName}" th:errorclass="is-invalid">
+            <p class="invalid-feedback" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></p>
         </div>
 
-        <div class="field">
-            <label for="taxId">DNI o NIE</label>
-            <input type="text" id="taxId" autocomplete="off" spellcheck="false" placeholder="12345678Z" th:field="*{taxId}">
-            <p class="field-error" th:if="${#fields.hasErrors('taxId')}" th:errors="*{taxId}"></p>
+        <div class="mb-3">
+            <label class="form-label" for="taxId">DNI o NIE</label>
+            <input class="form-control" type="text" id="taxId" autocomplete="off" spellcheck="false" placeholder="12345678Z" th:field="*{taxId}" th:errorclass="is-invalid">
+            <p class="invalid-feedback" th:if="${#fields.hasErrors('taxId')}" th:errors="*{taxId}"></p>
         </div>
 
-        <div class="field">
-            <label for="email">Correo electrónico</label>
-            <input type="email" id="email" autocomplete="email" th:field="*{email}">
-            <p class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+        <div class="mb-3">
+            <label class="form-label" for="email">Correo electrónico</label>
+            <input class="form-control" type="email" id="email" autocomplete="email" th:field="*{email}" th:errorclass="is-invalid">
+            <p class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
         </div>
 
-        <div class="form-actions">
-            <button class="button" type="submit">Continuar</button>
-            <a th:href="@{/login}">Cancelar</a>
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-primary" type="submit">Continuar</button>
+            <a class="link-secondary text-decoration-none" th:href="@{/login}">Cancelar</a>
         </div>
     </form>
 </main>

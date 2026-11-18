@@ -2,12 +2,11 @@
 <html lang="es" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org">
 <body>
 <!--/* Barra de progreso del alta: step es 1, 2 o 3. */-->
-<nav th:fragment="progress(step)" class="progress" aria-label="Progreso del alta">
-    <p class="progress-label muted" th:text="'Paso ' + ${step} + ' de 3'">Paso 1 de 3</p>
-    <ol class="progress-bar">
-        <li th:each="n : ${#numbers.sequence(1, 3)}" th:classappend="${n <= step} ? 'done'"
-            th:attr="aria-current=${n == step} ? 'step'"></li>
-    </ol>
+<nav th:fragment="progress(step)" class="mb-4" aria-label="Progreso del alta">
+    <p class="small text-body-secondary mb-2" th:text="'Paso ' + ${step} + ' de 3'">Paso 1 de 3</p>
+    <div class="progress signup-progress" role="progressbar" aria-label="Paso del alta" th:attr="aria-valuenow=${step}" aria-valuemin="0" aria-valuemax="3">
+        <div class="progress-bar" th:style="'width: ' + ${step * 100 / 3} + '%'"></div>
+    </div>
 </nav>
 </body>
 </html>

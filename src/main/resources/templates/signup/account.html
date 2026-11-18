@@ -4,46 +4,44 @@
 <body class="d-flex flex-column min-vh-100">
 <header th:replace="~{fragments/layout :: header}"></header>
 <main class="app-container mx-auto w-100 px-3 pb-5">
-    <a class="back" th:href="@{/signup/access}">← Atrás</a>
-    <h1>Abre tu cuenta</h1>
+    <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1 mb-3" th:href="@{/signup/access}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg>Atrás</a>
+    <h1 class="h3 fw-semibold mb-3">Abre tu cuenta</h1>
     <nav th:replace="~{signup/progress :: progress(3)}"></nav>
 
     <!--/* Resumen de los pasos anteriores. La contraseña no aparece. */-->
-    <dl class="summary">
-        <div><dt>Nombre</dt><dd th:text="${signUpForm.fullName}">Nombre</dd></div>
-        <div><dt>Documento</dt><dd th:text="${signUpForm.taxId}">12345678Z</dd></div>
-        <div><dt>Correo</dt><dd th:text="${signUpForm.email}">correo@example.com</dd></div>
-        <div><dt>Usuario</dt><dd th:text="${signUpForm.username}">usuario</dd></div>
+    <dl class="card card-body py-1 mb-4">
+        <div class="d-flex justify-content-between gap-3 py-2 border-bottom"><dt class="small fw-normal text-body-secondary">Nombre</dt><dd class="mb-0 text-end text-break" th:text="${signUpForm.fullName}">Nombre</dd></div>
+        <div class="d-flex justify-content-between gap-3 py-2 border-bottom"><dt class="small fw-normal text-body-secondary">Documento</dt><dd class="mb-0 text-end text-break" th:text="${signUpForm.taxId}">12345678Z</dd></div>
+        <div class="d-flex justify-content-between gap-3 py-2 border-bottom"><dt class="small fw-normal text-body-secondary">Correo</dt><dd class="mb-0 text-end text-break" th:text="${signUpForm.email}">correo@example.com</dd></div>
+        <div class="d-flex justify-content-between gap-3 py-2"><dt class="small fw-normal text-body-secondary">Usuario</dt><dd class="mb-0 text-end text-break" th:text="${signUpForm.username}">usuario</dd></div>
     </dl>
 
-    <form class="panel" th:action="@{/signup/account}" th:object="${signUpForm}" method="post" novalidate>
-        <p class="flash flash-error" role="alert" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+    <form class="card card-body" th:action="@{/signup/account}" th:object="${signUpForm}" method="post" novalidate>
+        <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:each="err : ${#fields.globalErrors()}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${err}">Error</span></div>
 
-        <div class="field">
-            <label for="initialDeposit">Depósito inicial</label>
-            <input type="number" id="initialDeposit" step="0.01" inputmode="decimal" autofocus th:field="*{initialDeposit}">
-            <p class="field-error" th:if="${#fields.hasErrors('initialDeposit')}" th:errors="*{initialDeposit}"></p>
+        <div class="mb-3">
+            <label class="form-label" for="initialDeposit">Depósito inicial</label>
+            <input class="form-control" type="number" id="initialDeposit" step="0.01" inputmode="decimal" autofocus th:field="*{initialDeposit}" th:errorclass="is-invalid">
+            <p class="invalid-feedback" th:if="${#fields.hasErrors('initialDeposit')}" th:errors="*{initialDeposit}"></p>
         </div>
 
-        <div class="field">
-            <label for="currency">Divisa</label>
-            <select id="currency" th:field="*{currency}">
+        <div class="mb-3">
+            <label class="form-label" for="currency">Divisa</label>
+            <select class="form-select" id="currency" th:field="*{currency}" th:errorclass="is-invalid">
                 <option th:each="c : ${currencies}" th:value="${c}" th:text="${c}">EUR</option>
             </select>
-            <p class="field-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
+            <p class="invalid-feedback" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
         </div>
 
-        <div class="field field-check">
-            <label for="conditionsAccepted">
-                <input type="checkbox" id="conditionsAccepted" th:field="*{conditionsAccepted}">
-                Acepto las condiciones de Mon-A Bank
-            </label>
-            <p class="field-error" th:if="${#fields.hasErrors('conditionsAccepted')}" th:errors="*{conditionsAccepted}"></p>
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="conditionsAccepted" th:field="*{conditionsAccepted}" th:errorclass="is-invalid">
+            <label class="form-check-label" for="conditionsAccepted">Acepto las condiciones de Mon-A Bank</label>
+            <p class="invalid-feedback" th:if="${#fields.hasErrors('conditionsAccepted')}" th:errors="*{conditionsAccepted}"></p>
         </div>
 
-        <div class="form-actions">
-            <button class="button" type="submit">Abrir mi cuenta</button>
-            <a th:href="@{/signup/access}">Atrás</a>
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-primary" type="submit">Abrir mi cuenta</button>
+            <a class="link-secondary text-decoration-none" th:href="@{/signup/access}">Atrás</a>
         </div>
     </form>
 </main>
