@@ -109,7 +109,7 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
 
 - **Deviation:** an expired session also loses the CSRF token stored in it, so an htmx POST hits the CSRF filter (403, `MissingCsrfTokenException`) before the authentication entry point. `HtmxLoginRedirect` is both the entry point and the access-denied handler: for htmx requests it answers 401 + `HX-Redirect: /login` when there is no authentication or the CSRF token is missing; an invalid token, any other denial and every non-htmx request keep the 403 page or the redirect to `/login`. It delegates instead of using `defaultAuthenticationEntryPointFor`, because registering that first made it the default entry point for every request. Tests: missing token → `HX-Redirect`; invalid token → 403.
 
-### [ ] T7 — Animations and error answers in `app.js` (~10 min)
+### [x] T7 — Animations and error answers in `app.js` (~10 min)
 
 - **Layer:** adapter.in.web (static)
 - **Files:** `static/js/app.js`
@@ -120,7 +120,9 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
   3. `htmx:beforeSwap` with status 4xx/5xx: swap the error page into `body` (`shouldSwap = true`, `target = document.body`, `swapOverride = 'innerHTML'`) and keep `isError`.
   4. Check it in Chromium (Playwright): deposit, rejected withdrawal, transfer to an unknown IBAN and new IBAN without a reload (the page's `window` keeps a marker), the accordion after a swap, an expired session (cookie deleted) going to `/login`, and the same flows with JavaScript disabled.
 - **Acceptance criteria:**
-  - [ ] Every flow of step 4 behaves as described, with no console errors.
+  - [x] Every flow of step 4 behaves as described, with no console errors.
+
+- **Checked in Chromium (Playwright):** deposit (balance 4.720 → 4.730 €, notice, empty field, panel closed), rejected withdrawal (warning), validation error (panel open with its error), unknown target IBAN (field error), new IBAN (heading and notice updated), all on the same page and URL; the accordion after a swap; a 404 answer swapped into `body` as the 404 page; deleting the cookies and submitting lands on `/login`. With reduced motion, no animation after the swap (`document.getAnimations()` is empty); with JavaScript disabled, the deposit still works through the redirect. The only console errors are the ones htmx logs for the 404 and 401 answers provoked on purpose.
 
 ### [ ] T8 — Project status and decisions (~5 min)
 
