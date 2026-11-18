@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-18
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~85 min (10 tasks)
 
 ## Goal
@@ -172,25 +172,25 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
 
 **Specific:**
 
-- [ ] Every library is served by the application (`/webjars/**`, `/vendor/**`); no page requests an external domain.
-- [ ] Every screen (list, detail, new account, another account, sign-up in three steps, login, 403, 404) uses Bootstrap with `data-bs-theme="dark"`; no rule of the old stylesheet is left unused.
-- [ ] The web works without JavaScript exactly as today (forms, panels, PRG).
-- [ ] Navigating between pages uses View Transitions in Chromium, and Motion animates the entrance; with `prefers-reduced-motion` neither runs.
-- [ ] Security rules unchanged apart from the three static paths.
+- [x] Every library is served by the application (`/webjars/**`, `/vendor/**`); no page requests an external domain.
+- [x] Every screen (list, detail, new account, another account, sign-up in three steps, login, 403, 404) uses Bootstrap with `data-bs-theme="dark"`; no rule of the old stylesheet is left unused.
+- [x] The web works without JavaScript exactly as today (forms, panels, PRG).
+- [x] Navigating between pages uses View Transitions in Chromium, and Motion animates the entrance; with `prefers-reduced-motion` neither runs.
+- [x] Security rules unchanged apart from the three static paths.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): ADR 0016.
-- [ ] If the API changes: n/a (the REST API does not change).
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): ADR 0016.
+- [x] If the API changes: n/a (the REST API does not change).
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a.
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
