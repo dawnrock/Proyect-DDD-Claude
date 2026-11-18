@@ -91,13 +91,18 @@ paths:
                 token:
                   summary: A token for the administrator
                   value:
-                    accessToken: "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJkZGQtbGFiIiwic3ViIjoiYWRtaW4iLCJyb2xlcyI6WyJBRE1JTiJdfQ.c2lnbmF0dXJl"
+                    accessToken: "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJkZGQtbGFiIiwic3ViIjoiYWRtaW4iLCJyb2xlcyI6WyJBRE1JTiJdfQ.not-a-real-signature"
                     tokenType: Bearer
                     expiresIn: 900
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
           description: Wrong username or password.
+          headers:
+            WWW-Authenticate:
+              description: Always `Bearer`.
+              schema:
+                type: string
           content:
             application/problem+json:
               schema:

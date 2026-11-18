@@ -45,7 +45,9 @@ public class JwtSupport {
 
     @Bean
     public JwtDecoder jwtDecoder(SecretKey jwtSigningKey, JwtProperties properties) {
-        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(jwtSigningKey).macAlgorithm(MacAlgorithm.HS256).build();
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(jwtSigningKey)
+                .macAlgorithm(MacAlgorithm.HS256)
+                .build();
         decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(properties.issuer()));
         return decoder;
     }

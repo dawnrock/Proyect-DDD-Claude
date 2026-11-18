@@ -1,6 +1,7 @@
 package com.pronoide.ddd.adapter.in.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -20,7 +21,9 @@ import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
+import javax.crypto.Mac;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -92,6 +95,16 @@ class ApiSecurityTests {
                 .getTokenValue();
     }
 
+    private static final String ADMIN_CLAIMS = "{\"iss\":\"ddd-lab\",\"sub\":\"admin\",\"roles\":[\"ADMIN\"],\"exp\":%d}";
+
+    private static long future() {
+        return Instant.now().plus(15, ChronoUnit.MINUTES).getEpochSecond();
+    }
+
+    private static String base64Url(String json) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(json.getBytes(StandardCharsets.UTF_8));
+    }
+
     private static AccountSummary summary() {
         return AccountSummary.builder().id(ID).accountNumber("ES9121000418450200051332").holderName("Ada Lovelace")
                 .segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build();
@@ -125,6 +138,24 @@ class ApiSecurityTests {
                     .andExpect(status().isCreated());
 
             verify(commands).openAccount(eq(Caller.builder().username("admin").admin(true).build()), any());
+        }
+
+        @Test
+        @DisplayName("Un token sin el claim roles no da ningún rol: consulta como usuario y no puede abrir cuentas")
+        void un_token_sin_roles_no_da_ningun_rol() throws Exception {
+            Instant now = Instant.now();
+            JwtClaimsSet claims = JwtClaimsSet.builder().issuer("ddd-lab").subject("ada").issuedAt(now)
+                    .expiresAt(now.plus(15, ChronoUnit.MINUTES)).build();
+            String noRoles = "Bearer " + encoder.encode(
+                    JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims)).getTokenValue();
+            given(queries.listAccounts(any(Caller.class))).willReturn(List.of());
+
+            mvc.perform(get("/api/accounts").header(HttpHeaders.AUTHORIZATION, noRoles)).andExpect(status().isOk());
+            mvc.perform(post("/api/accounts").header(HttpHeaders.AUTHORIZATION, noRoles)
+                            .contentType(MediaType.APPLICATION_JSON).content(OPEN_BODY))
+                    .andExpect(status().isForbidden());
+            verify(queries).listAccounts(Caller.builder().username("ada").admin(false).build());
+            verifyNoInteractions(commands);
         }
 
         @Test
@@ -169,7 +200,7 @@ class ApiSecurityTests {
             mvc.perform(get("/api/accounts").header(HttpHeaders.AUTHORIZATION, "Bearer no-es-un-jwt"))
                     .andExpect(status().isUnauthorized())
                     .andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE,
-                            org.hamcrest.Matchers.startsWith("Bearer error=\"invalid_token\"")))
+                            startsWith("Bearer error=\"invalid_token\"")))
                     .andExpect(jsonPath("$.title").value("No autenticado"))
                     .andExpect(jsonPath("$.detail").value("El token no es válido o ha caducado"));
         }
@@ -183,6 +214,30 @@ class ApiSecurityTests {
                             "Bearer " + token(encoder, past, past.plus(15, ChronoUnit.MINUTES))))
                     .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.detail").value("El token no es válido o ha caducado"));
+            verifyNoInteractions(queries);
+        }
+
+        @Test
+        @DisplayName("Un token sin firma (alg none) responde 401 aunque diga ser del administrador")
+        void un_token_sin_firma_responde_401() throws Exception {
+            String unsigned = base64Url("{\"alg\":\"none\"}") + "." + base64Url(ADMIN_CLAIMS.formatted(future())) + ".";
+
+            mvc.perform(get("/api/accounts").header(HttpHeaders.AUTHORIZATION, "Bearer " + unsigned))
+                    .andExpect(status().isUnauthorized());
+            verifyNoInteractions(queries);
+        }
+
+        @Test
+        @DisplayName("Un token firmado con el mismo secreto pero con HS512 responde 401: solo se acepta HS256")
+        void un_token_firmado_con_otro_algoritmo_responde_401() throws Exception {
+            String signingInput = base64Url("{\"alg\":\"HS512\"}") + "." + base64Url(ADMIN_CLAIMS.formatted(future()));
+            Mac mac = Mac.getInstance("HmacSHA512");
+            mac.init(new SecretKeySpec(SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA512"));
+            String signature = Base64.getUrlEncoder().withoutPadding()
+                    .encodeToString(mac.doFinal(signingInput.getBytes(StandardCharsets.US_ASCII)));
+
+            mvc.perform(get("/api/accounts").header(HttpHeaders.AUTHORIZATION, "Bearer " + signingInput + "." + signature))
+                    .andExpect(status().isUnauthorized());
             verifyNoInteractions(queries);
         }
 

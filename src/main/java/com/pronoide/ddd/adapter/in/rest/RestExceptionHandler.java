@@ -62,8 +62,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     /** Credenciales erróneas al pedir un token ({@link TokenController}): 401 sin decir si falla el usuario o la contraseña. */
     @ExceptionHandler(AuthenticationException.class)
-    ProblemDetail handleBadCredentials(AuthenticationException exception) {
-        return problem(HttpStatus.UNAUTHORIZED, ApiSecurityConfig.UNAUTHENTICATED_TITLE, BAD_CREDENTIALS_DETAIL);
+    ResponseEntity<ProblemDetail> handleBadCredentials(AuthenticationException exception) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.WWW_AUTHENTICATE, "Bearer")
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(problem(HttpStatus.UNAUTHORIZED, ApiSecurityConfig.UNAUTHENTICATED_TITLE, BAD_CREDENTIALS_DETAIL));
     }
 
     @ExceptionHandler(NotFoundException.class)

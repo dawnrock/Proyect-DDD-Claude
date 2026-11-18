@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-18
-- **Status:** in progress
-- **Total estimate:** ~75 min (8 tasks)
+- **Status:** done
+- **Total estimate:** ~85 min (9 tasks)
 
 ## Goal
 
@@ -152,29 +152,42 @@ The resource server support of Spring Security validates the Bearer token (`oaut
 - **Acceptance criteria:**
   - [x] The README `curl` example works against `./mvnw spring-boot:run`.
 
+### [x] T9 — Review fixes (~10 min)
+
+- **Layer:** adapter.in · tests · docs
+- **Files:** `RestExceptionHandler.java`, `JwtSupport.java`, `ApiSecurityTests`, `TokenControllerTests`, `openapi.yaml`, `render.md`, `decisiones.md`, `pendientes.md`
+- **Depends on:** T8
+- **What to do:** the `revisor-ddd` review (no blocking findings):
+  1. The 401 of `POST /api/auth/token` sends `WWW-Authenticate: Bearer` (RFC 9110), documented in the contract.
+  2. Tests for a token without signature (`alg: none`), one signed with HS512 and one without `roles` (no role: 200 as a user, 403 opening an account).
+  3. Stale lines in `decisiones.md`; a warning in `render.md` that the demo secret is public; the fail-open secret noted in `pendientes.md`; style (static imports, line length, example token).
+  4. Not changed: the body of ADR 0008 (an ADR records a past decision; its header already points to ADR 0015).
+- **Acceptance criteria:**
+  - [x] The new header test fails when the header is removed (sabotage) and passes with it; `./mvnw verify` green.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] `POST /api/auth/token` with valid credentials returns a JWT (HS256, `sub`, `roles`, `exp`); with invalid ones, 401 `ProblemDetail`.
-- [ ] Every `/api/**` operation except `issueToken` and `signUp` needs `Authorization: Bearer`; Basic is rejected.
-- [ ] Authorization is unchanged: `ADMIN` on the URLs, ownership through `Caller` (someone else's account = 404).
-- [ ] No secret in the repository apart from the demo development one; production reads `APP_JWT_SECRET`.
-- [ ] The web login (form + session) works as before.
+- [x] `POST /api/auth/token` with valid credentials returns a JWT (HS256, `sub`, `roles`, `exp`); with invalid ones, 401 `ProblemDetail`.
+- [x] Every `/api/**` operation except `issueToken` and `signUp` needs `Authorization: Bearer`; Basic is rejected.
+- [x] Authorization is unchanged: `ADMIN` on the URLs, ownership through `Caller` (someone else's account = 404).
+- [x] No secret in the repository apart from the demo development one; production reads `APP_JWT_SECRET`.
+- [x] The web login (form + session) works as before.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): ADR 0015.
-- [ ] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes.
-- [ ] Any new business term is in `docs/dominio/glosario.md` (n/a: "access token" is technical, not a domain term).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): ADR 0015.
+- [x] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes.
+- [x] Any new business term is in `docs/dominio/glosario.md` (n/a: "access token" is technical, not a domain term).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

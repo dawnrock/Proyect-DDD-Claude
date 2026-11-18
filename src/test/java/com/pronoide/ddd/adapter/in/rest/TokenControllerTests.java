@@ -1,7 +1,9 @@
 package com.pronoide.ddd.adapter.in.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -14,6 +16,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -85,6 +88,7 @@ class TokenControllerTests {
         mvc.perform(post("/api/auth/token").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\": \"%s\", \"password\": \"%s\"}".formatted(username, password)))
                 .andExpect(status().isUnauthorized())
+                .andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE, "Bearer"))
                 .andExpect(jsonPath("$.title").value("No autenticado"))
                 .andExpect(jsonPath("$.detail").value("Usuario o contraseña incorrectos"))
                 .andExpect(jsonPath("$.accessToken").doesNotExist());
@@ -93,7 +97,7 @@ class TokenControllerTests {
     @Test
     @DisplayName("Un método no declarado responde 405 sin pedir token")
     void un_metodo_no_declarado_responde_405_sin_pedir_token() throws Exception {
-        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/auth/token"))
+        mvc.perform(get("/api/auth/token"))
                 .andExpect(status().isMethodNotAllowed());
     }
 
