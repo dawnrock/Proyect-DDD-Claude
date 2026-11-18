@@ -17,7 +17,7 @@ com.pronoide.ddd
 │   │   ├── cli           DomainModelRunner
 │   │   ├── rest          REST API
 │   │   ├── scheduler     SegmentReviewScheduler (daily segment review)
-│   │   └── web           Thymeleaf
+│   │   └── web           Thymeleaf + Bootstrap, htmx, Alpine.js (ADR 0016)
 │   └── out
 │       ├── event         SpringDomainEventPublisher
 │       ├── persistence   InMemoryCheckingAccountRepository, InMemoryAccountOwnershipRepository, InMemoryAccountNumberSequence,

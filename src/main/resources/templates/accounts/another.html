@@ -1,32 +1,32 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Abrir otra cuenta')}"></head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 <header th:replace="~{fragments/layout :: header}"></header>
-<main>
-    <a class="back" th:href="@{/}">← Volver</a>
-    <h1>Abrir otra cuenta</h1>
-    <p class="muted">La abrimos a tu nombre y le asignamos un IBAN de Mon-A Bank. Solo necesitamos el depósito inicial.</p>
-    <form class="panel" th:action="@{/accounts/another}" th:object="${form}" method="post" novalidate>
-        <p class="flash flash-error" role="alert" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+<main class="app-container mx-auto w-100 px-3 pb-5">
+    <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1 mb-3" th:href="@{/}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg>Volver</a>
+    <h1 class="h3 fw-semibold mb-2">Abrir otra cuenta</h1>
+    <p class="text-body-secondary">La abrimos a tu nombre y le asignamos un IBAN de Mon-A Bank. Solo necesitamos el depósito inicial.</p>
+    <form class="card card-body" th:action="@{/accounts/another}" th:object="${form}" method="post" novalidate>
+        <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:each="err : ${#fields.globalErrors()}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${err}">Error</span></div>
 
-        <div class="field">
-            <label for="initialDeposit">Depósito inicial</label>
-            <input type="number" id="initialDeposit" step="0.01" inputmode="decimal" autofocus th:field="*{initialDeposit}">
-            <p class="field-error" th:if="${#fields.hasErrors('initialDeposit')}" th:errors="*{initialDeposit}"></p>
+        <div class="mb-3">
+            <label class="form-label" for="initialDeposit">Depósito inicial</label>
+            <input class="form-control" type="number" id="initialDeposit" step="0.01" inputmode="decimal" autofocus th:field="*{initialDeposit}" th:errorclass="is-invalid">
+            <p class="invalid-feedback" th:if="${#fields.hasErrors('initialDeposit')}" th:errors="*{initialDeposit}"></p>
         </div>
 
-        <div class="field">
-            <label for="currency">Divisa</label>
-            <select id="currency" th:field="*{currency}">
+        <div class="mb-3">
+            <label class="form-label" for="currency">Divisa</label>
+            <select class="form-select" id="currency" th:field="*{currency}" th:errorclass="is-invalid">
                 <option th:each="c : ${currencies}" th:value="${c}" th:text="${c}">EUR</option>
             </select>
-            <p class="field-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
+            <p class="invalid-feedback" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
         </div>
 
-        <div class="form-actions">
-            <button class="button" type="submit">Abrir cuenta</button>
-            <a th:href="@{/}">Cancelar</a>
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-primary" type="submit">Abrir cuenta</button>
+            <a class="link-secondary text-decoration-none" th:href="@{/}">Cancelar</a>
         </div>
     </form>
 </main>

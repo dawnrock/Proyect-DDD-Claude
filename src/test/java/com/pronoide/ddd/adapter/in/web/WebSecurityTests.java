@@ -7,12 +7,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -44,6 +47,33 @@ class WebSecurityTests {
         mvc.perform(get("/"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "/webjars/bootstrap/css/bootstrap.min.css",
+            "/webjars/bootstrap/js/bootstrap.bundle.min.js",
+            "/webjars/htmx.org/dist/htmx.min.js",
+            "/webjars/alpinejs/dist/cdn.min.js",
+            "/webjars/lucide-static/sprite.svg",
+            "/vendor/motion/motion.js"})
+    @DisplayName("Las librerías del frontend se sirven sin sesión y sin versión en la ruta (#124)")
+    void las_librerias_del_frontend_se_sirven_sin_sesion_y_sin_version_en_la_ruta(String path) throws Exception {
+        mvc.perform(get(path)).andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Las librerías del frontend se guardan en caché un año y las páginas no se guardan (#124)")
+    void las_librerias_del_frontend_se_guardan_en_cache_y_las_paginas_no() throws Exception {
+        mvc.perform(get("/webjars/bootstrap/css/bootstrap.min.css"))
+                .andExpect(header().string("Cache-Control", "max-age=31536000, public"));
+        mvc.perform(get("/login"))
+                .andExpect(header().string("Cache-Control", containsString("no-store")));
+        String css = mvc.perform(get("/login")).andReturn().getResponse().getContentAsString()
+                .replaceAll("(?s).*href=\"(/css/app-[0-9a-f]{32}\\.css)\".*", "$1");
+        mvc.perform(get(css))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", "max-age=31536000, public"));
     }
 
     @Test

@@ -1,36 +1,34 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Cuentas')}"></head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 <header th:replace="~{fragments/layout :: header}"></header>
-<main>
-    <div class="page-head">
-        <h1 th:text="${admin} ? 'Cuentas' : 'Mis cuentas'">Cuentas</h1>
-        <a class="pill pill-primary" th:if="${admin}" th:href="@{/accounts/new}">+ Abrir cuenta</a>
-        <a class="pill pill-primary" th:if="${customer}" th:href="@{/accounts/another}">Abrir otra cuenta</a>
+<main class="app-container mx-auto w-100 px-3 pb-5">
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+        <h1 class="h3 fw-semibold mb-0" th:text="${admin} ? 'Cuentas' : 'Mis cuentas'">Cuentas</h1>
+        <a class="btn btn-primary d-inline-flex align-items-center gap-2" th:if="${admin}" th:href="@{/accounts/new}"><svg th:replace="~{fragments/icons :: icon('plus')}"></svg>Abrir cuenta</a>
+        <a class="btn btn-primary d-inline-flex align-items-center gap-2" th:if="${customer}" th:href="@{/accounts/another}"><svg th:replace="~{fragments/icons :: icon('plus')}"></svg>Abrir otra cuenta</a>
     </div>
-    <p th:if="${message}" class="flash flash-success" role="status" th:text="${message}"></p>
+    <div th:if="${message}" class="alert alert-success d-flex align-items-center gap-2" role="status"><svg th:replace="~{fragments/icons :: icon('circle-check')}"></svg><span th:text="${message}">Cuenta abierta</span></div>
 
-    <div class="hero" th:unless="${accounts.isEmpty()}">
-        <p class="hero-label">Saldo total</p>
-        <p class="hero-amount" th:each="total : ${totals}" th:text="${@fmt.money(total.value, total.key)}">0,00 €</p>
+    <div class="mb-4" th:unless="${accounts.isEmpty()}">
+        <p class="small text-body-secondary mb-0">Saldo total</p>
+        <p class="display-6 fw-semibold text-nowrap mb-0" th:each="total : ${totals}" th:text="${@fmt.money(total.value, total.key)}">0,00 €</p>
     </div>
 
-    <ul class="list" th:unless="${accounts.isEmpty()}">
-        <li th:each="account : ${accounts}">
-            <a class="row" th:href="@{/accounts/{id}(id=${account.id()})}">
-                <span class="avatar" aria-hidden="true" th:text="${@fmt.initials(account.holderName())}">AP</span>
-                <span class="row-main">
-                    <span class="row-title" th:text="${account.holderName()}">Titular</span>
-                    <span class="row-sub"><span th:text="${@fmt.maskedIban(account.accountNumber())}"
-                          th:title="${account.accountNumber()}">ES00 •••• 0000</span> · <span th:text="${@fmt.segment(account.segment())}">Minorista</span></span>
-                </span>
-                <span class="row-amount" th:text="${@fmt.money(account.balance(), account.currency())}">0,00 €</span>
-            </a>
-        </li>
-    </ul>
-    <p th:if="${accounts.isEmpty() and admin}" class="empty">Todavía no hay cuentas. Abre la primera.</p>
-    <p th:if="${accounts.isEmpty() and !admin}" class="empty">Todavía no tienes cuentas.</p>
+    <div class="list-group" th:unless="${accounts.isEmpty()}">
+        <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3" th:each="account : ${accounts}" th:href="@{/accounts/{id}(id=${account.id()})}">
+            <span class="avatar rounded-circle bg-body-tertiary d-flex align-items-center justify-content-center flex-shrink-0 small fw-semibold" aria-hidden="true" th:text="${@fmt.initials(account.holderName())}">AP</span>
+            <span class="flex-grow-1 overflow-hidden">
+                <span class="d-block" th:text="${account.holderName()}">Titular</span>
+                <span class="d-block small text-body-secondary"><span th:text="${@fmt.maskedIban(account.accountNumber())}"
+                      th:title="${account.accountNumber()}">ES00 •••• 0000</span> · <span th:text="${@fmt.segment(account.segment())}">Minorista</span></span>
+            </span>
+            <span class="text-nowrap" th:text="${@fmt.money(account.balance(), account.currency())}">0,00 €</span>
+        </a>
+    </div>
+    <p th:if="${accounts.isEmpty() and admin}" class="text-body-secondary">Todavía no hay cuentas. Abre la primera.</p>
+    <p th:if="${accounts.isEmpty() and !admin}" class="text-body-secondary">Todavía no tienes cuentas.</p>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

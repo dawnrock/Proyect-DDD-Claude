@@ -1,22 +1,34 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org">
+<!--/* Fragmentos comunes. Cada página lleva data-bs-theme="dark" en <html> (tema oscuro de Bootstrap, ADR 0016). */-->
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark">
-    <meta name="theme-color" content="#0b0b0c">
+    <meta name="theme-color" content="#212529">
     <title th:text="${title} + ' · Cuentas corrientes'">Cuentas corrientes</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <!--/* Todo con defer y en este orden: app.js registra los componentes de Alpine antes de que Alpine arranque. */-->
+    <script defer th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script defer th:src="@{/webjars/htmx.org/dist/htmx.min.js}"></script>
+    <script defer th:src="@{/vendor/motion/motion.js}"></script>
+    <script defer th:src="@{/js/app.js}"></script>
+    <script defer th:src="@{/webjars/alpinejs/dist/cdn.min.js}"></script>
 </head>
-<body>
-<header th:fragment="header" class="app-header">
-    <a class="app-brand" th:href="@{/}">Cuentas corrientes</a>
-    <form class="app-user" th:if="${currentUser != null}" th:action="@{/logout}" method="post">
-        <span class="app-username" th:text="${currentUser}">usuario</span>
-        <button class="link-button" type="submit">Cerrar sesión</button>
-    </form>
+<body class="d-flex flex-column min-vh-100">
+<header th:fragment="header" class="border-bottom mb-4">
+    <nav class="navbar app-container mx-auto w-100 px-3">
+        <a class="navbar-brand d-inline-flex align-items-center gap-2 fw-semibold" th:href="@{/}">
+            <svg th:replace="~{fragments/icons :: icon('landmark')}"></svg>Cuentas corrientes
+        </a>
+        <form class="d-flex align-items-center gap-3 m-0 small text-body-secondary" th:if="${currentUser != null}" th:action="@{/logout}" method="post">
+            <span class="d-inline-flex align-items-center gap-1"><svg th:replace="~{fragments/icons :: icon('user-round')}"></svg><span th:text="${currentUser}">usuario</span></span>
+            <button class="btn btn-link btn-sm p-0 d-inline-flex align-items-center gap-1" type="submit"><svg th:replace="~{fragments/icons :: icon('log-out')}"></svg>Cerrar sesión</button>
+        </form>
+    </nav>
 </header>
-<footer th:fragment="footer" class="app-footer">
+<footer th:fragment="footer" class="app-container mx-auto w-100 mt-auto px-3 py-4 small text-body-secondary">
     Fase 2 · arquitectura hexagonal
 </footer>
 </body>

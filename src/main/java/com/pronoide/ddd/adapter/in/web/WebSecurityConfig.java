@@ -12,7 +12,8 @@ import org.springframework.security.web.SecurityFilterChain;
  * la API). Inicio de sesión con formulario propio y sesión, CSRF activo, {@code /accounts/new} solo para
  * administradores y la página 403 propia.
  *
- * <p>Públicos: {@code /login}, los estilos, la salud del actuator y las páginas de error. El resto exige sesión.
+ * <p>Públicos: {@code /login}, los estilos, los scripts y las librerías del frontend (ADR 0016), la salud del
+ * actuator y las páginas de error. El resto exige sesión.
  */
 @Configuration
 public class WebSecurityConfig {
@@ -22,7 +23,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain webSecurity(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/login", "/signup/**", "/css/**", "/actuator/health", "/error", "/error/**",
+                        .requestMatchers("/login", "/signup/**", "/css/**", "/js/**", "/webjars/**", "/vendor/**", "/actuator/health", "/error", "/error/**",
                                 "/openapi.yaml", "/api-docs", "/api-docs/**").permitAll()
                         // /accounts/another: cualquier sesión; el administrador recibe 403 del propio controlador
                         .requestMatchers("/accounts/new").hasRole("ADMIN")

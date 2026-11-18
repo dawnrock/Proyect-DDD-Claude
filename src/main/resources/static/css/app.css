@@ -1,179 +1,35 @@
-/* Tema oscuro y minimalista (#48): fondo casi negro, superficies un punto más claras, separadores finos,
-   dos tonos de texto y solo dos colores con significado (abonos y rechazos). */
-:root {
-    color-scheme: dark;
-    --background: #0b0b0c;
-    --surface: #141416;
-    --surface-raised: #1c1c1f;
-    --hairline: #26262a;
-    --text: #f5f5f7;
-    --muted: #8e8e93;
-    --positive: #30d158;
-    --negative: #ff6961;
-    --warning: #ffd60a;
-    --radius: 14px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
-    font-size: 16px;
-    line-height: 1.5;
+/* Ajustes sobre Bootstrap 5.3 en modo oscuro (ADR 0016). */
+
+/* Transiciones entre páginas con la View Transitions API; los navegadores sin soporte las ignoran. Solo con JavaScript:
+   sin él, Chromium deja a veces la página sin responder a los clics tras navegar. Nunca con movimiento reducido. */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+    @view-transition { navigation: auto; }
 }
 
-* { box-sizing: border-box; }
+.app-container { max-width: 720px; }
 
-body {
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    color: var(--text);
-    background: var(--background);
-    -webkit-font-smoothing: antialiased;
-}
+/* Iconos de Lucide (fragmento fragments/icons :: icon): del tamaño del texto que acompañan. */
+.icon { width: 1.15em; height: 1.15em; flex: none; vertical-align: -0.2em; }
 
-a { color: var(--text); }
+/* Puertas de entrada del login (#95) como tarjetas de Bootstrap. */
+.door { transition: background-color 0.15s ease-in-out; }
+.door:hover, .door:focus-visible { background-color: var(--bs-tertiary-bg); }
 
-.app-header,
-.app-footer {
-    width: 100%;
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 1.25rem 1.25rem;
-}
+/* Iniciales del titular en el listado de cuentas. */
+.avatar { width: 2.5rem; height: 2.5rem; }
 
-.app-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
-.app-user { display: flex; align-items: center; gap: 0.75rem; margin: 0; color: var(--muted); font-size: 0.85rem; }
-.link-button { padding: 0; border: 0; background: none; color: var(--text); font: inherit; text-decoration: underline; cursor: pointer; }
-.link-button:hover { color: var(--muted); }
-.link-button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
-
-.app-brand {
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    text-decoration: none;
-}
-
-.app-footer {
-    margin-top: auto;
-    color: var(--muted);
-    font-size: 0.8rem;
-}
-
-main {
-    width: 100%;
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 0.5rem 1.25rem 2.5rem;
-}
-
-h1 { font-size: 1.5rem; font-weight: 600; margin: 0 0 1.25rem; letter-spacing: -0.01em; }
-h2 { font-size: 1rem; font-weight: 600; margin: 2rem 0 0.75rem; }
-p { margin: 0 0 1rem; }
-
-.muted, .empty { color: var(--muted); }
-.positive { color: var(--positive); }
-.negative { color: var(--negative); }
-.nowrap { white-space: nowrap; }
-
-/* Saldo protagonista */
-.hero { margin: 0.5rem 0 1.5rem; }
-.hero-label { color: var(--muted); font-size: 0.85rem; margin: 0; }
-.hero-amount { font-size: 2.25rem; font-weight: 600; letter-spacing: -0.02em; margin: 0.1rem 0 0.25rem; white-space: nowrap; }
-.hero-sub { color: var(--muted); font-size: 0.85rem; margin: 0; }
-
-.page-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
-.page-head h1 { margin: 0; }
-.back { display: inline-block; color: var(--muted); text-decoration: none; font-size: 0.9rem; margin-bottom: 1rem; }
-.back:hover { color: var(--text); }
-
-/* Listas de filas */
-.list { list-style: none; margin: 0; padding: 0 1rem; background: var(--surface); border-radius: var(--radius); }
-.row { display: flex; align-items: center; gap: 0.85rem; padding: 0.9rem 0; border-bottom: 1px solid var(--hairline); text-decoration: none; color: inherit; }
-.list > li:last-child .row, .list > li:last-child.row { border-bottom: 0; }
-a.row:hover .row-title { text-decoration: underline; }
-.avatar { flex: none; width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--surface-raised); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 600; }
-.row-main { flex: 1; min-width: 0; }
-.row-title, .row-sub { display: block; }
-.row-title { margin: 0; }
-.row-sub { margin: 0; color: var(--muted); font-size: 0.8rem; }
-.row-amount { margin: 0; text-align: right; white-space: nowrap; }
-.row-rejected .row-amount { color: var(--muted); text-decoration: line-through; }
-.row-rejected .row-sub .status { color: var(--negative); }
-
-/* Botones en forma de pastilla */
-.button, .pill, .actions summary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.6rem 1.1rem;
-    border: 0;
-    border-radius: 999px;
-    font: inherit;
-    font-size: 0.95rem;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-}
-.button, .pill-primary { color: var(--background); background: var(--text); }
-.pill-secondary, .actions summary { color: var(--text); background: var(--surface-raised); }
-.button:hover, .pill:hover, .actions summary:hover { filter: brightness(0.9); }
-.button:focus-visible, .pill:focus-visible, .actions summary:focus-visible, .row:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
-
-/* Acciones con su formulario a demanda */
-.actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
-.actions details[open] { order: 10; flex-basis: 100%; }
+/* Acciones del detalle de cuenta: cada <summary> es un botón y el panel abierto ocupa toda la fila, tras los botones. */
 .actions summary { list-style: none; }
 .actions summary::-webkit-details-marker { display: none; }
-.actions details[open] summary { color: var(--background); background: var(--text); }
-.action-panel { margin: 0.75rem 0 0; padding: 1.25rem; background: var(--surface); border-radius: var(--radius); }
-.panel { padding: 1.25rem; background: var(--surface); border-radius: var(--radius); }
-
-/* Formularios */
-.field { margin-bottom: 1rem; }
-.field label { display: block; color: var(--muted); font-size: 0.85rem; margin-bottom: 0.35rem; }
-.field input, .field select {
-    width: 100%;
-    padding: 0.7rem 0.85rem;
-    color: var(--text);
-    background: var(--surface-raised);
-    border: 1px solid var(--hairline);
-    border-radius: 10px;
-    font: inherit;
+.actions details[open] { order: 10; flex-basis: 100%; }
+.actions details[open] > summary {
+    color: var(--bs-btn-active-color);
+    background-color: var(--bs-btn-active-bg);
+    border-color: var(--bs-btn-active-border-color);
 }
-.field input:focus-visible, .field select:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
-.field-error { color: var(--negative); font-size: 0.85rem; margin: 0.35rem 0 0; }
-.form-actions { display: flex; align-items: center; gap: 1rem; }
-.form-actions a { color: var(--muted); text-decoration: none; }
 
-/* Avisos */
-.flash { padding: 0.8rem 1rem; border-radius: 0 12px 12px 0; background: var(--surface); border-left: 3px solid var(--muted); }
-.flash-success { border-left-color: var(--positive); }
-.flash-error { border-left-color: var(--negative); }
-.flash-warning { border-left-color: var(--warning); }
+/* Movimiento rechazado: no cambió el saldo, así que su importe va tachado. */
+.row-rejected .row-amount { color: var(--bs-secondary-color); text-decoration: line-through; }
 
-@media (max-width: 480px) {
-    .hero-amount { font-size: 1.9rem; }
-    .list { padding: 0 0.85rem; }
-}
-.hint { color: var(--muted); font-size: 0.85rem; margin: 0 0 1rem; }
-
-/* Entrada con dos puertas (#95) */
-.doors { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-.door { display: flex; flex-direction: column; gap: 0.35rem; padding: 1.25rem; color: inherit; text-decoration: none; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); }
-.door:hover { background: var(--surface-raised); }
-.door:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
-.door-title { font-weight: 600; }
-.door-text { color: var(--muted); font-size: 0.85rem; }
-@media (max-width: 480px) { .doors { grid-template-columns: 1fr; } }
-
-/* Alta de cliente en tres pasos (#95) */
-.progress { margin-bottom: 1.25rem; }
-.progress-label { font-size: 0.85rem; margin: 0 0 0.4rem; }
-.progress-bar { display: flex; gap: 0.35rem; list-style: none; margin: 0; padding: 0; }
-.progress-bar li { flex: 1; height: 4px; border-radius: 2px; background: var(--surface-raised); }
-.progress-bar li.done { background: var(--text); }
-.summary { margin: 0 0 1.25rem; padding: 0.25rem 1rem; background: var(--surface); border-radius: var(--radius); }
-.summary div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--hairline); }
-.summary div:last-child { border-bottom: 0; }
-.summary dt { color: var(--muted); font-size: 0.85rem; }
-.summary dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
-.field-check label { display: flex; align-items: center; gap: 0.6rem; color: var(--text); font-size: 0.95rem; }
-.field-check input { width: auto; }
+/* Barra de progreso del alta de cliente (#95): fina, como una línea. */
+.signup-progress { height: 0.375rem; }

@@ -81,6 +81,16 @@ class SignUpControllerTests {
     class Paso1 {
 
         @Test
+        @DisplayName("El progreso del alta es una barra de Bootstrap accesible con el paso actual (#124)")
+        void el_progreso_del_alta_es_una_barra_de_bootstrap_accesible() throws Exception {
+            mvc.perform(get("/signup"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("role=\"progressbar\"")))
+                    .andExpect(content().string(containsString("aria-valuemin=\"0\" aria-valuemax=\"3\" aria-valuenow=\"1\"")))
+                    .andExpect(content().string(containsString("style=\"width: 33%\"")));
+        }
+
+        @Test
         @DisplayName("La página es pública, lleva el token CSRF y los tres campos")
         void la_pagina_es_publica_lleva_el_token_csrf_y_los_tres_campos() throws Exception {
             mvc.perform(get("/signup"))
@@ -100,7 +110,7 @@ class SignUpControllerTests {
                     .andExpect(status().isOk())
                     .andExpect(view().name("signup/data"))
                     .andExpect(content().string(containsString("El nombre y apellidos son obligatorios")))
-                    .andExpect(content().string(containsString("field-error")));
+                    .andExpect(content().string(containsString("invalid-feedback")));
         }
 
         @Test
@@ -142,7 +152,7 @@ class SignUpControllerTests {
                     .andExpect(content().string(containsString("value=\"Margaret Hamilton\"")))
                     .andExpect(content().string(containsString("value=\"12345678Z\"")))
                     .andExpect(content().string(containsString("value=\"margaret@example.com\"")))
-                    .andExpect(content().string(not(containsString("field-error"))));
+                    .andExpect(content().string(not(containsString("invalid-feedback"))));
         }
     }
 
@@ -204,6 +214,21 @@ class SignUpControllerTests {
                     .andExpect(status().isOk())
                     .andExpect(view().name("signup/access"))
                     .andExpect(content().string(containsString("Las contraseñas no coinciden")));
+        }
+
+        @Test
+        @DisplayName("Una repetición distinta marca como inválida solo la repetición, y una contraseña corta la contraseña (#124)")
+        void los_campos_de_contrasena_con_error_se_marcan_como_invalidos() throws Exception {
+            MockHttpSession session = sessionAfterStep1();
+
+            mvc.perform(post("/signup/access").session(session).param("username", "margaret")
+                            .param("password", "clave-secreta-1").param("passwordRepetition", "otra-clave-22"))
+                    .andExpect(content().string(containsString("<input class=\"form-control is-invalid\" type=\"password\" id=\"passwordRepetition\"")))
+                    .andExpect(content().string(containsString("<input class=\"form-control\" type=\"password\" id=\"password\"")));
+
+            mvc.perform(post("/signup/access").session(session).param("username", "margaret")
+                            .param("password", "corta").param("passwordRepetition", "corta"))
+                    .andExpect(content().string(containsString("<input class=\"form-control is-invalid\" type=\"password\" id=\"password\"")));
         }
 
         @Test

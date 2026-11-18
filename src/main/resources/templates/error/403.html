@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Acceso denegado')}"></head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 <header th:replace="~{fragments/layout :: header}"></header>
-<main>
-    <div class="hero">
-        <p class="hero-label">Error 403</p>
-        <h1 class="hero-amount">Acceso denegado</h1>
-        <p class="hero-sub">No tienes permiso para ver esta página.</p>
+<main class="app-container mx-auto w-100 px-3 pb-5">
+    <div class="text-center py-5">
+        <span class="d-block display-4 text-body-secondary mb-3"><svg th:replace="~{fragments/icons :: icon('shield-x')}"></svg></span>
+        <p class="small text-body-secondary mb-1">Error 403</p>
+        <h1 class="fw-semibold mb-2">Acceso denegado</h1>
+        <p class="text-body-secondary mb-4">No tienes permiso para ver esta página.</p>
+        <a class="btn btn-primary d-inline-flex align-items-center gap-2" th:href="@{/}"><svg th:replace="~{fragments/icons :: icon('house')}"></svg>Volver al inicio</a>
     </div>
-    <a class="button" th:href="@{/}">Volver al inicio</a>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

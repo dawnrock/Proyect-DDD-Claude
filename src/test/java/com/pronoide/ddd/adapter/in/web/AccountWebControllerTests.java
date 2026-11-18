@@ -25,7 +25,9 @@ import java.time.Instant;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -87,6 +89,26 @@ class AccountWebControllerTests {
     @Nested
     @DisplayName("Listado de cuentas")
     class Listado {
+
+        @Test
+        @DisplayName("La página usa el tema oscuro de Bootstrap y carga htmx, Alpine.js, Motion y app.js desde la propia aplicación (#124)")
+        void la_pagina_usa_el_tema_oscuro_de_bootstrap_y_carga_las_librerias_del_frontend() throws Exception {
+            when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
+
+            // Spring reescribe las rutas con la versión del WebJar (/webjars/bootstrap/5.3.8/...) o con el hash del contenido
+            // (/js/app-<md5>.js): el navegador puede guardarlas en caché sin servir nunca una versión antigua
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("data-bs-theme=\"dark\"")))
+                    .andExpect(content().string(webjar("href", "bootstrap", "css/bootstrap.min.css")))
+                    .andExpect(content().string(webjar("src", "bootstrap", "js/bootstrap.bundle.min.js")))
+                    .andExpect(content().string(webjar("src", "htmx.org", "dist/htmx.min.js")))
+                    .andExpect(content().string(webjar("src", "alpinejs", "dist/cdn.min.js")))
+                    .andExpect(content().string(hashed("src", "/vendor/motion/motion", ".js")))
+                    .andExpect(content().string(hashed("src", "/js/app", ".js")))
+                    .andExpect(content().string(hashed("href", "/css/app", ".css")))
+                    .andExpect(content().string(not(containsString("https://"))));
+        }
 
         @Test
         @DisplayName("Con cuentas, el listado muestra el saldo total y cada cuenta con iniciales, IBAN abreviado y saldo")
@@ -213,7 +235,7 @@ class AccountWebControllerTests {
                     ownAccount(UUID.randomUUID(), "ES9876543210987654321098", "Ada Lovelace")));
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
-                    .andExpect(content().string(containsString("<a class=\"back\" href=\"/\">← Mis cuentas</a>")));
+                    .andExpect(content().string(matchesPattern("(?s).*<a [^>]*href=\"/\"><svg [^>]*><use href=\"[^\"]*#arrow-left\"></use></svg>Mis cuentas</a>.*")));
         }
 
         @Test
@@ -226,7 +248,7 @@ class AccountWebControllerTests {
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(not(containsString("class=\"back\""))));
+                    .andExpect(content().string(not(containsString("#arrow-left\""))));
         }
 
         @Test
@@ -304,8 +326,8 @@ class AccountWebControllerTests {
 
             mvc.perform(get("/"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("<h1>Cuentas</h1>")))
-                    .andExpect(content().string(containsString("+ Abrir cuenta")))
+                    .andExpect(content().string(containsString(">Cuentas</h1>")))
+                    .andExpect(content().string(containsString("#plus\"></use></svg>Abrir cuenta")))
                     .andExpect(content().string(not(containsString("Mis cuentas"))));
 
             verify(queries).listAccounts(Caller.builder().username("admin").admin(true).build());
@@ -321,7 +343,7 @@ class AccountWebControllerTests {
 
             mvc.perform(get("/"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("<h1>Mis cuentas</h1>")))
+                    .andExpect(content().string(containsString(">Mis cuentas</h1>")))
                     .andExpect(content().string(containsString("Saldo total")))
                     .andExpect(content().string(containsString("300,00 €")))
                     .andExpect(content().string(not(containsString("Abrir cuenta"))))
@@ -350,7 +372,7 @@ class AccountWebControllerTests {
 
             mvc.perform(get("/"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("<h1>Mis cuentas</h1>")))
+                    .andExpect(content().string(containsString(">Mis cuentas</h1>")))
                     .andExpect(content().string(containsString("Todavía no tienes cuentas")))
                     .andExpect(content().string(not(containsString("Abrir cuenta"))));
         }
@@ -486,7 +508,7 @@ class AccountWebControllerTests {
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("<a class=\"back\" href=\"/\">← Cuentas</a>")));
+                    .andExpect(content().string(matchesPattern("(?s).*<a [^>]*href=\"/\"><svg [^>]*><use href=\"[^\"]*#arrow-left\"></use></svg>Cuentas</a>.*")));
         }
 
         @Test
@@ -714,7 +736,7 @@ class AccountWebControllerTests {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID).flashAttr("rejection", "Retirada de 500.00 EUR rechazada"))
-                    .andExpect(content().string(containsString("flash flash-warning")))
+                    .andExpect(content().string(containsString("alert alert-warning")))
                     .andExpect(content().string(containsString("role=\"alert\"")))
                     .andExpect(content().string(containsString("Retirada de 500.00 EUR rechazada")));
         }
@@ -1083,6 +1105,21 @@ class AccountWebControllerTests {
         }
 
         @Test
+        @DisplayName("Las acciones son un acordeón de Alpine.js con iconos de Lucide: abrir una cierra las demás (#124)")
+        void las_acciones_son_un_acordeon_de_alpine_con_iconos_de_lucide() throws Exception {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("x-data=\"actionPanels\"")))
+                    .andExpect(content().string(containsString("x-on:toggle.capture=\"closeOthers($event)\"")))
+                    .andExpect(content().string(containsString("#arrow-down-to-line\"></use></svg>Ingresar</summary>")))
+                    .andExpect(content().string(containsString("#arrow-up-from-line\"></use></svg>Retirar</summary>")))
+                    .andExpect(content().string(containsString("#arrow-left-right\"></use></svg>Transferir</summary>")))
+                    .andExpect(content().string(containsString("#refresh-cw\"></use></svg>Generar nuevo IBAN</summary>")));
+        }
+
+        @Test
         @DisplayName("Un error en el ingreso vuelve al detalle con solo el formulario de ingreso abierto")
         void un_error_en_el_ingreso_abre_solo_ese_formulario() throws Exception {
             mvc.perform(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "0").param("currency", "EUR"))
@@ -1239,6 +1276,19 @@ class AccountWebControllerTests {
         }
 
         @Test
+        @DisplayName("El campo con error se marca como inválido de Bootstrap y su mensaje va debajo (#124)")
+        void el_campo_con_error_se_marca_como_invalido_de_bootstrap() throws Exception {
+            mvc.perform(altaDe("12345678Z", "Ana Lopez", "100.00", "ana").param("holderEmail", "ana@"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<input class=\"form-control is-invalid\" type=\"email\" id=\"holderEmail\".*")))
+                    .andExpect(content().string(containsString(
+                            "<p class=\"invalid-feedback\">El correo electrónico no es válido")))
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<input class=\"form-control\" type=\"text\" id=\"holderName\".*")));
+        }
+
+        @Test
         @DisplayName("Un usuario del titular con formato inválido vuelve al formulario y conserva lo escrito")
         void un_usuario_del_titular_con_formato_invalido_vuelve_al_formulario() throws Exception {
             mvc.perform(altaDe("12345678Z", "Ana Lopez", "100.00", "Ana Lopez"))
@@ -1335,5 +1385,17 @@ class AccountWebControllerTests {
 
             verifyNoInteractions(commands, queries);
         }
+    }
+
+    /** Atributo que apunta a un recurso propio con el hash de su contenido en el nombre (/js/app-<md5>.js). */
+    private static Matcher<String> hashed(String attribute, String path, String extension) {
+        return matchesPattern("(?s).*" + attribute + "=\"" + Pattern.quote(path) + "-[0-9a-f]{32}"
+                + Pattern.quote(extension) + "\".*");
+    }
+
+    /** Atributo que apunta a un fichero de un WebJar, con la versión que añada Spring a la ruta. */
+    private static Matcher<String> webjar(String attribute, String webjar, String file) {
+        return matchesPattern("(?s).*" + attribute + "=\"/webjars/" + Pattern.quote(webjar)
+                + "/[^/\"]+/" + Pattern.quote(file) + "\".*");
     }
 }
