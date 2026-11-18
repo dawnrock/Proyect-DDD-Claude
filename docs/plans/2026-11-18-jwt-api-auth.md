@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-18
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~75 min (8 tasks)
 
 ## Goal
@@ -42,7 +42,7 @@ The resource server support of Spring Security validates the Bearer token (`oaut
 
 ## Tasks
 
-### [ ] T1 — ADR 0015 and the dependency (~5 min)
+### [x] T1 — ADR 0015 and the dependency (~5 min)
 
 - **Layer:** build · docs
 - **Files:** `docs/adr/0015-jwt-bearer-api.md`, `docs/adr/README.md`, `docs/adr/0008-spring-security.md` (status: amended by 0015), `pom.xml`
@@ -51,7 +51,7 @@ The resource server support of Spring Security validates the Bearer token (`oaut
   1. Write the ADR: context (Basic sends the password on every request), decision (resource server + Nimbus, HS256, Basic removed from `/api`, web unchanged, contract 2.0.0), alternatives (keep Basic alongside Bearer with a deprecation period; jjwt; a hand-made filter; RS256; external OIDC), consequences (no revocation, so a short lifetime; the secret is an environment variable).
   2. Add the starter to `pom.xml` with a comment pointing to the ADR.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green with the new dependency (nothing uses it yet).
+  - [x] `./mvnw verify` green with the new dependency (nothing uses it yet).
 
 ### [ ] T2 — Key, encoder and decoder (~10 min)
 

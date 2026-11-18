@@ -1,6 +1,6 @@
 # 0008 · Authentication and roles with Spring Security
 
-- **Status:** accepted · 2026-10-25 (issue #50) · extended by [ADR 0012](0012-customer-self-sign-up.md) (customer self sign-up)
+- **Status:** accepted · 2026-10-25 (issue #50) · extended by [ADR 0012](0012-customer-self-sign-up.md) (customer self sign-up) · amended by [ADR 0015](0015-jwt-bearer-api.md) (the API uses JWT Bearer tokens instead of HTTP Basic)
 
 ## Context
 
