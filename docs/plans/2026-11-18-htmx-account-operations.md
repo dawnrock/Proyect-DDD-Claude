@@ -25,7 +25,7 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
 | --------------- | ---- | ------ |
 | templates | `accounts/detail.html` | New `panel` fragment (`<div id="account-panel" th:fragment="panel">`) holding the notices, the balance, the actions and the transactions; the "back" link stays outside. The four forms get `th:hx-post` with the same URL as `th:action`; the panel sets `hx-target="#account-panel"` and `hx-swap="outerHTML transition:true"`, inherited by the forms |
 | adapter.in.web | `AccountWebController` | `deposit`, `withdraw`, `transfer` and `regenerateAccountNumber` read `@RequestHeader(name = "HX-Request", required = false)`. With htmx: success puts `message`/`rejection` in the model (not a flash attribute) and returns `accounts/detail :: panel`; errors return the same fragment with the form open and its errors. Without htmx: the current redirect and flash attributes, unchanged. A private helper avoids repeating that choice four times |
-| adapter.in.web | `HtmxAuthenticationEntryPoint` (new) + `WebSecurityConfig` | An htmx request without a session (expired) gets 401 with `HX-Redirect: /login`, so htmx navigates to the login page instead of swapping it inside the panel. Requests without the header keep the 302 to `/login` |
+| adapter.in.web | `HtmxLoginRedirect` (new) + `WebSecurityConfig` | An htmx request without a session (expired) gets 401 with `HX-Redirect: /login`, so htmx navigates to the login page instead of swapping it inside the panel. Requests without the header keep the 302 to `/login` |
 | static | `static/js/app.js` | After a swap of `#account-panel`: Motion animates the balance and the newest transaction. With reduced motion: no animation and `htmx:beforeTransition` is cancelled. A 4xx/5xx answer to an htmx request (a foreign account's 404, the 403 page, an expired CSRF token) replaces the page body with the error page instead of doing nothing |
 | tests | `AccountWebControllerTests`, `RegenerateAccountNumberWebTests`, `WebSecurityTests` | Each operation with and without `HX-Request` |
 | docs | `docs/ia/*`, `docs/adr/0016-web-frontend-libraries.md` | Decisions and status; ADR 0016 gains a line on how htmx answers are built (fragment + PRG fallback) |
@@ -96,16 +96,18 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
 - **Acceptance criteria:**
   - [x] Tests green with and without htmx.
 
-### [ ] T6 — Expired session and CSRF on htmx requests (~10 min)
+### [x] T6 — Expired session and CSRF on htmx requests (~10 min)
 
 - **Layer:** adapter.in.web (security)
-- **Files:** `HtmxAuthenticationEntryPoint` (new), `WebSecurityConfig`, `WebSecurityTests`
+- **Files:** `HtmxLoginRedirect` (new), `WebSecurityConfig`, `WebSecurityTests`
 - **Depends on:** —
 - **What to do:**
   1. Tests first: an anonymous POST with `HX-Request: true` answers 401 with `HX-Redirect: /login`; the same POST without the header still answers 302 to `/login`; an authenticated htmx POST without the CSRF token answers 403.
   2. Entry point for requests matching `RequestHeaderRequestMatcher("HX-Request", "true")` through `defaultAuthenticationEntryPointFor`; the form-login entry point stays the default.
 - **Acceptance criteria:**
-  - [ ] Tests green; the existing security tests unchanged and green.
+  - [x] Tests green; the existing security tests unchanged and green.
+
+- **Deviation:** an expired session also loses the CSRF token stored in it, so an htmx POST hits the CSRF filter (403, `MissingCsrfTokenException`) before the authentication entry point. `HtmxLoginRedirect` is both the entry point and the access-denied handler: for htmx requests it answers 401 + `HX-Redirect: /login` when there is no authentication or the CSRF token is missing; an invalid token, any other denial and every non-htmx request keep the 403 page or the redirect to `/login`. It delegates instead of using `defaultAuthenticationEntryPointFor`, because registering that first made it the default entry point for every request. Tests: missing token → `HX-Redirect`; invalid token → 403.
 
 ### [ ] T7 — Animations and error answers in `app.js` (~10 min)
 

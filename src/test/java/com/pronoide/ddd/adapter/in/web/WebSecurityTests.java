@@ -2,6 +2,7 @@ package com.pronoide.ddd.adapter.in.web;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -11,6 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
+import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +43,47 @@ class WebSecurityTests {
 
     @MockitoBean
     private CheckingAccountQueries queries;
+
+    @Test
+    @DisplayName("Una petición de htmx sin sesión recibe 401 con HX-Redirect al login, no la página de login (#125)")
+    void una_peticion_de_htmx_sin_sesion_recibe_hx_redirect_al_login() throws Exception {
+        mvc.perform(post("/accounts/" + UUID.randomUUID() + "/deposits").with(csrf())
+                        .header("HX-Request", "true"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("HX-Redirect", "/login"));
+    }
+
+    @Test
+    @DisplayName("La misma petición sin htmx sigue redirigiendo al login (#125)")
+    void la_misma_peticion_sin_htmx_sigue_redirigiendo_al_login() throws Exception {
+        mvc.perform(post("/accounts/" + UUID.randomUUID() + "/deposits").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"))
+                .andExpect(header().doesNotExist("HX-Redirect"));
+    }
+
+    @Test
+    @WithMockUser(username = "ada", roles = "USER")
+    @DisplayName("Una petición de htmx sin token CSRF, como tras caducar la sesión, recibe HX-Redirect al login (#125)")
+    void una_peticion_de_htmx_sin_token_csrf_recibe_hx_redirect_al_login() throws Exception {
+        mvc.perform(post("/accounts/" + UUID.randomUUID() + "/deposits").header("HX-Request", "true"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("HX-Redirect", "/login"));
+
+        verifyNoInteractions(commands, queries);
+    }
+
+    @Test
+    @WithMockUser(username = "ada", roles = "USER")
+    @DisplayName("Una petición de htmx con un token CSRF inválido sigue recibiendo 403 (#125)")
+    void una_peticion_de_htmx_con_un_token_csrf_invalido_recibe_403() throws Exception {
+        mvc.perform(post("/accounts/" + UUID.randomUUID() + "/deposits").with(csrf().useInvalidToken())
+                        .header("HX-Request", "true"))
+                .andExpect(status().isForbidden())
+                .andExpect(header().doesNotExist("HX-Redirect"));
+
+        verifyNoInteractions(commands, queries);
+    }
 
     @Test
     @DisplayName("Un anónimo que pide el listado es redirigido al login")

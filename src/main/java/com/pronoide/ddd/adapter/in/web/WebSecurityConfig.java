@@ -6,11 +6,14 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandlerImpl;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
 /**
  * Seguridad de la web (ADR 0008): la cadena de reserva, para todo lo que no es {@code /api/**} (va después de la de
  * la API). Inicio de sesión con formulario propio y sesión, CSRF activo, {@code /accounts/new} solo para
- * administradores y la página 403 propia.
+ * administradores y la página 403 propia. A htmx, una sesión caducada le responde 401 con {@code HX-Redirect}
+ * al login ({@link HtmxLoginRedirect}, #125).
  *
  * <p>Públicos: {@code /login}, los estilos, los scripts y las librerías del frontend (ADR 0016), la salud del
  * actuator y las páginas de error. El resto exige sesión.
@@ -38,7 +41,14 @@ public class WebSecurityConfig {
                         .defaultSuccessUrl("/", true)
                         .permitAll())
                 .logout(logout -> logout.logoutSuccessUrl("/login?logout"))
-                .exceptionHandling(errors -> errors.accessDeniedPage("/error/403"))
+                .exceptionHandling(errors -> {
+                    // htmx (#125): una sesión caducada lleva al login con HX-Redirect en vez de pintarlo en el panel
+                    AccessDeniedHandlerImpl errorPage = new AccessDeniedHandlerImpl();
+                    errorPage.setErrorPage("/error/403");
+                    HtmxLoginRedirect htmx = new HtmxLoginRedirect("/login",
+                            new LoginUrlAuthenticationEntryPoint("/login"), errorPage);
+                    errors.authenticationEntryPoint(htmx).accessDeniedHandler(htmx);
+                })
                 .build();
     }
 }
