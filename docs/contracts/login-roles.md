@@ -1,7 +1,7 @@
 # Contract: login with admin and user roles
 
 - **Issue:** [#50](https://github.com/dawnrock/Proyect-DDD-Claude/issues/50) · **Plan:** on the issue (removed from `docs/plans/`; in the git history) · **ADR:** `docs/adr/0008-spring-security.md`
-- **Status:** frozen at `cc7bc4d`
+- **Status:** frozen at `cc7bc4d` · the API part is superseded by [ADR 0015](../adr/0015-jwt-bearer-api.md) (#122): `/api/**` uses JWT Bearer tokens from `POST /api/auth/token` instead of HTTP Basic; roles and ownership work as described here
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both asked for minor changes, merged by the lead; the teammates cannot message each other)
 
 Builds on the frozen contracts of #5, #6 and #7 (`open-query-list-accounts.md`, `deposits-withdrawals.md`, `money-transfers.md`).

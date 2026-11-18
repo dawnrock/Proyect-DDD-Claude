@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,6 +38,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     static final String NOT_FOUND_TITLE = "Recurso inexistente";
     static final String BAD_REQUEST_TITLE = "Petición no válida";
     static final String UNSUPPORTED_MEDIA_TYPE_TITLE = "Tipo de contenido no admitido";
+    static final String BAD_CREDENTIALS_DETAIL = "Usuario o contraseña incorrectos";
 
     @ExceptionHandler(DomainException.class)
     ProblemDetail handleBusinessRule(DomainException exception) {
@@ -56,6 +58,15 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(OperationNotAllowedException.class)
     ProblemDetail handleNotAllowed(OperationNotAllowedException exception) {
         return problem(HttpStatus.FORBIDDEN, ApiSecurityConfig.FORBIDDEN_TITLE, exception.getMessage());
+    }
+
+    /** Credenciales erróneas al pedir un token ({@link TokenController}): 401 sin decir si falla el usuario o la contraseña. */
+    @ExceptionHandler(AuthenticationException.class)
+    ResponseEntity<ProblemDetail> handleBadCredentials(AuthenticationException exception) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.WWW_AUTHENTICATE, "Bearer")
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(problem(HttpStatus.UNAUTHORIZED, ApiSecurityConfig.UNAUTHENTICATED_TITLE, BAD_CREDENTIALS_DETAIL));
     }
 
     @ExceptionHandler(NotFoundException.class)

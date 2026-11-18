@@ -11,6 +11,7 @@ Render runs Java only through Docker, so the repository has a [`Dockerfile`](../
 | Memory | image (`JAVA_TOOL_OPTIONS`) | The JVM uses up to 75 % of the container (512 MB on the free plan) |
 | H2 console | image (`SPRING_H2_CONSOLE_ENABLED=false`) | Off: on a public URL it could run code on the server |
 | Users and passwords | you, in Render (`APP_SECURITY_USERS_*`) | Your own password instead of `demo` |
+| API token secret | you, in Render (`APP_JWT_SECRET`, `Hexagonal` only) | A random value of at least 32 bytes (#122, ADR 0015) |
 
 **Live services** (given by the user, 2026-11-17): `Hexagonal` at <https://proyect-ddd-claude.onrender.com> (also in the `servers` of `docs/api/openapi.yaml`) and `Monolithic` at <https://mon-e-bank-monolithic.onrender.com>. On the free plan they sleep when idle, so the first request may take about a minute. The image also serves the API documentation: Swagger UI at `/api-docs` over the contract at `/openapi.yaml` (#111; the `Dockerfile` copies `docs/api/openapi.yaml` into the build).
 
@@ -70,6 +71,7 @@ The result starts with `$2y$10$` or `$2b$10$` and is about 60 characters long. R
    - **All twelve are needed.** Spring Boot replaces the whole user list when a variable sets any part of it: with only the hashes the users would have no name and the application would not start.
    - **Keep the four user names.** (Customers who sign up on the site get their own runtime user and need no variable.) The demo accounts belong to `admin`, `ada`, `grace` and `alan`; with other names the customers would see no account. Each user may have a different hash.
    - Optional: `APP_ADMIN_USERNAME` and `APP_ADMIN_PASSWORD` add one more administrator (the password in plain text, stored in Render).
+   - **`Hexagonal` only: `APP_JWT_SECRET`**, the secret that signs the API tokens (#122). Use Render's **Generate** button, or `openssl rand -base64 48` on your computer; it must be at least 32 bytes. Without it the service starts with a random key and every token stops working when it sleeps or restarts. Changing it invalidates every token at once. **Never deploy without it:** the image runs the `demo` profile, whose development secret is public in the repository, so anyone could forge an administrator token.
 
 5. **Create Web Service.** The first build takes a few minutes (Maven downloads the dependencies); the service is live when the health check answers `UP`.
 
@@ -80,10 +82,14 @@ curl https://<your-service>.onrender.com/actuator/health
 ```
 
 ```bash
-curl -u admin:'your-password' https://<your-service>.onrender.com/api/accounts
+TOKEN=$(curl -s -X POST https://<your-service>.onrender.com/api/auth/token -H 'Content-Type: application/json' -d '{"username":"admin","password":"your-password"}' | sed -E 's/.*"accessToken":"([^"]+)".*/\1/')
 ```
 
-The first answers `{"status":"UP",...}`; the second lists the three demo accounts. With the twelve variables set, `admin:demo` must answer `401`. In the browser, `https://<your-service>.onrender.com` shows the login page: `admin` sees every account, `ada`, `grace` and `alan` only their own.
+```bash
+curl -H "Authorization: Bearer $TOKEN" https://<your-service>.onrender.com/api/accounts
+```
+
+The first answers `{"status":"UP",...}`; the other two get a token and list the three demo accounts (on `Monolithic` the API still uses HTTP Basic: `curl -u admin:'your-password' .../api/accounts`). With the twelve variables set, asking for a token with `admin`/`demo` must answer `401`. In the browser, `https://<your-service>.onrender.com` shows the login page: `admin` sees every account, `ada`, `grace` and `alan` only their own.
 
 ## What to expect on the free plan
 

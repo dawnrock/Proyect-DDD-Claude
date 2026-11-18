@@ -2,6 +2,14 @@
 
 Changes to `docs/api/openapi.yaml`, newest first. Versioning policy: [ADR 0014](../adr/0014-contract-versioning.md) (major for an incompatible change as `oasdiff breaking` reports it, minor for a compatible addition, patch for documentation only). The CI checks the bump on every pull request.
 
+## 2.0.0 · 2026-11-18 (#122)
+
+Authentication with JWT Bearer tokens ([ADR 0015](../adr/0015-jwt-bearer-api.md)).
+
+- **Incompatible:** HTTP Basic is no longer accepted. The global security scheme is now `bearerAuth` (`http`, `bearer`, JWT) instead of `basicAuth`. `oasdiff breaking` reports it on the seven protected operations (`api-security-removed`).
+- **New operation:** `issueToken` (`POST /api/auth/token`, tag `auth`, public): credentials in a JSON body (`TokenRequest`) in exchange for an `AccessToken` (`accessToken`, `tokenType: Bearer`, `expiresIn` in seconds, 900 by default). Wrong credentials give 401.
+- **401 responses:** they now carry `WWW-Authenticate: Bearer` and two examples (no token; invalid or expired token). The 401 of `signUp` only happens with an invalid Bearer token.
+
 ## 1.0.0 · 2026-11-17 (#112)
 
 First stable version, after the OpenAPI course review. No change to the API itself; the contract reached this state through the earlier `0.x` versions, all published as `0.1.0`:

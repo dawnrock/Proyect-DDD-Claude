@@ -6,8 +6,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -133,12 +133,20 @@ class CustomerControllerTests {
     }
 
     @Test
-    @DisplayName("Con credenciales HTTP Basic erróneas el alta pública responde 401 y no llama al caso de uso")
-    void con_credenciales_erroneas_el_alta_publica_responde_401() throws Exception {
-        mvc.perform(post("/api/customers").with(httpBasic("nadie", "incorrecta"))
+    @DisplayName("Con un token Bearer no válido el alta pública responde 401 y no llama al caso de uso")
+    void con_un_token_no_valido_el_alta_publica_responde_401() throws Exception {
+        mvc.perform(post("/api/customers").header("Authorization", "Bearer no-es-un-jwt")
                         .contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.title").value("No autenticado"));
+        verifyNoInteractions(registration);
+    }
+
+    @Test
+    @DisplayName("Un método no declarado en la ruta pública responde 405 sin pedir token")
+    void un_metodo_no_declarado_en_la_ruta_publica_responde_405_sin_pedir_token() throws Exception {
+        mvc.perform(put("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
+                .andExpect(status().isMethodNotAllowed());
         verifyNoInteractions(registration);
     }
 
