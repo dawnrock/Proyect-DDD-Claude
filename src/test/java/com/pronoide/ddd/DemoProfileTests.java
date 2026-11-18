@@ -9,7 +9,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,6 +21,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
+
+import com.pronoide.ddd.support.ApiTokens;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("demo")
@@ -38,11 +39,11 @@ class DemoProfileTests {
 	}
 
 	private HttpResponse<String> apiGetAs(String username, String path) throws Exception {
-		String credentials = Base64.getEncoder().encodeToString((username + ":" + PASSWORD).getBytes(StandardCharsets.UTF_8));
-		return HttpClient.newHttpClient().send(
+		HttpClient http = HttpClient.newHttpClient();
+		return http.send(
 				HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
 						.header("Accept", "application/json")
-						.header("Authorization", "Basic " + credentials)
+						.header("Authorization", ApiTokens.bearer(http, "http://localhost:" + port, username, PASSWORD))
 						.GET().build(),
 				HttpResponse.BodyHandlers.ofString());
 	}

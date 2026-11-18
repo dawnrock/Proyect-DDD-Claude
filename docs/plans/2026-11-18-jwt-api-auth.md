@@ -79,30 +79,31 @@ The resource server support of Spring Security validates the Bearer token (`oaut
 - **Acceptance criteria:**
   - [x] Valid credentials → 200 and a token whose `sub`/`roles` match; wrong password or unknown user → 401 with the same message; missing fields → 400.
 
-### [ ] T4 — The API chain accepts only Bearer (~10 min)
+### [x] T4 — The API chain accepts only Bearer (~10 min)
 
 - **Layer:** adapter.in
-- **Files:** `adapter/in/rest/ApiSecurityConfig.java`, new test `ApiSecurityTests` (`@SpringBootTest` + MockMvc with real tokens)
+- **Files:** `adapter/in/rest/ApiSecurityConfig.java`, new test `ApiSecurityTests` (`@WebMvcTest` with real tokens; `src/test/CLAUDE.md` keeps the full context to `DddLabApplicationTests`)
+- *Deviation:* T4 and T5 share one commit: once Basic is gone, the end-to-end tests cannot stay green until they use a token. `ApiSecurityConfig` imports `JwtSupport`, so the existing `@WebMvcTest`s did not change. The public sign-up test that sent wrong Basic credentials now sends an invalid Bearer token (still 401).
 - **Depends on:** T3
 - **What to do:**
   1. Replace `httpBasic` with `oauth2ResourceServer(jwt)` and a `JwtAuthenticationConverter` (claim `roles` → `ROLE_*`, name = `sub`).
   2. `POST /api/auth/token` and `POST /api/customers` public; the role rules unchanged.
   3. The entry point answers 401 `ProblemDetail` with `WWW-Authenticate: Bearer` (also for an invalid or expired token); the 403 stays as it is. Update the Javadoc.
 - **Acceptance criteria:**
-  - [ ] A valid Bearer → 200 on `GET /api/accounts`. A `USER` opening an account → 403. Missing, expired or wrongly signed token → 401 `ProblemDetail`.
-  - [ ] An `Authorization: Basic ...` header → 401 (Basic is no longer accepted).
-  - [ ] `CurrentCaller` gives the same `Caller` (ownership tests unchanged); the `@WebMvcTest`s with `@WithMockUser` keep passing.
+  - [x] A valid Bearer → 200 on `GET /api/accounts`. A `USER` opening an account → 403. Missing, expired or wrongly signed token → 401 `ProblemDetail`.
+  - [x] An `Authorization: Basic ...` header → 401 (Basic is no longer accepted).
+  - [x] `CurrentCaller` gives the same `Caller` (ownership tests unchanged); the `@WebMvcTest`s with `@WithMockUser` keep passing.
 
-### [ ] T5 — End-to-end tests with a token (~10 min)
+### [x] T5 — End-to-end tests with a token (~10 min)
 
 - **Layer:** tests
-- **Files:** `DddLabApplicationTests`, `DemoProfileTests`, `CustomerControllerTests` (and a small helper that gets a token, if it is repeated)
+- **Files:** `DddLabApplicationTests`, `DemoProfileTests`, `CustomerControllerTests`, helper `support/ApiTokens`
 - **Depends on:** T4
 - **What to do:**
   1. Replace the Basic credentials with: ask `/api/auth/token`, then send `Bearer`.
   2. Sign-up flow: a newly signed-up customer gets a token and sees their account.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green with no Basic left in the API tests (`grep -rn httpBasic src/test` empty for `/api`).
+  - [x] `./mvnw verify` green with no Basic left in the API tests (`grep -rn httpBasic src/test` empty for `/api`).
 
 ### [ ] T6 — OpenAPI contract 2.0.0 (~10 min)
 

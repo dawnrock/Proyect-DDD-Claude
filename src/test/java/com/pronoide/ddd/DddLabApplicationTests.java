@@ -34,6 +34,7 @@ import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
 import com.pronoide.ddd.application.listener.AuditLogListener;
 import com.pronoide.ddd.application.listener.CustomerNotificationListener;
+import com.pronoide.ddd.support.ApiTokens;
 
 /**
  * Usuarios de test (#50): admin, ada, grace y alan, todos con la contraseña "demo" (mismo hash que el perfil demo).
@@ -444,10 +445,8 @@ class DddLabApplicationTests {
 		}
 
 		private HttpResponse<String> api(String username, String method, String path, String json) throws Exception {
-			String credentials = java.util.Base64.getEncoder()
-					.encodeToString((username + ":" + PASSWORD).getBytes(StandardCharsets.UTF_8));
 			HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(url(path)))
-					.header("Authorization", "Basic " + credentials)
+					.header("Authorization", ApiTokens.bearer(http, url(""), username, PASSWORD))
 					.header("Accept", "application/json");
 			request = json == null ? request.GET() : request.header("Content-Type", "application/json")
 					.method(method, HttpRequest.BodyPublishers.ofString(json));
@@ -519,12 +518,12 @@ class DddLabApplicationTests {
 			assertThat(created.statusCode()).isEqualTo(201);
 			String location = created.headers().firstValue("Location").orElseThrow();
 			assertThat(location).startsWith("/api/accounts/");
-			HttpResponse<String> mine = basic("katherine", "GET", "/api/accounts", null);
+			HttpResponse<String> mine = bearer("katherine", "GET", "/api/accounts", null);
 			assertThat(mine.statusCode()).isEqualTo(200);
 			assertThat(mine.body()).contains("Katherine Johnson").containsPattern("ES\\d{2}99990001\\d{12}");
 
 			String target = openAccount();
-			HttpResponse<String> transfer = basic("katherine", "POST", "/api/transfers", """
+			HttpResponse<String> transfer = bearer("katherine", "POST", "/api/transfers", """
 					{"sourceAccountId": "%s", "targetAccountNumber": "%s", "amount": 25}"""
 					.formatted(location.substring(location.lastIndexOf('/') + 1), ibanOf(target)));
 			assertThat(transfer.statusCode()).isEqualTo(201);
@@ -596,11 +595,9 @@ class DddLabApplicationTests {
 					.build(), HttpResponse.BodyHandlers.ofString());
 		}
 
-		private HttpResponse<String> basic(String username, String method, String path, String json) throws Exception {
-			String credentials = java.util.Base64.getEncoder()
-					.encodeToString((username + ":" + NEW_PASSWORD).getBytes(StandardCharsets.UTF_8));
+		private HttpResponse<String> bearer(String username, String method, String path, String json) throws Exception {
 			HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(url(path)))
-					.header("Authorization", "Basic " + credentials)
+					.header("Authorization", ApiTokens.bearer(http, url(""), username, NEW_PASSWORD))
 					.header("Accept", "application/json");
 			request = json == null ? request.GET() : request.header("Content-Type", "application/json")
 					.method(method, HttpRequest.BodyPublishers.ofString(json));
@@ -654,10 +651,8 @@ class DddLabApplicationTests {
 		}
 
 		private HttpResponse<String> multipart(String method, String path, String body, String accept) throws Exception {
-			String credentials = java.util.Base64.getEncoder()
-					.encodeToString(("admin:" + PASSWORD).getBytes(StandardCharsets.UTF_8));
 			return http.send(HttpRequest.newBuilder(URI.create(url(path)))
-					.header("Authorization", "Basic " + credentials)
+					.header("Authorization", ApiTokens.bearer(http, url(""), "admin", PASSWORD))
 					.header("Content-Type", MULTIPART)
 					.header("Accept", accept)
 					.method(method, body == null ? HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofString(body))
@@ -784,10 +779,11 @@ class DddLabApplicationTests {
 		return page(path).body();
 	}
 
-	/** Cabecera HTTP Basic del administrador, que la API exige (#50); la web no la usa. */
-	private static HttpRequest.Builder withApiCredentials(HttpRequest.Builder request, String path) {
-		return path.startsWith("/api") ? request.header("Authorization", "Basic " + java.util.Base64.getEncoder()
-				.encodeToString(("admin:" + PASSWORD).getBytes(StandardCharsets.UTF_8))) : request;
+	/** Token Bearer del administrador, que la API exige (#122); la web no lo usa. */
+	private HttpRequest.Builder withApiCredentials(HttpRequest.Builder request, String path) throws Exception {
+		return path.startsWith("/api")
+				? request.header("Authorization", ApiTokens.bearer(http, "http://localhost:" + port, "admin", PASSWORD))
+				: request;
 	}
 
 	private HttpResponse<String> get(String path, String accept) throws Exception {
