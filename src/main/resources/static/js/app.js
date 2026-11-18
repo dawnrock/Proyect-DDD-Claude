@@ -55,11 +55,12 @@
         }
     });
 
-    // htmx no pinta las respuestas de error (4xx/5xx). La página de error (403, 404) sustituye entonces al contenido de
-    // la página, como si se hubiese navegado a ella, en vez de dejar el clic sin respuesta.
+    // htmx no pinta las respuestas de error. Las páginas de error propias (403, 404) sustituyen entonces al contenido
+    // de la página, como si se hubiese navegado a ella, en vez de dejar el clic sin respuesta. El resto de errores
+    // siguen sin pintarse: no hay una página nuestra que mostrar.
     document.addEventListener('htmx:beforeSwap', (event) => {
         const { xhr } = event.detail;
-        if (xhr.status >= 400 && /<html/i.test(xhr.responseText)) {
+        if ((xhr.status === 403 || xhr.status === 404) && /<html/i.test(xhr.responseText)) {
             event.detail.shouldSwap = true;
             event.detail.target = document.body;
             event.detail.swapOverride = 'innerHTML';

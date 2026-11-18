@@ -75,6 +75,16 @@ class WebSecurityTests {
 
     @Test
     @WithMockUser(username = "ada", roles = "USER")
+    @DisplayName("Una petición de htmx sin el rol necesario recibe la página 403, sin HX-Redirect (#125)")
+    void una_peticion_de_htmx_sin_el_rol_necesario_recibe_la_pagina_403() throws Exception {
+        mvc.perform(get("/accounts/new").header("HX-Request", "true"))
+                .andExpect(status().isForbidden())
+                .andExpect(forwardedUrl("/error/403"))
+                .andExpect(header().doesNotExist("HX-Redirect"));
+    }
+
+    @Test
+    @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("Una petición de htmx con un token CSRF inválido sigue recibiendo 403 (#125)")
     void una_peticion_de_htmx_con_un_token_csrf_invalido_recibe_403() throws Exception {
         mvc.perform(post("/accounts/" + UUID.randomUUID() + "/deposits").with(csrf().useInvalidToken())

@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-18
-- **Status:** in progress
-- **Total estimate:** ~70 min (8 tasks)
+- **Status:** done
+- **Total estimate:** ~80 min (9 tasks)
 
 ## Goal
 
@@ -134,28 +134,43 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
 - **Acceptance criteria:**
   - [x] The CI status-file check passes.
 
+### [x] T9 — Review fixes (~10 min)
+
+- **Layer:** adapter.in.web
+- **Files:** `AccountWebController`, `static/js/app.js`, `WebSecurityTests`, `RegenerateAccountNumberWebTests`
+- **Depends on:** T1-T8
+- **What to do:** findings of the `revisor-ddd` review (none blocking):
+  1. A local `caller` in `deposit`, `withdraw` and `transfer` instead of repeating `CurrentCaller.from(authentication)`.
+  2. One `HX-Request` constant (`HtmxLoginRedirect.HX_REQUEST`), and `MESSAGE`/`REJECTION` constants for the notice kinds.
+  3. `app.js` only swaps our own error pages (403, 404) into `body`; other errors stay unpainted.
+  4. New test: an htmx request without the needed role gets the 403 page and no `HX-Redirect`. Checked by making the handler redirect every htmx denial (red) and restoring it.
+  5. Import order in `RegenerateAccountNumberWebTests`.
+  - Not changed: the `afterSettle` animation was already checked in the browser (9 animations after a swap); the controller keeps a `boolean` header parameter, which accepts `1`/`yes` too, harmless (only changes the shape of the answer).
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green; browser flows re-checked.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] With JavaScript, the four operations update the panel without reloading the page and the URL stays `/accounts/{id}`.
-- [ ] Without JavaScript, every operation behaves exactly as before (redirect and flash notice, or the detail with the form errors).
-- [ ] An expired session during an htmx request ends on `/login`, never inside the panel; 403/404 answers show their error page.
-- [ ] No animation or view transition runs with `prefers-reduced-motion`.
+- [x] With JavaScript, the four operations update the panel without reloading the page and the URL stays `/accounts/{id}`.
+- [x] Without JavaScript, every operation behaves exactly as before (redirect and flash notice, or the detail with the form errors).
+- [x] An expired session during an htmx request ends on `/login`, never inside the panel; 403/404 answers show their error page.
+- [x] No animation or view transition runs with `prefers-reduced-motion`.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): none added.
-- [ ] If the API changes: n/a (the REST API does not change).
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): none added.
+- [x] If the API changes: n/a (the REST API does not change).
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a.
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

@@ -53,8 +53,11 @@ public class AccountWebController {
     /** Fragmento del detalle que htmx sustituye tras cada operación (#125). */
     private static final String DETAIL_PANEL = DETAIL_VIEW + " :: panel";
 
-    /** Cabecera con la que htmx marca sus peticiones. */
-    private static final String HX_REQUEST = "HX-Request";
+    /** Aviso de una operación aprobada (alerta de éxito en la plantilla). */
+    private static final String MESSAGE = "message";
+
+    /** Aviso de una operación rechazada (alerta de advertencia en la plantilla). */
+    private static final String REJECTION = "rejection";
 
     private static final String ANOTHER_VIEW = "accounts/another";
 
@@ -94,16 +97,17 @@ public class AccountWebController {
     @PostMapping("/accounts/{id}/account-number")
     public String regenerateAccountNumber(@PathVariable UUID id, Model model, RedirectAttributes redirect,
                                           Authentication authentication,
-                                          @RequestHeader(name = HX_REQUEST, defaultValue = "false") boolean htmx) {
+                                          @RequestHeader(name = HtmxLoginRedirect.HX_REQUEST, defaultValue = "false") boolean htmx) {
         Caller caller = CurrentCaller.from(authentication);
         AccountSummary account = commands.regenerateAccountNumber(caller, id);
-        return notice(id, htmx, "message", "Nuevo IBAN asignado: " + account.accountNumber(), caller, model, redirect);
+        return notice(id, htmx, MESSAGE, "Nuevo IBAN asignado: " + account.accountNumber(), caller, model, redirect);
     }
 
     @PostMapping("/accounts/{id}/deposits")
     public String deposit(@PathVariable UUID id, @Valid @ModelAttribute("depositForm") MovementForm form,
                           BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication,
-                          @RequestHeader(name = HX_REQUEST, defaultValue = "false") boolean htmx) {
+                          @RequestHeader(name = HtmxLoginRedirect.HX_REQUEST, defaultValue = "false") boolean htmx) {
+        Caller caller = CurrentCaller.from(authentication);
         if (!result.hasErrors()) {
             DepositCommand command = null;
             try {
@@ -114,22 +118,23 @@ public class AccountWebController {
             }
             if (command != null) {
                 try {
-                    TransactionSummary deposit = commands.deposit(CurrentCaller.from(authentication), command);
-                    return notice(id, htmx, "message",
+                    TransactionSummary deposit = commands.deposit(caller, command);
+                    return notice(id, htmx, MESSAGE,
                             "Ingreso de %s aprobado".formatted(fmt.money(deposit.amount(), deposit.currency())),
-                            CurrentCaller.from(authentication), model, redirect);
+                            caller, model, redirect);
                 } catch (DomainException e) {
                     result.reject("domain", e.getMessage());
                 }
             }
         }
-        return renderDetail(id, CurrentCaller.from(authentication), model, htmx);
+        return renderDetail(id, caller, model, htmx);
     }
 
     @PostMapping("/accounts/{id}/withdrawals")
     public String withdraw(@PathVariable UUID id, @Valid @ModelAttribute("withdrawalForm") MovementForm form,
                            BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication,
-                           @RequestHeader(name = HX_REQUEST, defaultValue = "false") boolean htmx) {
+                           @RequestHeader(name = HtmxLoginRedirect.HX_REQUEST, defaultValue = "false") boolean htmx) {
+        Caller caller = CurrentCaller.from(authentication);
         if (!result.hasErrors()) {
             WithdrawCommand command = null;
             try {
@@ -140,27 +145,28 @@ public class AccountWebController {
             }
             if (command != null) {
                 try {
-                    TransactionSummary withdrawal = commands.withdraw(CurrentCaller.from(authentication), command);
+                    TransactionSummary withdrawal = commands.withdraw(caller, command);
                     String amount = fmt.money(withdrawal.amount(), withdrawal.currency());
                     if (withdrawal.rejected()) {
-                        return notice(id, htmx, "rejection",
+                        return notice(id, htmx, REJECTION,
                                 "Retirada de %s rechazada: el saldo resultante no está permitido para esta cuenta"
-                                        .formatted(amount), CurrentCaller.from(authentication), model, redirect);
+                                        .formatted(amount), caller, model, redirect);
                     }
-                    return notice(id, htmx, "message", "Retirada de %s aprobada".formatted(amount),
-                            CurrentCaller.from(authentication), model, redirect);
+                    return notice(id, htmx, MESSAGE, "Retirada de %s aprobada".formatted(amount),
+                            caller, model, redirect);
                 } catch (DomainException e) {
                     result.reject("domain", e.getMessage());
                 }
             }
         }
-        return renderDetail(id, CurrentCaller.from(authentication), model, htmx);
+        return renderDetail(id, caller, model, htmx);
     }
 
     @PostMapping("/accounts/{id}/transfers")
     public String transfer(@PathVariable UUID id, @Valid @ModelAttribute("transferForm") TransferForm form,
                            BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication,
-                           @RequestHeader(name = HX_REQUEST, defaultValue = "false") boolean htmx) {
+                           @RequestHeader(name = HtmxLoginRedirect.HX_REQUEST, defaultValue = "false") boolean htmx) {
+        Caller caller = CurrentCaller.from(authentication);
         if (!result.hasErrors()) {
             TransferCommand command = null;
             try {
@@ -176,17 +182,17 @@ public class AccountWebController {
             }
             if (command != null) {
                 try {
-                    TransferSummary transfer = commands.transfer(CurrentCaller.from(authentication), command);
+                    TransferSummary transfer = commands.transfer(caller, command);
                     String amount = fmt.money(transfer.amount(), transfer.currency());
                     String target = fmt.maskedIban(transfer.targetAccountNumber());
                     if (transfer.rejected()) {
-                        return notice(id, htmx, "rejection",
+                        return notice(id, htmx, REJECTION,
                                 ("Transferencia de %s a %s rechazada: el saldo resultante no está permitido "
                                         + "para la cuenta de origen").formatted(amount, target),
-                                CurrentCaller.from(authentication), model, redirect);
+                                caller, model, redirect);
                     }
-                    return notice(id, htmx, "message", "Transferencia de %s a %s aprobada".formatted(amount, target),
-                            CurrentCaller.from(authentication), model, redirect);
+                    return notice(id, htmx, MESSAGE, "Transferencia de %s a %s aprobada".formatted(amount, target),
+                            caller, model, redirect);
                 } catch (TargetAccountNotFoundException e) {
                     // El IBAN de destino lo ha escrito el usuario: se avisa en el formulario, no con la página 404.
                     // Va antes que cualquier NotFoundException: una cuenta de origen inexistente o ajena sí es 404.
@@ -196,7 +202,7 @@ public class AccountWebController {
                 }
             }
         }
-        return renderDetail(id, CurrentCaller.from(authentication), model, htmx);
+        return renderDetail(id, caller, model, htmx);
     }
 
     /**
