@@ -2,7 +2,7 @@
 
 > **Read it at the start of every session.** It is the entry point to carry on without depending on earlier conversations, and it is kept **short on purpose**: it is loaded in every session. **It is updated in every PR that closes an issue** (CI checks it).
 
-- **Last updated:** 2026-11-18 · PR #123 (#122, JWT Bearer tokens on the API)
+- **Last updated:** 2026-11-18 · PR #127 (#124, web frontend base)
 - **Active branch:** `Hexagonal`, the repository's default branch; phase 2 is marked by the `v2-hexagonal` tag and work continues on the branch. `Monolithic` frozen at the `v1-monolito` tag (exceptions authorised by the user: the Render deployment, #86, the footer, #91, and the twins #99 and #95); `master` frozen.
 
 ## Where we are
@@ -11,11 +11,11 @@
 | ----- | ---- | ----------- | ------- |
 | 1 · Layered monolith | Closed: #2-#8, #11-#13, #31, #48, #50, #54, #57 (details in the [history](historial.md)) | — | — |
 | 2 · Hexagonal | Closed: #14-#23, tag `v2-hexagonal` | — | — |
-| After phase 2 (no milestone) | #70 translation, #71 Graphify, #72 web, #77 review leftovers, #78 unit of work, #79 Claude Code configuration, #82 code leftovers, #85 and #86 deploy both branches on Render, #89 and #91 web footer, #98 segment by verified income and by balance (Mon-A Bank IBAN, entity `9999`), #103 customer sign-up (twin of #95; on `Monolithic`: #99 in PR #101, #95 in PR #102), #108 contract discrepancies (PR #114), #113 no multipart (PR #115), #107 contract tests (PR #117), #109 OpenAPI style guide (PR #118), #110 contract examples (PR #119), #111 Swagger UI (PR #120), #112 contract versioning (PR #121), #122 JWT Bearer on the API (PR #123, ADR 0015, contract 2.0.0) | — | — |
+| After phase 2 (no milestone) | #70 translation, #71 Graphify, #72 web, #77 review leftovers, #78 unit of work, #79 Claude Code configuration, #82 code leftovers, #85 and #86 deploy both branches on Render, #89 and #91 web footer, #98 segment by verified income and by balance (Mon-A Bank IBAN, entity `9999`), #103 customer sign-up (twin of #95; on `Monolithic`: #99 in PR #101, #95 in PR #102), #108 contract discrepancies (PR #114), #113 no multipart (PR #115), #107 contract tests (PR #117), #109 OpenAPI style guide (PR #118), #110 contract examples (PR #119), #111 Swagger UI (PR #120), #112 contract versioning (PR #121), #122 JWT Bearer on the API (PR #123, ADR 0015, contract 2.0.0), #124 web frontend base (PR #127, ADR 0016) | — | #125 htmx in the account operations, #126 htmx in the rest of the web |
 
 ## Next step
 
-1. No issue is planned: the user chooses the next one (pending items in `pendientes.md`). The API uses JWT Bearer tokens since #122; `APP_JWT_SECRET` is already set on the Render `Hexagonal` service.
+1. #125: htmx in the account operations (deposit, withdrawal, transfer, new IBAN) without reloading the page, with the CSRF header for htmx requests; then #126 (sign-up, login, new account, list). Both depend on the base of #124 (ADR 0016) and must keep working without JavaScript.
 
 Both branches are live on Render (guide `docs/deploy/render.md`).
 

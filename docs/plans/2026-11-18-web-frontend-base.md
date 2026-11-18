@@ -144,7 +144,7 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
 - **Acceptance criteria:**
   - [x] No rule of `app.css` points to a class that no template uses, and no template uses a class that no stylesheet defines.
 
-### [ ] T9 — Project status and decisions (~5 min)
+### [x] T9 — Project status and decisions (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/decisiones.md`, `docs/ia/pendientes.md`, `docs/ia/historial.md`, `docs/ia/estado-del-proyecto.md`, `docs/arquitectura/fase-2-hexagonal.md` (only if it describes the web's static resources)
@@ -152,7 +152,7 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
 - **What to do:**
   1. Decision: frontend libraries (ADR 0016) and progressive enhancement. Pending items: htmx 4, CSP, a WebJar for Motion if one is published, jar size. Next step: #125.
 - **Acceptance criteria:**
-  - [ ] The CI status-file check passes.
+  - [x] The CI status-file check passes.
 
 ## Global acceptance criteria
 
