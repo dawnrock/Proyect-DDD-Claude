@@ -16,6 +16,7 @@
 | [0013](0013-contract-tests-schemathesis.md) | Contract tests with Schemathesis, at hexagon level | Accepted |
 | [0014](0014-contract-versioning.md) | Semantic versioning of the OpenAPI contract | Accepted |
 | [0015](0015-jwt-bearer-api.md) | JWT Bearer tokens for the REST API (amends 0008) | Accepted |
+| [0016](0016-web-frontend-libraries.md) | Frontend libraries for the Thymeleaf web (complements 0005) | Accepted |
 
 ADR 0011 (the `integration` layer) only exists on `Monolithic`: it applies to phase 1.
 

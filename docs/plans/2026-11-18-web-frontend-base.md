@@ -59,15 +59,15 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
   - [x] The new tests pass, and an authenticated page still needs a login (existing tests green).
   - [x] `./mvnw verify` green.
 
-### [ ] T2 — ADR 0016: frontend libraries for the web (~5 min)
+### [x] T2 — ADR 0016: frontend libraries for the web (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0016-web-frontend-libraries.md`, `docs/adr/README.md`
 - **Depends on:** T1
 - **What to do:**
-  1. Context, decision (libraries, versions, WebJars, Motion copied into the repo, progressive enhancement, sprite), alternatives (CDN with SRI as in #111, SPA, Tailwind, copying every library into `static/vendor`, the `lucide` JS package, htmx 4) and consequences (the jar grows by ~20 MB, mostly from `lucide-static`; Motion is upgraded by hand).
+  1. Context, decision (libraries, versions, WebJars, Motion copied into the repo, progressive enhancement, sprite), alternatives (CDN with SRI as in #111, SPA, Tailwind, copying every library into `static/vendor`, the `lucide` JS package, htmx 4) and consequences (the jar grows by ~14.5 MB, mostly from `lucide-static`; Motion is upgraded by hand).
 - **Acceptance criteria:**
-  - [ ] The ADR is listed in the index and written in English.
+  - [x] The ADR is listed in the index and written in English.
 
 ### [ ] T3 — Layout, icon fragment and `app.js` (~10 min)
 
