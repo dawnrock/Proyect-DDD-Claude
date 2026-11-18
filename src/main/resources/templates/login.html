@@ -4,36 +4,40 @@
 <body class="d-flex flex-column min-vh-100">
 <header th:replace="~{fragments/layout :: header}"></header>
 <main class="app-container mx-auto w-100 px-3 pb-5">
-    <h1 th:text="${showForm} ? 'Acceso' : 'Bienvenido a Mon-A Bank'">Acceso</h1>
-    <p class="flash flash-success" role="status" th:if="${param.logout}">Has cerrado la sesión</p>
+    <h1 class="h3 fw-semibold mb-4" th:text="${showForm} ? 'Acceso' : 'Bienvenido a Mon-A Bank'">Acceso</h1>
+    <div class="alert alert-success d-flex align-items-center gap-2" role="status" th:if="${param.logout}"><svg th:replace="~{fragments/icons :: icon('circle-check')}"></svg>Has cerrado la sesión</div>
 
-    <div class="doors" th:unless="${showForm}">
-        <a class="door" th:href="@{/login(form)}">
-            <span class="door-title">Ya soy cliente</span>
-            <span class="door-text">Entra con tu usuario y tu contraseña.</span>
-        </a>
-        <a class="door" th:href="@{/signup}">
-            <span class="door-title">Quiero ser cliente</span>
-            <span class="door-text">Abre tu cuenta en tres pasos.</span>
-        </a>
+    <div class="row row-cols-1 row-cols-sm-2 g-3" th:unless="${showForm}">
+        <div class="col">
+            <a class="card card-body h-100 text-reset text-decoration-none door" th:href="@{/login(form)}">
+                <span class="d-inline-flex align-items-center gap-2 fw-semibold mb-1"><svg th:replace="~{fragments/icons :: icon('log-in')}"></svg>Ya soy cliente</span>
+                <span class="small text-body-secondary">Entra con tu usuario y tu contraseña.</span>
+            </a>
+        </div>
+        <div class="col">
+            <a class="card card-body h-100 text-reset text-decoration-none door" th:href="@{/signup}">
+                <span class="d-inline-flex align-items-center gap-2 fw-semibold mb-1"><svg th:replace="~{fragments/icons :: icon('user-round-plus')}"></svg>Quiero ser cliente</span>
+                <span class="small text-body-secondary">Abre tu cuenta en tres pasos.</span>
+            </a>
+        </div>
     </div>
 
-    <form class="panel" th:if="${showForm}" th:action="@{/login}" method="post">
-        <p class="flash flash-error" role="alert" th:if="${param.error}">Usuario o contraseña incorrectos</p>
+    <form class="card card-body" th:if="${showForm}" th:action="@{/login}" method="post">
+        <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:if="${param.error}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg>Usuario o contraseña incorrectos</div>
 
-        <div class="field">
-            <label for="username">Usuario</label>
-            <input type="text" id="username" name="username" autocomplete="username" autofocus required>
+        <div class="mb-3">
+            <label class="form-label" for="username">Usuario</label>
+            <input class="form-control" type="text" id="username" name="username" autocomplete="username" autofocus required>
         </div>
 
-        <div class="field">
-            <label for="password">Contraseña</label>
-            <input type="password" id="password" name="password" autocomplete="current-password" required>
+        <div class="mb-3">
+            <label class="form-label" for="password">Contraseña</label>
+            <input class="form-control" type="password" id="password" name="password" autocomplete="current-password" required>
         </div>
 
-        <div class="form-actions">
-            <button class="button" type="submit">Entrar</button>
-            <a th:href="@{/login}">← Volver</a>
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-primary d-inline-flex align-items-center gap-2" type="submit"><svg th:replace="~{fragments/icons :: icon('log-in')}"></svg>Entrar</button>
+            <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1" th:href="@{/login}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg>Volver</a>
         </div>
     </form>
 </main>

@@ -83,7 +83,7 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
 - **Acceptance criteria:**
   - [x] Test green. `./mvnw spring-boot:run`: the browser console shows no 404s and no script errors.
 
-### [ ] T4 — Login, entry doors and error pages (~5 min)
+### [x] T4 — Login, entry doors and error pages (~5 min)
 
 - **Layer:** adapter.in.web (templates)
 - **Files:** `login.html`, `error/403.html`, `error/404.html`, `LoginControllerTests`
@@ -91,7 +91,7 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
 - **What to do:**
   1. Doors as Bootstrap cards with a Lucide icon; the login form uses `form-control` and `alert-danger`; error pages use the display headings.
 - **Acceptance criteria:**
-  - [ ] Login, logout and error tests green.
+  - [x] Login, logout and error tests green.
 
 ### [ ] T5 — Account list, new account and another account (~10 min)
 
