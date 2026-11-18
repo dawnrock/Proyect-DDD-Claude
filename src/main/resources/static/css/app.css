@@ -194,3 +194,6 @@ a.row:hover .row-title { text-decoration: underline; }
 /* Puertas de entrada del login (#95) como tarjetas de Bootstrap. */
 .door { transition: background-color 0.15s ease-in-out; }
 .door:hover, .door:focus-visible { background-color: var(--bs-tertiary-bg); }
+
+/* Iniciales del titular en el listado de cuentas. */
+.avatar { width: 2.5rem; height: 2.5rem; }

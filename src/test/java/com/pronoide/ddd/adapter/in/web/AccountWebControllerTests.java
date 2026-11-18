@@ -324,8 +324,8 @@ class AccountWebControllerTests {
 
             mvc.perform(get("/"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("<h1>Cuentas</h1>")))
-                    .andExpect(content().string(containsString("+ Abrir cuenta")))
+                    .andExpect(content().string(containsString(">Cuentas</h1>")))
+                    .andExpect(content().string(containsString("#plus\"></use></svg>Abrir cuenta")))
                     .andExpect(content().string(not(containsString("Mis cuentas"))));
 
             verify(queries).listAccounts(Caller.builder().username("admin").admin(true).build());
@@ -341,7 +341,7 @@ class AccountWebControllerTests {
 
             mvc.perform(get("/"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("<h1>Mis cuentas</h1>")))
+                    .andExpect(content().string(containsString(">Mis cuentas</h1>")))
                     .andExpect(content().string(containsString("Saldo total")))
                     .andExpect(content().string(containsString("300,00 €")))
                     .andExpect(content().string(not(containsString("Abrir cuenta"))))
@@ -370,7 +370,7 @@ class AccountWebControllerTests {
 
             mvc.perform(get("/"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("<h1>Mis cuentas</h1>")))
+                    .andExpect(content().string(containsString(">Mis cuentas</h1>")))
                     .andExpect(content().string(containsString("Todavía no tienes cuentas")))
                     .andExpect(content().string(not(containsString("Abrir cuenta"))));
         }
@@ -1256,6 +1256,19 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("El correo electrónico no es válido")));
 
             verifyNoInteractions(commands, queries);
+        }
+
+        @Test
+        @DisplayName("El campo con error se marca como inválido de Bootstrap y su mensaje va debajo (#124)")
+        void el_campo_con_error_se_marca_como_invalido_de_bootstrap() throws Exception {
+            mvc.perform(altaDe("12345678Z", "Ana Lopez", "100.00", "ana").param("holderEmail", "ana@"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<input class=\"form-control is-invalid\" type=\"email\" id=\"holderEmail\".*")))
+                    .andExpect(content().string(containsString(
+                            "<p class=\"invalid-feedback\">El correo electrónico no es válido")))
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<input class=\"form-control\" type=\"text\" id=\"holderName\".*")));
         }
 
         @Test

@@ -93,7 +93,7 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
 - **Acceptance criteria:**
   - [x] Login, logout and error tests green.
 
-### [ ] T5 — Account list, new account and another account (~10 min)
+### [x] T5 — Account list, new account and another account (~10 min)
 
 - **Layer:** adapter.in.web (templates)
 - **Files:** `accounts/list.html`, `accounts/new.html`, `accounts/another.html`, `AccountWebControllerTests`, `AnotherAccountWebTests`
@@ -103,7 +103,7 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
   2. Forms with `form-control`/`form-select`, `is-invalid` + `invalid-feedback` on errors, and an `alert-danger` for global errors.
   3. Add a test: a field error is rendered with `is-invalid`.
 - **Acceptance criteria:**
-  - [ ] Existing and new tests green.
+  - [x] Existing and new tests green.
 
 ### [ ] T6 — Account detail with icons and the Alpine.js accordion (~10 min)
 
