@@ -53,7 +53,7 @@ The resource server support of Spring Security validates the Bearer token (`oaut
 - **Acceptance criteria:**
   - [x] `./mvnw verify` green with the new dependency (nothing uses it yet).
 
-### [ ] T2 — Key, encoder and decoder (~10 min)
+### [x] T2 — Key, encoder and decoder (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/rest/JwtProperties.java`, `adapter/in/rest/JwtSupport.java`, `application.properties`, `application-demo.properties`, test `JwtSupportTests`
@@ -63,8 +63,8 @@ The resource server support of Spring Security validates the Bearer token (`oaut
   2. `JwtSupport`: a `SecretKey` HmacSHA256 from the secret (startup error if it is shorter than 32 bytes; a random key and a `log.warn` if it is missing), a `JwtEncoder` and a `JwtDecoder` (HS256, issuer and expiry checked).
   3. Demo secret in `application-demo.properties`.
 - **Acceptance criteria:**
-  - [ ] A token encoded with the key decodes with its claims; one signed with another key, expired, or with another issuer is rejected.
-  - [ ] A short secret fails at startup with a clear message.
+  - [x] A token encoded with the key decodes with its claims; one signed with another key, expired, or with another issuer is rejected.
+  - [x] A short secret fails at startup with a clear message.
 
 ### [ ] T3 — `POST /api/auth/token` (~10 min)
 
