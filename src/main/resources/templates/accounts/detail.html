@@ -4,106 +4,109 @@
 <body class="d-flex flex-column min-vh-100">
 <header th:replace="~{fragments/layout :: header}"></header>
 <main class="app-container mx-auto w-100 px-3 pb-5">
-    <a class="back" th:if="${backLabel != null}" th:href="@{/}" th:text="'← ' + ${backLabel}">← Cuentas</a>
-    <p th:if="${message}" class="flash flash-success" role="status" th:text="${message}"></p>
-    <p th:if="${rejection}" class="flash flash-warning" role="alert" th:text="${rejection}"></p>
+    <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1 mb-3" th:if="${backLabel != null}" th:href="@{/}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg><th:block th:text="${backLabel}">Cuentas</th:block></a>
+    <div th:if="${message}" class="alert alert-success d-flex align-items-center gap-2" role="status"><svg th:replace="~{fragments/icons :: icon('circle-check')}"></svg><span th:text="${message}">Ingreso aprobado</span></div>
+    <div th:if="${rejection}" class="alert alert-warning d-flex align-items-center gap-2" role="alert"><svg th:replace="~{fragments/icons :: icon('triangle-alert')}"></svg><span th:text="${rejection}">Retirada rechazada</span></div>
 
-    <div class="hero">
-        <h1 class="hero-label"><span th:text="${account.holderName()}">Titular</span> · <span class="nowrap" th:text="${account.accountNumber()}">ES00</span></h1>
-        <p class="hero-amount" th:text="${@fmt.money(account.balance(), account.currency())}">0,00 €</p>
-        <p class="hero-sub holder-data" th:if="${!#strings.isEmpty(account.holderTaxId())}"><span th:text="${account.holderTaxId()}">12345678Z</span><span th:if="${!#strings.isEmpty(account.holderEmail())}"> · <span th:text="${account.holderEmail()}">ada@example.com</span></span></p>
-        <p class="hero-sub" th:text="${@fmt.segment(account.segment())}">Minorista</p>
+    <div class="mb-4">
+        <h1 class="small fw-normal text-body-secondary mb-1"><span th:text="${account.holderName()}">Titular</span> · <span class="text-nowrap" th:text="${account.accountNumber()}">ES00</span></h1>
+        <p class="display-5 fw-semibold text-nowrap mb-1" th:text="${@fmt.money(account.balance(), account.currency())}">0,00 €</p>
+        <p class="small text-body-secondary mb-0" th:if="${!#strings.isEmpty(account.holderTaxId())}"><span th:text="${account.holderTaxId()}">12345678Z</span><span th:if="${!#strings.isEmpty(account.holderEmail())}"> · <span th:text="${account.holderEmail()}">ada@example.com</span></span></p>
+        <p class="small text-body-secondary mb-0" th:text="${@fmt.segment(account.segment())}">Minorista</p>
     </div>
 
-    <div class="actions">
+    <!--/* Cada acción es un <details>: se abre sin JavaScript y el servidor la deja abierta si su formulario vuelve con
+         errores. Alpine.js (actionPanels, en app.js) solo añade que abrir una cierre las demás. */-->
+    <div class="actions d-flex flex-wrap gap-2 mb-4" x-data="actionPanels" x-on:toggle.capture="closeOthers($event)">
         <details id="regenerate-action" th:if="${admin}">
-            <summary>⟳ Generar nuevo IBAN</summary>
-            <form class="action-panel" th:action="@{/accounts/{id}/account-number(id=${account.id()})}" method="post">
+            <summary class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><svg th:replace="~{fragments/icons :: icon('refresh-cw')}"></svg>Generar nuevo IBAN</summary>
+            <form class="card card-body mt-2" th:action="@{/accounts/{id}/account-number(id=${account.id()})}" method="post">
                 <p>Se sustituirá el IBAN actual por otro generado por Mon-A Bank. El IBAN anterior dejará de funcionar.</p>
-                <button class="button" type="submit">Confirmar</button>
+                <div><button class="btn btn-warning" type="submit">Confirmar</button></div>
             </form>
         </details>
-        <a class="pill pill-secondary" id="another-account" th:if="${customer}" th:href="@{/accounts/another}">+ Abrir otra cuenta</a>
+        <a class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" id="another-account" th:if="${customer}" th:href="@{/accounts/another}"><svg th:replace="~{fragments/icons :: icon('plus')}"></svg>Abrir otra cuenta</a>
+
         <details id="deposit-action" th:object="${depositForm}" th:open="${#fields.hasAnyErrors()}">
-            <summary>↓ Ingresar</summary>
-            <form class="action-panel" th:action="@{/accounts/{id}/deposits(id=${account.id()})}" th:object="${depositForm}" method="post" novalidate>
-            <p class="flash flash-error" role="alert" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
-            <div class="field">
-                <label for="deposit-amount">Importe</label>
-                <input type="number" id="deposit-amount" step="0.01" inputmode="decimal" th:field="*{amount}">
-                <p class="field-error" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
-            </div>
-            <div class="field">
-                <label for="deposit-currency">Divisa</label>
-                <select id="deposit-currency" th:field="*{currency}">
-                    <option th:each="c : ${currencies}" th:value="${c}" th:text="${c}">EUR</option>
-                </select>
-                <p class="field-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
-            </div>
-            <button class="button" type="submit">Ingresar</button>
+            <summary class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><svg th:replace="~{fragments/icons :: icon('arrow-down-to-line')}"></svg>Ingresar</summary>
+            <form class="card card-body mt-2" th:action="@{/accounts/{id}/deposits(id=${account.id()})}" th:object="${depositForm}" method="post" novalidate>
+                <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:each="err : ${#fields.globalErrors()}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${err}">Error</span></div>
+                <div class="mb-3">
+                    <label class="form-label" for="deposit-amount">Importe</label>
+                    <input class="form-control" type="number" id="deposit-amount" step="0.01" inputmode="decimal" th:field="*{amount}" th:errorclass="is-invalid">
+                    <p class="invalid-feedback" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="deposit-currency">Divisa</label>
+                    <select class="form-select" id="deposit-currency" th:field="*{currency}" th:errorclass="is-invalid">
+                        <option th:each="c : ${currencies}" th:value="${c}" th:text="${c}">EUR</option>
+                    </select>
+                    <p class="invalid-feedback" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
+                </div>
+                <div><button class="btn btn-primary" type="submit">Ingresar</button></div>
             </form>
         </details>
 
         <details id="withdrawal-action" th:object="${withdrawalForm}" th:open="${#fields.hasAnyErrors()}">
-            <summary>↑ Retirar</summary>
-            <form class="action-panel" th:action="@{/accounts/{id}/withdrawals(id=${account.id()})}" th:object="${withdrawalForm}" method="post" novalidate>
-            <p class="flash flash-error" role="alert" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
-            <div class="field">
-                <label for="withdrawal-amount">Importe</label>
-                <input type="number" id="withdrawal-amount" step="0.01" inputmode="decimal" th:field="*{amount}">
-                <p class="field-error" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
-            </div>
-            <div class="field">
-                <label for="withdrawal-currency">Divisa</label>
-                <select id="withdrawal-currency" th:field="*{currency}">
-                    <option th:each="c : ${currencies}" th:value="${c}" th:text="${c}">EUR</option>
-                </select>
-                <p class="field-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
-            </div>
-            <button class="button" type="submit">Retirar</button>
+            <summary class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><svg th:replace="~{fragments/icons :: icon('arrow-up-from-line')}"></svg>Retirar</summary>
+            <form class="card card-body mt-2" th:action="@{/accounts/{id}/withdrawals(id=${account.id()})}" th:object="${withdrawalForm}" method="post" novalidate>
+                <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:each="err : ${#fields.globalErrors()}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${err}">Error</span></div>
+                <div class="mb-3">
+                    <label class="form-label" for="withdrawal-amount">Importe</label>
+                    <input class="form-control" type="number" id="withdrawal-amount" step="0.01" inputmode="decimal" th:field="*{amount}" th:errorclass="is-invalid">
+                    <p class="invalid-feedback" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="withdrawal-currency">Divisa</label>
+                    <select class="form-select" id="withdrawal-currency" th:field="*{currency}" th:errorclass="is-invalid">
+                        <option th:each="c : ${currencies}" th:value="${c}" th:text="${c}">EUR</option>
+                    </select>
+                    <p class="invalid-feedback" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
+                </div>
+                <div><button class="btn btn-primary" type="submit">Retirar</button></div>
             </form>
         </details>
 
         <details id="transfer-action" th:object="${transferForm}" th:open="${#fields.hasAnyErrors()}">
-            <summary>⇄ Transferir</summary>
-            <form class="action-panel" th:action="@{/accounts/{id}/transfers(id=${account.id()})}" th:object="${transferForm}" method="post" novalidate>
-            <p class="flash flash-error" role="alert" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
-            <div class="field">
-                <label for="transfer-target">IBAN de destino</label>
-                <input type="text" id="transfer-target" autocomplete="off" spellcheck="false" placeholder="ES00 0000 0000 0000 0000 0000" th:field="*{targetAccountNumber}">
-                <p class="field-error" th:if="${#fields.hasErrors('targetAccountNumber')}" th:errors="*{targetAccountNumber}"></p>
-            </div>
-            <div class="field">
-                <label for="transfer-amount">Importe</label>
-                <input type="number" id="transfer-amount" step="0.01" inputmode="decimal" th:field="*{amount}">
-                <p class="field-error" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
-            </div>
-            <div class="field">
-                <label for="transfer-currency">Divisa</label>
-                <select id="transfer-currency" th:field="*{currency}">
-                    <option th:each="c : ${currencies}" th:value="${c}" th:text="${c}">EUR</option>
-                </select>
-                <p class="field-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
-            </div>
-            <button class="button" type="submit">Transferir</button>
+            <summary class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><svg th:replace="~{fragments/icons :: icon('arrow-left-right')}"></svg>Transferir</summary>
+            <form class="card card-body mt-2" th:action="@{/accounts/{id}/transfers(id=${account.id()})}" th:object="${transferForm}" method="post" novalidate>
+                <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:each="err : ${#fields.globalErrors()}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${err}">Error</span></div>
+                <div class="mb-3">
+                    <label class="form-label" for="transfer-target">IBAN de destino</label>
+                    <input class="form-control" type="text" id="transfer-target" autocomplete="off" spellcheck="false" placeholder="ES00 0000 0000 0000 0000 0000" th:field="*{targetAccountNumber}" th:errorclass="is-invalid">
+                    <p class="invalid-feedback" th:if="${#fields.hasErrors('targetAccountNumber')}" th:errors="*{targetAccountNumber}"></p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="transfer-amount">Importe</label>
+                    <input class="form-control" type="number" id="transfer-amount" step="0.01" inputmode="decimal" th:field="*{amount}" th:errorclass="is-invalid">
+                    <p class="invalid-feedback" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="transfer-currency">Divisa</label>
+                    <select class="form-select" id="transfer-currency" th:field="*{currency}" th:errorclass="is-invalid">
+                        <option th:each="c : ${currencies}" th:value="${c}" th:text="${c}">EUR</option>
+                    </select>
+                    <p class="invalid-feedback" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
+                </div>
+                <div><button class="btn btn-primary" type="submit">Transferir</button></div>
             </form>
         </details>
     </div>
 
-    <h2>Movimientos</h2>
-    <ul class="list" th:if="${!transactions.isEmpty()}">
+    <h2 class="h6 fw-semibold mb-3">Movimientos</h2>
+    <ul class="list-group" th:if="${!transactions.isEmpty()}">
         <!--/* Un ingreso suma (+) y una retirada resta (−); un movimiento rechazado no cambió el saldo y va sin signo.
              Supone que solo hay DEPOSIT y WITHDRAWAL: un tipo nuevo exigiría revisar el signo. */-->
-        <li class="row" th:each="t : ${transactions}" th:with="cp=${t.counterpartAccountNumber().orElse(null)}" th:classappend="${t.rejected()} ? 'row-rejected'">
-            <span class="row-main">
-                <span class="row-title" th:text="${t.type() == 'DEPOSIT' ? (cp != null ? 'Transferencia de ' + @fmt.maskedIban(cp) : 'Ingreso') : (t.type() == 'WITHDRAWAL' ? (cp != null ? 'Transferencia a ' + @fmt.maskedIban(cp) : 'Retirada') : t.type())}">Ingreso</span>
-                <span class="row-sub"><span th:text="${#temporals.format(t.occurredOn(), 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</span><span class="status" th:if="${t.rejected()}"> · Rechazado</span><span class="status" th:if="${t.status() == 'PENDING'}"> · Pendiente</span></span>
+        <li class="list-group-item d-flex align-items-center gap-3 py-3" th:each="t : ${transactions}" th:with="cp=${t.counterpartAccountNumber().orElse(null)}" th:classappend="${t.rejected()} ? 'row-rejected'">
+            <span class="flex-grow-1 overflow-hidden">
+                <span class="d-block" th:text="${t.type() == 'DEPOSIT' ? (cp != null ? 'Transferencia de ' + @fmt.maskedIban(cp) : 'Ingreso') : (t.type() == 'WITHDRAWAL' ? (cp != null ? 'Transferencia a ' + @fmt.maskedIban(cp) : 'Retirada') : t.type())}">Ingreso</span>
+                <span class="d-block small text-body-secondary"><span th:text="${#temporals.format(t.occurredOn(), 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</span><span class="text-danger" th:if="${t.rejected()}"> · Rechazado</span><span th:if="${t.status() == 'PENDING'}"> · Pendiente</span></span>
             </span>
-            <span class="row-amount" th:classappend="${t.type() == 'DEPOSIT' and t.approved()} ? 'positive'"
+            <span class="row-amount text-nowrap" th:classappend="${t.type() == 'DEPOSIT' and t.approved()} ? 'text-success'"
                   th:text="${t.rejected() ? @fmt.money(t.amount(), t.currency()) : @fmt.signedMoney(t.amount(), t.currency(), t.type() == 'DEPOSIT')}">+0,00 €</span>
         </li>
     </ul>
-    <p th:if="${transactions.isEmpty()}" class="empty">Todavía no hay movimientos.</p>
+    <p th:if="${transactions.isEmpty()}" class="text-body-secondary">Todavía no hay movimientos.</p>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

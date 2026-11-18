@@ -95,7 +95,8 @@ class AccountWebControllerTests {
         void la_pagina_usa_el_tema_oscuro_de_bootstrap_y_carga_las_librerias_del_frontend() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
 
-            // Spring reescribe las rutas de los WebJars con su versión (/webjars/bootstrap/5.3.8/...): sirve de cache busting
+            // Spring reescribe las rutas con la versión del WebJar (/webjars/bootstrap/5.3.8/...) o con el hash del contenido
+            // (/js/app-<md5>.js): el navegador puede guardarlas en caché sin servir nunca una versión antigua
             mvc.perform(get("/"))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("data-bs-theme=\"dark\"")))
@@ -103,8 +104,9 @@ class AccountWebControllerTests {
                     .andExpect(content().string(webjar("src", "bootstrap", "js/bootstrap.bundle.min.js")))
                     .andExpect(content().string(webjar("src", "htmx.org", "dist/htmx.min.js")))
                     .andExpect(content().string(webjar("src", "alpinejs", "dist/cdn.min.js")))
-                    .andExpect(content().string(containsString("src=\"/vendor/motion/motion.js\"")))
-                    .andExpect(content().string(containsString("src=\"/js/app.js\"")))
+                    .andExpect(content().string(hashed("src", "/vendor/motion/motion", ".js")))
+                    .andExpect(content().string(hashed("src", "/js/app", ".js")))
+                    .andExpect(content().string(hashed("href", "/css/app", ".css")))
                     .andExpect(content().string(not(containsString("https://"))));
         }
 
@@ -233,7 +235,7 @@ class AccountWebControllerTests {
                     ownAccount(UUID.randomUUID(), "ES9876543210987654321098", "Ada Lovelace")));
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
-                    .andExpect(content().string(containsString("<a class=\"back\" href=\"/\">← Mis cuentas</a>")));
+                    .andExpect(content().string(containsString("#arrow-left\"></use></svg>Mis cuentas</a>")));
         }
 
         @Test
@@ -246,7 +248,7 @@ class AccountWebControllerTests {
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(not(containsString("class=\"back\""))));
+                    .andExpect(content().string(not(containsString("#arrow-left\""))));
         }
 
         @Test
@@ -506,7 +508,7 @@ class AccountWebControllerTests {
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("<a class=\"back\" href=\"/\">← Cuentas</a>")));
+                    .andExpect(content().string(containsString("#arrow-left\"></use></svg>Cuentas</a>")));
         }
 
         @Test
@@ -734,7 +736,7 @@ class AccountWebControllerTests {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID).flashAttr("rejection", "Retirada de 500.00 EUR rechazada"))
-                    .andExpect(content().string(containsString("flash flash-warning")))
+                    .andExpect(content().string(containsString("alert alert-warning")))
                     .andExpect(content().string(containsString("role=\"alert\"")))
                     .andExpect(content().string(containsString("Retirada de 500.00 EUR rechazada")));
         }
@@ -1103,6 +1105,21 @@ class AccountWebControllerTests {
         }
 
         @Test
+        @DisplayName("Las acciones son un acordeón de Alpine.js con iconos de Lucide: abrir una cierra las demás (#124)")
+        void las_acciones_son_un_acordeon_de_alpine_con_iconos_de_lucide() throws Exception {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("x-data=\"actionPanels\"")))
+                    .andExpect(content().string(containsString("x-on:toggle.capture=\"closeOthers($event)\"")))
+                    .andExpect(content().string(containsString("#arrow-down-to-line\"></use></svg>Ingresar</summary>")))
+                    .andExpect(content().string(containsString("#arrow-up-from-line\"></use></svg>Retirar</summary>")))
+                    .andExpect(content().string(containsString("#arrow-left-right\"></use></svg>Transferir</summary>")))
+                    .andExpect(content().string(containsString("#refresh-cw\"></use></svg>Generar nuevo IBAN</summary>")));
+        }
+
+        @Test
         @DisplayName("Un error en el ingreso vuelve al detalle con solo el formulario de ingreso abierto")
         void un_error_en_el_ingreso_abre_solo_ese_formulario() throws Exception {
             mvc.perform(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "0").param("currency", "EUR"))
@@ -1368,6 +1385,12 @@ class AccountWebControllerTests {
 
             verifyNoInteractions(commands, queries);
         }
+    }
+
+    /** Atributo que apunta a un recurso propio con el hash de su contenido en el nombre (/js/app-<md5>.js). */
+    private static Matcher<String> hashed(String attribute, String path, String extension) {
+        return matchesPattern("(?s).*" + attribute + "=\"" + Pattern.quote(path) + "-[0-9a-f]{32}"
+                + Pattern.quote(extension) + "\".*");
     }
 
     /** Atributo que apunta a un fichero de un WebJar, con la versión que añada Spring a la ruta. */

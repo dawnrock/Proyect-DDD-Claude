@@ -27,4 +27,21 @@
                 { duration: 0.3, ease: 'easeOut', delay: Motion.stagger(0.04) });
         }
     });
+
+    // Acciones del detalle de cuenta: los <details> se abren solos sin JavaScript; con Alpine, abrir uno cierra los demás.
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('actionPanels', () => ({
+            closeOthers(event) {
+                const opened = event.target;
+                if (!(opened instanceof HTMLDetailsElement) || !opened.open) {
+                    return;
+                }
+                this.$el.querySelectorAll('details[open]').forEach((panel) => {
+                    if (panel !== opened) {
+                        panel.open = false;
+                    }
+                });
+            },
+        }));
+    });
 })();

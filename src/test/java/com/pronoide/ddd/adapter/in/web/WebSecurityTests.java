@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -59,6 +60,15 @@ class WebSecurityTests {
     @DisplayName("Las librerías del frontend se sirven sin sesión y sin versión en la ruta (#124)")
     void las_librerias_del_frontend_se_sirven_sin_sesion_y_sin_version_en_la_ruta(String path) throws Exception {
         mvc.perform(get(path)).andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Las librerías del frontend se guardan en caché un año y las páginas no se guardan (#124)")
+    void las_librerias_del_frontend_se_guardan_en_cache_y_las_paginas_no() throws Exception {
+        mvc.perform(get("/webjars/bootstrap/css/bootstrap.min.css"))
+                .andExpect(header().string("Cache-Control", "max-age=31536000, public"));
+        mvc.perform(get("/login"))
+                .andExpect(header().string("Cache-Control", containsString("no-store")));
     }
 
     @Test

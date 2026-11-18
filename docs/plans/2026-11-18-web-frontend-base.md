@@ -105,7 +105,7 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
 - **Acceptance criteria:**
   - [x] Existing and new tests green.
 
-### [ ] T6 — Account detail with icons and the Alpine.js accordion (~10 min)
+### [x] T6 — Account detail with icons and the Alpine.js accordion (~10 min)
 
 - **Layer:** adapter.in.web (templates and static)
 - **Files:** `accounts/detail.html`, `static/js/app.js`, `AccountWebControllerTests`, `RegenerateAccountNumberWebTests`
@@ -116,8 +116,12 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
   3. Transactions as a `list-group`; rejected ones in `text-body-secondary` with a strikethrough.
   4. Update the "back" link assertions (`← Cuentas` becomes an icon followed by `Cuentas`).
 - **Acceptance criteria:**
-  - [ ] The `<details … open="open">` tests stay green without changes.
-  - [ ] Without JavaScript, every panel still opens and submits.
+  - [x] The `<details … open="open">` tests stay green without changes.
+  - [x] Without JavaScript, every panel still opens and submits.
+
+- **Deviations found while checking it in Chromium:**
+  - Static resources were served with Spring Security's `Cache-Control: no-store`, so every navigation downloaded Bootstrap, the scripts and the 556 KB sprite again, and the new page often showed before its resources were ready, losing the view transition. `application.properties` now versions `/css`, `/js` and `/vendor` URLs with a content hash (WebJars already carry their version) and caches static resources for a year; pages stay `no-store`. Test in `WebSecurityTests`, checked by removing the setting (red) and restoring it.
+  - With JavaScript disabled, `@view-transition` sometimes left Chromium ignoring clicks after a navigation (4 of 5 runs). The rule now only applies under `@media (scripting: enabled) and (prefers-reduced-motion: no-preference)`.
 
 ### [ ] T7 — Customer sign-up in three steps (~10 min)
 
