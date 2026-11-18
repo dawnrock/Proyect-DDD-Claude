@@ -124,7 +124,7 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
 
 - **Checked in Chromium (Playwright):** deposit (balance 4.720 → 4.730 €, notice, empty field, panel closed), rejected withdrawal (warning), validation error (panel open with its error), unknown target IBAN (field error), new IBAN (heading and notice updated), all on the same page and URL; the accordion after a swap; a 404 answer swapped into `body` as the 404 page; deleting the cookies and submitting lands on `/login`. With reduced motion, no animation after the swap (`document.getAnimations()` is empty); with JavaScript disabled, the deposit still works through the redirect. The only console errors are the ones htmx logs for the 404 and 401 answers provoked on purpose.
 
-### [ ] T8 — Project status and decisions (~5 min)
+### [x] T8 — Project status and decisions (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0016-web-frontend-libraries.md`, `docs/ia/decisiones.md`, `docs/ia/pendientes.md`, `docs/ia/historial.md`, `docs/ia/estado-del-proyecto.md`
@@ -132,7 +132,7 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
 - **What to do:**
   1. ADR 0016: one line on htmx answers (fragment with `HX-Request`, PRG without it). Decision in `decisiones.md` with the pattern #126 reuses. Remove the "CSRF header for htmx" pending item of #124. Next step: #126.
 - **Acceptance criteria:**
-  - [ ] The CI status-file check passes.
+  - [x] The CI status-file check passes.
 
 ## Global acceptance criteria
 
