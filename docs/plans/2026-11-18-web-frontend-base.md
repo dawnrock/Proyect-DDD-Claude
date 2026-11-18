@@ -133,7 +133,7 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
 - **Acceptance criteria:**
   - [x] Sign-up tests green; the duplicate-customer flow still shows its link.
 
-### [ ] T8 — Trim `app.css` and check no old classes are left (~5 min)
+### [x] T8 — Trim `app.css` and check no old classes are left (~5 min)
 
 - **Layer:** adapter.in.web (static)
 - **Files:** `static/css/app.css`
@@ -142,7 +142,7 @@ Give the Thymeleaf web (`adapter.in.web`, ADR 0005) a modern frontend base witho
   1. Remove the rules that no template uses any more (`grep` every class of the old file against `templates/`).
   2. Keep the hero, the transaction rows, `.icon`, the theme tweaks through `--bs-*` variables, and the View Transitions.
 - **Acceptance criteria:**
-  - [ ] No rule of `app.css` points to a class that no template uses, and no template uses a class that no stylesheet defines.
+  - [x] No rule of `app.css` points to a class that no template uses, and no template uses a class that no stylesheet defines.
 
 ### [ ] T9 — Project status and decisions (~5 min)
 

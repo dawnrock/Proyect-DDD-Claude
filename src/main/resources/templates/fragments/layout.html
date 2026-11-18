@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark">
-    <meta name="theme-color" content="#0b0b0c">
+    <meta name="theme-color" content="#212529">
     <title th:text="${title} + ' · Cuentas corrientes'">Cuentas corrientes</title>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/app.css}">
@@ -17,13 +17,13 @@
     <script defer th:src="@{/webjars/alpinejs/dist/cdn.min.js}"></script>
 </head>
 <body class="d-flex flex-column min-vh-100">
-<header th:fragment="header" class="app-header border-bottom mb-4">
+<header th:fragment="header" class="border-bottom mb-4">
     <nav class="navbar app-container mx-auto w-100 px-3">
         <a class="navbar-brand d-inline-flex align-items-center gap-2 fw-semibold" th:href="@{/}">
             <svg th:replace="~{fragments/icons :: icon('landmark')}"></svg>Cuentas corrientes
         </a>
         <form class="d-flex align-items-center gap-3 m-0 small text-body-secondary" th:if="${currentUser != null}" th:action="@{/logout}" method="post">
-            <span class="d-inline-flex align-items-center gap-1"><svg th:replace="~{fragments/icons :: icon('user-round')}"></svg><span class="app-username" th:text="${currentUser}">usuario</span></span>
+            <span class="d-inline-flex align-items-center gap-1"><svg th:replace="~{fragments/icons :: icon('user-round')}"></svg><span th:text="${currentUser}">usuario</span></span>
             <button class="btn btn-link btn-sm p-0 d-inline-flex align-items-center gap-1" type="submit"><svg th:replace="~{fragments/icons :: icon('log-out')}"></svg>Cerrar sesión</button>
         </form>
     </nav>
