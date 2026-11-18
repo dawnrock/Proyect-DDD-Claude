@@ -502,6 +502,23 @@ class AccountWebControllerTests {
         }
 
         @Test
+        @DisplayName("El panel de la cuenta es el destino de htmx y cada formulario lo envía con hx-post sin perder action ni CSRF (#125)")
+        void el_panel_de_la_cuenta_es_el_destino_de_htmx() throws Exception {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+
+            String base = "/accounts/" + ACCOUNT_ID;
+            mvc.perform(get(base))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString(
+                            "<div id=\"account-panel\" hx-target=\"#account-panel\" hx-swap=\"outerHTML transition:true\">")))
+                    .andExpect(content().string(containsString("action=\"" + base + "/deposits\" hx-post=\"" + base + "/deposits\"")))
+                    .andExpect(content().string(containsString("action=\"" + base + "/withdrawals\" hx-post=\"" + base + "/withdrawals\"")))
+                    .andExpect(content().string(containsString("action=\"" + base + "/transfers\" hx-post=\"" + base + "/transfers\"")))
+                    .andExpect(content().string(containsString("action=\"" + base + "/account-number\" hx-post=\"" + base + "/account-number\"")))
+                    .andExpect(content().string(matchesPattern("(?s)(.*name=\"_csrf\"){4}.*")));
+        }
+
+        @Test
         @DisplayName("El detalle enlaza de vuelta al listado")
         void el_detalle_enlaza_de_vuelta_al_listado() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());

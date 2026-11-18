@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-18
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~70 min (8 tasks)
 
 ## Goal
@@ -41,7 +41,7 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
 
 ## Tasks
 
-### [ ] T1 — Detail panel fragment and htmx attributes on the forms (~10 min)
+### [x] T1 — Detail panel fragment and htmx attributes on the forms (~10 min)
 
 - **Layer:** adapter.in.web (templates)
 - **Files:** `accounts/detail.html`, `AccountWebControllerTests`
@@ -50,7 +50,7 @@ On the account detail, depositing, withdrawing, transferring and generating a ne
   1. Test first: the detail contains `id="account-panel"`, `hx-target="#account-panel"`, `hx-swap="outerHTML transition:true"` and `hx-post="/accounts/{id}/deposits"` (and the other three), and every form still has its `action` and `_csrf`.
   2. Wrap notices, balance, actions and transactions in the `panel` fragment; add `th:hx-post` to the forms.
 - **Acceptance criteria:**
-  - [ ] New test green; the existing detail tests unchanged and green.
+  - [x] New test green; the existing detail tests unchanged and green.
 
 ### [ ] T2 — Deposit answers the panel fragment to htmx (~10 min)
 
