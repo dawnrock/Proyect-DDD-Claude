@@ -91,6 +91,13 @@ class TokenControllerTests {
     }
 
     @Test
+    @DisplayName("Un método no declarado responde 405 sin pedir token")
+    void un_metodo_no_declarado_responde_405_sin_pedir_token() throws Exception {
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/auth/token"))
+                .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
     @DisplayName("Sin usuario o sin contraseña responde 400 con el error de cada campo")
     void sin_usuario_o_sin_contrasena_responde_400() throws Exception {
         mvc.perform(post("/api/auth/token").contentType(MediaType.APPLICATION_JSON).content("{\"username\": \" \"}"))

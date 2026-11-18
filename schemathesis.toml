@@ -8,10 +8,14 @@
 deterministic = true
 max-examples = 40
 
-# Usuario administrador del perfil demo (contraseña de práctica, ya pública en el README).
-[auth.basic]
-username = "admin"
-password = "demo"
+# Token Bearer del administrador del perfil demo (#122, ADR 0015; contraseña de práctica, ya pública en el README).
+# Schemathesis lo pide a POST /api/auth/token antes de probar y lo vuelve a pedir si recibe un 401 (retry_on). Solo
+# lo envía a las operaciones que usan el esquema bearerAuth del contrato: issueToken y signUp (security: []) van sin
+# token.
+[auth.dynamic.openapi.bearerAuth]
+path = "/api/auth/token"
+payload = { username = "admin", password = "demo" }
+extract_selector = "/accessToken"
 
 # Rechazos legítimos con datos que el esquema da por válidos. Se declaran solo en las operaciones que los
 # documentan; la comprobación sigue activa para todo lo demás, y el resto de operaciones usa los estados por

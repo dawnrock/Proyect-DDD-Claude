@@ -63,7 +63,8 @@ public class ApiSecurityConfig {
         return http
                 .securityMatcher("/api/**")
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers(HttpMethod.POST, "/api/auth/token", "/api/customers").permitAll()
+                        // Públicas con cualquier método: uno no declarado llega a Spring MVC y responde 405, no 401
+                        .requestMatchers("/api/auth/token", "/api/customers").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/accounts").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/accounts/*/account-number").hasRole("ADMIN")
                         .anyRequest().authenticated())

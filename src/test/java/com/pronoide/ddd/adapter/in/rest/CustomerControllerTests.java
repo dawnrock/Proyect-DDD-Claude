@@ -7,6 +7,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -138,6 +139,14 @@ class CustomerControllerTests {
                         .contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.title").value("No autenticado"));
+        verifyNoInteractions(registration);
+    }
+
+    @Test
+    @DisplayName("Un método no declarado en la ruta pública responde 405 sin pedir token")
+    void un_metodo_no_declarado_en_la_ruta_publica_responde_405_sin_pedir_token() throws Exception {
+        mvc.perform(put("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
+                .andExpect(status().isMethodNotAllowed());
         verifyNoInteractions(registration);
     }
 

@@ -118,7 +118,7 @@ The resource server support of Spring Security validates the Bearer token (`oaut
 - **Acceptance criteria:**
   - [x] `npx @redocly/cli lint docs/api/openapi.yaml` with no errors; `scripts/check-contract-version.mjs` accepts the bump (`oasdiff` reports 7 incompatible changes, 1.0.0 → 2.0.0).
 
-### [ ] T7 — Contract tests with a token (~10 min)
+### [x] T7 — Contract tests with a token (~10 min)
 
 - **Layer:** build
 - **Files:** `schemathesis.toml` (no Python hooks: Schemathesis 4.33.4 fetches tokens declaratively)
@@ -137,7 +137,8 @@ The resource server support of Spring Security validates the Bearer token (`oaut
   2. Adjust the `expected-statuses` of `issueToken` if the checks need it (401 for random credentials).
   3. Fallback only if the dynamic auth falls short: a hooks file `scripts/schemathesis_hooks.py` with `@schemathesis.auth(refresh_interval=600).skip_for(operation_id=["issueToken", "signUp"])` (class `ApiTokenAuth` with `get`/`set`), loaded with `hooks = "scripts/schemathesis_hooks.py"` in `schemathesis.toml`.
 - **Acceptance criteria:**
-  - [ ] `node scripts/contract-test.mjs` passes locally and in the CI.
+  - [x] `node scripts/contract-test.mjs` passes locally (694 cases; the CI runs it on the PR).
+  - *Deviation:* the first run found that an undeclared method (`QUERY`) on the two public paths answered 401 instead of 405. Before, Schemathesis sent Basic on every request, so this was hidden. Both paths are now public for any method, so Spring MVC answers 405; there are tests for it in `TokenControllerTests` and `CustomerControllerTests`. No change of `expected-statuses` was needed.
 
 ### [ ] T8 — Documentation and project status (~10 min)
 
