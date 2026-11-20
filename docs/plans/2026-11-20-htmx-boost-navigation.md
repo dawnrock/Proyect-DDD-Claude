@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-20
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~55 min (7 tasks)
 
 ## Goal
@@ -43,7 +43,7 @@ Every screen of the web moves between pages without a full reload: links and for
 
 ## Tasks
 
-### [ ] T1 — htmx configuration and boost on every page (~10 min)
+### [x] T1 — htmx configuration and boost on every page (~10 min)
 
 - **Layer:** adapter.in.web (templates)
 - **Files:** `fragments/layout.html`, the full-page templates, `AccountWebControllerTests`, `SignUpControllerTests`, `LoginControllerTests`
@@ -52,7 +52,7 @@ Every screen of the web moves between pages without a full reload: links and for
   1. Tests first: the list, the sign-up and the login carry `<body … hx-boost="true" hx-swap="innerHTML transition:true">` and the `htmx-config` meta with `"historyCacheSize":0` and `"refreshOnHistoryMiss":true`.
   2. Add the meta to the layout head and the attributes to every page's `<body>`.
 - **Acceptance criteria:**
-  - [ ] New tests green; every full page has the boost (a test walks the templates and fails if one lacks it).
+  - [x] New tests green; every full page has the boost (a test walks the templates and fails if one lacks it).
 
 ### [ ] T2 — "Abrir otra cuenta" inside the account panel (~5 min)
 
