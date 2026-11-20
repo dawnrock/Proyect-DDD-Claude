@@ -96,7 +96,7 @@ Every screen of the web moves between pages without a full reload: links and for
 - **Acceptance criteria:**
   - [x] Checked in T6.
 
-### [ ] T6 — Browser check (~15 min)
+### [x] T6 — Browser check (~15 min)
 
 - **Layer:** tests (manual, Playwright)
 - **Files:** —
@@ -115,7 +115,21 @@ Every screen of the web moves between pages without a full reload: links and for
   5. No console errors.
   6. The same flows with JavaScript disabled and with reduced motion (no animations).
 - **Acceptance criteria:**
-  - [ ] Every flow behaves as described.
+  - [x] Every flow behaves as described.
+
+- **Result (Playwright, 2026-11-20):**
+  - **With JavaScript:** the same `window` and the right URL and title through every flow listed above.
+    - Wrong and correct login, with `autofocus` on the username.
+    - List → detail → list; the detail's deposit still swaps only the panel.
+    - New account with field errors, then a correct one.
+    - Sign-up, with the progress bar at 33 %, 66 % and 100 %: field errors in steps 1 and 2, the account opened, and the duplicate customer with its link to the login.
+    - "Abrir otra cuenta" from the detail replaces the whole page, not the panel; a deposit below the minimum shows the domain error in the form.
+    - Logout.
+  - **Back button:** reloads from the server, with no `htmx-history-cache` in `sessionStorage`.
+  - **Expired session:** cookies cleared, then a boosted link lands on `/login`.
+  - **Animations:** 18 right after a boosted swap, 0 with reduced motion.
+  - **Without JavaScript:** every flow works through normal navigations.
+  - **Console:** the only error is the 401 of the expired session, provoked on purpose.
 
 ### [ ] T7 — Project status and decisions (~10 min)
 
