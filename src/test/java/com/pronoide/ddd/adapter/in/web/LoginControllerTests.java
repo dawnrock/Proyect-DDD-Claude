@@ -25,6 +25,17 @@ class LoginControllerTests {
     private MockMvc mvc;
 
     @Test
+    @DisplayName("Con ?blocked, el login muestra el formulario y el aviso de bloqueo con los minutos configurados (#130)")
+    void con_blocked_el_login_muestra_el_aviso_de_bloqueo() throws Exception {
+        mvc.perform(get("/login").param("blocked", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("name=\"username\"")))
+                .andExpect(content().string(containsString(
+                        "Demasiados intentos fallidos. Vuelve a intentarlo dentro de 30 minutos.")))
+                .andExpect(content().string(not(containsString("Usuario o contraseña incorrectos"))));
+    }
+
+    @Test
     @DisplayName("El login navega con htmx y la configuración de htmx no guarda copias de las páginas (#126)")
     void el_login_navega_con_htmx_y_no_guarda_copias_de_las_paginas() throws Exception {
         mvc.perform(get("/login").param("form", ""))

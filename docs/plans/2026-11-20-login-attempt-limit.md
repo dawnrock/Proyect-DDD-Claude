@@ -77,7 +77,7 @@ The application is public on Render and the demo user names are in the repositor
 - **Acceptance criteria:**
   - [x] Tests green.
 
-### [ ] T3 — Web login (~10 min)
+### [x] T3 — Web login (~10 min)
 
 - **Layer:** adapter.in (config) · adapter.in.web
 - **Files:** `SecuritySupport`, `WebSecurityConfig`, `LoginController`, `login.html`, `WebSecurityTests`, `LoginControllerTests`
@@ -90,7 +90,7 @@ The application is public on Render and the demo user names are in the repositor
      - a correct login still works.
   2. Provider bean in `SecuritySupport`; failure handler in the web chain; message in the template (`alert-danger` with an icon).
 - **Acceptance criteria:**
-  - [ ] Tests green; the existing login tests unchanged.
+  - [x] Tests green; the existing login tests unchanged.
 
 ### [ ] T4 — API token: 429 with Retry-After (~10 min)
 

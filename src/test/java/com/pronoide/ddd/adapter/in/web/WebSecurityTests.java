@@ -23,8 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import com.pronoide.ddd.application.CheckingAccountCommands;
 import com.pronoide.ddd.application.CheckingAccountQueries;
@@ -33,6 +35,11 @@ import com.pronoide.ddd.adapter.in.SecuritySupport;
 /** Reglas de la cadena de seguridad web (ADR 0008, #50): acceso, CSRF y rol de administrador. */
 @WebMvcTest({AccountWebController.class, LoginController.class, AccessDeniedController.class})
 @Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class})
+// Una usuaria real (contraseña «demo», el hash del perfil demo) para los inicios de sesión con el formulario (#130)
+@TestPropertySource(properties = {
+        "app.security.users[0].username=ada",
+        "app.security.users[0].password-hash=$2a$10$XbpS91y/CFr.Zvx6Xxi7RuLFFUMRM9adecz2G7FO4YClrsKKCdKWW",
+        "app.security.users[0].role=USER"})
 class WebSecurityTests {
 
     @Autowired
@@ -136,6 +143,29 @@ class WebSecurityTests {
         mvc.perform(get(css))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Cache-Control", "max-age=31536000, public"));
+    }
+
+    @Test
+    @DisplayName("Tras 3 inicios de sesión fallidos, ni la contraseña correcta entra: lleva a /login?blocked (#130)")
+    void tras_3_inicios_de_sesion_fallidos_ni_la_contrasena_correcta_entra() throws Exception {
+        for (int i = 0; i < 3; i++) {
+            mvc.perform(formLogin("ada", "mala", "198.51.100.7"))
+                    .andExpect(redirectedUrl("/login?error"));
+        }
+
+        mvc.perform(formLogin("ada", "demo", "198.51.100.7"))
+                .andExpect(redirectedUrl("/login?blocked"));
+        // Desde otra IP, la misma usuaria sigue pudiendo entrar
+        mvc.perform(formLogin("ada", "demo", "198.51.100.8"))
+                .andExpect(redirectedUrl("/"));
+    }
+
+    private static MockHttpServletRequestBuilder formLogin(String username, String password, String ip) {
+        return post("/login").with(csrf()).param("username", username).param("password", password)
+                .with(request -> {
+                    request.setRemoteAddr(ip);
+                    return request;
+                });
     }
 
     @Test

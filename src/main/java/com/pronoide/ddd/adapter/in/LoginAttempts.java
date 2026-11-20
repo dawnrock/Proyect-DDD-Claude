@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.stereotype.Component;
-
 /**
  * Fallos recientes de inicio de sesión, en memoria (#130, ADR 0017). Bloquea la pareja usuario e IP tras
  * {@link LoginAttemptsProperties#maxPerUser()} fallos y la IP entera tras {@link LoginAttemptsProperties#maxPerIp()},
@@ -21,9 +19,8 @@ import org.springframework.stereotype.Component;
  *
  * <p>Los contadores no se comparten entre instancias y se pierden al reiniciar: basta para una sola instancia. Las
  * entradas caducadas se eliminan al consultarlas y, cada cierto número de fallos, en bloque, para que los mapas no
- * crezcan sin límite con usuarios inventados.
+ * crezcan sin límite con usuarios inventados. Lo crea {@link SecuritySupport}.
  */
-@Component
 public class LoginAttempts {
 
     /** Cada cuántos fallos registrados se purgan las entradas caducadas de todos los usuarios e IP. */

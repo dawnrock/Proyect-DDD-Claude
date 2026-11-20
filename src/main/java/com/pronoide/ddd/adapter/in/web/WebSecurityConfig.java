@@ -1,5 +1,7 @@
 package com.pronoide.ddd.adapter.in.web;
 
+import java.util.Map;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -7,7 +9,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.ExceptionMappingAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+
+import com.pronoide.ddd.adapter.in.TooManyLoginAttemptsException;
 
 /**
  * Seguridad de la web (ADR 0008): la cadena de reserva, para todo lo que no es {@code /api/**} (va después de la de
@@ -39,6 +45,7 @@ public class WebSecurityConfig {
                 .formLogin(login -> login
                         .loginPage("/login")
                         .defaultSuccessUrl("/", true)
+                        .failureHandler(loginFailure())
                         .permitAll())
                 .logout(logout -> logout.logoutSuccessUrl("/login?logout"))
                 .exceptionHandling(errors -> {
@@ -50,5 +57,13 @@ public class WebSecurityConfig {
                     errors.authenticationEntryPoint(htmx).accessDeniedHandler(htmx);
                 })
                 .build();
+    }
+
+    /** Un bloqueo por demasiados intentos (#130) va a {@code /login?blocked}; el resto de fallos, a {@code /login?error}. */
+    private static AuthenticationFailureHandler loginFailure() {
+        ExceptionMappingAuthenticationFailureHandler handler = new ExceptionMappingAuthenticationFailureHandler();
+        handler.setDefaultFailureUrl("/login?error");
+        handler.setExceptionMappings(Map.of(TooManyLoginAttemptsException.class.getName(), "/login?blocked"));
+        return handler;
     }
 }
