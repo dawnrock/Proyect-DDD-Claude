@@ -128,7 +128,7 @@ The application is public on Render and the demo user names are in the repositor
 - **Acceptance criteria:**
   - [x] Lint without errors, version check and contract tests green.
 
-### [ ] T7 — Browser check (~5 min)
+### [x] T7 — Browser check (~5 min)
 
 - **Layer:** tests (manual, Playwright)
 - **Files:** —
@@ -137,7 +137,13 @@ The application is public on Render and the demo user names are in the repositor
   1. In Chromium, three wrong logins and then the right one show the blocked message; another user from the same browser can still log in until the IP reaches 10 failures.
   2. With JavaScript (boosted form, #126) and without it.
 - **Acceptance criteria:**
-  - [ ] Both behave as described.
+  - [x] Both behave as described.
+
+- **Result (Playwright, 2026-11-20):**
+  - **With JavaScript (boosted form):** three wrong logins for `ada` end on `/login?error`; the right password then ends on `/login?blocked` with "Demasiados intentos fallidos. Vuelve a intentarlo dentro de 30 minutos."; `grace` logs in from the same browser.
+  - **Without JavaScript:** the same with `alan`, and then `admin`.
+  - **Log:** it shows `Bloqueados los inicios de sesión de 'ada' desde 127.0.0.1 …`.
+  - **Console:** no page errors.
 
 ### [ ] T8 — ADR 0017 and project status (~10 min)
 
