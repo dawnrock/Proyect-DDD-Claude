@@ -18,3 +18,4 @@
   - **Check on Render after the first deploy:** fail a login three times and look at the warning `Bloqueados los inicios de sesión de … desde <ip>` in Render's logs. The IP must be the client's; if it is Render's proxy, set `server.tomcat.remoteip.internal-proxies`.
   - **In-memory counters:** they reset on restart and are not shared if the service ever runs several instances.
   - **Shared IPs:** a network behind one IP (NAT) is blocked as a whole after 10 failures.
+  - **Clients on internal addresses:** Tomcat trusts `X-Forwarded-For` from internal addresses (10/8, 172.16/12, 192.168/16, 100.64/10, loopback), so a client that reaches the container from one of them can choose the IP that counts. On Render clients come through its proxy; a second public proxy in front (a CDN) would instead make every request share the CDN's IP (#130 review).

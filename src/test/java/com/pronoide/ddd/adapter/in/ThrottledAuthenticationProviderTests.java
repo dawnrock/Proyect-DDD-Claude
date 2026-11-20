@@ -7,7 +7,14 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -101,6 +109,52 @@ class ThrottledAuthenticationProviderTests {
     }
 
     @Test
+    @DisplayName("Diez intentos simultáneos con contraseñas erróneas: solo 3 llegan a comprobar la contraseña")
+    void diez_intentos_simultaneos_solo_3_llegan_a_comprobar_la_contrasena() throws Exception {
+        CountDownLatch release = new CountDownLatch(1);
+        delegate.gate = release;
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+        try {
+            List<Future<Class<?>>> results = new ArrayList<>();
+            for (int i = 0; i < 10; i++) {
+                results.add(pool.submit(() -> {
+                    try {
+                        provider.authenticate(login("ada", "mala", IP));
+                        return null;
+                    } catch (AuthenticationException e) {
+                        return e.getClass();
+                    }
+                }));
+            }
+            // Los que no reservaron intento terminan ya; los 3 que lo reservaron esperan en el delegado
+            Thread.sleep(300);
+            release.countDown();
+            List<Class<?>> outcomes = new ArrayList<>();
+            for (Future<Class<?>> result : results) {
+                outcomes.add(result.get(5, TimeUnit.SECONDS));
+            }
+
+            assertThat(delegate.calls).isEqualTo(3);
+            assertThat(outcomes).filteredOn(TooManyLoginAttemptsException.class::equals).hasSize(7);
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
+    @Test
+    @DisplayName("Un rechazo que no es de credenciales, como una cuenta deshabilitada, no cuenta como fallo")
+    void un_rechazo_que_no_es_de_credenciales_no_cuenta_como_fallo() {
+        delegate.failure = new DisabledException("Cuenta deshabilitada");
+
+        for (int i = 0; i < 5; i++) {
+            assertThatExceptionOfType(DisabledException.class)
+                    .isThrownBy(() -> provider.authenticate(login("ada", "mala", IP)));
+        }
+
+        assertThat(attempts.lockedFor("ada", IP)).isEmpty();
+    }
+
+    @Test
     @DisplayName("Sin detalles de la petición, la IP cuenta como desconocida")
     void sin_detalles_la_ip_cuenta_como_desconocida() {
         assertThatExceptionOfType(BadCredentialsException.class)
@@ -124,11 +178,24 @@ class ThrottledAuthenticationProviderTests {
 
         static final String PASSWORD = "demo";
 
-        int calls;
+        final AtomicInteger callCount = new AtomicInteger();
+        volatile int calls;
+        volatile CountDownLatch gate;
+        volatile AuthenticationException failure;
 
         @Override
         public Authentication authenticate(Authentication authentication) {
-            calls++;
+            calls = callCount.incrementAndGet();
+            if (gate != null) {
+                try {
+                    gate.await(5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            if (failure != null) {
+                throw failure;
+            }
             if (!PASSWORD.equals(authentication.getCredentials())) {
                 throw new BadCredentialsException("Bad credentials");
             }

@@ -30,8 +30,38 @@ class LoginAttemptsTests {
 
     private void failTimes(String username, String ip, int times) {
         for (int i = 0; i < times; i++) {
-            attempts.failed(username, ip);
+            attempts.tryAttempt(username, ip);
         }
+    }
+
+    @Test
+    @DisplayName("Cada intento se reserva al empezar: el cuarto intento simultáneo ya encuentra el bloqueo")
+    void cada_intento_se_reserva_al_empezar() {
+        assertThat(attempts.tryAttempt(ADA, IP)).isEmpty();
+        assertThat(attempts.tryAttempt(ADA, IP)).isEmpty();
+        assertThat(attempts.tryAttempt(ADA, IP)).isEmpty();
+
+        assertThat(attempts.tryAttempt(ADA, IP)).contains(Duration.ofMinutes(30));
+    }
+
+    @Test
+    @DisplayName("Un intento liberado, porque no falló la contraseña, no cuenta como fallo")
+    void un_intento_liberado_no_cuenta_como_fallo() {
+        failTimes(ADA, IP, 2);
+
+        attempts.tryAttempt(ADA, IP);
+        attempts.released(ADA, IP);
+
+        assertThat(attempts.lockedFor(ADA, IP)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Un nombre de usuario larguísimo se recorta en la clave y no crece sin límite")
+    void un_nombre_de_usuario_larguisimo_se_recorta_en_la_clave() {
+        String longName = "a".repeat(5_000);
+        failTimes(longName, IP, 3);
+
+        assertThat(attempts.lockedFor(longName.substring(0, 128) + "zzz", IP)).isPresent();
     }
 
     @Test
@@ -46,7 +76,7 @@ class LoginAttemptsTests {
         failTimes(ADA, IP, 2);
         assertThat(attempts.lockedFor(ADA, IP)).isEmpty();
 
-        attempts.failed(ADA, IP);
+        attempts.tryAttempt(ADA, IP);
 
         assertThat(attempts.lockedFor(ADA, IP)).contains(Duration.ofMinutes(30));
         assertThat(attempts.lockedFor(ADA, OTHER_IP)).isEmpty();
@@ -56,7 +86,7 @@ class LoginAttemptsTests {
     @DisplayName("Tras 10 fallos desde una IP con usuarios distintos, esa IP queda bloqueada para cualquier usuario")
     void tras_10_fallos_desde_una_ip_queda_bloqueada_para_cualquier_usuario() {
         for (int i = 0; i < 10; i++) {
-            attempts.failed("usuario" + i, IP);
+            attempts.tryAttempt("usuario" + i, IP);
         }
 
         assertThat(attempts.lockedFor("grace", IP)).contains(Duration.ofMinutes(30));
@@ -89,9 +119,9 @@ class LoginAttemptsTests {
     @Test
     @DisplayName("El usuario se compara sin distinguir mayúsculas")
     void el_usuario_se_compara_sin_distinguir_mayusculas() {
-        attempts.failed("Ada", IP);
-        attempts.failed("ADA", IP);
-        attempts.failed("ada", IP);
+        attempts.tryAttempt("Ada", IP);
+        attempts.tryAttempt("ADA", IP);
+        attempts.tryAttempt("ada", IP);
 
         assertThat(attempts.lockedFor("aDa", IP)).isPresent();
     }
@@ -102,7 +132,7 @@ class LoginAttemptsTests {
         failTimes(ADA, IP, 2);
         clock.advance(Duration.ofMinutes(31));
 
-        attempts.failed(ADA, IP);
+        attempts.tryAttempt(ADA, IP);
 
         assertThat(attempts.lockedFor(ADA, IP)).isEmpty();
     }

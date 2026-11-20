@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-20
-- **Status:** in progress
-- **Total estimate:** ~75 min (8 tasks)
+- **Status:** done
+- **Total estimate:** ~95 min (9 tasks)
 
 ## Goal
 
@@ -162,29 +162,47 @@ The application is public on Render and the demo user names are in the repositor
 - **Acceptance criteria:**
   - [x] The CI status-file check passes.
 
+### [x] T9 — Review fixes (~20 min)
+
+- **Layer:** adapter.in · adapter.in.web · tests · docs
+- **Files:** `LoginAttempts`, `ThrottledAuthenticationProvider`, `LoginController`, `LoginAttemptsTests`, `ThrottledAuthenticationProviderTests`, `TokenControllerTests`, `docs/ia/pendientes.md`
+- **Depends on:** T1-T8
+- **What to do:** findings of the `revisor-ddd` review (none blocking):
+  1. **Bursts of concurrent requests.** Checking the lock and recording the failure were separate steps, so a burst of simultaneous requests could test more passwords than the limit. `LoginAttempts.tryAttempt` now reserves each attempt as a failure, in the same atomic step that checks the lock, before the password is checked. A success clears the pair and gives back the IP's reservation (`succeeded`). A rejection that is not about credentials (a disabled account…) gives back both (`released`). New tests:
+     - ten concurrent wrong attempts: only 3 reach the password check. Seen red by checking the lock without reserving, then restored;
+     - a `DisabledException` does not count.
+  2. **Race with pruning.** `LoginAttempts` is now fully `synchronized` over plain maps. This also closes the race in which pruning could drop a deque while a failure was being recorded in it.
+  3. **Bounded memory.** The user name is cut to 128 characters in the key (test with a 5,000-character name).
+  4. **Clean logs.** The log replaces every control character, U+2028 and U+2029, and truncates the user name.
+  5. **Stable test.** The `Retry-After` assertion accepts 1700-1800 seconds, so it does not depend on the time between two requests.
+  6. **One source for the minutes.** `LoginController` takes the minutes from `LoginAttemptsProperties`, rounded up and at least 1, instead of repeating the default.
+  7. **Pending item.** A client on an internal address can choose the IP that counts, and a CDN in front would make everyone share one IP.
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green; the browser check re-run.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] After 3 failures the user + IP pair, and after 10 the IP, are blocked for 30 minutes on the web and the API, even with the right password.
-- [ ] A success before the limit resets the pair.
-- [ ] Neither the message nor the status reveals whether the user exists.
-- [ ] Behind Render's proxy the counted IP is the client's, not the proxy's.
-- [ ] Contract tests still green.
+- [x] After 3 failures the user + IP pair, and after 10 the IP, are blocked for 30 minutes on the web and the API, even with the right password.
+- [x] A success before the limit resets the pair.
+- [x] Neither the message nor the status reveals whether the user exists.
+- [x] Behind Render's proxy the counted IP is the client's, not the proxy's.
+- [x] Contract tests still green.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): none added.
-- [ ] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes.
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a (a technical safeguard, not a business rule).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): none added.
+- [x] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes.
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a (a technical safeguard, not a business rule).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

@@ -1,6 +1,7 @@
 package com.pronoide.ddd.adapter.in.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -105,7 +106,8 @@ class TokenControllerTests {
 
         mvc.perform(tokenRequest("ada", "demo", "198.51.100.9"))
                 .andExpect(status().isTooManyRequests())
-                .andExpect(header().string(HttpHeaders.RETRY_AFTER, "1800"))
+                // Los segundos que quedan de 30 minutos: 1800, o algo menos si el reloj avanza entre peticiones
+                .andExpect(header().string(HttpHeaders.RETRY_AFTER, matchesPattern("1800|17[0-9]{2}")))
                 .andExpect(jsonPath("$.title").value("Demasiados intentos"))
                 .andExpect(jsonPath("$.detail").value(
                         "Demasiados intentos fallidos de inicio de sesión. Vuelve a intentarlo más tarde."))

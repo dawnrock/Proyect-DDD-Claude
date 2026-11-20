@@ -3,11 +3,12 @@ package com.pronoide.ddd.adapter.in.web;
 import java.time.Duration;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.pronoide.ddd.adapter.in.LoginAttemptsProperties;
 
 /**
  * Página de acceso. Sin parámetros enseña las dos puertas («Ya soy cliente» y «Quiero ser cliente»); con {@code ?form}
@@ -18,18 +19,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class LoginController {
 
-    /** Duración del bloqueo por demasiados intentos fallidos (#130), para decírsela a quien lo sufre. */
-    private final Duration lockout;
+    /** Minutos del bloqueo por demasiados intentos fallidos (#130), para decírselos a quien lo sufre: al menos 1. */
+    private final long lockoutMinutes;
 
-    public LoginController(@Value("${app.security.login-attempts.lockout:30m}") Duration lockout) {
-        this.lockout = lockout;
+    public LoginController(LoginAttemptsProperties loginAttempts) {
+        Duration lockout = loginAttempts.lockout();
+        this.lockoutMinutes = Math.max(1, (lockout.toSeconds() + 59) / 60);
     }
 
     @GetMapping("/login")
     public String login(@RequestParam Map<String, String> params, Model model) {
         model.addAttribute("showForm", params.containsKey("form") || params.containsKey("error")
                 || params.containsKey("blocked"));
-        model.addAttribute("lockoutMinutes", lockout.toMinutes());
+        model.addAttribute("lockoutMinutes", lockoutMinutes);
         return "login";
     }
 }

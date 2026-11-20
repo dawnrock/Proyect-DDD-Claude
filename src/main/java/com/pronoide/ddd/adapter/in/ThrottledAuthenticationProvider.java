@@ -35,7 +35,8 @@ public class ThrottledAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) {
         String username = authentication.getName();
         String ip = ipOf(authentication);
-        Optional<Duration> locked = attempts.lockedFor(username, ip);
+        // Se reserva el intento antes de comprobar la contraseña: una ráfaga simultánea no pasa del límite
+        Optional<Duration> locked = attempts.tryAttempt(username, ip);
         if (locked.isPresent()) {
             throw new TooManyLoginAttemptsException(locked.get());
         }
@@ -45,12 +46,14 @@ public class ThrottledAuthenticationProvider implements AuthenticationProvider {
             return result;
         } catch (BadCredentialsException e) {
             // Un usuario inexistente también llega como BadCredentialsException (hideUserNotFoundExceptions)
-            attempts.failed(username, ip);
             if (attempts.lockedFor(username, ip).isPresent()) {
-                // El usuario lo escribe quien intenta entrar: sin saltos de línea, para no falsear el log
                 log.warn("Bloqueados los inicios de sesión de '{}' desde {} por demasiados intentos fallidos",
-                        String.valueOf(username).replaceAll("[\\r\\n]", "_"), ip);
+                        forLog(username), ip);
             }
+            throw e;
+        } catch (RuntimeException e) {
+            // Cuenta deshabilitada, caducada...: no es una contraseña probada, así que no cuenta como fallo
+            attempts.released(username, ip);
             throw e;
         }
     }
@@ -58,6 +61,13 @@ public class ThrottledAuthenticationProvider implements AuthenticationProvider {
     @Override
     public boolean supports(Class<?> authentication) {
         return delegate.supports(authentication);
+    }
+
+    /** El usuario lo escribe quien intenta entrar: sin caracteres de control y recortado, para no falsear el log. */
+    private static String forLog(String username) {
+        String clean = String.valueOf(username).replaceAll("[\\p{Cntrl}\\u2028\\u2029]", "_");
+        return clean.length() > LoginAttempts.MAX_USERNAME_IN_KEY
+                ? clean.substring(0, LoginAttempts.MAX_USERNAME_IN_KEY) + "…" : clean;
     }
 
     private static String ipOf(Authentication authentication) {
