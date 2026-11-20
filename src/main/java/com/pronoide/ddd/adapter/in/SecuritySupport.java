@@ -1,19 +1,23 @@
 package com.pronoide.ddd.adapter.in;
 
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
@@ -30,7 +34,7 @@ import com.pronoide.ddd.application.OpenAccountCommandDef;
  * cuenta.
  */
 @Configuration
-@EnableConfigurationProperties(SecurityUsersProperties.class)
+@EnableConfigurationProperties({SecurityUsersProperties.class, LoginAttemptsProperties.class})
 public class SecuritySupport {
 
     private static final Set<String> ROLES = Set.of("ADMIN", "USER");
@@ -50,6 +54,24 @@ public class SecuritySupport {
         StrictHttpFirewall firewall = new StrictHttpFirewall();
         firewall.setAllowedHttpMethods(List.of("DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "QUERY"));
         return firewall;
+    }
+
+    /** Fallos recientes de inicio de sesión (#130, ADR 0017). Sin el reloj del núcleo, como en los tests web, el del sistema. */
+    @Bean
+    public LoginAttempts loginAttempts(LoginAttemptsProperties properties, ObjectProvider<Clock> clock) {
+        return new LoginAttempts(properties, clock.getIfAvailable(Clock::systemUTC));
+    }
+
+    /**
+     * Autenticación con usuario y contraseña limitada en intentos (#130, ADR 0017). Spring Security la usa en el inicio
+     * de sesión de la web, y la emisión de tokens de la API la reutiliza.
+     */
+    @Bean
+    public ThrottledAuthenticationProvider authenticationProvider(UserDetailsService users, PasswordEncoder encoder,
+                                                                  LoginAttempts attempts) {
+        DaoAuthenticationProvider credentials = new DaoAuthenticationProvider(users);
+        credentials.setPasswordEncoder(encoder);
+        return new ThrottledAuthenticationProvider(credentials, attempts);
     }
 
     @Bean

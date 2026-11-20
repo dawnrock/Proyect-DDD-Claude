@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Proyect-DDD-Claude · Checking accounts API
-  version: 2.0.0
+  version: 2.1.0
   description: |
     Versioned with SemVer (ADR 0014); the changes are in `docs/api/CHANGELOG.md`.
 
@@ -66,7 +66,8 @@ paths:
         JWT signed with HS256 that lasts 15 minutes. Send it on the other operations as `Authorization: Bearer
         <token>`. Its claims are `iss`, `sub` (the username), `roles` (`ADMIN` or `USER`), `iat` and `exp`. The
         answer is 200, not 201: a token is not a resource with its own URL. Wrong credentials give 401 without saying
-        whether the user or the password failed.
+        whether the user or the password failed. After 3 failures for a user from one IP, or 10 from one IP with any
+        user, the requests from there get 429 for 30 minutes, even with the right password (ADR 0017).
       security: []
       requestBody:
         required: true
@@ -114,6 +115,8 @@ paths:
                 detail: Usuario o contraseña incorrectos
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
   /api/accounts:
     get:
       tags: [accounts]
@@ -784,6 +787,26 @@ components:
       bearerFormat: JWT
       description: A token from `POST /api/auth/token` (demo profile users are in the README). It lasts 15 minutes.
   responses:
+    TooManyRequests:
+      description: |
+        Too many failed login attempts from this IP, for this user or for any user: try again after `Retry-After`
+        seconds. The same answer whether the user exists or not.
+      headers:
+        Retry-After:
+          description: Seconds until the lock ends.
+          schema:
+            type: integer
+            minimum: 1
+          example: 1800
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: Demasiados intentos
+            status: 429
+            detail: Demasiados intentos fallidos de inicio de sesión. Vuelve a intentarlo más tarde.
     Unauthorized:
       description: Not authenticated, with a `WWW-Authenticate` header that asks for a Bearer token.
       headers:

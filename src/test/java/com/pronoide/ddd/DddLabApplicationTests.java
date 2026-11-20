@@ -455,6 +455,39 @@ class DddLabApplicationTests {
 	}
 
 	@Nested
+	@DisplayName("IP del cliente detrás de un proxy (#130)")
+	class ClientIpBehindProxy {
+
+		@Test
+		@DisplayName("Detrás de un proxy cuenta la IP de X-Forwarded-For: bloqueada esa, otra IP de la misma usuaria entra")
+		void detras_de_un_proxy_cuenta_la_ip_de_x_forwarded_for() throws Exception {
+			for (int i = 0; i < 3; i++) {
+				assertThat(login("grace", "mala", "203.0.113.5")).endsWith("/login?error");
+			}
+
+			assertThat(login("grace", PASSWORD, "203.0.113.5")).endsWith("/login?blocked");
+			assertThat(login("grace", PASSWORD, "203.0.113.6")).doesNotContain("login");
+		}
+
+		/** Inicio de sesión por el formulario como si llegara a través del proxy; devuelve adónde redirige. */
+		private String login(String username, String password, String clientIp) throws Exception {
+			HttpClient client = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
+			HttpResponse<String> form = client.send(HttpRequest.newBuilder(URI.create(url("/login?form")))
+					.header("X-Forwarded-For", clientIp).GET().build(), HttpResponse.BodyHandlers.ofString());
+			java.util.regex.Matcher csrf = java.util.regex.Pattern.compile("name=\"_csrf\" value=\"([^\"]+)\"")
+					.matcher(form.body());
+			assertThat(csrf.find()).isTrue();
+			HttpResponse<String> login = client.send(HttpRequest.newBuilder(URI.create(url("/login")))
+					.header("Content-Type", "application/x-www-form-urlencoded")
+					.header("X-Forwarded-For", clientIp)
+					.POST(HttpRequest.BodyPublishers.ofString("username=%s&password=%s&_csrf=%s"
+							.formatted(username, password, csrf.group(1))))
+					.build(), HttpResponse.BodyHandlers.ofString());
+			return login.headers().firstValue("Location").orElseThrow();
+		}
+	}
+
+	@Nested
 	@DisplayName("Alta de cliente de Mon-A Bank con el servicio real (#103)")
 	class CustomerSignUp {
 

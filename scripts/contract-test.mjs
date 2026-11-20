@@ -50,7 +50,10 @@ if (jars.length === 0) fail('No hay ningún jar en target/: ejecuta antes ./mvnw
 if (await isUp()) fail(`Ya hay una aplicación en ${baseUrl}: detenla o elige otro puerto con CONTRACT_TEST_PORT.`);
 
 console.log(`Arrancando ${jars[0]} con el perfil demo en ${baseUrl}…`);
-const app = spawn('java', ['-jar', jars[0], '--spring.profiles.active=demo', `--server.port=${port}`], {
+// Schemathesis envía credenciales inventadas a POST /api/auth/token: con el límite normal de intentos (ADR 0017)
+// bloquearía su propia IP y luego no obtendría el token que necesitan las demás operaciones.
+const app = spawn('java', ['-jar', jars[0], '--spring.profiles.active=demo', `--server.port=${port}`,
+  '--app.security.login-attempts.max-per-user=1000000', '--app.security.login-attempts.max-per-ip=1000000'], {
   cwd: root,
   stdio: ['ignore', 'ignore', 'inherit'],
 });

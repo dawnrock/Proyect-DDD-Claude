@@ -24,6 +24,7 @@
 
     <form class="card card-body" th:if="${showForm}" th:action="@{/login}" method="post">
         <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:if="${param.error}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg>Usuario o contraseña incorrectos</div>
+        <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:if="${param.blocked}"><svg th:replace="~{fragments/icons :: icon('shield-x')}"></svg><span th:text="|Demasiados intentos fallidos. Vuelve a intentarlo dentro de ${lockoutMinutes} minutos.|">Demasiados intentos fallidos. Vuelve a intentarlo dentro de 30 minutos.</span></div>
 
         <div class="mb-3">
             <label class="form-label" for="username">Usuario</label>
