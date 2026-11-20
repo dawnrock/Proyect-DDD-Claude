@@ -105,7 +105,7 @@ The application is public on Render and the demo user names are in the repositor
 - **Acceptance criteria:**
   - [x] Tests green; the existing token tests unchanged.
 
-### [ ] T5 — Real client IP behind the proxy (~10 min)
+### [x] T5 — Real client IP behind the proxy (~10 min)
 
 - **Layer:** config
 - **Files:** `application.properties`, `DddLabApplicationTests`
@@ -114,7 +114,7 @@ The application is public on Render and the demo user names are in the repositor
   1. Test first, with the real server of `DddLabApplicationTests`. Three wrong logins with `X-Forwarded-For: 203.0.113.5` lock that address, and the same user with `X-Forwarded-For: 203.0.113.6` can still log in.
   2. `server.forward-headers-strategy=native`.
 - **Acceptance criteria:**
-  - [ ] Test green; seen red without the setting (every request then shares the loopback address).
+  - [x] Test green; seen red without the setting (every request then shares the loopback address).
 
 ### [ ] T6 — OpenAPI contract 2.1.0 and contract tests (~10 min)
 
