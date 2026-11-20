@@ -30,7 +30,7 @@ import com.pronoide.ddd.application.OpenAccountCommandDef;
  * cuenta.
  */
 @Configuration
-@EnableConfigurationProperties(SecurityUsersProperties.class)
+@EnableConfigurationProperties({SecurityUsersProperties.class, LoginAttemptsProperties.class})
 public class SecuritySupport {
 
     private static final Set<String> ROLES = Set.of("ADMIN", "USER");

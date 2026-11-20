@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-20
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~75 min (8 tasks)
 
 ## Goal
@@ -44,7 +44,7 @@ The application is public on Render and the demo user names are in the repositor
 
 ## Tasks
 
-### [ ] T1 — Login attempt counters (~10 min)
+### [x] T1 — Login attempt counters (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `LoginAttempts`, `LoginAttemptsProperties`, `LoginAttemptsTests`
@@ -59,7 +59,7 @@ The application is public on Render and the demo user names are in the repositor
      - old failures fall out of the window.
   2. Implement with `ConcurrentHashMap` and the `Clock` bean; properties `max-per-user` (3), `max-per-ip` (10), `lockout` (30m) under `app.security.login-attempts`.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
 ### [ ] T2 — Throttled authentication provider (~10 min)
 
