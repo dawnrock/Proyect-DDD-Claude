@@ -61,7 +61,7 @@ The application is public on Render and the demo user names are in the repositor
 - **Acceptance criteria:**
   - [x] Tests green.
 
-### [ ] T2 — Throttled authentication provider (~10 min)
+### [x] T2 — Throttled authentication provider (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `ThrottledAuthenticationProvider`, `TooManyLoginAttemptsException`, `ThrottledAuthenticationProviderTests`
@@ -75,7 +75,7 @@ The application is public on Render and the demo user names are in the repositor
      - no details means the IP is `unknown`.
   2. Implement; log a warning when a lock starts.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
 ### [ ] T3 — Web login (~10 min)
 
