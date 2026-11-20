@@ -76,7 +76,7 @@ Every screen of the web moves between pages without a full reload: links and for
 - **Acceptance criteria:**
   - [x] Test green.
 
-### [ ] T4 — Expired session on a boosted navigation (~5 min)
+### [x] T4 — Expired session on a boosted navigation (~5 min)
 
 - **Layer:** adapter.in.web (security tests)
 - **Files:** `WebSecurityTests`
@@ -84,7 +84,7 @@ Every screen of the web moves between pages without a full reload: links and for
 - **What to do:**
   1. Test: a boosted GET of `/` without a session (`HX-Request` and `HX-Boosted` headers) answers 401 with `HX-Redirect: /login`. It should pass already with `HtmxLoginRedirect`; check it can fail by removing the entry point temporarily.
 - **Acceptance criteria:**
-  - [ ] Test green and seen red when sabotaged.
+  - [x] Test green and seen red when sabotaged.
 
 ### [ ] T5 — Entrance animation after boosted navigations (~5 min)
 

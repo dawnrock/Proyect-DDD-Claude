@@ -54,6 +54,14 @@ class WebSecurityTests {
     }
 
     @Test
+    @DisplayName("Una navegación con hx-boost sin sesión recibe 401 con HX-Redirect al login (#126)")
+    void una_navegacion_con_hx_boost_sin_sesion_recibe_hx_redirect_al_login() throws Exception {
+        mvc.perform(get("/").header("HX-Request", "true").header("HX-Boosted", "true"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("HX-Redirect", "/login"));
+    }
+
+    @Test
     @DisplayName("La misma petición sin htmx sigue redirigiendo al login (#125)")
     void la_misma_peticion_sin_htmx_sigue_redirigiendo_al_login() throws Exception {
         mvc.perform(post("/accounts/" + UUID.randomUUID() + "/deposits").with(csrf()))
