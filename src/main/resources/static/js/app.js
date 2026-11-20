@@ -17,7 +17,7 @@
     window.addEventListener('pagereveal', ignoreAbortedTransition);
 
     // Entrada de la página con Motion: los bloques de <main> aparecen escalonados. No se anima con movimiento reducido.
-    document.addEventListener('DOMContentLoaded', () => {
+    const animateEntrance = () => {
         if (reducedMotion || !window.Motion) {
             return;
         }
@@ -25,6 +25,14 @@
         if (blocks.length > 0) {
             Motion.animate(blocks, { opacity: [0, 1], y: [8, 0] },
                 { duration: 0.3, ease: 'easeOut', delay: Motion.stagger(0.04) });
+        }
+    };
+    document.addEventListener('DOMContentLoaded', animateEntrance);
+
+    // Navegación con hx-boost (#126): htmx sustituye el <body> sin cargar la página, así que la entrada se anima aquí.
+    document.addEventListener('htmx:afterSettle', (event) => {
+        if (event.detail.target === document.body) {
+            animateEntrance();
         }
     });
 

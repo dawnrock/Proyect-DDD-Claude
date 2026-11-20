@@ -86,7 +86,7 @@ Every screen of the web moves between pages without a full reload: links and for
 - **Acceptance criteria:**
   - [x] Test green and seen red when sabotaged.
 
-### [ ] T5 — Entrance animation after boosted navigations (~5 min)
+### [x] T5 — Entrance animation after boosted navigations (~5 min)
 
 - **Layer:** adapter.in.web (static)
 - **Files:** `static/js/app.js`
@@ -94,7 +94,7 @@ Every screen of the web moves between pages without a full reload: links and for
 - **What to do:**
   1. Extract the entrance animation into a function; call it on `DOMContentLoaded` and on `htmx:afterSettle` when the swapped target is `body`. Nothing under reduced motion.
 - **Acceptance criteria:**
-  - [ ] Checked in T6.
+  - [x] Checked in T6.
 
 ### [ ] T6 — Browser check (~15 min)
 
