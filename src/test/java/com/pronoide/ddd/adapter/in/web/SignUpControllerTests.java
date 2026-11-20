@@ -87,7 +87,9 @@ class SignUpControllerTests {
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("role=\"progressbar\"")))
                     .andExpect(content().string(containsString("aria-valuemin=\"0\" aria-valuemax=\"3\" aria-valuenow=\"1\"")))
-                    .andExpect(content().string(containsString("style=\"width: 33%\"")));
+                    .andExpect(content().string(containsString("style=\"width: 33%\"")))
+                    // #126: con nombre de transición de vista, la barra crece de un paso al siguiente
+                    .andExpect(content().string(containsString("<div class=\"progress-bar signup-progress-bar\"")));
         }
 
         @Test

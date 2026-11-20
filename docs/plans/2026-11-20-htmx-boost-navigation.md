@@ -65,7 +65,7 @@ Every screen of the web moves between pages without a full reload: links and for
 - **Acceptance criteria:**
   - [x] Test green; the panel's `hx-post` forms unchanged (their #125 tests green).
 
-### [ ] T3 — Animated sign-up progress (~5 min)
+### [x] T3 — Animated sign-up progress (~5 min)
 
 - **Layer:** adapter.in.web (templates and static)
 - **Files:** `signup/progress.html`, `static/css/app.css`, `SignUpControllerTests`
@@ -74,7 +74,7 @@ Every screen of the web moves between pages without a full reload: links and for
   1. Test first: the progress bar carries the class `signup-progress-bar`.
   2. `.signup-progress-bar { view-transition-name: signup-progress; }` inside `@media (prefers-reduced-motion: no-preference)`.
 - **Acceptance criteria:**
-  - [ ] Test green.
+  - [x] Test green.
 
 ### [ ] T4 — Expired session on a boosted navigation (~5 min)
 
