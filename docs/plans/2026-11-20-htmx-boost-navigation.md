@@ -131,7 +131,7 @@ Every screen of the web moves between pages without a full reload: links and for
   - **Without JavaScript:** every flow works through normal navigations.
   - **Console:** the only error is the 401 of the expired session, provoked on purpose.
 
-### [ ] T7 — Project status and decisions (~10 min)
+### [x] T7 — Project status and decisions (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0016-web-frontend-libraries.md`, `docs/ia/decisiones.md`, `docs/ia/pendientes.md`, `docs/ia/historial.md`, `docs/ia/estado-del-proyecto.md`
@@ -142,7 +142,7 @@ Every screen of the web moves between pages without a full reload: links and for
   3. `pendientes.md`: per-field validation as a possible later step.
   4. Status: the htmx series (#124-#126) closed; next step chosen by the user.
 - **Acceptance criteria:**
-  - [ ] The CI status-file check passes.
+  - [x] The CI status-file check passes.
 
 ## Global acceptance criteria
 
