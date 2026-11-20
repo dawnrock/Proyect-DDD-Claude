@@ -116,7 +116,7 @@ The application is public on Render and the demo user names are in the repositor
 - **Acceptance criteria:**
   - [x] Test green; seen red without the setting (every request then shares the loopback address).
 
-### [ ] T6 — OpenAPI contract 2.1.0 and contract tests (~10 min)
+### [x] T6 — OpenAPI contract 2.1.0 and contract tests (~10 min)
 
 - **Layer:** docs · scripts
 - **Files:** `docs/api/openapi.yaml`, `docs/api/CHANGELOG.md`, `scripts/contract-test.mjs`
@@ -126,7 +126,7 @@ The application is public on Render and the demo user names are in the repositor
   2. `contract-test.mjs` starts the jar with high thresholds, because Schemathesis's random credentials would otherwise lock its own IP and its token request.
   3. `npx @redocly/cli lint docs/api/openapi.yaml`, `node scripts/check-contract-version.mjs` and `node scripts/contract-test.mjs`.
 - **Acceptance criteria:**
-  - [ ] Lint without errors, version check and contract tests green.
+  - [x] Lint without errors, version check and contract tests green.
 
 ### [ ] T7 — Browser check (~5 min)
 

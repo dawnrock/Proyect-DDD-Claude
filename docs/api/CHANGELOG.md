@@ -2,6 +2,12 @@
 
 Changes to `docs/api/openapi.yaml`, newest first. Versioning policy: [ADR 0014](../adr/0014-contract-versioning.md) (major for an incompatible change as `oasdiff breaking` reports it, minor for a compatible addition, patch for documentation only). The CI checks the bump on every pull request.
 
+## 2.1.0 · 2026-11-20 (#130)
+
+Limit on login attempts ([ADR 0017](../adr/0017-login-attempt-limit.md)).
+
+- **New response:** `issueToken` answers 429 (`TooManyRequests`, `ProblemDetail` with a `Retry-After` header in seconds) after 3 failures for a user from one IP, or 10 from one IP with any user, for 30 minutes and even with the right password. A compatible addition: no request or existing response changes.
+
 ## 2.0.0 · 2026-11-18 (#122)
 
 Authentication with JWT Bearer tokens ([ADR 0015](../adr/0015-jwt-bearer-api.md)).
