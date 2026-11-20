@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-20
-- **Status:** in progress
-- **Total estimate:** ~55 min (7 tasks)
+- **Status:** done
+- **Total estimate:** ~70 min (8 tasks)
 
 ## Goal
 
@@ -144,29 +144,44 @@ Every screen of the web moves between pages without a full reload: links and for
 - **Acceptance criteria:**
   - [x] The CI status-file check passes.
 
+### [x] T8 — Review fixes (~15 min)
+
+- **Layer:** adapter.in.web (tests and static), docs
+- **Files:** `WebSecurityTests`, `HtmxBoostTemplatesTests`, `static/js/app.js`, `docs/adr/0016-web-frontend-libraries.md`, `docs/ia/decisiones.md`, `docs/ia/pendientes.md`
+- **Depends on:** T1-T7
+- **What to do:** findings of the `revisor-ddd` review (none blocking):
+  1. **New test for an uncovered case.** The T4 test only repeated a #125 case, because `HtmxLoginRedirect` reads `HX-Request` and nothing reads `HX-Boosted`. It is replaced by a case that had no test: a boosted logout without the CSRF token (expired session) gets 401 + `HX-Redirect: /login`. Checked by giving the chain the plain 403 handler (red: 403) and restoring it.
+  2. **Sturdier page detection.** `HtmxBoostTemplatesTests` now treats every template with `<main>` as a full page and only checks the two attributes on its `<body>`, not a literal tag. Checked by removing the boost from `error/404.html` (red) and restoring it.
+  3. **Every error page is shown.** With the boost, a 400 or 500 on a navigation showed nothing: htmx sent no `Accept: text/html`, so Spring answered JSON, and `app.js` only painted 403 and 404. Now `app.js` asks for HTML like the browser does (`htmx:configRequest`), and any error answer that is an HTML page replaces the body. Checked in Chromium: a boosted link to `/accounts/no-es-un-uuid` shows Spring's error page, as without JavaScript. The #125 and #126 flows were re-run unchanged.
+  4. **ADR 0016 wording.** It still said htmx "will" answer fragments; it now describes what is done.
+  5. **Pending item.** After an expired session on a boosted navigation, the login lands on `/` instead of the page requested.
+  - **Seen while checking:** error answers carry the exception trace when the app runs through `spring-boot:run`, because `spring-boot-devtools` turns it on. The packaged jar deployed on Render does not include devtools, so it does not apply there.
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green; browser flows re-checked.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] With JavaScript, every screen navigates and submits without a full reload, with the right title and URL.
-- [ ] Without JavaScript, every screen works exactly as before.
-- [ ] The back button never restores a page from a client-side copy (no `htmx-history-cache` in `sessionStorage`).
-- [ ] The detail's operations of #125 keep swapping only the panel.
-- [ ] No animation or view transition runs with `prefers-reduced-motion`.
+- [x] With JavaScript, every screen navigates and submits without a full reload, with the right title and URL.
+- [x] Without JavaScript, every screen works exactly as before.
+- [x] The back button never restores a page from a client-side copy (no `htmx-history-cache` in `sessionStorage`).
+- [x] The detail's operations of #125 keep swapping only the panel.
+- [x] No animation or view transition runs with `prefers-reduced-motion`.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): none added.
-- [ ] If the API changes: n/a (the REST API does not change).
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): none added.
+- [x] If the API changes: n/a (the REST API does not change).
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a.
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

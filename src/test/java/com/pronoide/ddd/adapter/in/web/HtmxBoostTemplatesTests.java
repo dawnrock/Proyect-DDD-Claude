@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,8 +20,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
  */
 class HtmxBoostTemplatesTests {
 
-    private static final String BOOSTED_BODY =
-            "<body class=\"d-flex flex-column min-vh-100\" hx-boost=\"true\" hx-swap=\"innerHTML transition:true\">";
+    /** Etiqueta de apertura del body de una plantilla. */
+    private static final Pattern BODY = Pattern.compile("<body[^>]*>");
 
     @Test
     @DisplayName("Toda página completa lleva hx-boost con transición en su body")
@@ -29,10 +31,12 @@ class HtmxBoostTemplatesTests {
         List<String> withoutBoost = new ArrayList<>();
         for (Resource template : templates) {
             String html = template.getContentAsString(StandardCharsets.UTF_8);
-            // Una página completa toma la cabecera común; los fragmentos (layout, iconos, progreso) no
-            if (html.contains("<head th:replace=\"~{fragments/layout :: head(")) {
+            // Una página completa tiene <main>; los fragmentos (layout, iconos, progreso) no
+            Matcher body = BODY.matcher(html);
+            if (html.contains("<main") && body.find()) {
                 fullPages.add(template.getFilename());
-                if (!html.contains(BOOSTED_BODY)) {
+                String tag = body.group();
+                if (!tag.contains("hx-boost=\"true\"") || !tag.contains("hx-swap=\"innerHTML transition:true\"")) {
                     withoutBoost.add(template.getFilename());
                 }
             }
