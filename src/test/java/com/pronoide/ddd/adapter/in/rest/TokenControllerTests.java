@@ -22,6 +22,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import com.jayway.jsonpath.JsonPath;
 import com.pronoide.ddd.adapter.in.SecuritySupport;
@@ -92,6 +93,40 @@ class TokenControllerTests {
                 .andExpect(jsonPath("$.title").value("No autenticado"))
                 .andExpect(jsonPath("$.detail").value("Usuario o contraseña incorrectos"))
                 .andExpect(jsonPath("$.accessToken").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("Tras 3 fallos desde una IP, ni la contraseña correcta da token: 429 con Retry-After y sin revelar el usuario (#130)")
+    void tras_3_fallos_responde_429_con_retry_after() throws Exception {
+        for (int i = 0; i < 3; i++) {
+            mvc.perform(tokenRequest("ada", "incorrecta", "198.51.100.9"))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        mvc.perform(tokenRequest("ada", "demo", "198.51.100.9"))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().string(HttpHeaders.RETRY_AFTER, "1800"))
+                .andExpect(jsonPath("$.title").value("Demasiados intentos"))
+                .andExpect(jsonPath("$.detail").value(
+                        "Demasiados intentos fallidos de inicio de sesión. Vuelve a intentarlo más tarde."))
+                .andExpect(jsonPath("$.accessToken").doesNotExist());
+        // Un usuario inexistente bloqueado recibe exactamente la misma respuesta
+        for (int i = 0; i < 3; i++) {
+            mvc.perform(tokenRequest("nadie", "demo", "198.51.100.10"));
+        }
+        mvc.perform(tokenRequest("nadie", "demo", "198.51.100.10"))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.detail").value(
+                        "Demasiados intentos fallidos de inicio de sesión. Vuelve a intentarlo más tarde."));
+    }
+
+    private static MockHttpServletRequestBuilder tokenRequest(String username, String password, String ip) {
+        return post("/api/auth/token").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"username\": \"%s\", \"password\": \"%s\"}".formatted(username, password))
+                .with(request -> {
+                    request.setRemoteAddr(ip);
+                    return request;
+                });
     }
 
     @Test

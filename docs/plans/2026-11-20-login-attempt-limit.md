@@ -92,7 +92,7 @@ The application is public on Render and the demo user names are in the repositor
 - **Acceptance criteria:**
   - [x] Tests green; the existing login tests unchanged.
 
-### [ ] T4 — API token: 429 with Retry-After (~10 min)
+### [x] T4 — API token: 429 with Retry-After (~10 min)
 
 - **Layer:** adapter.in.rest
 - **Files:** `AccessTokenIssuer`, `TokenController`, `RestExceptionHandler`, `TokenControllerTests`
@@ -103,7 +103,7 @@ The application is public on Render and the demo user names are in the repositor
      - wrong credentials before the limit still answer 401.
   2. The issuer uses the throttled provider and sets `WebAuthenticationDetails` from the request; the handler maps the exception.
 - **Acceptance criteria:**
-  - [ ] Tests green; the existing token tests unchanged.
+  - [x] Tests green; the existing token tests unchanged.
 
 ### [ ] T5 — Real client IP behind the proxy (~10 min)
 

@@ -3,6 +3,8 @@ package com.pronoide.ddd.adapter.in.rest;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -18,12 +20,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.pronoide.ddd.adapter.in.TooManyLoginAttemptsException;
 import com.pronoide.ddd.adapter.in.UsernameTakenException;
 import com.pronoide.ddd.application.NotFoundException;
 import com.pronoide.ddd.application.OperationNotAllowedException;
 import com.pronoide.ddd.domain.model.DomainException;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Único punto de traducción de errores a HTTP para la API REST, con el formato {@link ProblemDetail}
@@ -39,6 +40,9 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     static final String BAD_REQUEST_TITLE = "Petición no válida";
     static final String UNSUPPORTED_MEDIA_TYPE_TITLE = "Tipo de contenido no admitido";
     static final String BAD_CREDENTIALS_DETAIL = "Usuario o contraseña incorrectos";
+    static final String TOO_MANY_ATTEMPTS_TITLE = "Demasiados intentos";
+    static final String TOO_MANY_ATTEMPTS_DETAIL =
+            "Demasiados intentos fallidos de inicio de sesión. Vuelve a intentarlo más tarde.";
 
     @ExceptionHandler(DomainException.class)
     ProblemDetail handleBusinessRule(DomainException exception) {
@@ -58,6 +62,19 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(OperationNotAllowedException.class)
     ProblemDetail handleNotAllowed(OperationNotAllowedException exception) {
         return problem(HttpStatus.FORBIDDEN, ApiSecurityConfig.FORBIDDEN_TITLE, exception.getMessage());
+    }
+
+    /**
+     * Demasiados intentos fallidos al pedir un token (#130, ADR 0017): 429 con {@code Retry-After} en segundos. El mismo
+     * mensaje exista o no el usuario.
+     */
+    @ExceptionHandler(TooManyLoginAttemptsException.class)
+    ResponseEntity<ProblemDetail> handleTooManyAttempts(TooManyLoginAttemptsException exception) {
+        long seconds = Math.max(1, (exception.retryAfter().toMillis() + 999) / 1000);
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(seconds))
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(problem(HttpStatus.TOO_MANY_REQUESTS, TOO_MANY_ATTEMPTS_TITLE, TOO_MANY_ATTEMPTS_DETAIL));
     }
 
     /** Credenciales erróneas al pedir un token ({@link TokenController}): 401 sin decir si falla el usuario o la contraseña. */

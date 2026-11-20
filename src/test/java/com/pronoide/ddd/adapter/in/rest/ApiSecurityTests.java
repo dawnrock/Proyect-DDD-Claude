@@ -85,7 +85,7 @@ class ApiSecurityTests {
     private CheckingAccountQueries queries;
 
     private String bearer(String username) {
-        return "Bearer " + issuer.issue(username, "demo").accessToken();
+        return "Bearer " + issuer.issue(username, "demo", null).accessToken();
     }
 
     private static String token(JwtEncoder encoder, Instant issuedAt, Instant expiresAt) {
