@@ -109,6 +109,18 @@ class AnotherAccountWebTests {
         }
 
         @Test
+        @DisplayName("En el detalle, el botón navega a toda la página y no dentro del panel de la cuenta (#126)")
+        void en_el_detalle_el_boton_navega_a_toda_la_pagina() throws Exception {
+            when(queries.listAccounts(ADA)).thenReturn(List.of(account(FIRST, "ES2199990001220000000001")));
+            when(queries.findAccount(ADA, FIRST)).thenReturn(details(FIRST));
+
+            mvc.perform(get("/accounts/" + FIRST))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString(
+                            "href=\"/accounts/another\" hx-target=\"body\" hx-swap=\"innerHTML transition:true\"")));
+        }
+
+        @Test
         @DisplayName("Un usuario sin cuentas no es cliente y no lo ve")
         void un_usuario_sin_cuentas_no_es_cliente_y_no_lo_ve() throws Exception {
             when(queries.listAccounts(ADA)).thenReturn(List.of());

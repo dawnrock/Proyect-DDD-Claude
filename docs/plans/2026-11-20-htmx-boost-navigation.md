@@ -54,7 +54,7 @@ Every screen of the web moves between pages without a full reload: links and for
 - **Acceptance criteria:**
   - [x] New tests green; every full page has the boost (a test walks the templates and fails if one lacks it).
 
-### [ ] T2 — "Abrir otra cuenta" inside the account panel (~5 min)
+### [x] T2 — "Abrir otra cuenta" inside the account panel (~5 min)
 
 - **Layer:** adapter.in.web (templates)
 - **Files:** `accounts/detail.html`, `AnotherAccountWebTests`
@@ -63,7 +63,7 @@ Every screen of the web moves between pages without a full reload: links and for
   1. Test first: the link carries `hx-target="body"` and `hx-swap="innerHTML transition:true"`.
   2. Add them.
 - **Acceptance criteria:**
-  - [ ] Test green; the panel's `hx-post` forms unchanged (their #125 tests green).
+  - [x] Test green; the panel's `hx-post` forms unchanged (their #125 tests green).
 
 ### [ ] T3 — Animated sign-up progress (~5 min)
 
