@@ -5,7 +5,7 @@
 <nav th:fragment="progress(step)" class="mb-4" aria-label="Progreso del alta">
     <p class="small text-body-secondary mb-2" th:text="'Paso ' + ${step} + ' de 3'">Paso 1 de 3</p>
     <div class="progress signup-progress" role="progressbar" aria-label="Paso del alta" th:attr="aria-valuenow=${step}" aria-valuemin="0" aria-valuemax="3">
-        <div class="progress-bar" th:style="'width: ' + ${step * 100 / 3} + '%'"></div>
+        <div class="progress-bar signup-progress-bar" th:style="'width: ' + ${step * 100 / 3} + '%'"></div>
     </div>
 </nav>
 </body>

@@ -25,6 +25,16 @@ class LoginControllerTests {
     private MockMvc mvc;
 
     @Test
+    @DisplayName("El login navega con htmx y la configuración de htmx no guarda copias de las páginas (#126)")
+    void el_login_navega_con_htmx_y_no_guarda_copias_de_las_paginas() throws Exception {
+        mvc.perform(get("/login").param("form", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("hx-boost=\"true\" hx-swap=\"innerHTML transition:true\"")))
+                .andExpect(content().string(containsString(
+                        "<meta name=\"htmx-config\" content='{\"historyCacheSize\":0,\"refreshOnHistoryMiss\":true}'>")));
+    }
+
+    @Test
     @DisplayName("Sin parámetros, /login muestra las dos puertas y ningún campo de formulario")
     void sin_parametros_login_muestra_las_dos_puertas_y_ningun_campo() throws Exception {
         mvc.perform(get("/login"))

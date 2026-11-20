@@ -54,6 +54,14 @@ class WebSecurityTests {
     }
 
     @Test
+    @DisplayName("Un cierre de sesión con htmx sin token CSRF, como tras caducar la sesión, lleva al login con HX-Redirect (#126)")
+    void un_cierre_de_sesion_con_htmx_sin_token_csrf_lleva_al_login() throws Exception {
+        mvc.perform(post("/logout").header("HX-Request", "true").header("HX-Boosted", "true"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("HX-Redirect", "/login"));
+    }
+
+    @Test
     @DisplayName("La misma petición sin htmx sigue redirigiendo al login (#125)")
     void la_misma_peticion_sin_htmx_sigue_redirigiendo_al_login() throws Exception {
         mvc.perform(post("/accounts/" + UUID.randomUUID() + "/deposits").with(csrf()))

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Detalle de cuenta')}"></head>
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100" hx-boost="true" hx-swap="innerHTML transition:true">
 <header th:replace="~{fragments/layout :: header}"></header>
 <main class="app-container mx-auto w-100 px-3 pb-5">
     <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1 mb-3" th:if="${backLabel != null}" th:href="@{/}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg><th:block th:text="${backLabel}">Cuentas</th:block></a>
@@ -28,7 +28,8 @@
                     <div><button class="btn btn-warning" type="submit">Confirmar</button></div>
                 </form>
             </details>
-            <a class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" id="another-account" th:if="${customer}" th:href="@{/accounts/another}"><svg th:replace="~{fragments/icons :: icon('plus')}"></svg>Abrir otra cuenta</a>
+            <!--/* Enlace dentro del panel: sin destino propio heredaría el del panel y se pintaría dentro de él (#126) */-->
+            <a class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" id="another-account" th:if="${customer}" th:href="@{/accounts/another}" hx-target="body" hx-swap="innerHTML transition:true"><svg th:replace="~{fragments/icons :: icon('plus')}"></svg>Abrir otra cuenta</a>
 
             <details id="deposit-action" th:object="${depositForm}" th:open="${#fields.hasAnyErrors()}">
                 <summary class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><svg th:replace="~{fragments/icons :: icon('arrow-down-to-line')}"></svg>Ingresar</summary>

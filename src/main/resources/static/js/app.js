@@ -17,7 +17,7 @@
     window.addEventListener('pagereveal', ignoreAbortedTransition);
 
     // Entrada de la página con Motion: los bloques de <main> aparecen escalonados. No se anima con movimiento reducido.
-    document.addEventListener('DOMContentLoaded', () => {
+    const animateEntrance = () => {
         if (reducedMotion || !window.Motion) {
             return;
         }
@@ -25,6 +25,14 @@
         if (blocks.length > 0) {
             Motion.animate(blocks, { opacity: [0, 1], y: [8, 0] },
                 { duration: 0.3, ease: 'easeOut', delay: Motion.stagger(0.04) });
+        }
+    };
+    document.addEventListener('DOMContentLoaded', animateEntrance);
+
+    // Navegación con hx-boost (#126): htmx sustituye el <body> sin cargar la página, así que la entrada se anima aquí.
+    document.addEventListener('htmx:afterSettle', (event) => {
+        if (event.detail.target === document.body) {
+            animateEntrance();
         }
     });
 
@@ -55,12 +63,17 @@
         }
     });
 
-    // htmx no pinta las respuestas de error. Las páginas de error propias (403, 404) sustituyen entonces al contenido
-    // de la página, como si se hubiese navegado a ella, en vez de dejar el clic sin respuesta. El resto de errores
-    // siguen sin pintarse: no hay una página nuestra que mostrar.
+    // htmx pide HTML, como el navegador al navegar: así un error genérico llega como página y no como JSON (#126).
+    document.addEventListener('htmx:configRequest', (event) => {
+        event.detail.headers.Accept = 'text/html';
+    });
+
+    // htmx no pinta las respuestas de error. Si el servidor devuelve una página de error (las propias 403 y 404, o la de
+    // Spring para el resto), sustituye al contenido de la página, como haría el navegador sin JavaScript al navegar a
+    // ella, en vez de dejar el clic sin respuesta (#125, ampliado a todos los errores con la navegación de #126).
     document.addEventListener('htmx:beforeSwap', (event) => {
         const { xhr } = event.detail;
-        if ((xhr.status === 403 || xhr.status === 404) && /<html/i.test(xhr.responseText)) {
+        if (xhr.status >= 400 && /<html/i.test(xhr.responseText)) {
             event.detail.shouldSwap = true;
             event.detail.target = document.body;
             event.detail.swapOverride = 'innerHTML';
