@@ -145,7 +145,7 @@ The application is public on Render and the demo user names are in the repositor
   - **Log:** it shows `Bloqueados los inicios de sesión de 'ada' desde 127.0.0.1 …`.
   - **Console:** no page errors.
 
-### [ ] T8 — ADR 0017 and project status (~10 min)
+### [x] T8 — ADR 0017 and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0017-login-attempt-limit.md`, `docs/adr/README.md`, `docs/ia/decisiones.md`, `docs/ia/pendientes.md`, `docs/ia/historial.md`, `docs/ia/estado-del-proyecto.md`, `docs/contracts/login-roles.md` (if it lists the token responses)
@@ -160,7 +160,7 @@ The application is public on Render and the demo user names are in the repositor
      - the limits of an in-memory counter.
   3. Next step: #131.
 - **Acceptance criteria:**
-  - [ ] The CI status-file check passes.
+  - [x] The CI status-file check passes.
 
 ## Global acceptance criteria
 
