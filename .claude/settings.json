@@ -12,7 +12,8 @@
       "Bash(gh issue list *)",
       "Bash(node .claude/skills/ddd-building-block/scripts/check-domain.mjs *)",
       "Bash(node scripts/notify.mjs *)",
-      "Bash(node scripts/graphify.mjs *)"
+      "Bash(node scripts/graphify.mjs *)",
+      "Bash(npx -y modern-web-guidance@latest *)"
     ],
     "deny": [
       "Read(./.env)",

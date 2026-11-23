@@ -15,7 +15,7 @@
 
 ## Next step
 
-1. No open issue left: agree the next one with the user (ideas in `pendientes.md`).
+1. Front-end review with `modern-web-guidance` (`docs/analysis/front-review-hexagonal.md`) opened #145 (accessible validation errors and focus), #146 (required fields, mobile keyboard, show password) and #147 (user decision: ask for the password once in the sign-up). Suggested order: #145 → #146 → #147.
 
 Both branches are live on Render (guide `docs/deploy/render.md`).
 

@@ -32,7 +32,7 @@ flowchart LR
 | Third-party skill | `.claude/skills/security-audit/` | 9 | Cloudflare's `security-audit` (copied from `cloudflare/security-audit-skill`, commit `c1c8a8c`, with its licence; #140, #141). Guidance mode for focused security questions; full audit mode (six phases with isolated agents, reports outside the repository) only on an explicit request. When to use it: see Security. |
 | Subagent | `.claude/agents/revisor-ddd.md` | 10.2 | DDD and architecture review, without edit rights, with Sonnet. |
 | Subagent | `.claude/agents/buscador-referencias.md` | 10.1, 10.3 | Wide searches with Haiku so the main context does not fill up. |
-| Teammates | `.claude/agents/backend-dev.md`, `.claude/agents/web-dev.md` | 10.2, 13.2 | One agent per side (back / web), with limited tools and packages; they review and negotiate the contract. |
+| Teammates | `.claude/agents/backend-dev.md`, `.claude/agents/web-dev.md` | 10.2, 13.2 | One agent per side (back / web), with limited tools and packages; they review and negotiate the contract. `web-dev` checks the `modern-web-guidance` plugin skill before writing templates, CSS or JavaScript. |
 | Team skill | `.claude/skills/implement-plan-team/` | 13.1, 13.2 | Back + web issue: contract first (`docs/contracts/`), parallel implementation in worktrees, integration and one PR (ADR 0007). |
 | `PreToolUse` hook | `.claude/hooks/block-backlog-json.mjs` | 12 | Blocks reading the backlog seed: the issues are the source of truth. |
 | `Notification` / `Stop` hooks | `.claude/hooks/notify-telegram.mjs` | 12.1 | Push notice to the phone when Claude waits for permission or finishes. |
