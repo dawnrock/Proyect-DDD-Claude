@@ -82,3 +82,4 @@
 - `Monolithic` is protected (PRs only, with `verify` required). `master` is locked.
 - If Claude's review fails with `is_error: true` in about 2 seconds, the known cause is a badly copied `CLAUDE_CODE_OAUTH_TOKEN` (401). It is diagnosed with `show_full_output` (see the history of PRs #28-#30).
 - Graphify 0.9.97 (`py -m pip install --user graphifyy`, Python 3.14 with the `py` launcher). It is not on the PATH: always use it through `scripts/graphify.mjs`. Without Graphify, everything still works with Grep.
+- **Password asked twice in the sign-up (#147):** the web sign-up keeps `password` + `passwordRepetition` on step 2, although the `autofill-sign-up-form` guide advises asking once; each field has its show-password button since #146. Decided by the user on 2026-11-23; #147 closed as not planned.

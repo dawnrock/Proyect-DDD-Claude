@@ -15,7 +15,7 @@
 
 ## Next step
 
-1. Front-end review with `modern-web-guidance` (`docs/analysis/front-review-hexagonal.md`): #145 and #146 done; next #147 (user decision: ask for the password once in the sign-up, now that the show-password button exists).
+1. Front-end review with `modern-web-guidance` (`docs/analysis/front-review-hexagonal.md`): #145 and #146 done, #147 closed (the user keeps the password repetition). Next: #152, the sign-up username format is not explained until it fails (found by the user; open question: lower-case what is typed?).
 
 Both branches are live on Render (guide `docs/deploy/render.md`).
 
