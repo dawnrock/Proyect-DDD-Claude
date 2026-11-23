@@ -50,15 +50,20 @@ public class CustomerRegistration {
         signUpLimit.tryReserve(clientIp).ifPresent(retryAfter -> {
             throw new TooManySignUpsException(retryAfter);
         });
+        AccountSummary account;
         try {
-            return signUp(command, rawPassword);
+            account = openAccount(command, rawPassword);
         } catch (RuntimeException e) {
+            // No se creó ningún cliente: la reserva se devuelve. Si el cliente ya existe y falla después la creación
+            // del usuario, el alta sigue contando, porque ocupa memoria
             signUpLimit.release(clientIp);
             throw e;
         }
+        createUser(command, rawPassword);
+        return account;
     }
 
-    private AccountSummary signUp(SignUpCommand command, String rawPassword) {
+    private AccountSummary openAccount(SignUpCommand command, String rawPassword) {
         if (users.userExists(command.username()) || queries.isUsernameTaken(command.username())) {
             throw new UsernameTakenException(command.username());
         }
@@ -66,7 +71,10 @@ public class CustomerRegistration {
             throw new IllegalArgumentException(
                     "La contraseña debe tener al menos %d caracteres".formatted(MINIMUM_PASSWORD_LENGTH));
         }
-        AccountSummary account = commands.signUp(command);
+        return commands.signUp(command);
+    }
+
+    private void createUser(SignUpCommand command, String rawPassword) {
         try {
             users.createUser(User.withUsername(command.username())
                     .password(passwordEncoder.encode(rawPassword))
@@ -78,6 +86,5 @@ public class CustomerRegistration {
             }
             throw e;
         }
-        return account;
     }
 }

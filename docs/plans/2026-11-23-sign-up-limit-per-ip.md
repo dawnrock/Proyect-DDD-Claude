@@ -149,6 +149,17 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
 - **Acceptance criteria:**
   - [ ] No mention of the pending Render check remains in `docs/ia/`; the CI project-status check passes.
 
+### [x] T9 — Review fixes (~5 min)
+
+- **Layer:** adapter.in
+- **Files:** `adapter/in/CustomerRegistration.java`, `CustomerRegistrationTests.java`
+- **Depends on:** T3
+- **What to do:**
+  1. `revisor-ddd` (no blocking findings): the reservation was also given back when the customer was already created and the user creation failed afterwards. Now it is only given back if no customer was created; test with a user store that fails.
+  2. The other findings (probing not limited, `release` not tied to its reservation) go to `pendientes.md`.
+- **Acceptance criteria:**
+  - [x] `CustomerRegistrationTests` green, including the new case.
+
 ## Global acceptance criteria
 
 **Specific:**

@@ -287,5 +287,23 @@ class CustomerRegistrationTests {
                     PASSWORD, IP);
             assertThat(limit.lockedFor(IP)).isPresent();
         }
+
+        @Test
+        @DisplayName("Si el cliente ya se creó y falla la creación del usuario, el alta sigue contando: ocupa memoria")
+        void si_el_cliente_ya_se_creo_y_falla_el_usuario_el_alta_sigue_contando() {
+            InMemoryUserDetailsManager failing = new InMemoryUserDetailsManager() {
+                @Override
+                public void createUser(UserDetails user) {
+                    throw new IllegalStateException("almacén de usuarios caído");
+                }
+            };
+            registration = registrationWith(failing, new SignUpLimitProperties(1, 2, Duration.ofHours(1)));
+
+            assertThatExceptionOfType(IllegalStateException.class)
+                    .isThrownBy(() -> registration.register(signUp().build(), PASSWORD, IP));
+
+            assertThat(accounts.findAll()).hasSize(1);
+            assertThat(limit.lockedFor(IP)).isPresent();
+        }
     }
 }
