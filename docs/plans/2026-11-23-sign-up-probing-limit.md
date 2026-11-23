@@ -62,7 +62,7 @@ Everything stays in the root of `adapter.in`, like #131; domain and application 
 ### [x] T3 — Defaults and tests that sign up many times from one IP (~5 min)
 
 - **Layer:** config
-- **Files:** `src/main/resources/application.properties`, `src/test/java/com/pronoide/ddd/DddLabApplicationTests.java`, `scripts/contract-test.mjs`
+- **Files:** `src/main/resources/application.properties`, `src/test/java/com/dawnrock/ddd/DddLabApplicationTests.java`, `scripts/contract-test.mjs`
 - **Depends on:** T1
 - **What to do:**
   1. `app.security.sign-ups.max-failures-per-ip=10` with its comment (#139, ADR 0018).

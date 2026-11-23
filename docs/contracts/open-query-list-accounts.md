@@ -8,7 +8,7 @@
 
 ## Application service
 
-Phase 1: concrete class `com.pronoide.ddd.application.CheckingAccountService` (`@Service`), backed by `InMemoryCheckingAccountRepository`.
+Phase 1: concrete class `com.dawnrock.ddd.application.CheckingAccountService` (`@Service`), backed by `InMemoryCheckingAccountRepository`.
 
 ```java
 public class CheckingAccountService {

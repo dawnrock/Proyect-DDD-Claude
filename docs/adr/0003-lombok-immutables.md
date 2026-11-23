@@ -23,7 +23,7 @@ Implemented in issue [#2](https://github.com/dawnrock/Proyect-DDD-Claude/issues/
 | Immutables | 2.12.3: `org.immutables:value-annotations` (`provided`) for the annotations and `org.immutables:value` only as a processor | [`pom.xml`](../../pom.xml) |
 | Processors | `maven-compiler-plugin` → `annotationProcessorPaths` with Lombok and Immutables. Once they are declared, Maven stops looking for processors on the classpath, so both must be listed. They apply to `compile` and `testCompile` | [`pom.xml`](../../pom.xml) |
 | Fluent accessors | `lombok.accessors.fluent = true` (`name()` instead of `getName()`), `config.stopBubbling = true` and `lombok.addLombokGeneratedAnnotation = true` | [`lombok.config`](../../lombok.config) |
-| Immutables style | `@ApplicationValue` meta-annotation: the abstract type carries the `Def` suffix and the generated one takes the name without it (`OpenAccountCommandDef` → `OpenAccountCommand`), public, without `with*` methods | [`ApplicationValue.java`](../../src/main/java/com/pronoide/ddd/application/ApplicationValue.java) |
+| Immutables style | `@ApplicationValue` meta-annotation: the abstract type carries the `Def` suffix and the generated one takes the name without it (`OpenAccountCommandDef` → `OpenAccountCommand`), public, without `with*` methods | [`ApplicationValue.java`](../../src/main/java/com/dawnrock/ddd/application/ApplicationValue.java) |
 
 The `LombokSetupTests` and `ImmutablesSetupTests` tests (in `src/test/.../build`) prove that both processors generate code.
 

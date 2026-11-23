@@ -67,7 +67,7 @@ Null or invalid arguments that are not business rules (for example, a non-positi
 
 ## Business rules
 
-Each rule cites the test that proves it (`src/test/java/com/pronoide/ddd/domain/model/` and, for R17-R19, `domain/service/`). Test names are in Spanish, like every `@DisplayName`.
+Each rule cites the test that proves it (`src/test/java/com/dawnrock/ddd/domain/model/` and, for R17-R19, `domain/service/`). Test names are in Spanish, like every `@DisplayName`.
 
 | Rule | Description | Test |
 | ---- | ----------- | ---- |

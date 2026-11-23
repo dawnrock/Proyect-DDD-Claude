@@ -34,11 +34,11 @@ No domain, application or persistence code changes. The layering is unchanged (e
 
 | Layer / package | File | Change |
 | --------------- | ---- | ------ |
-| `adapter.in` | `src/main/java/com/pronoide/ddd/adapter/in/Usernames.java` (new) | `normalize(String)`: strip + lower case `Locale.ROOT`, `null` stays `null` |
-| `adapter.in` | `src/main/java/com/pronoide/ddd/adapter/in/ThrottledAuthenticationProvider.java` | Normalise the name into a new unauthenticated token that keeps the details (IP) before throttling and delegating |
-| `adapter.in` | `src/main/java/com/pronoide/ddd/adapter/in/LoginAttempts.java` | `pairKey` uses `Usernames.normalize` |
-| `adapter.in.web` | `src/main/java/com/pronoide/ddd/adapter/in/web/SignUpForm.java` | `normalizeUsername` delegates to `Usernames.normalize` |
-| tests | `src/test/java/com/pronoide/ddd/adapter/in/CaseInsensitiveLoginTests.java` (new), `ThrottledAuthenticationProviderTests.java`, a full-context login test | Reproduce the bug on the real JDBC store; web and API end to end |
+| `adapter.in` | `src/main/java/com/dawnrock/ddd/adapter/in/Usernames.java` (new) | `normalize(String)`: strip + lower case `Locale.ROOT`, `null` stays `null` |
+| `adapter.in` | `src/main/java/com/dawnrock/ddd/adapter/in/ThrottledAuthenticationProvider.java` | Normalise the name into a new unauthenticated token that keeps the details (IP) before throttling and delegating |
+| `adapter.in` | `src/main/java/com/dawnrock/ddd/adapter/in/LoginAttempts.java` | `pairKey` uses `Usernames.normalize` |
+| `adapter.in.web` | `src/main/java/com/dawnrock/ddd/adapter/in/web/SignUpForm.java` | `normalizeUsername` delegates to `Usernames.normalize` |
+| tests | `src/test/java/com/dawnrock/ddd/adapter/in/CaseInsensitiveLoginTests.java` (new), `ThrottledAuthenticationProviderTests.java`, a full-context login test | Reproduce the bug on the real JDBC store; web and API end to end |
 | docs | `docs/api/openapi.yaml`, `docs/api/CHANGELOG.md` | Describe `TokenRequest.username` as case-insensitive (patch 2.2.3) |
 | docs | `docs/ia/*` | Fix the #152 note, decision for #157, status |
 
@@ -47,7 +47,7 @@ No domain, application or persistence code changes. The layering is unchanged (e
 ### [x] T1 — Reproduce on the JDBC store and normalise in the provider (~10 min)
 
 - **Layer:** adapter.in
-- **Files:** `src/test/java/com/pronoide/ddd/adapter/in/CaseInsensitiveLoginTests.java` (new), `src/main/java/com/pronoide/ddd/adapter/in/Usernames.java` (new), `src/main/java/com/pronoide/ddd/adapter/in/ThrottledAuthenticationProvider.java`
+- **Files:** `src/test/java/com/dawnrock/ddd/adapter/in/CaseInsensitiveLoginTests.java` (new), `src/main/java/com/dawnrock/ddd/adapter/in/Usernames.java` (new), `src/main/java/com/dawnrock/ddd/adapter/in/ThrottledAuthenticationProvider.java`
 - **Depends on:** —
 - **What to do:**
   1. Red: build the real chain as `SecuritySupport` does: an H2 database (`MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE`) migrated by Flyway, `UserStore.userDetailsService(...)` with a user `elber`, a `DaoAuthenticationProvider` with BCrypt, and a `ThrottledAuthenticationProvider` over it. Authenticating `Elber` and ` elber ` with the right password succeeds and the principal's name is `elber`. Check that it fails before the fix.
@@ -59,7 +59,7 @@ No domain, application or persistence code changes. The layering is unchanged (e
 ### [x] T2 — Provider unit tests: normalised name, details kept, shared lockout (~5 min)
 
 - **Layer:** adapter.in
-- **Files:** `src/test/java/com/pronoide/ddd/adapter/in/ThrottledAuthenticationProviderTests.java`, `src/test/java/com/pronoide/ddd/adapter/in/UsernamesTests.java` (new)
+- **Files:** `src/test/java/com/dawnrock/ddd/adapter/in/ThrottledAuthenticationProviderTests.java`, `src/test/java/com/dawnrock/ddd/adapter/in/UsernamesTests.java` (new)
 - **Depends on:** T1
 - **What to do:**
   1. The delegate receives `elber` when `" Elber "` is typed, and the details (IP) are the original ones.
@@ -71,7 +71,7 @@ No domain, application or persistence code changes. The layering is unchanged (e
 ### [x] T3 — One normalisation for the attempt limit and the web forms (~5 min)
 
 - **Layer:** adapter.in
-- **Files:** `src/main/java/com/pronoide/ddd/adapter/in/LoginAttempts.java`, `src/main/java/com/pronoide/ddd/adapter/in/web/SignUpForm.java`
+- **Files:** `src/main/java/com/dawnrock/ddd/adapter/in/LoginAttempts.java`, `src/main/java/com/dawnrock/ddd/adapter/in/web/SignUpForm.java`
 - **Depends on:** T1
 - **What to do:**
   1. `LoginAttempts.pairKey` uses `Usernames.normalize` (`strip()` instead of `trim()`), keeping the `null` → `""` handling and the length cut.
@@ -82,7 +82,7 @@ No domain, application or persistence code changes. The layering is unchanged (e
 ### [x] T4 — End to end on the web and the API with the real store (~10 min)
 
 - **Layer:** tests
-- **Files:** `src/test/java/com/pronoide/ddd/DddLabApplicationTests.java` (new `@Nested` class `CaseInsensitiveUsername`). Deviation: the plan proposed a new full-context class, but `src/test/CLAUDE.md` keeps a single full-context test, whose context already runs on the real `JdbcUserDetailsManager` (H2 in PostgreSQL mode).
+- **Files:** `src/test/java/com/dawnrock/ddd/DddLabApplicationTests.java` (new `@Nested` class `CaseInsensitiveUsername`). Deviation: the plan proposed a new full-context class, but `src/test/CLAUDE.md` keeps a single full-context test, whose context already runs on the real `JdbcUserDetailsManager` (H2 in PostgreSQL mode).
 - **Depends on:** T1
 - **What to do:**
   1. Web: `POST /login` with `Ada` and the demo password (README) redirects to `/` and the authenticated name is `ada`. Use its own IP (`setRemoteAddr`) as `decisiones.md` asks for tests that fail logins.

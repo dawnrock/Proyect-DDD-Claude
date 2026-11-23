@@ -74,7 +74,7 @@ Only `adapter.in.web` templates and `static/js/app.js`; no change in Java code, 
 ### [x] T4 — Template-wide guard (~5 min)
 
 - **Layer:** tests
-- **Files:** `src/test/java/com/pronoide/ddd/adapter/in/web/AccessibleFieldErrorsTemplatesTests.java`
+- **Files:** `src/test/java/com/dawnrock/ddd/adapter/in/web/AccessibleFieldErrorsTemplatesTests.java`
 - **Depends on:** T2, T3
 - **What to do:**
   1. Like `HtmxBoostTemplatesTests`: walk `templates/**/*.html`; every `<input>`/`<select>` that can be marked invalid (`th:errorclass` or `is-invalid`) must carry `th:aria-invalid` and `th:aria-describedby`, and each `invalid-feedback` must have an `id`.
