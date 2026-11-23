@@ -97,7 +97,7 @@
 - **Acceptance criteria:**
   - [x] Test green.
 
-### [ ] T5 — Script to check the list against Cloudflare (~5 min)
+### [x] T5 — Script to check the list against Cloudflare (~5 min)
 
 - **Layer:** scripts
 - **Files:** `scripts/check-cloudflare-ips.mjs`
@@ -106,7 +106,7 @@
   1. Download `ips-v4` and `ips-v6` and compare them with the Cloudflare ranges in `application.properties`. Print what to add and what to remove, and end with a non-zero exit code if they differ. It needs `www.cloudflare.com` on the network; it is not part of the CI.
   2. Run it: no differences today.
 - **Acceptance criteria:**
-  - [ ] It reports no difference.
+  - [x] It reports no difference.
 
 ### [ ] T6 — ADR 0017 and project status (~10 min)
 
