@@ -36,7 +36,7 @@ Only `adapter.in.web` templates, `static/js/app.js` and `static/css/app.css`; no
 
 ## Tasks
 
-### [ ] T1 — Account forms: required fields and IBAN keyboard (~10 min)
+### [x] T1 — Account forms: required fields and IBAN keyboard (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `templates/accounts/detail.html`, `templates/accounts/new.html`, `templates/accounts/another.html`, `AccountWebControllerTests.java`, `AnotherAccountWebTests.java`
@@ -45,7 +45,7 @@ Only `adapter.in.web` templates, `static/js/app.js` and `static/css/app.css`; no
   1. Test (red): the detail page renders `required` on the three amounts and the target IBAN, and `autocapitalize="characters"` on the IBAN; `accounts/new` renders `required` on tax id and deposit, not on holder name, e-mail and user name, and `autocapitalize="characters"` on the tax id; `accounts/another` renders `required` on the deposit.
   2. Add the attributes.
 - **Acceptance criteria:**
-  - [ ] The new tests pass and `./mvnw verify` is green.
+  - [x] The new tests pass and `./mvnw verify` is green.
 
 ### [ ] T2 — Sign-up steps: required fields and mobile keyboard (~10 min)
 

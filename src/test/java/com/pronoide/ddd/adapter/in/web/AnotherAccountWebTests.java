@@ -165,6 +165,16 @@ class AnotherAccountWebTests {
         }
 
         @Test
+        @DisplayName("El depósito se anuncia como obligatorio (#146)")
+        void el_deposito_se_anuncia_como_obligatorio() throws Exception {
+            when(queries.listAccounts(ADA)).thenReturn(List.of(account(FIRST, "ES2199990001220000000001")));
+
+            String html = mvc.perform(get("/accounts/another")).andReturn().getResponse().getContentAsString();
+
+            assertThat(FieldTags.tag(html, "initialDeposit")).contains(" required");
+        }
+
+        @Test
         @DisplayName("Un usuario que no es cliente recibe la página 403")
         void un_usuario_que_no_es_cliente_recibe_la_pagina_403() throws Exception {
             when(queries.listAccounts(ADA)).thenReturn(List.of());

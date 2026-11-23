@@ -13,7 +13,7 @@
 
         <div class="mb-3">
             <label class="form-label" for="holderTaxId">DNI o NIE del titular</label>
-            <input class="form-control" type="text" id="holderTaxId" autocomplete="off" placeholder="12345678Z" th:field="*{holderTaxId}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('holderTaxId')} ? 'true'" th:aria-describedby="${#fields.hasErrors('holderTaxId')} ? 'holderTaxId-error'">
+            <input class="form-control" type="text" id="holderTaxId" required autocapitalize="characters" spellcheck="false" autocomplete="off" placeholder="12345678Z" th:field="*{holderTaxId}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('holderTaxId')} ? 'true'" th:aria-describedby="${#fields.hasErrors('holderTaxId')} ? 'holderTaxId-error'">
             <p class="invalid-feedback" id="holderTaxId-error" th:if="${#fields.hasErrors('holderTaxId')}" th:errors="*{holderTaxId}"></p>
         </div>
 
@@ -37,7 +37,7 @@
 
         <div class="mb-3">
             <label class="form-label" for="initialDeposit">Depósito inicial</label>
-            <input class="form-control" type="number" id="initialDeposit" step="0.01" inputmode="decimal" th:field="*{initialDeposit}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('initialDeposit')} ? 'true'" th:aria-describedby="${#fields.hasErrors('initialDeposit')} ? 'initialDeposit-error'">
+            <input class="form-control" type="number" id="initialDeposit" required step="0.01" inputmode="decimal" th:field="*{initialDeposit}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('initialDeposit')} ? 'true'" th:aria-describedby="${#fields.hasErrors('initialDeposit')} ? 'initialDeposit-error'">
             <p class="invalid-feedback" id="initialDeposit-error" th:if="${#fields.hasErrors('initialDeposit')}" th:errors="*{initialDeposit}"></p>
         </div>
 
