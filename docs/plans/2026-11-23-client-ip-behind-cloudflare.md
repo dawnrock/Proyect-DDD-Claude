@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-23
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~50 min (6 tasks)
 
 ## Goal
@@ -55,7 +55,7 @@
 - **Acceptance criteria:**
   - [ ] Seen red for that reason.
 
-### [ ] T2 — Client IP resolver (~10 min)
+### [x] T2 — Client IP resolver (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `ClientIpResolver`, `TrustedProxiesProperties`, `ClientIpResolverTests`
@@ -71,7 +71,7 @@
      - spaces around the entries are ignored.
   2. Implement with `IpAddressMatcher` and an IP-literal check.
 - **Acceptance criteria:**
-  - [ ] Tests green.
+  - [x] Tests green.
 
 ### [ ] T3 — Use it in the web login and the API token (~10 min)
 
