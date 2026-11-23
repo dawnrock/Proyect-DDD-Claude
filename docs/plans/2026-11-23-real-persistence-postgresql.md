@@ -69,17 +69,17 @@ The output ports already exist and each one has an abstract contract (`*Contract
   - [x] A reconstituted transaction and holder keep every value and identity (`equals` by id).
   - [x] Null fields and a non-positive amount are rejected.
 
-### [ ] T3 — Reconstitute checking accounts (~10 min)
+### [x] T3 — Reconstitute checking accounts (~10 min)
 
 - **Layer:** domain
-- **Files:** `CheckingAccount.java`, `CheckingAccountTests.java`
+- **Files:** `CheckingAccount.java`, `CheckingAccountReconstitutionTests.java` (own class instead of `CheckingAccountTests`, already 500 lines)
 - **Depends on:** T2
 - **What to do:**
   1. `CheckingAccount.reconstitute(id, accountNumber, primaryHolder, currentBalance, nextSegmentReview, transactions)`: required fields, transactions of this account, balance equal to approved deposits minus approved withdrawals (otherwise `IllegalStateException`), **no domain events** recorded.
   2. The reconstituted account keeps working: a deposit after reconstitution changes the balance and records its event.
 - **Acceptance criteria:**
-  - [ ] `pullDomainEvents()` is empty right after `reconstitute`.
-  - [ ] A balance that does not match the transactions is rejected.
+  - [x] `pullDomainEvents()` is empty right after `reconstitute`.
+  - [x] A balance that does not match the transactions is rejected.
 
 ### [ ] T4 — Reconstitute customers (~5 min)
 

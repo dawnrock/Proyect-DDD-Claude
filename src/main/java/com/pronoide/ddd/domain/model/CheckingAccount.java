@@ -35,6 +35,56 @@ public class CheckingAccount {
         this.currentBalance = MonetaryAmount.zero(initialDeposit.currency());
     }
 
+    private CheckingAccount(UUID id, AccountNumber accountNumber, AccountHolder primaryHolder,
+                            MonetaryAmount currentBalance, Instant nextSegmentReview) {
+        this.id = id;
+        this.accountNumber = accountNumber;
+        this.primaryHolder = primaryHolder;
+        this.currentBalance = currentBalance;
+        this.nextSegmentReview = nextSegmentReview;
+    }
+
+    /**
+     * Reconstruye una cuenta ya guardada (#150). Solo la usan los adaptadores de persistencia al leerla (regla de
+     * ArchUnit): no comprueba las reglas de apertura, que ya se cumplieron al abrirla, ni registra eventos. Sí comprueba
+     * que lo guardado es coherente: los movimientos son de esta cuenta, ninguno está pendiente y el saldo es la suma de
+     * los ingresos aprobados menos las retiradas aprobadas.
+     *
+     * @param nextSegmentReview cuándo toca revisar el segmento, o {@code null} si no hay revisión pendiente
+     * @param transactions los movimientos en el orden en que se registraron
+     * @throws IllegalStateException si lo guardado no es coherente
+     */
+    public static CheckingAccount reconstitute(UUID id, AccountNumber accountNumber, AccountHolder primaryHolder,
+                                               MonetaryAmount currentBalance, Instant nextSegmentReview,
+                                               List<Transaction> transactions) {
+        CheckingAccount account = new CheckingAccount(
+                Objects.requireNonNull(id, "El id de la cuenta es obligatorio"),
+                Objects.requireNonNull(accountNumber, "El número de cuenta es obligatorio"),
+                Objects.requireNonNull(primaryHolder, "El titular de la cuenta es obligatorio"),
+                Objects.requireNonNull(currentBalance, "El saldo de la cuenta es obligatorio"),
+                nextSegmentReview);
+        MonetaryAmount expected = MonetaryAmount.zero(currentBalance.currency());
+        for (Transaction transaction : Objects.requireNonNull(transactions, "Los movimientos son obligatorios")) {
+            if (!id.equals(transaction.accountId())) {
+                throw new IllegalStateException("Un movimiento de la cuenta reconstituida pertenece a otra cuenta");
+            }
+            if (transaction.status() == TransactionStatus.PENDING) {
+                throw new IllegalStateException("Una cuenta guardada no tiene movimientos pendientes");
+            }
+            if (transaction.isApproved()) {
+                expected = transaction.type() == TransactionType.DEPOSIT
+                        ? expected.add(transaction.amount())
+                        : expected.subtract(transaction.amount());
+            }
+            account.transactions.add(transaction);
+        }
+        if (!expected.equals(currentBalance)) {
+            throw new IllegalStateException("El saldo guardado %s no cuadra con los movimientos aprobados (%s)"
+                    .formatted(currentBalance, expected));
+        }
+        return account;
+    }
+
     /**
      * Abre una cuenta. Solo lo usan {@link CheckingAccountFactory} y los tests del mismo paquete: fuera del dominio las
      * cuentas se abren con la factoría, que da el número y decide el segmento.
