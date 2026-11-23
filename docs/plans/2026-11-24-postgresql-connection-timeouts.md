@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-24
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~25 min (3 tasks)
 
 ## Goal
@@ -78,26 +78,27 @@ Technical decisions (taken by Claude under `/advance-issues`, reversible configu
 
 **Specific:**
 
-- [ ] With the URL without parameters, a failed connection at start with `prod` ends in an error with a stack trace within the configured times, not a hang (T2).
-- [ ] `ProdProfileTests` checks the timeouts (T1).
+- [x] With the URL without parameters, a failed connection at start with `prod` ends in an error with a stack trace within the configured times, not a hang (T2).
+- [x] `ProdProfileTests` checks the timeouts (T1).
 - [ ] Render deploys with the plain URL and starts against Neon: **checked by the user after the merge** (changing the Render variable is theirs; noted in `pendientes.md` until confirmed).
-- [ ] `render.md`, `pendientes.md` and `estado-del-proyecto.md` updated.
+- [x] `render.md`, `pendientes.md` and `estado-del-proyecto.md` updated.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: n/a (no API change).
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a (no business term).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: n/a (no API change).
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a (no business term).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
 - The root cause is probable, not confirmed (the first attempt waited forever while Neon woke up). The timeouts turn any such wait into a visible error; if it happens again on Render, the log now says where.
 - The real deploy with the plain URL can only be checked on Render after the merge (the user changes the variable, or Claude reads the deploy logs with Render's API).
+- **Review (`revisor-ddd`):** no blocking findings. Minor, accepted: the silent-server test depends on the driver's message `Connection attempt timed out` (like its neighbour on `'url' must start with "jdbc"`), and the properties test runs on H2, which ignores the driver timeouts (the silent-server test covers `loginTimeout` on the real driver).
