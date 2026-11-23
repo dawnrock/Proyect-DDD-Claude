@@ -1,4 +1,4 @@
-package com.pronoide.ddd.domain.model;
+package com.dawnrock.ddd.domain.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

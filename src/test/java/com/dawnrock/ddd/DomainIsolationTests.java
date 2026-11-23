@@ -1,4 +1,4 @@
-package com.pronoide.ddd;
+package com.dawnrock.ddd;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
@@ -7,7 +7,7 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 
-@AnalyzeClasses(packages = "com.pronoide.ddd", 
+@AnalyzeClasses(packages = "com.dawnrock.ddd", 
                 importOptions = ImportOption.DoNotIncludeTests.class)
 class DomainIsolationTests {
 
@@ -17,7 +17,7 @@ class DomainIsolationTests {
             .should().dependOnClassesThat()
             .resideInAnyPackage("org.springframework..", 
                                 "jakarta..", 
-                                "com.pronoide.ddd.bootstrap..");
+                                "com.dawnrock.ddd.bootstrap..");
     
     @ArchTest
     static final ArchRule el_estado_del_dominio_esta_encapsulado = fields()

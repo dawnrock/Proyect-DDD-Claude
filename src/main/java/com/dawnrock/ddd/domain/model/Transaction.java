@@ -1,4 +1,4 @@
-package com.pronoide.ddd.domain.model;
+package com.dawnrock.ddd.domain.model;
 
 import java.time.Instant;
 import java.util.Objects;
