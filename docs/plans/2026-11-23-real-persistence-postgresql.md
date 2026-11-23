@@ -81,7 +81,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
   - [x] `pullDomainEvents()` is empty right after `reconstitute`.
   - [x] A balance that does not match the transactions is rejected.
 
-### [ ] T4 — Reconstitute customers (~5 min)
+### [x] T4 — Reconstitute customers (~5 min)
 
 - **Layer:** domain
 - **Files:** `Customer.java`, `CustomerTests.java`
@@ -89,7 +89,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **What to do:**
   1. `Customer.reconstitute(id, fullName, taxId, email)` with the same field rules as `register`, keeping the stored id.
 - **Acceptance criteria:**
-  - [ ] Same id, document, name and e-mail as stored; invalid fields rejected as in `register`.
+  - [x] Same id, document, name and e-mail as stored; invalid fields rejected as in `register`.
 
 ### [ ] T5 — ArchUnit: only persistence reconstitutes (~5 min)
 

@@ -24,11 +24,23 @@ public class Customer {
     }
 
     public static Customer register(String fullName, TaxId taxId, EmailAddress email) {
+        return create(UUID.randomUUID(), fullName, taxId, email);
+    }
+
+    /**
+     * Reconstruye un cliente ya guardado, con su identidad (#150). Solo lo usan los adaptadores de persistencia; los
+     * datos cumplen las mismas reglas que en el alta.
+     */
+    public static Customer reconstitute(UUID id, String fullName, TaxId taxId, EmailAddress email) {
+        return create(Objects.requireNonNull(id, "El id del cliente es obligatorio"), fullName, taxId, email);
+    }
+
+    private static Customer create(UUID id, String fullName, TaxId taxId, EmailAddress email) {
         Objects.requireNonNull(fullName, "El nombre del cliente es obligatorio");
         if (fullName.isBlank()) {
             throw new IllegalArgumentException("El nombre del cliente no puede estar vacío");
         }
-        return new Customer(UUID.randomUUID(), fullName.strip(),
+        return new Customer(id, fullName.strip(),
                 Objects.requireNonNull(taxId, "El documento del cliente es obligatorio"),
                 Objects.requireNonNull(email, "El correo del cliente es obligatorio"));
     }

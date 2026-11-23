@@ -2,6 +2,9 @@ package com.pronoide.ddd.domain.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -69,5 +72,39 @@ class CustomerTests {
                 .isInstanceOf(DomainException.class)
                 .hasMessageStartingWith("Ya eres cliente de Mon-A Bank")
                 .hasMessageContaining("12345678Z");
+    }
+
+    @Test
+    @DisplayName("Un cliente reconstituido conserva su identidad, su nombre, su documento y su correo")
+    void un_cliente_reconstituido_conserva_todos_sus_datos() {
+        UUID id = UUID.randomUUID();
+
+        Customer cliente = Customer.reconstitute(id, "Ada Lovelace", new TaxId("12345678Z"),
+                new EmailAddress("ada@example.com"));
+
+        assertThat(cliente.id()).isEqualTo(id);
+        assertThat(cliente.fullName()).isEqualTo("Ada Lovelace");
+        assertThat(cliente.taxId()).isEqualTo(new TaxId("12345678Z"));
+        assertThat(cliente.email()).isEqualTo(new EmailAddress("ada@example.com"));
+    }
+
+    @Test
+    @DisplayName("Un cliente no se reconstituye sin identidad ni con los datos que rechaza el alta")
+    void un_cliente_no_se_reconstituye_sin_sus_datos_obligatorios() {
+        TaxId taxId = new TaxId("12345678Z");
+        EmailAddress email = new EmailAddress("ada@example.com");
+        assertThatThrownBy(
+                () -> Customer.reconstitute(null, "Ada Lovelace", taxId, email))
+                .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(
+                () -> Customer.reconstitute(UUID.randomUUID(), " ", taxId, email))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("El nombre del cliente no puede estar vacío");
+        assertThatThrownBy(
+                () -> Customer.reconstitute(UUID.randomUUID(), "Ada Lovelace", null, email))
+                .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(
+                () -> Customer.reconstitute(UUID.randomUUID(), "Ada Lovelace", taxId, null))
+                .isInstanceOf(NullPointerException.class);
     }
 }
