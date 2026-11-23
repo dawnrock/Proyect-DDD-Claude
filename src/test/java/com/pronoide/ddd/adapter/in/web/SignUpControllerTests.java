@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
@@ -47,6 +48,7 @@ import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.adapter.in.CustomerRegistration;
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.TooManySignUpsException;
 import com.pronoide.ddd.adapter.in.UsernameTakenException;
 
 /** Alta de cliente en tres pasos (#95): datos personales, acceso y cuenta. */
@@ -499,6 +501,46 @@ class SignUpControllerTests {
 
             mvc.perform(get("/accounts/" + UUID.randomUUID()).session(session))
                     .andExpect(redirectedUrl("/login"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Límite de altas (#131, ADR 0018)")
+    class LimiteDeAltas {
+
+        @Test
+        @DisplayName("Superado el límite, el paso 3 se queda con el aviso y los minutos que faltan, sin iniciar sesión")
+        void superado_el_limite_el_paso_3_se_queda_con_el_aviso() throws Exception {
+            when(registration.register(any(SignUpCommand.class), any(), any()))
+                    .thenThrow(new TooManySignUpsException(Duration.ofSeconds(25 * 60 + 1)));
+            MockHttpSession session = sessionAfterStep2();
+
+            mvc.perform(validStep3(post("/signup/account")).session(session))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("signup/account"))
+                    .andExpect(content().string(containsString(
+                            "Demasiadas altas de clientes en este momento. Inténtalo de nuevo dentro de 26 minutos.")))
+                    .andExpect(content().string(containsString("Margaret Hamilton")));
+
+            assertThat(session.getAttribute("SPRING_SECURITY_CONTEXT")).isNull();
+            mvc.perform(get("/signup/account").session(session))
+                    .andExpect(view().name("signup/account"));
+        }
+
+        @Test
+        @DisplayName("El alta de la web cuenta para la IP del cliente detrás de Render y Cloudflare")
+        void el_alta_de_la_web_cuenta_para_la_ip_del_cliente() throws Exception {
+            when(registration.register(any(SignUpCommand.class), any(), any())).thenReturn(openedAccount(UUID.randomUUID()));
+
+            mvc.perform(validStep3(post("/signup/account")).session(sessionAfterStep2())
+                            .header("X-Forwarded-For", "198.51.100.40, 104.22.136.75")
+                            .with(request -> {
+                                request.setRemoteAddr("10.0.0.5");
+                                return request;
+                            }))
+                    .andExpect(status().is3xxRedirection());
+
+            verify(registration).register(any(SignUpCommand.class), any(), eq("198.51.100.40"));
         }
     }
 }

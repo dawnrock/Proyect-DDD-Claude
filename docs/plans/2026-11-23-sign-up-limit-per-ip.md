@@ -90,7 +90,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
 - **Acceptance criteria:**
   - [x] `CustomerControllerTests` green; existing sign-up cases unchanged.
 
-### [ ] T5 — Web: IP to the sign-up and message at the last step (~10 min)
+### [x] T5 — Web: IP to the sign-up and message at the last step (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/web/SignUpController.java`, `templates/signup/account.html` (if the global error is not already shown), `SignUpControllerTests.java`
@@ -99,7 +99,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
   1. Tests first: over the limit, `POST /signup/account` stays on the account step with a global error that says when it can be tried again (minutes, rounded up), keeps the form in the session, does not sign in; with htmx the same fragment is returned.
   2. `SignUpController.submitAccount` passes `clientIpResolver.resolve(request)` and catches `TooManySignUpsException` → `result.reject("tooManySignUps", message)`.
 - **Acceptance criteria:**
-  - [ ] `SignUpControllerTests` green; the message is visible in `signup/account` (check the template renders global errors).
+  - [x] `SignUpControllerTests` green; the message is visible in `signup/account` (check the template renders global errors).
 
 ### [ ] T5b — Web: check the limit at step 1 (~10 min)
 

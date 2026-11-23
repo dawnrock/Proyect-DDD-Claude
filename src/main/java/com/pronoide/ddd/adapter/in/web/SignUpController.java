@@ -1,5 +1,6 @@
 package com.pronoide.ddd.adapter.in.web;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,6 +27,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.pronoide.ddd.adapter.in.ClientIpResolver;
 import com.pronoide.ddd.adapter.in.CustomerRegistration;
+import com.pronoide.ddd.adapter.in.TooManySignUpsException;
 import com.pronoide.ddd.adapter.in.UsernameTakenException;
 import com.pronoide.ddd.application.AccountSummary;
 import com.pronoide.ddd.application.SignUpCommand;
@@ -140,6 +142,9 @@ public class SignUpController {
             redirect.addFlashAttribute("message",
                     "Te damos la bienvenida a Mon-A Bank. Tu IBAN es " + account.accountNumber());
             return "redirect:/accounts/" + account.id();
+        } catch (TooManySignUpsException e) {
+            result.reject("tooManySignUps", tooManySignUps(e.retryAfter()));
+            return ACCOUNT_VIEW;
         } catch (DuplicateCustomerException e) {
             return backToData(form, redirect, e.getMessage(), true);
         } catch (UsernameTakenException e) {
@@ -169,6 +174,13 @@ public class SignUpController {
         context.setAuthentication(authentication);
         SecurityContextHolder.getContextHolderStrategy().setContext(context);
         securityContextRepository.saveContext(context, request, response);
+    }
+
+    /** Aviso del límite de altas (#131, ADR 0018) con los minutos que faltan, redondeados hacia arriba. */
+    static String tooManySignUps(Duration retryAfter) {
+        long minutes = Math.max(1, (retryAfter.toSeconds() + 59) / 60);
+        return "Demasiadas altas de clientes en este momento. Inténtalo de nuevo dentro de %d %s."
+                .formatted(minutes, minutes == 1 ? "minuto" : "minutos");
     }
 
     /** Vuelve al paso 1 con el mensaje (PRG); el paso 1 pinta el enlace para entrar si el cliente ya existe. */
