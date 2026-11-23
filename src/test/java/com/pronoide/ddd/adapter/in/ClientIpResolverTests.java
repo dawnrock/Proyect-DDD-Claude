@@ -58,10 +58,28 @@ class ClientIpResolverTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"example.com", "999.1.1.1", "no-es-una-ip", "1.2.3", "::zz", ""})
+    @ValueSource(strings = {"example.com", "999.1.1.1", "no-es-una-ip", "1.2.3", "::zz", "", ":::", "1:2", "::1.2"})
     @DisplayName("Una entrada que no es una IP literal no se consulta en DNS: la IP es la de la conexión")
     void una_entrada_que_no_es_una_ip_literal_da_la_ip_de_la_conexion(String entry) {
         assertThat(resolver.resolve(RENDER_PROXY, entry + ", " + CLOUDFLARE_EDGE)).isEqualTo(RENDER_PROXY);
+    }
+
+    @Test
+    @DisplayName("Un cliente IPv6 a través de Cloudflare es la IP")
+    void un_cliente_ipv6_a_traves_de_cloudflare_es_la_ip() {
+        assertThat(resolver.resolve(RENDER_PROXY, "2001:db8::1, " + CLOUDFLARE_EDGE)).isEqualTo("2001:db8::1");
+    }
+
+    @Test
+    @DisplayName("Una entrada vacía en medio de la cabecera da la IP de la conexión")
+    void una_entrada_vacia_en_medio_da_la_ip_de_la_conexion() {
+        assertThat(resolver.resolve(RENDER_PROXY, CLIENT + ",, " + CLOUDFLARE_EDGE)).isEqualTo(RENDER_PROXY);
+    }
+
+    @Test
+    @DisplayName("Una IPv4 escrita como IPv6 de un proxy interno se reconoce como proxy")
+    void una_ipv4_escrita_como_ipv6_de_un_proxy_interno_se_reconoce() {
+        assertThat(resolver.resolve(RENDER_PROXY, CLIENT + ", ::ffff:10.0.0.1")).isEqualTo(CLIENT);
     }
 
     @Test

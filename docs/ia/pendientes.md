@@ -19,3 +19,4 @@
   - **In-memory counters:** they reset on restart and are not shared if the service ever runs several instances.
   - **Shared IPs:** a network behind one IP (NAT) is blocked as a whole after 10 failures.
   - **Clients on internal addresses:** the internal ranges are trusted proxies, so a client that reached the container from one of them could choose the IP that counts. On Render clients only arrive through Cloudflare and Render's proxy (#130 and #133 reviews).
+  - **IPv6 clients:** the per-IP counter keys on the full /128 address, so a client with a /64 can rotate addresses to get past `max-per-ip` (the user + IP limit has the same gap). Grouping IPv6 addresses by /64 would close it (#133 review).

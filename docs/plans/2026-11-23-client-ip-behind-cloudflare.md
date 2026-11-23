@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-23
-- **Status:** in progress
-- **Total estimate:** ~50 min (6 tasks)
+- **Status:** done
+- **Total estimate:** ~60 min (7 tasks)
 
 ## Goal
 
@@ -124,6 +124,18 @@
 - **Acceptance criteria:**
   - [x] The CI status-file check passes.
 
+### [x] T7 — Review fixes (~10 min)
+
+- **Layer:** adapter.in · tests · docs
+- **Files:** `ClientIpResolver`, `ClientIpAuthenticationDetailsSource`, `ClientIpResolverTests`, `ClientIpAuthenticationDetailsSourceTests` (new), `docs/ia/pendientes.md`
+- **Depends on:** T1-T6
+- **What to do:** findings of the `revisor-ddd` review (none blocking):
+  1. **Repeated headers.** With several `X-Forwarded-For` headers, `getHeader` returned only the first, which the client can write. They are now joined in order, with a test using two headers.
+  2. **Strict IP literals.** The IPv6 pattern let through strings like `:::` or `1:2`, which ended up as the client's "IP". After the pattern, `InetAddress` now parses the entry: with a colon, Java treats it as an IPv6 literal and never queries the DNS. An invalid entry falls back to the connection address. Tests for those strings, for an IPv6 client, for an empty entry in the middle and for `::ffff:10.0.0.1`.
+  3. **Pending item.** An IPv6 client can rotate addresses within its /64 to get past the per-IP limit.
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green; the local browser check re-run.
+
 **Deviations:**
 
 - **T1:** its real-server test was committed with T4, the task that makes it green. It needs the trusted-proxies list, and the build cannot be committed red.
@@ -133,24 +145,24 @@
 
 **Specific:**
 
-- [ ] Through Render's chain (internal proxy → Cloudflare), the counted IP is the client's, both on the web and in the API.
-- [ ] A direct client cannot choose its IP with `X-Forwarded-For`, and one behind the proxies cannot either: addresses it adds stay to the left and do not count.
-- [ ] No DNS lookup comes from a forwarded header.
-- [ ] After the deploy, the user's lock warning on Render shows their own public IP.
+- [x] Through Render's chain (internal proxy → Cloudflare), the counted IP is the client's, both on the web and in the API.
+- [x] A direct client cannot choose its IP with `X-Forwarded-For`, and one behind the proxies cannot either: addresses it adds stay to the left and do not count.
+- [x] No DNS lookup comes from a forwarded header.
+- [ ] After the deploy, the user's lock warning on Render shows their own public IP *(checked by the user after merging)*.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): none added.
-- [ ] If the API changes: n/a (same responses; only which IP is counted).
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): none added.
+- [x] If the API changes: n/a (same responses; only which IP is counted).
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a.
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

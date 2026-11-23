@@ -1,5 +1,7 @@
 package com.pronoide.ddd.adapter.in;
 
+import java.util.Collections;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -23,7 +25,10 @@ public class ClientIpAuthenticationDetailsSource
 
     @Override
     public WebAuthenticationDetails buildDetails(HttpServletRequest request) {
-        String ip = resolver.resolve(request.getRemoteAddr(), request.getHeader("X-Forwarded-For"));
+        // Varias cabeceras X-Forwarded-For se unen en orden: la primera puede escribirla el cliente, y la que añade un
+        // proxy de confianza va después
+        String forwardedFor = String.join(",", Collections.list(request.getHeaders("X-Forwarded-For")));
+        String ip = resolver.resolve(request.getRemoteAddr(), forwardedFor.isEmpty() ? null : forwardedFor);
         HttpSession session = request.getSession(false);
         return new WebAuthenticationDetails(ip, session == null ? null : session.getId());
     }

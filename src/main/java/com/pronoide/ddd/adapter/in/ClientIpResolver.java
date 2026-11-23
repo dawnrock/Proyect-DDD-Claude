@@ -1,5 +1,7 @@
 package com.pronoide.ddd.adapter.in;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -64,7 +66,7 @@ public class ClientIpResolver {
                     return true;
                 }
             } catch (IllegalArgumentException e) {
-                // Una IPv6 mal formada que pasó el patrón: no es un proxy de confianza
+                // No debería ocurrir con una IP literal ya validada; por si acaso, no es un proxy de confianza
                 return false;
             }
         }
@@ -72,6 +74,22 @@ public class ClientIpResolver {
     }
 
     static boolean isIpLiteral(String address) {
-        return address != null && (IPV4.matcher(address).matches() || IPV6.matcher(address).matches());
+        if (address == null) {
+            return false;
+        }
+        if (IPV4.matcher(address).matches()) {
+            return true;
+        }
+        if (!IPV6.matcher(address).matches()) {
+            return false;
+        }
+        // El patrón deja pasar cadenas como ":::" o "1:2". Con dos puntos, Java la trata como IPv6 literal: la
+        // valida sin consultar el DNS y lanza la excepción si no lo es
+        try {
+            InetAddress.getByName(address);
+            return true;
+        } catch (UnknownHostException e) {
+            return false;
+        }
     }
 }
