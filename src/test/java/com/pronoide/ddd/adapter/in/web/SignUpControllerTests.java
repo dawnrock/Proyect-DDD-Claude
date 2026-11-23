@@ -692,4 +692,39 @@ class SignUpControllerTests {
             assertThat(html).containsPattern("(?s)<div class=\"input-group has-validation\"[^>]*>\\s*<input[^>]*id=\"password\".*?</button>\\s*<p class=\"invalid-feedback\" id=\"password-error\">");
         }
     }
+
+    @Nested
+    @DisplayName("El usuario se guarda en minúsculas (#152)")
+    class UsuarioEnMinusculas {
+
+        @Test
+        @DisplayName("Un usuario con mayúsculas y espacios alrededor pasa al paso 3 y se da de alta en minúsculas")
+        void un_usuario_con_mayusculas_se_da_de_alta_en_minusculas() throws Exception {
+            when(registration.register(any(SignUpCommand.class), eq("clave-secreta-1"), any()))
+                    .thenReturn(openedAccount(UUID.randomUUID()));
+            MockHttpSession session = sessionAfterStep1();
+
+            mvc.perform(post("/signup/access").session(session).param("username", " Margaret ")
+                            .param("password", "clave-secreta-1").param("passwordRepetition", "clave-secreta-1"))
+                    .andExpect(redirectedUrl("/signup/account"));
+            mvc.perform(validStep3(post("/signup/account")).session(session))
+                    .andExpect(status().is3xxRedirection());
+
+            ArgumentCaptor<SignUpCommand> command = ArgumentCaptor.forClass(SignUpCommand.class);
+            verify(registration).register(command.capture(), eq("clave-secreta-1"), any());
+            assertThat(command.getValue().username()).isEqualTo("margaret");
+        }
+
+        @Test
+        @DisplayName("Un usuario con tildes o ñ se sigue rechazando con el mensaje que explica el formato")
+        void un_usuario_con_tildes_o_enye_se_sigue_rechazando() throws Exception {
+            mvc.perform(post("/signup/access").session(sessionAfterStep1()).param("username", "Íñigo")
+                            .param("password", "clave-secreta-1").param("passwordRepetition", "clave-secreta-1"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("signup/access"))
+                    .andExpect(content().string(containsString("guiones bajos o guiones")));
+
+            verifyNoInteractions(registration);
+        }
+    }
 }

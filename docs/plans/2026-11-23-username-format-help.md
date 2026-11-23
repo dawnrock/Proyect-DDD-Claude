@@ -49,7 +49,7 @@ The user could not create a sign-up username: the format (`[a-z0-9._-]{3,30}`) i
   - [x] The new tests pass; no copy of the old text is left (`grep "puntos o guiones"` finds nothing).
   - [x] `./mvnw verify` is green and `oasdiff` sees no contract change.
 
-### [ ] T2 — The web lower-cases the username (~10 min)
+### [x] T2 — The web lower-cases the username (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `SignUpForm.java`, `OpenAccountForm.java`, `SignUpControllerTests.java`, `AccountWebControllerTests.java`
@@ -58,7 +58,7 @@ The user could not create a sign-up username: the format (`[a-z0-9._-]{3,30}`) i
   1. Test (red): sign-up step 2 with ` Margaret ` goes on to step 3 and the final `SignUpCommand` carries `margaret`; the admin opening with `ownerUsername` `Ana.Perez` sends `ana.perez`; `Íñigo` is still rejected with the new message; an empty `ownerUsername` stays optional.
   2. Hand-written setters with `strip()` + `toLowerCase(Locale.ROOT)`.
 - **Acceptance criteria:**
-  - [ ] The new tests pass and `./mvnw verify` is green.
+  - [x] The new tests pass and `./mvnw verify` is green.
 
 ### [ ] T3 — Help text under the username fields (~10 min)
 

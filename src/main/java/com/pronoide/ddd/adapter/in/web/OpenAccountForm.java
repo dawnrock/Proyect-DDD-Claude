@@ -46,4 +46,9 @@ public class OpenAccountForm {
 
     @Pattern(regexp = "[A-Z]{3}", message = "La divisa debe ser un código de tres letras mayúsculas")
     private String currency = "EUR";
+
+    /** Como en el alta (#152): el usuario del titular se envía en minúsculas y sin espacios alrededor. */
+    public void setOwnerUsername(String ownerUsername) {
+        this.ownerUsername = SignUpForm.normalizeUsername(ownerUsername);
+    }
 }

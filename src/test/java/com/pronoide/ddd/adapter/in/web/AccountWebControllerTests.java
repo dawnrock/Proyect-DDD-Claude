@@ -1672,6 +1672,44 @@ class AccountWebControllerTests {
         }
     }
 
+    @Nested
+    @DisplayName("El usuario del titular se guarda en minúsculas (#152)")
+    class UsuarioDelTitularEnMinusculas {
+
+        private AccountSummary cuentaAbierta() {
+            return AccountSummary.builder().id(UUID.randomUUID()).accountNumber("ES1234567890123456789012")
+                    .holderName("Ana Pérez").segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build();
+        }
+
+        @Test
+        @DisplayName("Un usuario del titular con mayúsculas y espacios alrededor se envía en minúsculas")
+        void un_usuario_del_titular_con_mayusculas_se_envia_en_minusculas() throws Exception {
+            when(commands.openAccount(any(Caller.class), any())).thenReturn(cuentaAbierta());
+
+            mvc.perform(post("/accounts/new").param("holderName", "Ana Pérez").param("holderTaxId", "12345678Z")
+                            .param("holderEmail", "ana@example.com").param("ownerUsername", " Ana.Perez ")
+                            .param("initialDeposit", "100.00").param("currency", "EUR"))
+                    .andExpect(status().is3xxRedirection());
+
+            verify(commands).openAccount(ADMIN, OpenAccountCommand.builder()
+                    .holderName("Ana Pérez").holderTaxId("12345678Z").holderEmail("ana@example.com")
+                    .ownerUsername("ana.perez").initialDeposit(new BigDecimal("100.00")).currency("EUR").build());
+        }
+
+        @Test
+        @DisplayName("Sin usuario del titular, la apertura para un cliente existente sigue sin pedirlo")
+        void sin_usuario_del_titular_sigue_siendo_opcional() throws Exception {
+            when(commands.openAccount(any(Caller.class), any())).thenReturn(cuentaAbierta());
+
+            mvc.perform(post("/accounts/new").param("holderTaxId", "12345678Z").param("ownerUsername", "")
+                            .param("initialDeposit", "100.00").param("currency", "EUR"))
+                    .andExpect(status().is3xxRedirection());
+
+            verify(commands).openAccount(ADMIN, OpenAccountCommand.builder()
+                    .holderTaxId("12345678Z").initialDeposit(new BigDecimal("100.00")).currency("EUR").build());
+        }
+    }
+
     /** Petición como la envía htmx: con la cabecera HX-Request. */
     private static MockHttpServletRequestBuilder htmx(MockHttpServletRequestBuilder request) {
         return request.header("HX-Request", "true");
