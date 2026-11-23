@@ -59,7 +59,7 @@ Everything stays in the root of `adapter.in`, like #131; domain and application 
 - **Acceptance criteria:**
   - [x] `CustomerRegistrationTests` green, including the new cases.
 
-### [ ] T3 — Defaults and tests that sign up many times from one IP (~5 min)
+### [x] T3 — Defaults and tests that sign up many times from one IP (~5 min)
 
 - **Layer:** config
 - **Files:** `src/main/resources/application.properties`, `src/test/java/com/pronoide/ddd/DddLabApplicationTests.java`, `scripts/contract-test.mjs`
@@ -68,7 +68,7 @@ Everything stays in the root of `adapter.in`, like #131; domain and application 
   1. `app.security.sign-ups.max-failures-per-ip=10` with its comment (#139, ADR 0018).
   2. Raise it in `DddLabApplicationTests` and in `contract-test.mjs` (Schemathesis sends many duplicate documents and usernames).
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green; `node scripts/contract-test.mjs` passes.
+  - [x] `./mvnw verify` green; `node scripts/contract-test.mjs` passes.
 
 ### [ ] T4 — Contract 2.2.2 (~5 min)
 

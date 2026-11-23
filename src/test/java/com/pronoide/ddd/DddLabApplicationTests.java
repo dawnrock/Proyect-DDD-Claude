@@ -44,6 +44,7 @@ import com.pronoide.ddd.support.ApiTokens;
 		// Todas las altas de estos tests llegan desde 127.0.0.1: el límite de altas (#131) se prueba en sus tests
 		"app.security.sign-ups.max-per-ip=1000",
 		"app.security.sign-ups.max-total=1000",
+		"app.security.sign-ups.max-failures-per-ip=1000",
 		"app.security.users[0].username=admin",
 		"app.security.users[0].password-hash=" + DddLabApplicationTests.DEMO_HASH,
 		"app.security.users[0].role=ADMIN",
