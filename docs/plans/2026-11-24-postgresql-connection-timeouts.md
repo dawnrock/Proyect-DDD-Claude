@@ -51,7 +51,7 @@ Technical decisions (taken by Claude under `/advance-issues`, reversible configu
   - [x] The new test fails without the properties and passes with them; the H2 driver accepts the extra properties.
   - [x] `./mvnw verify` green.
 
-### [ ] T2 — A silent database ends the start in an error, not a hang (~10 min)
+### [x] T2 — A silent database ends the start in an error, not a hang (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/pronoide/ddd/ProdProfileTests.java`
@@ -60,8 +60,8 @@ Technical decisions (taken by Claude under `/advance-issues`, reversible configu
   1. A test opens a local `ServerSocket` that accepts connections and never answers (as a compute that does not wake up), starts `prod` against `jdbc:postgresql://127.0.0.1:<port>/monabank` with `loginTimeout` lowered to 2 s (the only override, to keep the test fast), and checks with `assertTimeoutPreemptively` that the start fails within a few seconds with the driver's timeout in the stack trace.
   2. Show it can fail: with `loginTimeout=0` the test must hit its own timeout (red), then revert.
 - **Acceptance criteria:**
-  - [ ] The test passes in a few seconds; with `loginTimeout=0` it fails on `assertTimeoutPreemptively`.
-  - [ ] `./mvnw verify` green.
+  - [x] The test passes in a few seconds; with `loginTimeout=0` it fails on `assertTimeoutPreemptively` (checked: `execution timed out after 20000 ms`, the driver waiting on `Read timed out`).
+  - [x] `./mvnw verify` green.
 
 ### [ ] T3 — Document the plain URL and the timeouts (~5 min)
 

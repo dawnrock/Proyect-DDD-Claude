@@ -2,8 +2,13 @@ package com.pronoide.ddd;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 import com.zaxxer.hikari.HikariDataSource;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.time.Duration;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,6 +64,22 @@ class ProdProfileTests {
             assertThat(pool.getConnectionTimeout()).isEqualTo(30_000);
             assertThat(pool.getInitializationFailTimeout()).isEqualTo(1);
             assertThat(pool.getKeepaliveTime()).isEqualTo(120_000);
+        }
+    }
+
+    @Test
+    @DisplayName("Con el perfil prod una base que no contesta hace fallar el arranque en segundos, sin colgarlo")
+    void con_el_perfil_prod_una_base_que_no_contesta_hace_fallar_el_arranque_sin_colgarlo() throws IOException {
+        // Acepta la conexión TCP y nunca contesta, como el cómputo de Neon que no despertaba el 2026-11-23 (#156)
+        try (ServerSocket silentDatabase = new ServerSocket(0, 1, InetAddress.getLoopbackAddress())) {
+            String url = "jdbc:postgresql://127.0.0.1:" + silentDatabase.getLocalPort() + "/monabank";
+            // Solo se acorta loginTimeout (30 s en el perfil) para que el test sea rápido; la URL no lleva tiempos
+            assertTimeoutPreemptively(Duration.ofSeconds(20), () -> assertThatThrownBy(() -> prod()
+                            .run("--SPRING_DATASOURCE_URL=" + url, "--SPRING_DATASOURCE_USERNAME=monabank",
+                                    "--SPRING_DATASOURCE_PASSWORD=secreto",
+                                    "--spring.datasource.hikari.data-source-properties.loginTimeout=2")
+                            .close())
+                    .hasStackTraceContaining("Connection attempt timed out"));
         }
     }
 }
