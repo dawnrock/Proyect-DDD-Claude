@@ -179,6 +179,29 @@ class SignUpLimitTests {
         }
 
         @Test
+        @DisplayName("Solo cuentan los últimos fallos: con 3 fallos y un máximo de 2, el bloqueo acaba cuando caduca el segundo")
+        void solo_cuentan_los_ultimos_fallos() {
+            limit.recordFailure(IP);
+            clock.advance(Duration.ofMinutes(10));
+            limit.recordFailure(IP);
+            clock.advance(Duration.ofMinutes(10));
+            limit.recordFailure(IP);
+
+            assertThat(limit.lockedFor(IP)).contains(Duration.ofMinutes(50));
+        }
+
+        @Test
+        @DisplayName("Pasada la ventana desde el último fallo, la IP vuelve a poder darse de alta")
+        void pasada_la_ventana_los_fallos_caducan() {
+            limit.recordFailure(IP);
+            limit.recordFailure(IP);
+            clock.advance(Duration.ofHours(1));
+
+            assertThat(limit.lockedFor(IP)).isEmpty();
+            assertThat(limit.tryReserve(IP)).isEmpty();
+        }
+
+        @Test
         @DisplayName("Los fallos no gastan el cupo global de altas")
         void los_fallos_no_gastan_el_cupo_global() {
             for (int i = 1; i <= 5; i++) {

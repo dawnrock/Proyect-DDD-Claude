@@ -6,7 +6,7 @@
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-23
 - **Status:** in progress
-- **Total estimate:** ~45 min (6 tasks)
+- **Total estimate:** ~50 min (7 tasks, T7 added by the review)
 
 ## Goal
 
@@ -102,6 +102,17 @@ Everything stays in the root of `adapter.in`, like #131; domain and application 
   3. `decisiones.md`: extend the #131 line with the failures limit; `historial.md`: a row for the PR.
 - **Acceptance criteria:**
   - [ ] The CI project-status check passes.
+
+### [x] T7 — Review fixes (~5 min)
+
+- **Layer:** adapter.in
+- **Files:** `SignUpLimitTests.java`, `docs/ia/pendientes.md`
+- **Depends on:** T1
+- **What to do:**
+  1. `revisor-ddd` (no blocking findings): tests for keeping only the last failures and for their expiry.
+  2. Checked that `signUp` validates the deposit before the duplicate document, so an insufficient deposit reveals nothing. The failures map has no global cap: recorded in `pendientes.md`.
+- **Acceptance criteria:**
+  - [x] `SignUpLimitTests` green with the new cases.
 
 ## Global acceptance criteria
 
