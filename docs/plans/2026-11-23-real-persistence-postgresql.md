@@ -137,7 +137,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Acceptance criteria:**
   - [x] The contract passes against H2; `findAll` sorted by account number.
 
-### [ ] T9 — JPA customer repository (~10 min)
+### [x] T9 — JPA customer repository (~10 min)
 
 - **Layer:** adapter.out
 - **Files:** `JpaCustomerRepository.java`, `CustomerEntity.java`, its Spring Data repository, `JpaCustomerRepositoryTests.java`
@@ -145,7 +145,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **What to do:**
   1. Adapter of `CustomerRepository`; a document of another customer → `DuplicateCustomerException` (checked and backed by the unique constraint, R30).
 - **Acceptance criteria:**
-  - [ ] `CustomerRepositoryContract` passes in `@DataJpaTest`.
+  - [x] `CustomerRepositoryContract` passes against H2 (with `JpaTestDatabase`, see T8).
 
 ### [ ] T10 — JPA ownership repositories (~10 min)
 
