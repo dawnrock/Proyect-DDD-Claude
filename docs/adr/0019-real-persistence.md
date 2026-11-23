@@ -1,6 +1,6 @@
 # 0019 · Real persistence: PostgreSQL (Neon) in production, H2 locally
 
-- **Status:** proposed · 2026-11-23
+- **Status:** accepted · 2026-11-23 (Neon, option C, users in the database and the global lock chosen by the user)
 - **Issue:** #150 · **Related:** [ADR 0006](0006-hexagonal-architecture.md) (output ports), [ADR 0008](0008-spring-security.md) (users), [ADR 0012](0012-customer-self-sign-up.md) (sign-up in memory)
 
 ## Context

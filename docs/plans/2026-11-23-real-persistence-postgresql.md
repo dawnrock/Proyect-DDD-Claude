@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-23
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~170 min (19 tasks)
 
 ## Goal
@@ -52,7 +52,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Files:** `docs/adr/0019-real-persistence.md`, `docs/adr/README.md`, `pom.xml`
 - **Depends on:** —
 - **What to do:**
-  1. Write ADR 0019 (status `proposed` until the user accepts it): Neon in production (rejected: Supabase pauses after a week, Render Postgres expires after 30 days), H2 in PostgreSQL mode locally and in tests (rejected: Testcontainers, needs Docker in the CI), Flyway migrations instead of `ddl-auto`, option C for the in-memory adapters (rejected: both in production behind a switch; deleting them), users with `JdbcUserDetailsManager`, unit of work as lock + transaction.
+  1. Write ADR 0019 (accepted at the end: the user chose each of its decisions): Neon in production (rejected: Supabase pauses after a week, Render Postgres expires after 30 days), H2 in PostgreSQL mode locally and in tests (rejected: Testcontainers, needs Docker in the CI), Flyway migrations instead of `ddl-auto`, option C for the in-memory adapters (rejected: both in production behind a switch; deleting them), users with `JdbcUserDetailsManager`, unit of work as lock + transaction.
   2. Add the PostgreSQL driver (`runtime`) and Flyway (Spring Boot 4 starter plus `flyway-database-postgresql`) to the `pom.xml`, without migrations yet (`spring.flyway.enabled=false` until T6).
 - **Acceptance criteria:**
   - [x] ADR listed in `docs/adr/README.md`; `./mvnw verify` green with the new dependencies.
@@ -243,7 +243,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Acceptance criteria:**
   - [x] Both documents describe the new persistence; no secret in the repository.
 
-### [ ] T19 — Project status (~10 min)
+### [x] T19 — Project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -252,7 +252,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
   1. Decisions: option C, users in the database, reconstitution, unit of work with rollback.
   2. Pending items: remove the in-memory notes resolved (unique constraints of #103, lost data, no rollback of #78) and add the new ones (lock vs. row locks, H2 vs. PostgreSQL differences).
 - **Acceptance criteria:**
-  - [ ] The CI check of the project status passes.
+  - [x] Project status, decisions, pending items and history updated (the CI check runs on the PR).
 
 ### [x] T20 — Review fixes (~5 min)
 
@@ -269,25 +269,25 @@ The output ports already exist and each one has an abstract contract (`*Contract
 
 **Specific:**
 
-- [ ] On Render, users, customers, accounts and transactions survive a restart of the service (checked by the user after setting up Neon).
-- [ ] Locally, `./mvnw verify` and `./mvnw spring-boot:run` work without network, with H2.
-- [ ] No in-memory adapter left in `src/main`; the JPA adapters and the test doubles pass the same port contracts.
-- [ ] Only `adapter.out.persistence` reconstitutes aggregates (ArchUnit); `DomainIsolationTests` green.
-- [ ] ADR 0019 accepted by the user.
+- [ ] On Render, users, customers, accounts and transactions survive a restart of the service (checked by the user after setting up Neon). **Pending the user's Neon setup;** checked locally on PostgreSQL 16 (sign-up over the API, restart, the customer logs in and sees their account, demo not duplicated) and by `PersistenceRestartTests` on H2.
+- [x] Locally, `./mvnw verify` and `./mvnw spring-boot:run` work without network, with H2.
+- [x] No in-memory adapter left in `src/main`; the JPA adapters and the test doubles pass the same port contracts.
+- [x] Only `adapter.out.persistence` reconstitutes aggregates (ArchUnit); `DomainIsolationTests` green.
+- [x] ADR 0019 accepted: every decision in it was chosen by the user on 2026-11-23.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (justified in ADR 0019).
-- [ ] If the API changes: n/a (the API contract does not change; `node scripts/contract-test.mjs` still passes).
-- [ ] Any new business term is in `docs/dominio/glosario.md` (none expected: reconstitution is technical).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (justified in ADR 0019).
+- [x] If the API changes: n/a (the API contract does not change; `node scripts/contract-test.mjs` still passes).
+- [x] Any new business term is in `docs/dominio/glosario.md` (none expected: reconstitution is technical).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
