@@ -35,7 +35,7 @@ import com.pronoide.ddd.application.OpenAccountCommandDef;
  */
 @Configuration
 @EnableConfigurationProperties({SecurityUsersProperties.class, LoginAttemptsProperties.class,
-        TrustedProxiesProperties.class})
+        TrustedProxiesProperties.class, SignUpLimitProperties.class})
 public class SecuritySupport {
 
     private static final Set<String> ROLES = Set.of("ADMIN", "USER");
@@ -73,6 +73,12 @@ public class SecuritySupport {
     @Bean
     public LoginAttempts loginAttempts(LoginAttemptsProperties properties, ObjectProvider<Clock> clock) {
         return new LoginAttempts(properties, clock.getIfAvailable(Clock::systemUTC));
+    }
+
+    /** Altas de clientes recientes por IP y en total (#131, ADR 0018). Sin el reloj del núcleo, el del sistema. */
+    @Bean
+    public SignUpLimit signUpLimit(SignUpLimitProperties properties, ObjectProvider<Clock> clock) {
+        return new SignUpLimit(properties, clock.getIfAvailable(Clock::systemUTC));
     }
 
     /**

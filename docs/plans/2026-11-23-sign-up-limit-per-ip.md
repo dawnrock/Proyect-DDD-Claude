@@ -53,7 +53,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
 - **Acceptance criteria:**
   - [x] New `ClientIpResolverTests` cases pass; `ClientIpAuthenticationDetailsSourceTests`, `TrustedProxiesConfigurationTests` and `TokenControllerTests` (#133 case) still pass unchanged.
 
-### [ ] T2 — `SignUpLimit`: sign-ups per IP and in total, in a sliding window (~10 min)
+### [x] T2 — `SignUpLimit`: sign-ups per IP and in total, in a sliding window (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/SignUpLimitProperties.java` (new), `adapter/in/SignUpLimit.java` (new), `adapter/in/SecuritySupport.java`, `SignUpLimitTests.java` (new)
@@ -64,7 +64,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
   3. `SignUpLimit`: `synchronized`, map IP → `Deque<Instant>` plus one global `Deque<Instant>`, drop expired on access and prune every N reservations (same pattern as `LoginAttempts`).
   4. Bean in `SecuritySupport` (with the core `Clock` if available, like `loginAttempts`) and register the properties in `@EnableConfigurationProperties`.
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest=SignUpLimitTests` green.
+  - [x] `./mvnw test -Dtest=SignUpLimitTests` green.
 
 ### [ ] T3 — `CustomerRegistration` reserves a slot per IP (~10 min)
 
