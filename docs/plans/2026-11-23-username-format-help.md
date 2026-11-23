@@ -72,7 +72,7 @@ The user could not create a sign-up username: the format (`[a-z0-9._-]{3,30}`) i
   - [x] The new tests pass; `AccessibleFieldErrorsTemplatesTests` still passes.
   - [x] Checked by hand in Chromium: typing `Margaret` signs up as `margaret`.
 
-### [ ] T4 — Record the decision (~5 min)
+### [x] T4 — Record the decision (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/decisiones.md`
@@ -80,29 +80,29 @@ The user could not create a sign-up username: the format (`[a-z0-9._-]{3,30}`) i
 - **What to do:**
   1. Note that the web lower-cases usernames and the API does not (#152, user decision), so the shared validation of the web and REST differs on purpose in this one field.
 - **Acceptance criteria:**
-  - [ ] Decision recorded.
+  - [x] Decision recorded.
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] The username format is visible before submitting and announced by screen readers (sign-up and admin opening).
-- [ ] The web accepts `Margaret` as `margaret`; the API still rejects upper case.
-- [ ] Every username error message names every accepted character.
+- [x] The username format is visible before submitting and announced by screen readers (sign-up and admin opening).
+- [x] The web accepts `Margaret` as `margaret`; the API still rejects upper case.
+- [x] Every username error message names every accepted character.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: n/a (only the text of an error message changes; the contract's `pattern` and responses do not, so no version bump).
-- [ ] Any new business term is in `docs/dominio/glosario.md` (n/a: no new term).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: n/a (only the text of an error message changes; the contract's `pattern` and responses do not, so no version bump).
+- [x] Any new business term is in `docs/dominio/glosario.md` (n/a: no new term).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
