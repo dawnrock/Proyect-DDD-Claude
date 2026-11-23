@@ -1,6 +1,6 @@
 ---
 name: implement-plan
-description: Implementa el plan de una issue de GitHub (generado con plan-feature) en un git worktree aislado, tarea a tarea, con TDD estricto (JUnit + ArchUnit, ./mvnw). Cada tarea terminada se commitea y se marca en el plan; al cumplir los criterios globales abre una PR contra la rama de la fase (Monolithic o Hexagonal, nunca master) y avisa por Telegram. Úsala cuando se pida implementar, ejecutar o llevar a cabo un plan o una issue.
+description: Implementa el plan de una issue de GitHub (generado con plan-feature) en un git worktree aislado (o, en las sesiones en la nube, en la rama que impone el entorno), tarea a tarea, con TDD estricto (JUnit + ArchUnit, ./mvnw). Cada tarea terminada se commitea y se marca en el plan; al cumplir los criterios globales abre una PR contra la rama de la fase (Monolithic o Hexagonal, nunca master) y avisa por Telegram. Úsala cuando se pida implementar, ejecutar o llevar a cabo un plan o una issue.
 argument-hint: <número de issue de GitHub>
 allowed-tools: Read, Grep, Glob, Edit, Write, AskUserQuestion, Bash(git:*), Bash(./mvnw:*), Bash(mvnw.cmd:*), Bash(node:*), Bash(npx @redocly/cli:*), Bash(curl:*), Bash(ls:*), Bash(cp:*), Bash(gh issue view:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh pr checks:*), Bash(gh pr merge:*)
 ---
@@ -24,6 +24,8 @@ Issue indicada por el usuario: $ARGUMENTS
 
 ### 2. Crear el git worktree
 
+> **¿El entorno impone una rama de desarrollo?** En las sesiones de Claude Code en la nube, las instrucciones del entorno nombran una rama (`claude/<nombre>`) en la que hay que desarrollar y a la que se limita el push. Entonces no se sigue este paso, sino el **2 bis**. En local (sin rama impuesta) se sigue este paso tal cual.
+
 - Slug = nombre del plan sin fecha ni `.md`. Rama `<tipo>/<slug>` (`feat`, `fix` o `refactor`).
 - `git fetch origin <rama-base>` y crea el worktree desde ella:
   ```bash
@@ -35,6 +37,19 @@ Issue indicada por el usuario: $ARGUMENTS
 - A partir de aquí **todo** se hace dentro del worktree. Comprueba que las rutas absolutas incluyen `.claude/worktrees/<slug>/` antes de editar.
 - Genera el grafo del código en el worktree: `node scripts/graphify.mjs update .` (local, sin tokens; ADR 0010). Si Graphify no está instalado, sigue sin él.
 - Cambia `**Status:**` del plan a `in progress`.
+
+### 2 bis. Rama impuesta por el entorno (sesiones en la nube)
+
+Si el entorno impone una rama de desarrollo, se trabaja **en esa rama, sin worktree**: una rama `<tipo>/<slug>` no se podría subir. Todo lo demás del flujo (TDD, un commit por tarea, `revisor-ddd`, criterios globales, estado del proyecto, PR y fusión con los checks en verde) es igual.
+
+- `git fetch origin <rama-base>` y comprueba que la rama impuesta no lleva trabajo sin fusionar: `git log --oneline origin/<rama-base>..HEAD`.
+  - Vacío, o solo commits ya contenidos en la rama base (PR anterior fusionada): reiníciala desde la base con `git checkout -B <rama-impuesta> origin/<rama-base>`.
+  - Commits de esta misma issue (por ejemplo, su plan): síguela sin reiniciar y continúa desde la primera tarea sin marcar.
+  - Commits de otro trabajo sin fusionar: **para** y pregunta con `AskUserQuestion`; no mezcles dos issues en la misma PR.
+- Trabaja en el checkout principal. El plan se commitea en la rama como en el paso 2, se genera el grafo (`node scripts/graphify.mjs update .`) y `**Status:**` pasa a `in progress`.
+- Sube con `git push -u origin <rama-impuesta>`; nunca a otra rama.
+- La PR (paso 7) se abre **desde la rama impuesta contra la rama de la fase** (`Monolithic` o `Hexagonal`, nunca `master`). No es una desviación del plan: no hace falta justificarla en la PR.
+- Tras la fusión (paso 9) no hay worktree que borrar. GitHub puede borrar la rama remota al fusionar; la local se reinicia desde la base ya actualizada (`git fetch origin <rama-base> && git checkout -B <rama-impuesta> origin/<rama-base>`) y se sube si el entorno pide que no queden commits sin subir. Así la siguiente issue parte de la base fusionada.
 
 ### 3. Implementar cada tarea con TDD estricto
 
@@ -111,4 +126,4 @@ No avises si no hay PR. Si falla o no está configurado, menciónalo en el infor
 
 ### 9. Informar
 
-Issue, rama, worktree, URL de la PR, `git log --oneline origin/<rama-base>..HEAD`, tareas y criterios (con desviaciones y validaciones por sabotaje), si se avisó por Telegram y si la PR se fusionó (paso 7 bis) o qué la frena. Una vez fusionada (por ti con los checks en verde o por el usuario), borra el worktree y las ramas de la PR, local y remota, tras comprobar que están contenidas en la rama base (`git merge-base --is-ancestor`); nunca `master`, `Monolithic` ni `Hexagonal`.
+Issue, rama, worktree (o rama impuesta, paso 2 bis), URL de la PR, `git log --oneline origin/<rama-base>..HEAD`, tareas y criterios (con desviaciones y validaciones por sabotaje), si se avisó por Telegram y si la PR se fusionó (paso 7 bis) o qué la frena. Una vez fusionada (por ti con los checks en verde o por el usuario), borra el worktree y las ramas de la PR, local y remota, tras comprobar que están contenidas en la rama base (`git merge-base --is-ancestor`); nunca `master`, `Monolithic` ni `Hexagonal`. Con rama impuesta por el entorno, en vez de borrarla se reinicia desde la base (paso 2 bis).
