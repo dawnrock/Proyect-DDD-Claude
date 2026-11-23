@@ -232,7 +232,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Acceptance criteria:**
   - [x] The test passes; it is the local equivalent of the restart check on Render.
 
-### [ ] T18 — Architecture and Render guide (~10 min)
+### [x] T18 — Architecture and Render guide (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/fase-2-hexagonal.md`, `docs/deploy/render.md`
@@ -241,7 +241,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
   1. Package tree and adapter table with the JPA adapters and the doubles in tests; reconstitution rule.
   2. Guide: create the Neon project in AWS `eu-central-1`, use the direct (non-pooled) connection string, and set `SPRING_PROFILES_ACTIVE=demo,prod` and the three `SPRING_DATASOURCE_*` variables as secrets on the `Hexagonal` service.
 - **Acceptance criteria:**
-  - [ ] Both documents describe the new persistence; no secret in the repository.
+  - [x] Both documents describe the new persistence; no secret in the repository.
 
 ### [ ] T19 — Project status (~10 min)
 
