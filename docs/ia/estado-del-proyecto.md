@@ -2,7 +2,7 @@
 
 > **Read it at the start of every session.** It is the entry point to carry on without depending on earlier conversations, and it is kept **short on purpose**: it is loaded in every session. **It is updated in every PR that closes an issue** (CI checks it).
 
-- **Last updated:** 2026-11-23 · PR #151 (#146, form ergonomics)
+- **Last updated:** 2026-11-23 · PR #153 (#152, username format help)
 - **Active branch:** `Hexagonal`, the repository's default branch; phase 2 is marked by the `v2-hexagonal` tag and work continues on the branch. `Monolithic` frozen at the `v1-monolito` tag (exceptions authorised by the user: the Render deployment, #86, the footer, #91, and the twins #99 and #95); `master` frozen.
 
 ## Where we are
@@ -11,11 +11,11 @@
 | ----- | ---- | ----------- | ------- |
 | 1 · Layered monolith | Closed: #2-#8, #11-#13, #31, #48, #50, #54, #57 (details in the [history](historial.md)) | — | — |
 | 2 · Hexagonal | Closed: #14-#23, tag `v2-hexagonal` | — | — |
-| After phase 2 (no milestone) | #70 translation, #71 Graphify, #72 web, #77 review leftovers, #78 unit of work, #79 Claude Code configuration, #82 code leftovers, #85 and #86 deploy both branches on Render, #89 and #91 web footer, #98 segment by verified income and by balance (Mon-A Bank IBAN, entity `9999`), #103 customer sign-up (twin of #95; on `Monolithic`: #99 in PR #101, #95 in PR #102), #108 contract discrepancies (PR #114), #113 no multipart (PR #115), #107 contract tests (PR #117), #109 OpenAPI style guide (PR #118), #110 contract examples (PR #119), #111 Swagger UI (PR #120), #112 contract versioning (PR #121), #122 JWT Bearer on the API (PR #123, ADR 0015, contract 2.0.0), #124 web frontend base (PR #127, ADR 0016), #125 htmx in the account operations (PR #128), #126 htmx navigation for the rest of the web (PR #129), #130 limit on login attempts (PR #132, ADR 0017), #133 client IP behind Cloudflare (PR #134; checked on Render by the user), #131 limit on customer sign-ups (PR #135, ADR 0018), #136 implementation skills on the branch imposed by cloud sessions (PR #137), #139 limit on sign-up probing (PR #144), #145 accessible validation errors and focus on the first error (PR #149), #146 required fields, mobile keyboard and show password (PR #151) | — | — |
+| After phase 2 (no milestone) | #70 translation, #71 Graphify, #72 web, #77 review leftovers, #78 unit of work, #79 Claude Code configuration, #82 code leftovers, #85 and #86 deploy both branches on Render, #89 and #91 web footer, #98 segment by verified income and by balance (Mon-A Bank IBAN, entity `9999`), #103 customer sign-up (twin of #95; on `Monolithic`: #99 in PR #101, #95 in PR #102), #108 contract discrepancies (PR #114), #113 no multipart (PR #115), #107 contract tests (PR #117), #109 OpenAPI style guide (PR #118), #110 contract examples (PR #119), #111 Swagger UI (PR #120), #112 contract versioning (PR #121), #122 JWT Bearer on the API (PR #123, ADR 0015, contract 2.0.0), #124 web frontend base (PR #127, ADR 0016), #125 htmx in the account operations (PR #128), #126 htmx navigation for the rest of the web (PR #129), #130 limit on login attempts (PR #132, ADR 0017), #133 client IP behind Cloudflare (PR #134; checked on Render by the user), #131 limit on customer sign-ups (PR #135, ADR 0018), #136 implementation skills on the branch imposed by cloud sessions (PR #137), #139 limit on sign-up probing (PR #144), #145 accessible validation errors and focus on the first error (PR #149), #146 required fields, mobile keyboard and show password (PR #151), #147 closed (password repetition kept), #152 username format explained and lower-cased on the web (PR #153) | — | — |
 
 ## Next step
 
-1. Front-end review with `modern-web-guidance` (`docs/analysis/front-review-hexagonal.md`): #145 and #146 done, #147 closed (the user keeps the password repetition). Next: #152, the sign-up username format is not explained until it fails (found by the user; open question: lower-case what is typed?).
+1. No open issue left from the front-end review (`docs/analysis/front-review-hexagonal.md`): agree the next one with the user (ideas in `pendientes.md`).
 
 Both branches are live on Render (guide `docs/deploy/render.md`).
 
