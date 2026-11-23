@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.ExceptionMappingAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
+import com.pronoide.ddd.adapter.in.ClientIpAuthenticationDetailsSource;
 import com.pronoide.ddd.adapter.in.TooManyLoginAttemptsException;
 
 /**
@@ -29,7 +30,8 @@ public class WebSecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain webSecurity(HttpSecurity http) throws Exception {
+    public SecurityFilterChain webSecurity(HttpSecurity http, ClientIpAuthenticationDetailsSource clientIp)
+            throws Exception {
         return http
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/login", "/signup/**", "/css/**", "/js/**", "/webjars/**", "/vendor/**", "/actuator/health", "/error", "/error/**",
@@ -46,6 +48,8 @@ public class WebSecurityConfig {
                         .loginPage("/login")
                         .defaultSuccessUrl("/", true)
                         .failureHandler(loginFailure())
+                        // La IP del cliente detrás de Render y Cloudflare, para el límite de intentos (#133)
+                        .authenticationDetailsSource(clientIp)
                         .permitAll())
                 .logout(logout -> logout.logoutSuccessUrl("/login?logout"))
                 .exceptionHandling(errors -> {

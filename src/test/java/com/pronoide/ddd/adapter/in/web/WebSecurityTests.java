@@ -39,7 +39,8 @@ import com.pronoide.ddd.adapter.in.SecuritySupport;
 @TestPropertySource(properties = {
         "app.security.users[0].username=ada",
         "app.security.users[0].password-hash=$2a$10$XbpS91y/CFr.Zvx6Xxi7RuLFFUMRM9adecz2G7FO4YClrsKKCdKWW",
-        "app.security.users[0].role=USER"})
+        "app.security.users[0].role=USER",
+        "app.security.trusted-proxies=10.0.0.0/8,104.16.0.0/13"})
 class WebSecurityTests {
 
     @Autowired
@@ -158,6 +159,26 @@ class WebSecurityTests {
         // Desde otra IP, la misma usuaria sigue pudiendo entrar
         mvc.perform(formLogin("ada", "demo", "198.51.100.8"))
                 .andExpect(redirectedUrl("/"));
+    }
+
+    @Test
+    @DisplayName("A través del proxy de Render y de Cloudflare, el bloqueo es para la IP del cliente y no para la de Cloudflare (#133)")
+    void a_traves_de_render_y_cloudflare_el_bloqueo_es_para_la_ip_del_cliente() throws Exception {
+        for (int i = 0; i < 3; i++) {
+            mvc.perform(behindCloudflare(formLogin("ada", "mala", "10.0.0.5"), "198.51.100.30"))
+                    .andExpect(redirectedUrl("/login?error"));
+        }
+
+        mvc.perform(behindCloudflare(formLogin("ada", "demo", "10.0.0.5"), "198.51.100.30"))
+                .andExpect(redirectedUrl("/login?blocked"));
+        // Otro cliente que entra por el mismo nodo de Cloudflare sí puede entrar
+        mvc.perform(behindCloudflare(formLogin("ada", "demo", "10.0.0.5"), "198.51.100.31"))
+                .andExpect(redirectedUrl("/"));
+    }
+
+    /** Petición que llega por Cloudflare (104.22.136.75) y el proxy interno de Render, en nombre de un cliente. */
+    private static MockHttpServletRequestBuilder behindCloudflare(MockHttpServletRequestBuilder request, String client) {
+        return request.header("X-Forwarded-For", client + ", 104.22.136.75");
     }
 
     private static MockHttpServletRequestBuilder formLogin(String username, String password, String ip) {

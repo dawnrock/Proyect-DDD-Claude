@@ -34,7 +34,8 @@ import com.pronoide.ddd.application.OpenAccountCommandDef;
  * cuenta.
  */
 @Configuration
-@EnableConfigurationProperties({SecurityUsersProperties.class, LoginAttemptsProperties.class})
+@EnableConfigurationProperties({SecurityUsersProperties.class, LoginAttemptsProperties.class,
+        TrustedProxiesProperties.class})
 public class SecuritySupport {
 
     private static final Set<String> ROLES = Set.of("ADMIN", "USER");
@@ -54,6 +55,12 @@ public class SecuritySupport {
         StrictHttpFirewall firewall = new StrictHttpFirewall();
         firewall.setAllowedHttpMethods(List.of("DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "QUERY"));
         return firewall;
+    }
+
+    /** IP del cliente detrás de los proxies de confianza (#133, ADR 0017): Render y Cloudflare. */
+    @Bean
+    public ClientIpAuthenticationDetailsSource clientIpDetailsSource(TrustedProxiesProperties properties) {
+        return new ClientIpAuthenticationDetailsSource(new ClientIpResolver(properties.trustedProxies()));
     }
 
     /** Fallos recientes de inicio de sesión (#130, ADR 0017). Sin el reloj del núcleo, como en los tests web, el del sistema. */

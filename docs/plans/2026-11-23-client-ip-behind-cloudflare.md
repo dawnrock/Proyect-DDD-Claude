@@ -73,7 +73,7 @@
 - **Acceptance criteria:**
   - [x] Tests green.
 
-### [ ] T3 — Use it in the web login and the API token (~10 min)
+### [x] T3 — Use it in the web login and the API token (~10 min)
 
 - **Layer:** adapter.in · adapter.in.web · adapter.in.rest
 - **Files:** `ClientIpAuthenticationDetailsSource`, `SecuritySupport`, `WebSecurityConfig`, `TokenController`, `WebSecurityTests`, `TokenControllerTests`
@@ -84,7 +84,7 @@
      - the same for `POST /api/auth/token`.
   2. Beans in `SecuritySupport`; `authenticationDetailsSource` in the form login; the token controller uses the source.
 - **Acceptance criteria:**
-  - [ ] Tests green; T1 green; the existing tests unchanged.
+  - [x] Tests green; T1 green; the existing tests unchanged.
 
 ### [ ] T4 — Official ranges in the configuration (~5 min)
 
