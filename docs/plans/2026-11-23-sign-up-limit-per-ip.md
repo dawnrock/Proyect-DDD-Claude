@@ -125,7 +125,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
 - **Acceptance criteria:**
   - [x] Lint without errors; `node scripts/check-contract-version.mjs` accepts the bump.
 
-### [ ] T7 — Defaults and ADR 0018 (~5 min)
+### [x] T7 — Defaults and ADR 0018 (~5 min)
 
 - **Layer:** config · docs
 - **Files:** `src/main/resources/application.properties`, `docs/adr/0018-sign-up-limit.md` (new), `docs/adr/0012-customer-self-sign-up.md`, `docs/adr/README.md`
@@ -135,7 +135,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
   2. ADR 0018: context (memory on Render, #103 risk), decision (successful sign-ups per client IP and in total, sliding window, reserve/release, check at step 1 of the web, input adapter), alternatives (reuse `LoginAttempts`, a library like Bucket4j, CAPTCHA, a memory-based cap) and consequences (shared IPs/NAT, in memory, a full global cap also stops legitimate users until the window slides, IPv6 /128).
   3. ADR 0012: the "no rate limit" risk now points to ADR 0018. Index row in `docs/adr/README.md`.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green; `DddLabApplicationTests` loads the context with the new properties.
+  - [x] `./mvnw verify` green; `DddLabApplicationTests` loads the context with the new properties.
 
 ### [ ] T8 — Project status, including the verified Render check of #133 (~5 min)
 
