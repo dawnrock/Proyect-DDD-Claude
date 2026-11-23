@@ -101,7 +101,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
 - **Acceptance criteria:**
   - [x] `SignUpControllerTests` green; the message is visible in `signup/account` (check the template renders global errors).
 
-### [ ] T5b — Web: check the limit at step 1 (~10 min)
+### [x] T5b — Web: check the limit at step 1 (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/web/SignUpController.java`, `templates/signup/data.html`, `SignUpControllerTests.java`
@@ -110,7 +110,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
   1. Tests first: over the per-IP or the global limit, `POST /signup` stays on step 1 with the same message (minutes left) and does not complete the personal data, so `/signup/access` still redirects to `/signup`; `GET /signup` shows the notice too; under the limit nothing changes and nothing is reserved (`lockedFor`, never `tryReserve`).
   2. `submitData` (and `data`) ask `signUpLimit.lockedFor(clientIpResolver.resolve(request))`; when locked, a global error / model attribute shown by `signup/data.html`.
 - **Acceptance criteria:**
-  - [ ] `SignUpControllerTests` green; step 1 cannot be passed over the limit, and the final step still rejects if the limit filled up meanwhile (T5 test).
+  - [x] `SignUpControllerTests` green; step 1 cannot be passed over the limit, and the final step still rejects if the limit filled up meanwhile (T5 test).
 
 ### [ ] T6 — Contract 2.2.0 and contract tests (~10 min)
 

@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Currency;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -34,6 +36,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountSummary;
@@ -48,6 +51,7 @@ import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.adapter.in.CustomerRegistration;
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.SignUpLimit;
 import com.pronoide.ddd.adapter.in.TooManySignUpsException;
 import com.pronoide.ddd.adapter.in.UsernameTakenException;
 
@@ -67,6 +71,10 @@ class SignUpControllerTests {
 
     @MockitoBean
     private CheckingAccountQueries queries;
+
+    /** Sin preparar, nunca bloquea (Mockito devuelve un {@code Optional} vacío). */
+    @MockitoBean
+    private SignUpLimit signUpLimit;
 
     /** POST con token CSRF: la cadena web lo exige para las rutas públicas del alta. */
     private static MockHttpServletRequestBuilder post(String url) {
@@ -541,6 +549,50 @@ class SignUpControllerTests {
                     .andExpect(status().is3xxRedirection());
 
             verify(registration).register(any(SignUpCommand.class), any(), eq("198.51.100.40"));
+        }
+
+        @Test
+        @DisplayName("Con el límite lleno, el paso 1 ya muestra el aviso al entrar")
+        void con_el_limite_lleno_el_paso_1_muestra_el_aviso_al_entrar() throws Exception {
+            when(signUpLimit.lockedFor("198.51.100.40")).thenReturn(Optional.of(Duration.ofMinutes(10)));
+
+            mvc.perform(get("/signup").with(from("198.51.100.40")))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString(
+                            "Demasiadas altas de clientes en este momento. Inténtalo de nuevo dentro de 10 minutos.")));
+            mvc.perform(get("/signup").with(from("198.51.100.41")))
+                    .andExpect(content().string(not(containsString("Demasiadas altas"))));
+        }
+
+        @Test
+        @DisplayName("Con el límite lleno, el paso 1 no deja seguir: el paso 2 vuelve al 1 y no se reserva nada")
+        void con_el_limite_lleno_el_paso_1_no_deja_seguir() throws Exception {
+            when(signUpLimit.lockedFor("198.51.100.40")).thenReturn(Optional.of(Duration.ofSeconds(30)));
+            MockHttpSession session = new MockHttpSession();
+
+            mvc.perform(validStep1(post("/signup")).session(session).with(from("198.51.100.40")))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("signup/data"))
+                    .andExpect(content().string(containsString("Inténtalo de nuevo dentro de 1 minuto.")));
+            mvc.perform(get("/signup/access").session(session))
+                    .andExpect(redirectedUrl("/signup"));
+
+            verify(signUpLimit, never()).tryReserve(any());
+            verifyNoInteractions(registration);
+        }
+
+        @Test
+        @DisplayName("Con cupo, el paso 1 sigue al paso 2 como siempre")
+        void con_cupo_el_paso_1_sigue_al_paso_2() throws Exception {
+            mvc.perform(validStep1(post("/signup")).with(from("198.51.100.40")))
+                    .andExpect(redirectedUrl("/signup/access"));
+        }
+
+        private static RequestPostProcessor from(String ip) {
+            return request -> {
+                request.setRemoteAddr(ip);
+                return request;
+            };
         }
     }
 }

@@ -27,6 +27,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.pronoide.ddd.adapter.in.ClientIpResolver;
 import com.pronoide.ddd.adapter.in.CustomerRegistration;
+import com.pronoide.ddd.adapter.in.SignUpLimit;
 import com.pronoide.ddd.adapter.in.TooManySignUpsException;
 import com.pronoide.ddd.adapter.in.UsernameTakenException;
 import com.pronoide.ddd.application.AccountSummary;
@@ -62,6 +63,8 @@ public class SignUpController {
 
     private final ClientIpResolver clientIpResolver;
 
+    private final SignUpLimit signUpLimit;
+
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
     @ModelAttribute(FORM)
@@ -70,13 +73,18 @@ public class SignUpController {
     }
 
     @GetMapping("/signup")
-    public String data() {
+    public String data(HttpServletRequest request, Model model) {
+        warnIfLimitReached(request, model);
         return DATA_VIEW;
     }
 
     @PostMapping("/signup")
     public String submitData(@Validated(SignUpForm.PersonalData.class) @ModelAttribute(FORM) SignUpForm form,
-                             BindingResult result) {
+                             BindingResult result, HttpServletRequest request, Model model) {
+        if (warnIfLimitReached(request, model)) {
+            form.resetProgress();
+            return DATA_VIEW;
+        }
         if (result.hasErrors()) {
             form.resetProgress();
             return DATA_VIEW;
@@ -174,6 +182,18 @@ public class SignUpController {
         context.setAuthentication(authentication);
         SecurityContextHolder.getContextHolderStrategy().setContext(context);
         securityContextRepository.saveContext(context, request, response);
+    }
+
+    /**
+     * Comprueba el límite de altas en el paso 1 (#131, ADR 0018), sin reservar nada: así nadie rellena los tres pasos
+     * para nada. El último paso vuelve a comprobarlo al reservar, porque el límite puede llenarse entretanto.
+     *
+     * @return si el límite está lleno; entonces deja el aviso en {@code signUpError}
+     */
+    private boolean warnIfLimitReached(HttpServletRequest request, Model model) {
+        return signUpLimit.lockedFor(clientIpResolver.resolve(request))
+                .map(retryAfter -> model.addAttribute("signUpError", tooManySignUps(retryAfter)))
+                .isPresent();
     }
 
     /** Aviso del límite de altas (#131, ADR 0018) con los minutos que faltan, redondeados hacia arriba. */
