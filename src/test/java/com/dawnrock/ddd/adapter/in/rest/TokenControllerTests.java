@@ -1,0 +1,167 @@
+package com.dawnrock.ddd.adapter.in.rest;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.Duration;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
+import com.jayway.jsonpath.JsonPath;
+import com.dawnrock.ddd.adapter.in.SecuritySupport;
+import com.dawnrock.ddd.adapter.in.TestUsers;
+
+/** {@code POST /api/auth/token} (#122, ADR 0015): credenciales a cambio de un token JWT, sin autenticarse antes. */
+@WithAnonymousUser
+@WebMvcTest(controllers = TokenController.class, properties = {
+        "app.security.users[0].username=admin",
+        "app.security.users[0].password-hash=" + TokenControllerTests.DEMO_HASH,
+        "app.security.users[0].role=ADMIN",
+        "app.security.users[1].username=ada",
+        "app.security.users[1].password-hash=" + TokenControllerTests.DEMO_HASH,
+        "app.security.users[1].role=USER",
+        "app.jwt.secret=un-secreto-de-pruebas-de-al-menos-32-bytes",
+        "app.security.trusted-proxies=10.0.0.0/8,104.16.0.0/13"})
+@Import({ApiSecurityConfig.class, SecuritySupport.class, TestUsers.class, JwtSupport.class, AccessTokenIssuer.class})
+class TokenControllerTests {
+
+    /** Hash BCrypt de "demo". */
+    static final String DEMO_HASH = "$2a$10$XbpS91y/CFr.Zvx6Xxi7RuLFFUMRM9adecz2G7FO4YClrsKKCdKWW";
+
+    @Autowired
+    private MockMvc mvc;
+
+    @Autowired
+    private JwtDecoder decoder;
+
+    private String tokenFor(String username, String password) throws Exception {
+        String body = mvc.perform(post("/api/auth/token").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\": \"%s\", \"password\": \"%s\"}".formatted(username, password)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        return JsonPath.read(body, "$.accessToken");
+    }
+
+    @Test
+    @DisplayName("Con credenciales válidas responde 200 con un token Bearer que dura 15 minutos")
+    void con_credenciales_validas_responde_200_con_un_token_bearer() throws Exception {
+        mvc.perform(post("/api/auth/token").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\": \"ada\", \"password\": \"demo\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").isString())
+                .andExpect(jsonPath("$.tokenType").value("Bearer"))
+                .andExpect(jsonPath("$.expiresIn").value(900));
+    }
+
+    @Test
+    @DisplayName("El token lleva el usuario como sub, sus roles, el emisor y la caducidad")
+    void el_token_lleva_el_usuario_sus_roles_el_emisor_y_la_caducidad() throws Exception {
+        Jwt admin = decoder.decode(tokenFor("admin", "demo"));
+        Jwt ada = decoder.decode(tokenFor("ada", "demo"));
+
+        assertThat(admin.getSubject()).isEqualTo("admin");
+        assertThat(admin.getClaimAsStringList("roles")).containsExactly("ADMIN");
+        assertThat(ada.getClaimAsStringList("roles")).containsExactly("USER");
+        assertThat(admin.getClaimAsString("iss")).isEqualTo("ddd-lab");
+        assertThat(Duration.between(admin.getIssuedAt(), admin.getExpiresAt())).hasMinutes(15);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"ada, incorrecta", "nadie, demo"})
+    @DisplayName("Con una contraseña errónea o un usuario inexistente responde 401 con el mismo mensaje")
+    void con_credenciales_erroneas_responde_401_con_el_mismo_mensaje(String username, String password)
+            throws Exception {
+        mvc.perform(post("/api/auth/token").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\": \"%s\", \"password\": \"%s\"}".formatted(username, password)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE, "Bearer"))
+                .andExpect(jsonPath("$.title").value("No autenticado"))
+                .andExpect(jsonPath("$.detail").value("Usuario o contraseña incorrectos"))
+                .andExpect(jsonPath("$.accessToken").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("Tras 3 fallos desde una IP, ni la contraseña correcta da token: 429 con Retry-After y sin revelar el usuario (#130)")
+    void tras_3_fallos_responde_429_con_retry_after() throws Exception {
+        for (int i = 0; i < 3; i++) {
+            mvc.perform(tokenRequest("ada", "incorrecta", "198.51.100.9"))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        mvc.perform(tokenRequest("ada", "demo", "198.51.100.9"))
+                .andExpect(status().isTooManyRequests())
+                // Los segundos que quedan de 30 minutos: 1800, o algo menos si el reloj avanza entre peticiones
+                .andExpect(header().string(HttpHeaders.RETRY_AFTER, matchesPattern("1800|17[0-9]{2}")))
+                .andExpect(jsonPath("$.title").value("Demasiados intentos"))
+                .andExpect(jsonPath("$.detail").value(
+                        "Demasiados intentos fallidos de inicio de sesión. Vuelve a intentarlo más tarde."))
+                .andExpect(jsonPath("$.accessToken").doesNotExist());
+        // Un usuario inexistente bloqueado recibe exactamente la misma respuesta
+        for (int i = 0; i < 3; i++) {
+            mvc.perform(tokenRequest("nadie", "demo", "198.51.100.10"));
+        }
+        mvc.perform(tokenRequest("nadie", "demo", "198.51.100.10"))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.detail").value(
+                        "Demasiados intentos fallidos de inicio de sesión. Vuelve a intentarlo más tarde."));
+    }
+
+    @Test
+    @DisplayName("A través del proxy de Render y de Cloudflare, el 429 es para la IP del cliente y no para la de Cloudflare (#133)")
+    void a_traves_de_render_y_cloudflare_el_429_es_para_la_ip_del_cliente() throws Exception {
+        for (int i = 0; i < 3; i++) {
+            mvc.perform(tokenRequest("admin", "incorrecta", "10.0.0.5")
+                            .header("X-Forwarded-For", "198.51.100.40, 104.22.136.75"))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        mvc.perform(tokenRequest("admin", "demo", "10.0.0.5").header("X-Forwarded-For", "198.51.100.40, 104.22.136.75"))
+                .andExpect(status().isTooManyRequests());
+        mvc.perform(tokenRequest("admin", "demo", "10.0.0.5").header("X-Forwarded-For", "198.51.100.41, 104.22.136.75"))
+                .andExpect(status().isOk());
+    }
+
+    private static MockHttpServletRequestBuilder tokenRequest(String username, String password, String ip) {
+        return post("/api/auth/token").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"username\": \"%s\", \"password\": \"%s\"}".formatted(username, password))
+                .with(request -> {
+                    request.setRemoteAddr(ip);
+                    return request;
+                });
+    }
+
+    @Test
+    @DisplayName("Un método no declarado responde 405 sin pedir token")
+    void un_metodo_no_declarado_responde_405_sin_pedir_token() throws Exception {
+        mvc.perform(get("/api/auth/token"))
+                .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
+    @DisplayName("Sin usuario o sin contraseña responde 400 con el error de cada campo")
+    void sin_usuario_o_sin_contrasena_responde_400() throws Exception {
+        mvc.perform(post("/api/auth/token").contentType(MediaType.APPLICATION_JSON).content("{\"username\": \" \"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Petición no válida"))
+                .andExpect(jsonPath("$.errors.username").exists())
+                .andExpect(jsonPath("$.errors.password").exists());
+    }
+}

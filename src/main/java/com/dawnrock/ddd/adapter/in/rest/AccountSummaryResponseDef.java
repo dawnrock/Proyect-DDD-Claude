@@ -1,0 +1,30 @@
+package com.dawnrock.ddd.adapter.in.rest;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
+import org.immutables.value.Value;
+
+import com.dawnrock.ddd.application.ApplicationValue;
+
+import tools.jackson.databind.annotation.JsonSerialize;
+
+/** Respuesta REST con el resumen de una cuenta (esquema {@code AccountSummary} del OpenAPI). */
+@ApplicationValue
+@Value.Immutable
+@JsonSerialize(as = AccountSummaryResponse.class)
+public interface AccountSummaryResponseDef {
+
+    UUID id();
+
+    String accountNumber();
+
+    String holderName();
+
+    /** {@code RETAIL} o {@code HIGH_NET_WORTH}: el segmento que ha calculado la factoría. */
+    String segment();
+
+    BigDecimal balance();
+
+    String currency();
+}

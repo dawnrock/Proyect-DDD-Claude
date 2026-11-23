@@ -26,7 +26,7 @@ On 2026-11-23 the first deploy against Neon hung with no error until Render gave
 | Layer / package | File | Change |
 | --------------- | ---- | ------ |
 | config (resources) | `src/main/resources/application-prod.properties` | Driver timeouts as `spring.datasource.hikari.data-source-properties.*`, plus explicit Hikari `connection-timeout`, `initialization-fail-timeout` and `keepalive-time` |
-| tests | `src/test/java/com/pronoide/ddd/ProdProfileTests.java` | The profile exposes the timeouts; a silent server ends the start in an error, not a hang |
+| tests | `src/test/java/com/dawnrock/ddd/ProdProfileTests.java` | The profile exposes the timeouts; a silent server ends the start in an error, not a hang |
 | docs | `docs/deploy/render.md` (section 2 bis), `docs/adr/0019-*.md`, `docs/ia/*` | Plain URL, why the timeouts exist, which log appears when they run out, how it was diagnosed |
 
 Technical decisions (taken by Claude under `/advance-issues`, reversible configuration):
@@ -42,7 +42,7 @@ Technical decisions (taken by Claude under `/advance-issues`, reversible configu
 ### [x] T1 — The prod profile sets the driver and pool timeouts (~10 min)
 
 - **Layer:** config
-- **Files:** `src/main/resources/application-prod.properties`, `src/test/java/com/pronoide/ddd/ProdProfileTests.java`
+- **Files:** `src/main/resources/application-prod.properties`, `src/test/java/com/dawnrock/ddd/ProdProfileTests.java`
 - **Depends on:** —
 - **What to do:**
   1. Red: a test that starts the `prod` profile with the H2 URL and checks the `HikariDataSource`: `dataSourceProperties` with `connectTimeout=15`, `loginTimeout=30`, `socketTimeout=120`, and `connectionTimeout`, `initializationFailTimeout` and `keepaliveTime` as above.
@@ -54,7 +54,7 @@ Technical decisions (taken by Claude under `/advance-issues`, reversible configu
 ### [x] T2 — A silent database ends the start in an error, not a hang (~10 min)
 
 - **Layer:** tests
-- **Files:** `src/test/java/com/pronoide/ddd/ProdProfileTests.java`
+- **Files:** `src/test/java/com/dawnrock/ddd/ProdProfileTests.java`
 - **Depends on:** T1
 - **What to do:**
   1. A test opens a local `ServerSocket` that accepts connections and never answers (as a compute that does not wake up), starts `prod` against `jdbc:postgresql://127.0.0.1:<port>/monabank` with `loginTimeout` lowered to 2 s (the only override, to keep the test fast), and checks with `assertTimeoutPreemptively` that the start fails within a few seconds with the driver's timeout in the stack trace.

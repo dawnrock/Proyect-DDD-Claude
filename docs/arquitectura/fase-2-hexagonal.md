@@ -11,7 +11,7 @@ The domain sits in the centre; the application surrounds it and exposes the inpu
 At the end of the phase:
 
 ```
-com.pronoide.ddd
+com.dawnrock.ddd
 ├── adapter
 │   ├── in
 │   │   ├── cli           DomainModelRunner

@@ -8,7 +8,7 @@ Replaces the open-account part of `open-query-list-accounts.md` (#5) and keeps t
 
 ## Application service
 
-Phase 2: input port `com.pronoide.ddd.application.CheckingAccountCommands`, implemented by `CheckingAccountService`. The signature does not change; what changes is the command and the view.
+Phase 2: input port `com.dawnrock.ddd.application.CheckingAccountCommands`, implemented by `CheckingAccountService`. The signature does not change; what changes is the command and the view.
 
 ```java
 public interface CheckingAccountCommands {
