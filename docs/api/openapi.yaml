@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Proyect-DDD-Claude · Checking accounts API
-  version: 2.2.1
+  version: 2.2.2
   description: |
     Versioned with SemVer (ADR 0014); the changes are in `docs/api/CHANGELOG.md`.
 
@@ -318,7 +318,8 @@ paths:
         ask for a token with `POST /api/auth/token` and use the API. A document is unique per customer (R29): signing up again with it fails with 422,
         whatever the e-mail. Successful sign-ups are limited to 3 per hour from one IP and 50 per hour in total; over
         either limit the answer is 429 until the oldest sign-up of the hour expires (ADR 0018). Failed sign-ups do not
-        count.
+        count towards those limits, but 10 failures in the last hour from one IP because the username was taken or the
+        document already belongs to a customer also give 429, so nobody can probe which ones exist without limit (#139).
       security: []
       requestBody:
         required: true
@@ -814,8 +815,9 @@ components:
             detail: Demasiados intentos fallidos de inicio de sesión. Vuelve a intentarlo más tarde.
     TooManySignUps:
       description: |
-        Too many customer sign-ups in the last hour, from this IP or from all of them together: try again after
-        `Retry-After` seconds. The answer does not say which limit was reached.
+        Too many customer sign-ups in the last hour, from this IP or from all of them together, or too many failed ones
+        from this IP because the username or the document already existed: try again after `Retry-After` seconds. The
+        answer does not say which limit was reached.
       headers:
         Retry-After:
           description: Seconds until there is room for another sign-up.

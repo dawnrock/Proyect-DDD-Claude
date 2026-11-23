@@ -2,6 +2,12 @@
 
 Changes to `docs/api/openapi.yaml`, newest first. Versioning policy: [ADR 0014](../adr/0014-contract-versioning.md) (major for an incompatible change as `oasdiff breaking` reports it, minor for a compatible addition, patch for documentation only). The CI checks the bump on every pull request.
 
+## 2.2.2 · 2026-11-23 (#139)
+
+Documentation only ([ADR 0018](../adr/0018-sign-up-limit.md)).
+
+- **`signUp` and `TooManySignUps`:** the 429 also comes after 10 failed sign-ups in the last hour from one IP because the username was taken or the document already belongs to a customer. Same response, status and headers.
+
 ## 2.2.1 · 2026-11-23
 
 Documentation only.

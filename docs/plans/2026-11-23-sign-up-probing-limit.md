@@ -70,7 +70,7 @@ Everything stays in the root of `adapter.in`, like #131; domain and application 
 - **Acceptance criteria:**
   - [x] `./mvnw verify` green; `node scripts/contract-test.mjs` passes.
 
-### [ ] T4 — Contract 2.2.2 (~5 min)
+### [x] T4 — Contract 2.2.2 (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`, `docs/api/CHANGELOG.md`
@@ -79,7 +79,7 @@ Everything stays in the root of `adapter.in`, like #131; domain and application 
   1. `signUp` description: 10 failed sign-ups per hour from one IP because of a taken username or an existing document also give 429. `TooManySignUps` description: also after too many of those failures.
   2. `info.version` 2.2.1 → **2.2.2** (documentation only, ADR 0014); CHANGELOG entry; Redocly lint and `check-contract-version.mjs`.
 - **Acceptance criteria:**
-  - [ ] Lint without errors; the contract version check accepts the bump.
+  - [x] Lint without errors; the contract version check accepts the bump.
 
 ### [ ] T5 — ADR 0018 amended (~5 min)
 
