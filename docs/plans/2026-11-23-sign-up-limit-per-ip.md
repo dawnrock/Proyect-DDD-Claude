@@ -112,7 +112,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
 - **Acceptance criteria:**
   - [x] `SignUpControllerTests` green; step 1 cannot be passed over the limit, and the final step still rejects if the limit filled up meanwhile (T5 test).
 
-### [ ] T6 — Contract 2.2.0 and contract tests (~10 min)
+### [x] T6 — Contract 2.2.0 and contract tests (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`, `docs/api/CHANGELOG.md`, `scripts/contract-test.mjs`
@@ -123,7 +123,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
   3. `scripts/contract-test.mjs` starts the jar also with `--app.security.sign-ups.max-per-ip=1000000` and `--app.security.sign-ups.max-total=1000000`, so Schemathesis tests the contract and not the limit.
   4. `npx @redocly/cli lint docs/api/openapi.yaml`, `oasdiff breaking` (no breaking change) and `node scripts/contract-test.mjs` (if Schemathesis is available).
 - **Acceptance criteria:**
-  - [ ] Lint without errors; `node scripts/check-contract-version.mjs` accepts the bump.
+  - [x] Lint without errors; `node scripts/check-contract-version.mjs` accepts the bump.
 
 ### [ ] T7 — Defaults and ADR 0018 (~5 min)
 
