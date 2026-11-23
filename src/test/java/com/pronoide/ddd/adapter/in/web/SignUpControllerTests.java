@@ -344,7 +344,7 @@ class SignUpControllerTests {
         @DisplayName("Con todo correcto da de alta con los datos de los tres pasos y redirige a la cuenta con la bienvenida")
         void con_todo_correcto_da_de_alta_y_redirige_a_la_cuenta_con_la_bienvenida() throws Exception {
             UUID id = UUID.randomUUID();
-            when(registration.register(any(SignUpCommand.class), eq("clave-secreta-1"))).thenReturn(openedAccount(id));
+            when(registration.register(any(SignUpCommand.class), eq("clave-secreta-1"), any())).thenReturn(openedAccount(id));
 
             mvc.perform(validStep3(post("/signup/account")).session(sessionAfterStep2()))
                     .andExpect(status().is3xxRedirection())
@@ -353,7 +353,7 @@ class SignUpControllerTests {
                             "Te damos la bienvenida a Mon-A Bank. Tu IBAN es ES2199990001220000000001"));
 
             ArgumentCaptor<SignUpCommand> command = ArgumentCaptor.forClass(SignUpCommand.class);
-            verify(registration).register(command.capture(), eq("clave-secreta-1"));
+            verify(registration).register(command.capture(), eq("clave-secreta-1"), any());
             assertThat(command.getValue().fullName()).isEqualTo("Margaret Hamilton");
             assertThat(command.getValue().taxId()).isEqualTo("12345678Z");
             assertThat(command.getValue().email()).isEqualTo("margaret@example.com");
@@ -366,7 +366,7 @@ class SignUpControllerTests {
         @DisplayName("Un cliente que ya existe vuelve al paso 1 con el mensaje y el enlace para entrar")
         void un_cliente_que_ya_existe_vuelve_al_paso_1_con_el_mensaje_y_el_enlace_para_entrar() throws Exception {
             var error = new DuplicateCustomerException(new TaxId("12345678Z"));
-            when(registration.register(any(SignUpCommand.class), any())).thenThrow(error);
+            when(registration.register(any(SignUpCommand.class), any(), any())).thenThrow(error);
             MockHttpSession session = sessionAfterStep2();
 
             mvc.perform(validStep3(post("/signup/account")).session(session))
@@ -384,7 +384,7 @@ class SignUpControllerTests {
         @DisplayName("Un usuario ocupado vuelve al paso 2 con el mensaje")
         void un_usuario_ocupado_vuelve_al_paso_2_con_el_mensaje() throws Exception {
             var error = new UsernameTakenException("margaret");
-            when(registration.register(any(SignUpCommand.class), any())).thenThrow(error);
+            when(registration.register(any(SignUpCommand.class), any(), any())).thenThrow(error);
             MockHttpSession session = sessionAfterStep2();
 
             mvc.perform(validStep3(post("/signup/account")).session(session))
@@ -398,7 +398,7 @@ class SignUpControllerTests {
         @Test
         @DisplayName("Un documento con la letra de control mal (IllegalArgumentException) vuelve al paso 1 con el mensaje del dominio")
         void un_documento_con_la_letra_mal_vuelve_al_paso_1_con_el_mensaje_del_dominio() throws Exception {
-            when(registration.register(any(SignUpCommand.class), any()))
+            when(registration.register(any(SignUpCommand.class), any(), any()))
                     .thenThrow(new IllegalArgumentException("La letra del documento no es correcta"));
 
             mvc.perform(validStep3(post("/signup/account")).session(sessionAfterStep2()))
@@ -413,7 +413,7 @@ class SignUpControllerTests {
             MockHttpSession session = sessionAfterStep2();
             var insufficient = new InsufficientInitialDepositException(
                     MonetaryAmount.euros("10.00"), MonetaryAmount.euros("50.00"));
-            when(registration.register(any(SignUpCommand.class), any())).thenThrow(insufficient);
+            when(registration.register(any(SignUpCommand.class), any(), any())).thenThrow(insufficient);
 
             mvc.perform(post("/signup/account").session(session).param("initialDeposit", "10.00")
                             .param("conditionsAccepted", "true"))
@@ -422,7 +422,7 @@ class SignUpControllerTests {
                     .andExpect(content().string(containsString("no alcanza el mínimo exigido")))
                     .andExpect(content().string(containsString("value=\"10.00\"")));
 
-            when(registration.register(any(SignUpCommand.class), any())).thenThrow(
+            when(registration.register(any(SignUpCommand.class), any(), any())).thenThrow(
                     new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD")));
 
             mvc.perform(post("/signup/account").session(session).param("initialDeposit", "100.00")
@@ -454,7 +454,7 @@ class SignUpControllerTests {
         @DisplayName("Tras el POST final, la misma sesión abre el detalle como el cliente nuevo y ve la bienvenida")
         void tras_el_post_final_la_misma_sesion_abre_el_detalle_como_el_cliente_nuevo() throws Exception {
             UUID id = UUID.randomUUID();
-            when(registration.register(any(SignUpCommand.class), any())).thenReturn(openedAccount(id));
+            when(registration.register(any(SignUpCommand.class), any(), any())).thenReturn(openedAccount(id));
             when(queries.findAccount(any(Caller.class), eq(id))).thenReturn(details(id));
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(openedAccount(id)));
             MockHttpSession session = sessionAfterStep2();
@@ -478,7 +478,7 @@ class SignUpControllerTests {
         @DisplayName("Terminado el alta se borra el asistente: no quedan datos ni contraseña en la sesión")
         void terminado_el_alta_se_borra_el_asistente() throws Exception {
             UUID id = UUID.randomUUID();
-            when(registration.register(any(SignUpCommand.class), any())).thenReturn(openedAccount(id));
+            when(registration.register(any(SignUpCommand.class), any(), any())).thenReturn(openedAccount(id));
             MockHttpSession session = sessionAfterStep2();
 
             mvc.perform(validStep3(post("/signup/account")).session(session))
@@ -490,7 +490,7 @@ class SignUpControllerTests {
         @Test
         @DisplayName("Si el alta falla, la sesión no queda iniciada")
         void si_el_alta_falla_la_sesion_no_queda_iniciada() throws Exception {
-            when(registration.register(any(SignUpCommand.class), any()))
+            when(registration.register(any(SignUpCommand.class), any(), any()))
                     .thenThrow(new UsernameTakenException("margaret"));
             MockHttpSession session = sessionAfterStep2();
 

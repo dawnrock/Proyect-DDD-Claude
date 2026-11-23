@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.pronoide.ddd.adapter.in.ClientIpResolver;
 import com.pronoide.ddd.adapter.in.CustomerRegistration;
 import com.pronoide.ddd.adapter.in.UsernameTakenException;
 import com.pronoide.ddd.application.AccountSummary;
@@ -56,6 +57,8 @@ public class SignUpController {
     private static final String REDIRECT_DATA = "redirect:/signup";
 
     private final CustomerRegistration registration;
+
+    private final ClientIpResolver clientIpResolver;
 
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
@@ -129,7 +132,8 @@ public class SignUpController {
             return backToData(form, redirect, e.getMessage(), false);
         }
         try {
-            AccountSummary account = registration.register(command, form.getPassword());
+            AccountSummary account = registration.register(command, form.getPassword(),
+                    clientIpResolver.resolve(request));
             String username = form.getUsername();
             status.setComplete();
             signIn(username, request, response);

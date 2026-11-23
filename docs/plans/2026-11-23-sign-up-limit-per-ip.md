@@ -66,7 +66,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
 - **Acceptance criteria:**
   - [x] `./mvnw test -Dtest=SignUpLimitTests` green.
 
-### [ ] T3 — `CustomerRegistration` reserves a slot per IP (~10 min)
+### [x] T3 — `CustomerRegistration` reserves a slot per IP (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/TooManySignUpsException.java` (new), `adapter/in/CustomerRegistration.java`, `CustomerRegistrationTests.java`
@@ -76,7 +76,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
   2. `TooManySignUpsException(Duration retryAfter)` (`RuntimeException`, message in Spanish: "Demasiadas altas desde tu conexión…").
   3. `register` takes the IP, calls `tryReserve` first and `release` in a `catch` that rethrows; update the two callers (they still compile by passing the IP in T4/T5; in this task pass a placeholder only if needed to keep `verify` green, removed in T4/T5).
 - **Acceptance criteria:**
-  - [ ] `CustomerRegistrationTests` green, including the three new cases.
+  - [x] `CustomerRegistrationTests` green, including the three new cases.
 
 ### [ ] T4 — API: IP to the sign-up and 429 with `Retry-After` (~10 min)
 
