@@ -66,7 +66,7 @@ class CustomerRegistrationTests {
     }
 
     private CustomerRegistration registrationWith(InMemoryUserDetailsManager manager) {
-        return registrationWith(manager, new SignUpLimitProperties(1_000, 1_000, Duration.ofHours(1)));
+        return registrationWith(manager, new SignUpLimitProperties(1_000, 1_000, Duration.ofHours(1), 1_000));
     }
 
     private CustomerRegistration registrationWith(InMemoryUserDetailsManager manager, SignUpLimitProperties limits) {
@@ -240,7 +240,7 @@ class CustomerRegistrationTests {
 
         @BeforeEach
         void oneSignUpPerIpAndTwoInTotal() {
-            registration = registrationWith(users, new SignUpLimitProperties(1, 2, Duration.ofHours(1)));
+            registration = registrationWith(users, new SignUpLimitProperties(1, 2, Duration.ofHours(1), 1_000));
         }
 
         @Test
@@ -297,7 +297,7 @@ class CustomerRegistrationTests {
                     throw new IllegalStateException("almacén de usuarios caído");
                 }
             };
-            registration = registrationWith(failing, new SignUpLimitProperties(1, 2, Duration.ofHours(1)));
+            registration = registrationWith(failing, new SignUpLimitProperties(1, 2, Duration.ofHours(1), 1_000));
 
             assertThatExceptionOfType(IllegalStateException.class)
                     .isThrownBy(() -> registration.register(signUp().build(), PASSWORD, IP));

@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-23
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~45 min (6 tasks)
 
 ## Goal
@@ -37,7 +37,7 @@ Everything stays in the root of `adapter.in`, like #131; domain and application 
 
 ## Tasks
 
-### [ ] T1 — Failures window in `SignUpLimit` (~10 min)
+### [x] T1 — Failures window in `SignUpLimit` (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/SignUpLimitProperties.java`, `adapter/in/SignUpLimit.java`, `SignUpLimitTests.java`
@@ -46,7 +46,7 @@ Everything stays in the root of `adapter.in`, like #131; domain and application 
   1. Tests first: `maxFailuresPerIp` defaults to 10 and must be positive; after `maxFailuresPerIp` calls to `recordFailure(ip)` both `lockedFor(ip)` and `tryReserve(ip)` give the time left until the oldest failure expires, and `tryReserve` reserves nothing; other IPs are not affected; after the window it allows again; with the per-IP sign-up window also full, the time left is the longest.
   2. Add the property (record component, default, validation) and the window, pruned like the others.
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest=SignUpLimitTests` green.
+  - [x] `./mvnw test -Dtest=SignUpLimitTests` green.
 
 ### [ ] T2 — `CustomerRegistration` records the revealing failures (~10 min)
 
