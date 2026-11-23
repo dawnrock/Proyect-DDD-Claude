@@ -94,7 +94,7 @@ Decisions taken in this plan:
 ### [x] T5 — A holder is always registered as retail (~10 min)
 
 - **Layer:** domain (plus the callers needed to compile)
-- **Files:** `AccountHolder.java`, `AccountHolderTests.java`, `src/test/java/com/pronoide/ddd/support/TestAccounts.java`, `TestAccountsTests.java`, one line in `CheckingAccountService.java`
+- **Files:** `AccountHolder.java`, `AccountHolderTests.java`, `src/test/java/com/dawnrock/ddd/support/TestAccounts.java`, `TestAccountsTests.java`, one line in `CheckingAccountService.java`
 - **Depends on:** T1
 - **What to do:**
   1. Test first: `AccountHolder.register("Ada Lovelace")` is `RETAIL`. Add the pending test "el nombre del titular es obligatorio" if it is still missing (`pendientes.md`).
@@ -136,7 +136,7 @@ Decisions taken in this plan:
   2. `DemoDataLoader`: drop the segment argument; Grace Hopper opens with `150000.00`. `DemoDataLoaderTests` keeps asserting `RETAIL, RETAIL, HIGH_NET_WORTH`.
   3. Stop passing `segment` in the two presentation mappers (the request and form fields are removed in T9 and T10).
 - **Acceptance criteria:**
-  - [x] `grep -n "segment()\|SEGMENTS" src/main/java/com/pronoide/ddd/application/OpenAccountCommandDef.java` finds nothing (only the Javadoc explains that the segment is not an input); `./mvnw verify` green.
+  - [x] `grep -n "segment()\|SEGMENTS" src/main/java/com/dawnrock/ddd/application/OpenAccountCommandDef.java` finds nothing (only the Javadoc explains that the segment is not an input); `./mvnw verify` green.
 
 ### [x] T9 — REST: `POST /api/accounts` without segment (~5 min)
 

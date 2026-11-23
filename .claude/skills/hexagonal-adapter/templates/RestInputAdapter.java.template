@@ -1,9 +1,9 @@
-package com.pronoide.ddd.adapter.in.rest;
+package com.dawnrock.ddd.adapter.in.rest;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.pronoide.ddd.application.{{InputPort}};
+import com.dawnrock.ddd.application.{{InputPort}};
 
 import lombok.RequiredArgsConstructor;
 

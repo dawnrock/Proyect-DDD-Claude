@@ -18,12 +18,12 @@ No production code changes: the current code already follows D1-D5 (checked whil
 ### Out of scope
 
 - Changing production code (if a rule fails on the current code, stop and ask: that would be a real violation to fix in its own task).
-- `DomainIsolationTests` stays as it is (framework-free domain, private state). Its stale reference to `com.pronoide.ddd.bootstrap..` (a package that does not exist) is noted as a pending item, not fixed here.
+- `DomainIsolationTests` stays as it is (framework-free domain, private state). Its stale reference to `com.dawnrock.ddd.bootstrap..` (a package that does not exist) is noted as a pending item, not fixed here.
 - Hexagonal rules (`HexagonalArchitectureTests`, phase 2).
 
 ## Context
 
-- **ArchUnit 1.5.0** is already a test dependency; the rules follow `DomainIsolationTests`: `@AnalyzeClasses(packages = "com.pronoide.ddd", importOptions = ImportOption.DoNotIncludeTests.class)`, `@ArchTest static final ArchRule` fields with Spanish `snake_case` names (they are the test names). Test classes (such as `presentation/rest/support/FailingTestController`) are excluded.
+- **ArchUnit 1.5.0** is already a test dependency; the rules follow `DomainIsolationTests`: `@AnalyzeClasses(packages = "com.dawnrock.ddd", importOptions = ImportOption.DoNotIncludeTests.class)`, `@ArchTest static final ArchRule` fields with Spanish `snake_case` names (they are the test names). Test classes (such as `presentation/rest/support/FailingTestController`) are excluded.
 - **Layers** (`layeredArchitecture().consideringOnlyDependenciesInLayers()`): `Presentation` = `..presentation..`, `Application` = `..application..`, `Domain` = `..domain..`, `Persistence` = `..persistence..`. `DddLabApplication` (root package) is in no layer. Immutables-generated classes (`Immutable*`) live in the same packages as their `*Def` and are covered by the same rules.
 - **Rules → D-table:**
 
@@ -40,7 +40,7 @@ No production code changes: the current code already follows D1-D5 (checked whil
 
 | Layer / package | File | Change |
 | --------------- | ---- | ------ |
-| tests (root) | `src/test/java/com/pronoide/ddd/LayeredArchitectureTests.java` | New: 6 rules |
+| tests (root) | `src/test/java/com/dawnrock/ddd/LayeredArchitectureTests.java` | New: 6 rules |
 | `docs` | `docs/arquitectura/fase-1-capas.md`, `docs/ia/estado-del-proyecto.md` | D1-D5 now enforced; status |
 
 ## Tasks
@@ -48,7 +48,7 @@ No production code changes: the current code already follows D1-D5 (checked whil
 ### [x] T1 — Layered architecture rule (~10 min)
 
 - **Layer:** tests
-- **Files:** `src/test/java/com/pronoide/ddd/LayeredArchitectureTests.java`
+- **Files:** `src/test/java/com/dawnrock/ddd/LayeredArchitectureTests.java`
 - **Depends on:** —
 - **What to do:**
   1. Create the class and `las_capas_solo_dependen_hacia_abajo` with `layeredArchitecture()` as in the table.
@@ -117,8 +117,8 @@ No production code changes: the current code already follows D1-D5 (checked whil
 - **Files:** `LayeredArchitectureTests.java`, `docs/arquitectura/fase-1-capas.md`
 - **Depends on:** T2, T1 (added after the `revisor-ddd` review; no blocking findings)
 - **What to do:**
-  1. D1 used `..domain..` as the allowed target, which would also accept third-party packages with a `domain` segment (`org.springframework.data.domain`). Now `com.pronoide.ddd.domain..`. The Spring sabotage from T2 is still red.
-  2. New rule `toda_clase_pertenece_a_una_capa`: outside the four layers only `DddLabApplication` may exist, because `consideringOnlyDependenciesInLayers()` ignores any other package. Validated with a temporary `com.pronoide.ddd.config.Sabotaje` class (red), then removed.
+  1. D1 used `..domain..` as the allowed target, which would also accept third-party packages with a `domain` segment (`org.springframework.data.domain`). Now `com.dawnrock.ddd.domain..`. The Spring sabotage from T2 is still red.
+  2. New rule `toda_clase_pertenece_a_una_capa`: outside the four layers only `DddLabApplication` may exist, because `consideringOnlyDependenciesInLayers()` ignores any other package. Validated with a temporary `com.dawnrock.ddd.config.Sabotaje` class (red), then removed.
   3. Not applied (minor, no coverage gained today): a class directly in `presentation` would sit outside the D5 slices; `@ControllerAdvice` classes are not meta-annotated with `@Controller` (the layered rule already covers them); import grouping.
 - **Acceptance criteria:**
   - [x] Both changes green on the current code; red with their temporary breakages. `./mvnw verify`: 241 tests.

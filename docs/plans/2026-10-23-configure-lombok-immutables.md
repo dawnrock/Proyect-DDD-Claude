@@ -30,9 +30,9 @@ Dejar el build preparado para usar Lombok e Immutables según la tabla "dónde s
 | -------------- | ------- | ------ |
 | build | `pom.xml` | Dependencias de Lombok e Immutables, `annotationProcessorPaths` y exclusión de Lombok del JAR |
 | build | `lombok.config` | Nuevo: accesores fluidos y configuración común |
-| `application` | `src/main/java/com/pronoide/ddd/application/ApplicationValue.java` | Nueva meta-anotación con `@Value.Style` |
-| tests | `src/test/java/com/pronoide/ddd/build/LombokSetupTests.java` | Nuevo |
-| tests | `src/test/java/com/pronoide/ddd/build/ImmutablesSetupTests.java` | Nuevo |
+| `application` | `src/main/java/com/dawnrock/ddd/application/ApplicationValue.java` | Nueva meta-anotación con `@Value.Style` |
+| tests | `src/test/java/com/dawnrock/ddd/build/LombokSetupTests.java` | Nuevo |
+| tests | `src/test/java/com/dawnrock/ddd/build/ImmutablesSetupTests.java` | Nuevo |
 | docs | `docs/adr/0003-lombok-immutables.md` | Versiones elegidas y configuración |
 
 ## Tareas
@@ -40,7 +40,7 @@ Dejar el build preparado para usar Lombok e Immutables según la tabla "dónde s
 ### [x] T1 — Lombok en el build con accesores fluidos (~10 min)
 
 - **Capa:** build
-- **Archivos:** `pom.xml`, `lombok.config`, `src/test/java/com/pronoide/ddd/build/LombokSetupTests.java`
+- **Archivos:** `pom.xml`, `lombok.config`, `src/test/java/com/dawnrock/ddd/build/LombokSetupTests.java`
 - **Depende de:** —
 - **Qué hacer:**
   1. **Rojo:** escribir `LombokSetupTests` con una clase de ejemplo anidada (`@Getter @RequiredArgsConstructor`, campo `name`) y un test que llama a `sample.name()`. Debe fallar al compilar porque Lombok aún no existe.
@@ -68,7 +68,7 @@ Dejar el build preparado para usar Lombok e Immutables según la tabla "dónde s
 ### [x] T3 — Estilo común `@ApplicationValue` y test de Immutables (~15 min)
 
 - **Capa:** application
-- **Archivos:** `src/main/java/com/pronoide/ddd/application/ApplicationValue.java`, `src/test/java/com/pronoide/ddd/build/ImmutablesSetupTests.java`
+- **Archivos:** `src/main/java/com/dawnrock/ddd/application/ApplicationValue.java`, `src/test/java/com/dawnrock/ddd/build/ImmutablesSetupTests.java`
 - **Depende de:** T2
 - **Qué hacer:**
   1. **Rojo:** escribir `ImmutablesSetupTests` con una interfaz de ejemplo `@ApplicationValue @Value.Immutable interface SampleCommandDef { String holderName(); BigDecimal amount(); }` y tests que usan el `SampleCommand` generado: el builder construye la instancia, dos instancias con los mismos valores son iguales, y falta un atributo obligatorio → `IllegalStateException`.

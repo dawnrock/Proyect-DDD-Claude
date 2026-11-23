@@ -7,7 +7,7 @@
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-const root = process.argv[2] ?? 'src/main/java/com/pronoide/ddd/domain';
+const root = process.argv[2] ?? 'src/main/java/com/dawnrock/ddd/domain';
 if (!existsSync(root)) {
   console.error(`No existe ${root}`);
   process.exit(1);

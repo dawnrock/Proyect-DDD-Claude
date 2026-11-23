@@ -16,7 +16,7 @@ The question is which layer holds the simulated agency, a class that talks to an
 
 ## Decision
 
-- A fifth layer, **`integration`** (`com.pronoide.ddd.integration`), sibling of `persistence`: it holds the clients of external systems, today only `TaxAgencyClient` (concrete, `@Component`, same demo table as `Hexagonal`).
+- A fifth layer, **`integration`** (`com.dawnrock.ddd.integration`), sibling of `persistence`: it holds the clients of external systems, today only `TaxAgencyClient` (concrete, `@Component`, same demo table as `Hexagonal`).
 - Only `application` uses it, and it only depends on the JDK, the domain and Spring stereotypes. No interfaces, like `persistence`.
 - The domain receives the **result** of the verification: `application` asks the agency and passes the segment to `AccountHolder.register(...)` and `incomeStillHigh` to `CheckingAccount.resolveSegmentReview(...)`. The decision (threshold in `HighNetWorthIncome`, periods, what each result means) stays in the domain; only the orchestration ("ask the agency only when a review is due") moves to `CheckingAccountService`.
 - `LayeredArchitectureTests` adds the `Integration` layer to `las_capas_solo_dependen_hacia_abajo` and two rules: `la_integracion_no_tiene_interfaces` and `la_integracion_solo_conoce_el_dominio`. They were validated by breaking them (a controller using the agency, an interface in `integration`, an `integration` class using `application`).

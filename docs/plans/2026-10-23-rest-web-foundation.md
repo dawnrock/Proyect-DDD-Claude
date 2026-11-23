@@ -40,13 +40,13 @@ Con esto, los contratos de la #5 en adelante ya parten de unos errores y unos ti
 
 | Capa / paquete | Archivo | Cambio |
 | -------------- | ------- | ------ |
-| `application` | `src/main/java/com/pronoide/ddd/application/NotFoundException.java` | Base de los errores "no existe" |
-| `presentation.rest` | `src/main/java/com/pronoide/ddd/presentation/rest/RestExceptionHandler.java` | `@RestControllerAdvice` único |
-| tests | `src/test/java/com/pronoide/ddd/presentation/rest/RestExceptionHandlerTests.java` (+ controlador de prueba) | Nuevo |
-| tests | `src/test/java/com/pronoide/ddd/presentation/rest/JacksonImmutablesTests.java` | Nuevo (riesgo del ADR 0003) |
+| `application` | `src/main/java/com/dawnrock/ddd/application/NotFoundException.java` | Base de los errores "no existe" |
+| `presentation.rest` | `src/main/java/com/dawnrock/ddd/presentation/rest/RestExceptionHandler.java` | `@RestControllerAdvice` único |
+| tests | `src/test/java/com/dawnrock/ddd/presentation/rest/RestExceptionHandlerTests.java` (+ controlador de prueba) | Nuevo |
+| tests | `src/test/java/com/dawnrock/ddd/presentation/rest/JacksonImmutablesTests.java` | Nuevo (riesgo del ADR 0003) |
 | docs / CI | `docs/api/openapi.yaml`, `redocly.yaml`, `.github/workflows/ci.yml` | OpenAPI inicial y lint en CI |
 | `presentation.web` | `pom.xml`, `src/main/resources/templates/fragments/layout.html`, `templates/error/404.html`, `static/css/app.css` | Thymeleaf, plantilla base y 404 |
-| tests | `src/test/java/com/pronoide/ddd/DddLabApplicationTests.java` | Prueba de la página 404 |
+| tests | `src/test/java/com/dawnrock/ddd/DddLabApplicationTests.java` | Prueba de la página 404 |
 | docs | `docs/adr/0003-lombok-immutables.md`, `docs/dominio/glosario.md`, `docs/arquitectura/fase-1-capas.md` | Resultado de Jackson 3, término "Recurso inexistente" y enlace a la implementación |
 
 ## Tareas

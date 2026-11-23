@@ -22,7 +22,7 @@
 
 | Layer / package | File | Change |
 | --------------- | ---- | ------ |
-| `domain.model` | `src/main/java/com/pronoide/ddd/domain/model/...` | ... |
+| `domain.model` | `src/main/java/com/dawnrock/ddd/domain/model/...` | ... |
 
 ## Tasks
 

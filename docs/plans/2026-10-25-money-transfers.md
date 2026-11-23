@@ -179,7 +179,7 @@ As with withdrawals, a transfer rejected by the source account's balance rules i
 
 - **Side:** both
 - **Layer:** tests
-- **Files:** `src/test/java/com/pronoide/ddd/DddLabApplicationTests.java`
+- **Files:** `src/test/java/com/dawnrock/ddd/DddLabApplicationTests.java`
 - **Depends on:** T1-T9 (after merging `-back` and `-web`)
 - **What to do:**
   1. With the real service: open two accounts; transfer via API → 201 `APPROVED` and both balances updated in `GET /api/accounts/{id}`; transfer more than the balance (retail) → 201 `REJECTED` and nothing in the target; same account → 422; the web transfer redirects to the detail with its flash and the target's detail shows the deposit.

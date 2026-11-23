@@ -27,8 +27,8 @@ Que la aplicación pueda guardar y recuperar cuentas corrientes en la capa `pers
 
 | Capa / paquete | Archivo | Cambio |
 | -------------- | ------- | ------ |
-| `persistence` | `src/main/java/com/pronoide/ddd/persistence/InMemoryCheckingAccountRepository.java` | Nuevo |
-| tests | `src/test/java/com/pronoide/ddd/persistence/InMemoryCheckingAccountRepositoryTests.java` | Nuevo |
+| `persistence` | `src/main/java/com/dawnrock/ddd/persistence/InMemoryCheckingAccountRepository.java` | Nuevo |
+| tests | `src/test/java/com/dawnrock/ddd/persistence/InMemoryCheckingAccountRepositoryTests.java` | Nuevo |
 | docs | `docs/dominio/glosario.md` | "Repositorio de cuentas" pasa de previsto a existente |
 
 ## Tareas
@@ -97,7 +97,7 @@ Que la aplicación pueda guardar y recuperar cuentas corrientes en la capa `pers
 **Específicos:**
 
 - [x] Tests JUnit: guardar y recuperar por id y por número de cuenta; `findById` de una cuenta inexistente devuelve `Optional.empty()`.
-- [x] `domain` no depende de `persistence` (ningún `import com.pronoide.ddd.persistence` en `src/main/java/com/pronoide/ddd/domain`), y `persistence` solo importa de `domain` (D1 y D2).
+- [x] `domain` no depende de `persistence` (ningún `import com.dawnrock.ddd.persistence` en `src/main/java/com/dawnrock/ddd/domain`), y `persistence` solo importa de `domain` (D1 y D2).
 - [x] `./mvnw verify` en verde.
 
 **Fijos:**
