@@ -1641,6 +1641,37 @@ class AccountWebControllerTests {
         }
     }
 
+    @Nested
+    @DisplayName("Campos obligatorios y teclado móvil (#146)")
+    class CamposObligatoriosYTeclado {
+
+        @Test
+        @DisplayName("En el detalle, los importes y el IBAN de destino son obligatorios y el IBAN se escribe en mayúsculas")
+        void en_el_detalle_los_importes_y_el_iban_son_obligatorios() throws Exception {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+
+            String html = mvc.perform(get("/accounts/" + ACCOUNT_ID)).andReturn().getResponse().getContentAsString();
+
+            for (String id : List.of("deposit-amount", "withdrawal-amount", "transfer-amount", "transfer-target")) {
+                assertThat(FieldTags.tag(html, id)).as(id).contains(" required");
+            }
+            assertThat(FieldTags.tag(html, "transfer-target")).contains("autocapitalize=\"characters\"");
+            assertThat(FieldTags.tag(html, "deposit-currency")).doesNotContain(" required");
+        }
+
+        @Test
+        @DisplayName("Al abrir cuenta, documento y depósito son obligatorios y los datos de cliente nuevo no")
+        void al_abrir_cuenta_documento_y_deposito_son_obligatorios() throws Exception {
+            String html = mvc.perform(get("/accounts/new")).andReturn().getResponse().getContentAsString();
+
+            assertThat(FieldTags.tag(html, "holderTaxId")).contains(" required").contains("autocapitalize=\"characters\"");
+            assertThat(FieldTags.tag(html, "initialDeposit")).contains(" required");
+            for (String id : List.of("holderName", "holderEmail", "ownerUsername")) {
+                assertThat(FieldTags.tag(html, id)).as(id).doesNotContain(" required");
+            }
+        }
+    }
+
     /** Petición como la envía htmx: con la cabecera HX-Request. */
     private static MockHttpServletRequestBuilder htmx(MockHttpServletRequestBuilder request) {
         return request.header("HX-Request", "true");

@@ -28,12 +28,15 @@
 
         <div class="mb-3">
             <label class="form-label" for="username">Usuario</label>
-            <input class="form-control" type="text" id="username" name="username" autocomplete="username" autofocus required>
+            <input class="form-control" type="text" id="username" autocapitalize="none" spellcheck="false" name="username" autocomplete="username" autofocus required>
         </div>
 
         <div class="mb-3">
             <label class="form-label" for="password">Contraseña</label>
-            <input class="form-control" type="password" id="password" name="password" autocomplete="current-password" required>
+            <div class="input-group" x-data="passwordToggle">
+                <input class="form-control" type="password" id="password" name="password" autocomplete="current-password" required x-bind:type="shown ? 'text' : 'password'">
+                <button th:replace="~{fragments/password-toggle :: button('password')}"></button>
+            </div>
         </div>
 
         <div class="d-flex align-items-center gap-3">

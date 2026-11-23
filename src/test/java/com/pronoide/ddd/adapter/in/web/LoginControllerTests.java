@@ -1,5 +1,6 @@
 package com.pronoide.ddd.adapter.in.web;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -91,5 +92,25 @@ class LoginControllerTests {
                 .andExpect(content().string(containsString("Has cerrado la sesión")))
                 .andExpect(content().string(containsString("Quiero ser cliente")))
                 .andExpect(content().string(not(containsString("name=\"username\""))));
+    }
+
+    @Test
+    @DisplayName("El usuario del login no se escribe con mayúscula inicial ni con corrector, y se autocompleta (#146)")
+    void el_usuario_del_login_no_se_escribe_con_mayuscula_ni_corrector() throws Exception {
+        String html = mvc.perform(get("/login").param("form", "")).andReturn().getResponse().getContentAsString();
+
+        assertThat(FieldTags.tag(html, "username"))
+                .contains("autocapitalize=\"none\"")
+                .contains("spellcheck=\"false\"")
+                .contains("autocomplete=\"username\"")
+                .contains(" required");
+    }
+
+    @Test
+    @DisplayName("La contraseña del login tiene el botón «Mostrar contraseña», oculto sin JavaScript (#146)")
+    void la_contrasena_del_login_tiene_el_boton_mostrar_contrasena() throws Exception {
+        String html = mvc.perform(get("/login").param("form", "")).andReturn().getResponse().getContentAsString();
+
+        FieldTags.assertPasswordToggle(html, "password");
     }
 }
