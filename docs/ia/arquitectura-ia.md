@@ -28,6 +28,7 @@ flowchart LR
 | Skill | `.claude/skills/implement-plan/` | 9, 13.1 | Plan → worktree → TDD → commits → PR against the phase branch. |
 | Skill with supporting material | `.claude/skills/ddd-building-block/` | 9.2 | `references/` (DDD rules, Lombok/Immutables), `templates/` (VO, entity, test) and `scripts/check-domain.mjs`. |
 | Phase 2 skill | `.claude/skills/hexagonal-adapter/` | 9.2 | Templates for port, adapter and adapter test. |
+| Third-party skill | `.claude/skills/security-audit/` | 9 | Cloudflare's `security-audit` (copied from `cloudflare/security-audit-skill`, commit `c1c8a8c`, with its licence; #140, #141). Guidance mode for focused security questions; full audit mode (six phases with isolated agents, reports outside the repository) only on an explicit request. When to use it: see Security. |
 | Subagent | `.claude/agents/revisor-ddd.md` | 10.2 | DDD and architecture review, without edit rights, with Sonnet. |
 | Subagent | `.claude/agents/buscador-referencias.md` | 10.1, 10.3 | Wide searches with Haiku so the main context does not fill up. |
 | Teammates | `.claude/agents/backend-dev.md`, `.claude/agents/web-dev.md` | 10.2, 13.2 | One agent per side (back / web), with limited tools and packages; they review and negotiate the contract. |
@@ -77,6 +78,17 @@ A contract change during implementation is requested from the lead, agreed with 
 - Hooks run with your permissions: the agent cannot edit them (`deny` on `Edit(./.claude/hooks/**)`).
 - The Telegram token lives in `.claude/settings.local.json` (ignored by git) and the agent is not allowed to read it.
 - `master` is frozen: `deny` on `git push origin master`, and `/commit` refuses to commit on it.
+
+### Security reviews of the code
+
+Two pieces cover security reviews; they complement each other and no other skill or agent overlaps them (`revisor-ddd` reviews DDD and architecture, Claude Code Review bugs and `CLAUDE.md` compliance):
+
+| Piece | Scope | When |
+| ----- | ----- | ---- |
+| `/security-review` (built into Claude Code) | Only the pending changes of the branch (the diff), in one pass | Before opening a PR that touches security: authentication, roles, ownership checks, tokens, throttling and limits, input validation, headers or CSP |
+| `security-audit` skill (`.claude/skills/security-audit/`) | The whole code base, or one focused question in guidance mode | Occasional full audits (for example when closing a phase) and focused questions about a security feature. The full audit is only run when asked explicitly; its reports go outside the repository (by default `~/security-audit-skill/<repo>/run-<N>`), so in a cloud session copy what is worth keeping before the container is reclaimed |
+
+Findings from either become GitHub issues; they are not fixed inside an unrelated PR.
 
 ## Usage log
 
