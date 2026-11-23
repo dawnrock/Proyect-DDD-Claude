@@ -5,11 +5,12 @@ import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.pronoide.ddd.adapter.in.ClientIpAuthenticationDetailsSource;
 
 /**
  * Emisión de tokens de la API: {@code POST /api/auth/token}, público (#122, ADR 0015). Las credenciales erróneas las
@@ -22,7 +23,8 @@ public class TokenController {
 
     private final AccessTokenIssuer issuer;
 
-    private final WebAuthenticationDetailsSource details = new WebAuthenticationDetailsSource();
+    /** La IP del cliente detrás de Render y Cloudflare, para el límite de intentos (#133). */
+    private final ClientIpAuthenticationDetailsSource details;
 
     @PostMapping("/token")
     public TokenResponse issueToken(@Valid @RequestBody TokenRequest request, HttpServletRequest http) {

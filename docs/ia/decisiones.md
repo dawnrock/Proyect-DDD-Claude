@@ -62,10 +62,14 @@
   - **Policy (OWASP), chosen by the user on 2026-11-20:** 3 failures per user + IP and 10 per IP block for 30 minutes, even with the right password (`app.security.login-attempts.*`).
   - **Where:** `ThrottledAuthenticationProvider` and `LoginAttempts` in the root of `adapter.in`, created by `SecuritySupport` as beans, so the `@WebMvcTest`s that import it get them; they use the core's `Clock` when there is one. The web form login and `AccessTokenIssuer` use the same provider and pass the IP in `WebAuthenticationDetails`.
   - **Answers:** the web redirects to `/login?blocked`; the API answers 429 `ProblemDetail` with `Retry-After` (contract 2.1.0). An unknown user gets the same treatment as a known one.
-  - **IP:** `server.forward-headers-strategy=native` takes the client's IP behind Render's proxy.
+  - **IP:** from `ClientIpResolver` since #133 (see below); `native` alone counted Cloudflare's IP.
   - **Contract tests:** `contract-test.mjs` raises the thresholds.
   - **Tests that fail logins on purpose** use their own IP (`setRemoteAddr`, or `X-Forwarded-For` against the real server), so they do not lock other tests sharing the same context.
   - **Sign-up limit:** split into #131.
+- **Client IP behind Render and Cloudflare (#133, ADR 0017):** Render serves through Cloudflare, so `forward-headers-strategy=native` alone counted Cloudflare's edge.
+  - **`ClientIpResolver`:** the IP comes from it, in the shared security support, through `ClientIpAuthenticationDetailsSource`, which the web login and `TokenController` use.
+  - **Trusted proxies:** `app.security.trusted-proxies` holds the internal ranges and Cloudflare's official ranges; `scripts/check-cloudflare-ips.mjs` keeps them in sync.
+  - **Reuse:** #131 and any future per-IP limit must take the IP from the resolver, never from `getRemoteAddr()`.
 
 ## Environment
 

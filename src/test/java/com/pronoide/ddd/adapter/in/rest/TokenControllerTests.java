@@ -37,7 +37,8 @@ import com.pronoide.ddd.adapter.in.SecuritySupport;
         "app.security.users[1].username=ada",
         "app.security.users[1].password-hash=" + TokenControllerTests.DEMO_HASH,
         "app.security.users[1].role=USER",
-        "app.jwt.secret=un-secreto-de-pruebas-de-al-menos-32-bytes"})
+        "app.jwt.secret=un-secreto-de-pruebas-de-al-menos-32-bytes",
+        "app.security.trusted-proxies=10.0.0.0/8,104.16.0.0/13"})
 @Import({ApiSecurityConfig.class, SecuritySupport.class, JwtSupport.class, AccessTokenIssuer.class})
 class TokenControllerTests {
 
@@ -120,6 +121,21 @@ class TokenControllerTests {
                 .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.detail").value(
                         "Demasiados intentos fallidos de inicio de sesión. Vuelve a intentarlo más tarde."));
+    }
+
+    @Test
+    @DisplayName("A través del proxy de Render y de Cloudflare, el 429 es para la IP del cliente y no para la de Cloudflare (#133)")
+    void a_traves_de_render_y_cloudflare_el_429_es_para_la_ip_del_cliente() throws Exception {
+        for (int i = 0; i < 3; i++) {
+            mvc.perform(tokenRequest("admin", "incorrecta", "10.0.0.5")
+                            .header("X-Forwarded-For", "198.51.100.40, 104.22.136.75"))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        mvc.perform(tokenRequest("admin", "demo", "10.0.0.5").header("X-Forwarded-For", "198.51.100.40, 104.22.136.75"))
+                .andExpect(status().isTooManyRequests());
+        mvc.perform(tokenRequest("admin", "demo", "10.0.0.5").header("X-Forwarded-For", "198.51.100.41, 104.22.136.75"))
+                .andExpect(status().isOk());
     }
 
     private static MockHttpServletRequestBuilder tokenRequest(String username, String password, String ip) {
