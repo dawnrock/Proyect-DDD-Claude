@@ -4,9 +4,11 @@ import java.time.Instant;
 import java.time.Period;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class CheckingAccount {
@@ -47,8 +49,9 @@ public class CheckingAccount {
     /**
      * Reconstruye una cuenta ya guardada (#150). Solo la usan los adaptadores de persistencia al leerla (regla de
      * ArchUnit): no comprueba las reglas de apertura, que ya se cumplieron al abrirla, ni registra eventos. Sí comprueba
-     * que lo guardado es coherente: los movimientos son de esta cuenta, ninguno está pendiente y el saldo es la suma de
-     * los ingresos aprobados menos las retiradas aprobadas.
+     * que lo guardado es coherente: los movimientos son de esta cuenta, no se repiten, ninguno está pendiente y el saldo
+     * es la suma de los ingresos aprobados menos las retiradas aprobadas; solo un titular de alto patrimonio tiene
+     * revisión de segmento pendiente.
      *
      * @param nextSegmentReview cuándo toca revisar el segmento, o {@code null} si no hay revisión pendiente
      * @param transactions los movimientos en el orden en que se registraron
@@ -63,8 +66,15 @@ public class CheckingAccount {
                 Objects.requireNonNull(primaryHolder, "El titular de la cuenta es obligatorio"),
                 Objects.requireNonNull(currentBalance, "El saldo de la cuenta es obligatorio"),
                 nextSegmentReview);
+        if (nextSegmentReview != null && !primaryHolder.isHighNetWorth()) {
+            throw new IllegalStateException("Solo una cuenta de alto patrimonio tiene revisión de segmento pendiente");
+        }
         MonetaryAmount expected = MonetaryAmount.zero(currentBalance.currency());
+        Set<UUID> ids = new HashSet<>();
         for (Transaction transaction : Objects.requireNonNull(transactions, "Los movimientos son obligatorios")) {
+            if (!ids.add(transaction.id())) {
+                throw new IllegalStateException("Una cuenta guardada no repite movimientos");
+            }
             if (!id.equals(transaction.accountId())) {
                 throw new IllegalStateException("Un movimiento de la cuenta reconstituida pertenece a otra cuenta");
             }

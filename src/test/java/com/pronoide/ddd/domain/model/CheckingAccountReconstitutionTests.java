@@ -136,4 +136,24 @@ class CheckingAccountReconstitutionTests {
         assertThatThrownBy(() -> CheckingAccount.reconstitute(ID, IBAN, titular, saldo, null, null))
                 .isInstanceOf(NullPointerException.class);
     }
+
+    @Test
+    @DisplayName("Una cuenta minorista no se reconstituye con una revisión de segmento pendiente")
+    void una_cuenta_minorista_no_se_reconstituye_con_una_revision_pendiente() {
+        assertThatThrownBy(() -> CheckingAccount.reconstitute(ID, IBAN, holder(CustomerSegment.RETAIL),
+                MonetaryAmount.euros("1250.00"), Instant.parse("2027-05-03T10:15:30Z"), history(ID)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Solo una cuenta de alto patrimonio tiene revisión de segmento pendiente");
+    }
+
+    @Test
+    @DisplayName("Una cuenta no se reconstituye con dos movimientos con el mismo id")
+    void una_cuenta_no_se_reconstituye_con_movimientos_repetidos() {
+        Transaction deposito = movement(ID, TransactionType.DEPOSIT, "100.00", TransactionStatus.APPROVED, null);
+
+        assertThatThrownBy(() -> CheckingAccount.reconstitute(ID, IBAN, holder(CustomerSegment.RETAIL),
+                MonetaryAmount.euros("200.00"), null, List.of(deposito, deposito)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Una cuenta guardada no repite movimientos");
+    }
 }

@@ -254,6 +254,17 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Acceptance criteria:**
   - [ ] The CI check of the project status passes.
 
+### [x] T20 — Review fixes (~5 min)
+
+- **Layer:** domain · docs
+- **Files:** `CheckingAccount.java`, `CheckingAccountReconstitutionTests.java`, `docs/ia/pendientes.md`
+- **Depends on:** T3
+- **What to do:**
+  1. `revisor-ddd` review: `reconstitute` also rejects repeated transaction ids and a pending segment review on a retail holder.
+  2. The rest of the findings that only matter with several instances or are accepted (untranslated unique-index and optimistic-lock exceptions, demo loaded halfway) go to `pendientes.md`.
+- **Acceptance criteria:**
+  - [x] Both new coherence checks have their test; `./mvnw verify` green.
+
 ## Global acceptance criteria
 
 **Specific:**
