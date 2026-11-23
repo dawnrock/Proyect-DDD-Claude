@@ -42,7 +42,7 @@
 
 ## Tasks
 
-### [ ] T1 — Test that reproduces the bug (~10 min)
+### [x] T1 — Test that reproduces the bug (~10 min)
 
 - **Layer:** tests
 - **Files:** `DddLabApplicationTests` (`ClientIpBehindProxy`)
@@ -53,7 +53,7 @@
      - then `alan` with `X-Forwarded-For: 198.51.100.21, 104.22.136.75` (another client behind the same Cloudflare edge) can still log in.
   2. Today it fails, because both count as `104.22.136.75`. Commit it red only if the build allows it; otherwise keep it with T3, which makes it green.
 - **Acceptance criteria:**
-  - [ ] Seen red for that reason.
+  - [x] Seen red for that reason.
 
 ### [x] T2 — Client IP resolver (~10 min)
 
@@ -86,7 +86,7 @@
 - **Acceptance criteria:**
   - [x] Tests green; T1 green; the existing tests unchanged.
 
-### [ ] T4 — Official ranges in the configuration (~5 min)
+### [x] T4 — Official ranges in the configuration (~5 min)
 
 - **Layer:** config
 - **Files:** `application.properties`, `TrustedProxiesPropertiesTests` (or a case in `ClientIpResolverTests` that loads the real file)
@@ -95,7 +95,7 @@
   1. Test: the configured list trusts `104.22.136.75`, Render's `10.x`, and an address from each Cloudflare IPv6 range; it does not trust `46.6.116.139`.
   2. The list with its source and the download date in a comment.
 - **Acceptance criteria:**
-  - [ ] Test green.
+  - [x] Test green.
 
 ### [ ] T5 — Script to check the list against Cloudflare (~5 min)
 

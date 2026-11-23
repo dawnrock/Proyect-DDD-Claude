@@ -469,6 +469,19 @@ class DddLabApplicationTests {
 			assertThat(login("grace", PASSWORD, "203.0.113.6")).doesNotContain("login");
 		}
 
+		@Test
+		@DisplayName("Detrás de Cloudflare cuenta la IP del cliente, no la del nodo de Cloudflare (#133)")
+		void detras_de_cloudflare_cuenta_la_ip_del_cliente() throws Exception {
+			String cloudflareEdge = "104.22.136.75";
+			for (int i = 0; i < 3; i++) {
+				assertThat(login("alan", "mala", "198.51.100.20, " + cloudflareEdge)).endsWith("/login?error");
+			}
+
+			assertThat(login("alan", PASSWORD, "198.51.100.20, " + cloudflareEdge)).endsWith("/login?blocked");
+			// Otro cliente que entra por el mismo nodo de Cloudflare no queda bloqueado
+			assertThat(login("alan", PASSWORD, "198.51.100.21, " + cloudflareEdge)).doesNotContain("login");
+		}
+
 		/** Inicio de sesión por el formulario como si llegara a través del proxy; devuelve adónde redirige. */
 		private String login(String username, String password, String clientIp) throws Exception {
 			HttpClient client = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
