@@ -1,5 +1,6 @@
 package com.pronoide.ddd.adapter.in.rest;
 
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -21,6 +22,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.pronoide.ddd.adapter.in.TooManyLoginAttemptsException;
+import com.pronoide.ddd.adapter.in.TooManySignUpsException;
 import com.pronoide.ddd.adapter.in.UsernameTakenException;
 import com.pronoide.ddd.application.NotFoundException;
 import com.pronoide.ddd.application.OperationNotAllowedException;
@@ -43,6 +45,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     static final String TOO_MANY_ATTEMPTS_TITLE = "Demasiados intentos";
     static final String TOO_MANY_ATTEMPTS_DETAIL =
             "Demasiados intentos fallidos de inicio de sesión. Vuelve a intentarlo más tarde.";
+    static final String TOO_MANY_SIGN_UPS_TITLE = "Demasiadas altas";
 
     @ExceptionHandler(DomainException.class)
     ProblemDetail handleBusinessRule(DomainException exception) {
@@ -70,11 +73,25 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(TooManyLoginAttemptsException.class)
     ResponseEntity<ProblemDetail> handleTooManyAttempts(TooManyLoginAttemptsException exception) {
-        long seconds = Math.max(1, (exception.retryAfter().toMillis() + 999) / 1000);
+        return tooManyRequests(exception.retryAfter(), TOO_MANY_ATTEMPTS_TITLE, TOO_MANY_ATTEMPTS_DETAIL);
+    }
+
+    /**
+     * Límite de altas de clientes por IP o en total (#131, ADR 0018): 429 con {@code Retry-After} en segundos. El mensaje
+     * no dice qué límite se alcanzó.
+     */
+    @ExceptionHandler(TooManySignUpsException.class)
+    ResponseEntity<ProblemDetail> handleTooManySignUps(TooManySignUpsException exception) {
+        return tooManyRequests(exception.retryAfter(), TOO_MANY_SIGN_UPS_TITLE, exception.getMessage());
+    }
+
+    /** 429 con {@code Retry-After} en segundos enteros, redondeado hacia arriba y nunca menos de uno. */
+    private static ResponseEntity<ProblemDetail> tooManyRequests(Duration retryAfter, String title, String detail) {
+        long seconds = Math.max(1, (retryAfter.toMillis() + 999) / 1000);
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                 .header(HttpHeaders.RETRY_AFTER, String.valueOf(seconds))
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
-                .body(problem(HttpStatus.TOO_MANY_REQUESTS, TOO_MANY_ATTEMPTS_TITLE, TOO_MANY_ATTEMPTS_DETAIL));
+                .body(problem(HttpStatus.TOO_MANY_REQUESTS, title, detail));
     }
 
     /** Credenciales erróneas al pedir un token ({@link TokenController}): 401 sin decir si falla el usuario o la contraseña. */

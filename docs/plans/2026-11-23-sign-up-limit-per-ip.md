@@ -78,7 +78,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
 - **Acceptance criteria:**
   - [x] `CustomerRegistrationTests` green, including the three new cases.
 
-### [ ] T4 — API: IP to the sign-up and 429 with `Retry-After` (~10 min)
+### [x] T4 — API: IP to the sign-up and 429 with `Retry-After` (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/rest/CustomerController.java`, `adapter/in/rest/RestExceptionHandler.java`, `CustomerControllerTests.java`
@@ -88,7 +88,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
   2. `CustomerController` receives the `HttpServletRequest` and passes `clientIpResolver.resolve(request)`.
   3. `RestExceptionHandler` handles `TooManySignUpsException` like `TooManyLoginAttemptsException` (shared helper for the seconds).
 - **Acceptance criteria:**
-  - [ ] `CustomerControllerTests` green; existing sign-up cases unchanged.
+  - [x] `CustomerControllerTests` green; existing sign-up cases unchanged.
 
 ### [ ] T5 — Web: IP to the sign-up and message at the last step (~10 min)
 

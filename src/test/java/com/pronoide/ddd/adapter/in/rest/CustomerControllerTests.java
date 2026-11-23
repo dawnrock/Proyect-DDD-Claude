@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -37,6 +38,7 @@ import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.adapter.in.CustomerRegistration;
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.TooManySignUpsException;
 import com.pronoide.ddd.adapter.in.UsernameTakenException;
 
 /** {@code POST /api/customers}: público, sin credenciales ni CSRF. */
@@ -226,5 +228,37 @@ class CustomerControllerTests {
         mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.title").value("Regla de negocio incumplida"));
+    }
+
+    @Test
+    @DisplayName("Superado el límite de altas responde 429 con Retry-After en segundos, redondeado hacia arriba (#131)")
+    void superado_el_limite_de_altas_responde_429_con_retry_after() throws Exception {
+        given(registration.register(any(SignUpCommand.class), any(), any()))
+                .willThrow(new TooManySignUpsException(Duration.ofMillis(90_500)));
+
+        mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().string("Retry-After", "91"))
+                .andExpect(header().string("Content-Type", "application/problem+json"))
+                .andExpect(jsonPath("$.status").value(429))
+                .andExpect(jsonPath("$.title").value("Demasiadas altas"))
+                .andExpect(jsonPath("$.detail").value(
+                        "Demasiadas altas de clientes en este momento: inténtalo de nuevo más tarde"));
+    }
+
+    @Test
+    @DisplayName("A través del proxy de Render y de Cloudflare, el alta cuenta para la IP del cliente y no para la de Cloudflare (#131)")
+    void a_traves_de_render_y_cloudflare_el_alta_cuenta_para_la_ip_del_cliente() throws Exception {
+        given(registration.register(any(SignUpCommand.class), any(), any())).willReturn(summary());
+
+        mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY)
+                        .header("X-Forwarded-For", "198.51.100.40, 104.22.136.75")
+                        .with(request -> {
+                            request.setRemoteAddr("10.0.0.5");
+                            return request;
+                        }))
+                .andExpect(status().isCreated());
+
+        verify(registration).register(any(SignUpCommand.class), eq("demo-1234"), eq("198.51.100.40"));
     }
 }
