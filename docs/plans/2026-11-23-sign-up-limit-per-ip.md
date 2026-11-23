@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-23
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~80 min (9 tasks)
 
 ## Goal
@@ -41,7 +41,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
 
 ## Tasks
 
-### [ ] T1 — Client IP from a request in `ClientIpResolver` (~10 min)
+### [x] T1 — Client IP from a request in `ClientIpResolver` (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/ClientIpResolver.java`, `adapter/in/ClientIpAuthenticationDetailsSource.java`, `adapter/in/SecuritySupport.java`, `ClientIpResolverTests.java`
@@ -51,7 +51,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
   2. Move the header joining from `ClientIpAuthenticationDetailsSource.buildDetails` to the new method; the details source calls it.
   3. `SecuritySupport` exposes `ClientIpResolver` as a bean and builds the details source from it.
 - **Acceptance criteria:**
-  - [ ] New `ClientIpResolverTests` cases pass; `ClientIpAuthenticationDetailsSourceTests`, `TrustedProxiesConfigurationTests` and `TokenControllerTests` (#133 case) still pass unchanged.
+  - [x] New `ClientIpResolverTests` cases pass; `ClientIpAuthenticationDetailsSourceTests`, `TrustedProxiesConfigurationTests` and `TokenControllerTests` (#133 case) still pass unchanged.
 
 ### [ ] T2 — `SignUpLimit`: sign-ups per IP and in total, in a sliding window (~10 min)
 

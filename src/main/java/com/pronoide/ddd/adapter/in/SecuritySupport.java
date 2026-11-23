@@ -59,8 +59,14 @@ public class SecuritySupport {
 
     /** IP del cliente detrás de los proxies de confianza (#133, ADR 0017): Render y Cloudflare. */
     @Bean
-    public ClientIpAuthenticationDetailsSource clientIpDetailsSource(TrustedProxiesProperties properties) {
-        return new ClientIpAuthenticationDetailsSource(new ClientIpResolver(properties.trustedProxies()));
+    public ClientIpResolver clientIpResolver(TrustedProxiesProperties properties) {
+        return new ClientIpResolver(properties.trustedProxies());
+    }
+
+    /** Detalles de autenticación con la IP del cliente, para el límite de intentos de inicio de sesión (#133). */
+    @Bean
+    public ClientIpAuthenticationDetailsSource clientIpDetailsSource(ClientIpResolver resolver) {
+        return new ClientIpAuthenticationDetailsSource(resolver);
     }
 
     /** Fallos recientes de inicio de sesión (#130, ADR 0017). Sin el reloj del núcleo, como en los tests web, el del sistema. */
