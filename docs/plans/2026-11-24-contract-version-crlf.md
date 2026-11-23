@@ -53,7 +53,7 @@
 - **Acceptance criteria:**
   - [x] The step passes on the PR (checked locally; the PR's `verify` run confirms it).
 
-### [ ] T3 — Check the Windows scenario by hand (~5 min)
+### [x] T3 — Check the Windows scenario by hand (~5 min)
 
 - **Layer:** tests
 - **Files:** —
@@ -61,7 +61,7 @@
 - **What to do:**
   1. Convert the working copy of `docs/api/openapi.yaml` to CRLF (as `core.autocrlf=true` leaves it on Windows), run `BASE_REF=Hexagonal node scripts/check-contract-version.mjs` and check it says the contract does not change; revert the file.
 - **Acceptance criteria:**
-  - [ ] The git mode with a CRLF working copy reads `info.version` (no exit 2).
+  - [x] The git mode with a CRLF working copy reads `info.version` (no exit 2): the old script exits with 2 (`No encuentro info.version`), the new one with 0 (`El contrato no cambia`).
 
 ## Global acceptance criteria
 
