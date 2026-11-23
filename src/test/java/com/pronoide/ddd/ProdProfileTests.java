@@ -3,6 +3,7 @@ package com.pronoide.ddd;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.zaxxer.hikari.HikariDataSource;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,24 @@ class ProdProfileTests {
                 "--SPRING_DATASOURCE_USERNAME=sa", "--SPRING_DATASOURCE_PASSWORD=")) {
             assertThat(context.getEnvironment().getProperty("spring.datasource.url")).isEqualTo(url);
             assertThat(context.getEnvironment().getProperty("spring.h2.console.enabled")).isEqualTo("false");
+        }
+    }
+
+    @Test
+    @DisplayName("Con el perfil prod la conexión tiene tiempos de espera aunque la URL no los lleve")
+    void con_el_perfil_prod_la_conexion_tiene_tiempos_de_espera_aunque_la_url_no_los_lleve() {
+        String url = "jdbc:h2:mem:" + UUID.randomUUID() + ";MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1";
+        try (ConfigurableApplicationContext context = prod().run("--SPRING_DATASOURCE_URL=" + url,
+                "--SPRING_DATASOURCE_USERNAME=sa", "--SPRING_DATASOURCE_PASSWORD=")) {
+            HikariDataSource pool = context.getBean(HikariDataSource.class);
+            // Segundos, como los espera el driver de PostgreSQL (#156)
+            assertThat(pool.getDataSourceProperties())
+                    .containsEntry("connectTimeout", "15")
+                    .containsEntry("loginTimeout", "30")
+                    .containsEntry("socketTimeout", "120");
+            assertThat(pool.getConnectionTimeout()).isEqualTo(30_000);
+            assertThat(pool.getInitializationFailTimeout()).isEqualTo(1);
+            assertThat(pool.getKeepaliveTime()).isEqualTo(120_000);
         }
     }
 }

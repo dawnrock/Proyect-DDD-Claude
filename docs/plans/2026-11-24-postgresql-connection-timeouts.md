@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-24
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~25 min (3 tasks)
 
 ## Goal
@@ -39,7 +39,7 @@ Technical decisions (taken by Claude under `/advance-issues`, reversible configu
 
 ## Tasks
 
-### [ ] T1 — The prod profile sets the driver and pool timeouts (~10 min)
+### [x] T1 — The prod profile sets the driver and pool timeouts (~10 min)
 
 - **Layer:** config
 - **Files:** `src/main/resources/application-prod.properties`, `src/test/java/com/pronoide/ddd/ProdProfileTests.java`
@@ -48,8 +48,8 @@ Technical decisions (taken by Claude under `/advance-issues`, reversible configu
   1. Red: a test that starts the `prod` profile with the H2 URL and checks the `HikariDataSource`: `dataSourceProperties` with `connectTimeout=15`, `loginTimeout=30`, `socketTimeout=120`, and `connectionTimeout`, `initializationFailTimeout` and `keepaliveTime` as above.
   2. Green: add the properties, with a comment explaining each one and the hang of 2026-11-23.
 - **Acceptance criteria:**
-  - [ ] The new test fails without the properties and passes with them; the H2 driver accepts the extra properties.
-  - [ ] `./mvnw verify` green.
+  - [x] The new test fails without the properties and passes with them; the H2 driver accepts the extra properties.
+  - [x] `./mvnw verify` green.
 
 ### [ ] T2 — A silent database ends the start in an error, not a hang (~10 min)
 
