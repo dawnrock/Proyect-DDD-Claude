@@ -77,4 +77,32 @@ class AccountHolderTests {
 
         assertThat(titular.segment()).isEqualTo(CustomerSegment.RETAIL);
     }
+
+    @Test
+    @DisplayName("Un titular reconstituido conserva su identidad, su nombre, su NIF y su segmento")
+    void un_titular_reconstituido_conserva_su_identidad_su_nombre_su_nif_y_su_segmento() {
+        UUID id = UUID.randomUUID();
+        AccountHolder titular = AccountHolder.reconstitute(id, "Grace Hopper", new TaxId("87654321X"),
+                CustomerSegment.HIGH_NET_WORTH);
+
+        assertThat(titular.id()).isEqualTo(id);
+        assertThat(titular.fullName()).isEqualTo("Grace Hopper");
+        assertThat(titular.taxId()).isEqualTo(new TaxId("87654321X"));
+        assertThat(titular.isHighNetWorth()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Un titular no se reconstituye sin identidad, sin NIF, sin segmento ni con un nombre vacío")
+    void un_titular_no_se_reconstituye_sin_sus_datos_obligatorios() {
+        TaxId taxId = new TaxId("87654321X");
+        assertThatThrownBy(() -> AccountHolder.reconstitute(null, "Grace Hopper", taxId, CustomerSegment.RETAIL))
+                .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> AccountHolder.reconstitute(UUID.randomUUID(), "Grace Hopper", null,
+                CustomerSegment.RETAIL)).isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> AccountHolder.reconstitute(UUID.randomUUID(), "Grace Hopper", taxId, null))
+                .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> AccountHolder.reconstitute(UUID.randomUUID(), " ", taxId, CustomerSegment.RETAIL))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("El nombre del titular no puede estar vacío");
+    }
 }

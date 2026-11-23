@@ -27,6 +27,16 @@ public class AccountHolder {
                 Objects.requireNonNull(segment, "El segmento del titular es obligatorio"));
     }
 
+    /**
+     * Reconstruye un titular ya guardado, con su identidad y su segmento (#150). Solo lo usan los adaptadores de
+     * persistencia al reconstituir la cuenta.
+     */
+    public static AccountHolder reconstitute(UUID id, String fullName, TaxId taxId, CustomerSegment segment) {
+        return new AccountHolder(Objects.requireNonNull(id, "El id del titular es obligatorio"), requireName(fullName),
+                Objects.requireNonNull(taxId, "El NIF del titular es obligatorio"),
+                Objects.requireNonNull(segment, "El segmento del titular es obligatorio"));
+    }
+
     public void rename(String fullName) {
         this.fullName = requireName(fullName);
     }

@@ -57,7 +57,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Acceptance criteria:**
   - [x] ADR listed in `docs/adr/README.md`; `./mvnw verify` green with the new dependencies.
 
-### [ ] T2 — Reconstitute transactions and account holders (~10 min)
+### [x] T2 — Reconstitute transactions and account holders (~10 min)
 
 - **Layer:** domain
 - **Files:** `Transaction.java`, `AccountHolder.java`, `TransactionTests.java` (new or existing), `AccountHolderTests.java`
@@ -66,8 +66,8 @@ The output ports already exist and each one has an abstract contract (`*Contract
   1. `Transaction.reconstitute(id, accountId, type, amount, occurredOn, counterpart, status)`: required fields, positive amount; a counterpart only on transfers is not checked (the type does not say it).
   2. `AccountHolder.reconstitute(id, fullName, taxId, segment)` with the R21 name rule.
 - **Acceptance criteria:**
-  - [ ] A reconstituted transaction and holder keep every value and identity (`equals` by id).
-  - [ ] Null fields and a non-positive amount are rejected.
+  - [x] A reconstituted transaction and holder keep every value and identity (`equals` by id).
+  - [x] Null fields and a non-positive amount are rejected.
 
 ### [ ] T3 — Reconstitute checking accounts (~10 min)
 

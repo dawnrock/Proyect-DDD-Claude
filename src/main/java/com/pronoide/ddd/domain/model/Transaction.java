@@ -25,6 +25,31 @@ public class Transaction {
         this.status = TransactionStatus.PENDING;
     }
 
+    private Transaction(UUID id, UUID accountId, TransactionType type, MonetaryAmount amount, Instant occurredOn,
+                        AccountNumber counterpart, TransactionStatus status) {
+        this.id = Objects.requireNonNull(id, "El id del movimiento es obligatorio");
+        this.accountId = Objects.requireNonNull(accountId, "La cuenta del movimiento es obligatoria");
+        this.type = Objects.requireNonNull(type, "El tipo del movimiento es obligatorio");
+        this.amount = Objects.requireNonNull(amount, "El importe del movimiento es obligatorio");
+        this.occurredOn = Objects.requireNonNull(occurredOn, "La fecha del movimiento es obligatoria");
+        this.counterpart = counterpart;
+        this.status = Objects.requireNonNull(status, "El estado del movimiento es obligatorio");
+        if (!amount.isPositive()) {
+            throw new IllegalArgumentException("El importe del movimiento debe ser positivo");
+        }
+    }
+
+    /**
+     * Reconstruye un movimiento ya guardado, con su identidad, su fecha y su estado (#150). Solo lo usan la cuenta al
+     * reconstituirse y los adaptadores de persistencia; un movimiento nuevo nace dentro de la cuenta.
+     *
+     * @param counterpart la otra cuenta de una transferencia, o {@code null}
+     */
+    public static Transaction reconstitute(UUID id, UUID accountId, TransactionType type, MonetaryAmount amount,
+                                           Instant occurredOn, AccountNumber counterpart, TransactionStatus status) {
+        return new Transaction(id, accountId, type, amount, occurredOn, counterpart, status);
+    }
+
     static Transaction deposit(UUID accountId, MonetaryAmount amount) {
         return new Transaction(accountId, TransactionType.DEPOSIT, amount, null);
     }
