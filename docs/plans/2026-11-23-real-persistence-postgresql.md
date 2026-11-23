@@ -114,15 +114,15 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Acceptance criteria:**
   - [x] Flyway applies V1 on start; `./mvnw verify` green and `GET /actuator/health` is `UP`.
 
-### [ ] T7 — Account entities and mapper (~10 min)
+### [x] T7 — Account entities and mapper (~10 min)
 
 - **Layer:** adapter.out
 - **Files:** `adapter/out/persistence/CheckingAccountEntity.java`, `TransactionEntity.java`, `CheckingAccountMapper.java`, `CheckingAccountMapperTests.java`
 - **Depends on:** T3, T6
 - **What to do:**
-  1. Package-private JPA entities (Lombok allowed outside the domain) and a mapper domain ↔ entity that uses `reconstitute` to read.
+  1. Package-private JPA entities (plain fields: `CLAUDE.md` only allows `@Getter`/`@Setter` on web forms) and a mapper domain ↔ entity that uses `reconstitute` to read.
 - **Acceptance criteria:**
-  - [ ] An account with deposits, a rejected withdrawal and a transfer makes the round trip domain → entity → domain without changing any value.
+  - [x] An account with deposits, a rejected withdrawal and a transfer makes the round trip domain → entity → domain without changing any value.
 
 ### [ ] T8 — JPA account repository (~10 min)
 
