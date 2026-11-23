@@ -48,7 +48,7 @@ Only `adapter.in.web` templates and `static/js/app.js`; no change in Java code, 
   - [x] The new tests pass and `./mvnw verify` is green.
   - [x] A detail page without errors has no `aria-invalid` attribute.
 
-### [ ] T2 — Opening forms announce their field errors (~5 min)
+### [x] T2 — Opening forms announce their field errors (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `templates/accounts/new.html`, `templates/accounts/another.html`, `AccountWebControllerTests.java`, `AnotherAccountWebTests.java`
@@ -57,7 +57,7 @@ Only `adapter.in.web` templates and `static/js/app.js`; no change in Java code, 
   1. Test (red): an invalid opening (blank tax id, `0` deposit) and an invalid "another account" (`0` deposit) render the attributes on the wrong fields.
   2. Add the pattern to every field of both templates.
 - **Acceptance criteria:**
-  - [ ] The new tests pass and `./mvnw verify` is green.
+  - [x] The new tests pass and `./mvnw verify` is green.
 
 ### [ ] T3 — Sign-up steps announce their field errors (~10 min)
 

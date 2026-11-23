@@ -202,6 +202,16 @@ class AnotherAccountWebTests {
         }
 
         @Test
+        @DisplayName("Un depósito no positivo marca el depósito como erróneo y lo liga a su mensaje (#145)")
+        void un_deposito_no_positivo_marca_el_deposito_como_erroneo() throws Exception {
+            String html = mvc.perform(post("/accounts/another").param("initialDeposit", "0"))
+                    .andReturn().getResponse().getContentAsString();
+
+            FieldTags.assertInvalid(html, "initialDeposit");
+            FieldTags.assertValid(html, "currency");
+        }
+
+        @Test
         @DisplayName("Con un depósito válido abre la cuenta y redirige a ella con su IBAN")
         void con_un_deposito_valido_abre_la_cuenta_y_redirige_a_ella_con_su_iban() throws Exception {
             when(commands.openAnotherAccount(any(Caller.class), any(OpenAnotherAccountCommand.class)))

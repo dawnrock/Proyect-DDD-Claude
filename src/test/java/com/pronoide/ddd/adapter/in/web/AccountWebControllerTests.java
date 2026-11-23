@@ -1463,7 +1463,7 @@ class AccountWebControllerTests {
                     .andExpect(content().string(matchesPattern(
                             "(?s).*<input class=\"form-control is-invalid\" type=\"email\" id=\"holderEmail\".*")))
                     .andExpect(content().string(containsString(
-                            "<p class=\"invalid-feedback\">El correo electrónico no es válido")))
+                            "<p class=\"invalid-feedback\" id=\"holderEmail-error\">El correo electrónico no es válido")))
                     .andExpect(content().string(matchesPattern(
                             "(?s).*<input class=\"form-control\" type=\"text\" id=\"holderName\".*")));
         }
@@ -1568,8 +1568,8 @@ class AccountWebControllerTests {
     }
 
     @Nested
-    @DisplayName("Errores accesibles en las acciones de la cuenta (#145)")
-    class ErroresAccesiblesEnLasAcciones {
+    @DisplayName("Errores accesibles en los formularios de cuentas (#145)")
+    class ErroresAccesibles {
 
         @BeforeEach
         void cuenta() {
@@ -1614,6 +1614,21 @@ class AccountWebControllerTests {
 
             FieldTags.assertInvalid(html, "transfer-target");
             FieldTags.assertValid(html, "transfer-amount");
+        }
+
+        @Test
+        @DisplayName("Una apertura sin documento ni depósito marca esos dos campos como erróneos y deja el resto sin marcar")
+        void una_apertura_sin_documento_ni_deposito_marca_esos_campos_como_erroneos() throws Exception {
+            String html = mvc.perform(post("/accounts/new").param("holderTaxId", "").param("initialDeposit", "0")
+                            .param("currency", "EUR"))
+                    .andReturn().getResponse().getContentAsString();
+
+            FieldTags.assertInvalid(html, "holderTaxId");
+            FieldTags.assertInvalid(html, "initialDeposit");
+            FieldTags.assertValid(html, "holderName");
+            FieldTags.assertValid(html, "holderEmail");
+            FieldTags.assertValid(html, "ownerUsername");
+            FieldTags.assertValid(html, "currency");
         }
 
         @Test
