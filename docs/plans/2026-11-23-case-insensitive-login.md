@@ -56,7 +56,7 @@ No domain, application or persistence code changes. The layering is unchanged (e
   - [x] `CaseInsensitiveLoginTests` passes: `Elber` and ` elber ` log in as `elber`. A wrong password is still `BadCredentialsException`.
   - [x] An unknown username (`Nadie`) still fails with the same `BadCredentialsException` as a wrong password (no user enumeration).
 
-### [ ] T2 — Provider unit tests: normalised name, details kept, shared lockout (~5 min)
+### [x] T2 — Provider unit tests: normalised name, details kept, shared lockout (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `src/test/java/com/pronoide/ddd/adapter/in/ThrottledAuthenticationProviderTests.java`, `src/test/java/com/pronoide/ddd/adapter/in/UsernamesTests.java` (new)
@@ -66,7 +66,7 @@ No domain, application or persistence code changes. The layering is unchanged (e
   2. Three failures with `Elber` lock `elber` from the same IP (documents the shared key).
   3. `UsernamesTests`: spaces and capitals, `null`, and a name that is already normalised.
 - **Acceptance criteria:**
-  - [ ] The new tests pass and the existing `ThrottledAuthenticationProviderTests` stay green.
+  - [x] The new tests pass and the existing `ThrottledAuthenticationProviderTests` stay green.
 
 ### [ ] T3 — One normalisation for the attempt limit and the web forms (~5 min)
 

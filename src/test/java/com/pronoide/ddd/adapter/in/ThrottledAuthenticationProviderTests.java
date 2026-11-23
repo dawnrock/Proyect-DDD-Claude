@@ -174,6 +174,27 @@ class ThrottledAuthenticationProviderTests {
     }
 
     /** Delegado que solo acepta la contraseña {@link #PASSWORD} y cuenta sus llamadas. */
+    @Test
+    @DisplayName("El delegado recibe el usuario normalizado, con la misma contraseña y la misma IP (#157)")
+    void el_delegado_recibe_el_usuario_normalizado_con_la_misma_ip() {
+        Authentication result = provider.authenticate(login(" Ada ", StubDelegate.PASSWORD, IP));
+
+        assertThat(result.getName()).isEqualTo("ada");
+        assertThat(delegate.received.getName()).isEqualTo("ada");
+        assertThat(delegate.received.getCredentials()).isEqualTo(StubDelegate.PASSWORD);
+        assertThat(delegate.received.getDetails()).isInstanceOfSatisfying(WebAuthenticationDetails.class,
+                details -> assertThat(details.getRemoteAddress()).isEqualTo(IP));
+    }
+
+    @Test
+    @DisplayName("Los fallos con mayúsculas en el usuario cuentan para el mismo usuario en minúsculas (#157)")
+    void los_fallos_con_mayusculas_cuentan_para_el_mismo_usuario() {
+        failTimes("Ada", 2);
+        failTimes(" ADA", 1);
+
+        assertThat(attempts.lockedFor("ada", IP)).isPresent();
+    }
+
     private static final class StubDelegate implements AuthenticationProvider {
 
         static final String PASSWORD = "demo";
@@ -182,10 +203,12 @@ class ThrottledAuthenticationProviderTests {
         volatile int calls;
         volatile CountDownLatch gate;
         volatile AuthenticationException failure;
+        volatile Authentication received;
 
         @Override
         public Authentication authenticate(Authentication authentication) {
             calls = callCount.incrementAndGet();
+            received = authentication;
             if (gate != null) {
                 try {
                     gate.await(5, TimeUnit.SECONDS);
