@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
@@ -16,7 +17,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails;
  * autenticación ({@link WebAuthenticationDetails}).
  *
  * <p>Mientras la pareja usuario e IP, o la IP, están bloqueadas, rechaza con {@link TooManyLoginAttemptsException} sin
- * comprobar la contraseña, aunque sea la correcta. Un usuario que no existe cuenta igual que uno que existe.
+ * comprobar la contraseña, aunque sea la correcta. Un usuario que no existe cuenta igual que uno que existe. Antes de
+ * todo normaliza el usuario ({@link Usernames}, #157), así que {@code Elber} entra y falla como {@code elber}.
  */
 @Slf4j
 public class ThrottledAuthenticationProvider implements AuthenticationProvider {
@@ -32,7 +34,9 @@ public class ThrottledAuthenticationProvider implements AuthenticationProvider {
     }
 
     @Override
-    public Authentication authenticate(Authentication authentication) {
+    public Authentication authenticate(Authentication typed) {
+        // El usuario no distingue mayúsculas ni espacios alrededor (#157): la base de datos sí los distingue
+        Authentication authentication = normalized(typed);
         String username = authentication.getName();
         String ip = ipOf(authentication);
         // Se reserva el intento antes de comprobar la contraseña: una ráfaga simultánea no pasa del límite
@@ -61,6 +65,25 @@ public class ThrottledAuthenticationProvider implements AuthenticationProvider {
     @Override
     public boolean supports(Class<?> authentication) {
         return delegate.supports(authentication);
+    }
+
+    /**
+     * La misma petición de autenticación con el usuario normalizado ({@link Usernames#normalize}) y los mismos detalles
+     * (la IP). Solo se rehace la de usuario y contraseña; otra, o una que ya viene normalizada, sigue igual.
+     */
+    private static Authentication normalized(Authentication authentication) {
+        if (!(authentication instanceof UsernamePasswordAuthenticationToken token)
+                || !(token.getPrincipal() instanceof String typed)) {
+            return authentication;
+        }
+        String username = Usernames.normalize(typed);
+        if (username.equals(typed)) {
+            return authentication;
+        }
+        UsernamePasswordAuthenticationToken result =
+                UsernamePasswordAuthenticationToken.unauthenticated(username, token.getCredentials());
+        result.setDetails(token.getDetails());
+        return result;
     }
 
     /** El usuario lo escribe quien intenta entrar: sin caracteres de control y recortado, para no falsear el log. */

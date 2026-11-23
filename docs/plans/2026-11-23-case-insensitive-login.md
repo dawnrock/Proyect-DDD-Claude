@@ -44,7 +44,7 @@ No domain, application or persistence code changes. The layering is unchanged (e
 
 ## Tasks
 
-### [ ] T1 — Reproduce on the JDBC store and normalise in the provider (~10 min)
+### [x] T1 — Reproduce on the JDBC store and normalise in the provider (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `src/test/java/com/pronoide/ddd/adapter/in/CaseInsensitiveLoginTests.java` (new), `src/main/java/com/pronoide/ddd/adapter/in/Usernames.java` (new), `src/main/java/com/pronoide/ddd/adapter/in/ThrottledAuthenticationProvider.java`
@@ -53,8 +53,8 @@ No domain, application or persistence code changes. The layering is unchanged (e
   1. Red: build the real chain as `SecuritySupport` does: an H2 database (`MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE`) migrated by Flyway, `UserStore.userDetailsService(...)` with a user `elber`, a `DaoAuthenticationProvider` with BCrypt, and a `ThrottledAuthenticationProvider` over it. Authenticating `Elber` and ` elber ` with the right password succeeds and the principal's name is `elber`. Check that it fails before the fix.
   2. Green: add `Usernames.normalize(String)` (`strip()` + `toLowerCase(Locale.ROOT)`, `null` stays `null`). In `authenticate`, build `UsernamePasswordAuthenticationToken.unauthenticated(normalized, credentials)`, copy the original details onto it, and use it for `tryAttempt`, the delegate, `succeeded`, `released` and the log.
 - **Acceptance criteria:**
-  - [ ] `CaseInsensitiveLoginTests` passes: `Elber` and ` elber ` log in as `elber`. A wrong password is still `BadCredentialsException`.
-  - [ ] An unknown username (`Nadie`) still fails with the same `BadCredentialsException` as a wrong password (no user enumeration).
+  - [x] `CaseInsensitiveLoginTests` passes: `Elber` and ` elber ` log in as `elber`. A wrong password is still `BadCredentialsException`.
+  - [x] An unknown username (`Nadie`) still fails with the same `BadCredentialsException` as a wrong password (no user enumeration).
 
 ### [ ] T2 — Provider unit tests: normalised name, details kept, shared lockout (~5 min)
 
