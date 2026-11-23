@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-24
-- **Status:** in progress
-- **Total estimate:** ~20 min (3 tasks)
+- **Status:** done
+- **Total estimate:** ~22 min (4 tasks)
 
 ## Goal
 
@@ -63,29 +63,40 @@
 - **Acceptance criteria:**
   - [x] The git mode with a CRLF working copy reads `info.version` (no exit 2): the old script exits with 2 (`No encuentro info.version`), the new one with 0 (`El contrato no cambia`).
 
+### [x] T4 — Review fixes (~2 min)
+
+- **Layer:** scripts
+- **Files:** `scripts/check-contract-version.test.mjs`
+- **Depends on:** T1
+- **What to do:**
+  1. `revisor-ddd`: `variant()` relied on `replace` calls that fail silently; if the contract's `info:` block changed shape, base and head would be equal and the test would check nothing. It now asserts that each `replace` changed the text.
+- **Acceptance criteria:**
+  - [x] `node --test "scripts/*.test.mjs"` green (7 tests).
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] With a CRLF working copy, `BASE_REF=Hexagonal node scripts/check-contract-version.mjs` reads `info.version` (T3, simulated on Linux; the user can confirm on Windows).
-- [ ] With one contract in CRLF and the other in LF, the two-file mode gives the same result as with both in LF (T1).
-- [ ] The CI stays green and runs the script tests; `scripts/README.md` mentions them.
-- [ ] `pendientes.md` and `estado-del-proyecto.md` updated.
+- [x] With a CRLF working copy, `BASE_REF=Hexagonal node scripts/check-contract-version.mjs` reads `info.version` (T3, simulated on Linux; the user can confirm on Windows).
+- [x] With one contract in CRLF and the other in LF, the two-file mode gives the same result as with both in LF (T1).
+- [x] The CI stays green and runs the script tests; `scripts/README.md` mentions them.
+- [x] `pendientes.md` and `estado-del-proyecto.md` updated.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit: no Java change.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish): n/a for JUnit; the `node:test` names are Spanish sentences, like the `@DisplayName`s.
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): `node:test` is part of Node.
-- [ ] If the API changes: n/a (no API change).
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a.
-- [ ] Documentation written or changed by this plan is in English (`scripts/README.md` follows its current language).
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit: no Java change.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish): n/a for JUnit; the `node:test` names are Spanish sentences, like the `@DisplayName`s.
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): `node:test` is part of Node.
+- [x] If the API changes: n/a (no API change).
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a.
+- [x] Documentation written or changed by this plan is in English (`scripts/README.md` follows its current language).
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
 - The real Windows run can only be confirmed by the user; T3 reproduces it with a CRLF working copy on Linux.
+- **Review (`revisor-ddd`):** no blocking findings in the code (the project status was still pending when it ran). Fixed in T4: the silent `replace` in the test. Accepted: `/\r\n?/g` also turns a lone `\r` into `\n`, harmless for YAML, and oasdiff still gets the original files.

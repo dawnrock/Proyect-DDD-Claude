@@ -20,10 +20,15 @@ after(() => rmSync(tempDir, { recursive: true, force: true }));
 const crlf = (text) => text.replace(/\n/g, '\r\n');
 
 // El contrato con otra info.version y, si se pide, un cambio que no toca la versión.
+// Si el bloque info: del contrato cambiara de forma y un replace no encontrara nada, el test fallaría aquí en lugar de
+// comparar dos contratos iguales sin comprobar nada.
 function variant({ version, change = false }) {
-  let text = contract.replace(/^( {2}version:\s*)['"]?[0-9]+\.[0-9]+\.[0-9]+['"]?/m, `$1${version}`);
-  if (change) text = text.replace(/^info:\n/m, 'info:\n  x-test-change: true\n');
-  return text;
+  const versioned = contract.replace(/^( {2}version:\s*)['"]?[0-9]+\.[0-9]+\.[0-9]+['"]?/m, `$1${version}`);
+  assert.match(versioned, new RegExp(`^ {2}version: ${version.replace(/\./g, '\\.')}$`, 'm'));
+  if (!change) return versioned;
+  const changed = versioned.replace(/^info:\n/m, 'info:\n  x-test-change: true\n');
+  assert.notEqual(changed, versioned);
+  return changed;
 }
 
 let files = 0;
