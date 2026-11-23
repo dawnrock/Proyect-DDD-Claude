@@ -82,7 +82,7 @@ Only `adapter.in.web` templates and `static/js/app.js`; no change in Java code, 
 - **Acceptance criteria:**
   - [x] The test passes; the sabotage made it fail naming the template.
 
-### [ ] T5 — Focus the first error after a failed submit (~15 min)
+### [x] T5 — Focus the first error after a failed submit (~15 min)
 
 - **Layer:** adapter.in
 - **Files:** `static/js/app.js`
@@ -91,29 +91,29 @@ Only `adapter.in.web` templates and `static/js/app.js`; no change in Java code, 
   1. Add `focusFirstError(root)` and call it on `DOMContentLoaded` (root `document`) and on `htmx:afterSettle` (root the swap target).
   2. There is no JavaScript test harness in the project (and adding one would be a new dependency): check it by hand with the preinstalled Chromium/Playwright against `./mvnw spring-boot:run`: a failed opening (full page) and a failed deposit (htmx) leave `document.activeElement` on the first wrong field; a page without errors keeps the `autofocus` field.
 - **Acceptance criteria:**
-  - [ ] Both manual checks pass (reported in the PR).
-  - [ ] `./mvnw verify` is green.
+  - [x] Both manual checks pass (reported in the PR).
+  - [x] `./mvnw verify` is green.
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] Every field with an error has `aria-invalid="true"` and `aria-describedby` pointing to its message; without error, neither attribute.
-- [ ] After a failed submit (full page or htmx panel) the focus is on the first wrong field.
+- [x] Every field with an error has `aria-invalid="true"` and `aria-describedby` pointing to its message; without error, neither attribute.
+- [x] After a failed submit (full page or htmx panel) the focus is on the first wrong field.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: n/a (no API change).
-- [ ] Any new business term is in `docs/dominio/glosario.md` (n/a: no new term).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: n/a (no API change).
+- [x] Any new business term is in `docs/dominio/glosario.md` (n/a: no new term).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
