@@ -90,7 +90,7 @@ No domain, application or persistence code changes. The layering is unchanged (e
 - **Acceptance criteria:**
   - [x] Both tests pass on the real `JdbcUserDetailsManager` (H2 in PostgreSQL mode) and failed before T1.
 
-### [ ] T5 — Contract and project documentation (~10 min)
+### [x] T5 — Contract and project documentation (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`, `docs/api/CHANGELOG.md`, `docs/ia/decisiones.md`, `docs/ia/pendientes.md`, `docs/ia/estado-del-proyecto.md`, `docs/ia/historial.md`
@@ -100,8 +100,8 @@ No domain, application or persistence code changes. The layering is unchanged (e
   2. `decisiones.md`: correct the #152 entry (since #150 the JDBC store is case-sensitive) and add a #157 entry. Logins normalise the username in `ThrottledAuthenticationProvider` with `Usernames.normalize`, and the API sign-up stays strict.
   3. `pendientes.md`, `estado-del-proyecto.md` (short) and a row in `historial.md`. If `glosario.md` describes the username, add the rule.
 - **Acceptance criteria:**
-  - [ ] Redocly has no errors, the contract test passes and the CI bump check accepts 2.2.3.
-  - [ ] Project status updated; all new text in English.
+  - [x] Redocly has no errors, the contract test passes and the CI bump check accepts 2.2.3. (Schemathesis is not installed locally: the contract test and the bump check run in the CI.)
+  - [x] Project status updated; all new text in English.
 
 ## Global acceptance criteria
 
