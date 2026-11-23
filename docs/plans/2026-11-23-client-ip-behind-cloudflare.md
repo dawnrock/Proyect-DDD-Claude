@@ -108,7 +108,7 @@
 - **Acceptance criteria:**
   - [x] It reports no difference.
 
-### [ ] T6 — ADR 0017 and project status (~10 min)
+### [x] T6 — ADR 0017 and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0017-login-attempt-limit.md`, `docs/ia/decisiones.md`, `docs/ia/pendientes.md`, `docs/ia/historial.md`, `docs/ia/estado-del-proyecto.md`
@@ -122,7 +122,12 @@
      - drop the item about clients on internal addresses, now covered by the resolver, which only trusts the header from proxies.
   3. Next step: the user checks Render's log, then #131.
 - **Acceptance criteria:**
-  - [ ] The CI status-file check passes.
+  - [x] The CI status-file check passes.
+
+**Deviations:**
+
+- **T1:** its real-server test was committed with T4, the task that makes it green. It needs the trusted-proxies list, and the build cannot be committed red.
+- **T6:** the "clients on internal addresses" pending item was reworded instead of dropped. The internal ranges are trusted proxies, so it still holds in principle.
 
 ## Global acceptance criteria
 
