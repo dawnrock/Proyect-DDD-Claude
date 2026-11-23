@@ -31,7 +31,7 @@
 
 ## Tasks
 
-### [ ] T1 — CRLF contracts give the same result as LF ones (~10 min)
+### [x] T1 — CRLF contracts give the same result as LF ones (~10 min)
 
 - **Layer:** scripts
 - **Files:** `scripts/check-contract-version.test.mjs`, `scripts/check-contract-version.mjs`
@@ -40,7 +40,7 @@
   1. Red: tests that run the script in two-file mode (`spawnSync(process.execPath, …)`) on copies of `docs/api/openapi.yaml` in a temporary folder, the base in LF and the new one in CRLF, and compare exit code and message with the LF-LF run: unchanged contract (0), changed without bump (1), bumped (reaches oasdiff; with `OASDIFF` pointing to a missing binary it exits with 2 and `No se pudo ejecutar`, so no oasdiff is needed).
   2. Green: `readFileSync(…).replace(/\r\n?/g, '\n')` for both contracts, with a comment on why.
 - **Acceptance criteria:**
-  - [ ] The CRLF tests fail before the fix and pass after it; `node --test "scripts/*.test.mjs"` green.
+  - [x] The CRLF tests fail before the fix and pass after it; `node --test "scripts/*.test.mjs"` green (7 tests; without the fix the 6 CRLF ones fail). The test runs the script with `NODE_NO_WARNINGS=1`, because Node's warnings carry the PID and would make two equal outputs differ.
 
 ### [ ] T2 — Run the script tests in the CI (~5 min)
 
