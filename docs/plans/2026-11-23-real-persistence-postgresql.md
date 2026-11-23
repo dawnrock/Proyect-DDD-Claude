@@ -212,15 +212,15 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Acceptance criteria:**
   - [x] Running the runner twice leaves three demo accounts and the same balances (Ada 1500, Grace 4700, Alan 200).
 
-### [ ] T16 — `prod` profile (~5 min)
+### [x] T16 — `prod` profile (~5 min)
 
 - **Layer:** config
-- **Files:** `src/main/resources/application-prod.properties`, `DemoProfileTests.java` or a new profile test
+- **Files:** `src/main/resources/application-prod.properties`, new `ProdProfileTests.java`
 - **Depends on:** T6
 - **What to do:**
   1. Datasource only from `SPRING_DATASOURCE_URL` / `_USERNAME` / `_PASSWORD` (no defaults, so a missing one fails at startup), small Hikari pool (Neon free plan), H2 console off.
 - **Acceptance criteria:**
-  - [ ] The `prod` profile without `SPRING_DATASOURCE_URL` does not start; the default and `demo` profiles still use H2.
+  - [x] The `prod` profile without `SPRING_DATASOURCE_URL` does not start (the unresolved placeholder is not a JDBC URL); with the variables it uses that database; the default and `demo` profiles still use H2.
 
 ### [ ] T17 — Data survives a restart (~10 min)
 
