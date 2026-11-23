@@ -51,6 +51,9 @@ final class FieldTags {
                 .contains(" hidden")
                 .contains("x-bind:hidden=\"false\"")
                 .contains("aria-pressed=\"false\"")
+                .contains("x-bind:class=\"{ active: shown }\"")
+                .contains("#eye\"")
+                .contains("#eye-off\"")
                 .contains("Mostrar contraseña");
         assertThat(tag(html, id)).as("campo %s", id)
                 .contains("type=\"password\"")

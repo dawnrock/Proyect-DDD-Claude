@@ -6,7 +6,7 @@
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-23
 - **Status:** in progress
-- **Total estimate:** ~45 min (4 tasks)
+- **Total estimate:** ~50 min (5 tasks)
 
 ## Goal
 
@@ -81,6 +81,18 @@ Only `adapter.in.web` templates, `static/js/app.js` and `static/css/app.css`; no
 - **Acceptance criteria:**
   - [x] The new tests pass and `./mvnw verify` is green.
   - [x] The manual checks pass (reported in the PR).
+
+### [x] T5 — Review fixes: visible pressed state (~5 min)
+
+- **Layer:** adapter.in
+- **Files:** `templates/fragments/password-toggle.html`, `FieldTags.java`
+- **Depends on:** T4
+- **What to do:**
+  1. `revisor-ddd` found that the pressed state was only announced (`aria-pressed`), not shown: the icon switches between `eye` and `eye-off` and the button gets Bootstrap's `active` class while the password is shown.
+  2. Extend `assertPasswordToggle` (red with the T4 fragment) and check it by hand in Chromium.
+- **Acceptance criteria:**
+  - [x] The test passes and `./mvnw verify` is green.
+  - [x] In Chromium the icon and the `active` class follow the state.
 
 ## Global acceptance criteria
 
