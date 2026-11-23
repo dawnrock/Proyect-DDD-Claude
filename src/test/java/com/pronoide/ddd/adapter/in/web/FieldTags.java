@@ -37,4 +37,23 @@ final class FieldTags {
                 .doesNotContain("aria-invalid")
                 .doesNotContain("aria-describedby");
     }
+
+    /**
+     * El campo de contraseña tiene su botón «Mostrar contraseña» (#146): un {@code <button type="button">} que controla
+     * el campo, empieza sin pulsar y está oculto hasta que Alpine.js lo muestra, así que sin JavaScript no aparece.
+     */
+    static void assertPasswordToggle(String html, String id) {
+        Matcher matcher = Pattern.compile("<button\\b[^>]*\\baria-controls=\"" + Pattern.quote(id) + "\"[^>]*>(.*?)</button>",
+                Pattern.DOTALL).matcher(html);
+        assertThat(matcher.find()).as("botón de mostrar la contraseña %s", id).isTrue();
+        assertThat(matcher.group()).as("botón de %s", id)
+                .contains("type=\"button\"")
+                .contains(" hidden")
+                .contains("x-bind:hidden=\"false\"")
+                .contains("aria-pressed=\"false\"")
+                .contains("Mostrar contraseña");
+        assertThat(tag(html, id)).as("campo %s", id)
+                .contains("type=\"password\"")
+                .doesNotContain("value=");
+    }
 }

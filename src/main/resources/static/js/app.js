@@ -101,6 +101,9 @@
 
     // Acciones del detalle de cuenta: los <details> se abren solos sin JavaScript; con Alpine, abrir uno cierra los demás.
     document.addEventListener('alpine:init', () => {
+        // Botón «Mostrar contraseña» (#146, fragments/password-toggle): alterna el type del campo entre password y text.
+        Alpine.data('passwordToggle', () => ({ shown: false }));
+
         Alpine.data('actionPanels', () => ({
             closeOthers(event) {
                 const opened = event.target;

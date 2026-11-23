@@ -671,5 +671,25 @@ class SignUpControllerTests {
             assertThat(FieldTags.tag(html, "initialDeposit")).contains(" required").contains("enterkeyhint=\"done\"");
             assertThat(FieldTags.tag(html, "conditionsAccepted")).contains(" required");
         }
+
+        @Test
+        @DisplayName("En el paso 2, cada contraseña tiene su botón «Mostrar contraseña», oculto sin JavaScript")
+        void en_el_paso_2_cada_contrasena_tiene_su_boton_mostrar_contrasena() throws Exception {
+            String html = mvc.perform(get("/signup/access").session(sessionAfterStep1()))
+                    .andReturn().getResponse().getContentAsString();
+
+            FieldTags.assertPasswordToggle(html, "password");
+            FieldTags.assertPasswordToggle(html, "passwordRepetition");
+        }
+
+        @Test
+        @DisplayName("En el paso 2, una contraseña corta sigue mostrando su error junto al botón")
+        void en_el_paso_2_una_contrasena_corta_sigue_mostrando_su_error() throws Exception {
+            String html = mvc.perform(post("/signup/access").session(sessionAfterStep1()).param("username", "margaret")
+                            .param("password", "corta").param("passwordRepetition", "corta"))
+                    .andReturn().getResponse().getContentAsString();
+
+            assertThat(html).containsPattern("(?s)<div class=\"input-group has-validation\"[^>]*>\\s*<input[^>]*id=\"password\".*?</button>\\s*<p class=\"invalid-feedback\" id=\"password-error\">");
+        }
     }
 }

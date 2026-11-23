@@ -69,7 +69,7 @@ Only `adapter.in.web` templates, `static/js/app.js` and `static/css/app.css`; no
 - **Acceptance criteria:**
   - [x] The new test passes and `./mvnw verify` is green.
 
-### [ ] T4 — Show-password toggle (~20 min)
+### [x] T4 — Show-password toggle (~20 min)
 
 - **Layer:** adapter.in
 - **Files:** `templates/login.html`, `templates/signup/access.html`, `static/js/app.js`, `static/css/app.css` (if needed), tests of both pages
@@ -79,30 +79,30 @@ Only `adapter.in.web` templates, `static/js/app.js` and `static/css/app.css`; no
   2. Markup with `input-group has-validation`, Alpine component `passwordToggle` in `app.js` (toggles `type` and `aria-pressed`).
   3. Check by hand in Chromium (Playwright): with JavaScript the button shows and toggles `type`/`aria-pressed` with the keyboard; without JavaScript it does not show; the field's error message still shows inside the input group.
 - **Acceptance criteria:**
-  - [ ] The new tests pass and `./mvnw verify` is green.
-  - [ ] The manual checks pass (reported in the PR).
+  - [x] The new tests pass and `./mvnw verify` is green.
+  - [x] The manual checks pass (reported in the PR).
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] Mandatory fields carry `required` and the optional ones of `accounts/new` do not.
-- [ ] The mobile keyboard attributes are on the fields listed above.
-- [ ] The show-password button works with the keyboard, announces its state (`aria-pressed`) and does not show without JavaScript.
+- [x] Mandatory fields carry `required` and the optional ones of `accounts/new` do not.
+- [x] The mobile keyboard attributes are on the fields listed above.
+- [x] The show-password button works with the keyboard, announces its state (`aria-pressed`) and does not show without JavaScript.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: n/a (no API change).
-- [ ] Any new business term is in `docs/dominio/glosario.md` (n/a: no new term).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: n/a (no API change).
+- [x] Any new business term is in `docs/dominio/glosario.md` (n/a: no new term).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

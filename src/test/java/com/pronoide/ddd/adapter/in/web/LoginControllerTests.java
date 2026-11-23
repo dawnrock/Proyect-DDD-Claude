@@ -105,4 +105,12 @@ class LoginControllerTests {
                 .contains("autocomplete=\"username\"")
                 .contains(" required");
     }
+
+    @Test
+    @DisplayName("La contraseña del login tiene el botón «Mostrar contraseña», oculto sin JavaScript (#146)")
+    void la_contrasena_del_login_tiene_el_boton_mostrar_contrasena() throws Exception {
+        String html = mvc.perform(get("/login").param("form", "")).andReturn().getResponse().getContentAsString();
+
+        FieldTags.assertPasswordToggle(html, "password");
+    }
 }
