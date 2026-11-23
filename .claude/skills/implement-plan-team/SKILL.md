@@ -19,6 +19,8 @@ Eres el **lead**. Coordinas, redactas el contrato, integras y verificas; no impl
 
 Crea el worktree de integración desde la rama base, como en `implement-plan` (paso 2): rama `<tipo>/<slug>` en `.claude/worktrees/<slug>`. Commitea el plan si hace falta.
 
+**Rama impuesta por el entorno** (sesiones en la nube, `implement-plan` paso 2 bis): la integración se hace en esa rama, en el checkout principal y sin worktree de integración; donde abajo dice "worktree de integración" o "rama de integración", es la rama impuesta. Los worktrees `-back` y `-web` del paso 3 se crean igual: son locales, nadie los sube, y se fusionan en la rama impuesta. La PR única sale de la rama impuesta contra la rama de la fase, y tras la fusión la rama se reinicia desde la base en lugar de borrarse.
+
 ## 2. Contrato (T0)
 
 1. Redacta `docs/contracts/<slug>.md` a partir de [assets/contract-template.md](assets/contract-template.md): servicio de aplicación (firmas), commands y vistas (campos y tipos), errores (excepción → qué ve la web → código HTTP) y el fragmento de `docs/api/openapi.yaml`.
