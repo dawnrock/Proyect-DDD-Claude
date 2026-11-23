@@ -63,7 +63,7 @@ Technical decisions (taken by Claude under `/advance-issues`, reversible configu
   - [x] The test passes in a few seconds; with `loginTimeout=0` it fails on `assertTimeoutPreemptively` (checked: `execution timed out after 20000 ms`, the driver waiting on `Read timed out`).
   - [x] `./mvnw verify` green.
 
-### [ ] T3 — Document the plain URL and the timeouts (~5 min)
+### [x] T3 — Document the plain URL and the timeouts (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/deploy/render.md`, `docs/adr/0019-*.md`
@@ -72,7 +72,7 @@ Technical decisions (taken by Claude under `/advance-issues`, reversible configu
   1. `render.md` section 2 bis: the URL is just `…?sslmode=require`; a paragraph on why there are timeouts and which log appears when they run out (`Connection attempt timed out` / `SocketTimeoutException` and the start stops), and how to override them.
   2. ADR 0019, consequences: the hang of 2026-11-23, how it was diagnosed (Render's API logs and Neon's read-only tools) and the fix.
 - **Acceptance criteria:**
-  - [ ] The docs say the same values as `application-prod.properties`.
+  - [x] The docs say the same values as `application-prod.properties`.
 
 ## Global acceptance criteria
 

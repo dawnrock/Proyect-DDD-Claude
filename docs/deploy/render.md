@@ -95,7 +95,21 @@ Since #150 (ADR 0019) the `Hexagonal` service keeps users, customers, accounts a
    ```
 
    The URL is the connection string with `jdbc:` in front and without the user and password. **Add them only once the deployed code includes #150:** older code also reads `SPRING_DATASOURCE_URL` and would fail to start without the PostgreSQL driver.
+   Do not add timeouts to the URL: the `prod` profile sets them (see below).
 5. **Save, rebuild and deploy.** On the first start Flyway creates the tables and the `demo` profile loads the demo data; later starts find the accounts and load nothing. The `prod` profile has no defaults: if a variable is missing, the service does not start instead of silently using H2.
+
+**Connection timeouts (#156).** By default the PostgreSQL driver waits forever while it logs in and while it reads; on 2026-11-23 the first deploy hung with no error while Neon's compute woke up, until Render gave up after 15 minutes. `application-prod.properties` sets them as driver properties, so they apply whatever the URL says:
+
+| Setting | Value | What it bounds |
+| ------- | ----- | -------------- |
+| `connectTimeout` | 15 s | TCP connection and SSL handshake |
+| `loginTimeout` | 30 s | The whole connection attempt (Neon's cold start takes about 7 s) |
+| `socketTimeout` | 120 s | Any read, so a query never waits forever |
+| Hikari `connection-timeout` | 30 s | A request waiting for a pool connection |
+| Hikari `initialization-fail-timeout` | 1 ms | One connection attempt at start: if it fails, the start fails |
+| Hikari `keepalive-time` | 2 min | Pings the idle connection, below Neon's 5-minute suspension |
+
+If they run out, the start stops with a stack trace instead of hanging: `PSQLException: Connection attempt timed out.` (login), a `SocketTimeoutException` (connect or read), followed by Spring's `Application run failed`, and Render keeps the previous version. A parameter in the URL wins over these values, so to change one for a test add it there (for example `…?sslmode=require&loginTimeout=60`).
 
 The configured users (`APP_SECURITY_USERS_*`, `APP_ADMIN_*`) are written to the database on every start: changing a hash in Render still changes that user's password. Users who signed up are kept.
 
