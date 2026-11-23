@@ -124,16 +124,18 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Acceptance criteria:**
   - [x] An account with deposits, a rejected withdrawal and a transfer makes the round trip domain → entity → domain without changing any value.
 
-### [ ] T8 — JPA account repository (~10 min)
+### [x] T8 — JPA account repository (~10 min)
 
 - **Layer:** adapter.out
 - **Files:** `JpaCheckingAccountRepository.java`, `CheckingAccountJpaRepository.java` (Spring Data), `JpaCheckingAccountRepositoryTests.java`
 - **Depends on:** T7
 - **What to do:**
   1. Adapter of `CheckingAccountRepository`; an account number already used by another account → `IllegalStateException` (port contract).
-  2. `@DataJpaTest` that extends `CheckingAccountRepositoryContract`.
+  2. Test that extends `CheckingAccountRepositoryContract`. **Deviation:** not `@DataJpaTest`. The contracts group their tests with `@Nested`, and Spring builds the context of a nested class from its declaring class (the contract, which knows no Spring). The JPA tests share a minimal context (`JpaTestDatabase`: H2 of the configuration, Flyway, JPA, Spring Data of this package) and run each port call in its own transaction, as the unit of work does.
+  3. The JPA adapters get `@Repository` in T13, when the in-memory ones lose theirs (two beans of the same port would break the context).
+  4. Contract fix: `tras_cambiar_el_numero...` compared with `containsSame`, against the contract's own rule (compare by id; a real implementation returns another instance).
 - **Acceptance criteria:**
-  - [ ] The contract passes against H2; `findAll` sorted by account number.
+  - [x] The contract passes against H2; `findAll` sorted by account number.
 
 ### [ ] T9 — JPA customer repository (~10 min)
 
