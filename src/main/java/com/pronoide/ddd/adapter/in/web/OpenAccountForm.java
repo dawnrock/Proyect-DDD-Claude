@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Positive;
 
 import com.pronoide.ddd.application.OpenAccountCommandDef;
 import com.pronoide.ddd.application.SignUpCommandDef;
+import com.pronoide.ddd.adapter.in.Usernames;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -49,6 +50,6 @@ public class OpenAccountForm {
 
     /** Como en el alta (#152): el usuario del titular se envía en minúsculas y sin espacios alrededor. */
     public void setOwnerUsername(String ownerUsername) {
-        this.ownerUsername = SignUpForm.normalizeUsername(ownerUsername);
+        this.ownerUsername = Usernames.normalize(ownerUsername);
     }
 }

@@ -2,6 +2,12 @@
 
 Changes to `docs/api/openapi.yaml`, newest first. Versioning policy: [ADR 0014](../adr/0014-contract-versioning.md) (major for an incompatible change as `oasdiff breaking` reports it, minor for a compatible addition, patch for documentation only). The CI checks the bump on every pull request.
 
+## 2.2.3 · 2026-11-24 (#157)
+
+Documentation only.
+
+- **`TokenRequest.username`:** case-insensitive, and surrounding spaces are ignored: `" ADA "` gets a token for `ada`. Since #150 the users are in PostgreSQL, which compares the username case-sensitively, so `Ada` was answered with 401; now the login normalises it first (#157).
+
 ## 2.2.2 · 2026-11-23 (#139)
 
 Documentation only ([ADR 0018](../adr/0018-sign-up-limit.md)).
