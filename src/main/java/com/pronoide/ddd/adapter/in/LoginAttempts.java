@@ -7,7 +7,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -143,7 +142,7 @@ public class LoginAttempts {
     }
 
     private static String pairKey(String username, String ip) {
-        String user = username == null ? "" : username.trim().toLowerCase(Locale.ROOT);
+        String user = username == null ? "" : Usernames.normalize(username);
         if (user.length() > MAX_USERNAME_IN_KEY) {
             user = user.substring(0, MAX_USERNAME_IN_KEY);
         }

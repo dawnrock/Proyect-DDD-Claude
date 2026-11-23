@@ -1,7 +1,6 @@
 package com.pronoide.ddd.adapter.in.web;
 
 import java.math.BigDecimal;
-import java.util.Locale;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
@@ -13,6 +12,7 @@ import jakarta.validation.constraints.Size;
 import com.pronoide.ddd.application.OpenAccountCommandDef;
 import com.pronoide.ddd.application.SignUpCommandDef;
 import com.pronoide.ddd.adapter.in.CustomerRegistration;
+import com.pronoide.ddd.adapter.in.Usernames;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -117,11 +117,6 @@ public class SignUpForm {
      * en la web; la API exige el formato exacto. Lombok no genera este setter porque ya existe.
      */
     public void setUsername(String username) {
-        this.username = normalizeUsername(username);
-    }
-
-    /** Normalización de un usuario escrito en un formulario web; {@code null} sigue siendo {@code null}. */
-    static String normalizeUsername(String username) {
-        return username == null ? null : username.strip().toLowerCase(Locale.ROOT);
+        this.username = Usernames.normalize(username);
     }
 }

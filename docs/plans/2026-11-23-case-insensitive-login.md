@@ -68,7 +68,7 @@ No domain, application or persistence code changes. The layering is unchanged (e
 - **Acceptance criteria:**
   - [x] The new tests pass and the existing `ThrottledAuthenticationProviderTests` stay green.
 
-### [ ] T3 — One normalisation for the attempt limit and the web forms (~5 min)
+### [x] T3 — One normalisation for the attempt limit and the web forms (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `src/main/java/com/pronoide/ddd/adapter/in/LoginAttempts.java`, `src/main/java/com/pronoide/ddd/adapter/in/web/SignUpForm.java`
@@ -77,7 +77,7 @@ No domain, application or persistence code changes. The layering is unchanged (e
   1. `LoginAttempts.pairKey` uses `Usernames.normalize` (`strip()` instead of `trim()`), keeping the `null` → `""` handling and the length cut.
   2. `SignUpForm.normalizeUsername` delegates to `Usernames.normalize`, or callers use the helper directly (`OpenAccountForm`). Keep the behaviour.
 - **Acceptance criteria:**
-  - [ ] `LoginAttemptsTests`, `SignUpForm` and `OpenAccountForm` tests stay green with no change in behaviour.
+  - [x] `LoginAttemptsTests`, `SignUpForm` and `OpenAccountForm` tests stay green with no change in behaviour.
 
 ### [ ] T4 — End to end on the web and the API with the real store (~10 min)
 
