@@ -16,19 +16,19 @@
 
         <div class="mb-3">
             <label class="form-label" for="fullName">Nombre y apellidos</label>
-            <input class="form-control" type="text" id="fullName" autocomplete="name" autofocus th:field="*{fullName}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('fullName')} ? 'true'" th:aria-describedby="${#fields.hasErrors('fullName')} ? 'fullName-error'">
+            <input class="form-control" type="text" id="fullName" required enterkeyhint="next" autocomplete="name" autofocus th:field="*{fullName}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('fullName')} ? 'true'" th:aria-describedby="${#fields.hasErrors('fullName')} ? 'fullName-error'">
             <p class="invalid-feedback" id="fullName-error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></p>
         </div>
 
         <div class="mb-3">
             <label class="form-label" for="taxId">DNI o NIE</label>
-            <input class="form-control" type="text" id="taxId" autocomplete="off" spellcheck="false" placeholder="12345678Z" th:field="*{taxId}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('taxId')} ? 'true'" th:aria-describedby="${#fields.hasErrors('taxId')} ? 'taxId-error'">
+            <input class="form-control" type="text" id="taxId" required enterkeyhint="next" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="12345678Z" th:field="*{taxId}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('taxId')} ? 'true'" th:aria-describedby="${#fields.hasErrors('taxId')} ? 'taxId-error'">
             <p class="invalid-feedback" id="taxId-error" th:if="${#fields.hasErrors('taxId')}" th:errors="*{taxId}"></p>
         </div>
 
         <div class="mb-3">
             <label class="form-label" for="email">Correo electrónico</label>
-            <input class="form-control" type="email" id="email" autocomplete="email" th:field="*{email}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('email')} ? 'true'" th:aria-describedby="${#fields.hasErrors('email')} ? 'email-error'">
+            <input class="form-control" type="email" id="email" required enterkeyhint="next" autocomplete="email" th:field="*{email}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('email')} ? 'true'" th:aria-describedby="${#fields.hasErrors('email')} ? 'email-error'">
             <p class="invalid-feedback" id="email-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
         </div>
 

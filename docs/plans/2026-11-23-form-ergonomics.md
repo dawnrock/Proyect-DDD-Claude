@@ -47,7 +47,7 @@ Only `adapter.in.web` templates, `static/js/app.js` and `static/css/app.css`; no
 - **Acceptance criteria:**
   - [x] The new tests pass and `./mvnw verify` is green.
 
-### [ ] T2 — Sign-up steps: required fields and mobile keyboard (~10 min)
+### [x] T2 — Sign-up steps: required fields and mobile keyboard (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `templates/signup/data.html`, `templates/signup/access.html`, `templates/signup/account.html`, `SignUpControllerTests.java`
@@ -56,7 +56,7 @@ Only `adapter.in.web` templates, `static/js/app.js` and `static/css/app.css`; no
   1. Test (red): step 1 renders `required` + `enterkeyhint="next"` on name, tax id and e-mail, and `autocapitalize="characters"` on the tax id; step 2 `required` + `enterkeyhint="next"` on user name and passwords; step 3 `required` on deposit and conditions and `enterkeyhint="done"` on the deposit.
   2. Add the attributes.
 - **Acceptance criteria:**
-  - [ ] The new tests pass and `./mvnw verify` is green.
+  - [x] The new tests pass and `./mvnw verify` is green.
 
 ### [ ] T3 — Login user name keyboard (~5 min)
 
