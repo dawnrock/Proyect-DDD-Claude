@@ -21,22 +21,22 @@
 
         <div class="mb-3">
             <label class="form-label" for="initialDeposit">Depósito inicial</label>
-            <input class="form-control" type="number" id="initialDeposit" step="0.01" inputmode="decimal" autofocus th:field="*{initialDeposit}" th:errorclass="is-invalid">
-            <p class="invalid-feedback" th:if="${#fields.hasErrors('initialDeposit')}" th:errors="*{initialDeposit}"></p>
+            <input class="form-control" type="number" id="initialDeposit" step="0.01" inputmode="decimal" autofocus th:field="*{initialDeposit}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('initialDeposit')} ? 'true'" th:aria-describedby="${#fields.hasErrors('initialDeposit')} ? 'initialDeposit-error'">
+            <p class="invalid-feedback" id="initialDeposit-error" th:if="${#fields.hasErrors('initialDeposit')}" th:errors="*{initialDeposit}"></p>
         </div>
 
         <div class="mb-3">
             <label class="form-label" for="currency">Divisa</label>
-            <select class="form-select" id="currency" th:field="*{currency}" th:errorclass="is-invalid">
+            <select class="form-select" id="currency" th:field="*{currency}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('currency')} ? 'true'" th:aria-describedby="${#fields.hasErrors('currency')} ? 'currency-error'">
                 <option th:each="c : ${currencies}" th:value="${c}" th:text="${c}">EUR</option>
             </select>
-            <p class="invalid-feedback" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
+            <p class="invalid-feedback" id="currency-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
         </div>
 
         <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="conditionsAccepted" th:field="*{conditionsAccepted}" th:errorclass="is-invalid">
+            <input class="form-check-input" type="checkbox" id="conditionsAccepted" th:field="*{conditionsAccepted}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('conditionsAccepted')} ? 'true'" th:aria-describedby="${#fields.hasErrors('conditionsAccepted')} ? 'conditionsAccepted-error'">
             <label class="form-check-label" for="conditionsAccepted">Acepto las condiciones de Mon-A Bank</label>
-            <p class="invalid-feedback" th:if="${#fields.hasErrors('conditionsAccepted')}" th:errors="*{conditionsAccepted}"></p>
+            <p class="invalid-feedback" id="conditionsAccepted-error" th:if="${#fields.hasErrors('conditionsAccepted')}" th:errors="*{conditionsAccepted}"></p>
         </div>
 
         <div class="d-flex align-items-center gap-3">

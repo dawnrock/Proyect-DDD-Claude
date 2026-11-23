@@ -59,7 +59,7 @@ Only `adapter.in.web` templates and `static/js/app.js`; no change in Java code, 
 - **Acceptance criteria:**
   - [x] The new tests pass and `./mvnw verify` is green.
 
-### [ ] T3 — Sign-up steps announce their field errors (~10 min)
+### [x] T3 — Sign-up steps announce their field errors (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `templates/signup/data.html`, `templates/signup/access.html`, `templates/signup/account.html`, `SignUpControllerTests.java`
@@ -68,8 +68,8 @@ Only `adapter.in.web` templates and `static/js/app.js`; no change in Java code, 
   1. Test (red): step 1 with a blank name, step 2 with a short password, step 3 without accepting the conditions render the attributes on those fields.
   2. Add the pattern to every field of the three steps (the password fields use `th:classappend` and an explicit `name`; same attributes).
 - **Acceptance criteria:**
-  - [ ] The new tests pass and the existing step-2 tests that compare the literal `<input …>` start are updated to the new markup.
-  - [ ] `./mvnw verify` is green.
+  - [x] The new tests pass; the existing step-2 tests that compare the literal `<input …>` start still pass unchanged (the new attributes go after it).
+  - [x] `./mvnw verify` is green.
 
 ### [ ] T4 — Template-wide guard (~5 min)
 

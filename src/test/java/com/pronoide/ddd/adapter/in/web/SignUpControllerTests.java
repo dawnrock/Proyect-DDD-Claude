@@ -595,4 +595,44 @@ class SignUpControllerTests {
             };
         }
     }
+
+    @Nested
+    @DisplayName("Errores accesibles en los pasos del alta (#145)")
+    class ErroresAccesibles {
+
+        @Test
+        @DisplayName("En el paso 1, un nombre vacío marca el nombre como erróneo y deja el resto sin marcar")
+        void en_el_paso_1_un_nombre_vacio_marca_el_nombre_como_erroneo() throws Exception {
+            String html = mvc.perform(post("/signup").param("fullName", "").param("taxId", "12345678Z")
+                            .param("email", "margaret@example.com"))
+                    .andReturn().getResponse().getContentAsString();
+
+            FieldTags.assertInvalid(html, "fullName");
+            FieldTags.assertValid(html, "taxId");
+            FieldTags.assertValid(html, "email");
+        }
+
+        @Test
+        @DisplayName("En el paso 2, una contraseña corta marca la contraseña como errónea y no la repetición")
+        void en_el_paso_2_una_contrasena_corta_marca_la_contrasena_como_erronea() throws Exception {
+            String html = mvc.perform(post("/signup/access").session(sessionAfterStep1()).param("username", "margaret")
+                            .param("password", "corta").param("passwordRepetition", "corta"))
+                    .andReturn().getResponse().getContentAsString();
+
+            FieldTags.assertInvalid(html, "password");
+            FieldTags.assertValid(html, "passwordRepetition");
+            FieldTags.assertValid(html, "username");
+        }
+
+        @Test
+        @DisplayName("En el paso 3, no aceptar las condiciones las marca como erróneas")
+        void en_el_paso_3_no_aceptar_las_condiciones_las_marca_como_erroneas() throws Exception {
+            String html = mvc.perform(post("/signup/account").session(sessionAfterStep2())
+                            .param("initialDeposit", "100.00").param("currency", "EUR"))
+                    .andReturn().getResponse().getContentAsString();
+
+            FieldTags.assertInvalid(html, "conditionsAccepted");
+            FieldTags.assertValid(html, "initialDeposit");
+        }
+    }
 }
