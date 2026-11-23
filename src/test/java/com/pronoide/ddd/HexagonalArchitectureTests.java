@@ -1,6 +1,7 @@
 package com.pronoide.ddd;
 
 import static com.tngtech.archunit.base.DescribedPredicate.alwaysTrue;
+import static com.tngtech.archunit.base.DescribedPredicate.describe;
 import static com.tngtech.archunit.base.DescribedPredicate.not;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.INTERFACES;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo;
@@ -204,6 +205,18 @@ class HexagonalArchitectureTests {
             .should().dependOnClassesThat()
             .resideInAnyPackage("..adapter.in.cli..", "..adapter.in.rest..", "..adapter.in.web..",
                     "..adapter.in.scheduler..");
+
+    /**
+     * #150: solo los adaptadores de persistencia reconstruyen agregados guardados. {@code reconstitute(...)} se salta las
+     * reglas de apertura y no registra eventos, así que un caso de uso o un adaptador de entrada que la usara podría
+     * fabricar cuentas o clientes sin pasar por el dominio.
+     */
+    @ArchTest
+    static final ArchRule solo_la_persistencia_reconstituye_agregados = noClasses()
+            .that().resideOutsideOfPackages("..domain.model..", "..adapter.out.persistence..")
+            .should().callMethodWhere(describe("reconstitute(...) de un agregado",
+                    call -> call.getName().equals("reconstitute")
+                            && call.getTargetOwner().getPackageName().startsWith("com.pronoide.ddd.domain.model")));
 
     /** #20: {@code config} construye el núcleo y nadie depende de ella. */
     @ArchTest

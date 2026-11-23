@@ -91,7 +91,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Acceptance criteria:**
   - [x] Same id, document, name and e-mail as stored; invalid fields rejected as in `register`.
 
-### [ ] T5 — ArchUnit: only persistence reconstitutes (~5 min)
+### [x] T5 — ArchUnit: only persistence reconstitutes (~5 min)
 
 - **Layer:** tests
 - **Files:** `HexagonalArchitectureTests.java`
@@ -100,7 +100,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
   1. Rule `solo_la_persistencia_reconstituye_agregados`: no class outside `..domain.model..` and `..adapter.out.persistence..` calls a method named `reconstitute`.
   2. Validate it by breaking it (a temporary call from `application`) and reverting.
 - **Acceptance criteria:**
-  - [ ] The rule fails with the temporary call and passes without it.
+  - [x] The rule fails with the temporary call and passes without it (validated with a temporary `application.SabotageReconstitute` calling `Customer.reconstitute`).
 
 ### [ ] T6 — Initial schema and database per environment (~10 min)
 
