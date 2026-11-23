@@ -222,7 +222,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Acceptance criteria:**
   - [x] The `prod` profile without `SPRING_DATASOURCE_URL` does not start (the unresolved placeholder is not a JDBC URL); with the variables it uses that database; the default and `demo` profiles still use H2.
 
-### [ ] T17 — Data survives a restart (~10 min)
+### [x] T17 — Data survives a restart (~10 min)
 
 - **Layer:** tests
 - **Files:** `PersistenceRestartTests.java` (end to end)
@@ -230,7 +230,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **What to do:**
   1. Start a context over a named H2 database, sign up a customer, close the context, start another over the same database: the customer, their account and their login are still there, and the demo data is not loaded twice.
 - **Acceptance criteria:**
-  - [ ] The test passes; it is the local equivalent of the restart check on Render.
+  - [x] The test passes; it is the local equivalent of the restart check on Render.
 
 ### [ ] T18 — Architecture and Render guide (~10 min)
 
