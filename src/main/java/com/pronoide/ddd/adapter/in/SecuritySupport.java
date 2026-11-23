@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +15,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
@@ -27,8 +24,9 @@ import com.pronoide.ddd.application.OpenAccountCommandDef;
  * Lo que comparten las dos cadenas de seguridad (web y API, ADR 0008): el cifrado de contraseñas, los usuarios y el
  * cortafuegos HTTP.
  *
- * <p>Los usuarios salen de {@link SecurityUsersProperties} y, si están definidas, de las variables de entorno
- * {@code APP_ADMIN_USERNAME} y {@code APP_ADMIN_PASSWORD} (un administrador). Sin perfil {@code demo} ni variables no
+ * <p>Los usuarios los guarda {@link UserStore} en la base de datos (#150). Los configurados salen de
+ * {@link SecurityUsersProperties} y, si están definidas, de las variables de entorno {@code APP_ADMIN_USERNAME} y
+ * {@code APP_ADMIN_PASSWORD} (un administrador). Sin perfil {@code demo} ni variables no
  * hay usuarios: la aplicación arranca, pero nadie puede entrar. Un nombre de usuario que no cumple
  * {@link OpenAccountCommandDef#USERNAME_PATTERN} se rechaza al arrancar, porque nunca podría ser propietario de una
  * cuenta.
@@ -93,10 +91,14 @@ public class SecuritySupport {
         return new ThrottledAuthenticationProvider(credentials, attempts);
     }
 
-    @Bean
-    public UserDetailsManager userDetailsService(SecurityUsersProperties properties, PasswordEncoder encoder,
-                                                 @Value("${APP_ADMIN_USERNAME:}") String adminUsername,
-                                                 @Value("${APP_ADMIN_PASSWORD:}") String adminPassword) {
+    /**
+     * Los usuarios configurados: los de {@link SecurityUsersProperties} y, si están definidas las dos variables, el
+     * administrador de {@code APP_ADMIN_USERNAME} y {@code APP_ADMIN_PASSWORD}. Los guarda {@link UserStore}.
+     *
+     * @throws IllegalStateException si un usuario no cumple el formato o su rol no es ADMIN ni USER
+     */
+    public static List<UserDetails> configuredUsers(SecurityUsersProperties properties, PasswordEncoder encoder,
+                                                    String adminUsername, String adminPassword) {
         List<UserDetails> users = new ArrayList<>();
         for (SecurityUsersProperties.User user : properties.users()) {
             users.add(user(user.username(), user.passwordHash(), user.role()));
@@ -104,7 +106,7 @@ public class SecuritySupport {
         if (!adminUsername.isBlank() && !adminPassword.isBlank()) {
             users.add(user(adminUsername, encoder.encode(adminPassword), "ADMIN"));
         }
-        return new InMemoryUserDetailsManager(users);
+        return users;
     }
 
     private static UserDetails user(String username, String passwordHash, String role) {

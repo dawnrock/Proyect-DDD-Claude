@@ -38,6 +38,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.TestUsers;
 import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountNotFoundException;
 import com.pronoide.ddd.application.AccountSummary;
@@ -57,7 +58,7 @@ import com.pronoide.ddd.domain.model.MonetaryAmount;
 
 @WithMockUser(username = "admin", roles = "ADMIN")
 @WebMvcTest(AccountController.class)
-@Import({ApiSecurityConfig.class, SecuritySupport.class})
+@Import({ApiSecurityConfig.class, SecuritySupport.class, TestUsers.class})
 class AccountControllerTests {
 
     private static final UUID ID = UUID.fromString("11111111-2222-3333-4444-555555555555");

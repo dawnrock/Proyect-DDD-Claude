@@ -46,6 +46,7 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.TestUsers;
 import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountNotFoundException;
 import com.pronoide.ddd.application.AccountSummary;
@@ -68,7 +69,7 @@ import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.SameAccountTransferException;
 
 @WebMvcTest(AccountWebController.class)
-@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class})
+@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class, TestUsers.class})
 @WithMockUser(username = "admin", roles = "ADMIN")
 class AccountWebControllerTests {
 

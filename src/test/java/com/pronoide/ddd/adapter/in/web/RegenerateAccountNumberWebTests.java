@@ -35,10 +35,11 @@ import com.pronoide.ddd.application.Caller;
 import com.pronoide.ddd.application.CheckingAccountCommands;
 import com.pronoide.ddd.application.CheckingAccountQueries;
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.TestUsers;
 
 /** El administrador sustituye el IBAN de una cuenta por otro generado (#95, R31); un cliente no puede. */
 @WebMvcTest(AccountWebController.class)
-@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class})
+@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class, TestUsers.class})
 class RegenerateAccountNumberWebTests {
 
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();

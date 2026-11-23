@@ -30,6 +30,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.TestUsers;
 import com.pronoide.ddd.application.AccountNotFoundException;
 import com.pronoide.ddd.application.Caller;
 import com.pronoide.ddd.application.CheckingAccountCommands;
@@ -42,7 +43,7 @@ import com.pronoide.ddd.domain.model.SameAccountTransferException;
 
 @WithMockUser(username = "admin", roles = "ADMIN")
 @WebMvcTest(TransferController.class)
-@Import({ApiSecurityConfig.class, SecuritySupport.class})
+@Import({ApiSecurityConfig.class, SecuritySupport.class, TestUsers.class})
 @DisplayName("POST /api/transfers")
 class TransferControllerTests {
 

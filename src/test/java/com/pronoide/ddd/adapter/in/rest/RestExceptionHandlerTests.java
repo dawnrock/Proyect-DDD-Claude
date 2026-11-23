@@ -17,10 +17,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.TestUsers;
 import com.pronoide.ddd.adapter.in.rest.support.FailingTestController;
 
 @WebMvcTest(FailingTestController.class)
-@Import({ApiSecurityConfig.class, SecuritySupport.class})
+@Import({ApiSecurityConfig.class, SecuritySupport.class, TestUsers.class})
 class RestExceptionHandlerTests {
 
     @Autowired

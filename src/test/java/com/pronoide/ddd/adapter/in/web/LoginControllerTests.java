@@ -16,10 +16,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.TestUsers;
 
 /** Página de acceso: las dos puertas y el formulario (#95). */
 @WebMvcTest(LoginController.class)
-@Import({WebSecurityConfig.class, SecuritySupport.class})
+@Import({WebSecurityConfig.class, SecuritySupport.class, TestUsers.class})
 class LoginControllerTests {
 
     @Autowired

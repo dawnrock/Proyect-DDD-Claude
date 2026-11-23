@@ -189,17 +189,18 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Acceptance criteria:**
   - [x] No `InMemory*` left in `src/main`; the `InMemory*Tests` still pass their contracts; `DomainConfigurationTests` and the end-to-end tests green with JPA.
 
-### [ ] T14 — Users in the database (~10 min)
+### [x] T14 — Users in the database (~10 min)
 
 - **Layer:** adapter.in
-- **Files:** `SecuritySupport.java`, `SecuritySupportTests.java` (or the closest existing test)
+- **Files:** `SecuritySupport.java`, new `UserStore.java` (adapter.in), `SecuritySupportTests.java`, test `TestUsers.java` and the `@Import` of 13 `@WebMvcTest`s
 - **Depends on:** T6
 - **What to do:**
   1. `JdbcUserDetailsManager` over the `DataSource` instead of `InMemoryUserDetailsManager`.
-  2. Create the configured users (`app.security.users`, `APP_ADMIN_*`) only when they do not exist; keep the format and role checks.
+  2. Create the configured users (`app.security.users`, `APP_ADMIN_*`) when they do not exist; keep the format and role checks. **Deviation:** an existing configured user takes the configured password and role (the configuration rules over those users, so the admin password can still be rotated on Render); other users are not touched.
+  3. **Deviation:** the store is its own `@Configuration` (`UserStore`), because the `@WebMvcTest`s import `SecuritySupport` and have no database; they now also import `TestUsers` (the configured users in memory).
 - **Acceptance criteria:**
-  - [ ] A user created by the sign-up is still found by a new `UserDetailsManager` over the same database.
-  - [ ] Starting twice does not fail or duplicate the configured users; the login and token tests stay green.
+  - [x] A user created by the sign-up is still found by a new `UserDetailsManager` over the same database.
+  - [x] Starting twice does not fail or duplicate the configured users; the login and token tests stay green.
 
 ### [ ] T15 — Idempotent demo data (~5 min)
 

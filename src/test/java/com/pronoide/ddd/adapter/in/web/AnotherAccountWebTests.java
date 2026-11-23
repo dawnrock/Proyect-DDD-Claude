@@ -45,10 +45,11 @@ import com.pronoide.ddd.domain.model.CurrencyMismatchException;
 import com.pronoide.ddd.domain.model.InsufficientInitialDepositException;
 import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.TestUsers;
 
 /** «Abrir otra cuenta» para clientes (#95): el botón, el formulario de solo depósito y el rechazo al administrador. */
 @WebMvcTest(AccountWebController.class)
-@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class})
+@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class, TestUsers.class})
 @WithMockUser(username = "ada", roles = "USER")
 class AnotherAccountWebTests {
 

@@ -31,10 +31,11 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import com.pronoide.ddd.application.CheckingAccountCommands;
 import com.pronoide.ddd.application.CheckingAccountQueries;
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.TestUsers;
 
 /** Reglas de la cadena de seguridad web (ADR 0008, #50): acceso, CSRF y rol de administrador. */
 @WebMvcTest({AccountWebController.class, LoginController.class, AccessDeniedController.class})
-@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class})
+@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class, TestUsers.class})
 // Una usuaria real (contraseña «demo», el hash del perfil demo) para los inicios de sesión con el formulario (#130)
 @TestPropertySource(properties = {
         "app.security.users[0].username=ada",
