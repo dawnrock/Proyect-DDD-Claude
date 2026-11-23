@@ -31,11 +31,11 @@ final class FieldTags {
         assertThat(html).contains("id=\"" + id + "-error\"");
     }
 
-    /** El campo no lleva marcas de error. */
+    /** El campo no lleva marcas de error (puede describirlo un texto de ayuda, pero no un mensaje de error). */
     static void assertValid(String html, String id) {
         assertThat(tag(html, id)).as("campo %s", id)
                 .doesNotContain("aria-invalid")
-                .doesNotContain("aria-describedby");
+                .doesNotContainPattern("aria-describedby=\"[^\"]*-error");
     }
 
     /**

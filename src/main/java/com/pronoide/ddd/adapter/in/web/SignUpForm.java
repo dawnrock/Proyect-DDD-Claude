@@ -1,6 +1,7 @@
 package com.pronoide.ddd.adapter.in.web;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
@@ -57,7 +58,7 @@ public class SignUpForm {
     /** Usuario con el que entrará; mismo formato que el command. */
     @NotBlank(groups = Access.class, message = "El usuario es obligatorio")
     @Pattern(groups = Access.class, regexp = OpenAccountCommandDef.USERNAME_PATTERN,
-            message = "El usuario debe tener de 3 a 30 minúsculas, dígitos, puntos o guiones")
+            message = OpenAccountCommandDef.USERNAME_MESSAGE)
     private String username;
 
     /** Solo vive en la sesión del servidor entre los pasos 2 y 3; ninguna plantilla la pinta. */
@@ -109,5 +110,18 @@ public class SignUpForm {
     public void resetProgress() {
         personalDataDone = false;
         accessDone = false;
+    }
+
+    /**
+     * El usuario se guarda en minúsculas y sin espacios alrededor (#152): «Margaret» se da de alta como «margaret». Solo
+     * en la web; la API exige el formato exacto. Lombok no genera este setter porque ya existe.
+     */
+    public void setUsername(String username) {
+        this.username = normalizeUsername(username);
+    }
+
+    /** Normalización de un usuario escrito en un formulario web; {@code null} sigue siendo {@code null}. */
+    static String normalizeUsername(String username) {
+        return username == null ? null : username.strip().toLowerCase(Locale.ROOT);
     }
 }

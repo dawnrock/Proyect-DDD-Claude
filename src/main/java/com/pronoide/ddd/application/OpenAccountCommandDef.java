@@ -22,6 +22,15 @@ public interface OpenAccountCommandDef {
     /** Formato de un nombre de usuario: 3-30 minúsculas, dígitos, punto, guion o guion bajo. */
     String USERNAME_PATTERN = "[a-z0-9._-]{3,30}";
 
+    /** {@link #USERNAME_PATTERN} en palabras, con todos los caracteres que admite (#152). */
+    String USERNAME_FORMAT = "de 3 a 30 caracteres: minúsculas sin tildes ni ñ, dígitos, puntos, guiones bajos o guiones";
+
+    /** Mensaje de un usuario mal formado en el alta. */
+    String USERNAME_MESSAGE = "El usuario debe tener " + USERNAME_FORMAT;
+
+    /** Mensaje de un usuario del titular mal formado en la apertura del administrador. */
+    String OWNER_USERNAME_MESSAGE = "El usuario del titular debe tener " + USERNAME_FORMAT;
+
     /**
      * Formato de un DNI (8 dígitos y una letra) o un NIE (X, Y o Z, 7 dígitos y una letra), con espacios alrededor o
      * entre medias; lo normaliza {@code TaxId}, que además comprueba la letra de control.
@@ -71,8 +80,7 @@ public interface OpenAccountCommandDef {
             throw new IllegalArgumentException("El correo electrónico no es válido");
         }
         if (!ownerUsername().isEmpty() && !ownerUsername().matches(USERNAME_PATTERN)) {
-            throw new IllegalArgumentException(
-                    "El usuario del titular debe tener de 3 a 30 minúsculas, dígitos, puntos o guiones");
+            throw new IllegalArgumentException(OWNER_USERNAME_MESSAGE);
         }
         if (!CommandValidation.isIsoCurrency(currency())) {
             throw new IllegalArgumentException("La divisa %s no es un código ISO 4217 válido".formatted(currency()));

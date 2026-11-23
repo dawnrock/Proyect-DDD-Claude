@@ -37,7 +37,7 @@ public class OpenAccountForm {
 
     /** Usuario (cliente) que verá y operará la cuenta; obligatorio solo para un cliente nuevo. */
     @Pattern(regexp = "^$|" + OpenAccountCommandDef.USERNAME_PATTERN,
-            message = "El usuario del titular debe tener de 3 a 30 minúsculas, dígitos, puntos o guiones")
+            message = OpenAccountCommandDef.OWNER_USERNAME_MESSAGE)
     private String ownerUsername;
 
     @NotNull(message = "El depósito inicial es obligatorio")
@@ -46,4 +46,9 @@ public class OpenAccountForm {
 
     @Pattern(regexp = "[A-Z]{3}", message = "La divisa debe ser un código de tres letras mayúsculas")
     private String currency = "EUR";
+
+    /** Como en el alta (#152): el usuario del titular se envía en minúsculas y sin espacios alrededor. */
+    public void setOwnerUsername(String ownerUsername) {
+        this.ownerUsername = SignUpForm.normalizeUsername(ownerUsername);
+    }
 }

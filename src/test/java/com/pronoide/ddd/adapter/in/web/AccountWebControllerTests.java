@@ -1474,7 +1474,7 @@ class AccountWebControllerTests {
             mvc.perform(altaDe("12345678Z", "Ana Lopez", "100.00", "Ana Lopez"))
                     .andExpect(status().isOk())
                     .andExpect(model().attributeHasFieldErrors("form", "ownerUsername"))
-                    .andExpect(content().string(containsString("minúsculas, dígitos, puntos o guiones")))
+                    .andExpect(content().string(containsString("minúsculas sin tildes ni ñ, dígitos, puntos, guiones bajos o guiones")))
                     .andExpect(content().string(containsString("Ana Lopez")));
 
             verifyNoInteractions(commands, queries);
@@ -1669,6 +1669,55 @@ class AccountWebControllerTests {
             for (String id : List.of("holderName", "holderEmail", "ownerUsername")) {
                 assertThat(FieldTags.tag(html, id)).as(id).doesNotContain(" required");
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("El usuario del titular se guarda en minúsculas (#152)")
+    class UsuarioDelTitularEnMinusculas {
+
+        private AccountSummary cuentaAbierta() {
+            return AccountSummary.builder().id(UUID.randomUUID()).accountNumber("ES1234567890123456789012")
+                    .holderName("Ana Pérez").segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build();
+        }
+
+        @Test
+        @DisplayName("Un usuario del titular con mayúsculas y espacios alrededor se envía en minúsculas")
+        void un_usuario_del_titular_con_mayusculas_se_envia_en_minusculas() throws Exception {
+            when(commands.openAccount(any(Caller.class), any())).thenReturn(cuentaAbierta());
+
+            mvc.perform(post("/accounts/new").param("holderName", "Ana Pérez").param("holderTaxId", "12345678Z")
+                            .param("holderEmail", "ana@example.com").param("ownerUsername", " Ana.Perez ")
+                            .param("initialDeposit", "100.00").param("currency", "EUR"))
+                    .andExpect(status().is3xxRedirection());
+
+            verify(commands).openAccount(ADMIN, OpenAccountCommand.builder()
+                    .holderName("Ana Pérez").holderTaxId("12345678Z").holderEmail("ana@example.com")
+                    .ownerUsername("ana.perez").initialDeposit(new BigDecimal("100.00")).currency("EUR").build());
+        }
+
+        @Test
+        @DisplayName("Sin usuario del titular, la apertura para un cliente existente sigue sin pedirlo")
+        void sin_usuario_del_titular_sigue_siendo_opcional() throws Exception {
+            when(commands.openAccount(any(Caller.class), any())).thenReturn(cuentaAbierta());
+
+            mvc.perform(post("/accounts/new").param("holderTaxId", "12345678Z").param("ownerUsername", "")
+                            .param("initialDeposit", "100.00").param("currency", "EUR"))
+                    .andExpect(status().is3xxRedirection());
+
+            verify(commands).openAccount(ADMIN, OpenAccountCommand.builder()
+                    .holderTaxId("12345678Z").initialDeposit(new BigDecimal("100.00")).currency("EUR").build());
+        }
+
+        @Test
+        @DisplayName("Abrir cuenta explica el formato del usuario del titular bajo el campo y lo liga al campo")
+        void abrir_cuenta_explica_el_formato_del_usuario_del_titular() throws Exception {
+            String html = mvc.perform(get("/accounts/new")).andReturn().getResponse().getContentAsString();
+
+            assertThat(html).containsPattern("<p class=\"form-text[^\"]*\" id=\"ownerUsername-help\">[^<]*guiones bajos o guiones[^<]*minúsculas");
+            assertThat(FieldTags.tag(html, "ownerUsername"))
+                    .contains("aria-describedby=\"ownerUsername-help\"")
+                    .doesNotContain("maxlength=");
         }
     }
 

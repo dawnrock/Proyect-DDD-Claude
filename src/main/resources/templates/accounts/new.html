@@ -31,7 +31,8 @@
 
         <div class="mb-3">
             <label class="form-label" for="ownerUsername">Usuario del titular (solo cliente nuevo)</label>
-            <input class="form-control" type="text" id="ownerUsername" autocomplete="off" autocapitalize="none" spellcheck="false" th:field="*{ownerUsername}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('ownerUsername')} ? 'true'" th:aria-describedby="${#fields.hasErrors('ownerUsername')} ? 'ownerUsername-error'">
+            <input class="form-control" type="text" id="ownerUsername" autocomplete="off" autocapitalize="none" spellcheck="false" th:field="*{ownerUsername}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('ownerUsername')} ? 'true'" th:aria-describedby="${#fields.hasErrors('ownerUsername')} ? 'ownerUsername-help ownerUsername-error' : 'ownerUsername-help'">
+            <p class="form-text mb-0" id="ownerUsername-help">De 3 a 30 caracteres: minúsculas sin tildes ni ñ, dígitos, puntos, guiones bajos o guiones. Si escribes mayúsculas, se guarda en minúsculas.</p>
             <p class="invalid-feedback" id="ownerUsername-error" th:if="${#fields.hasErrors('ownerUsername')}" th:errors="*{ownerUsername}"></p>
         </div>
 
