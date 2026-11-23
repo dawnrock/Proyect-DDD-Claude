@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-23
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~50 min (7 tasks, T7 added by the review)
 
 ## Goal
@@ -91,7 +91,7 @@ Everything stays in the root of `adapter.in`, like #131; domain and application 
 - **Acceptance criteria:**
   - [x] The ADR describes the three limits consistently with the code.
 
-### [ ] T6 — Project status (~10 min)
+### [x] T6 — Project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `docs/ia/pendientes.md`, `docs/ia/decisiones.md`, `docs/ia/historial.md`
@@ -101,7 +101,7 @@ Everything stays in the root of `adapter.in`, like #131; domain and application 
   2. `pendientes.md`: remove "Probing is not limited" from the #131 items; add what the review leaves.
   3. `decisiones.md`: extend the #131 line with the failures limit; `historial.md`: a row for the PR.
 - **Acceptance criteria:**
-  - [ ] The CI project-status check passes.
+  - [x] The CI project-status check passes.
 
 ### [x] T7 — Review fixes (~5 min)
 
@@ -118,23 +118,23 @@ Everything stays in the root of `adapter.in`, like #131; domain and application 
 
 **Specific:**
 
-- [ ] After 10 sign-ups failing with a taken username or an existing document in the last hour, an IP cannot sign up, even with valid data, on the web (from step 1) or on the API (429 with `Retry-After`).
-- [ ] Other failures do not count: a user who makes a couple of mistakes can still sign up.
-- [ ] `pendientes.md` no longer lists probing as unlimited.
+- [x] After 10 sign-ups failing with a taken username or an existing document in the last hour, an IP cannot sign up, even with valid data, on the web (from step 1) or on the API (429 with `Retry-After`).
+- [x] Other failures do not count: a user who makes a couple of mistakes can still sign up.
+- [x] `pendientes.md` no longer lists probing as unlimited.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes.
-- [ ] Any new business term is in `docs/dominio/glosario.md` (none expected).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes.
+- [x] Any new business term is in `docs/dominio/glosario.md` (none expected).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
