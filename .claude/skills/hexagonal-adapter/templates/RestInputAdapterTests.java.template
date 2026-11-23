@@ -1,4 +1,4 @@
-package com.pronoide.ddd.adapter.in.rest;
+package com.dawnrock.ddd.adapter.in.rest;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,7 +11,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.pronoide.ddd.application.{{InputPort}};
+import com.dawnrock.ddd.application.{{InputPort}};
 
 @WebMvcTest({{Resource}}Controller.class)
 class {{Resource}}ControllerTests {

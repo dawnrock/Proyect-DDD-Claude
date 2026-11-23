@@ -151,12 +151,12 @@ Changes from `v1-monolito` to `v2-hexagonal` (3): `src/main` 54 files, +895 / �
 ## See the diffs
 
 - Whole repository: [`v1-monolito...v2-hexagonal`](https://github.com/dawnrock/Proyect-DDD-Claude/compare/v1-monolito...v2-hexagonal).
-- Production code at each tag: [`v1-monolito`](https://github.com/dawnrock/Proyect-DDD-Claude/tree/v1-monolito/src/main/java/com/pronoide/ddd) · [`v2-hexagonal`](https://github.com/dawnrock/Proyect-DDD-Claude/tree/v2-hexagonal/src/main/java/com/pronoide/ddd).
+- Production code at each tag: [`v1-monolito`](https://github.com/dawnrock/Proyect-DDD-Claude/tree/v1-monolito/src/main/java) · [`v2-hexagonal`](https://github.com/dawnrock/Proyect-DDD-Claude/tree/v2-hexagonal/src/main/java).
 - One package at a time, locally (moves are detected with `-M`):
 
   ```bash
   git diff -M --stat v1-monolito v2-hexagonal -- src/main
-  git diff -M v1-monolito v2-hexagonal -- src/main/java/com/pronoide/ddd/application
-  git diff -M v1-monolito v2-hexagonal -- src/main/java/com/pronoide/ddd/domain/model
-  git diff v1-monolito v2-hexagonal -- src/test/java/com/pronoide/ddd/LayeredArchitectureTests.java src/test/java/com/pronoide/ddd/HexagonalArchitectureTests.java
+  git diff -M v1-monolito v2-hexagonal -- 'src/main/java/*/ddd/application/*'
+  git diff -M v1-monolito v2-hexagonal -- 'src/main/java/*/ddd/domain/model/*'
+  git diff v1-monolito v2-hexagonal -- '*/LayeredArchitectureTests.java' '*/HexagonalArchitectureTests.java'
   ```

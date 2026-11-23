@@ -1,4 +1,4 @@
-package com.pronoide.ddd.adapter.out.{{technology}};
+package com.dawnrock.ddd.adapter.out.{{technology}};
 
 import {{portPackage}}.{{PortName}};
 
