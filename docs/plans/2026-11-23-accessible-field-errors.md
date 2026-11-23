@@ -71,7 +71,7 @@ Only `adapter.in.web` templates and `static/js/app.js`; no change in Java code, 
   - [x] The new tests pass; the existing step-2 tests that compare the literal `<input …>` start still pass unchanged (the new attributes go after it).
   - [x] `./mvnw verify` is green.
 
-### [ ] T4 — Template-wide guard (~5 min)
+### [x] T4 — Template-wide guard (~5 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/pronoide/ddd/adapter/in/web/AccessibleFieldErrorsTemplatesTests.java`
@@ -80,7 +80,7 @@ Only `adapter.in.web` templates and `static/js/app.js`; no change in Java code, 
   1. Like `HtmxBoostTemplatesTests`: walk `templates/**/*.html`; every `<input>`/`<select>` that can be marked invalid (`th:errorclass` or `is-invalid`) must carry `th:aria-invalid` and `th:aria-describedby`, and each `invalid-feedback` must have an `id`.
   2. It passes at once (characterization): validate it by removing the attributes from one field (red) and restoring them.
 - **Acceptance criteria:**
-  - [ ] The test passes; the sabotage made it fail naming the template.
+  - [x] The test passes; the sabotage made it fail naming the template.
 
 ### [ ] T5 — Focus the first error after a failed submit (~15 min)
 
