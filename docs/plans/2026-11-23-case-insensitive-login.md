@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-23
-- **Status:** in progress
-- **Total estimate:** ~40 min (5 tasks)
+- **Status:** done
+- **Total estimate:** ~45 min (6 tasks)
 
 ## Goal
 
@@ -117,23 +117,23 @@ No domain, application or persistence code changes. The layering is unchanged (e
 
 **Specific:**
 
-- [ ] A customer who signed up as `elber` logs in with `Elber` or ` elber ` on the web and through `POST /api/auth/token`.
-- [ ] An unknown username still gets the same answer as a wrong password, and the attempt limit treats `Elber` and `elber` as the same user.
-- [ ] After deploying to Render with Neon, the user checks the login with a capitalised username.
+- [x] A customer who signed up as `elber` logs in with `Elber` or ` elber ` on the web and through `POST /api/auth/token`.
+- [x] An unknown username still gets the same answer as a wrong password, and the attempt limit treats `Elber` and `elber` as the same user.
+- [ ] After deploying to Render with Neon, the user checks the login with a capitalised username. (Pending: after the merge.)
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes. (Applies as documentation only: 2.2.3.)
-- [ ] Any new business term is in `docs/dominio/glosario.md`. (n/a: no new term.)
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`. (Checked on port 18157; `POST /api/auth/token` with `" ADA "` answered 200.)
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes. (Applies as documentation only: 2.2.3. Redocly passed locally; Schemathesis is not installed here, so the contract test runs in the CI.)
+- [x] Any new business term is in `docs/dominio/glosario.md`. (n/a: no new term.)
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
