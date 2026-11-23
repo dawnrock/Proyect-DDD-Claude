@@ -168,7 +168,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Acceptance criteria:**
   - [x] `AccountNumberSequenceContract` passes; the first IBAN is the same as today's (`...0000000001`), and a new numbering on the same database carries on.
 
-### [ ] T12 — Transactional unit of work (~10 min)
+### [x] T12 — Transactional unit of work (~10 min)
 
 - **Layer:** adapter.out
 - **Files:** `TransactionalUnitOfWork.java`, `TransactionalUnitOfWorkTests.java`
@@ -176,7 +176,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **What to do:**
   1. Adapter of `UnitOfWork`: fair global lock + `TransactionTemplate`; an exception rolls the transaction back.
 - **Acceptance criteria:**
-  - [ ] `UnitOfWorkContract` passes; an account saved inside a unit that then fails is not in the database.
+  - [x] `UnitOfWorkContract` passes; an account saved inside a unit that then fails is not in the database (validated by removing the transaction: the rollback test fails).
 
 ### [ ] T13 — In-memory adapters become test doubles (~10 min)
 
