@@ -37,15 +37,15 @@
                     <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:each="err : ${#fields.globalErrors()}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${err}">Error</span></div>
                     <div class="mb-3">
                         <label class="form-label" for="deposit-amount">Importe</label>
-                        <input class="form-control" type="number" id="deposit-amount" step="0.01" inputmode="decimal" th:field="*{amount}" th:errorclass="is-invalid">
-                        <p class="invalid-feedback" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
+                        <input class="form-control" type="number" id="deposit-amount" step="0.01" inputmode="decimal" th:field="*{amount}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('amount')} ? 'true'" th:aria-describedby="${#fields.hasErrors('amount')} ? 'deposit-amount-error'">
+                        <p class="invalid-feedback" id="deposit-amount-error" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="deposit-currency">Divisa</label>
-                        <select class="form-select" id="deposit-currency" th:field="*{currency}" th:errorclass="is-invalid">
+                        <select class="form-select" id="deposit-currency" th:field="*{currency}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('currency')} ? 'true'" th:aria-describedby="${#fields.hasErrors('currency')} ? 'deposit-currency-error'">
                             <option th:each="c : ${currencies}" th:value="${c}" th:text="${c}">EUR</option>
                         </select>
-                        <p class="invalid-feedback" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
+                        <p class="invalid-feedback" id="deposit-currency-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
                     </div>
                     <div><button class="btn btn-primary" type="submit">Ingresar</button></div>
                 </form>
@@ -57,15 +57,15 @@
                     <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:each="err : ${#fields.globalErrors()}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${err}">Error</span></div>
                     <div class="mb-3">
                         <label class="form-label" for="withdrawal-amount">Importe</label>
-                        <input class="form-control" type="number" id="withdrawal-amount" step="0.01" inputmode="decimal" th:field="*{amount}" th:errorclass="is-invalid">
-                        <p class="invalid-feedback" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
+                        <input class="form-control" type="number" id="withdrawal-amount" step="0.01" inputmode="decimal" th:field="*{amount}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('amount')} ? 'true'" th:aria-describedby="${#fields.hasErrors('amount')} ? 'withdrawal-amount-error'">
+                        <p class="invalid-feedback" id="withdrawal-amount-error" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="withdrawal-currency">Divisa</label>
-                        <select class="form-select" id="withdrawal-currency" th:field="*{currency}" th:errorclass="is-invalid">
+                        <select class="form-select" id="withdrawal-currency" th:field="*{currency}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('currency')} ? 'true'" th:aria-describedby="${#fields.hasErrors('currency')} ? 'withdrawal-currency-error'">
                             <option th:each="c : ${currencies}" th:value="${c}" th:text="${c}">EUR</option>
                         </select>
-                        <p class="invalid-feedback" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
+                        <p class="invalid-feedback" id="withdrawal-currency-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
                     </div>
                     <div><button class="btn btn-primary" type="submit">Retirar</button></div>
                 </form>
@@ -77,20 +77,20 @@
                     <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:each="err : ${#fields.globalErrors()}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${err}">Error</span></div>
                     <div class="mb-3">
                         <label class="form-label" for="transfer-target">IBAN de destino</label>
-                        <input class="form-control" type="text" id="transfer-target" autocomplete="off" spellcheck="false" placeholder="ES00 0000 0000 0000 0000 0000" th:field="*{targetAccountNumber}" th:errorclass="is-invalid">
-                        <p class="invalid-feedback" th:if="${#fields.hasErrors('targetAccountNumber')}" th:errors="*{targetAccountNumber}"></p>
+                        <input class="form-control" type="text" id="transfer-target" autocomplete="off" spellcheck="false" placeholder="ES00 0000 0000 0000 0000 0000" th:field="*{targetAccountNumber}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('targetAccountNumber')} ? 'true'" th:aria-describedby="${#fields.hasErrors('targetAccountNumber')} ? 'transfer-target-error'">
+                        <p class="invalid-feedback" id="transfer-target-error" th:if="${#fields.hasErrors('targetAccountNumber')}" th:errors="*{targetAccountNumber}"></p>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="transfer-amount">Importe</label>
-                        <input class="form-control" type="number" id="transfer-amount" step="0.01" inputmode="decimal" th:field="*{amount}" th:errorclass="is-invalid">
-                        <p class="invalid-feedback" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
+                        <input class="form-control" type="number" id="transfer-amount" step="0.01" inputmode="decimal" th:field="*{amount}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('amount')} ? 'true'" th:aria-describedby="${#fields.hasErrors('amount')} ? 'transfer-amount-error'">
+                        <p class="invalid-feedback" id="transfer-amount-error" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="transfer-currency">Divisa</label>
-                        <select class="form-select" id="transfer-currency" th:field="*{currency}" th:errorclass="is-invalid">
+                        <select class="form-select" id="transfer-currency" th:field="*{currency}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('currency')} ? 'true'" th:aria-describedby="${#fields.hasErrors('currency')} ? 'transfer-currency-error'">
                             <option th:each="c : ${currencies}" th:value="${c}" th:text="${c}">EUR</option>
                         </select>
-                        <p class="invalid-feedback" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
+                        <p class="invalid-feedback" id="transfer-currency-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
                     </div>
                     <div><button class="btn btn-primary" type="submit">Transferir</button></div>
                 </form>

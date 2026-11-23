@@ -63,6 +63,25 @@
         }
     });
 
+    // Errores accesibles (#145): los formularios usan novalidate y el servidor devuelve la página (o el panel de la cuenta)
+    // con los errores, así que el navegador no mueve el foco. Se lleva al primer campo erróneo, que el lector de pantalla
+    // anuncia con su mensaje (aria-describedby); si el error es del formulario entero, a su aviso. Sin errores, no se toca
+    // el foco (gana el autofocus de la página).
+    const focusFirstError = () => {
+        const field = document.querySelector('[aria-invalid="true"]');
+        if (field) {
+            field.focus();
+            return;
+        }
+        const alert = document.querySelector('form .alert[role="alert"]');
+        if (alert) {
+            alert.tabIndex = -1;
+            alert.focus();
+        }
+    };
+    document.addEventListener('DOMContentLoaded', focusFirstError);
+    document.addEventListener('htmx:afterSettle', focusFirstError);
+
     // htmx pide HTML, como el navegador al navegar: así un error genérico llega como página y no como JSON (#126).
     document.addEventListener('htmx:configRequest', (event) => {
         event.detail.headers.Accept = 'text/html';

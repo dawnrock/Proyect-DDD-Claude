@@ -13,40 +13,40 @@
 
         <div class="mb-3">
             <label class="form-label" for="holderTaxId">DNI o NIE del titular</label>
-            <input class="form-control" type="text" id="holderTaxId" autocomplete="off" placeholder="12345678Z" th:field="*{holderTaxId}" th:errorclass="is-invalid">
-            <p class="invalid-feedback" th:if="${#fields.hasErrors('holderTaxId')}" th:errors="*{holderTaxId}"></p>
+            <input class="form-control" type="text" id="holderTaxId" autocomplete="off" placeholder="12345678Z" th:field="*{holderTaxId}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('holderTaxId')} ? 'true'" th:aria-describedby="${#fields.hasErrors('holderTaxId')} ? 'holderTaxId-error'">
+            <p class="invalid-feedback" id="holderTaxId-error" th:if="${#fields.hasErrors('holderTaxId')}" th:errors="*{holderTaxId}"></p>
         </div>
 
         <div class="mb-3">
             <label class="form-label" for="holderName">Titular (solo cliente nuevo)</label>
-            <input class="form-control" type="text" id="holderName" th:field="*{holderName}" th:errorclass="is-invalid">
-            <p class="invalid-feedback" th:if="${#fields.hasErrors('holderName')}" th:errors="*{holderName}"></p>
+            <input class="form-control" type="text" id="holderName" th:field="*{holderName}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('holderName')} ? 'true'" th:aria-describedby="${#fields.hasErrors('holderName')} ? 'holderName-error'">
+            <p class="invalid-feedback" id="holderName-error" th:if="${#fields.hasErrors('holderName')}" th:errors="*{holderName}"></p>
         </div>
 
         <div class="mb-3">
             <label class="form-label" for="holderEmail">Correo del titular (solo cliente nuevo)</label>
-            <input class="form-control" type="email" id="holderEmail" autocomplete="off" th:field="*{holderEmail}" th:errorclass="is-invalid">
-            <p class="invalid-feedback" th:if="${#fields.hasErrors('holderEmail')}" th:errors="*{holderEmail}"></p>
+            <input class="form-control" type="email" id="holderEmail" autocomplete="off" th:field="*{holderEmail}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('holderEmail')} ? 'true'" th:aria-describedby="${#fields.hasErrors('holderEmail')} ? 'holderEmail-error'">
+            <p class="invalid-feedback" id="holderEmail-error" th:if="${#fields.hasErrors('holderEmail')}" th:errors="*{holderEmail}"></p>
         </div>
 
         <div class="mb-3">
             <label class="form-label" for="ownerUsername">Usuario del titular (solo cliente nuevo)</label>
-            <input class="form-control" type="text" id="ownerUsername" autocomplete="off" autocapitalize="none" spellcheck="false" th:field="*{ownerUsername}" th:errorclass="is-invalid">
-            <p class="invalid-feedback" th:if="${#fields.hasErrors('ownerUsername')}" th:errors="*{ownerUsername}"></p>
+            <input class="form-control" type="text" id="ownerUsername" autocomplete="off" autocapitalize="none" spellcheck="false" th:field="*{ownerUsername}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('ownerUsername')} ? 'true'" th:aria-describedby="${#fields.hasErrors('ownerUsername')} ? 'ownerUsername-error'">
+            <p class="invalid-feedback" id="ownerUsername-error" th:if="${#fields.hasErrors('ownerUsername')}" th:errors="*{ownerUsername}"></p>
         </div>
 
         <div class="mb-3">
             <label class="form-label" for="initialDeposit">Depósito inicial</label>
-            <input class="form-control" type="number" id="initialDeposit" step="0.01" inputmode="decimal" th:field="*{initialDeposit}" th:errorclass="is-invalid">
-            <p class="invalid-feedback" th:if="${#fields.hasErrors('initialDeposit')}" th:errors="*{initialDeposit}"></p>
+            <input class="form-control" type="number" id="initialDeposit" step="0.01" inputmode="decimal" th:field="*{initialDeposit}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('initialDeposit')} ? 'true'" th:aria-describedby="${#fields.hasErrors('initialDeposit')} ? 'initialDeposit-error'">
+            <p class="invalid-feedback" id="initialDeposit-error" th:if="${#fields.hasErrors('initialDeposit')}" th:errors="*{initialDeposit}"></p>
         </div>
 
         <div class="mb-3">
             <label class="form-label" for="currency">Divisa</label>
-            <select class="form-select" id="currency" th:field="*{currency}" th:errorclass="is-invalid">
+            <select class="form-select" id="currency" th:field="*{currency}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('currency')} ? 'true'" th:aria-describedby="${#fields.hasErrors('currency')} ? 'currency-error'">
                 <option th:each="c : ${currencies}" th:value="${c}" th:text="${c}">EUR</option>
             </select>
-            <p class="invalid-feedback" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
+            <p class="invalid-feedback" id="currency-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
         </div>
 
         <p class="form-text mt-0 mb-3">El número de cuenta (IBAN) se genera automáticamente y el segmento se decide según los ingresos verificados del titular.</p>
