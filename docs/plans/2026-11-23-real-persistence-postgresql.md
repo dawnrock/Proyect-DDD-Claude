@@ -178,16 +178,16 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Acceptance criteria:**
   - [x] `UnitOfWorkContract` passes; an account saved inside a unit that then fails is not in the database (validated by removing the transaction: the rollback test fails).
 
-### [ ] T13 — In-memory adapters become test doubles (~10 min)
+### [x] T13 — In-memory adapters become test doubles (~10 min)
 
 - **Layer:** tests
 - **Files:** the six `InMemory*` from `src/main/.../adapter/out/persistence` to `src/test/.../adapter/out/persistence`, `PersistenceTestAdapters.java`
 - **Depends on:** T8–T12
 - **What to do:**
   1. `git mv` them to `src/test`, without `@Repository`/`@Component` (otherwise the scan of `@SpringBootTest` would find them next to the JPA ones); they use `MonABankIbans`.
-  2. The application context only has the JPA adapters; `PersistenceTestAdapters` keeps returning the doubles.
+  2. The application context only has the JPA adapters (they get `@Repository`/`@Component` here); `PersistenceTestAdapters` keeps returning the doubles.
 - **Acceptance criteria:**
-  - [ ] No `InMemory*` left in `src/main`; the `InMemory*Tests` still pass their contracts; `DomainConfigurationTests` and the end-to-end tests green with JPA.
+  - [x] No `InMemory*` left in `src/main`; the `InMemory*Tests` still pass their contracts; `DomainConfigurationTests` and the end-to-end tests green with JPA.
 
 ### [ ] T14 — Users in the database (~10 min)
 

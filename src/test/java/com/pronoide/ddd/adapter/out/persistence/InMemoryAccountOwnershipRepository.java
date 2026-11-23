@@ -8,16 +8,15 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Repository;
-
 import com.pronoide.ddd.application.AccountOwnershipRepository;
 
 /**
- * Adaptador de salida en memoria (simulado) del puerto {@link AccountOwnershipRepository}: id de cuenta a nombre de
+ * Solo para tests (#150, ADR 0019): la aplicación usa el adaptador JPA. Cumple el mismo contrato del puerto.
+ *
+ * <p>Doble de test en memoria del puerto {@link AccountOwnershipRepository}: id de cuenta a nombre de
  * usuario. Guarda la relación fuera del agregado: el dominio no conoce a los usuarios. Contrato:
  * {@code docs/contracts/login-roles.md}.
  */
-@Repository
 class InMemoryAccountOwnershipRepository implements AccountOwnershipRepository {
 
     private final Map<UUID, String> owners = new ConcurrentHashMap<>();

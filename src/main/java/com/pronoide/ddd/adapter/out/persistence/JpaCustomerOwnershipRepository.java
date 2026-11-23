@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 import com.pronoide.ddd.application.CustomerOwnershipRepository;
 import com.pronoide.ddd.domain.model.TaxId;
@@ -12,6 +13,7 @@ import com.pronoide.ddd.domain.model.TaxId;
  * Adaptador de salida JPA del puerto {@link CustomerOwnershipRepository} (#150, ADR 0019): con qué usuario entra cada
  * cliente. Que un usuario sea de un único cliente (R30) lo comprueba antes de asignar y lo respalda el índice único.
  */
+@Repository
 @RequiredArgsConstructor
 class JpaCustomerOwnershipRepository implements CustomerOwnershipRepository {
 

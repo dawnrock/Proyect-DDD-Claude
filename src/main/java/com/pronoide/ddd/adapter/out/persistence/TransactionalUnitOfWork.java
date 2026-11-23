@@ -3,6 +3,7 @@ package com.pronoide.ddd.adapter.out.persistence;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -14,6 +15,7 @@ import com.pronoide.ddd.application.UnitOfWork;
  * basta con una sola instancia (Render) y evita los interbloqueos de dos transferencias cruzadas que tendría bloquear
  * solo las filas implicadas. Es reentrante: una unidad abierta dentro de otra se une a su transacción.
  */
+@Component
 class TransactionalUnitOfWork implements UnitOfWork {
 
     private final ReentrantLock lock = new ReentrantLock(true);

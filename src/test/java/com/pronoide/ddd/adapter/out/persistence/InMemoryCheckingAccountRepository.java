@@ -8,21 +8,20 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.stereotype.Repository;
-
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
 import com.pronoide.ddd.domain.model.CheckingAccountRepository;
 
 /**
- * Adaptador de salida en memoria (simulado) del puerto {@link CheckingAccountRepository}: los
+ * Solo para tests (#150, ADR 0019): la aplicación usa el adaptador JPA. Cumple el mismo contrato del puerto.
+ *
+ * <p>Doble de test en memoria del puerto {@link CheckingAccountRepository}: los
  * movimientos se guardan dentro de la cuenta.
  *
  * <p>Guarda referencias, no copias: un cambio en una cuenta ya guardada se ve aunque no se vuelva
  * a llamar a {@link #save(CheckingAccount)}, cosa que una base de datos real no haría. Los casos de
  * uso deben llamar siempre a {@code save} después de modificar una cuenta.
  */
-@Repository
 class InMemoryCheckingAccountRepository implements CheckingAccountRepository {
 
     private final Map<UUID, CheckingAccount> accounts = new ConcurrentHashMap<>();

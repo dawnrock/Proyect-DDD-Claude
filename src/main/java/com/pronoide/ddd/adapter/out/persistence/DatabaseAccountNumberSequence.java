@@ -2,6 +2,7 @@ package com.pronoide.ddd.adapter.out.persistence;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.AccountNumberSequence;
@@ -11,6 +12,7 @@ import com.pronoide.ddd.domain.model.AccountNumberSequence;
  * (#150, ADR 0019): los números no se repiten tras un reinicio ni entre transacciones, porque una secuencia no vuelve
  * atrás aunque la transacción que la usó se deshaga (puede dejar huecos).
  */
+@Component
 @RequiredArgsConstructor
 class DatabaseAccountNumberSequence implements AccountNumberSequence {
 

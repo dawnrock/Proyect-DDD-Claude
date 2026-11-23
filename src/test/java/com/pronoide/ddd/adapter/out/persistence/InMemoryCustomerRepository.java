@@ -5,19 +5,18 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.stereotype.Repository;
-
 import com.pronoide.ddd.domain.model.Customer;
 import com.pronoide.ddd.domain.model.CustomerRepository;
 import com.pronoide.ddd.domain.model.DuplicateCustomerException;
 import com.pronoide.ddd.domain.model.TaxId;
 
 /**
- * Adaptador de salida en memoria (simulado) del puerto {@link CustomerRepository}. El documento es único (R30):
+ * Solo para tests (#150, ADR 0019): la aplicación usa el adaptador JPA. Cumple el mismo contrato del puerto.
+ *
+ * <p>Doble de test en memoria del puerto {@link CustomerRepository}. El documento es único (R30):
  * comprobarlo y guardar es una sola operación atómica. No guarda la relación cliente-usuario, que es identidad y vive
  * en {@code InMemoryCustomerOwnershipRepository}.
  */
-@Repository
 class InMemoryCustomerRepository implements CustomerRepository {
 
     private final Map<TaxId, Customer> byTaxId = new ConcurrentHashMap<>();

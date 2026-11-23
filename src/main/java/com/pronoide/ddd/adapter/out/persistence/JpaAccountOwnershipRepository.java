@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 import com.pronoide.ddd.application.AccountOwnershipRepository;
 
@@ -14,6 +15,7 @@ import com.pronoide.ddd.application.AccountOwnershipRepository;
  * Adaptador de salida JPA del puerto {@link AccountOwnershipRepository} (#150, ADR 0019): id de cuenta a nombre de
  * usuario, fuera del agregado, porque el dominio no conoce a los usuarios (ADR 0008).
  */
+@Repository
 @RequiredArgsConstructor
 class JpaAccountOwnershipRepository implements AccountOwnershipRepository {
 

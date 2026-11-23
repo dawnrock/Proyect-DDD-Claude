@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 import com.pronoide.ddd.domain.model.AccountNumber;
 import com.pronoide.ddd.domain.model.CheckingAccount;
@@ -16,6 +17,7 @@ import com.pronoide.ddd.domain.model.CheckingAccountRepository;
  * y sus movimientos en la suya. Devuelve copias: un cambio en una cuenta solo llega a la base al guardarla. Corre dentro
  * de la transacción de la unidad de trabajo.
  */
+@Repository
 @RequiredArgsConstructor
 class JpaCheckingAccountRepository implements CheckingAccountRepository {
 

@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 import com.pronoide.ddd.domain.model.Customer;
 import com.pronoide.ddd.domain.model.CustomerRepository;
@@ -15,6 +16,7 @@ import com.pronoide.ddd.domain.model.TaxId;
  * Adaptador de salida JPA del puerto {@link CustomerRepository} (#150, ADR 0019). Que dos clientes no compartan
  * documento (R30) lo comprueba antes de guardar y lo respalda el índice único de la tabla.
  */
+@Repository
 @RequiredArgsConstructor
 class JpaCustomerRepository implements CustomerRepository {
 
