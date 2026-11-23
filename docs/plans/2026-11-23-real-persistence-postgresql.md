@@ -147,7 +147,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Acceptance criteria:**
   - [x] `CustomerRepositoryContract` passes against H2 (with `JpaTestDatabase`, see T8).
 
-### [ ] T10 — JPA ownership repositories (~10 min)
+### [x] T10 — JPA ownership repositories (~10 min)
 
 - **Layer:** adapter.out
 - **Files:** `JpaAccountOwnershipRepository.java`, `JpaCustomerOwnershipRepository.java`, their entities, `Jpa*OwnershipRepositoryTests.java`
@@ -155,7 +155,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **What to do:**
   1. Adapters of `AccountOwnershipRepository` and `CustomerOwnershipRepository`; a username of another customer → `IllegalArgumentException` (R30).
 - **Acceptance criteria:**
-  - [ ] `AccountOwnershipRepositoryContract` and `CustomerOwnershipRepositoryContract` pass in `@DataJpaTest`.
+  - [x] `AccountOwnershipRepositoryContract` and `CustomerOwnershipRepositoryContract` pass against H2 (with `JpaTestDatabase`, see T8).
 
 ### [ ] T11 — Account numbering on a database sequence (~10 min)
 
