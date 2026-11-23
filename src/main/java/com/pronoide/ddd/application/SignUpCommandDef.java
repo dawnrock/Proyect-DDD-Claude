@@ -46,8 +46,7 @@ public interface SignUpCommandDef {
             throw new IllegalArgumentException("El correo electrónico no es válido");
         }
         if (!username().matches(OpenAccountCommandDef.USERNAME_PATTERN)) {
-            throw new IllegalArgumentException(
-                    "El usuario debe tener de 3 a 30 minúsculas, dígitos, puntos o guiones");
+            throw new IllegalArgumentException(OpenAccountCommandDef.USERNAME_MESSAGE);
         }
         if (!CommandValidation.isIsoCurrency(currency())) {
             throw new IllegalArgumentException("La divisa %s no es un código ISO 4217 válido".formatted(currency()));

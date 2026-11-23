@@ -1474,7 +1474,7 @@ class AccountWebControllerTests {
             mvc.perform(altaDe("12345678Z", "Ana Lopez", "100.00", "Ana Lopez"))
                     .andExpect(status().isOk())
                     .andExpect(model().attributeHasFieldErrors("form", "ownerUsername"))
-                    .andExpect(content().string(containsString("minúsculas, dígitos, puntos o guiones")))
+                    .andExpect(content().string(containsString("minúsculas sin tildes ni ñ, dígitos, puntos, guiones bajos o guiones")))
                     .andExpect(content().string(containsString("Ana Lopez")));
 
             verifyNoInteractions(commands, queries);

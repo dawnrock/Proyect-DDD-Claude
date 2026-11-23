@@ -37,7 +37,7 @@ public class OpenAccountForm {
 
     /** Usuario (cliente) que verá y operará la cuenta; obligatorio solo para un cliente nuevo. */
     @Pattern(regexp = "^$|" + OpenAccountCommandDef.USERNAME_PATTERN,
-            message = "El usuario del titular debe tener de 3 a 30 minúsculas, dígitos, puntos o guiones")
+            message = OpenAccountCommandDef.OWNER_USERNAME_MESSAGE)
     private String ownerUsername;
 
     @NotNull(message = "El depósito inicial es obligatorio")

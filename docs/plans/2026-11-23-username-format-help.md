@@ -37,7 +37,7 @@ The user could not create a sign-up username: the format (`[a-z0-9._-]{3,30}`) i
 
 ## Tasks
 
-### [ ] T1 — One username message that names every accepted character (~10 min)
+### [x] T1 — One username message that names every accepted character (~10 min)
 
 - **Layer:** application
 - **Files:** `OpenAccountCommandDef.java`, `SignUpCommandDef.java`, `SignUpRequest.java`, `OpenAccountRequest.java`, `SignUpForm.java`, `OpenAccountForm.java`, tests that assert the old text
@@ -46,8 +46,8 @@ The user could not create a sign-up username: the format (`[a-z0-9._-]{3,30}`) i
   1. Test (red): a `SignUpCommand` with username `Ab` is rejected with a message that mentions "guiones bajos"; same for the admin opening's owner username.
   2. Constants `USERNAME_MESSAGE` and `OWNER_USERNAME_MESSAGE` in `OpenAccountCommandDef`; use them in the six places; update the web test that checks the old text.
 - **Acceptance criteria:**
-  - [ ] The new tests pass; no copy of the old text is left (`grep "puntos o guiones"` finds nothing).
-  - [ ] `./mvnw verify` is green and `oasdiff` sees no contract change.
+  - [x] The new tests pass; no copy of the old text is left (`grep "puntos o guiones"` finds nothing).
+  - [x] `./mvnw verify` is green and `oasdiff` sees no contract change.
 
 ### [ ] T2 — The web lower-cases the username (~10 min)
 

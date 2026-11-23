@@ -33,7 +33,7 @@ public record SignUpRequest(
 
         @NotBlank(message = "El usuario es obligatorio")
         @Pattern(regexp = OpenAccountCommandDef.USERNAME_PATTERN,
-                message = "El usuario debe tener de 3 a 30 minúsculas, dígitos, puntos o guiones")
+                message = OpenAccountCommandDef.USERNAME_MESSAGE)
         String username,
 
         @NotBlank(message = "La contraseña es obligatoria")

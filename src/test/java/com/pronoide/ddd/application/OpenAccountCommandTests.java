@@ -149,4 +149,29 @@ class OpenAccountCommandTests {
             }
         }
     }
+
+    @Nested
+    @DisplayName("Mensaje del formato del usuario (#152)")
+    class MensajeDelUsuario {
+
+        private static final String FORMAT = "de 3 a 30 caracteres: minúsculas sin tildes ni ñ, dígitos, puntos, guiones bajos o guiones";
+
+        @Test
+        @DisplayName("Un usuario del titular mal formado se rechaza con un mensaje que nombra todos los caracteres aceptados")
+        void un_usuario_del_titular_mal_formado_nombra_todos_los_caracteres() {
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> validCommand().holderName("Ada Lovelace").holderEmail("ada@example.com")
+                            .ownerUsername("Ab").build())
+                    .withMessage("El usuario del titular debe tener " + FORMAT);
+        }
+
+        @Test
+        @DisplayName("Un usuario del alta mal formado se rechaza con un mensaje que nombra todos los caracteres aceptados")
+        void un_usuario_del_alta_mal_formado_nombra_todos_los_caracteres() {
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> SignUpCommand.builder().fullName("Margaret Hamilton").taxId("00000000T")
+                            .email("margaret@example.com").username("Ab").initialDeposit(new BigDecimal("100.00")).build())
+                    .withMessage("El usuario debe tener " + FORMAT);
+        }
+    }
 }

@@ -57,7 +57,7 @@ public class SignUpForm {
     /** Usuario con el que entrará; mismo formato que el command. */
     @NotBlank(groups = Access.class, message = "El usuario es obligatorio")
     @Pattern(groups = Access.class, regexp = OpenAccountCommandDef.USERNAME_PATTERN,
-            message = "El usuario debe tener de 3 a 30 minúsculas, dígitos, puntos o guiones")
+            message = OpenAccountCommandDef.USERNAME_MESSAGE)
     private String username;
 
     /** Solo vive en la sesión del servidor entre los pasos 2 y 3; ninguna plantilla la pinta. */

@@ -43,6 +43,6 @@ public record OpenAccountRequest(
 
         /** Usuario (cliente) que verá y operará la cuenta; obligatorio solo para un cliente nuevo. */
         @Pattern(regexp = "^$|" + OpenAccountCommandDef.USERNAME_PATTERN,
-                message = "El usuario debe tener de 3 a 30 minúsculas, dígitos, puntos o guiones")
+                message = OpenAccountCommandDef.USERNAME_MESSAGE)
         String ownerUsername) {
 }
