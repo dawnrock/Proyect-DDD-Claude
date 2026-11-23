@@ -157,16 +157,16 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Acceptance criteria:**
   - [x] `AccountOwnershipRepositoryContract` and `CustomerOwnershipRepositoryContract` pass against H2 (with `JpaTestDatabase`, see T8).
 
-### [ ] T11 — Account numbering on a database sequence (~10 min)
+### [x] T11 — Account numbering on a database sequence (~10 min)
 
 - **Layer:** adapter.out
-- **Files:** `MonABankIbans.java` (IBAN calculation extracted from `InMemoryAccountNumberSequence`), `DatabaseAccountNumberSequence.java`, `DatabaseAccountNumberSequenceTests.java`
+- **Files:** `MonABankIbans.java` (IBAN calculation extracted from `InMemoryAccountNumberSequence`), `MonABankIbansTests.java`, `DatabaseAccountNumberSequence.java`, `DatabaseAccountNumberSequenceTests.java`
 - **Depends on:** T6
 - **What to do:**
   1. Move the CCC and IBAN calculation into a package-private helper shared by both implementations.
   2. `DatabaseAccountNumberSequence` takes the next value of `account_number_seq`, so numbers are not repeated after a restart.
 - **Acceptance criteria:**
-  - [ ] `AccountNumberSequenceContract` passes; the first IBAN is the same as today's (`...0000000001`).
+  - [x] `AccountNumberSequenceContract` passes; the first IBAN is the same as today's (`...0000000001`), and a new numbering on the same database carries on.
 
 ### [ ] T12 — Transactional unit of work (~10 min)
 
