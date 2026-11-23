@@ -103,6 +103,16 @@ No domain, application or persistence code changes. The layering is unchanged (e
   - [x] Redocly has no errors, the contract test passes and the CI bump check accepts 2.2.3. (Schemathesis is not installed locally: the contract test and the bump check run in the CI.)
   - [x] Project status updated; all new text in English.
 
+### [x] T6 — Review fixes (~5 min)
+
+- **Layer:** tests
+- **Files:** `ThrottledAuthenticationProviderTests.java`, `CaseInsensitiveLoginTests.java`, `DddLabApplicationTests.java`
+- **Depends on:** T1-T5
+- **What to do:**
+  1. `revisor-ddd` found no blocking issue. Fix its nits: the `StubDelegate` Javadoc back above its class, imports in order, `Base64` imported.
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green, with no change in behaviour.
+
 ## Global acceptance criteria
 
 **Specific:**

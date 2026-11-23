@@ -10,6 +10,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -543,7 +544,7 @@ class DddLabApplicationTests {
 			String bearer = ApiTokens.bearer(http, url(""), " ADA ", PASSWORD);
 
 			String payload = bearer.substring("Bearer ".length()).split("\\.")[1];
-			String claims = new String(java.util.Base64.getUrlDecoder().decode(payload), StandardCharsets.UTF_8);
+			String claims = new String(Base64.getUrlDecoder().decode(payload), StandardCharsets.UTF_8);
 			assertThat(claims).contains("\"sub\":\"ada\"");
 		}
 	}

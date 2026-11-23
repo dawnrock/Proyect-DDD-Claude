@@ -173,7 +173,6 @@ class ThrottledAuthenticationProviderTests {
         throw new AssertionError("Se esperaba un rechazo");
     }
 
-    /** Delegado que solo acepta la contraseña {@link #PASSWORD} y cuenta sus llamadas. */
     @Test
     @DisplayName("El delegado recibe el usuario normalizado, con la misma contraseña y la misma IP (#157)")
     void el_delegado_recibe_el_usuario_normalizado_con_la_misma_ip() {
@@ -195,6 +194,7 @@ class ThrottledAuthenticationProviderTests {
         assertThat(attempts.lockedFor("ada", IP)).isPresent();
     }
 
+    /** Delegado que solo acepta la contraseña {@link #PASSWORD} y cuenta sus llamadas. */
     private static final class StubDelegate implements AuthenticationProvider {
 
         static final String PASSWORD = "demo";
