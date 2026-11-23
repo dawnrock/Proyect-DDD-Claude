@@ -102,17 +102,17 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **Acceptance criteria:**
   - [x] The rule fails with the temporary call and passes without it (validated with a temporary `application.SabotageReconstitute` calling `Customer.reconstitute`).
 
-### [ ] T6 — Initial schema and database per environment (~10 min)
+### [x] T6 — Initial schema and database per environment (~10 min)
 
 - **Layer:** config
-- **Files:** `src/main/resources/db/migration/V1__initial_schema.sql`, `application.properties`, `src/test/resources/application.properties` (or equivalent)
+- **Files:** `src/main/resources/db/migration/V1__initial_schema.sql`, `application.properties`, `src/test/resources/config/application.properties` (adds to the main file instead of replacing it)
 - **Depends on:** T1
 - **What to do:**
   1. Tables: `checking_account` (holder embedded, `account_number` unique, `version`), `account_transaction` (FK to the account, position for the order), `customer` (`tax_id` unique), `customer_username` (`username` unique), `account_owner`, Spring Security's `users`/`authorities`, and the sequence `account_number_seq`.
   2. H2 in PostgreSQL mode (`MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE`), Flyway on, `spring.jpa.hibernate.ddl-auto=validate`, `show-sql` off by default.
   3. Tests: one H2 database per Spring context (`jdbc:h2:mem:${random.uuid};...`), so contexts do not share data now that it outlives the beans.
 - **Acceptance criteria:**
-  - [ ] Flyway applies V1 on start; `./mvnw verify` green and `GET /actuator/health` is `UP`.
+  - [x] Flyway applies V1 on start; `./mvnw verify` green and `GET /actuator/health` is `UP`.
 
 ### [ ] T7 — Account entities and mapper (~10 min)
 
