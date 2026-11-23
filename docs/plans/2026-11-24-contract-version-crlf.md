@@ -42,7 +42,7 @@
 - **Acceptance criteria:**
   - [x] The CRLF tests fail before the fix and pass after it; `node --test "scripts/*.test.mjs"` green (7 tests; without the fix the 6 CRLF ones fail). The test runs the script with `NODE_NO_WARNINGS=1`, because Node's warnings carry the PID and would make two equal outputs differ.
 
-### [ ] T2 — Run the script tests in the CI (~5 min)
+### [x] T2 — Run the script tests in the CI (~5 min)
 
 - **Layer:** ci
 - **Files:** `.github/workflows/ci.yml`, `scripts/README.md`
@@ -51,7 +51,7 @@
   1. A step `Tests de los scripts (node:test)` after the project status check: `node --test "scripts/*.test.mjs"` (Node 22 expands the glob itself, also on Windows).
   2. `scripts/README.md`: the script reads LF and CRLF contracts, and how to run the tests.
 - **Acceptance criteria:**
-  - [ ] The step passes on the PR.
+  - [x] The step passes on the PR (checked locally; the PR's `verify` run confirms it).
 
 ### [ ] T3 — Check the Windows scenario by hand (~5 min)
 

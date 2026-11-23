@@ -90,3 +90,9 @@ Requisitos: `git` con la rama base descargada y oasdiff (`go install github.com/
 BASE_REF=Hexagonal node scripts/check-contract-version.mjs
 OASDIFF=~/go/bin/oasdiff node scripts/check-contract-version.mjs base.yaml nuevo.yaml   # dos ficheros, sin git
 ```
+
+Lee los contratos con finales de línea LF o CRLF (#159): en Windows, con `core.autocrlf=true`, la copia de trabajo tiene CRLF y la rama base sale de git con LF; los dos se normalizan a LF antes de compararlos. Sus tests (`check-contract-version.test.mjs`, con el runner de Node y sin oasdiff) los ejecuta el CI en cada push y PR:
+
+```bash
+node --test "scripts/*.test.mjs"
+```
