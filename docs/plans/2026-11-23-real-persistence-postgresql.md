@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-23
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~170 min (19 tasks)
 
 ## Goal
@@ -46,7 +46,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
 
 ## Tasks
 
-### [ ] T1 — ADR and dependencies (~10 min)
+### [x] T1 — ADR and dependencies (~10 min)
 
 - **Layer:** build · docs
 - **Files:** `docs/adr/0019-real-persistence.md`, `docs/adr/README.md`, `pom.xml`
@@ -55,7 +55,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
   1. Write ADR 0019 (status `proposed` until the user accepts it): Neon in production (rejected: Supabase pauses after a week, Render Postgres expires after 30 days), H2 in PostgreSQL mode locally and in tests (rejected: Testcontainers, needs Docker in the CI), Flyway migrations instead of `ddl-auto`, option C for the in-memory adapters (rejected: both in production behind a switch; deleting them), users with `JdbcUserDetailsManager`, unit of work as lock + transaction.
   2. Add the PostgreSQL driver (`runtime`) and Flyway (Spring Boot 4 starter plus `flyway-database-postgresql`) to the `pom.xml`, without migrations yet (`spring.flyway.enabled=false` until T6).
 - **Acceptance criteria:**
-  - [ ] ADR listed in `docs/adr/README.md`; `./mvnw verify` green with the new dependencies.
+  - [x] ADR listed in `docs/adr/README.md`; `./mvnw verify` green with the new dependencies.
 
 ### [ ] T2 — Reconstitute transactions and account holders (~10 min)
 
@@ -277,8 +277,8 @@ The output ports already exist and each one has an abstract contract (`*Contract
 
 ## Risks and open questions
 
-- **Concurrency:** the plan keeps the global lock around the transaction (same behaviour as today, valid with one instance). Locking only the rows involved (`PESSIMISTIC_WRITE`) scales better but can deadlock on crossed transfers (A→B and B→A). Confirm the lock for now.
-- **H2 is not PostgreSQL:** PostgreSQL mode covers the usual SQL, but a migration could pass on H2 and fail on Neon. The first deploy is the real check; Testcontainers stays as a later option.
+- **Concurrency:** the plan keeps the global lock around the transaction (same behaviour as today, valid with one instance). Locking only the rows involved (`PESSIMISTIC_WRITE`) scales better but can deadlock on crossed transfers (A→B and B→A). **Confirmed by the user (2026-11-23).**
+- **H2 is not PostgreSQL:** PostgreSQL mode covers the usual SQL, but a migration could pass on H2 and fail on Neon. The first deploy is the real check; Testcontainers stays as a later option. **Accepted by the user (2026-11-23).**
 - **Neon connection:** the pooled endpoint (PgBouncer in transaction mode) does not get on with prepared statements; the guide uses the direct one and a small Hikari pool. Neon suspends its compute after 5 min idle, which adds to Render's own cold start.
 - **The Render service runs `demo` today:** until Neon is configured, the deploy keeps H2 in memory (same as now). The user creates the Neon project and the secrets; Claude cannot do it.
 - **Users and the login limit:** `LoginAttempts` stays in memory; a restart clears the locks (unchanged).
