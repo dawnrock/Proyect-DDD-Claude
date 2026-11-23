@@ -36,7 +36,7 @@ Only `adapter.in.web` templates and `static/js/app.js`; no change in Java code, 
 
 ## Tasks
 
-### [ ] T1 — Account actions announce their field errors (~10 min)
+### [x] T1 — Account actions announce their field errors (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `templates/accounts/detail.html`, `AccountWebControllerTests.java`
@@ -45,8 +45,8 @@ Only `adapter.in.web` templates and `static/js/app.js`; no change in Java code, 
   1. Test (red): an invalid deposit (amount `0`) renders `aria-invalid="true"` and `aria-describedby="deposit-amount-error"` on the amount, and `id="deposit-amount-error"` on its message; the detail page without errors contains no `aria-invalid`. Same check for an invalid transfer IBAN (`transfer-target`), also through htmx.
   2. Add the pattern to the amount, currency and IBAN fields of the three forms.
 - **Acceptance criteria:**
-  - [ ] The new tests pass and `./mvnw verify` is green.
-  - [ ] A detail page without errors has no `aria-invalid` attribute.
+  - [x] The new tests pass and `./mvnw verify` is green.
+  - [x] A detail page without errors has no `aria-invalid` attribute.
 
 ### [ ] T2 — Opening forms announce their field errors (~5 min)
 

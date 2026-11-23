@@ -1567,6 +1567,65 @@ class AccountWebControllerTests {
         }
     }
 
+    @Nested
+    @DisplayName("Errores accesibles en las acciones de la cuenta (#145)")
+    class ErroresAccesiblesEnLasAcciones {
+
+        @BeforeEach
+        void cuenta() {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
+        }
+
+        @Test
+        @DisplayName("Sin errores, ningún campo del detalle lleva aria-invalid")
+        void sin_errores_ningun_campo_del_detalle_lleva_aria_invalid() throws Exception {
+            String html = mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andReturn().getResponse().getContentAsString();
+
+            assertThat(html).doesNotContain("aria-invalid");
+        }
+
+        @Test
+        @DisplayName("Un ingreso de cero marca el importe como erróneo y lo liga a su mensaje")
+        void un_ingreso_de_cero_marca_el_importe_como_erroneo_y_lo_liga_a_su_mensaje() throws Exception {
+            String html = mvc.perform(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "0").param("currency", "EUR"))
+                    .andReturn().getResponse().getContentAsString();
+
+            FieldTags.assertInvalid(html, "deposit-amount");
+            FieldTags.assertValid(html, "deposit-currency");
+            FieldTags.assertValid(html, "withdrawal-amount");
+        }
+
+        @Test
+        @DisplayName("Una retirada sin importe marca el importe de la retirada como erróneo")
+        void una_retirada_sin_importe_marca_el_importe_como_erroneo() throws Exception {
+            String html = mvc.perform(post("/accounts/" + ACCOUNT_ID + "/withdrawals").param("currency", "EUR"))
+                    .andReturn().getResponse().getContentAsString();
+
+            FieldTags.assertInvalid(html, "withdrawal-amount");
+        }
+
+        @Test
+        @DisplayName("Con htmx, una transferencia sin IBAN responde el panel con el IBAN marcado como erróneo")
+        void con_htmx_una_transferencia_sin_iban_marca_el_iban_como_erroneo() throws Exception {
+            String html = mvc.perform(htmx(post("/accounts/" + ACCOUNT_ID + "/transfers")
+                            .param("targetAccountNumber", "").param("amount", "25.00").param("currency", "EUR")))
+                    .andReturn().getResponse().getContentAsString();
+
+            FieldTags.assertInvalid(html, "transfer-target");
+            FieldTags.assertValid(html, "transfer-amount");
+        }
+
+        @Test
+        @DisplayName("Una divisa inexistente marca la divisa del ingreso como errónea")
+        void una_divisa_inexistente_marca_la_divisa_como_erronea() throws Exception {
+            String html = mvc.perform(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "10.00").param("currency", "xx"))
+                    .andReturn().getResponse().getContentAsString();
+
+            FieldTags.assertInvalid(html, "deposit-currency");
+        }
+    }
+
     /** Petición como la envía htmx: con la cabecera HX-Request. */
     private static MockHttpServletRequestBuilder htmx(MockHttpServletRequestBuilder request) {
         return request.header("HX-Request", "true");
