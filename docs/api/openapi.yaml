@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Proyect-DDD-Claude · Checking accounts API
-  version: 2.2.0
+  version: 2.2.1
   description: |
     Versioned with SemVer (ADR 0014); the changes are in `docs/api/CHANGELOG.md`.
 
@@ -29,6 +29,7 @@ info:
     | 404 | The requested resource does not exist, or it is another customer's account (its existence is not revealed) | Recurso inexistente |
     | 415 | The request body is not JSON (operations with a body) | Tipo de contenido no admitido |
     | 422 | A domain business rule is violated | Regla de negocio incumplida |
+    | 429 | Too many requests from one IP, with a `Retry-After` header in seconds: failed login attempts when asking for a token (ADR 0017) or customer sign-ups (ADR 0018) | Demasiados intentos / Demasiadas altas |
   contact:
     name: Proyect-DDD-Claude
     url: https://github.com/dawnrock/Proyect-DDD-Claude/issues
