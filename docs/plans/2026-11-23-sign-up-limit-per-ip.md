@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-23
-- **Status:** in progress
-- **Total estimate:** ~80 min (9 tasks)
+- **Status:** done
+- **Total estimate:** ~85 min (10 tasks, T9 added by the review)
 
 ## Goal
 
@@ -137,7 +137,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
 - **Acceptance criteria:**
   - [x] `./mvnw verify` green; `DddLabApplicationTests` loads the context with the new properties.
 
-### [ ] T8 — Project status, including the verified Render check of #133 (~5 min)
+### [x] T8 — Project status, including the verified Render check of #133 (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `docs/ia/pendientes.md`, `docs/ia/decisiones.md`, `docs/ia/historial.md`
@@ -147,7 +147,7 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
   2. `estado-del-proyecto.md`: #131 to done (PR number), next step updated, "Last updated".
   3. `pendientes.md`: remove "or rate limit (#131)" from the #103 risks; add the new pending items of #131 (in memory, NAT, a full global cap blocks legitimate users, IPv6) under a "Sign-up limit (#131, ADR 0018)" bullet. `decisiones.md`: one line with the decision; `historial.md`: a row for the PR.
 - **Acceptance criteria:**
-  - [ ] No mention of the pending Render check remains in `docs/ia/`; the CI project-status check passes.
+  - [x] No mention of the pending Render check remains in `docs/ia/`; the CI project-status check passes.
 
 ### [x] T9 — Review fixes (~5 min)
 
@@ -164,24 +164,24 @@ The client IP: today only `ClientIpAuthenticationDetailsSource` turns a request 
 
 **Specific:**
 
-- [ ] Over the limit, an IP cannot sign up more customers until the window passes, neither on the web (message in the form, from step 1) nor on the API (429 `ProblemDetail` with `Retry-After`).
-- [ ] Over the global cap (50 per hour by default), no IP can sign up until the window frees room, whatever the number of IPs used.
-- [ ] Failed sign-ups do not count towards the limit; the IP is the client's behind Render and Cloudflare (same `ClientIpResolver` as the login limit).
-- [ ] `pendientes.md` no longer lists the sign-up rate limit as an accepted risk, nor the Render check of #133.
+- [x] Over the limit, an IP cannot sign up more customers until the window passes, neither on the web (message in the form, from step 1) nor on the API (429 `ProblemDetail` with `Retry-After`).
+- [x] Over the global cap (50 per hour by default), no IP can sign up until the window frees room, whatever the number of IPs used.
+- [x] Failed sign-ups do not count towards the limit; the IP is the client's behind Render and Cloudflare (same `ClientIpResolver` as the login limit).
+- [x] `pendientes.md` no longer lists the sign-up rate limit as an accepted risk, nor the Render check of #133.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes.
-- [ ] Any new business term is in `docs/dominio/glosario.md` (no new term expected: "sign-up" already exists).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes.
+- [x] Any new business term is in `docs/dominio/glosario.md` (no new term expected: "sign-up" already exists).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

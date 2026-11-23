@@ -70,6 +70,7 @@
   - **`ClientIpResolver`:** the IP comes from it, in the shared security support, through `ClientIpAuthenticationDetailsSource`, which the web login and `TokenController` use.
   - **Trusted proxies:** `app.security.trusted-proxies` holds the internal ranges and Cloudflare's official ranges; `scripts/check-cloudflare-ips.mjs` keeps them in sync.
   - **Reuse:** #131 and any future per-IP limit must take the IP from the resolver, never from `getRemoteAddr()`.
+- **Sign-up limit (#131, ADR 0018, agreed with the user on 2026-11-23):** 3 successful sign-ups per client IP and 50 in total per sliding hour (`app.security.sign-ups.*`); failed sign-ups give their slot back. `SignUpLimit` lives in `adapter.in` and `CustomerRegistration.register(command, password, clientIp)` reserves the slot; API 429 `TooManySignUps` with `Retry-After`, web message from step 1 (read-only check) and at the last step. Tests that make many sign-ups from one IP (full context, contract tests) raise both limits.
 
 ## Environment
 
