@@ -38,4 +38,4 @@ Constraints:
 - Both branches have customers, generated IBANs and runtime users, with the same routes, messages and demo IBANs.
 - `POST /api/accounts` changed incompatibly (conditional customer fields, new `holderEmail`), documented in `openapi.yaml`.
 - `CheckingAccountService` gains two output ports (`CustomerRepository`, `CustomerOwnershipRepository`) wired in `config.DomainConfiguration`.
-- **Accepted risks** (local practice project): no e-mail verification or rate limit; customers, accounts and users live in memory; if creating the user failed for a reason other than a taken username, a customer without a usable login would remain; the wizard keeps the password in the server session between steps 2 and 3 (never rendered).
+- **Accepted risks** (local practice project): no e-mail verification; no rate limit (closed by #131, [ADR 0018](0018-sign-up-limit.md)); customers, accounts and users live in memory; if creating the user failed for a reason other than a taken username, a customer without a usable login would remain; the wizard keeps the password in the server session between steps 2 and 3 (never rendered).

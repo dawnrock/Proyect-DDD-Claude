@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -17,8 +18,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.Currency;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -33,6 +36,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import com.pronoide.ddd.application.AccountDetails;
 import com.pronoide.ddd.application.AccountSummary;
@@ -47,6 +51,8 @@ import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.adapter.in.CustomerRegistration;
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.SignUpLimit;
+import com.pronoide.ddd.adapter.in.TooManySignUpsException;
 import com.pronoide.ddd.adapter.in.UsernameTakenException;
 
 /** Alta de cliente en tres pasos (#95): datos personales, acceso y cuenta. */
@@ -65,6 +71,10 @@ class SignUpControllerTests {
 
     @MockitoBean
     private CheckingAccountQueries queries;
+
+    /** Sin preparar, nunca bloquea (Mockito devuelve un {@code Optional} vacío). */
+    @MockitoBean
+    private SignUpLimit signUpLimit;
 
     /** POST con token CSRF: la cadena web lo exige para las rutas públicas del alta. */
     private static MockHttpServletRequestBuilder post(String url) {
@@ -344,7 +354,7 @@ class SignUpControllerTests {
         @DisplayName("Con todo correcto da de alta con los datos de los tres pasos y redirige a la cuenta con la bienvenida")
         void con_todo_correcto_da_de_alta_y_redirige_a_la_cuenta_con_la_bienvenida() throws Exception {
             UUID id = UUID.randomUUID();
-            when(registration.register(any(SignUpCommand.class), eq("clave-secreta-1"))).thenReturn(openedAccount(id));
+            when(registration.register(any(SignUpCommand.class), eq("clave-secreta-1"), any())).thenReturn(openedAccount(id));
 
             mvc.perform(validStep3(post("/signup/account")).session(sessionAfterStep2()))
                     .andExpect(status().is3xxRedirection())
@@ -353,7 +363,7 @@ class SignUpControllerTests {
                             "Te damos la bienvenida a Mon-A Bank. Tu IBAN es ES2199990001220000000001"));
 
             ArgumentCaptor<SignUpCommand> command = ArgumentCaptor.forClass(SignUpCommand.class);
-            verify(registration).register(command.capture(), eq("clave-secreta-1"));
+            verify(registration).register(command.capture(), eq("clave-secreta-1"), any());
             assertThat(command.getValue().fullName()).isEqualTo("Margaret Hamilton");
             assertThat(command.getValue().taxId()).isEqualTo("12345678Z");
             assertThat(command.getValue().email()).isEqualTo("margaret@example.com");
@@ -366,7 +376,7 @@ class SignUpControllerTests {
         @DisplayName("Un cliente que ya existe vuelve al paso 1 con el mensaje y el enlace para entrar")
         void un_cliente_que_ya_existe_vuelve_al_paso_1_con_el_mensaje_y_el_enlace_para_entrar() throws Exception {
             var error = new DuplicateCustomerException(new TaxId("12345678Z"));
-            when(registration.register(any(SignUpCommand.class), any())).thenThrow(error);
+            when(registration.register(any(SignUpCommand.class), any(), any())).thenThrow(error);
             MockHttpSession session = sessionAfterStep2();
 
             mvc.perform(validStep3(post("/signup/account")).session(session))
@@ -384,7 +394,7 @@ class SignUpControllerTests {
         @DisplayName("Un usuario ocupado vuelve al paso 2 con el mensaje")
         void un_usuario_ocupado_vuelve_al_paso_2_con_el_mensaje() throws Exception {
             var error = new UsernameTakenException("margaret");
-            when(registration.register(any(SignUpCommand.class), any())).thenThrow(error);
+            when(registration.register(any(SignUpCommand.class), any(), any())).thenThrow(error);
             MockHttpSession session = sessionAfterStep2();
 
             mvc.perform(validStep3(post("/signup/account")).session(session))
@@ -398,7 +408,7 @@ class SignUpControllerTests {
         @Test
         @DisplayName("Un documento con la letra de control mal (IllegalArgumentException) vuelve al paso 1 con el mensaje del dominio")
         void un_documento_con_la_letra_mal_vuelve_al_paso_1_con_el_mensaje_del_dominio() throws Exception {
-            when(registration.register(any(SignUpCommand.class), any()))
+            when(registration.register(any(SignUpCommand.class), any(), any()))
                     .thenThrow(new IllegalArgumentException("La letra del documento no es correcta"));
 
             mvc.perform(validStep3(post("/signup/account")).session(sessionAfterStep2()))
@@ -413,7 +423,7 @@ class SignUpControllerTests {
             MockHttpSession session = sessionAfterStep2();
             var insufficient = new InsufficientInitialDepositException(
                     MonetaryAmount.euros("10.00"), MonetaryAmount.euros("50.00"));
-            when(registration.register(any(SignUpCommand.class), any())).thenThrow(insufficient);
+            when(registration.register(any(SignUpCommand.class), any(), any())).thenThrow(insufficient);
 
             mvc.perform(post("/signup/account").session(session).param("initialDeposit", "10.00")
                             .param("conditionsAccepted", "true"))
@@ -422,7 +432,7 @@ class SignUpControllerTests {
                     .andExpect(content().string(containsString("no alcanza el mínimo exigido")))
                     .andExpect(content().string(containsString("value=\"10.00\"")));
 
-            when(registration.register(any(SignUpCommand.class), any())).thenThrow(
+            when(registration.register(any(SignUpCommand.class), any(), any())).thenThrow(
                     new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD")));
 
             mvc.perform(post("/signup/account").session(session).param("initialDeposit", "100.00")
@@ -454,7 +464,7 @@ class SignUpControllerTests {
         @DisplayName("Tras el POST final, la misma sesión abre el detalle como el cliente nuevo y ve la bienvenida")
         void tras_el_post_final_la_misma_sesion_abre_el_detalle_como_el_cliente_nuevo() throws Exception {
             UUID id = UUID.randomUUID();
-            when(registration.register(any(SignUpCommand.class), any())).thenReturn(openedAccount(id));
+            when(registration.register(any(SignUpCommand.class), any(), any())).thenReturn(openedAccount(id));
             when(queries.findAccount(any(Caller.class), eq(id))).thenReturn(details(id));
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(openedAccount(id)));
             MockHttpSession session = sessionAfterStep2();
@@ -478,7 +488,7 @@ class SignUpControllerTests {
         @DisplayName("Terminado el alta se borra el asistente: no quedan datos ni contraseña en la sesión")
         void terminado_el_alta_se_borra_el_asistente() throws Exception {
             UUID id = UUID.randomUUID();
-            when(registration.register(any(SignUpCommand.class), any())).thenReturn(openedAccount(id));
+            when(registration.register(any(SignUpCommand.class), any(), any())).thenReturn(openedAccount(id));
             MockHttpSession session = sessionAfterStep2();
 
             mvc.perform(validStep3(post("/signup/account")).session(session))
@@ -490,7 +500,7 @@ class SignUpControllerTests {
         @Test
         @DisplayName("Si el alta falla, la sesión no queda iniciada")
         void si_el_alta_falla_la_sesion_no_queda_iniciada() throws Exception {
-            when(registration.register(any(SignUpCommand.class), any()))
+            when(registration.register(any(SignUpCommand.class), any(), any()))
                     .thenThrow(new UsernameTakenException("margaret"));
             MockHttpSession session = sessionAfterStep2();
 
@@ -499,6 +509,90 @@ class SignUpControllerTests {
 
             mvc.perform(get("/accounts/" + UUID.randomUUID()).session(session))
                     .andExpect(redirectedUrl("/login"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Límite de altas (#131, ADR 0018)")
+    class LimiteDeAltas {
+
+        @Test
+        @DisplayName("Superado el límite, el paso 3 se queda con el aviso y los minutos que faltan, sin iniciar sesión")
+        void superado_el_limite_el_paso_3_se_queda_con_el_aviso() throws Exception {
+            when(registration.register(any(SignUpCommand.class), any(), any()))
+                    .thenThrow(new TooManySignUpsException(Duration.ofSeconds(25 * 60 + 1)));
+            MockHttpSession session = sessionAfterStep2();
+
+            mvc.perform(validStep3(post("/signup/account")).session(session))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("signup/account"))
+                    .andExpect(content().string(containsString(
+                            "Demasiadas altas de clientes en este momento. Inténtalo de nuevo dentro de 26 minutos.")))
+                    .andExpect(content().string(containsString("Margaret Hamilton")));
+
+            assertThat(session.getAttribute("SPRING_SECURITY_CONTEXT")).isNull();
+            mvc.perform(get("/signup/account").session(session))
+                    .andExpect(view().name("signup/account"));
+        }
+
+        @Test
+        @DisplayName("El alta de la web cuenta para la IP del cliente detrás de Render y Cloudflare")
+        void el_alta_de_la_web_cuenta_para_la_ip_del_cliente() throws Exception {
+            when(registration.register(any(SignUpCommand.class), any(), any())).thenReturn(openedAccount(UUID.randomUUID()));
+
+            mvc.perform(validStep3(post("/signup/account")).session(sessionAfterStep2())
+                            .header("X-Forwarded-For", "198.51.100.40, 104.22.136.75")
+                            .with(request -> {
+                                request.setRemoteAddr("10.0.0.5");
+                                return request;
+                            }))
+                    .andExpect(status().is3xxRedirection());
+
+            verify(registration).register(any(SignUpCommand.class), any(), eq("198.51.100.40"));
+        }
+
+        @Test
+        @DisplayName("Con el límite lleno, el paso 1 ya muestra el aviso al entrar")
+        void con_el_limite_lleno_el_paso_1_muestra_el_aviso_al_entrar() throws Exception {
+            when(signUpLimit.lockedFor("198.51.100.40")).thenReturn(Optional.of(Duration.ofMinutes(10)));
+
+            mvc.perform(get("/signup").with(from("198.51.100.40")))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString(
+                            "Demasiadas altas de clientes en este momento. Inténtalo de nuevo dentro de 10 minutos.")));
+            mvc.perform(get("/signup").with(from("198.51.100.41")))
+                    .andExpect(content().string(not(containsString("Demasiadas altas"))));
+        }
+
+        @Test
+        @DisplayName("Con el límite lleno, el paso 1 no deja seguir: el paso 2 vuelve al 1 y no se reserva nada")
+        void con_el_limite_lleno_el_paso_1_no_deja_seguir() throws Exception {
+            when(signUpLimit.lockedFor("198.51.100.40")).thenReturn(Optional.of(Duration.ofSeconds(30)));
+            MockHttpSession session = new MockHttpSession();
+
+            mvc.perform(validStep1(post("/signup")).session(session).with(from("198.51.100.40")))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("signup/data"))
+                    .andExpect(content().string(containsString("Inténtalo de nuevo dentro de 1 minuto.")));
+            mvc.perform(get("/signup/access").session(session))
+                    .andExpect(redirectedUrl("/signup"));
+
+            verify(signUpLimit, never()).tryReserve(any());
+            verifyNoInteractions(registration);
+        }
+
+        @Test
+        @DisplayName("Con cupo, el paso 1 sigue al paso 2 como siempre")
+        void con_cupo_el_paso_1_sigue_al_paso_2() throws Exception {
+            mvc.perform(validStep1(post("/signup")).with(from("198.51.100.40")))
+                    .andExpect(redirectedUrl("/signup/access"));
+        }
+
+        private static RequestPostProcessor from(String ip) {
+            return request -> {
+                request.setRemoteAddr(ip);
+                return request;
+            };
         }
     }
 }

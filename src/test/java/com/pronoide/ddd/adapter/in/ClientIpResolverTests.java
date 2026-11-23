@@ -8,6 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 /** IP del cliente detrás de los proxies de confianza (#133, ADR 0017): el proxy interno de Render y Cloudflare. */
 class ClientIpResolverTests {
@@ -86,5 +87,25 @@ class ClientIpResolverTests {
     @DisplayName("Los espacios alrededor de cada entrada se ignoran")
     void los_espacios_alrededor_de_cada_entrada_se_ignoran() {
         assertThat(resolver.resolve(RENDER_PROXY, "  " + CLIENT + " ,  " + CLOUDFLARE_EDGE + "  ")).isEqualTo(CLIENT);
+    }
+
+    @Test
+    @DisplayName("Desde una petición, varias cabeceras X-Forwarded-For se unen en orden: la del cliente primero, la del proxy después (#131)")
+    void desde_una_peticion_las_cabeceras_se_unen_en_orden() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRemoteAddr(RENDER_PROXY);
+        request.addHeader("X-Forwarded-For", "1.2.3.4");
+        request.addHeader("X-Forwarded-For", CLIENT + ", " + CLOUDFLARE_EDGE);
+
+        assertThat(resolver.resolve(request)).isEqualTo(CLIENT);
+    }
+
+    @Test
+    @DisplayName("Desde una petición sin X-Forwarded-For, la IP es la de la conexión (#131)")
+    void desde_una_peticion_sin_cabecera_la_ip_es_la_de_la_conexion() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRemoteAddr(CLIENT);
+
+        assertThat(resolver.resolve(request)).isEqualTo(CLIENT);
     }
 }

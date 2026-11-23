@@ -2,6 +2,12 @@
 
 Changes to `docs/api/openapi.yaml`, newest first. Versioning policy: [ADR 0014](../adr/0014-contract-versioning.md) (major for an incompatible change as `oasdiff breaking` reports it, minor for a compatible addition, patch for documentation only). The CI checks the bump on every pull request.
 
+## 2.2.0 · 2026-11-23 (#131)
+
+Limit on customer sign-ups ([ADR 0018](../adr/0018-sign-up-limit.md)).
+
+- **New response:** `signUp` answers 429 (`TooManySignUps`, `ProblemDetail` with a `Retry-After` header in seconds) after 3 successful sign-ups from one IP, or 50 from all IPs together, within the last hour. Failed sign-ups do not count. A compatible addition: no request or existing response changes.
+
 ## 2.1.0 · 2026-11-20 (#130)
 
 Limit on login attempts ([ADR 0017](../adr/0017-login-attempt-limit.md)).

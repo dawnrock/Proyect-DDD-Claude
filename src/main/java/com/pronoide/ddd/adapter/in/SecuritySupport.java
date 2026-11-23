@@ -35,7 +35,7 @@ import com.pronoide.ddd.application.OpenAccountCommandDef;
  */
 @Configuration
 @EnableConfigurationProperties({SecurityUsersProperties.class, LoginAttemptsProperties.class,
-        TrustedProxiesProperties.class})
+        TrustedProxiesProperties.class, SignUpLimitProperties.class})
 public class SecuritySupport {
 
     private static final Set<String> ROLES = Set.of("ADMIN", "USER");
@@ -59,14 +59,26 @@ public class SecuritySupport {
 
     /** IP del cliente detrás de los proxies de confianza (#133, ADR 0017): Render y Cloudflare. */
     @Bean
-    public ClientIpAuthenticationDetailsSource clientIpDetailsSource(TrustedProxiesProperties properties) {
-        return new ClientIpAuthenticationDetailsSource(new ClientIpResolver(properties.trustedProxies()));
+    public ClientIpResolver clientIpResolver(TrustedProxiesProperties properties) {
+        return new ClientIpResolver(properties.trustedProxies());
+    }
+
+    /** Detalles de autenticación con la IP del cliente, para el límite de intentos de inicio de sesión (#133). */
+    @Bean
+    public ClientIpAuthenticationDetailsSource clientIpDetailsSource(ClientIpResolver resolver) {
+        return new ClientIpAuthenticationDetailsSource(resolver);
     }
 
     /** Fallos recientes de inicio de sesión (#130, ADR 0017). Sin el reloj del núcleo, como en los tests web, el del sistema. */
     @Bean
     public LoginAttempts loginAttempts(LoginAttemptsProperties properties, ObjectProvider<Clock> clock) {
         return new LoginAttempts(properties, clock.getIfAvailable(Clock::systemUTC));
+    }
+
+    /** Altas de clientes recientes por IP y en total (#131, ADR 0018). Sin el reloj del núcleo, el del sistema. */
+    @Bean
+    public SignUpLimit signUpLimit(SignUpLimitProperties properties, ObjectProvider<Clock> clock) {
+        return new SignUpLimit(properties, clock.getIfAvailable(Clock::systemUTC));
     }
 
     /**

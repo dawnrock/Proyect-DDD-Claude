@@ -18,6 +18,7 @@
 | [0015](0015-jwt-bearer-api.md) | JWT Bearer tokens for the REST API (amends 0008) | Accepted |
 | [0016](0016-web-frontend-libraries.md) | Frontend libraries for the Thymeleaf web (complements 0005) | Accepted |
 | [0017](0017-login-attempt-limit.md) | Limit on login attempts (amends 0008 and 0015) | Accepted |
+| [0018](0018-sign-up-limit.md) | Limit on customer sign-ups per IP and in total (amends 0012) | Accepted |
 
 ADR 0011 (the `integration` layer) only exists on `Monolithic`: it applies to phase 1.
 

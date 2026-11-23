@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Proyect-DDD-Claude · Checking accounts API
-  version: 2.1.0
+  version: 2.2.0
   description: |
     Versioned with SemVer (ADR 0014); the changes are in `docs/api/CHANGELOG.md`.
 
@@ -315,7 +315,9 @@ paths:
         Registers the customer, opens their first account with an IBAN assigned by the bank and creates their user
         (role USER), all at once and without administrator approval. No credentials are needed. The new user can then
         ask for a token with `POST /api/auth/token` and use the API. A document is unique per customer (R29): signing up again with it fails with 422,
-        whatever the e-mail.
+        whatever the e-mail. Successful sign-ups are limited to 3 per hour from one IP and 50 per hour in total; over
+        either limit the answer is 429 until the oldest sign-up of the hour expires (ADR 0018). Failed sign-ups do not
+        count.
       security: []
       requestBody:
         required: true
@@ -355,6 +357,8 @@ paths:
           $ref: '#/components/responses/UnsupportedMediaType'
         '422':
           $ref: '#/components/responses/UnprocessableContent'
+        '429':
+          $ref: '#/components/responses/TooManySignUps'
   /api/accounts/{id}/deposits:
     post:
       tags: [accounts]
@@ -807,6 +811,26 @@ components:
             title: Demasiados intentos
             status: 429
             detail: Demasiados intentos fallidos de inicio de sesión. Vuelve a intentarlo más tarde.
+    TooManySignUps:
+      description: |
+        Too many customer sign-ups in the last hour, from this IP or from all of them together: try again after
+        `Retry-After` seconds. The answer does not say which limit was reached.
+      headers:
+        Retry-After:
+          description: Seconds until there is room for another sign-up.
+          schema:
+            type: integer
+            minimum: 1
+          example: 2400
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: Demasiadas altas
+            status: 429
+            detail: 'Demasiadas altas de clientes en este momento: inténtalo de nuevo más tarde'
     Unauthorized:
       description: Not authenticated, with a `WWW-Authenticate` header that asks for a Bearer token.
       headers:

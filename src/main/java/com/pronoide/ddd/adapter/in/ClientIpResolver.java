@@ -2,13 +2,17 @@ package com.pronoide.ddd.adapter.in;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
 
 /**
- * IP del cliente para el límite de intentos de inicio de sesión (#133, ADR 0017). En Render la petición llega a través
+ * IP del cliente para el límite de intentos de inicio de sesión (#133, ADR 0017) y el de altas de clientes (#131, ADR
+ * 0018). En Render la petición llega a través
  * de Cloudflare y del proxy interno de Render, que añaden cada uno la dirección de quien les conecta a
  * {@code X-Forwarded-For}.
  *
@@ -33,6 +37,14 @@ public class ClientIpResolver {
 
     public ClientIpResolver(List<String> trustedProxies) {
         this.trustedProxies = trustedProxies.stream().map(IpAddressMatcher::new).toList();
+    }
+
+    /** IP del cliente de una petición: su dirección de conexión y sus cabeceras {@code X-Forwarded-For}. */
+    public String resolve(HttpServletRequest request) {
+        // Varias cabeceras X-Forwarded-For se unen en orden: la primera puede escribirla el cliente, y la que añade un
+        // proxy de confianza va después
+        String forwardedFor = String.join(",", Collections.list(request.getHeaders("X-Forwarded-For")));
+        return resolve(request.getRemoteAddr(), forwardedFor.isEmpty() ? null : forwardedFor);
     }
 
     /**

@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -37,6 +38,7 @@ import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.adapter.in.CustomerRegistration;
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.TooManySignUpsException;
 import com.pronoide.ddd.adapter.in.UsernameTakenException;
 
 /** {@code POST /api/customers}: público, sin credenciales ni CSRF. */
@@ -70,7 +72,7 @@ class CustomerControllerTests {
     @Test
     @DisplayName("Un alta válida sin credenciales responde 201 con Location y el resumen de la cuenta")
     void un_alta_valida_sin_credenciales_responde_201_con_location_y_el_resumen() throws Exception {
-        given(registration.register(any(SignUpCommand.class), eq("demo-1234"))).willReturn(summary());
+        given(registration.register(any(SignUpCommand.class), eq("demo-1234"), any())).willReturn(summary());
 
         mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
                 .andExpect(status().isCreated())
@@ -84,12 +86,12 @@ class CustomerControllerTests {
     @Test
     @DisplayName("El command lleva los datos de la petición y EUR por defecto; la contraseña va aparte")
     void el_command_lleva_los_datos_de_la_peticion_y_eur_por_defecto() throws Exception {
-        given(registration.register(any(SignUpCommand.class), any())).willReturn(summary());
+        given(registration.register(any(SignUpCommand.class), any(), any())).willReturn(summary());
 
         send(VALID_BODY);
 
         ArgumentCaptor<SignUpCommand> command = ArgumentCaptor.forClass(SignUpCommand.class);
-        verify(registration).register(command.capture(), eq("demo-1234"));
+        verify(registration).register(command.capture(), eq("demo-1234"), any());
         assertThat(command.getValue().fullName()).isEqualTo("Margaret Hamilton");
         assertThat(command.getValue().taxId()).isEqualTo("00000000T");
         assertThat(command.getValue().email()).isEqualTo("margaret@example.com");
@@ -101,7 +103,7 @@ class CustomerControllerTests {
     @Test
     @DisplayName("Un NIE con formato válido se acepta en la petición")
     void un_nie_con_formato_valido_se_acepta() throws Exception {
-        given(registration.register(any(SignUpCommand.class), any())).willReturn(summary());
+        given(registration.register(any(SignUpCommand.class), any(), any())).willReturn(summary());
 
         mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_BODY.replace("00000000T", "X1234567L")))
@@ -179,7 +181,7 @@ class CustomerControllerTests {
     @Test
     @DisplayName("Un documento con la letra incorrecta responde 400 con el mensaje del dominio")
     void un_documento_con_la_letra_incorrecta_responde_400() throws Exception {
-        given(registration.register(any(SignUpCommand.class), any())).willThrow(
+        given(registration.register(any(SignUpCommand.class), any(), any())).willThrow(
                 new IllegalArgumentException("La letra de control del documento 00000000A no es correcta"));
 
         mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
@@ -191,7 +193,7 @@ class CustomerControllerTests {
     @Test
     @DisplayName("Un cliente duplicado responde 422 Regla de negocio incumplida")
     void un_cliente_duplicado_responde_422() throws Exception {
-        given(registration.register(any(SignUpCommand.class), any()))
+        given(registration.register(any(SignUpCommand.class), any(), any()))
                 .willThrow(new DuplicateCustomerException(new TaxId("00000000T")));
 
         mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
@@ -203,7 +205,7 @@ class CustomerControllerTests {
     @Test
     @DisplayName("Un usuario ocupado responde 422 Regla de negocio incumplida")
     void un_usuario_ocupado_responde_422() throws Exception {
-        given(registration.register(any(SignUpCommand.class), any())).willThrow(new UsernameTakenException("margaret"));
+        given(registration.register(any(SignUpCommand.class), any(), any())).willThrow(new UsernameTakenException("margaret"));
 
         mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
                 .andExpect(status().isUnprocessableContent())
@@ -214,17 +216,49 @@ class CustomerControllerTests {
     @Test
     @DisplayName("Un depósito insuficiente o en otra divisa responde 422")
     void un_deposito_insuficiente_o_en_otra_divisa_responde_422() throws Exception {
-        given(registration.register(any(SignUpCommand.class), any()))
+        given(registration.register(any(SignUpCommand.class), any(), any()))
                 .willThrow(new InsufficientInitialDepositException(MonetaryAmount.euros("10.00"),
                         MonetaryAmount.euros("50.00")));
         mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
                 .andExpect(status().isUnprocessableContent());
 
-        given(registration.register(any(SignUpCommand.class), any()))
+        given(registration.register(any(SignUpCommand.class), any(), any()))
                 .willThrow(new CurrencyMismatchException(MonetaryAmount.euros("1.00").currency(),
                         java.util.Currency.getInstance("USD")));
         mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.title").value("Regla de negocio incumplida"));
+    }
+
+    @Test
+    @DisplayName("Superado el límite de altas responde 429 con Retry-After en segundos, redondeado hacia arriba (#131)")
+    void superado_el_limite_de_altas_responde_429_con_retry_after() throws Exception {
+        given(registration.register(any(SignUpCommand.class), any(), any()))
+                .willThrow(new TooManySignUpsException(Duration.ofMillis(90_500)));
+
+        mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().string("Retry-After", "91"))
+                .andExpect(header().string("Content-Type", "application/problem+json"))
+                .andExpect(jsonPath("$.status").value(429))
+                .andExpect(jsonPath("$.title").value("Demasiadas altas"))
+                .andExpect(jsonPath("$.detail").value(
+                        "Demasiadas altas de clientes en este momento: inténtalo de nuevo más tarde"));
+    }
+
+    @Test
+    @DisplayName("A través del proxy de Render y de Cloudflare, el alta cuenta para la IP del cliente y no para la de Cloudflare (#131)")
+    void a_traves_de_render_y_cloudflare_el_alta_cuenta_para_la_ip_del_cliente() throws Exception {
+        given(registration.register(any(SignUpCommand.class), any(), any())).willReturn(summary());
+
+        mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY)
+                        .header("X-Forwarded-For", "198.51.100.40, 104.22.136.75")
+                        .with(request -> {
+                            request.setRemoteAddr("10.0.0.5");
+                            return request;
+                        }))
+                .andExpect(status().isCreated());
+
+        verify(registration).register(any(SignUpCommand.class), eq("demo-1234"), eq("198.51.100.40"));
     }
 }
