@@ -1708,6 +1708,17 @@ class AccountWebControllerTests {
             verify(commands).openAccount(ADMIN, OpenAccountCommand.builder()
                     .holderTaxId("12345678Z").initialDeposit(new BigDecimal("100.00")).currency("EUR").build());
         }
+
+        @Test
+        @DisplayName("Abrir cuenta explica el formato del usuario del titular bajo el campo y lo liga al campo")
+        void abrir_cuenta_explica_el_formato_del_usuario_del_titular() throws Exception {
+            String html = mvc.perform(get("/accounts/new")).andReturn().getResponse().getContentAsString();
+
+            assertThat(html).containsPattern("<p class=\"form-text[^\"]*\" id=\"ownerUsername-help\">[^<]*guiones bajos o guiones[^<]*minúsculas");
+            assertThat(FieldTags.tag(html, "ownerUsername"))
+                    .contains("aria-describedby=\"ownerUsername-help\"")
+                    .contains("maxlength=\"30\"");
+        }
     }
 
     /** Petición como la envía htmx: con la cabecera HX-Request. */

@@ -13,7 +13,8 @@
 
         <div class="mb-3">
             <label class="form-label" for="username">Usuario</label>
-            <input class="form-control" type="text" id="username" required enterkeyhint="next" autocomplete="username" autocapitalize="none" spellcheck="false" autofocus th:field="*{username}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('username')} ? 'true'" th:aria-describedby="${#fields.hasErrors('username')} ? 'username-error'">
+            <input class="form-control" type="text" id="username" required enterkeyhint="next" autocomplete="username" autocapitalize="none" spellcheck="false" autofocus th:field="*{username}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('username')} ? 'true'" th:aria-describedby="${#fields.hasErrors('username')} ? 'username-help username-error' : 'username-help'" maxlength="30">
+            <p class="form-text mb-0" id="username-help">De 3 a 30 caracteres: minúsculas sin tildes ni ñ, dígitos, puntos, guiones bajos o guiones. Si escribes mayúsculas, se guarda en minúsculas.</p>
             <p class="invalid-feedback" id="username-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></p>
         </div>
 

@@ -60,7 +60,7 @@ The user could not create a sign-up username: the format (`[a-z0-9._-]{3,30}`) i
 - **Acceptance criteria:**
   - [x] The new tests pass and `./mvnw verify` is green.
 
-### [ ] T3 — Help text under the username fields (~10 min)
+### [x] T3 — Help text under the username fields (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `templates/signup/access.html`, `templates/accounts/new.html`, `SignUpControllerTests.java`, `AccountWebControllerTests.java`
@@ -69,8 +69,8 @@ The user could not create a sign-up username: the format (`[a-z0-9._-]{3,30}`) i
   1. Test (red): step 2 renders `<p class="form-text" id="username-help">` with the format and "se guarda en minúsculas", and the field has `aria-describedby="username-help"` and `maxlength="30"`; with an error, `aria-describedby="username-help username-error"`. Same for `ownerUsername` in `accounts/new`.
   2. Add the help text and the attributes.
 - **Acceptance criteria:**
-  - [ ] The new tests pass; `AccessibleFieldErrorsTemplatesTests` still passes.
-  - [ ] Checked by hand in Chromium: typing `Margaret` signs up as `margaret`.
+  - [x] The new tests pass; `AccessibleFieldErrorsTemplatesTests` still passes.
+  - [x] Checked by hand in Chromium: typing `Margaret` signs up as `margaret`.
 
 ### [ ] T4 — Record the decision (~5 min)
 

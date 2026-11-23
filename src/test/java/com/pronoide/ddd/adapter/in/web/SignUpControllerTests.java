@@ -726,5 +726,24 @@ class SignUpControllerTests {
 
             verifyNoInteractions(registration);
         }
+
+        @Test
+        @DisplayName("El paso 2 explica el formato del usuario bajo el campo y lo liga al campo, también junto al error")
+        void el_paso_2_explica_el_formato_del_usuario() throws Exception {
+            MockHttpSession session = sessionAfterStep1();
+            String html = mvc.perform(get("/signup/access").session(session)).andReturn().getResponse().getContentAsString();
+
+            assertThat(html).containsPattern("<p class=\"form-text[^\"]*\" id=\"username-help\">[^<]*guiones bajos o guiones[^<]*minúsculas");
+            assertThat(FieldTags.tag(html, "username"))
+                    .contains("aria-describedby=\"username-help\"")
+                    .contains("maxlength=\"30\"")
+                    .doesNotContain("pattern=")
+                    .doesNotContain("minlength=");
+
+            String withError = mvc.perform(post("/signup/access").session(session).param("username", "Ab")
+                            .param("password", "clave-secreta-1").param("passwordRepetition", "clave-secreta-1"))
+                    .andReturn().getResponse().getContentAsString();
+            assertThat(FieldTags.tag(withError, "username")).contains("aria-describedby=\"username-help username-error\"");
+        }
     }
 }
