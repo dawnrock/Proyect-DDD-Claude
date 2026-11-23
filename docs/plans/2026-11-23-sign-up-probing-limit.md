@@ -81,7 +81,7 @@ Everything stays in the root of `adapter.in`, like #131; domain and application 
 - **Acceptance criteria:**
   - [x] Lint without errors; the contract version check accepts the bump.
 
-### [ ] T5 — ADR 0018 amended (~5 min)
+### [x] T5 — ADR 0018 amended (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0018-sign-up-limit.md`
@@ -89,7 +89,7 @@ Everything stays in the root of `adapter.in`, like #131; domain and application 
 - **What to do:**
   1. Add the failures limit to the decision (only revealing failures, 10 per hour per IP, `max-failures-per-ip`), with the issue and the date agreed with the user; move "probing is not limited" from consequences to the decision; new consequence: a NAT shares the failures quota too.
 - **Acceptance criteria:**
-  - [ ] The ADR describes the three limits consistently with the code.
+  - [x] The ADR describes the three limits consistently with the code.
 
 ### [ ] T6 — Project status (~10 min)
 
