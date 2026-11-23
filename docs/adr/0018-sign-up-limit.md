@@ -1,7 +1,7 @@
 # 0018 · Limit on customer sign-ups
 
 - **Status:** accepted · 2026-11-23
-- **Issues:** #131 · **Amends:** [ADR 0012](0012-customer-self-sign-up.md) (accepted risk "no rate limit") · **Related:** [ADR 0017](0017-login-attempt-limit.md) (client IP and in-memory counters), [ADR 0014](0014-contract-versioning.md) (contract 2.2.0)
+- **Issues:** #131, #139 (probing limit) · **Amends:** [ADR 0012](0012-customer-self-sign-up.md) (accepted risk "no rate limit") · **Related:** [ADR 0017](0017-login-attempt-limit.md) (client IP and in-memory counters), [ADR 0014](0014-contract-versioning.md) (contract 2.2.0)
 
 ## Context
 
@@ -13,8 +13,9 @@ The public customer sign-up (`/signup` on the web, `POST /api/customers` on the 
   - At most **3 successful sign-ups per client IP** in the last hour.
   - At most **50 successful sign-ups from all IPs together** in the last hour, so that someone with many IPs cannot keep filling the memory.
   - Both windows slide: there is room again when the oldest sign-up of the hour expires.
-  - **Failed sign-ups do not count** (duplicate document, username taken, short password, business rule): they use no memory, and a user fixing a typo is not punished.
-- **Configurable:** `app.security.sign-ups.max-per-ip`, `max-total` and `window` (defaults 3, 50 and 1h); `max-total` cannot be lower than `max-per-ip`.
+  - **Failed sign-ups do not count** towards those two limits (duplicate document, username taken, short password, business rule): they use no memory, and a user fixing a typo is not punished.
+- **Probing limit (#139, agreed with the user on 2026-11-23):** a failed sign-up that reveals that a **username is taken** or that a **document already belongs to a customer** counts for a third per-IP window. After **10 of them in the last hour**, the IP cannot try more sign-ups, even with valid data, until the oldest expires. Other failures (short password, minimum deposit, wrong DNI letter, validation) reveal nothing and do not count. A username found taken only when creating the user, with the customer already saved, does not count either: it is a race, not a probe.
+- **Configurable:** `app.security.sign-ups.max-per-ip`, `max-total`, `max-failures-per-ip` and `window` (defaults 3, 50, 10 and 1h); `max-total` cannot be lower than `max-per-ip`.
 - **Where:** an input-adapter concern, like the login limit; the domain and the application layer do not change. `SignUpLimit` (in memory, with the application's `Clock`) lives in the root of `adapter.in`. `CustomerRegistration`, shared by the web and REST adapters and already `synchronized`, reserves a slot before calling the use case and releases it if the sign-up fails, so a burst of simultaneous requests cannot exceed either limit.
 - **Client IP:** the same `ClientIpResolver` as the login limit (#133), now a bean with `resolve(HttpServletRequest)`.
 - **Answers:**
@@ -32,7 +33,7 @@ The public customer sign-up (`/signup` on the web, `POST /api/customers` on the 
 ## Consequences
 
 - **The global cap can be used against everyone:** someone with many IPs can fill it and stop legitimate sign-ups for up to an hour. Accepted: it is what keeps the memory bounded, and login and operations keep working.
-- **Shared IPs:** a family or office behind one IP (NAT) shares the quota of 3.
+- **Shared IPs:** a family or office behind one IP (NAT) shares the quota of 3 sign-ups and of 10 revealing failures.
 - **In memory:** the counters reset on restart and are not shared between instances.
 - **IPv6:** the per-IP counter keys on the full address, so a client with a /64 can rotate addresses (same gap as the login limit, #133 review); the global cap still bounds it.
-- The full-context test and the contract tests raise both limits: all their sign-ups come from `127.0.0.1`.
+- The full-context test and the contract tests raise the three limits: all their sign-ups come from `127.0.0.1`.

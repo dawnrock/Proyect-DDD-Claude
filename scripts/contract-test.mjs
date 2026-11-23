@@ -52,10 +52,12 @@ if (await isUp()) fail(`Ya hay una aplicación en ${baseUrl}: detenla o elige ot
 console.log(`Arrancando ${jars[0]} con el perfil demo en ${baseUrl}…`);
 // Schemathesis envía credenciales inventadas a POST /api/auth/token: con el límite normal de intentos (ADR 0017)
 // bloquearía su propia IP y luego no obtendría el token que necesitan las demás operaciones. Con el límite de altas
-// (ADR 0018), signUp respondería 429 tras tres altas y no se probaría el contrato.
+// (ADR 0018), signUp respondería 429 tras tres altas, o tras diez documentos o usuarios repetidos (#139), y no se
+// probaría el contrato.
 const app = spawn('java', ['-jar', jars[0], '--spring.profiles.active=demo', `--server.port=${port}`,
   '--app.security.login-attempts.max-per-user=1000000', '--app.security.login-attempts.max-per-ip=1000000',
-  '--app.security.sign-ups.max-per-ip=1000000', '--app.security.sign-ups.max-total=1000000'], {
+  '--app.security.sign-ups.max-per-ip=1000000', '--app.security.sign-ups.max-total=1000000',
+  '--app.security.sign-ups.max-failures-per-ip=1000000'], {
   cwd: root,
   stdio: ['ignore', 'ignore', 'inherit'],
 });

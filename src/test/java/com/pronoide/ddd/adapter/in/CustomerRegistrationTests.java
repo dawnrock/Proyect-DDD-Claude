@@ -66,7 +66,7 @@ class CustomerRegistrationTests {
     }
 
     private CustomerRegistration registrationWith(InMemoryUserDetailsManager manager) {
-        return registrationWith(manager, new SignUpLimitProperties(1_000, 1_000, Duration.ofHours(1)));
+        return registrationWith(manager, new SignUpLimitProperties(1_000, 1_000, Duration.ofHours(1), 1_000));
     }
 
     private CustomerRegistration registrationWith(InMemoryUserDetailsManager manager, SignUpLimitProperties limits) {
@@ -240,7 +240,7 @@ class CustomerRegistrationTests {
 
         @BeforeEach
         void oneSignUpPerIpAndTwoInTotal() {
-            registration = registrationWith(users, new SignUpLimitProperties(1, 2, Duration.ofHours(1)));
+            registration = registrationWith(users, new SignUpLimitProperties(1, 2, Duration.ofHours(1), 1_000));
         }
 
         @Test
@@ -297,13 +297,86 @@ class CustomerRegistrationTests {
                     throw new IllegalStateException("almacén de usuarios caído");
                 }
             };
-            registration = registrationWith(failing, new SignUpLimitProperties(1, 2, Duration.ofHours(1)));
+            registration = registrationWith(failing, new SignUpLimitProperties(1, 2, Duration.ofHours(1), 1_000));
 
             assertThatExceptionOfType(IllegalStateException.class)
                     .isThrownBy(() -> registration.register(signUp().build(), PASSWORD, IP));
 
             assertThat(accounts.findAll()).hasSize(1);
             assertThat(limit.lockedFor(IP)).isPresent();
+        }
+    }
+
+    @Nested
+    @DisplayName("Sondeo de usuarios y documentos (#139, ADR 0018)")
+    class Probing {
+
+        @BeforeEach
+        void twoRevealingFailuresPerIp() {
+            registration = registrationWith(users, new SignUpLimitProperties(1_000, 1_000, Duration.ofHours(1), 2));
+            registration.register(signUp().build(), PASSWORD, "198.51.100.1");
+        }
+
+        private SignUpCommand.Builder another() {
+            return signUp().taxId("12345678Z").username("otra").email("otra@example.com");
+        }
+
+        @Test
+        @DisplayName("Tras 2 altas con un usuario ocupado o un documento existente, ni un alta válida desde esa IP prospera")
+        void tras_dos_fallos_que_revelan_datos_ni_un_alta_valida_prospera() {
+            assertThatExceptionOfType(UsernameTakenException.class)
+                    .isThrownBy(() -> registration.register(another().username("margaret").build(), PASSWORD, IP));
+            assertThatExceptionOfType(DuplicateCustomerException.class)
+                    .isThrownBy(() -> registration.register(signUp().username("otra").build(), PASSWORD, IP));
+
+            assertThatExceptionOfType(TooManySignUpsException.class)
+                    .isThrownBy(() -> registration.register(another().build(), PASSWORD, IP));
+            assertThat(accounts.findAll()).hasSize(1);
+            assertThat(users.userExists("otra")).isFalse();
+
+            registration.register(another().build(), PASSWORD, "198.51.100.2");
+            assertThat(users.userExists("otra")).isTrue();
+        }
+
+        @Test
+        @DisplayName("Una contraseña corta o un depósito insuficiente no cuentan como sondeo")
+        void una_contrasena_corta_o_un_deposito_insuficiente_no_cuentan() {
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> registration.register(another().build(), "corta12", IP));
+            assertThatExceptionOfType(InsufficientInitialDepositException.class).isThrownBy(() -> registration.register(
+                    another().initialDeposit(new BigDecimal("10")).build(), PASSWORD, IP));
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> registration.register(another().build(), "corta12", IP));
+
+            registration.register(another().build(), PASSWORD, IP);
+            assertThat(users.userExists("otra")).isTrue();
+        }
+
+        @Test
+        @DisplayName("Un usuario que se ocupa solo al crearlo, con el cliente ya guardado, no cuenta como sondeo")
+        void un_usuario_ocupado_al_crearlo_no_cuenta_como_sondeo() {
+            InMemoryUserDetailsManager racing = new InMemoryUserDetailsManager() {
+                private boolean firstCheck = true;
+
+                @Override
+                public boolean userExists(String username) {
+                    boolean exists = !firstCheck;
+                    firstCheck = false;
+                    return exists;
+                }
+
+                @Override
+                public void createUser(UserDetails user) {
+                    throw new IllegalArgumentException("user should not exist");
+                }
+            };
+            accounts = PersistenceTestAdapters.accounts();
+            registration = registrationWith(racing, new SignUpLimitProperties(1_000, 1_000, Duration.ofHours(1), 1));
+
+            assertThatExceptionOfType(UsernameTakenException.class)
+                    .isThrownBy(() -> registration.register(signUp().build(), PASSWORD, IP));
+
+            assertThat(limit.lockedFor(IP)).isEmpty();
         }
     }
 }

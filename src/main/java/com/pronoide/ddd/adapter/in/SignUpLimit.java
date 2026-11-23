@@ -4,8 +4,10 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -14,7 +16,9 @@ import java.util.Optional;
  * ventana deslizante de {@link SignUpLimitProperties#window()}: una IP no puede pasar de
  * {@link SignUpLimitProperties#maxPerIp()} y entre todas no pueden pasar de {@link SignUpLimitProperties#maxTotal()}.
  * El límite global acota la memoria que ocupan las altas aunque alguien use muchas IP; mientras está lleno, nadie puede
- * darse de alta.
+ * darse de alta. Además, tras {@link SignUpLimitProperties#maxFailuresPerIp()} altas fallidas que revelan un usuario o
+ * un documento existentes ({@link #recordFailure}), esa IP no puede intentar más altas dentro de la ventana (#139): así
+ * no se puede sondear sin límite qué usuarios o documentos existen.
  *
  * <p>Cada alta se <em>reserva</em> al empezar ({@link #tryReserve}), en la misma operación atómica que mira los dos
  * límites, para que una ráfaga de peticiones simultáneas no pase de ellos. Si el alta falla, {@link #release} devuelve
@@ -33,6 +37,7 @@ public class SignUpLimit {
     private final Clock clock;
     private final Map<String, Deque<Instant>> byIp = new HashMap<>();
     private final Deque<Instant> total = new ArrayDeque<>();
+    private final Map<String, Deque<Instant>> failuresByIp = new HashMap<>();
     private int reservationsSincePrune;
 
     public SignUpLimit(SignUpLimitProperties properties, Clock clock) {
@@ -43,22 +48,11 @@ public class SignUpLimit {
     /** Tiempo que le falta a esa IP para poder darse de alta; vacío si puede. */
     public synchronized Optional<Duration> lockedFor(String ip) {
         Instant now = clock.instant();
-        Deque<Instant> recent = byIp.get(ip);
-        Optional<Duration> address = Optional.empty();
-        if (recent != null) {
-            dropExpired(recent, now);
-            if (recent.isEmpty()) {
-                byIp.remove(ip);
-            } else {
-                address = remaining(recent, properties.maxPerIp(), now);
-            }
-        }
         dropExpired(total, now);
-        Optional<Duration> global = remaining(total, properties.maxTotal(), now);
-        if (address.isPresent() && global.isPresent()) {
-            return Optional.of(address.get().compareTo(global.get()) >= 0 ? address.get() : global.get());
-        }
-        return address.isPresent() ? address : global;
+        return longest(
+                remainingFor(byIp, ip, properties.maxPerIp(), now),
+                remaining(total, properties.maxTotal(), now),
+                remainingFor(failuresByIp, ip, properties.maxFailuresPerIp(), now));
     }
 
     /**
@@ -77,6 +71,21 @@ public class SignUpLimit {
         return Optional.empty();
     }
 
+    /**
+     * Un alta falló porque el usuario o el documento ya existían (#139): cuenta para el límite de fallos de la IP. Solo
+     * cuentan los {@link SignUpLimitProperties#maxFailuresPerIp()} últimos.
+     */
+    public synchronized void recordFailure(String ip) {
+        Instant now = clock.instant();
+        Deque<Instant> recent = failuresByIp.computeIfAbsent(ip, ignored -> new ArrayDeque<>());
+        dropExpired(recent, now);
+        recent.addLast(now);
+        while (recent.size() > properties.maxFailuresPerIp()) {
+            recent.removeFirst();
+        }
+        pruneNowAndThen(now);
+    }
+
     /** El alta falló: se devuelve su reserva de la IP y del total. */
     public synchronized void release(String ip) {
         Deque<Instant> recent = byIp.get(ip);
@@ -90,11 +99,29 @@ public class SignUpLimit {
         total.pollLast();
     }
 
+    private Optional<Duration> remainingFor(Map<String, Deque<Instant>> byKey, String ip, int max, Instant now) {
+        Deque<Instant> recent = byKey.get(ip);
+        if (recent == null) {
+            return Optional.empty();
+        }
+        dropExpired(recent, now);
+        if (recent.isEmpty()) {
+            byKey.remove(ip);
+            return Optional.empty();
+        }
+        return remaining(recent, max, now);
+    }
+
+    @SafeVarargs
+    private static Optional<Duration> longest(Optional<Duration>... remaining) {
+        return Arrays.stream(remaining).flatMap(Optional::stream).max(Duration::compareTo);
+    }
+
     private Optional<Duration> remaining(Deque<Instant> recent, int max, Instant now) {
         if (recent.size() < max) {
             return Optional.empty();
         }
-        // Solo se reserva con sitio, así que nunca hay más de max: hay sitio cuando caduque la más antigua
+        // Nunca hay más de max (solo se reserva con sitio y los fallos se recortan): hay sitio cuando caduque la más antigua
         return Optional.of(Duration.between(now, recent.peekFirst().plus(properties.window())));
     }
 
@@ -110,9 +137,11 @@ public class SignUpLimit {
             return;
         }
         reservationsSincePrune = 0;
-        byIp.values().removeIf(recent -> {
-            dropExpired(recent, now);
-            return recent.isEmpty();
-        });
+        for (Map<String, Deque<Instant>> byKey : List.of(byIp, failuresByIp)) {
+            byKey.values().removeIf(recent -> {
+                dropExpired(recent, now);
+                return recent.isEmpty();
+            });
+        }
     }
 }
