@@ -2,6 +2,12 @@
 
 Changes to `docs/api/openapi.yaml`, newest first. Versioning policy: [ADR 0014](../adr/0014-contract-versioning.md) (major for an incompatible change as `oasdiff breaking` reports it, minor for a compatible addition, patch for documentation only). The CI checks the bump on every pull request.
 
+## 2.2.1 · 2026-11-23
+
+Documentation only.
+
+- **Error table:** the summary of status codes in `info.description` gets the 429 row (`Demasiados intentos` when asking for a token, ADR 0017; `Demasiadas altas` when signing up, ADR 0018). The operations already declared it since 2.1.0 and 2.2.0.
+
 ## 2.2.0 · 2026-11-23 (#131)
 
 Limit on customer sign-ups ([ADR 0018](../adr/0018-sign-up-limit.md)).
