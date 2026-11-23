@@ -12,6 +12,7 @@ import com.pronoide.ddd.adapter.in.SegmentLabels;
 import com.pronoide.ddd.application.AccountSummary;
 import com.pronoide.ddd.application.CallerDef;
 import com.pronoide.ddd.application.CheckingAccountCommands;
+import com.pronoide.ddd.application.CheckingAccountQueries;
 import com.pronoide.ddd.application.DepositCommand;
 import com.pronoide.ddd.application.OpenAccountCommand;
 import com.pronoide.ddd.application.TransactionSummary;
@@ -25,10 +26,11 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Adaptador de entrada de línea de comandos (#19): al arrancar con el perfil {@code demo}, que
  * {@code ./mvnw spring-boot:run} activa por defecto, abre las cuentas de demostración para poder probar la aplicación
- * sin preparar datos. Como la API REST y la web, solo usa el puerto de entrada {@link CheckingAccountCommands}: los
+ * sin preparar datos. Como la API REST y la web, solo usa los puertos de entrada {@link CheckingAccountCommands} y
+ * {@link CheckingAccountQueries}: los
  * datos cumplen las mismas reglas que los reales (el IBAN lo genera la numeración y el segmento lo decide la agencia
- * tributaria a partir del NIF; Grace Hopper es de alto patrimonio por sus ingresos verificados). Los tests no lo
- * cargan.
+ * tributaria a partir del NIF; Grace Hopper es de alto patrimonio por sus ingresos verificados). Si ya hay cuentas
+ * (la base persiste entre arranques, #150), no carga nada. Los tests no lo cargan.
  */
 @Slf4j
 @Component
@@ -42,6 +44,7 @@ public class DomainModelRunner implements ApplicationRunner {
             account("Alan Turing", "11111111H", "alan@example.com", "250.00", "alan"));
 
     private final CheckingAccountCommands commands;
+    private final CheckingAccountQueries queries;
 
     /**
      * Abre las cuentas de demostración y, con los IBAN generados que devuelven sus resúmenes, ingresa en la de Ada,
@@ -50,6 +53,11 @@ public class DomainModelRunner implements ApplicationRunner {
      */
     @Override
     public void run(ApplicationArguments args) {
+        if (!queries.listAccounts(CallerDef.system()).isEmpty()) {
+            // Con la base persistente (#150) la demo se carga una sola vez, no en cada arranque
+            log.info("[demo] datos ya cargados: no se abren las cuentas de demostración");
+            return;
+        }
         List<AccountSummary> opened = DEMO_ACCOUNTS.stream().map(this::open).toList();
         log.info("[demo] {} cuentas de demostración abiertas", opened.size());
         AccountSummary ada = opened.get(0);

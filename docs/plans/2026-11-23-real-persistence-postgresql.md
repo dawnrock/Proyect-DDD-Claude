@@ -202,7 +202,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
   - [x] A user created by the sign-up is still found by a new `UserDetailsManager` over the same database.
   - [x] Starting twice does not fail or duplicate the configured users; the login and token tests stay green.
 
-### [ ] T15 — Idempotent demo data (~5 min)
+### [x] T15 — Idempotent demo data (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/cli/DomainModelRunner.java`, `DomainModelRunnerTests.java`
@@ -210,7 +210,7 @@ The output ports already exist and each one has an abstract contract (`*Contract
 - **What to do:**
   1. If the system caller already sees accounts (`CheckingAccountQueries`), log `[demo] datos ya cargados` and open nothing.
 - **Acceptance criteria:**
-  - [ ] Running the runner twice leaves three demo accounts and the same balances (Ada 1500, Grace 4700, Alan 200).
+  - [x] Running the runner twice leaves three demo accounts and the same balances (Ada 1500, Grace 4700, Alan 200).
 
 ### [ ] T16 — `prod` profile (~5 min)
 
