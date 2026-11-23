@@ -181,7 +181,7 @@ A rejected withdrawal is **not an error**: the domain records it with status `RE
 
 - **Side:** both
 - **Layer:** tests
-- **Files:** `src/test/java/com/pronoide/ddd/DddLabApplicationTests.java`
+- **Files:** `src/test/java/com/dawnrock/ddd/DddLabApplicationTests.java`
 - **Depends on:** T1-T9 (after merging `-back` and `-web`)
 - **What to do:**
   1. With the real service: open an account; deposit via API → 201 `APPROVED`; withdraw more than the balance (retail) → 201 `REJECTED`; `GET /accounts/{id}` shows both transactions and the rejected one as rejected; web deposit and withdrawal redirect to the detail with their flash.

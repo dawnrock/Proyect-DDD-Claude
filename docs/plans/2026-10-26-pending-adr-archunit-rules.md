@@ -22,8 +22,8 @@ Turn two architecture rules that today only live in ADRs into executable ArchUni
 
 | Layer / package | File | Change |
 | --------------- | ---- | ------ |
-| tests (ArchUnit) | `src/test/java/com/pronoide/ddd/LayeredArchitectureTests.java` | Two new rules: `application` without Spring Security / method security (ADR 0008) and no interfaces in `persistence` (ADR 0004) |
-| tests (ArchUnit) | `src/test/java/com/pronoide/ddd/DomainIsolationTests.java` | Drop the non-existent `com.pronoide.ddd.bootstrap..` package |
+| tests (ArchUnit) | `src/test/java/com/dawnrock/ddd/LayeredArchitectureTests.java` | Two new rules: `application` without Spring Security / method security (ADR 0008) and no interfaces in `persistence` (ADR 0004) |
+| tests (ArchUnit) | `src/test/java/com/dawnrock/ddd/DomainIsolationTests.java` | Drop the non-existent `com.dawnrock.ddd.bootstrap..` package |
 | docs | `docs/arquitectura/fase-1-capas.md` | Add the new rules to the table of rules implemented in #12 |
 | docs | `docs/ia/estado-del-proyecto.md` | Issue status, next step (#13) and history row; remove the "bootstrap" pending item |
 
@@ -45,7 +45,7 @@ Technical decisions:
 ### [x] T1 — Rule: application and method security without Spring Security (ADR 0008) (~10 min)
 
 - **Layer:** tests
-- **Files:** `src/test/java/com/pronoide/ddd/LayeredArchitectureTests.java`
+- **Files:** `src/test/java/com/dawnrock/ddd/LayeredArchitectureTests.java`
 - **Depends on:** —
 - **What to do:**
   1. Add `la_aplicacion_no_depende_de_spring_security`: `noClasses().that().resideInAPackage("..application..").should().dependOnClassesThat().resideInAPackage("org.springframework.security..")`, with Javadoc citing ADR 0008.
@@ -59,7 +59,7 @@ Technical decisions:
 ### [x] T2 — Rule: no port interfaces in persistence (ADR 0004) (~5 min)
 
 - **Layer:** tests
-- **Files:** `src/test/java/com/pronoide/ddd/LayeredArchitectureTests.java`
+- **Files:** `src/test/java/com/dawnrock/ddd/LayeredArchitectureTests.java`
 - **Depends on:** —
 - **What to do:**
   1. Add `la_persistencia_no_tiene_interfaces`: `noClasses().that().resideInAPackage("..persistence..").should().beInterfaces()`, with Javadoc citing ADR 0004 and stating that it is a phase 1 rule (phase 2 declares the port in `domain.model`).
@@ -70,10 +70,10 @@ Technical decisions:
 ### [x] T3 — Remove the non-existent bootstrap package from DomainIsolationTests (~5 min)
 
 - **Layer:** tests
-- **Files:** `src/test/java/com/pronoide/ddd/DomainIsolationTests.java`
+- **Files:** `src/test/java/com/dawnrock/ddd/DomainIsolationTests.java`
 - **Depends on:** —
 - **What to do:**
-  1. Remove `"com.pronoide.ddd.bootstrap.."` from `el_dominio_no_depende_del_framework`; keep Spring and `jakarta`, and the private-state rule.
+  1. Remove `"com.dawnrock.ddd.bootstrap.."` from `el_dominio_no_depende_del_framework`; keep Spring and `jakarta`, and the private-state rule.
   2. Run `./mvnw test -Dtest=DomainIsolationTests`: green.
 - **Acceptance criteria:**
   - [x] `DomainIsolationTests` no longer mentions `bootstrap` and passes.

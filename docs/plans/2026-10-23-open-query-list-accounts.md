@@ -183,7 +183,7 @@ Business rules (minimum deposit, currency) stay in the aggregate. The use case o
 
 - **Side:** both
 - **Layer:** tests
-- **Files:** `src/test/java/com/pronoide/ddd/DddLabApplicationTests.java`
+- **Files:** `src/test/java/com/dawnrock/ddd/DddLabApplicationTests.java`
 - **Depends on:** T1-T9 (after merging `-back` and `-web`)
 - **What to do:**
   1. With the real service: `POST /api/accounts` → 201; `GET /api/accounts/{id}` → 200; `GET /` → the HTML contains the account number.

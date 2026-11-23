@@ -105,7 +105,7 @@ Restyle the Thymeleaf web UI as a dark, minimal interface in the style of mobile
 ### [x] T6 — Flash messages in the new format (~10 min)
 
 - **Layer:** presentation
-- **Files:** `AccountWebController.java`, `AccountWebControllerTests.java`, `src/test/java/com/pronoide/ddd/DddLabApplicationTests.java`
+- **Files:** `AccountWebController.java`, `AccountWebControllerTests.java`, `src/test/java/com/dawnrock/ddd/DddLabApplicationTests.java`
 - **Depends on:** T1
 - **What to do:**
   1. Build the deposit, withdrawal and transfer flash texts with `WebFormat.money` ("Ingreso de 25,00 € aprobado", "Transferencia de 25,00 € a ES79 •••• 6789 aprobada").

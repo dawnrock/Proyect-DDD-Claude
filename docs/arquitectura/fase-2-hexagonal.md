@@ -7,7 +7,7 @@ El dominio ocupa el centro; la aplicación lo rodea y expone los puertos de entr
 ## Estructura de paquetes
 
 ```
-com.pronoide.ddd
+com.dawnrock.ddd
 ├── adapter
 │   ├── in
 │   │   ├── cli           DomainModelRunner

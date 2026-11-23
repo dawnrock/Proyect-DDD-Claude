@@ -198,5 +198,5 @@ Parte del objetivo del proyecto es practicar un flujo de trabajo asistido por IA
 - JPA y H2 están configurados, pero la persistencia es en memoria; la persistencia real y una transacción alrededor de los dos `save` de una transferencia están previstas para la fase 2.
 - `MoneyTransferService` se crea con `new` dentro de `CheckingAccountService`; en la fase 2 pasará a ser un bean en `config`.
 - `CheckingAccount.tryWithdraw` registra el movimiento antes de evaluarlo; con cuentas que no fueran en EUR, un cliente de alto patrimonio podría provocar un `CurrencyMismatchException` dejando un movimiento `PENDING`.
-- `DomainIsolationTests` sigue prohibiendo un paquete `com.pronoide.ddd.bootstrap..` que no existe (resto inofensivo).
+- `DomainIsolationTests` sigue prohibiendo un paquete `com.dawnrock.ddd.bootstrap..` que no existe (resto inofensivo).
 - Falta un test: "el nombre del titular es obligatorio" (`AccountHolder`).

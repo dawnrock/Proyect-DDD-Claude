@@ -46,7 +46,7 @@ Los argumentos nulos o inválidos que no son reglas de negocio (por ejemplo, un 
 
 ## Reglas de negocio
 
-Cada regla cita el test que la demuestra (`src/test/java/com/pronoide/ddd/domain/model/` y, para R17-R19, `domain/service/`).
+Cada regla cita el test que la demuestra (`src/test/java/com/dawnrock/ddd/domain/model/` y, para R17-R19, `domain/service/`).
 
 | Regla | Descripción | Test |
 | ----- | ----------- | ---- |
