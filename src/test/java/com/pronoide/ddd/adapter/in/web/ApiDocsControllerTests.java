@@ -13,10 +13,11 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.TestUsers;
 
 /** {@code /api-docs} (#111): la documentación interactiva de la API, pública. */
 @WebMvcTest(ApiDocsController.class)
-@Import({WebSecurityConfig.class, SecuritySupport.class})
+@Import({WebSecurityConfig.class, SecuritySupport.class, TestUsers.class})
 class ApiDocsControllerTests {
 
     @Autowired

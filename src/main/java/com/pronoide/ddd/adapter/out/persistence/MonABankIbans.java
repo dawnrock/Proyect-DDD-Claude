@@ -1,33 +1,32 @@
 package com.pronoide.ddd.adapter.out.persistence;
 
 import java.math.BigInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.springframework.stereotype.Component;
 
 import com.pronoide.ddd.domain.model.AccountNumber;
-import com.pronoide.ddd.domain.model.AccountNumberSequence;
 
 /**
- * Adaptador de salida en memoria (simulado) del puerto {@link AccountNumberSequence}: genera IBAN españoles válidos y
- * consecutivos. Es determinista y se reinicia con cada arranque.
- *
- * <p>Cada IBAN lleva la entidad {@code 9999} de Mon-A Bank (inventada), la oficina {@code 0001}, los dígitos de control nacionales calculados con
- * el algoritmo del CCC español, un número de cuenta secuencial de 10 dígitos (desde {@code 0000000001}) y los dígitos
- * de control del IBAN (ISO 13616, módulo 97). Es seguro entre hilos.
+ * IBAN de Mon-A Bank a partir del número secuencial de la cuenta (#150, compartido por las numeraciones). Cada IBAN
+ * lleva la entidad {@code 9999} de Mon-A Bank (inventada), la oficina {@code 0001}, los dígitos de control nacionales
+ * calculados con el algoritmo del CCC español, el número de cuenta de 10 dígitos y los dígitos de control del IBAN
+ * (ISO 13616, módulo 97).
  */
-@Component
-class InMemoryAccountNumberSequence implements AccountNumberSequence {
+final class MonABankIbans {
 
     private static final String BANK = "9999";
     private static final String BRANCH = "0001";
     private static final int[] CCC_WEIGHTS = {1, 2, 4, 8, 5, 10, 9, 7, 3, 6};
+    private static final long MAX_ACCOUNT = 9_999_999_999L;
 
-    private final AtomicLong counter = new AtomicLong();
+    private MonABankIbans() {
+    }
 
-    @Override
-    public AccountNumber next() {
-        String account = "%010d".formatted(counter.incrementAndGet());
+    /** @throws IllegalArgumentException si el número no es positivo o no cabe en diez dígitos */
+    static AccountNumber forAccount(long number) {
+        if (number < 1 || number > MAX_ACCOUNT) {
+            throw new IllegalArgumentException("El número de cuenta debe estar entre 1 y %d: %d"
+                    .formatted(MAX_ACCOUNT, number));
+        }
+        String account = "%010d".formatted(number);
         String bban = BANK + BRANCH + controlDigit("00" + BANK + BRANCH) + controlDigit(account) + account;
         return new AccountNumber("ES" + ibanCheckDigits(bban) + bban);
     }

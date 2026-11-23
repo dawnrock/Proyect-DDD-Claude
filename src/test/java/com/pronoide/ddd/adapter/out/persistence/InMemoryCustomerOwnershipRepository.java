@@ -5,17 +5,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.springframework.stereotype.Repository;
-
 import com.pronoide.ddd.application.CustomerOwnershipRepository;
 import com.pronoide.ddd.domain.model.TaxId;
 
 /**
- * Adaptador de salida en memoria (simulado) del puerto {@link CustomerOwnershipRepository}: con qué usuario entra cada
+ * Solo para tests (#150, ADR 0019): la aplicación usa el adaptador JPA. Cumple el mismo contrato del puerto.
+ *
+ * <p>Doble de test en memoria del puerto {@link CustomerOwnershipRepository}: con qué usuario entra cada
  * cliente. Un cliente tiene un único usuario y un usuario es de un único cliente (R30); comprobarlo y asignar es una
  * sola operación atómica.
  */
-@Repository
 class InMemoryCustomerOwnershipRepository implements CustomerOwnershipRepository {
 
     private final Map<TaxId, String> usernames = new HashMap<>();

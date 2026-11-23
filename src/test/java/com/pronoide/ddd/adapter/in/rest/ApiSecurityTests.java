@@ -43,6 +43,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.TestUsers;
 import com.pronoide.ddd.application.AccountSummary;
 import com.pronoide.ddd.application.Caller;
 import com.pronoide.ddd.application.CheckingAccountCommands;
@@ -60,7 +61,7 @@ import com.pronoide.ddd.application.CheckingAccountQueries;
         "app.security.users[1].password-hash=" + TokenControllerTests.DEMO_HASH,
         "app.security.users[1].role=USER",
         "app.jwt.secret=" + ApiSecurityTests.SECRET})
-@Import({ApiSecurityConfig.class, SecuritySupport.class, AccessTokenIssuer.class})
+@Import({ApiSecurityConfig.class, SecuritySupport.class, TestUsers.class, AccessTokenIssuer.class})
 class ApiSecurityTests {
 
     static final String SECRET = "un-secreto-de-pruebas-de-al-menos-32-bytes";

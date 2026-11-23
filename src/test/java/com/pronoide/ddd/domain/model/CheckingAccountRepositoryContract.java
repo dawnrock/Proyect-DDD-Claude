@@ -179,7 +179,7 @@ public abstract class CheckingAccountRepositoryContract {
         repository.save(cuenta);
 
         assertThat(repository.findByAccountNumber(old)).isEmpty();
-        assertThat(repository.findByAccountNumber(replacement)).containsSame(cuenta);
+        assertThat(repository.findByAccountNumber(replacement)).contains(cuenta);
         assertThat(repository.findAll()).containsExactly(cuenta);
     }
 }

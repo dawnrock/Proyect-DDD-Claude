@@ -20,8 +20,8 @@ com.pronoide.ddd
 │   │   └── web           Thymeleaf + Bootstrap, htmx, Alpine.js (ADR 0016)
 │   └── out
 │       ├── event         SpringDomainEventPublisher
-│       ├── persistence   InMemoryCheckingAccountRepository, InMemoryAccountOwnershipRepository, InMemoryAccountNumberSequence,
-│       │                 InMemoryCustomerRepository, InMemoryCustomerOwnershipRepository
+│       ├── persistence   JpaCheckingAccountRepository, JpaCustomerRepository, JpaAccountOwnershipRepository,
+│       │                 JpaCustomerOwnershipRepository, DatabaseAccountNumberSequence, TransactionalUnitOfWork (#150)
 │       └── taxagency     FakeTaxAgencyIncomeVerifier
 ├── application           application services and input ports
 │   └── listener          domain event consumers
@@ -52,16 +52,21 @@ com.pronoide.ddd
 
   The shared security support in the root of `adapter.in`, `config` and the boot class sit outside the rings. Explicit rules complete the onion: output adapters only implement ports of the hexagon and know `application` only through interfaces; input ports (`*Commands`, `*Queries`) are interfaces and input adapters never use `CheckingAccountService`; input adapters only know `DomainException` from the domain; nobody outside `adapter.in` depends on it, and its shared security support does not know `cli`, `rest` or `web`; only `adapter.out` knows the output adapters; nobody depends on `config`; only adapters and `config` depend on Spring web, HTTP, MVC or data; the core does not depend on Spring (except `@EventListener` in `application.listener`); the domain only depends on the JDK (no `org.immutables`) and has no public setters; the ADR 0008 security rules; every class belongs to the hexagon, an adapter or `config`. `DomainIsolationTests` (both phases) and `AdapterTestIsolationTests` (test code, #21) complete them.
 
+## Persistence (#150, ADR 0019)
+
+PostgreSQL managed by Neon in production (`prod` profile, credentials from `SPRING_DATASOURCE_*`), H2 in PostgreSQL mode locally and in the tests (one database per Spring test context). The schema is versioned with Flyway (`src/main/resources/db/migration`) and Hibernate only validates it. JPA entities are not the aggregates: the adapters translate, and they rebuild aggregates with `reconstitute(...)`, which checks that the stored state is coherent (the balance matches the approved transactions) and records no events. Only `adapter.out.persistence` may call it (`solo_la_persistencia_reconstituye_agregados`). The in-memory adapters are test doubles in `src/test`.
+
 ## How adapters are tested
 
-Each adapter is tested without the hexagon (#21). `AdapterTestIsolationTests` (ArchUnit over the test code) forbids `@SpringBootTest` in any input-adapter test; the full-context tests live in the root package (`DddLabApplicationTests`, `DemoProfileTests`).
+Each adapter is tested without the hexagon (#21). `AdapterTestIsolationTests` (ArchUnit over the test code) forbids `@SpringBootTest` in any input-adapter test; the full-context tests live in the root package (`DddLabApplicationTests`, `DemoProfileTests`, `ProdProfileTests`, `PersistenceRestartTests`).
 
 | Adapter | How | Test class |
 | ------- | --- | ---------- |
 | REST controllers | `@WebMvcTest` with `CheckingAccountCommands`/`CheckingAccountQueries` mocked (`@MockitoBean`) | `AccountControllerTests`, `TransferControllerTests`, `RestExceptionHandlerTests` |
 | Web controllers | `@WebMvcTest` with the ports mocked | `AccountWebControllerTests`, `WebSecurityTests` |
-| CLI runner | the real application service with in-memory adapters, without Spring | `DomainModelRunnerTests` |
-| Persistence | port contracts (`*Contract`) extended by the in-memory adapter's test | `InMemoryCheckingAccountRepositoryTests`, `InMemoryAccountOwnershipRepositoryTests`, `InMemoryAccountNumberSequenceTests`, `InMemoryUnitOfWorkTests` |
+| CLI runner | the real application service with the in-memory test doubles, without Spring | `DomainModelRunnerTests` |
+| Persistence (JPA) | port contracts (`*Contract`) against H2 in PostgreSQL mode, in a minimal shared Spring context (`JpaTestDatabase`: Flyway, JPA and Spring Data, each port call in its own transaction); not `@DataJpaTest`, because the contracts' `@Nested` classes would get the context of the contract (#150) | `JpaCheckingAccountRepositoryTests`, `JpaCustomerRepositoryTests`, `Jpa*OwnershipRepositoryTests`, `DatabaseAccountNumberSequenceTests`, `TransactionalUnitOfWorkTests`, `CheckingAccountMapperTests` |
+| Persistence (test doubles) | the same contracts over the in-memory doubles, which live in `src/test` and feed the fast tests of `application` through `PersistenceTestAdapters` (ADR 0019, option C) | `InMemoryCheckingAccountRepositoryTests`, `InMemoryAccountOwnershipRepositoryTests`, `InMemoryAccountNumberSequenceTests`, `InMemoryUnitOfWorkTests` |
 | Events | a minimal Spring context with only the adapter and a recording `@EventListener`; plus a unit test with a mocked `ApplicationEventPublisher` | `SpringDomainEventPublisherContextTests`, `SpringDomainEventPublisherTests` |
 | Tax agency | the fake on its own | `FakeTaxAgencyIncomeVerifierTests` |
 
@@ -95,15 +100,15 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | `WebExceptionHandler`, `WebModelAdvice`, `WebFormat` | `adapter.in.web` | Web support: 404 page, common model attributes, formatting (amounts, shortened IBAN, segment label) |
 | `WebSecurityConfig` | `adapter.in.web` | Input adapter: fallback security chain (form login) |
 | `SecuritySupport`, `CurrentCaller`, `SecurityUsersProperties` | `adapter.in` | Support shared by the input adapters: authenticated user → `Caller` |
+| `UserStore` | `adapter.in` | Support shared by the input adapters (#150): the Spring Security users in the database (`JdbcUserDetailsManager`); creates or updates the configured users at startup. The `@WebMvcTest`s import `TestUsers` (in memory) instead |
 | `SegmentLabels` | `adapter.in` | Support shared by the input adapters: Spanish label of a segment code, used by the web (`WebFormat.segment`) and the CLI trace (#77) |
-| `InMemoryCheckingAccountRepository` | `adapter.out.persistence` | Output adapter (simulated persistence, package-private): implements `CheckingAccountRepository` |
+| `JpaCheckingAccountRepository` | `adapter.out.persistence` | Output adapter (JPA, package-private, #150): implements `CheckingAccountRepository`; the holder is embedded in the account row, the transactions have their own table; `CheckingAccountMapper` rebuilds the aggregate with `reconstitute(...)` |
+| `JpaCustomerRepository` | `adapter.out.persistence` | Output adapter (JPA, package-private, #150): implements `CustomerRepository`, one customer per document (R30, unique index) |
+| `JpaAccountOwnershipRepository`, `JpaCustomerOwnershipRepository` | `adapter.out.persistence` | Output adapters (JPA, package-private, #150): implement `AccountOwnershipRepository` (ADR 0008) and `CustomerOwnershipRepository` (one username per customer, R30) |
+| `DatabaseAccountNumberSequence`, `MonABankIbans` | `adapter.out.persistence` | Output adapter (package-private, #150): implements `AccountNumberSequence` over the database sequence `account_number_seq`, so numbers survive a restart; `MonABankIbans` computes the IBAN (entity `9999`, branch `0001`) |
+| `TransactionalUnitOfWork` | `adapter.out.persistence` | Output adapter (package-private, #150): implements `UnitOfWork` as a database transaction inside one fair lock (#78), so a failed use case is rolled back |
 | `SpringDomainEventPublisher` | `adapter.out.event` | Output adapter (package-private): implements `DomainEventPublisher` over Spring's `ApplicationEventPublisher` |
-| `InMemoryAccountNumberSequence` | `adapter.out.persistence` | Output adapter (simulated, package-private): implements `AccountNumberSequence`, valid consecutive Spanish IBANs |
 | `FakeTaxAgencyIncomeVerifier` | `adapter.out.taxagency` | Output adapter (simulated, package-private): implements `IncomeVerifier` with a fixed table |
-| `InMemoryAccountOwnershipRepository` | `adapter.out.persistence` | Output adapter (package-private): implements `AccountOwnershipRepository`, which user owns each account (ADR 0008) |
-| `InMemoryCustomerRepository` | `adapter.out.persistence` | Output adapter (package-private, #103): implements `CustomerRepository`, one customer per document (R30) |
-| `InMemoryCustomerOwnershipRepository` | `adapter.out.persistence` | Output adapter (package-private, #103): implements `CustomerOwnershipRepository`, one username per customer (R30) |
-| `InMemoryUnitOfWork` | `adapter.out.persistence` | Output adapter (simulated, package-private): implements `UnitOfWork` with one fair lock for every use case (#78) |
 | `CheckingAccountService` | `application` | Application service: implements `CheckingAccountCommands` and `CheckingAccountQueries` (use cases and account ownership); uses the output ports only, opens accounts through `CheckingAccountFactory` and runs every use case inside a `UnitOfWork` and publishes the domain events of the saved accounts once the unit has finished (#78). Keeps its name (not `CheckingAccountApplicationService`): nobody outside `application` sees it. No Spring annotations: built in `config` |
 | `CheckingAccountCommands`, `CheckingAccountQueries` | `application` | Input ports: use cases that change accounts (open, sign up, open another account, regenerate an IBAN, deposit, withdraw, transfer) and that query them (list, detail, is a username taken) |
 | `AccountOwnershipRepository` | `application` | Output port: account ownership. In `application`, not `domain.model`, because the user's identity never reaches the domain (ADR 0008) |

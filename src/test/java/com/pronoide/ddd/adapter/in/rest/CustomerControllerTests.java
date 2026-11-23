@@ -38,13 +38,14 @@ import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.adapter.in.CustomerRegistration;
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.TestUsers;
 import com.pronoide.ddd.adapter.in.TooManySignUpsException;
 import com.pronoide.ddd.adapter.in.UsernameTakenException;
 
 /** {@code POST /api/customers}: público, sin credenciales ni CSRF. */
 @WithAnonymousUser
 @WebMvcTest(CustomerController.class)
-@Import({ApiSecurityConfig.class, SecuritySupport.class})
+@Import({ApiSecurityConfig.class, SecuritySupport.class, TestUsers.class})
 class CustomerControllerTests {
 
     private static final UUID ID = UUID.fromString("11111111-2222-3333-4444-555555555555");

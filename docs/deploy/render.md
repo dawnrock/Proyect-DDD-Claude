@@ -6,7 +6,8 @@ Render runs Java only through Docker, so the repository has a [`Dockerfile`](../
 
 | What | Set by | Value |
 | ---- | ------ | ----- |
-| Demo data | image (`SPRING_PROFILES_ACTIVE`) | `demo` profile: three accounts and their operations, rebuilt on every start |
+| Demo data | image (`SPRING_PROFILES_ACTIVE`) | `demo` profile: three accounts and their operations, loaded when the database has no accounts |
+| Database (`Hexagonal`) | you, in Render (`SPRING_PROFILES_ACTIVE=demo,prod` and `SPRING_DATASOURCE_*`) | PostgreSQL on Neon, so data survives restarts (#150, ADR 0019); without them, H2 in memory |
 | Port | Render (`PORT`) | The container listens on `PORT` (8080 when it is not set) |
 | Memory | image (`JAVA_TOOL_OPTIONS`) | The JVM uses up to 75 % of the container (512 MB on the free plan) |
 | H2 console | image (`SPRING_H2_CONSOLE_ENABLED=false`) | Off: on a public URL it could run code on the server |
@@ -69,11 +70,34 @@ The result starts with `$2y$10$` or `$2b$10$` and is about 60 characters long. R
    ```
 
    - **All twelve are needed.** Spring Boot replaces the whole user list when a variable sets any part of it: with only the hashes the users would have no name and the application would not start.
-   - **Keep the four user names.** (Customers who sign up on the site get their own runtime user and need no variable.) The demo accounts belong to `admin`, `ada`, `grace` and `alan`; with other names the customers would see no account. Each user may have a different hash.
+   - **Keep the four user names.** (Customers who sign up on the site get their own user and need no variable.) The demo accounts belong to `admin`, `ada`, `grace` and `alan`; with other names the customers would see no account. Each user may have a different hash.
    - Optional: `APP_ADMIN_USERNAME` and `APP_ADMIN_PASSWORD` add one more administrator (the password in plain text, stored in Render).
    - **`Hexagonal` only: `APP_JWT_SECRET`**, the secret that signs the API tokens (#122). Use Render's **Generate** button, or `openssl rand -base64 48` on your computer; it must be at least 32 bytes. Without it the service starts with a random key and every token stops working when it sleeps or restarts. Changing it invalidates every token at once. **Never deploy without it:** the image runs the `demo` profile, whose development secret is public in the repository, so anyone could forge an administrator token.
 
+   - **`Hexagonal` only, once the Neon database exists ([section 2 bis](#2-bis-database-on-neon-hexagonal)):** `SPRING_PROFILES_ACTIVE=demo,prod` and the three `SPRING_DATASOURCE_*` variables.
+
 5. **Create Web Service.** The first build takes a few minutes (Maven downloads the dependencies); the service is live when the health check answers `UP`.
+
+## 2 bis. Database on Neon (`Hexagonal`)
+
+Since #150 (ADR 0019) the `Hexagonal` service keeps users, customers, accounts and transactions in PostgreSQL managed by [Neon](https://neon.com), on its free plan. Without this section the service still works, with H2 in memory as before. `Monolithic` does not change.
+
+1. **Sign up at Neon** (GitHub or Google account; the free plan needs no card).
+2. **Create a project** in the region **AWS Europe Central 1 (Frankfurt), `eu-central-1`**, the same as the Render services, so every query stays inside Frankfurt. The default PostgreSQL version and the database `neondb` are fine.
+3. **Get the connection details:** in the project dashboard, **Connect**, with **Connection pooling off** (the direct connection: the pooled one, PgBouncer in transaction mode, does not get on with JDBC prepared statements). The connection string looks like `postgresql://USER:PASSWORD@ep-xxxx.eu-central-1.aws.neon.tech/neondb?sslmode=require`. Keep the values in a password manager; never in the repository or a chat.
+4. **In Render, Environment of the `Hexagonal` service**, add:
+
+   ```text
+   SPRING_PROFILES_ACTIVE=demo,prod
+   SPRING_DATASOURCE_URL=jdbc:postgresql://ep-xxxx.eu-central-1.aws.neon.tech/neondb?sslmode=require
+   SPRING_DATASOURCE_USERNAME=<user, usually neondb_owner>
+   SPRING_DATASOURCE_PASSWORD=<password>
+   ```
+
+   The URL is the connection string with `jdbc:` in front and without the user and password. **Add them only once the deployed code includes #150:** older code also reads `SPRING_DATASOURCE_URL` and would fail to start without the PostgreSQL driver.
+5. **Save, rebuild and deploy.** On the first start Flyway creates the tables and the `demo` profile loads the demo data; later starts find the accounts and load nothing. The `prod` profile has no defaults: if a variable is missing, the service does not start instead of silently using H2.
+
+The configured users (`APP_SECURITY_USERS_*`, `APP_ADMIN_*`) are written to the database on every start: changing a hash in Render still changes that user's password. Users who signed up are kept.
 
 ## 3. Check it
 
@@ -96,7 +120,8 @@ The first answers `{"status":"UP",...}`; the other two get a token and list the 
 Render's free conditions change from time to time: check the current plan on its website. At the time of writing:
 
 - **Sleep.** After about 15 minutes without requests the service sleeps; the next request wakes it up, which takes about a minute.
-- **Data in memory.** Every start rebuilds the demo data, so accounts opened, customers and users who signed up on the site, and operations made there disappear when the service sleeps or is redeployed. This is a practice project with simulated persistence.
+- **Data.** With Neon (`Hexagonal`, [section 2 bis](#2-bis-database-on-neon-hexagonal)) users, customers, accounts and transactions survive sleeps and redeploys; to check it, sign up a test customer, restart the service (**Manual Deploy → Restart service**) and log in with that customer. Without Neon, and always on `Monolithic`, data lives in memory: every start rebuilds the demo data and what was done on the site disappears.
+- **Neon also sleeps.** Its compute suspends after about 5 minutes idle; the first request after a pause pays that start (about a second) on top of Render's. The free plan's storage (about 1 GB at the time of writing) is far more than the demo needs.
 - **Monthly hours.** The free instance hours are shared by every free service of the account; two services that sleep when idle fit in them.
 
 ## Redeploy and stop

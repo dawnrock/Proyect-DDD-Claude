@@ -27,6 +27,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import com.jayway.jsonpath.JsonPath;
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.TestUsers;
 
 /** {@code POST /api/auth/token} (#122, ADR 0015): credenciales a cambio de un token JWT, sin autenticarse antes. */
 @WithAnonymousUser
@@ -39,7 +40,7 @@ import com.pronoide.ddd.adapter.in.SecuritySupport;
         "app.security.users[1].role=USER",
         "app.jwt.secret=un-secreto-de-pruebas-de-al-menos-32-bytes",
         "app.security.trusted-proxies=10.0.0.0/8,104.16.0.0/13"})
-@Import({ApiSecurityConfig.class, SecuritySupport.class, JwtSupport.class, AccessTokenIssuer.class})
+@Import({ApiSecurityConfig.class, SecuritySupport.class, TestUsers.class, JwtSupport.class, AccessTokenIssuer.class})
 class TokenControllerTests {
 
     /** Hash BCrypt de "demo". */

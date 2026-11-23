@@ -51,13 +51,14 @@ import com.pronoide.ddd.domain.model.MonetaryAmount;
 import com.pronoide.ddd.domain.model.TaxId;
 import com.pronoide.ddd.adapter.in.CustomerRegistration;
 import com.pronoide.ddd.adapter.in.SecuritySupport;
+import com.pronoide.ddd.adapter.in.TestUsers;
 import com.pronoide.ddd.adapter.in.SignUpLimit;
 import com.pronoide.ddd.adapter.in.TooManySignUpsException;
 import com.pronoide.ddd.adapter.in.UsernameTakenException;
 
 /** Alta de cliente en tres pasos (#95): datos personales, acceso y cuenta. */
 @WebMvcTest({SignUpController.class, AccountWebController.class})
-@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class})
+@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class, TestUsers.class})
 class SignUpControllerTests {
 
     @Autowired
