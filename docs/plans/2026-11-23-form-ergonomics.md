@@ -58,16 +58,16 @@ Only `adapter.in.web` templates, `static/js/app.js` and `static/css/app.css`; no
 - **Acceptance criteria:**
   - [x] The new tests pass and `./mvnw verify` is green.
 
-### [ ] T3 — Login user name keyboard (~5 min)
+### [x] T3 — Login user name keyboard (~5 min)
 
 - **Layer:** adapter.in
-- **Files:** `templates/login.html`, `WebSecurityTests.java` (or `LoginControllerTests.java`, wherever the login page is rendered)
+- **Files:** `templates/login.html`, `LoginControllerTests.java`
 - **Depends on:** —
 - **What to do:**
   1. Test (red): the login form's user name has `autocapitalize="none"` and `spellcheck="false"`, and keeps `autocomplete="username"` and `required`.
   2. Add the attributes.
 - **Acceptance criteria:**
-  - [ ] The new test passes and `./mvnw verify` is green.
+  - [x] The new test passes and `./mvnw verify` is green.
 
 ### [ ] T4 — Show-password toggle (~20 min)
 
