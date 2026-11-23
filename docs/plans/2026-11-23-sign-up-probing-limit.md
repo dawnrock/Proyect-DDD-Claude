@@ -48,7 +48,7 @@ Everything stays in the root of `adapter.in`, like #131; domain and application 
 - **Acceptance criteria:**
   - [x] `./mvnw test -Dtest=SignUpLimitTests` green.
 
-### [ ] T2 — `CustomerRegistration` records the revealing failures (~10 min)
+### [x] T2 — `CustomerRegistration` records the revealing failures (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/CustomerRegistration.java`, `CustomerRegistrationTests.java`
@@ -57,7 +57,7 @@ Everything stays in the root of `adapter.in`, like #131; domain and application 
   1. Tests first (with `maxFailuresPerIp` = 2): two sign-ups failing with a taken username or a duplicate document from one IP → the next valid sign-up from that IP throws `TooManySignUpsException` and creates nothing; a short password or an insufficient deposit does not count; a valid sign-up from another IP still works; a username taken only when creating the user (after the customer was saved) does not count.
   2. In the `catch` that releases the slot, call `signUpLimit.recordFailure(clientIp)` for `UsernameTakenException` and `DuplicateCustomerException`.
 - **Acceptance criteria:**
-  - [ ] `CustomerRegistrationTests` green, including the new cases.
+  - [x] `CustomerRegistrationTests` green, including the new cases.
 
 ### [ ] T3 — Defaults and tests that sign up many times from one IP (~5 min)
 
