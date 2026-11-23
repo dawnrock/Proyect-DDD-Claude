@@ -736,7 +736,7 @@ class SignUpControllerTests {
             assertThat(html).containsPattern("<p class=\"form-text[^\"]*\" id=\"username-help\">[^<]*guiones bajos o guiones[^<]*minúsculas");
             assertThat(FieldTags.tag(html, "username"))
                     .contains("aria-describedby=\"username-help\"")
-                    .contains("maxlength=\"30\"")
+                    .doesNotContain("maxlength=")
                     .doesNotContain("pattern=")
                     .doesNotContain("minlength=");
 

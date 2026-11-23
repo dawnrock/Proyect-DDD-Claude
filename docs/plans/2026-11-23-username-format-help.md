@@ -6,7 +6,7 @@
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-23
 - **Status:** in progress
-- **Total estimate:** ~40 min (4 tasks)
+- **Total estimate:** ~45 min (5 tasks)
 
 ## Goal
 
@@ -31,7 +31,7 @@ The user could not create a sign-up username: the format (`[a-z0-9._-]{3,30}`) i
 
 **Normalisation in the web form** (decided here, reversible): the Lombok `@Setter` of the username is replaced by a hand-written setter `setUsername(String)` that does `strip()` + `toLowerCase(Locale.ROOT)` (null stays null; an empty `ownerUsername` stays empty, since it is optional). Spring binds through the setter, so validation and the command already see `margaret`. Not in an `@InitBinder`: the rule belongs to the field.
 
-**No `pattern`/`minlength` attribute:** with lower-casing, `Manu` is valid input but would match `:invalid` against a lower-case `pattern`, and Firefox/Safari expose `:invalid` to screen readers; `minlength` has the same effect while typing. Only `maxlength="30"`, which cannot produce an invalid state.
+**No `pattern`/`minlength`/`maxlength` attribute** (`maxlength` removed in T5): with lower-casing, `Manu` is valid input but would match `:invalid` against a lower-case `pattern`, and Firefox/Safari expose `:invalid` to screen readers; `minlength` has the same effect while typing. Only `maxlength="30"`, which cannot produce an invalid state.
 
 **`aria-describedby` with help and error:** `th:aria-describedby="${#fields.hasErrors('username')} ? 'username-help username-error' : 'username-help'"`. The template guard of #145 keeps passing (the attribute is there).
 
@@ -81,6 +81,16 @@ The user could not create a sign-up username: the format (`[a-z0-9._-]{3,30}`) i
   1. Note that the web lower-cases usernames and the API does not (#152, user decision), so the shared validation of the web and REST differs on purpose in this one field.
 - **Acceptance criteria:**
   - [x] Decision recorded.
+
+### [x] T5 — Review fixes: no `maxlength` (~5 min)
+
+- **Layer:** adapter.in
+- **Files:** `templates/signup/access.html`, `templates/accounts/new.html`, their tests
+- **Depends on:** T3
+- **What to do:**
+  1. `revisor-ddd`: `maxlength="30"` silently cuts a longer paste, which could still match the pattern and sign up a different username than the one pasted. Remove it and let the server's message explain the length; the tests now require no `maxlength`.
+- **Acceptance criteria:**
+  - [x] The tests pass and `./mvnw verify` is green.
 
 ## Global acceptance criteria
 

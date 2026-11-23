@@ -1717,7 +1717,7 @@ class AccountWebControllerTests {
             assertThat(html).containsPattern("<p class=\"form-text[^\"]*\" id=\"ownerUsername-help\">[^<]*guiones bajos o guiones[^<]*minúsculas");
             assertThat(FieldTags.tag(html, "ownerUsername"))
                     .contains("aria-describedby=\"ownerUsername-help\"")
-                    .contains("maxlength=\"30\"");
+                    .doesNotContain("maxlength=");
         }
     }
 
