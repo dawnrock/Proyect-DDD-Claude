@@ -79,16 +79,16 @@ No domain, application or persistence code changes. The layering is unchanged (e
 - **Acceptance criteria:**
   - [x] `LoginAttemptsTests`, `SignUpForm` and `OpenAccountForm` tests stay green with no change in behaviour.
 
-### [ ] T4 — End to end on the web and the API with the real store (~10 min)
+### [x] T4 — End to end on the web and the API with the real store (~10 min)
 
 - **Layer:** tests
-- **Files:** a full-context test that boots `DddLabApplication` with the `demo` profile and its own H2 database (in the style of `PersistenceRestartTests`), for example `src/test/java/com/pronoide/ddd/CaseInsensitiveLoginEndToEndTests.java`
+- **Files:** `src/test/java/com/pronoide/ddd/DddLabApplicationTests.java` (new `@Nested` class `CaseInsensitiveUsername`). Deviation: the plan proposed a new full-context class, but `src/test/CLAUDE.md` keeps a single full-context test, whose context already runs on the real `JdbcUserDetailsManager` (H2 in PostgreSQL mode).
 - **Depends on:** T1
 - **What to do:**
   1. Web: `POST /login` with `Ada` and the demo password (README) redirects to `/` and the authenticated name is `ada`. Use its own IP (`setRemoteAddr`) as `decisiones.md` asks for tests that fail logins.
   2. API: `POST /api/auth/token` with `{"username":" ADA ","password":…}` answers 200 and the JWT `sub` is `ada`.
 - **Acceptance criteria:**
-  - [ ] Both tests pass on the real `JdbcUserDetailsManager` (H2 in PostgreSQL mode) and failed before T1.
+  - [x] Both tests pass on the real `JdbcUserDetailsManager` (H2 in PostgreSQL mode) and failed before T1.
 
 ### [ ] T5 — Contract and project documentation (~10 min)
 

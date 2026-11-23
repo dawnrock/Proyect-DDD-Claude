@@ -505,6 +505,50 @@ class DddLabApplicationTests {
 	}
 
 	@Nested
+	@DisplayName("El usuario del inicio de sesión no distingue mayúsculas, con el almacén de usuarios real (#157)")
+	class CaseInsensitiveUsername {
+
+		/** IP propia: estos inicios de sesión no comparten el límite de intentos con otros tests del contexto. */
+		private static final String CLIENT_IP = "203.0.113.157";
+
+		@Test
+		@DisplayName("Por la web, «Ada» entra como ada")
+		void por_la_web_ada_con_mayuscula_entra_como_ada() throws Exception {
+			CookieManager cookies = new CookieManager();
+			HttpClient client = HttpClient.newBuilder().cookieHandler(cookies).build();
+			HttpResponse<String> form = client.send(HttpRequest.newBuilder(URI.create(url("/login?form")))
+					.header("X-Forwarded-For", CLIENT_IP).GET().build(), HttpResponse.BodyHandlers.ofString());
+			Matcher csrf = Pattern.compile("name=\"_csrf\" value=\"([^\"]+)\"").matcher(form.body());
+			assertThat(csrf.find()).isTrue();
+
+			HttpResponse<String> login = client.send(HttpRequest.newBuilder(URI.create(url("/login")))
+					.header("Content-Type", "application/x-www-form-urlencoded")
+					.header("X-Forwarded-For", CLIENT_IP)
+					.POST(HttpRequest.BodyPublishers.ofString("username=%s&password=%s&_csrf=%s"
+							.formatted(URLEncoder.encode(" Ada ", StandardCharsets.UTF_8), PASSWORD, csrf.group(1))))
+					.build(), HttpResponse.BodyHandlers.ofString());
+
+			String location = login.headers().firstValue("Location").orElseThrow();
+			assertThat(location).doesNotContain("login");
+			HttpClient browser = HttpClient.newBuilder().cookieHandler(cookies)
+					.followRedirects(HttpClient.Redirect.NORMAL).build();
+			HttpResponse<String> home = browser.send(HttpRequest.newBuilder(URI.create(location))
+					.header("Accept", "text/html").GET().build(), HttpResponse.BodyHandlers.ofString());
+			assertThat(home.body()).contains("<span>ada</span>");
+		}
+
+		@Test
+		@DisplayName("Por la API, « ADA » recibe un token cuyo sub es ada")
+		void por_la_api_ada_en_mayusculas_recibe_un_token_de_ada() throws Exception {
+			String bearer = ApiTokens.bearer(http, url(""), " ADA ", PASSWORD);
+
+			String payload = bearer.substring("Bearer ".length()).split("\\.")[1];
+			String claims = new String(java.util.Base64.getUrlDecoder().decode(payload), StandardCharsets.UTF_8);
+			assertThat(claims).contains("\"sub\":\"ada\"");
+		}
+	}
+
+	@Nested
 	@DisplayName("Alta de cliente de Mon-A Bank con el servicio real (#103)")
 	class CustomerSignUp {
 
