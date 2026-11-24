@@ -129,7 +129,7 @@ Technical decisions inside the user's choices (Claude, reversible):
 - **Acceptance criteria:**
   - [x] The test passes; the sabotage makes it fail (checked). (the opening also records a `MoneyDeposited` for the initial deposit, so both deposits stay pending with one attempt; sabotage: calling Spring's `ApplicationEventPublisher` from the publisher again makes the use case fail with the consumer's exception; reverted)
 
-### [ ] T8 — A committed event survives a restart (~10 min)
+### [x] T8 — A committed event survives a restart (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/dawnrock/ddd/OutboxRestartTests.java`
@@ -137,7 +137,7 @@ Technical decisions inside the user's choices (Claude, reversible):
 - **What to do:**
   1. Two starts on the same H2 database (pattern of `PersistenceRestartTests`) with `app.events.outbox.relay-interval=1h`: the first makes a deposit and stops before any relay run delivers it; the second, after `relayPending()`, logs `Auditoría · MoneyDeposited` for that account and leaves no pending rows.
 - **Acceptance criteria:**
-  - [ ] The test passes; with the second start skipped, the row is still pending (the first context really did not deliver it).
+  - [x] The test passes; with the second start skipped, the row is still pending (the first context really did not deliver it). (instead of skipping the second start, the test itself asserts 3 pending events and no audit line before the restart. *Deviation:* the relay's `@Scheduled` also has `initialDelayString` with the same interval: with `fixedDelay` alone the first run happens at startup and could deliver the deposit in the first context, making the test flaky)
 
 ### [ ] T9 — Only the event adapter talks to Spring's event bus (~5 min)
 

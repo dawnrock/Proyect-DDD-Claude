@@ -39,7 +39,9 @@ public class OutboxRelay {
     /** Una sola pasada a la vez, también si un test la llama mientras corre la programada. */
     private final ReentrantLock lock = new ReentrantLock();
 
-    @Scheduled(fixedDelayString = "${app.events.outbox.relay-interval:2s}")
+    /** La primera pasada espera también un intervalo: con un intervalo largo (tests) el relé no corre al arrancar. */
+    @Scheduled(fixedDelayString = "${app.events.outbox.relay-interval:2s}",
+            initialDelayString = "${app.events.outbox.relay-interval:2s}")
     public void relayPending() {
         lock.lock();
         try {
