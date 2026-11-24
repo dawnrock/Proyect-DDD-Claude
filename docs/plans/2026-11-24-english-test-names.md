@@ -54,7 +54,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
   1. `./mvnw verify` and save the per-class test count from `target/surefire-reports/*.xml` (`tests`, `skipped`) and the total.
   2. Run Checkstyle locally in a scratch copy with the course rules (`MethodName`, `ConstantName`) and save the count: 792 + 21.
 - **Acceptance criteria:**
-  - [x] Baseline saved: total tests and per-class counts (84 classes, 1,004 tests, 0 skipped; Checkstyle 792 `MethodName` + 21 `ConstantName`).
+  - [x] Baseline saved: total tests and per-class counts (84 classes, 1,023 test cases, 0 skipped; Checkstyle 792 `MethodName` + 21 `ConstantName`). *Correction during T10:* the first count (1,004) read the `tests` attribute of the surefire report, which merges test cases that share a name across the `@Nested` classes of a file; as the rename made more names coincide, that attribute dropped while the cases did not. The baseline was rebuilt by counting `<testcase>` elements on `origin/Hexagonal` (1,023), and T3-T10 were checked against it class by class.
 
 ### [x] T2 — New convention in `src/test/CLAUDE.md` and the templates (~5 min)
 
@@ -138,7 +138,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **Acceptance criteria:**
   - [x] Same as T3, for the whole package. (102 renamed in the other nine files; the whole package is done; 1,004 tests, same as the baseline)
 
-### [ ] T10 — `adapter.in.rest` (~10 min)
+### [x] T10 — `adapter.in.rest` (~10 min)
 
 - **Layer:** tests
 - **Files:** 8 files in `.../adapter/in/rest`, 111 methods
@@ -146,7 +146,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **What to do:**
   1. Same as T3.
 - **Acceptance criteria:**
-  - [ ] Same as T3, for the package.
+  - [x] Same as T3, for the package. (111 renamed; 1,023 test cases, class by class the same as the baseline)
 
 ### [ ] T11 — `adapter.in.cli` and `adapter.in.scheduler` (~5 min)
 

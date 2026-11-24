@@ -71,7 +71,7 @@ class TransferControllerTests {
     @Test
     @WithAnonymousUser
     @DisplayName("Sin credenciales responde 401 No autenticado y no llama al servicio")
-    void sin_credenciales_responde_401_no_autenticado_y_no_llama_al_servicio() throws Exception {
+    void withoutCredentialsResponds401AndDoesNotCallTheService() throws Exception {
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(BODY))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.title").value("No autenticado"));
@@ -81,7 +81,7 @@ class TransferControllerTests {
 
     @Test
     @DisplayName("Una transferencia aprobada responde 201 con la transferencia APPROVED y sin Location")
-    void una_transferencia_aprobada_responde_201_con_la_transferencia_approved_y_sin_location() throws Exception {
+    void anApprovedTransferResponds201WithTheApprovedTransferAndNoLocation() throws Exception {
         given(commands.transfer(any(Caller.class), any())).willReturn(transfer("APPROVED"));
 
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(BODY))
@@ -106,7 +106,7 @@ class TransferControllerTests {
 
     @Test
     @DisplayName("Una transferencia rechazada no es un error: responde 201 con la transferencia REJECTED")
-    void una_transferencia_rechazada_responde_201_con_la_transferencia_rejected() throws Exception {
+    void aRejectedTransferResponds201WithTheRejectedTransfer() throws Exception {
         given(commands.transfer(any(Caller.class), any())).willReturn(transfer("REJECTED"));
 
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(BODY))
@@ -116,7 +116,7 @@ class TransferControllerTests {
 
     @Test
     @DisplayName("Sin divisa se usa EUR por defecto")
-    void sin_divisa_se_usa_eur_por_defecto() throws Exception {
+    void withoutCurrencyEurIsUsedByDefault() throws Exception {
         given(commands.transfer(any(Caller.class), any())).willReturn(transfer("APPROVED"));
         String body = """
                 {"sourceAccountId": "%s", "targetAccountNumber": "%s", "amount": 25.00}"""
@@ -133,7 +133,7 @@ class TransferControllerTests {
     @ParameterizedTest(name = "importe {0}")
     @DisplayName("Un importe que redondea a cero o supera el máximo responde 400 con el error del campo")
     @ValueSource(strings = {"0.004", "1000000000.00", "1.7976931348623155E+308"})
-    void un_importe_fuera_de_los_limites_responde_400_con_el_error_del_campo(String amount) throws Exception {
+    void anAmountOutOfBoundsResponds400WithTheFieldError(String amount) throws Exception {
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"sourceAccountId\": \"11111111-2222-3333-4444-555555555555\","
                         + " \"targetAccountNumber\": \"ES7921000813610123456789\", \"amount\": " + amount + "}"))
@@ -158,7 +158,7 @@ class TransferControllerTests {
             "{\"sourceAccountId\": \"11111111-2222-3333-4444-555555555555\","
                     + " \"targetAccountNumber\": \"ES7921000813610123456789\","
                     + " \"amount\": 10, \"currency\": \"eur\"}"})
-    void ids_ausentes_o_importe_no_positivo_responden_400(String body) throws Exception {
+    void missingIdsOrANonPositiveAmountRespond400(String body) throws Exception {
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Petición no válida"))
@@ -171,7 +171,7 @@ class TransferControllerTests {
     @DisplayName("Un IBAN de destino ausente o mal formado responde 400 con el error del campo")
     @ValueSource(strings = {"", " ", "ES12", "XX7921000813610123456789", "ES79210008136101234567AB",
             "ES792100081361012345678"})
-    void un_iban_de_destino_mal_formado_responde_400(String iban) throws Exception {
+    void aMalformedTargetIbanResponds400(String iban) throws Exception {
         String body = """
                 {"sourceAccountId": "%s", "targetAccountNumber": "%s", "amount": 10}"""
                 .formatted(SOURCE_ID, iban);
@@ -185,7 +185,7 @@ class TransferControllerTests {
 
     @Test
     @DisplayName("Sin IBAN de destino responde 400 con el error del campo")
-    void sin_iban_de_destino_responde_400() throws Exception {
+    void withoutTargetIbanResponds400() throws Exception {
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"sourceAccountId\": \"%s\", \"amount\": 10}".formatted(SOURCE_ID)))
                 .andExpect(status().isBadRequest())
@@ -196,7 +196,7 @@ class TransferControllerTests {
 
     @Test
     @DisplayName("Un IBAN con espacios y minúsculas se acepta y llega tal como se escribió al command")
-    void un_iban_con_espacios_y_minusculas_se_acepta() throws Exception {
+    void anIbanWithSpacesAndLowerCaseIsAccepted() throws Exception {
         given(commands.transfer(any(Caller.class), any())).willReturn(transfer("APPROVED"));
         String body = """
                 {"sourceAccountId": "%s", "targetAccountNumber": " es79 2100 0813 6101 2345 6789 ", "amount": 10}"""
@@ -213,7 +213,7 @@ class TransferControllerTests {
     @Test
     @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("Un usuario puede transferir: el servicio recibe su Caller de usuario")
-    void un_usuario_puede_transferir_con_su_caller() throws Exception {
+    void aUserCanTransferWithTheirCaller() throws Exception {
         Caller ada = Caller.builder().username("ada").admin(false).build();
         given(commands.transfer(any(Caller.class), any())).willReturn(transfer("APPROVED"));
 
@@ -226,7 +226,7 @@ class TransferControllerTests {
     @Test
     @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("Una cuenta de origen ajena responde 404 Recurso inexistente")
-    void una_cuenta_de_origen_ajena_responde_404() throws Exception {
+    void aForeignSourceAccountResponds404() throws Exception {
         given(commands.transfer(any(Caller.class), any())).willThrow(new AccountNotFoundException(SOURCE_ID));
 
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(BODY))
@@ -236,7 +236,7 @@ class TransferControllerTests {
 
     @Test
     @DisplayName("Un IBAN de destino inexistente responde 404 Recurso inexistente")
-    void un_iban_de_destino_inexistente_responde_404() throws Exception {
+    void aMissingTargetIbanResponds404() throws Exception {
         given(commands.transfer(any(Caller.class), any())).willThrow(new TargetAccountNotFoundException(TARGET_IBAN));
 
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(BODY))
@@ -247,7 +247,7 @@ class TransferControllerTests {
 
     @Test
     @DisplayName("Una cuenta desconocida responde 404 Recurso inexistente")
-    void una_cuenta_desconocida_responde_404_recurso_inexistente() throws Exception {
+    void anUnknownAccountResponds404() throws Exception {
         given(commands.transfer(any(Caller.class), any())).willThrow(new AccountNotFoundException(TARGET_ID));
 
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(BODY))
@@ -257,7 +257,7 @@ class TransferControllerTests {
 
     @Test
     @DisplayName("Transferir a la misma cuenta responde 422 Regla de negocio incumplida")
-    void transferir_a_la_misma_cuenta_responde_422() throws Exception {
+    void transferringToTheSameAccountResponds422() throws Exception {
         given(commands.transfer(any(Caller.class), any()))
                 .willThrow(new SameAccountTransferException(new AccountNumber("ES9121000418450200051332")));
 
@@ -268,7 +268,7 @@ class TransferControllerTests {
 
     @Test
     @DisplayName("Una divisa distinta a la de las cuentas responde 422 Regla de negocio incumplida")
-    void una_divisa_distinta_a_la_de_las_cuentas_responde_422() throws Exception {
+    void aCurrencyDifferentFromTheAccountsResponds422() throws Exception {
         given(commands.transfer(any(Caller.class), any())).willThrow(
                 new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD")));
 
@@ -279,7 +279,7 @@ class TransferControllerTests {
 
     @Test
     @DisplayName("Una divisa ISO inexistente rechazada por el command responde 400 Petición no válida")
-    void una_divisa_iso_inexistente_responde_400() throws Exception {
+    void aMissingIsoCurrencyResponds400() throws Exception {
         String body = """
                 {"sourceAccountId": "%s", "targetAccountNumber": "%s", "amount": 10, "currency": "XYZ"}"""
                 .formatted(SOURCE_ID, TARGET_IBAN);

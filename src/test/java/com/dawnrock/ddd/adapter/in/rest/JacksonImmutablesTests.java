@@ -31,7 +31,7 @@ class JacksonImmutablesTests {
 
     @Test
     @DisplayName("Un DTO de Immutables se serializa y deserializa con Jackson 3")
-    void un_dto_de_immutables_se_serializa_y_deserializa_con_jackson_3() {
+    void anImmutablesDtoIsSerialisedAndDeserialisedWithJackson3() {
         SampleDto dto = SampleDto.builder().holderName("Ada Lovelace").amount(new BigDecimal("50.00")).build();
 
         String json = mapper.writeValueAsString(dto);

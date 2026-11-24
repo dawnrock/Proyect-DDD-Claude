@@ -117,7 +117,7 @@ class ApiSecurityTests {
 
         @Test
         @DisplayName("Un usuario con su token consulta la API como él mismo, sin rol de administrador")
-        void un_usuario_con_su_token_consulta_la_api_como_el_mismo() throws Exception {
+        void aUserWithTheirTokenQueriesTheApiAsThemselves() throws Exception {
             given(queries.listAccounts(any(Caller.class))).willReturn(List.of());
 
             mvc.perform(get("/api/accounts").header(HttpHeaders.AUTHORIZATION, bearer("ada")))
@@ -131,7 +131,7 @@ class ApiSecurityTests {
 
         @Test
         @DisplayName("El token del administrador le deja abrir cuentas como administrador")
-        void el_token_del_administrador_le_deja_abrir_cuentas() throws Exception {
+        void theAdministratorTokenLetsThemOpenAccounts() throws Exception {
             given(commands.openAccount(any(Caller.class), any())).willReturn(summary());
 
             mvc.perform(post("/api/accounts").header(HttpHeaders.AUTHORIZATION, bearer("admin"))
@@ -143,7 +143,7 @@ class ApiSecurityTests {
 
         @Test
         @DisplayName("Un token sin el claim roles no da ningún rol: consulta como usuario y no puede abrir cuentas")
-        void un_token_sin_roles_no_da_ningun_rol() throws Exception {
+        void aTokenWithoutRolesGivesNoRole() throws Exception {
             Instant now = Instant.now();
             JwtClaimsSet claims = JwtClaimsSet.builder().issuer("ddd-lab").subject("ada").issuedAt(now)
                     .expiresAt(now.plus(15, ChronoUnit.MINUTES)).build();
@@ -161,7 +161,7 @@ class ApiSecurityTests {
 
         @Test
         @DisplayName("Un usuario sin rol de administrador que abre una cuenta recibe 403")
-        void un_usuario_que_abre_una_cuenta_recibe_403() throws Exception {
+        void aUserOpeningAnAccountGets403() throws Exception {
             mvc.perform(post("/api/accounts").header(HttpHeaders.AUTHORIZATION, bearer("ada"))
                             .contentType(MediaType.APPLICATION_JSON).content(OPEN_BODY))
                     .andExpect(status().isForbidden())
@@ -176,7 +176,7 @@ class ApiSecurityTests {
 
         @Test
         @DisplayName("Sin cabecera Authorization responde 401 y pide un token Bearer")
-        void sin_cabecera_responde_401_y_pide_un_token_bearer() throws Exception {
+        void withoutHeaderResponds401AndAsksForABearerToken() throws Exception {
             mvc.perform(get("/api/accounts"))
                     .andExpect(status().isUnauthorized())
                     .andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE, "Bearer"))
@@ -186,7 +186,7 @@ class ApiSecurityTests {
 
         @Test
         @DisplayName("Con credenciales HTTP Basic responde 401: la API ya no las acepta")
-        void con_credenciales_http_basic_responde_401() throws Exception {
+        void withHttpBasicCredentialsResponds401() throws Exception {
             String basic = Base64.getEncoder().encodeToString("admin:demo".getBytes(StandardCharsets.UTF_8));
 
             mvc.perform(get("/api/accounts").header(HttpHeaders.AUTHORIZATION, "Basic " + basic))
@@ -197,7 +197,7 @@ class ApiSecurityTests {
 
         @Test
         @DisplayName("Con algo que no es un JWT responde 401 con invalid_token")
-        void con_algo_que_no_es_un_jwt_responde_401() throws Exception {
+        void withSomethingThatIsNotAJwtResponds401() throws Exception {
             mvc.perform(get("/api/accounts").header(HttpHeaders.AUTHORIZATION, "Bearer no-es-un-jwt"))
                     .andExpect(status().isUnauthorized())
                     .andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE,
@@ -208,7 +208,7 @@ class ApiSecurityTests {
 
         @Test
         @DisplayName("Con un token caducado responde 401")
-        void con_un_token_caducado_responde_401() throws Exception {
+        void withAnExpiredTokenResponds401() throws Exception {
             Instant past = Instant.now().minus(1, ChronoUnit.HOURS);
 
             mvc.perform(get("/api/accounts").header(HttpHeaders.AUTHORIZATION,
@@ -220,7 +220,7 @@ class ApiSecurityTests {
 
         @Test
         @DisplayName("Un token sin firma (alg none) responde 401 aunque diga ser del administrador")
-        void un_token_sin_firma_responde_401() throws Exception {
+        void anUnsignedTokenResponds401() throws Exception {
             String unsigned = base64Url("{\"alg\":\"none\"}") + "." + base64Url(ADMIN_CLAIMS.formatted(future())) + ".";
 
             mvc.perform(get("/api/accounts").header(HttpHeaders.AUTHORIZATION, "Bearer " + unsigned))
@@ -230,7 +230,7 @@ class ApiSecurityTests {
 
         @Test
         @DisplayName("Un token firmado con el mismo secreto pero con HS512 responde 401: solo se acepta HS256")
-        void un_token_firmado_con_otro_algoritmo_responde_401() throws Exception {
+        void aTokenSignedWithAnotherAlgorithmResponds401() throws Exception {
             String signingInput = base64Url("{\"alg\":\"HS512\"}") + "." + base64Url(ADMIN_CLAIMS.formatted(future()));
             Mac mac = Mac.getInstance("HmacSHA512");
             mac.init(new SecretKeySpec(SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA512"));
@@ -244,7 +244,7 @@ class ApiSecurityTests {
 
         @Test
         @DisplayName("Con un token firmado con otra clave responde 401")
-        void con_un_token_firmado_con_otra_clave_responde_401() throws Exception {
+        void withATokenSignedWithAnotherKeyResponds401() throws Exception {
             SecretKey otherKey = JwtSupport.signingKey("otro-secreto-distinto-de-al-menos-32-bytes");
             Instant now = Instant.now();
             String forged = token(new JwtSupport().jwtEncoder(otherKey), now, now.plus(15, ChronoUnit.MINUTES));

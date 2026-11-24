@@ -72,7 +72,7 @@ class CustomerControllerTests {
 
     @Test
     @DisplayName("Un alta válida sin credenciales responde 201 con Location y el resumen de la cuenta")
-    void un_alta_valida_sin_credenciales_responde_201_con_location_y_el_resumen() throws Exception {
+    void aValidSignUpWithoutCredentialsResponds201WithLocationAndTheSummary() throws Exception {
         given(registration.register(any(SignUpCommand.class), eq("demo-1234"), any())).willReturn(summary());
 
         mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
@@ -86,7 +86,7 @@ class CustomerControllerTests {
 
     @Test
     @DisplayName("El command lleva los datos de la petición y EUR por defecto; la contraseña va aparte")
-    void el_command_lleva_los_datos_de_la_peticion_y_eur_por_defecto() throws Exception {
+    void theCommandCarriesTheRequestDataAndEurByDefault() throws Exception {
         given(registration.register(any(SignUpCommand.class), any(), any())).willReturn(summary());
 
         send(VALID_BODY);
@@ -103,7 +103,7 @@ class CustomerControllerTests {
 
     @Test
     @DisplayName("Un NIE con formato válido se acepta en la petición")
-    void un_nie_con_formato_valido_se_acepta() throws Exception {
+    void aNieWithAValidFormatIsAccepted() throws Exception {
         given(registration.register(any(SignUpCommand.class), any(), any())).willReturn(summary());
 
         mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON)
@@ -121,7 +121,7 @@ class CustomerControllerTests {
             currency       | "eur"                    | currency
             """)
     @DisplayName("Un campo no válido responde 400 con el error de ese campo y no llama al caso de uso")
-    void un_campo_no_valido_responde_400_con_el_error_del_campo(String field, String value, String errorField)
+    void anInvalidFieldResponds400WithTheFieldError(String field, String value, String errorField)
             throws Exception {
         String body = VALID_BODY.replaceFirst("\"" + field + "\": \"[^\"]*\"", "\"" + field + "\": " + value);
         if (field.equals("currency")) {
@@ -137,7 +137,7 @@ class CustomerControllerTests {
 
     @Test
     @DisplayName("Con un token Bearer no válido el alta pública responde 401 y no llama al caso de uso")
-    void con_un_token_no_valido_el_alta_publica_responde_401() throws Exception {
+    void withAnInvalidTokenThePublicSignUpResponds401() throws Exception {
         mvc.perform(post("/api/customers").header("Authorization", "Bearer no-es-un-jwt")
                         .contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
                 .andExpect(status().isUnauthorized())
@@ -147,7 +147,7 @@ class CustomerControllerTests {
 
     @Test
     @DisplayName("Un método no declarado en la ruta pública responde 405 sin pedir token")
-    void un_metodo_no_declarado_en_la_ruta_publica_responde_405_sin_pedir_token() throws Exception {
+    void anUndeclaredMethodOnThePublicRouteResponds405WithoutAskingForAToken() throws Exception {
         mvc.perform(put("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
                 .andExpect(status().isMethodNotAllowed());
         verifyNoInteractions(registration);
@@ -156,7 +156,7 @@ class CustomerControllerTests {
     @ParameterizedTest(name = "depósito inicial {0}")
     @CsvSource({"0.004", "1000000000.00", "1.7976931348623155E+308"})
     @DisplayName("Un depósito inicial que redondea a cero o supera el máximo responde 400 con el error del campo")
-    void un_deposito_inicial_fuera_de_los_limites_responde_400(String deposit) throws Exception {
+    void anInitialDepositOutOfBoundsResponds400(String deposit) throws Exception {
         mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_BODY.replace("\"initialDeposit\": 100.00", "\"initialDeposit\": " + deposit)))
                 .andExpect(status().isBadRequest())
@@ -167,7 +167,7 @@ class CustomerControllerTests {
 
     @Test
     @DisplayName("Un depósito ausente o no positivo responde 400")
-    void un_deposito_ausente_o_no_positivo_responde_400() throws Exception {
+    void aMissingOrNonPositiveDepositResponds400() throws Exception {
         mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_BODY.replace("\"initialDeposit\": 100.00", "\"initialDeposit\": -5")))
                 .andExpect(status().isBadRequest())
@@ -181,7 +181,7 @@ class CustomerControllerTests {
 
     @Test
     @DisplayName("Un documento con la letra incorrecta responde 400 con el mensaje del dominio")
-    void un_documento_con_la_letra_incorrecta_responde_400() throws Exception {
+    void aDocumentWithTheWrongLetterResponds400() throws Exception {
         given(registration.register(any(SignUpCommand.class), any(), any())).willThrow(
                 new IllegalArgumentException("La letra de control del documento 00000000A no es correcta"));
 
@@ -193,7 +193,7 @@ class CustomerControllerTests {
 
     @Test
     @DisplayName("Un cliente duplicado responde 422 Regla de negocio incumplida")
-    void un_cliente_duplicado_responde_422() throws Exception {
+    void aDuplicateCustomerResponds422() throws Exception {
         given(registration.register(any(SignUpCommand.class), any(), any()))
                 .willThrow(new DuplicateCustomerException(new TaxId("00000000T")));
 
@@ -205,7 +205,7 @@ class CustomerControllerTests {
 
     @Test
     @DisplayName("Un usuario ocupado responde 422 Regla de negocio incumplida")
-    void un_usuario_ocupado_responde_422() throws Exception {
+    void aTakenUsernameResponds422() throws Exception {
         given(registration.register(any(SignUpCommand.class), any(), any())).willThrow(new UsernameTakenException("margaret"));
 
         mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
@@ -216,7 +216,7 @@ class CustomerControllerTests {
 
     @Test
     @DisplayName("Un depósito insuficiente o en otra divisa responde 422")
-    void un_deposito_insuficiente_o_en_otra_divisa_responde_422() throws Exception {
+    void anInsufficientDepositOrAnotherCurrencyResponds422() throws Exception {
         given(registration.register(any(SignUpCommand.class), any(), any()))
                 .willThrow(new InsufficientInitialDepositException(MonetaryAmount.euros("10.00"),
                         MonetaryAmount.euros("50.00")));
@@ -233,7 +233,7 @@ class CustomerControllerTests {
 
     @Test
     @DisplayName("Superado el límite de altas responde 429 con Retry-After en segundos, redondeado hacia arriba (#131)")
-    void superado_el_limite_de_altas_responde_429_con_retry_after() throws Exception {
+    void overTheSignUpLimitResponds429WithRetryAfter() throws Exception {
         given(registration.register(any(SignUpCommand.class), any(), any()))
                 .willThrow(new TooManySignUpsException(Duration.ofMillis(90_500)));
 
@@ -249,7 +249,7 @@ class CustomerControllerTests {
 
     @Test
     @DisplayName("A través del proxy de Render y de Cloudflare, el alta cuenta para la IP del cliente y no para la de Cloudflare (#131)")
-    void a_traves_de_render_y_cloudflare_el_alta_cuenta_para_la_ip_del_cliente() throws Exception {
+    void throughRenderAndCloudflareTheSignUpCountsForTheClientIp() throws Exception {
         given(registration.register(any(SignUpCommand.class), any(), any())).willReturn(summary());
 
         mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY)
