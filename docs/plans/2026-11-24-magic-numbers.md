@@ -88,7 +88,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
 - **Acceptance criteria:**
   - [x] `MonABankIbansTests` and `InMemoryAccountNumberSequenceTests` green without changes; the demo IBANs (`ES8099990001450000000001`…) are the same. (the "10 → 1, 11 → 0" rule went to a named method, `asSingleDigit`, as the plan's risk suggested; sabotages: `IBAN_CHECK_BASE = 97` fails 4 tests and dropping the "10 → 1" rule fails 10; reverted; the demo IBAN test of `MonABankIbansTests` is green)
 
-### [ ] T5 — `Durations`: waiting times rounded up (~10 min)
+### [x] T5 — `Durations`: waiting times rounded up (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `src/main/java/com/dawnrock/ddd/adapter/in/Durations.java`, `src/test/java/com/dawnrock/ddd/adapter/in/DurationsTests.java`
@@ -97,7 +97,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
   1. Red: tests (with the convention from #166) for `minutesRoundedUp`: exact minutes (30 min → 30), one second over (30 min 1 s → 31), under a minute (20 s → 1) and zero (→ 1). For `secondsRoundedUp`: exact (91 s → 91), one millisecond over (90.001 s → 91), under a second (→ 1). Use `@ParameterizedTest` + `@CsvSource`, as in `src/test/CLAUDE.md`.
   2. Green: `final class Durations` with a private constructor and the two static methods, without numeric literals other than 1.
 - **Acceptance criteria:**
-  - [ ] `DurationsTests` green; ArchUnit green (the class lives in `adapter.in`).
+  - [x] `DurationsTests` green; ArchUnit green (the class lives in `adapter.in`). (red: `Durations` did not exist; green: 8 cases; total 1,031 = 1,023 + 8)
 
 ### [ ] T6 — Use `Durations` in the controllers and the REST handler (~5 min)
 
