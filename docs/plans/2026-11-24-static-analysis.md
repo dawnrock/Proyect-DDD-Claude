@@ -78,7 +78,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
   - [x] `./mvnw verify` green; `mvn pmd:pmd` still lists the 9 baselined violations in the report.
   - *Deviations:* (1) like Checkstyle, PMD and CPD read the sources Immutables generates (14 CPD duplicates between generated classes), so `excludeRoots` leaves out `target/generated-sources`; (2) `excludeFromFailureFile` also takes the baselined smells out of the report, so the baseline is a property and `./mvnw pmd:pmd -Dpmd.baseline=` shows all 9; (3) at `verify` CPD no longer reported the 14 lines of `AccountControllerTests` (same code as in the scratch run, cause not found), but the duplication was real (the same body four times, in deposits and withdrawals) and was extracted to `expectAmountRejected` anyway. Sabotage: a method with 11 parameters fails the build with `ExcessiveParameterList`.
 
-### [ ] T4 — Domain classes that validate in the constructor are `final` (~5 min)
+### [x] T4 — Domain classes that validate in the constructor are `final` (~5 min)
 
 - **Layer:** domain
 - **Files:** `domain/model/Transaction.java`, `domain/model/CheckingAccountFactory.java`, `domain/service/SegmentReviewService.java`
@@ -86,7 +86,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 - **What to do:**
   1. Check that no class extends them, then declare them `final` (Mockito 5 mocks final classes if a test needs it).
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` and `check-domain.mjs` green.
+  - [x] `./mvnw verify` and `check-domain.mjs` green. (no subclass or mock of the three; SpotBugs' `CT_CONSTRUCTOR_THROW` is checked in T8)
 
 ### [ ] T5 — Configuration defaults without reboxing (~5 min)
 
