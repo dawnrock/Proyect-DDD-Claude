@@ -1,6 +1,11 @@
 package com.dawnrock.ddd.adapter.out.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,5 +33,16 @@ class DatabaseAccountNumberSequenceTests extends AccountNumberSequenceContract {
         assertThat(afterRestart).isNotEqualTo(last);
         assertThat(Long.parseLong(afterRestart.value().substring(14)))
                 .isEqualTo(Long.parseLong(last.value().substring(14)) + 1);
+    }
+
+    @Test
+    @DisplayName("Si la secuencia no devuelve ningún valor, falla con un error claro en lugar de un NullPointerException")
+    void aSequenceReturningNothingFailsWithAClearError() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        given(jdbc.queryForObject(anyString(), eq(Long.class))).willReturn(null);
+
+        assertThatIllegalStateException()
+                .isThrownBy(() -> new DatabaseAccountNumberSequence(jdbc).next())
+                .withMessageContaining("account_number_seq");
     }
 }

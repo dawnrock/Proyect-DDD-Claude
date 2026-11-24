@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<!-- Excepciones de checkstyle.xml (ADR 0020) -->
+<suppressions>
+    <!-- Los números de los tests son datos de prueba (deposit(100), "30.00"): se leen mejor como literales (#167) -->
+    <suppress checks="MagicNumber" files="[\\/]src[\\/]test[\\/]"/>
+</suppressions>

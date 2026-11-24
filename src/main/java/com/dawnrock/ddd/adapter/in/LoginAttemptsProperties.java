@@ -1,6 +1,7 @@
 package com.dawnrock.ddd.adapter.in;
 
 import java.time.Duration;
+import java.util.Objects;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -19,9 +20,9 @@ public record LoginAttemptsProperties(Integer maxPerUser, Integer maxPerIp, Dura
     static final Duration DEFAULT_LOCKOUT = Duration.ofMinutes(30);
 
     public LoginAttemptsProperties {
-        maxPerUser = maxPerUser == null ? DEFAULT_MAX_PER_USER : maxPerUser;
-        maxPerIp = maxPerIp == null ? DEFAULT_MAX_PER_IP : maxPerIp;
-        lockout = lockout == null ? DEFAULT_LOCKOUT : lockout;
+        maxPerUser = Objects.requireNonNullElse(maxPerUser, DEFAULT_MAX_PER_USER);
+        maxPerIp = Objects.requireNonNullElse(maxPerIp, DEFAULT_MAX_PER_IP);
+        lockout = Objects.requireNonNullElse(lockout, DEFAULT_LOCKOUT);
         if (maxPerUser < 1 || maxPerIp < 1 || lockout.isNegative() || lockout.isZero()) {
             throw new IllegalStateException("El límite de intentos de inicio de sesión debe ser positivo");
         }

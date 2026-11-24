@@ -12,7 +12,7 @@ import com.dawnrock.ddd.domain.model.IncomeVerifier;
  * patrimonio mínimo), vuelve a verificar los ingresos del titular en la agencia tributaria y le comunica el resultado
  * al agregado, que decide. Solo consulta a la agencia si la revisión está vencida.
  */
-public class SegmentReviewService {
+public final class SegmentReviewService {
 
     private final IncomeVerifier incomeVerifier;
 

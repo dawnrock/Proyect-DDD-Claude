@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-24
-- **Status:** draft
-- **Total estimate:** ~80 min (10 tasks)
+- **Status:** done
+- **Total estimate:** ~85 min (11 tasks)
 
 ## Goal
 
@@ -43,7 +43,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 
 ## Tasks
 
-### [ ] T1 — ADR 0020 (~10 min)
+### [x] T1 — ADR 0020 (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0020-static-analysis.md`, `docs/adr/README.md`
@@ -51,9 +51,9 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 - **What to do:**
   1. Context (the course, the 2026-11-24 analysis), decision (the three tools, versions, rules, `verify`, baseline, exclusions), alternatives (SonarQube: server and token, recommended as SonarQube for IDE; Error Prone; only reports without failing the build), consequences (build time, how to handle a false positive). Status `proposed` until T10.
 - **Acceptance criteria:**
-  - [ ] ADR written in English and listed in the README.
+  - [x] ADR written in English and listed in the README.
 
-### [ ] T2 — Checkstyle in `verify` (~10 min)
+### [x] T2 — Checkstyle in `verify` (~10 min)
 
 - **Layer:** build
 - **Files:** `pom.xml`, `checkstyle.xml`, `checkstyle-suppressions.xml`
@@ -62,9 +62,9 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
   1. `checkstyle.xml` with the course rules (`PackageName`, `TypeName`, `MethodName`, `ConstantName`, `MemberName`, `ParameterName`, `LocalVariableName`, `AbbreviationAsWordInName`, `MagicNumber`), plus `SuppressionFilter` pointing to `checkstyle-suppressions.xml`, which suppresses `MagicNumber` in `src/test`.
   2. Plugin with the Checkstyle 14.3.0 dependency, `includeTestSourceDirectory`, `consoleOutput`, and `check` bound to `verify`.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green with 0 Checkstyle violations.
+  - [x] `./mvnw verify` green with 0 Checkstyle violations. (*Deviation:* at `verify` the plugin also reads the sources Immutables generates in `target/generated-sources` (161 warnings), so `sourceDirectories` and `testSourceDirectories` limit it to `src/main/java` and `src/test/java`; the plan's *Generated code* note was only true for a run without compiling. Checked: a `snake_case` test method fails `MethodName` and a number in a test is not flagged)
 
-### [ ] T3 — PMD and CPD in `verify`, with the baseline (~10 min)
+### [x] T3 — PMD and CPD in `verify`, with the baseline (~10 min)
 
 - **Layer:** build · tests
 - **Files:** `pom.xml`, `pmd-ruleset.xml`, `pmd-baseline.properties`, `src/test/java/.../adapter/in/rest/AccountControllerTests.java`
@@ -75,9 +75,10 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
   3. CPD: extract the 14 repeated lines in `AccountControllerTests` (lines 535 and 648) to a helper, instead of putting them in the baseline.
   4. Plugin with `includeTests`, `excludeFromFailureFile`, and `check` and `cpd-check` bound to `verify`.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green; `mvn pmd:pmd` still lists the 9 baselined violations in the report.
+  - [x] `./mvnw verify` green; `mvn pmd:pmd` still lists the 9 baselined violations in the report.
+  - *Deviations:* (1) like Checkstyle, PMD and CPD read the sources Immutables generates (14 CPD duplicates between generated classes), so `excludeRoots` leaves out `target/generated-sources`; (2) `excludeFromFailureFile` also takes the baselined smells out of the report, so the baseline is a property and `./mvnw pmd:pmd -Dpmd.baseline=` shows all 9; (3) at `verify` CPD no longer reported the 14 lines of `AccountControllerTests` (same code as in the scratch run, cause not found), but the duplication was real (the same body four times, in deposits and withdrawals) and was extracted to `expectAmountRejected` anyway. Sabotage: a method with 11 parameters fails the build with `ExcessiveParameterList`.
 
-### [ ] T4 — Domain classes that validate in the constructor are `final` (~5 min)
+### [x] T4 — Domain classes that validate in the constructor are `final` (~5 min)
 
 - **Layer:** domain
 - **Files:** `domain/model/Transaction.java`, `domain/model/CheckingAccountFactory.java`, `domain/service/SegmentReviewService.java`
@@ -85,9 +86,9 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 - **What to do:**
   1. Check that no class extends them, then declare them `final` (Mockito 5 mocks final classes if a test needs it).
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` and `check-domain.mjs` green.
+  - [x] `./mvnw verify` and `check-domain.mjs` green. (no subclass or mock of the three; SpotBugs' `CT_CONSTRUCTOR_THROW` is checked in T8)
 
-### [ ] T5 — Configuration defaults without reboxing (~5 min)
+### [x] T5 — Configuration defaults without reboxing (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/LoginAttemptsProperties.java`, `adapter/in/SignUpLimitProperties.java`, `adapter/in/LoginAttemptsTests.java`
@@ -96,9 +97,9 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
   1. Characterization first: `SignUpLimitTests` already builds `SignUpLimitProperties(null, …)` and checks the defaults; no test does it for `LoginAttemptsProperties`. Add one (`new LoginAttemptsProperties(null, null, null)` gives 3, 10 and 30 minutes).
   2. `maxPerUser == null ? DEFAULT_MAX_PER_USER : maxPerUser` → `Objects.requireNonNullElse(maxPerUser, DEFAULT_MAX_PER_USER)`, and the same for the other `Integer` fields.
 - **Acceptance criteria:**
-  - [ ] The default tests of both properties pass before and after the change.
+  - [x] The default tests of both properties pass before and after the change. (characterization test `LoginAttemptsTests.defaultValues`; sabotage: changing a default fails it; reverted)
 
-### [ ] T6 — `DatabaseAccountNumberSequence` with no null path (~5 min)
+### [x] T6 — `DatabaseAccountNumberSequence` with no null path (~5 min)
 
 - **Layer:** adapter.out
 - **Files:** `adapter/out/persistence/DatabaseAccountNumberSequence.java` and its test
@@ -106,9 +107,9 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 - **What to do:**
   1. `queryForObject` is declared as nullable. Turn a `null` into a clear error (`Objects.requireNonNull(number, "La secuencia de números de cuenta no devolvió ningún valor")` or `IllegalStateException`), following ch. 17 of the course: do not let `null` in.
 - **Acceptance criteria:**
-  - [ ] Existing persistence tests green.
+  - [x] Existing persistence tests green. (red: `NullPointerException` on unboxing; green: `IllegalStateException` naming the sequence; new test `aSequenceReturningNothingFailsWithAClearError`)
 
-### [ ] T7 — `JwtSupport`: one `SecureRandom` (~5 min)
+### [x] T7 — `JwtSupport`: one `SecureRandom` (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/rest/JwtSupport.java`
@@ -116,9 +117,9 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 - **What to do:**
   1. `private static final SecureRandom RANDOM = new SecureRandom();`, used for the fallback key.
 - **Acceptance criteria:**
-  - [ ] `JwtSupport` tests green (fallback key when the secret is missing).
+  - [x] `JwtSupport` tests green (fallback key when the secret is missing). (7 `JwtSupportTests` green, including `withoutSecretARandomKeyIsGenerated`)
 
-### [ ] T8 — SpotBugs in `verify`, with narrow exclusions (~10 min)
+### [x] T8 — SpotBugs in `verify`, with narrow exclusions (~10 min)
 
 - **Layer:** build
 - **Files:** `pom.xml`, `spotbugs-exclude.xml`
@@ -129,10 +130,10 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
      - `URF_UNREAD_FIELD` in `~.*\.adapter\.out\..*Entity`: the JPA entities of every output adapter, not only `adapter.out.persistence`. The outbox of #165 adds `OutboxEventEntity` in `adapter.out.event`, with columns that only Hibernate reads.
   2. Plugin with `excludeFilterFile` and `check` bound to `verify` (after `compile`, since it reads bytecode).
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green with 0 SpotBugs bugs.
-  - [ ] Without the filter, the 15 excluded warnings come back, and only those.
+  - [x] `./mvnw verify` green with 0 SpotBugs bugs.
+  - [x] Without the filter, the 15 excluded warnings come back, and only those. (the filter matches the generated classes by `@org.immutables.value.Generated`, which SpotBugs supports, so no class list to maintain; without the filter: 12 `AT_STALE_THREAD_WRITE_OF_PRIMITIVE`, 2 `EI_EXPOSE_REP`, 1 `URF_UNREAD_FIELD`, and nothing else, since T4-T7 removed the other 8)
 
-### [ ] T9 — Prove the rules fail the build, and measure (~10 min)
+### [x] T9 — Prove the rules fail the build, and measure (~10 min)
 
 - **Layer:** build
 - **Files:** — (temporary changes, reverted)
@@ -141,9 +142,9 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
   1. One at a time, check that `./mvnw verify` fails and revert: a magic number in `src/main` (Checkstyle), a method with 11 parameters (PMD `ExcessiveParameterList`), and a `BigDecimal.add()` whose result is ignored (SpotBugs `RV_RETURN_VALUE_IGNORED`).
   2. Measure `./mvnw verify` before and after the plugins and write the difference in the ADR.
 - **Acceptance criteria:**
-  - [ ] Each of the three changes fails the build with its rule; recorded in the commit or the PR.
+  - [x] Each of the three changes fails the build with its rule; recorded in the commit or the PR. (1: Checkstyle, 1 violation; 2: PMD, 1 violation; 3: SpotBugs `RV_RETURN_VALUE_IGNORED`; all reverted. Time: ~8 s more per `verify`, written in the ADR)
 
-### [ ] T10 — Documentation and project status (~10 min)
+### [x] T10 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `CLAUDE.md`, `.claude/agents/revisor-ddd.md`, `docs/ia/arquitectura-ia.md`, `docs/adr/0020-static-analysis.md`, `docs/ia/pendientes.md`, `docs/ia/decisiones.md`, `docs/ia/estado-del-proyecto.md`, `docs/ia/historial.md`
@@ -153,30 +154,42 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
   2. `revisor-ddd`: it can read the reports in `target/` as input to its review.
   3. `pendientes.md`: one entry per baselined smell (two God classes, `CheckingAccount`, `reconstitute`, the two `validate()`). `decisiones.md`: tools, baseline and exclusions. ADR status `accepted`.
 - **Acceptance criteria:**
-  - [ ] The documents describe the tools and how to run them; status and history updated.
+  - [x] The documents describe the tools and how to run them; status and history updated. (the reports command was run: `target/reports/{checkstyle,pmd,cpd}.html` and `target/spotbugsXml.xml`; ADR 0020 accepted)
+
+### [x] T11 — Fixes from the review (~5 min)
+
+- **Layer:** tests · docs
+- **Files:** `adapter/in/LoginAttemptsTests.java`, `pmd-baseline.properties`, `docs/adr/0020-static-analysis.md`
+- **Depends on:** T10
+- **What to do:**
+  1. `defaultValues` had been inserted between the Javadoc of `MovableClock` and the class: the Javadoc goes back to its class.
+  2. The baseline comment and the ADR said the baselined smells "stay in the report"; the plugin leaves them out (T3), so both now say so and point to `-Dpmd.baseline=`.
+  3. ADR: the baseline works by class and rule, not by method (a limit of the plugin), and the 4 `CT_CONSTRUCTOR_THROW` were in 3 classes (`Transaction` had two constructors).
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green with 1,037 test cases.
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] `./mvnw verify` runs Checkstyle, PMD, CPD and SpotBugs and is green; the CI runs them through `./mvnw -B verify` with no new step.
-- [ ] A magic number, an 11-parameter method and an ignored `BigDecimal.add()` each fail the build (checked and reverted).
-- [ ] The SpotBugs exclusions and the PMD baseline are versioned, narrow (never a whole package) and commented.
-- [ ] The 4 real SpotBugs bugs and the 4 `CT_CONSTRUCTOR_THROW` are fixed, not excluded.
+- [x] `./mvnw verify` runs Checkstyle, PMD, CPD and SpotBugs and is green; the CI runs them through `./mvnw -B verify` with no new step.
+- [x] A magic number, an 11-parameter method and an ignored `BigDecimal.add()` each fail the build (checked and reverted).
+- [x] The SpotBugs exclusions and the PMD baseline are versioned, narrow (never a whole package) and commented.
+- [x] The 4 real SpotBugs bugs and the 4 `CT_CONSTRUCTOR_THROW` are fixed, not excluded.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (English camelCase + `@DisplayName` in Spanish, after #166).
-- [ ] No dependencies added beyond the planned ones: the three Maven plugins are justified in ADR 0020 (they are build plugins, not runtime dependencies).
-- [ ] If the API changes: n/a.
-- [ ] Any new business term is in `docs/dominio/glosario.md` (none expected).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit + static analysis): 1,037 test cases, 0 Checkstyle violations, 0 PMD failures, 0 SpotBugs bugs.
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (English camelCase + `@DisplayName` in Spanish, after #166).
+- [x] No dependencies added beyond the planned ones: the three Maven plugins are justified in ADR 0020 (they are build plugins, not runtime dependencies).
+- [x] If the API changes: n/a.
+- [x] Any new business term is in `docs/dominio/glosario.md` (none expected).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

@@ -11,7 +11,7 @@ import java.util.Objects;
  * <p>R20: el titular se registra como {@link CustomerSegment#HIGH_NET_WORTH} solo si sus ingresos verificados superan
  * {@code 100.000,00 €}; con ingresos menores, iguales al umbral o sin verificar, es {@link CustomerSegment#RETAIL}.
  */
-public class CheckingAccountFactory {
+public final class CheckingAccountFactory {
 
     private final AccountNumberSequence numbering;
     private final IncomeVerifier incomeVerifier;
