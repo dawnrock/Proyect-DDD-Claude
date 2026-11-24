@@ -40,7 +40,8 @@ The course's guidelines for adopting these tools: start with few rules, agree th
 
 ## Consequences
 
-- `./mvnw verify` takes longer: about 25 s more in the scratch measurement (Checkstyle ~6 s, PMD and CPD ~7 s, SpotBugs ~12 s); the measured time on the real build is in the history of #168.
+- `./mvnw verify` takes about **8 s longer** (measured on 2026-11-24, two rounds on the same code: 64 → 69 s and 51 → 62 s). For a quick local run the four can be skipped with `-Dcheckstyle.skip -Dpmd.skip -Dcpd.skip -Dspotbugs.skip`; never in the CI.
 - New code must pass the three tools; Claude's skills and agents run `./mvnw verify` as the "done" check, so they get the same feedback.
 - HTML reports, for reading and for the course: `./mvnw checkstyle:checkstyle pmd:pmd pmd:cpd spotbugs:spotbugs` (in `target/reports` and `target/spotbugsXml.xml`), and `./mvnw spotbugs:gui`.
-- A new Immutables value type must be added to the SpotBugs exclusion if the filter matches generated classes by name.
+- The SpotBugs exclusion matches the generated classes by their `@org.immutables.value.Generated` annotation, so a new Immutables value type needs no change. Checkstyle, PMD and CPD are limited to `src/main/java` and `src/test/java` (they would otherwise read `target/generated-sources` at `verify`).
+- Proven on 2026-11-24 by breaking each tool on purpose, one at a time: a magic number in `src/main` (Checkstyle), a method with 11 parameters (PMD `ExcessiveParameterList`) and an ignored `BigDecimal.add()` (SpotBugs `RV_RETURN_VALUE_IGNORED`) each fail the build.

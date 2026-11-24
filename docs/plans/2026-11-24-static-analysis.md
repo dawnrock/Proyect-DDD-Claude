@@ -133,7 +133,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
   - [x] `./mvnw verify` green with 0 SpotBugs bugs.
   - [x] Without the filter, the 15 excluded warnings come back, and only those. (the filter matches the generated classes by `@org.immutables.value.Generated`, which SpotBugs supports, so no class list to maintain; without the filter: 12 `AT_STALE_THREAD_WRITE_OF_PRIMITIVE`, 2 `EI_EXPOSE_REP`, 1 `URF_UNREAD_FIELD`, and nothing else, since T4-T7 removed the other 8)
 
-### [ ] T9 — Prove the rules fail the build, and measure (~10 min)
+### [x] T9 — Prove the rules fail the build, and measure (~10 min)
 
 - **Layer:** build
 - **Files:** — (temporary changes, reverted)
@@ -142,7 +142,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
   1. One at a time, check that `./mvnw verify` fails and revert: a magic number in `src/main` (Checkstyle), a method with 11 parameters (PMD `ExcessiveParameterList`), and a `BigDecimal.add()` whose result is ignored (SpotBugs `RV_RETURN_VALUE_IGNORED`).
   2. Measure `./mvnw verify` before and after the plugins and write the difference in the ADR.
 - **Acceptance criteria:**
-  - [ ] Each of the three changes fails the build with its rule; recorded in the commit or the PR.
+  - [x] Each of the three changes fails the build with its rule; recorded in the commit or the PR. (1: Checkstyle, 1 violation; 2: PMD, 1 violation; 3: SpotBugs `RV_RETURN_VALUE_IGNORED`; all reverted. Time: ~8 s more per `verify`, written in the ADR)
 
 ### [ ] T10 — Documentation and project status (~10 min)
 
