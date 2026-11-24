@@ -168,7 +168,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **Acceptance criteria:**
   - [x] Same as T3, for the packages. (56 renamed; no snake_case test method left in src/test; 1,023 test cases, class by class the same as the baseline)
 
-### [ ] T13 — ArchUnit rules as English `@ArchTest` methods (~10 min)
+### [x] T13 — ArchUnit rules as English `@ArchTest` methods (~10 min)
 
 - **Layer:** tests
 - **Files:** `HexagonalArchitectureTests`, `DomainIsolationTests`, `AdapterTestIsolationTests`
@@ -177,8 +177,8 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
   1. Each `@ArchTest static final ArchRule las_…` becomes `@ArchTest static void englishName(JavaClasses classes)`, which builds the same rule (same `because(...)`) and calls `check(classes)`. Shared definitions stay as private constants in `UPPER_SNAKE_CASE`.
   2. Validate by breaking one rule, as `src/test/CLAUDE.md` asks: add a forbidden dependency temporarily, check that `./mvnw test -Dtest=HexagonalArchitectureTests` fails on that rule, and revert. Record it in the commit.
 - **Acceptance criteria:**
-  - [ ] The three classes run the same number of rules as in the baseline (18 + 2 + 1) and all pass.
-  - [ ] A broken rule makes its method fail.
+  - [x] The three classes run the same number of rules as in the baseline (18 + 2 + 1) and all pass.
+  - [x] A broken rule makes its method fail. (21 rules turned into methods; sabotage: a Spring dependency added temporarily to `TaxId` made `theCoreDoesNotDependOnSpring`, `theDomainOnlyDependsOnTheJdk` and `theDomainDoesNotDependOnTheFramework` fail, then reverted)
 
 ### [ ] T14 — Test references in the glossary and `CLAUDE.md` (~10 min)
 
