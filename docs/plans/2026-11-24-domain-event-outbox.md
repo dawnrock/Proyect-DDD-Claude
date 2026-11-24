@@ -74,7 +74,7 @@ Technical decisions inside the user's choices (Claude, reversible):
 - **Acceptance criteria:**
   - [x] The four kinds of test pass; removing one event from the registry makes the scan test fail (checked). (8 cases; sabotage: removing `WithdrawalRejected` from the registry fails the scan test and its round trip; reverted)
 
-### [ ] T3 — The relay delivers pending events and counts failures (~10 min)
+### [x] T3 — The relay delivers pending events and counts failures (~10 min)
 
 - **Layer:** adapter.out (event)
 - **Files:** `adapter/out/event/OutboxRelay.java`, `adapter/out/event/OutboxProperties.java`, `OutboxRelayTests.java`
@@ -83,7 +83,7 @@ Technical decisions inside the user's choices (Claude, reversible):
   1. Red: with rows inserted through the repository and a mocked `ApplicationEventPublisher`: pending events are delivered in order and marked published; published ones are not delivered again; when the publisher throws for one event, the others are still delivered, that row gets `attempts = 1` and `last_error`, and it is delivered on the next run; after `max-attempts` failures it gets `failed_at` and is not tried again.
   2. Green: `OutboxRelay.relayPending()` (`@Scheduled(fixedDelayString = "${app.events.outbox.relay-interval:2s}")`, guarded by a lock) and `OutboxProperties` (`app.events.outbox.*`, record with named default constants like `LoginAttemptsProperties`, `@EnableConfigurationProperties` in the adapter).
 - **Acceptance criteria:**
-  - [ ] Relay tests green; `./mvnw verify` green (the relay runs every 2 s on an empty outbox in the full context).
+  - [x] Relay tests green; `./mvnw verify` green (the relay runs every 2 s on an empty outbox in the full context). (4 cases. *Deviation:* `OutboxProperties` has `batchSize`, `maxAttempts` and `retention` with named defaults; the relay interval is read by `@Scheduled(fixedDelayString = "${app.events.outbox.relay-interval:2s}")` directly, so it is not a record component nor a `DEFAULT_RELAY_INTERVAL` constant)
 
 ### [ ] T4 — The application publishes inside the unit of work (~10 min)
 
