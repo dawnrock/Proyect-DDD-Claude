@@ -1,6 +1,7 @@
 package com.dawnrock.ddd.adapter.in;
 
 import java.time.Duration;
+import java.util.Objects;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -23,10 +24,10 @@ public record SignUpLimitProperties(Integer maxPerIp, Integer maxTotal, Duration
     static final int DEFAULT_MAX_FAILURES_PER_IP = 10;
 
     public SignUpLimitProperties {
-        maxPerIp = maxPerIp == null ? DEFAULT_MAX_PER_IP : maxPerIp;
-        maxTotal = maxTotal == null ? DEFAULT_MAX_TOTAL : maxTotal;
-        window = window == null ? DEFAULT_WINDOW : window;
-        maxFailuresPerIp = maxFailuresPerIp == null ? DEFAULT_MAX_FAILURES_PER_IP : maxFailuresPerIp;
+        maxPerIp = Objects.requireNonNullElse(maxPerIp, DEFAULT_MAX_PER_IP);
+        maxTotal = Objects.requireNonNullElse(maxTotal, DEFAULT_MAX_TOTAL);
+        window = Objects.requireNonNullElse(window, DEFAULT_WINDOW);
+        maxFailuresPerIp = Objects.requireNonNullElse(maxFailuresPerIp, DEFAULT_MAX_FAILURES_PER_IP);
         if (maxPerIp < 1 || maxTotal < 1 || maxFailuresPerIp < 1 || window.isNegative() || window.isZero()) {
             throw new IllegalStateException("El límite de altas de clientes debe ser positivo");
         }

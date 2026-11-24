@@ -138,6 +138,16 @@ class LoginAttemptsTests {
     }
 
     /** Reloj fijo que el test adelanta a mano. */
+    @Test
+    @DisplayName("Sin valores, 3 fallos por usuario, 10 por IP y 30 minutos de bloqueo")
+    void defaultValues() {
+        LoginAttemptsProperties properties = new LoginAttemptsProperties(null, null, null);
+
+        assertThat(properties.maxPerUser()).isEqualTo(3);
+        assertThat(properties.maxPerIp()).isEqualTo(10);
+        assertThat(properties.lockout()).isEqualTo(Duration.ofMinutes(30));
+    }
+
     private static final class MovableClock extends Clock {
 
         private Instant now;

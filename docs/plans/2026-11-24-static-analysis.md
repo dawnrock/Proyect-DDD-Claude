@@ -88,7 +88,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 - **Acceptance criteria:**
   - [x] `./mvnw verify` and `check-domain.mjs` green. (no subclass or mock of the three; SpotBugs' `CT_CONSTRUCTOR_THROW` is checked in T8)
 
-### [ ] T5 — Configuration defaults without reboxing (~5 min)
+### [x] T5 — Configuration defaults without reboxing (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/LoginAttemptsProperties.java`, `adapter/in/SignUpLimitProperties.java`, `adapter/in/LoginAttemptsTests.java`
@@ -97,7 +97,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
   1. Characterization first: `SignUpLimitTests` already builds `SignUpLimitProperties(null, …)` and checks the defaults; no test does it for `LoginAttemptsProperties`. Add one (`new LoginAttemptsProperties(null, null, null)` gives 3, 10 and 30 minutes).
   2. `maxPerUser == null ? DEFAULT_MAX_PER_USER : maxPerUser` → `Objects.requireNonNullElse(maxPerUser, DEFAULT_MAX_PER_USER)`, and the same for the other `Integer` fields.
 - **Acceptance criteria:**
-  - [ ] The default tests of both properties pass before and after the change.
+  - [x] The default tests of both properties pass before and after the change. (characterization test `LoginAttemptsTests.defaultValues`; sabotage: changing a default fails it; reverted)
 
 ### [ ] T6 — `DatabaseAccountNumberSequence` with no null path (~5 min)
 
