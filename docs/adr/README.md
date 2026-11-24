@@ -20,6 +20,7 @@
 | [0017](0017-login-attempt-limit.md) | Limit on login attempts (amends 0008 and 0015) | Accepted |
 | [0018](0018-sign-up-limit.md) | Limit on customer sign-ups per IP and in total (amends 0012) | Accepted |
 | [0019](0019-real-persistence.md) | Real persistence: PostgreSQL (Neon) in production, H2 locally | Accepted |
+| [0020](0020-static-analysis.md) | Static analysis in the build: Checkstyle, PMD/CPD and SpotBugs | Proposed |
 
 ADR 0011 (the `integration` layer) only exists on `Monolithic`: it applies to phase 1.
 

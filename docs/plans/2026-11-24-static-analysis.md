@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-24
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~80 min (10 tasks)
 
 ## Goal
@@ -43,7 +43,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 
 ## Tasks
 
-### [ ] T1 — ADR 0020 (~10 min)
+### [x] T1 — ADR 0020 (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0020-static-analysis.md`, `docs/adr/README.md`
@@ -51,7 +51,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 - **What to do:**
   1. Context (the course, the 2026-11-24 analysis), decision (the three tools, versions, rules, `verify`, baseline, exclusions), alternatives (SonarQube: server and token, recommended as SonarQube for IDE; Error Prone; only reports without failing the build), consequences (build time, how to handle a false positive). Status `proposed` until T10.
 - **Acceptance criteria:**
-  - [ ] ADR written in English and listed in the README.
+  - [x] ADR written in English and listed in the README.
 
 ### [ ] T2 — Checkstyle in `verify` (~10 min)
 
