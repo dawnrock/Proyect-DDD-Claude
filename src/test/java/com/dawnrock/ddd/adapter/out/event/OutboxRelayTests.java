@@ -2,6 +2,7 @@ package com.dawnrock.ddd.adapter.out.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -118,6 +119,31 @@ class OutboxRelayTests {
         assertThat(failed.failedAt).isEqualTo(NOW);
         assertThat(failed.publishedAt).isNull();
         verify(spring, never()).publishEvent(withdrawn());
+    }
+
+    @Test
+    @DisplayName("Un consumidor que falla dentro de su propia transacción cuenta el intento y no bloquea los eventos siguientes")
+    void aConsumerFailingInsideItsOwnTransactionCountsTheAttemptAndDoesNotBlockTheQueue() {
+        DomainEvent failing = deposited();
+        DomainEvent other = withdrawn();
+        Long failingId = store(failing);
+        Long otherId = store(other);
+        TransactionTemplate consumerTransaction = OutboxTestDatabase.bean(TransactionTemplate.class);
+        willAnswer(invocation -> {
+            // Como un consumidor que llama a un caso de uso: su transacción se une a la del relé y la marca para deshacer
+            consumerTransaction.executeWithoutResult(status -> {
+                throw new IllegalStateException("el caso de uso del consumidor ha fallado");
+            });
+            return null;
+        }).given(spring).publishEvent(failing);
+
+        relay.relayPending();
+
+        OutboxEventEntity failed = row(failingId);
+        assertThat(failed.attempts).isEqualTo(1);
+        assertThat(failed.lastError).contains("el caso de uso del consumidor ha fallado");
+        assertThat(failed.publishedAt).isNull();
+        assertThat(row(otherId).publishedAt).isEqualTo(NOW);
     }
 
     @Test

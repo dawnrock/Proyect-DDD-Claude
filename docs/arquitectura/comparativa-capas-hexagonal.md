@@ -84,6 +84,8 @@ sequenceDiagram
 | Who builds the service | Spring (`@Service`), which builds `MoneyTransferService` with `new` inside it | `config.DomainConfiguration` (`@Bean`), with no Spring annotation in the core |
 | After saving | nothing | `MoneyDeposited` reaches the audit and customer-notification listeners |
 
+> The diagram shows the `v2-hexagonal` snapshot. Since #150 the repositories are JPA adapters, and since #165 (ADR 0021) `DomainEventPublisher` is implemented by `OutboxDomainEventPublisher`: the events are stored in the outbox inside the unit of work, and `OutboxRelay` delivers them to the listeners a moment later.
+
 ## What changed in each package
 
 | Phase 1 (`v1-monolito`) | Phase 2 (`v2-hexagonal`) | What changed | Issue |

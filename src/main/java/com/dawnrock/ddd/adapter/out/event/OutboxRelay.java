@@ -21,7 +21,8 @@ import lombok.extern.slf4j.Slf4j;
  * guardaron y los entrega a los consumidores ({@code @EventListener} de {@code application.listener}) por los eventos
  * de Spring. Cada evento se entrega y se marca en su propia transacción: si un consumidor falla, se cuenta el intento,
  * el resto sigue y ese evento se reintenta en la pasada siguiente, hasta {@code maxAttempts}. Entrega al menos una
- * vez: si el proceso cae entre la entrega y la marca, el evento se entrega otra vez.
+ * vez: si el proceso cae entre la entrega y la marca, o si un consumidor falla después de que otro ya lo recibiera, el
+ * evento se entrega otra vez.
  */
 @Slf4j
 @Component
@@ -69,21 +70,31 @@ public class OutboxRelay {
         log.info("Outbox · limpieza: {} eventos publicados borrados", deleted);
     }
 
+    /**
+     * Entrega el evento y lo marca como publicado en una transacción. Si algo falla, también al confirmarla (un consumidor
+     * que se une a ella y la marca para deshacer), esa transacción se deshace entera y el intento se anota en otra: así
+     * cuenta para {@code maxAttempts} y no bloquea a los eventos siguientes.
+     */
     private void deliver(Long id) {
-        transactions.executeWithoutResult(status -> repository.findById(id).ifPresent(row -> {
-            try {
-                DomainEvent event = types.fromJson(row.eventType, row.payload);
-                spring.publishEvent(event);
+        try {
+            transactions.executeWithoutResult(status -> repository.findById(id).ifPresent(row -> {
+                spring.publishEvent(types.fromJson(row.eventType, row.payload));
                 row.markPublished(clock.instant());
-            } catch (RuntimeException e) {
-                row.recordFailedAttempt(e.toString(), properties.maxAttempts(), clock.instant());
-                if (row.failedAt != null) {
-                    log.error("Outbox · el evento {} {} falla tras {} intentos y no se reintentará: {}", row.id,
-                            row.eventType, row.attempts, e.toString());
-                } else {
-                    log.warn("Outbox · el evento {} {} ha fallado (intento {}), se reintentará: {}", row.id,
-                            row.eventType, row.attempts, e.toString());
-                }
+            }));
+        } catch (RuntimeException e) {
+            recordFailure(id, e);
+        }
+    }
+
+    private void recordFailure(Long id, RuntimeException failure) {
+        transactions.executeWithoutResult(status -> repository.findById(id).ifPresent(row -> {
+            row.recordFailedAttempt(failure.toString(), properties.maxAttempts(), clock.instant());
+            if (row.failedAt != null) {
+                log.error("Outbox · el evento {} {} falla tras {} intentos y no se reintentará: {}", row.id,
+                        row.eventType, row.attempts, failure.toString());
+            } else {
+                log.warn("Outbox · el evento {} {} ha fallado (intento {}), se reintentará: {}", row.id,
+                        row.eventType, row.attempts, failure.toString());
             }
         }));
     }

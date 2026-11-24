@@ -50,7 +50,7 @@ Terms of the checking-accounts domain. The code and the documentation use the En
 | Money withdrawn | Dinero retirado | `MoneyWithdrawn` | Domain event | A withdrawal was approved, including the source side of an approved transfer. |
 | Withdrawal rejected | Retirada rechazada | `WithdrawalRejected` | Domain event | A withdrawal (or a transfer) was rejected because it would leave the account below what is allowed; the balance does not change. |
 | Pull the events | Recoger los eventos | `pullDomainEvents` | Account operation | Hands over the events recorded since the last pull and forgets them, so they are not published twice. |
-| Event publisher | Publicador de eventos | `DomainEventPublisher` | Output port | Delivers the events to whoever wants to react. Implemented by `SpringDomainEventPublisher` (`adapter.out.event`). |
+| Event publisher | Publicador de eventos | `DomainEventPublisher` | Output port | Delivers the events to whoever wants to react. Used inside the unit of work; implemented by `OutboxDomainEventPublisher` (`adapter.out.event`), which stores them in the outbox with their aggregate, and `OutboxRelay` delivers them to the listeners (#165, ADR 0021). |
 | Audit | Auditoría | `AuditLogListener` | Consumer (`application.listener`) | Logs every event, with its type, its account and its instant. |
 | Customer notification | Aviso al cliente | `CustomerNotificationListener` | Consumer (`application.listener`) | Notifies the customer of deposits, withdrawals and rejected withdrawals. Simulated: writes the notice to the log. Does not notify account openings. |
 

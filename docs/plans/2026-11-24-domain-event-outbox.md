@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-24 (revised the same day: order and adjustments)
-- **Status:** in progress
-- **Total estimate:** ~90 min (10 tasks)
+- **Status:** done
+- **Total estimate:** ~100 min (11 tasks)
 
 ## Goal
 
@@ -162,29 +162,40 @@ Technical decisions inside the user's choices (Claude, reversible):
 - **Acceptance criteria:**
   - [x] Documentation in English and consistent with the code. (the project status, decisions, pending items and history are updated here as well)
 
+### [x] T11 — Fixes from the review (~10 min)
+
+- **Layer:** adapter.out (event) · docs
+- **Files:** `adapter/out/event/OutboxRelay.java`, `OutboxRelayTests.java`, `AuditLogListener.java` (Javadoc), `docs/dominio/glosario.md`, `docs/arquitectura/comparativa-capas-hexagonal.md`, ADR 0021, `decisiones.md`
+- **Depends on:** T10
+- **What to do:**
+  1. `revisor-ddd` found that a consumer joining the delivery transaction (for example, one that calls a use case) and failing would mark it rollback-only: the commit threw `UnexpectedRollbackException`, the attempt was not saved and that event blocked the queue forever. Red: a test with such a consumer (`UnexpectedRollbackException`). Green: delivery and the record of a failed attempt run in separate transactions.
+  2. Stale references to `SpringDomainEventPublisher`: `AuditLogListener` Javadoc, the glossary and a text note under the diagram of `comparativa-capas-hexagonal.md` (the diagram shows the `v2-hexagonal` snapshot and is not changed without the user). The ADR and `decisiones.md` mention the redelivery after a partial failure.
+- **Acceptance criteria:**
+  - [x] The new relay test fails before the fix and passes after it; `./mvnw verify` green with 1,058 test cases.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] A use case stores its events in the outbox in the same transaction as the aggregate; with a rollback none is left (T4, T6).
-- [ ] A committed event reaches the consumers even if the process restarts before delivering it (T8).
-- [ ] A consumer that throws does not make the use case fail nor lose the other events; the event is retried and, after 5 attempts, marked as failed (T3, T7).
-- [ ] The V2 migration applies on H2 and, on the next deploy, on Neon (checked after the merge with Render's logs or by the user).
-- [ ] The new code passes Checkstyle, PMD/CPD and SpotBugs (#168) with no new baseline entry or exclusion.
+- [x] A use case stores its events in the outbox in the same transaction as the aggregate; with a rollback none is left (T4, T6).
+- [x] A committed event reaches the consumers even if the process restarts before delivering it (T8).
+- [x] A consumer that throws does not make the use case fail nor lose the other events; the event is retried and, after 5 attempts, marked as failed (T3, T7).
+- [x] The V2 migration applies on H2 and, on the next deploy, on Neon (H2 checked; Neon on the next deploy, after the merge, with Render's logs or by the user).
+- [x] The new code passes Checkstyle, PMD/CPD and SpotBugs (#168) with no new baseline entry or exclusion.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit + static analysis).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (English camelCase + `@DisplayName` in Spanish, after #166).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): Jackson, Spring Data JPA and scheduling are already in the project.
-- [ ] If the API changes: n/a (no API change).
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a (outbox and relay are technical terms, explained in ADR 0021).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md` (replace "consumers are synchronous" of #17), pending items in `pendientes.md` (remove the synchronous-consumers note; add one instance and possible duplicates) and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit + static analysis).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (English camelCase + `@DisplayName` in Spanish, after #166).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): Jackson, Spring Data JPA and scheduling are already in the project.
+- [x] If the API changes: n/a (no API change).
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a (outbox and relay are technical terms, explained in ADR 0021).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md` (replace "consumers are synchronous" of #17), pending items in `pendientes.md` (remove the synchronous-consumers note; add one instance and possible duplicates) and a row in `historial.md`.
 
 ## Risks and open questions
 
