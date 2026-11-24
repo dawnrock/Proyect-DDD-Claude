@@ -139,7 +139,7 @@ Technical decisions inside the user's choices (Claude, reversible):
 - **Acceptance criteria:**
   - [x] The test passes; with the second start skipped, the row is still pending (the first context really did not deliver it). (instead of skipping the second start, the test itself asserts 3 pending events and no audit line before the restart. *Deviation:* the relay's `@Scheduled` also has `initialDelayString` with the same interval: with `fixedDelay` alone the first run happens at startup and could deliver the deposit in the first context, making the test flaky)
 
-### [ ] T9 — Only the event adapter talks to Spring's event bus (~5 min)
+### [x] T9 — Only the event adapter talks to Spring's event bus (~5 min)
 
 - **Layer:** tests (ArchUnit)
 - **Files:** `src/test/java/com/dawnrock/ddd/HexagonalArchitectureTests.java`
@@ -148,7 +148,7 @@ Technical decisions inside the user's choices (Claude, reversible):
   1. Rule as an `@ArchTest` method in English camelCase, following #166 (`onlyTheEventAdapterPublishesToSpring`): no class outside `adapter.out.event` depends on `ApplicationEventPublisher`, so domain events can only reach the listeners through the outbox.
   2. Validate it by breaking it (inject `ApplicationEventPublisher` into a class of `application` temporarily) and revert.
 - **Acceptance criteria:**
-  - [ ] The rule passes and fails when broken (checked).
+  - [x] The rule passes and fails when broken (checked). (sabotage: an `ApplicationEventPublisher` reference added to `AuditLogListener` fails `onlyTheEventAdapterPublishesToSpring` and `theCoreDoesNotDependOnSpring`; reverted)
 
 ### [ ] T10 — ADR and documentation (~10 min)
 

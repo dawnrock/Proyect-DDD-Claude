@@ -25,6 +25,7 @@ import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.CompositeArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 
 import com.dawnrock.ddd.application.CheckingAccountService;
@@ -263,6 +264,18 @@ class HexagonalArchitectureTests {
                 .should().callMethodWhere(describe("reconstitute(...) de un agregado",
                         call -> call.getName().equals("reconstitute")
                                 && call.getTargetOwner().getPackageName().startsWith("com.dawnrock.ddd.domain.model")))
+                .check(classes);
+    }
+
+    /**
+     * #165, ADR 0021: solo el adaptador de eventos publica en el bus de eventos de Spring. Así los eventos de dominio
+     * llegan a los consumidores únicamente a través del outbox, guardados con su agregado.
+     */
+    @ArchTest
+    static void onlyTheEventAdapterPublishesToSpring(JavaClasses classes) {
+        noClasses()
+                .that().resideOutsideOfPackage("..adapter.out.event..")
+                .should().dependOnClassesThat().areAssignableTo(ApplicationEventPublisher.class)
                 .check(classes);
     }
 
