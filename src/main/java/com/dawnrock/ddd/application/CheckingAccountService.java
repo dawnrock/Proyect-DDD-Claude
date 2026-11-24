@@ -322,17 +322,21 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     }
 
     /**
-     * Ejecuta el caso de uso dentro de la unidad de trabajo y, cuando ha terminado, publica los eventos de cada cuenta
-     * guardada, una llamada por cuenta y en el orden en que se guardaron. Si el caso de uso falla, no publica nada.
+     * Ejecuta el caso de uso dentro de la unidad de trabajo y, al final del trabajo y todavía dentro de ella, publica los
+     * eventos de cada cuenta guardada, una llamada por cuenta y en el orden en que se guardaron. Así el outbox los guarda
+     * en la misma transacción que las cuentas (#165, ADR 0021): si la unidad no termina bien, desaparecen con ella. Si
+     * el caso de uso falla antes, no publica nada.
      */
     private <T> T inUnit(Function<Events, T> work) {
         Events events = new Events();
-        T result = unitOfWork.execute(() -> work.apply(events));
-        events.batches.forEach(publisher::publishAll);
-        return result;
+        return unitOfWork.execute(() -> {
+            T result = work.apply(events);
+            events.batches.forEach(publisher::publishAll);
+            return result;
+        });
     }
 
-    /** Guarda la cuenta y recoge los eventos que ha registrado, para publicarlos al terminar la unidad. */
+    /** Guarda la cuenta y recoge los eventos que ha registrado, para publicarlos al final de la unidad. */
     private CheckingAccount save(CheckingAccount account, Events events) {
         CheckingAccount saved = repository.save(account);
         events.batches.add(account.pullDomainEvents());

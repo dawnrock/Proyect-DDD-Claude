@@ -85,7 +85,7 @@ Technical decisions inside the user's choices (Claude, reversible):
 - **Acceptance criteria:**
   - [x] Relay tests green; `./mvnw verify` green (the relay runs every 2 s on an empty outbox in the full context). (4 cases. *Deviation:* `OutboxProperties` has `batchSize`, `maxAttempts` and `retention` with named defaults; the relay interval is read by `@Scheduled(fixedDelayString = "${app.events.outbox.relay-interval:2s}")` directly, so it is not a record component nor a `DEFAULT_RELAY_INTERVAL` constant)
 
-### [ ] T4 — The application publishes inside the unit of work (~10 min)
+### [x] T4 — The application publishes inside the unit of work (~10 min)
 
 - **Layer:** application
 - **Files:** `application/CheckingAccountService.java`, `domain/model/DomainEventPublisher.java` (Javadoc), `application/CheckingAccountServiceTests.java`
@@ -94,7 +94,7 @@ Technical decisions inside the user's choices (Claude, reversible):
   1. Red: turn the tests of the nested unit-of-work class around: the events are published **inside** the unit, after the last save; a use case that fails before or while saving publishes nothing (unchanged).
   2. Green: `inUnit` publishes the batches at the end of the work, inside `unitOfWork.execute`; update the Javadocs (`inUnit`, `DomainEventPublisher`: "inside the unit of work, so an outbox shares its transaction"). No new types in `CheckingAccountService` (PMD baseline).
 - **Acceptance criteria:**
-  - [ ] Application tests green; `./mvnw verify` green with the old `SpringDomainEventPublisher` (listeners are still called synchronously, now inside the transaction).
+  - [x] Application tests green; `./mvnw verify` green with the old `SpringDomainEventPublisher` (listeners are still called synchronously, now inside the transaction). (red: both unit-of-work tests failed with the old order; the second one, "the unit does not finish well", now checks that its events were published inside it, so they go away with the rollback; no new type in `CheckingAccountService`)
 
 ### [ ] T5 — Old published events are cleaned up (~5 min)
 

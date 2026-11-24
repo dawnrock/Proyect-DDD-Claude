@@ -653,7 +653,7 @@ class CheckingAccountServiceTests {
         }
 
         private final RecordingUnitOfWork unit = new RecordingUnitOfWork();
-        private final AtomicBoolean publishedInsideUnit = new AtomicBoolean(false);
+        private final AtomicBoolean publishedOutsideUnit = new AtomicBoolean(false);
         private int publications;
         private CheckingAccountService recorded;
 
@@ -661,8 +661,8 @@ class CheckingAccountServiceTests {
         void setUp() {
             DomainEventPublisher recordingPublisher = event -> {
                 publications++;
-                if (unit.inside.get()) {
-                    publishedInsideUnit.set(true);
+                if (!unit.inside.get()) {
+                    publishedOutsideUnit.set(true);
                 }
             };
             recorded = new CheckingAccountService(PersistenceTestAdapters.accounts(), PersistenceTestAdapters.ownership(),
@@ -673,25 +673,26 @@ class CheckingAccountServiceTests {
         }
 
         @Test
-        @DisplayName("Los eventos se publican cuando la unidad de trabajo ha terminado, nunca dentro")
-        void eventsArePublishedWhenTheUnitFinishes() {
+        @DisplayName("Los eventos se publican dentro de la unidad de trabajo, para que un outbox comparta su transacción (#165)")
+        void eventsArePublishedInsideTheUnitOfWork() {
             UUID id = recorded.openAccount(ADMIN, command().build()).id();
             recorded.deposit(ADMIN, DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).build());
 
             assertThat(publications).isPositive();
-            assertThat(publishedInsideUnit).as("algún evento se publicó dentro de la unidad").isFalse();
+            assertThat(publishedOutsideUnit).as("algún evento se publicó fuera de la unidad").isFalse();
         }
 
         @Test
-        @DisplayName("Si la unidad de trabajo no termina bien, no se publica ningún evento")
-        void whenTheUnitDoesNotFinishWellNothingIsPublished() {
+        @DisplayName("Si la unidad de trabajo no termina bien, sus eventos se publicaron dentro de ella y se deshacen con ella")
+        void whenTheUnitDoesNotFinishWellItsEventsWerePublishedInsideIt() {
             UUID id = recorded.openAccount(ADMIN, command().build()).id();
             publications = 0;
             unit.failOnFinish = true;
 
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() ->
                     recorded.deposit(ADMIN, DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).build()));
-            assertThat(publications).isZero();
+            assertThat(publications).isPositive();
+            assertThat(publishedOutsideUnit).as("algún evento se publicó fuera de la unidad").isFalse();
         }
     }
 
