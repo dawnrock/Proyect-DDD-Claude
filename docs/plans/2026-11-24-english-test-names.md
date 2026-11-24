@@ -78,7 +78,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **Acceptance criteria:**
   - [x] No `void [a-z]+_` method left in the package; per-class counts match the baseline; `./mvnw verify` green. (125 renamed; 84 classes, 1,004 tests, same as the baseline)
 
-### [ ] T4 — `domain.service` (~5 min)
+### [x] T4 — `domain.service` (~5 min)
 
 - **Layer:** tests
 - **Files:** 2 files in `.../domain/service`, 22 methods
@@ -86,7 +86,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **What to do:**
   1. Same as T3.
 - **Acceptance criteria:**
-  - [ ] Same as T3, for the package.
+  - [x] Same as T3, for the package. (22 renamed; 1,004 tests, same as the baseline)
 
 ### [ ] T5 — `application` (~10 min)
 

@@ -38,7 +38,7 @@ class MoneyTransferServiceTests {
 
         @Test
         @DisplayName("Una transferencia aprobada resta el importe del origen y lo suma al destino")
-        void una_transferencia_aprobada_mueve_el_importe_entre_las_cuentas() {
+        void anApprovedTransferMovesTheAmountBetweenTheAccounts() {
             CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
             CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
 
@@ -50,7 +50,7 @@ class MoneyTransferServiceTests {
 
         @Test
         @DisplayName("Una transferencia aprobada registra una retirada en el origen y un ingreso en el destino")
-        void una_transferencia_aprobada_registra_retirada_e_ingreso() {
+        void anApprovedTransferRecordsAWithdrawalAndADeposit() {
             CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
             CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
 
@@ -68,7 +68,7 @@ class MoneyTransferServiceTests {
 
         @Test
         @DisplayName("La transferencia devuelve la retirada aprobada del origen")
-        void la_transferencia_devuelve_la_retirada_aprobada_del_origen() {
+        void theTransferReturnsTheApprovedWithdrawalFromTheSource() {
             CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
             CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
 
@@ -88,7 +88,7 @@ class MoneyTransferServiceTests {
         @ParameterizedTest
         @CsvSource({"RETAIL, 501.00", "HIGH_NET_WORTH, 1501.00"})
         @DisplayName("Si la retirada se rechaza no se ingresa nada en el destino y los saldos no cambian")
-        void si_la_retirada_se_rechaza_no_se_ingresa_nada_en_el_destino(CustomerSegment segment, String amount) {
+        void whenTheWithdrawalIsRejectedNothingIsDepositedInTheDestination(CustomerSegment segment, String amount) {
             CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).segment(segment).initialDeposit("500.00").open();
             CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
 
@@ -109,7 +109,7 @@ class MoneyTransferServiceTests {
 
         @Test
         @DisplayName("Un importe en otra divisa se rechaza sin registrar ningún movimiento en las cuentas")
-        void un_importe_en_otra_divisa_se_rechaza_sin_registrar_movimientos() {
+        void anAmountInAnotherCurrencyIsRejectedWithoutRecordingTransactions() {
             CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
             CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
             MonetaryAmount dollars = new MonetaryAmount(new BigDecimal("10.00"), Currency.getInstance("USD"));
@@ -130,7 +130,7 @@ class MoneyTransferServiceTests {
 
         @Test
         @DisplayName("Transferir a la misma cuenta se rechaza sin registrar ningún movimiento")
-        void transferir_a_la_misma_cuenta_se_rechaza_sin_registrar_movimientos() {
+        void aTransferToTheSameAccountIsRejectedWithoutRecordingTransactions() {
             CheckingAccount account = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
 
             assertThatExceptionOfType(SameAccountTransferException.class)
@@ -147,7 +147,7 @@ class MoneyTransferServiceTests {
 
         @Test
         @DisplayName("Una transferencia aprobada deja dinero retirado en el origen y dinero ingresado en el destino")
-        void una_transferencia_aprobada_deja_dinero_retirado_en_origen_e_ingresado_en_destino() {
+        void anApprovedTransferLeavesMoneyWithdrawnInTheSourceAndMoneyDepositedInTheDestination() {
             CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
             CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
             source.pullDomainEvents();
@@ -161,7 +161,7 @@ class MoneyTransferServiceTests {
 
         @Test
         @DisplayName("Una transferencia rechazada deja una retirada rechazada en el origen y nada en el destino")
-        void una_transferencia_rechazada_deja_una_retirada_rechazada_en_origen_y_nada_en_destino() {
+        void aRejectedTransferLeavesWithdrawalRejectedInTheSourceAndNothingInTheDestination() {
             CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("100.00").open();
             CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
             source.pullDomainEvents();
@@ -180,7 +180,7 @@ class MoneyTransferServiceTests {
 
         @Test
         @DisplayName("Una transferencia aprobada deja la retirada apuntando al destino y el ingreso al origen")
-        void una_transferencia_aprobada_registra_la_contrapartida_en_ambas_cuentas() {
+        void anApprovedTransferRecordsTheCounterpartInBothAccounts() {
             CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
             CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
 
@@ -194,7 +194,7 @@ class MoneyTransferServiceTests {
 
         @Test
         @DisplayName("Una transferencia rechazada deja la retirada rechazada apuntando al destino y nada en el destino")
-        void una_transferencia_rechazada_registra_la_contrapartida_solo_en_el_origen() {
+        void aRejectedTransferRecordsTheCounterpartOnlyInTheSource() {
             CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
             CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).open();
 
@@ -212,7 +212,7 @@ class MoneyTransferServiceTests {
 
         @Test
         @DisplayName("Una transferencia recibida que lleva el saldo al patrimonio mínimo convierte al titular destino en alto patrimonio")
-        void una_transferencia_recibida_que_alcanza_el_patrimonio_minimo_promociona_al_titular_destino() {
+        void aReceivedTransferReachingTheMinimumWealthPromotesTheDestinationHolder() {
             CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("500.00").open();
             CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).initialDeposit("99900.00").open();
 
@@ -224,7 +224,7 @@ class MoneyTransferServiceTests {
 
         @Test
         @DisplayName("Una transferencia rechazada no cambia el segmento de nadie")
-        void una_transferencia_rechazada_no_cambia_el_segmento_de_nadie() {
+        void aRejectedTransferChangesNobodysSegment() {
             CheckingAccount source = TestAccounts.anAccount().accountNumber(SOURCE_IBAN).initialDeposit("50.00").open();
             CheckingAccount target = TestAccounts.anAccount().accountNumber(TARGET_IBAN).initialDeposit("99900.00").open();
 
