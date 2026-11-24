@@ -77,7 +77,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
 - **Acceptance criteria:**
   - [x] `AccountNumberTests` green without changes. (*BBAN* added to the glossary; sabotage: `BBAN_OFFSET = 3` makes `AccountNumberTests` fail; reverted)
 
-### [ ] T4 — `MonABankIbans`: CCC and IBAN moduli (~5 min)
+### [x] T4 — `MonABankIbans`: CCC and IBAN moduli (~5 min)
 
 - **Layer:** adapter.out
 - **Files:** `src/main/java/com/dawnrock/ddd/adapter/out/persistence/MonABankIbans.java`
@@ -86,7 +86,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
   1. `CCC_MODULUS = 11`: `digit = CCC_MODULUS - sum % CCC_MODULUS`; then `CCC_MODULUS → 0` and `CCC_MODULUS - 1 → 1`. `-1` is ignored by the rule; if the ternary chain still reads badly, extract it to a method with a name.
   2. `IBAN_MODULUS = BigInteger.valueOf(97)` and `IBAN_CHECK_BASE = 98`, keeping the ISO 13616 Javadoc.
 - **Acceptance criteria:**
-  - [ ] `MonABankIbansTests` and `InMemoryAccountNumberSequenceTests` green without changes; the demo IBANs (`ES8099990001450000000001`…) are the same.
+  - [x] `MonABankIbansTests` and `InMemoryAccountNumberSequenceTests` green without changes; the demo IBANs (`ES8099990001450000000001`…) are the same. (the "10 → 1, 11 → 0" rule went to a named method, `asSingleDigit`, as the plan's risk suggested; sabotages: `IBAN_CHECK_BASE = 97` fails 4 tests and dropping the "10 → 1" rule fails 10; reverted; the demo IBAN test of `MonABankIbansTests` is green)
 
 ### [ ] T5 — `Durations`: waiting times rounded up (~10 min)
 
