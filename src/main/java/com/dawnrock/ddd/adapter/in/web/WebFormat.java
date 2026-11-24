@@ -23,6 +23,8 @@ public class WebFormat {
     private static final Locale SPANISH = Locale.of("es", "ES");
     private static final String MINUS = "−";
     private static final String NBSP = "\u00A0";
+    /** Caracteres del IBAN que quedan a la vista en cada extremo al abreviarlo. */
+    private static final int VISIBLE_IBAN_CHARACTERS = 4;
 
     /** {@code 1000.00 EUR} → {@code 1.000,00 €}; siempre con separador de miles, a diferencia de {@code es-ES}. */
     public String money(BigDecimal amount, String currency) {
@@ -43,10 +45,11 @@ public class WebFormat {
      * no se parta entre líneas.
      */
     public String maskedIban(String accountNumber) {
-        if (accountNumber.length() < 8) {
+        if (accountNumber.length() < 2 * VISIBLE_IBAN_CHARACTERS) {
             return accountNumber;
         }
-        return accountNumber.substring(0, 4) + NBSP + "••••" + NBSP + accountNumber.substring(accountNumber.length() - 4);
+        return accountNumber.substring(0, VISIBLE_IBAN_CHARACTERS) + NBSP + "••••" + NBSP
+                + accountNumber.substring(accountNumber.length() - VISIBLE_IBAN_CHARACTERS);
     }
 
     /** Etiqueta en español del segmento; si el código es desconocido se muestra tal cual. Único sitio de la web. */

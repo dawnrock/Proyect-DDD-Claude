@@ -110,7 +110,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
 - **Acceptance criteria:**
   - [x] `LoginControllerTests`, `SignUpControllerTests`, `CustomerControllerTests` and `TokenControllerTests` green without changes. (8 + 43 + 21 + 8 cases green, unchanged)
 
-### [ ] T7 — `WebFormat.maskedIban` (~5 min)
+### [x] T7 — `WebFormat.maskedIban` (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `src/main/java/com/dawnrock/ddd/adapter/in/web/WebFormat.java`
@@ -118,7 +118,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
 - **What to do:**
   1. `private static final int VISIBLE_IBAN_CHARACTERS = 4;` for the first and last characters that stay visible. The minimum length becomes `2 * VISIBLE_IBAN_CHARACTERS` (`2` is ignored by the rule and says what it means: both ends).
 - **Acceptance criteria:**
-  - [ ] `WebFormatTests` green without changes.
+  - [x] `WebFormatTests` green without changes. (sabotage: `VISIBLE_IBAN_CHARACTERS = 3` makes `WebFormatTests` fail; reverted)
 
 ### [ ] T8 — Final check and project status (~10 min)
 
