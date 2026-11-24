@@ -180,7 +180,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
   - [x] The three classes run the same number of rules as in the baseline (18 + 2 + 1) and all pass.
   - [x] A broken rule makes its method fail. (21 rules turned into methods; sabotage: a Spring dependency added temporarily to `TaxId` made `theCoreDoesNotDependOnSpring`, `theDomainOnlyDependsOnTheJdk` and `theDomainDoesNotDependOnTheFramework` fail, then reverted)
 
-### [ ] T14 — Test references in the glossary and `CLAUDE.md` (~10 min)
+### [x] T14 — Test references in the glossary and `CLAUDE.md` (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/dominio/glosario.md`, `CLAUDE.md`
@@ -190,7 +190,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
   2. Check them with a one-off command: every `Class#method` in the glossary exists as a method in `src/test/java`.
   3. `CLAUDE.md`: the single-method example (`-Dtest='CheckingAccountTests#nombre*'`) with an English camelCase prefix.
 - **Acceptance criteria:**
-  - [ ] Every `Class#method` in the glossary resolves to an existing test method.
+  - [x] Every `Class#method` in the glossary resolves to an existing test method. (62 distinct references, including 2 to `*Contract` interfaces, all resolve; the `CLAUDE.md` example `CheckingAccountTests#aRetail*` was run)
 
 ### [ ] T15 — Final check and project status (~5 min)
 

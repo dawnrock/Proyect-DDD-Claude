@@ -17,7 +17,7 @@ Antes de tocar código, comprueba en qué rama estás (`git branch --show-curren
 ```bash
 ./mvnw verify                      # compila + todos los tests (JUnit + ArchUnit). Es la comprobación de "terminado"
 ./mvnw test -Dtest=CheckingAccountTests              # una clase de test
-./mvnw test -Dtest='CheckingAccountTests#nombre*'    # un método
+./mvnw test -Dtest='CheckingAccountTests#aRetail*'   # los métodos que empiezan así
 ./mvnw spring-boot:run             # arranca en :8080 con el perfil demo (tres cuentas y sus operaciones); GET /actuator/health → {"status":"UP"}
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=default   # arranca sin datos de demostración
 node scripts/contract-test.mjs                       # pruebas de contrato (Schemathesis) contra el jar; requiere ./mvnw verify y schemathesis instalado (ADR 0013)
