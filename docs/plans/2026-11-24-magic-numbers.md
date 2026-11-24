@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-24
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~55 min (8 tasks)
 
 ## Goal
@@ -43,7 +43,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
 
 ## Tasks
 
-### [ ] T1 — Baseline (~5 min)
+### [x] T1 — Baseline (~5 min)
 
 - **Layer:** tests
 - **Files:** — (scratchpad only)
@@ -53,7 +53,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
   2. Run Checkstyle `MagicNumber` on `src/main` in a scratch copy: 19 warnings, with file and line.
   3. Check that each warning's behaviour is covered by the tests listed in *Safety net*.
 - **Acceptance criteria:**
-  - [ ] Baseline recorded: 19 warnings, each one mapped to the tests that cover it.
+  - [x] Baseline recorded: 19 warnings, each one mapped to the tests that cover it. (19 warnings confirmed on the code merged in #169; 1,023 test cases; each warning is covered by the tests of *Safety net*)
 
 ### [ ] T2 — `TaxId`: control letter position and modulus (~5 min)
 
