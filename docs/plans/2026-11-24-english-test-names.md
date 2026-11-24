@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-24
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~130 min (15 tasks)
 
 ## Goal
@@ -45,7 +45,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 
 ## Tasks
 
-### [ ] T1 — Baseline of the test suite (~5 min)
+### [x] T1 — Baseline of the test suite (~5 min)
 
 - **Layer:** tests
 - **Files:** — (scratchpad only)
@@ -54,7 +54,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
   1. `./mvnw verify` and save the per-class test count from `target/surefire-reports/*.xml` (`tests`, `skipped`) and the total.
   2. Run Checkstyle locally in a scratch copy with the course rules (`MethodName`, `ConstantName`) and save the count: 792 + 21.
 - **Acceptance criteria:**
-  - [ ] Baseline saved: total tests and per-class counts.
+  - [x] Baseline saved: total tests and per-class counts (84 classes, 1,004 tests, 0 skipped; Checkstyle 792 `MethodName` + 21 `ConstantName`).
 
 ### [ ] T2 — New convention in `src/test/CLAUDE.md` and the templates (~5 min)
 
