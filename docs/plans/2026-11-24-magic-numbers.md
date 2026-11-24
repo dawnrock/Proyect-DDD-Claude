@@ -99,7 +99,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
 - **Acceptance criteria:**
   - [x] `DurationsTests` green; ArchUnit green (the class lives in `adapter.in`). (red: `Durations` did not exist; green: 8 cases; total 1,031 = 1,023 + 8)
 
-### [ ] T6 — Use `Durations` in the controllers and the REST handler (~5 min)
+### [x] T6 — Use `Durations` in the controllers and the REST handler (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/web/LoginController.java`, `adapter/in/web/SignUpController.java`, `adapter/in/rest/RestExceptionHandler.java`
@@ -108,7 +108,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
   1. `Math.max(1, (x.toSeconds() + 59) / 60)` → `Durations.minutesRoundedUp(x)` in `LoginController` and `SignUpController.tooManySignUps`.
   2. `Math.max(1, (retryAfter.toMillis() + 999) / 1000)` → `Durations.secondsRoundedUp(retryAfter)` in `RestExceptionHandler.tooManyRequests`.
 - **Acceptance criteria:**
-  - [ ] `LoginControllerTests`, `SignUpControllerTests`, `CustomerControllerTests` and `TokenControllerTests` green without changes.
+  - [x] `LoginControllerTests`, `SignUpControllerTests`, `CustomerControllerTests` and `TokenControllerTests` green without changes. (8 + 43 + 21 + 8 cases green, unchanged)
 
 ### [ ] T7 — `WebFormat.maskedIban` (~5 min)
 
