@@ -6,7 +6,7 @@
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-24
 - **Status:** draft
-- **Total estimate:** ~120 min (14 tasks)
+- **Total estimate:** ~130 min (15 tasks)
 
 ## Goal
 
@@ -34,6 +34,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 | tests · `adapter.in.cli`, `adapter.in.scheduler`, `adapter.out.*` | 13 files, 32 methods | Rename methods |
 | tests · root package, `config`, `build`, `support` | 8 files, 56 methods | Rename methods |
 | tests · ArchUnit | `HexagonalArchitectureTests` (18), `DomainIsolationTests` (2), `AdapterTestIsolationTests` (1) | `static final ArchRule` fields with Spanish names → `@ArchTest` methods |
+| docs · glossary | `docs/dominio/glosario.md` (61 references `Class#method` in the business rules table, R1-R32), `CLAUDE.md` (example `-Dtest='CheckingAccountTests#nombre*'`) | Point to the new method names |
 | docs · conventions | `src/test/CLAUDE.md`, `.claude/skills/ddd-building-block/templates/BuildingBlockTests.java.template`, `.claude/skills/plan-feature/assets/template.md` | New convention (approved by the user in the issue) |
 
 **Naming rule.** The method name states the behaviour of its `@DisplayName` in English: what happens, in which situation, and what is expected (`aRetailCustomerCannotOverdrawTheAccount`, `rejectsADepositWithANegativeAmount`). It does not translate word for word, and it does not need to repeat the class under test. Within a `@Nested` class, the name continues the nested class's sentence. Domain terms come from `docs/dominio/glosario.md` (for example *checking account*, *overdraft*, *segment*).
@@ -179,11 +180,23 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
   - [ ] The three classes run the same number of rules as in the baseline (18 + 2 + 1) and all pass.
   - [ ] A broken rule makes its method fail.
 
-### [ ] T14 — Final check and project status (~5 min)
+### [ ] T14 — Test references in the glossary and `CLAUDE.md` (~10 min)
+
+- **Layer:** docs
+- **Files:** `docs/dominio/glosario.md`, `CLAUDE.md`
+- **Depends on:** T3-T13
+- **What to do:**
+  1. Replace the 61 `Class#method` references in the business rules table (R1-R32) with the new names.
+  2. Check them with a one-off command: every `Class#method` in the glossary exists as a method in `src/test/java`.
+  3. `CLAUDE.md`: the single-method example (`-Dtest='CheckingAccountTests#nombre*'`) with an English camelCase prefix.
+- **Acceptance criteria:**
+  - [ ] Every `Class#method` in the glossary resolves to an existing test method.
+
+### [ ] T15 — Final check and project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `docs/ia/decisiones.md`, `docs/ia/historial.md`
-- **Depends on:** T3-T13
+- **Depends on:** T14
 - **What to do:**
   1. `./mvnw verify` and compare the total and per-class counts with T1.
   2. Run Checkstyle again in the scratch copy: 0 `MethodName` and 0 `ConstantName`.
@@ -199,6 +212,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - [ ] `./mvnw verify` runs the same number of tests as before, all green (JUnit + ArchUnit).
 - [ ] ArchUnit rules still fail when broken (checked by breaking one).
 - [ ] `src/test/CLAUDE.md` and the skill templates describe the new convention.
+- [ ] The glossary's test references (R1-R32) point to existing methods.
 - [ ] One commit per package (or pair of small packages), so the PR can be reviewed.
 
 **Fixed:**
