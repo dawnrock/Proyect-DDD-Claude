@@ -66,7 +66,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
 - **Acceptance criteria:**
   - [x] `TaxIdTests` green without changes; `check-domain.mjs` without errors. (sabotage: `CONTROL_LETTER_POSITION = 7` makes 9 `TaxIdTests` fail; reverted)
 
-### [ ] T3 — `AccountNumber`: where the BBAN starts (~5 min)
+### [x] T3 — `AccountNumber`: where the BBAN starts (~5 min)
 
 - **Layer:** domain
 - **Files:** `src/main/java/com/dawnrock/ddd/domain/model/AccountNumber.java`, `docs/dominio/glosario.md`
@@ -75,7 +75,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
   1. `private static final int BBAN_OFFSET = 4;` with a Javadoc (`ES` and the two IBAN check digits), used in `isMonABank()`.
   2. Add *BBAN* to the glossary if the name is kept.
 - **Acceptance criteria:**
-  - [ ] `AccountNumberTests` green without changes.
+  - [x] `AccountNumberTests` green without changes. (*BBAN* added to the glossary; sabotage: `BBAN_OFFSET = 3` makes `AccountNumberTests` fail; reverted)
 
 ### [ ] T4 — `MonABankIbans`: CCC and IBAN moduli (~5 min)
 
