@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-24
-- **Status:** in progress
-- **Total estimate:** ~55 min (8 tasks)
+- **Status:** done
+- **Total estimate:** ~60 min (9 tasks)
 
 ## Goal
 
@@ -132,27 +132,39 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
 - **Acceptance criteria:**
   - [x] 0 `MagicNumber` warnings in `src/main`; the number of tests is the baseline plus the new `DurationsTests`. (Checkstyle: 0 `MagicNumber` in `src/main`; `./mvnw verify` green with 1,031 test cases = 1,023 + 8 of `DurationsTests`; `check-domain.mjs` OK; with `demo` the health check is UP and the demo IBANs are the same)
 
+### [x] T9 — Fixes from the review (~5 min)
+
+- **Layer:** adapter.in · adapter.out · docs
+- **Files:** `adapter/in/DurationsTests.java`, `adapter/out/persistence/MonABankIbans.java`, `docs/ia/pendientes.md`
+- **Depends on:** T8
+- **What to do:**
+  1. *Deviation found by `revisor-ddd`:* the old formulas truncated sub-second (minutes) or sub-millisecond (seconds) fractions before rounding up, so `PT30M0.5S` gave 30 minutes and `PT1.0005S` 1 second; `Durations` rounds up for real (31 and 2), which is what the old Javadoc already promised. Kept on purpose (a fraction of a second of difference) and pinned with cases `PT30M0.5S → 31`, `PT1.0005S → 2` and a negative duration (`PT-5S → 1`).
+  2. `asSingleDigit` names its parameter `rawCheckDigit` and its Javadoc says the value comes from `11 - remainder`, so the modulus and the value are not confused.
+  3. `pendientes.md`: numbers hidden where Checkstyle does not look (`"142800"`, the lengths inside the IBAN and NIF regexes).
+- **Acceptance criteria:**
+  - [x] `DurationsTests` 12 cases green; `./mvnw verify` green with 1,035 test cases.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] Checkstyle `MagicNumber` gives 0 warnings in `src/main`.
-- [ ] The time conversions of the two controllers and the REST handler use a single named method.
-- [ ] The existing tests pass without changes: same IBANs, NIF validation, masking, minutes and `Retry-After`.
+- [x] Checkstyle `MagicNumber` gives 0 warnings in `src/main`.
+- [x] The time conversions of the two controllers and the REST handler use a single named method.
+- [x] The existing tests pass without changes: same IBANs, NIF validation, masking, minutes and `Retry-After` (except the sub-second rounding of T9, more faithful to "rounded up").
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (English camelCase + `@DisplayName` in Spanish, after #166).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: n/a (`Retry-After` keeps its value and format).
-- [ ] Any new business term is in `docs/dominio/glosario.md` (*BBAN*, if used).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (English camelCase + `@DisplayName` in Spanish, after #166).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: n/a (`Retry-After` keeps its value and format).
+- [x] Any new business term is in `docs/dominio/glosario.md` (*BBAN*, if used).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

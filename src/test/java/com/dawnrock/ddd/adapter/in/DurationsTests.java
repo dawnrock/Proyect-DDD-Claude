@@ -21,7 +21,9 @@ class DurationsTests {
             "PT30M, 30",
             "PT30M1S, 31",
             "PT20S, 1",
+            "PT30M0.5S, 31",
             "PT0S, 1",
+            "PT-5S, 1",
         })
         @DisplayName("Los minutos se redondean hacia arriba y nunca son menos de uno")
         void minutesAreRoundedUpAndNeverLessThanOne(Duration duration, long expected) {
@@ -38,7 +40,9 @@ class DurationsTests {
             "PT1M31S, 91",
             "PT1M30.001S, 91",
             "PT0.2S, 1",
+            "PT1.0005S, 2",
             "PT0S, 1",
+            "PT-5S, 1",
         })
         @DisplayName("Los segundos se redondean hacia arriba y nunca son menos de uno")
         void secondsAreRoundedUpAndNeverLessThanOne(Duration duration, long expected) {

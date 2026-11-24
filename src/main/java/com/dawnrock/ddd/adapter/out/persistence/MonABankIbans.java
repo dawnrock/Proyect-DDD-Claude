@@ -46,12 +46,15 @@ final class MonABankIbans {
         return String.valueOf(asSingleDigit(CCC_MODULUS - sum % CCC_MODULUS));
     }
 
-    /** El dígito de control del CCC es de una cifra: el 11 se escribe 0 y el 10 se escribe 1. */
-    private static int asSingleDigit(int digit) {
-        if (digit == CCC_MODULUS) {
+    /**
+     * El dígito de control del CCC es de una cifra. El valor sin ajustar ({@code 11 - resto}) va de 1 a 11: el 11 se
+     * escribe 0 y el 10 se escribe 1.
+     */
+    private static int asSingleDigit(int rawCheckDigit) {
+        if (rawCheckDigit == CCC_MODULUS) {
             return 0;
         }
-        return digit == CCC_MODULUS - 1 ? 1 : digit;
+        return rawCheckDigit == CCC_MODULUS - 1 ? 1 : rawCheckDigit;
     }
 
     /** Dígitos de control del IBAN: 98 menos el resto módulo 97 del BBAN seguido de {@code ES00} en cifras. */
