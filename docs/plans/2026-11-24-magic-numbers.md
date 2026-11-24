@@ -55,7 +55,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
 - **Acceptance criteria:**
   - [x] Baseline recorded: 19 warnings, each one mapped to the tests that cover it. (19 warnings confirmed on the code merged in #169; 1,023 test cases; each warning is covered by the tests of *Safety net*)
 
-### [ ] T2 — `TaxId`: control letter position and modulus (~5 min)
+### [x] T2 — `TaxId`: control letter position and modulus (~5 min)
 
 - **Layer:** domain
 - **Files:** `src/main/java/com/dawnrock/ddd/domain/model/TaxId.java`
@@ -64,7 +64,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
   1. `private static final int CONTROL_LETTER_POSITION = 8;` used in `charAt` and in `substring(1, CONTROL_LETTER_POSITION)`.
   2. `% 23` → `% CONTROL_LETTERS.length()`: the modulus is the number of letters in the table, so no extra constant is needed.
 - **Acceptance criteria:**
-  - [ ] `TaxIdTests` green without changes; `check-domain.mjs` without errors.
+  - [x] `TaxIdTests` green without changes; `check-domain.mjs` without errors. (sabotage: `CONTROL_LETTER_POSITION = 7` makes 9 `TaxIdTests` fail; reverted)
 
 ### [ ] T3 — `AccountNumber`: where the BBAN starts (~5 min)
 

@@ -13,6 +13,8 @@ public record TaxId(String value) {
 
     private static final Pattern DOCUMENT = Pattern.compile("[XYZ0-9]\\d{7}[A-Z]");
     private static final String CONTROL_LETTERS = "TRWAGMYFPDXBNJZSQVHLCKE";
+    /** Posición de la letra de control, tras los 8 caracteres numéricos (o la letra del NIE y 7 dígitos). */
+    private static final int CONTROL_LETTER_POSITION = 8;
 
     public TaxId {
         Objects.requireNonNull(value, "El NIF es obligatorio");
@@ -20,7 +22,7 @@ public record TaxId(String value) {
         if (!DOCUMENT.matcher(value).matches()) {
             throw new IllegalArgumentException("El documento debe ser un DNI o un NIE");
         }
-        if (value.charAt(8) != controlLetter(value)) {
+        if (value.charAt(CONTROL_LETTER_POSITION) != controlLetter(value)) {
             throw new IllegalArgumentException(
                     "La letra de control del documento %s no es correcta".formatted(value));
         }
@@ -33,8 +35,8 @@ public record TaxId(String value) {
             case 'Y' -> "1";
             case 'Z' -> "2";
             default -> String.valueOf(first);
-        } + document.substring(1, 8);
-        return CONTROL_LETTERS.charAt(Integer.parseInt(digits) % 23);
+        } + document.substring(1, CONTROL_LETTER_POSITION);
+        return CONTROL_LETTERS.charAt(Integer.parseInt(digits) % CONTROL_LETTERS.length());
     }
 
     @Override
