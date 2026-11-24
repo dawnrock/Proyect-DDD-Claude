@@ -56,6 +56,17 @@ class OutboxRelay {
         }
     }
 
+    /**
+     * Cada día borra los eventos publicados hace más de la retención (7 días por defecto). Los fallidos se quedan para
+     * poder revisarlos.
+     */
+    @Scheduled(cron = "${app.events.outbox.clean-up-cron:0 30 3 * * *}")
+    public void cleanUp() {
+        Long deleted = transactions.execute(status ->
+                repository.deleteByPublishedAtBefore(clock.instant().minus(properties.retention())));
+        log.info("Outbox · limpieza: {} eventos publicados borrados", deleted);
+    }
+
     private void deliver(Long id) {
         transactions.executeWithoutResult(status -> repository.findById(id).ifPresent(row -> {
             try {

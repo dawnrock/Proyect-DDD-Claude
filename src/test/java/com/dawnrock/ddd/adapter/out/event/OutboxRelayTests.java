@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Currency;
@@ -117,6 +118,27 @@ class OutboxRelayTests {
         assertThat(failed.failedAt).isEqualTo(NOW);
         assertThat(failed.publishedAt).isNull();
         verify(spring, never()).publishEvent(withdrawn());
+    }
+
+    @Test
+    @DisplayName("La limpieza borra los eventos publicados hace más de la retención y conserva los recientes, los pendientes y los fallidos")
+    void theCleanUpDeletesOldPublishedEventsAndKeepsTheRest() {
+        Long old = store(deposited());
+        Long recent = store(withdrawn());
+        Long pending = store(deposited());
+        Long failed = store(withdrawn());
+        OutboxTestDatabase.inTransaction(() -> {
+            repository.findById(old).orElseThrow().markPublished(NOW.minus(Duration.ofDays(8)));
+            repository.findById(recent).orElseThrow().markPublished(NOW.minus(Duration.ofDays(1)));
+            repository.findById(failed).orElseThrow().recordFailedAttempt("falló", 1, NOW.minus(Duration.ofDays(30)));
+            return null;
+        });
+
+        relay.cleanUp();
+
+        assertThat(OutboxTestDatabase.inTransaction(() -> repository.findAll()))
+                .extracting(row -> row.id)
+                .containsExactlyInAnyOrder(recent, pending, failed);
     }
 
     private Long store(DomainEvent event) {

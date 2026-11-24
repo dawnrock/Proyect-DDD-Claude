@@ -96,7 +96,7 @@ Technical decisions inside the user's choices (Claude, reversible):
 - **Acceptance criteria:**
   - [x] Application tests green; `./mvnw verify` green with the old `SpringDomainEventPublisher` (listeners are still called synchronously, now inside the transaction). (red: both unit-of-work tests failed with the old order; the second one, "the unit does not finish well", now checks that its events were published inside it, so they go away with the rollback; no new type in `CheckingAccountService`)
 
-### [ ] T5 — Old published events are cleaned up (~5 min)
+### [x] T5 — Old published events are cleaned up (~5 min)
 
 - **Layer:** adapter.out (event)
 - **Files:** `adapter/out/event/OutboxRelay.java`, `OutboxRelayTests.java`
@@ -105,7 +105,7 @@ Technical decisions inside the user's choices (Claude, reversible):
   1. Red: a published row older than the retention is deleted; a recent published row, a pending row and a failed row are kept.
   2. Green: `cleanUp()` with `@Scheduled(cron = "${app.events.outbox.clean-up-cron:0 30 3 * * *}")` and a derived delete query.
 - **Acceptance criteria:**
-  - [ ] Clean-up test green; `./mvnw verify` green.
+  - [x] Clean-up test green; `./mvnw verify` green.
 
 ### [ ] T6 — The publisher writes to the outbox (replaces SpringDomainEventPublisher) (~10 min)
 
