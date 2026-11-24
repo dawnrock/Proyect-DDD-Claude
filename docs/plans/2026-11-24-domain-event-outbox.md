@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-24 (revised the same day: order and adjustments)
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~90 min (10 tasks)
 
 ## Goal
@@ -51,7 +51,7 @@ Technical decisions inside the user's choices (Claude, reversible):
 
 ## Tasks
 
-### [ ] T1 — Outbox table, entity and repository (~10 min)
+### [x] T1 — Outbox table, entity and repository (~10 min)
 
 - **Layer:** adapter.out (event) · db
 - **Files:** `src/main/resources/db/migration/V2__domain_event_outbox.sql`, `adapter/out/event/OutboxEventEntity.java`, `adapter/out/event/OutboxEventJpaRepository.java`, test `adapter/out/event/OutboxTestDatabase.java`, `OutboxEventJpaRepositoryTests.java`
@@ -60,8 +60,8 @@ Technical decisions inside the user's choices (Claude, reversible):
   1. Red: a test that saves two rows and reads the pending ones in `id` order, limited by a `Limit`, skipping published and failed rows.
   2. Green: migration, entity (package-private, Lombok allowed outside the domain) and `findByPublishedAtIsNullAndFailedAtIsNullOrderByIdAsc(Limit)`; `OutboxTestDatabase` with `@AutoConfigurationPackage` on `adapter.out.event` (same pattern as `JpaTestDatabase`).
 - **Acceptance criteria:**
-  - [ ] The repository test passes on H2 with Flyway and `ddl-auto=validate`.
-  - [ ] `./mvnw verify` green (the full context validates the new entity against V2; the static analysis passes).
+  - [x] The repository test passes on H2 with Flyway and `ddl-auto=validate`.
+  - [x] `./mvnw verify` green (the full context validates the new entity against V2; the static analysis passes). (*Deviation:* SpotBugs flagged the publication and retry fields as unused (`UUF_UNUSED_FIELD`) until the relay exists, so the entity's `markPublished` and `recordFailedAttempt` moved here from T3; the repository test uses them to set up its rows)
 
 ### [ ] T2 — Event type registry and JSON (~10 min)
 
