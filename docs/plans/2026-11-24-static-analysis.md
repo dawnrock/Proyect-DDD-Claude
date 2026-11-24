@@ -64,7 +64,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 - **Acceptance criteria:**
   - [x] `./mvnw verify` green with 0 Checkstyle violations. (*Deviation:* at `verify` the plugin also reads the sources Immutables generates in `target/generated-sources` (161 warnings), so `sourceDirectories` and `testSourceDirectories` limit it to `src/main/java` and `src/test/java`; the plan's *Generated code* note was only true for a run without compiling. Checked: a `snake_case` test method fails `MethodName` and a number in a test is not flagged)
 
-### [ ] T3 — PMD and CPD in `verify`, with the baseline (~10 min)
+### [x] T3 — PMD and CPD in `verify`, with the baseline (~10 min)
 
 - **Layer:** build · tests
 - **Files:** `pom.xml`, `pmd-ruleset.xml`, `pmd-baseline.properties`, `src/test/java/.../adapter/in/rest/AccountControllerTests.java`
@@ -75,7 +75,8 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
   3. CPD: extract the 14 repeated lines in `AccountControllerTests` (lines 535 and 648) to a helper, instead of putting them in the baseline.
   4. Plugin with `includeTests`, `excludeFromFailureFile`, and `check` and `cpd-check` bound to `verify`.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green; `mvn pmd:pmd` still lists the 9 baselined violations in the report.
+  - [x] `./mvnw verify` green; `mvn pmd:pmd` still lists the 9 baselined violations in the report.
+  - *Deviations:* (1) like Checkstyle, PMD and CPD read the sources Immutables generates (14 CPD duplicates between generated classes), so `excludeRoots` leaves out `target/generated-sources`; (2) `excludeFromFailureFile` also takes the baselined smells out of the report, so the baseline is a property and `./mvnw pmd:pmd -Dpmd.baseline=` shows all 9; (3) at `verify` CPD no longer reported the 14 lines of `AccountControllerTests` (same code as in the scratch run, cause not found), but the duplication was real (the same body four times, in deposits and withdrawals) and was extracted to `expectAmountRejected` anyway. Sabotage: a method with 11 parameters fails the build with `ExcessiveParameterList`.
 
 ### [ ] T4 — Domain classes that validate in the constructor are `final` (~5 min)
 

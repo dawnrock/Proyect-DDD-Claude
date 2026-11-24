@@ -40,6 +40,9 @@
         <!-- Análisis estático en ./mvnw verify (ADR 0020), con las versiones del curso de Clean Code -->
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
         <checkstyle.version>14.3.0</checkstyle.version>
+        <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
+        <!-- Línea base de PMD; ./mvnw pmd:pmd -Dpmd.baseline= enseña también los smells que ya existían -->
+        <pmd.baseline>${project.basedir}/pmd-baseline.properties</pmd.baseline>
     </properties>
     <dependencies>
         <dependency>
@@ -272,6 +275,37 @@
                         <phase>verify</phase>
                         <goals>
                             <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Análisis estático (ADR 0020): code smells de diseño (PMD) y código duplicado (CPD) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>${maven-pmd-plugin.version}</version>
+                <configuration>
+                    <rulesets>
+                        <ruleset>pmd-ruleset.xml</ruleset>
+                    </rulesets>
+                    <includeTests>true</includeTests>
+                    <!-- Solo el código escrito a mano: el que genera Immutables no se puede corregir -->
+                    <excludeRoots>
+                        <excludeRoot>${project.build.directory}/generated-sources</excludeRoot>
+                        <excludeRoot>${project.build.directory}/generated-test-sources</excludeRoot>
+                    </excludeRoots>
+                    <!-- Los smells que ya existían no hacen fallar el build ni salen en el informe; los nuevos, sí -->
+                    <excludeFromFailureFile>${pmd.baseline}</excludeFromFailureFile>
+                    <printFailingErrors>true</printFailingErrors>
+                    <linkXRef>false</linkXRef>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>pmd</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                            <goal>cpd-check</goal>
                         </goals>
                     </execution>
                 </executions>

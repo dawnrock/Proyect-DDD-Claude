@@ -81,6 +81,17 @@ class AccountControllerTests {
                 .balance(new BigDecimal("100.00")).currency("EUR").build();
     }
 
+    /** Un importe no válido responde 400 con el error del campo y no llega a los puertos (ingresos y retiradas). */
+    private void expectAmountRejected(String path, String amount) throws Exception {
+        mvc.perform(post(path, ID).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"amount\": " + amount + "}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Petición no válida"))
+                .andExpect(jsonPath("$.errors.amount").exists());
+
+        verifyNoInteractions(commands, queries);
+    }
+
     @Nested
     @DisplayName("POST /api/accounts")
     class OpenAccount {
@@ -532,26 +543,14 @@ class AccountControllerTests {
         @DisplayName("Un importe que redondea a cero o supera el máximo responde 400 con el error del campo")
         @ValueSource(strings = {"0.004", "1000000000.00", "1.7976931348623155E+308"})
         void anAmountOutOfBoundsResponds400WithTheFieldError(String amount) throws Exception {
-            mvc.perform(post("/api/accounts/{id}/deposits", ID).contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"amount\": " + amount + "}"))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.title").value("Petición no válida"))
-                    .andExpect(jsonPath("$.errors.amount").exists());
-
-            verifyNoInteractions(commands, queries);
+            expectAmountRejected("/api/accounts/{id}/deposits", amount);
         }
 
         @ParameterizedTest(name = "importe {0}")
         @DisplayName("Un importe cero o negativo responde 400 con el error del campo")
         @ValueSource(strings = {"0", "-5"})
         void aZeroOrNegativeAmountResponds400WithTheFieldError(String amount) throws Exception {
-            mvc.perform(post("/api/accounts/{id}/deposits", ID).contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"amount\": " + amount + "}"))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.title").value("Petición no válida"))
-                    .andExpect(jsonPath("$.errors.amount").exists());
-
-            verifyNoInteractions(commands, queries);
+            expectAmountRejected("/api/accounts/{id}/deposits", amount);
         }
 
         @Test
@@ -645,26 +644,14 @@ class AccountControllerTests {
         @DisplayName("Un importe que redondea a cero o supera el máximo responde 400 con el error del campo")
         @ValueSource(strings = {"0.004", "1000000000.00", "1.7976931348623155E+308"})
         void anAmountOutOfBoundsResponds400WithTheFieldError(String amount) throws Exception {
-            mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"amount\": " + amount + "}"))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.title").value("Petición no válida"))
-                    .andExpect(jsonPath("$.errors.amount").exists());
-
-            verifyNoInteractions(commands, queries);
+            expectAmountRejected("/api/accounts/{id}/withdrawals", amount);
         }
 
         @ParameterizedTest(name = "importe {0}")
         @DisplayName("Un importe cero o negativo responde 400 con el error del campo")
         @ValueSource(strings = {"0", "-5"})
         void aZeroOrNegativeAmountResponds400WithTheFieldError(String amount) throws Exception {
-            mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"amount\": " + amount + "}"))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.title").value("Petición no válida"))
-                    .andExpect(jsonPath("$.errors.amount").exists());
-
-            verifyNoInteractions(commands, queries);
+            expectAmountRejected("/api/accounts/{id}/withdrawals", amount);
         }
 
         @Test
