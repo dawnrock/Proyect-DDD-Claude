@@ -32,6 +32,8 @@ public class JwtSupport {
 
     static final String KEY_ALGORITHM = "HmacSHA256";
     static final int MIN_SECRET_BYTES = 32;
+    /** Generador de la clave aleatoria de respaldo: uno para toda la clase, como recomienda su documentación. */
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     @Bean
     public SecretKey jwtSigningKey(JwtProperties properties) {
@@ -63,7 +65,7 @@ public class JwtSupport {
             log.warn("APP_JWT_SECRET no está definido: se usa una clave aleatoria y los tokens de la API no "
                     + "sobrevivirán a un reinicio");
             byte[] random = new byte[MIN_SECRET_BYTES];
-            new SecureRandom().nextBytes(random);
+            RANDOM.nextBytes(random);
             return new SecretKeySpec(random, KEY_ALGORITHM);
         }
         byte[] bytes = secret.getBytes(StandardCharsets.UTF_8);

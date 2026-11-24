@@ -109,7 +109,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 - **Acceptance criteria:**
   - [x] Existing persistence tests green. (red: `NullPointerException` on unboxing; green: `IllegalStateException` naming the sequence; new test `aSequenceReturningNothingFailsWithAClearError`)
 
-### [ ] T7 — `JwtSupport`: one `SecureRandom` (~5 min)
+### [x] T7 — `JwtSupport`: one `SecureRandom` (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/rest/JwtSupport.java`
@@ -117,7 +117,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 - **What to do:**
   1. `private static final SecureRandom RANDOM = new SecureRandom();`, used for the fallback key.
 - **Acceptance criteria:**
-  - [ ] `JwtSupport` tests green (fallback key when the secret is missing).
+  - [x] `JwtSupport` tests green (fallback key when the secret is missing). (7 `JwtSupportTests` green, including `withoutSecretARandomKeyIsGenerated`)
 
 ### [ ] T8 — SpotBugs in `verify`, with narrow exclusions (~10 min)
 
