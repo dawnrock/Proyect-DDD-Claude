@@ -107,7 +107,7 @@ Technical decisions inside the user's choices (Claude, reversible):
 - **Acceptance criteria:**
   - [x] Clean-up test green; `./mvnw verify` green.
 
-### [ ] T6 — The publisher writes to the outbox (replaces SpringDomainEventPublisher) (~10 min)
+### [x] T6 — The publisher writes to the outbox (replaces SpringDomainEventPublisher) (~10 min)
 
 - **Layer:** adapter.out (event)
 - **Files:** `adapter/out/event/OutboxDomainEventPublisher.java`, `OutboxDomainEventPublisherTests.java`; delete `SpringDomainEventPublisher.java`, `SpringDomainEventPublisherTests.java`, `SpringDomainEventPublisherContextTests.java`; `DddLabApplicationTests.java`
@@ -116,7 +116,7 @@ Technical decisions inside the user's choices (Claude, reversible):
   1. Red: publishing inside a committed transaction leaves one pending row per event, in order, with its type, account and JSON; inside a rolled-back transaction it leaves none; outside a transaction it fails (`IllegalTransactionStateException`).
   2. Green: the adapter (`@Transactional(propagation = MANDATORY)`), delete the old one and its tests. The `DddLabApplicationTests` test that checks a deposit reaches the audit consumer calls `OutboxRelay.relayPending()` before checking the log (it no longer arrives synchronously).
 - **Acceptance criteria:**
-  - [ ] Publisher tests green; `./mvnw verify` green; `./mvnw spring-boot:run` logs the demo events' audit lines a couple of seconds after the start.
+  - [x] Publisher tests green; `./mvnw verify` green; `./mvnw spring-boot:run` logs the demo events' audit lines a couple of seconds after the start. (*Deviations:* the "inside a transaction" requirement is an explicit check (`TransactionSynchronizationManager.isActualTransactionActive()`, same `IllegalTransactionStateException`) instead of `@Transactional(propagation = MANDATORY)`, which only works through a Spring proxy that the adapter's minimal test context does not create; `OutboxRelay` is public so that `DddLabApplicationTests` can call `relayPending()`. With `spring-boot:run`, the demo's 11 audit lines appear on the `scheduling-1` thread, delivered by the relay)
 
 ### [ ] T7 — A failing consumer does not break the use case (~10 min)
 

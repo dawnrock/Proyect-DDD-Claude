@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @EnableConfigurationProperties(OutboxProperties.class)
-class OutboxRelay {
+public class OutboxRelay {
 
     private final OutboxEventJpaRepository repository;
     private final DomainEventTypes types;
