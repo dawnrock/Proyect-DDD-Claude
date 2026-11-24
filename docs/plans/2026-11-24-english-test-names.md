@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-24
-- **Status:** in progress
-- **Total estimate:** ~130 min (15 tasks)
+- **Status:** done
+- **Total estimate:** ~135 min (16 tasks)
 
 ## Goal
 
@@ -204,34 +204,45 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **Acceptance criteria:**
   - [x] Same number of tests as the baseline; Checkstyle naming rules give 0 warnings in `src/test`. (1,023 test cases, class by class the same as `origin/Hexagonal`; Checkstyle on a copy: 0 `MethodName`, 0 `ConstantName`, only the 267 `MagicNumber` left for #167 and #168)
 
+### [x] T16 — Fixes from the review (~5 min)
+
+- **Layer:** docs · tests
+- **Files:** `docs/dominio/glosario.md`, `CustomerTests`, `TransferControllerTests`, `CheckingAccountReconstitutionTests`, `DomainIsolationTests`
+- **Depends on:** T15
+- **What to do:**
+  1. `revisor-ddd` found two references in the glossary (R20) written as `#method` without the class, which T14's check did not catch: point them to `incomeExactlyAtTheThresholdKeepsTheHolderRetail` and `unverifiedIncomeKeepsTheHolderRetail`.
+  2. Two names that drifted from their `@DisplayName` (`aDuplicateDocumentIsABrokenBusinessRule`, `anAbsentOrMalformedTargetIbanResponds400`) and one awkward one (`aReconstitutedAccountKeepsOperatingUnderItsRules`); a blank line between static and regular imports in `DomainIsolationTests`. Kept on purpose: "document" alongside "tax id" in test names, as in their `@DisplayName`s.
+- **Acceptance criteria:**
+  - [x] The 65 test references in the glossary (with or without the class) resolve to existing methods; 1,023 test cases, class by class the same as the baseline.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] No test method in `snake_case` or in Spanish; every `@DisplayName` is unchanged (`git diff` shows no changed `@DisplayName` line).
-- [ ] `./mvnw verify` runs the same number of tests as before, all green (JUnit + ArchUnit).
-- [ ] ArchUnit rules still fail when broken (checked by breaking one).
-- [ ] `src/test/CLAUDE.md` and the skill templates describe the new convention.
-- [ ] The glossary's test references (R1-R32) point to existing methods.
-- [ ] One commit per package (or pair of small packages), so the PR can be reviewed.
+- [x] No test method in `snake_case` or in Spanish; every `@DisplayName` is unchanged (`git diff` shows no changed `@DisplayName` line).
+- [x] `./mvnw verify` runs the same number of tests as before, all green (JUnit + ArchUnit): 1,023 test cases in 84 classes, class by class the same as `origin/Hexagonal`.
+- [x] ArchUnit rules still fail when broken (checked by breaking one).
+- [x] `src/test/CLAUDE.md` and the skill templates describe the new convention.
+- [x] The glossary's test references (R1-R32) point to existing methods.
+- [x] One commit per package (or pair of small packages), so the PR can be reviewed.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (English camelCase + `@DisplayName` in Spanish, as updated by T2).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: n/a (only tests and docs change).
-- [ ] Any new business term is in `docs/dominio/glosario.md` (none expected).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}` (checked).
+- [x] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (English camelCase + `@DisplayName` in Spanish, as updated by T2).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: n/a (only tests and docs change).
+- [x] Any new business term is in `docs/dominio/glosario.md` (none expected).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
-- **ArchUnit rules: methods or constants?** The plan turns them into `@ArchTest` methods, which read like the rest of the tests. The cost is a little more code per rule (method + `check`). The alternative keeps the declarative fields and only renames them to English `UPPER_SNAKE_CASE` (`DEPENDENCIES_POINT_TOWARDS_THE_HEXAGON`). That is less code, but the reports show the rule names in upper case. Methods were proposed to the user in the conversation; confirm before T13.
+- **ArchUnit rules: methods or constants?** The plan turns them into `@ArchTest` methods, which read like the rest of the tests. The cost is a little more code per rule (method + `check`). The alternative keeps the declarative fields and only renames them to English `UPPER_SNAKE_CASE` (`DEPENDENCIES_POINT_TOWARDS_THE_HEXAGON`). That is less code, but the reports show the rule names in upper case. Methods were proposed to the user in the conversation; **the user chose methods** before T1 (2026-11-24).
 - **Diff size and conflicts.** The PR touches almost every test file. It should go in when no other branch is open on the tests (today #165 is open but not started), and before #167, so that its new tests already use the new convention.
 - **Translation quality.** About 790 names are translated by hand. Each commit is limited to one package so the review can check that each name still says what its `@DisplayName` says.
 - **Duplicate names.** Two Spanish names may translate to the same English one within a class. That does not compile, so it cannot slip through, but it needs a more precise name.

@@ -171,7 +171,7 @@ class TransferControllerTests {
     @DisplayName("Un IBAN de destino ausente o mal formado responde 400 con el error del campo")
     @ValueSource(strings = {"", " ", "ES12", "XX7921000813610123456789", "ES79210008136101234567AB",
             "ES792100081361012345678"})
-    void aMalformedTargetIbanResponds400(String iban) throws Exception {
+    void anAbsentOrMalformedTargetIbanResponds400(String iban) throws Exception {
         String body = """
                 {"sourceAccountId": "%s", "targetAccountNumber": "%s", "amount": 10}"""
                 .formatted(SOURCE_ID, iban);

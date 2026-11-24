@@ -75,7 +75,7 @@ class CheckingAccountReconstitutionTests {
 
     @Test
     @DisplayName("Una cuenta reconstituida sigue operando con sus reglas y registra los eventos nuevos")
-    void aReconstitutedAccountKeepsOperatingByItsRules() {
+    void aReconstitutedAccountKeepsOperatingUnderItsRules() {
         CheckingAccount cuenta = CheckingAccount.reconstitute(ID, IBAN, holder(CustomerSegment.RETAIL),
                 MonetaryAmount.euros("1250.00"), null, history(ID));
 

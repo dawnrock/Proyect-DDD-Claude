@@ -67,7 +67,7 @@ class CustomerTests {
 
     @Test
     @DisplayName("Un documento duplicado es una regla de negocio incumplida con el documento en el mensaje (R30)")
-    void aDuplicateCustomerIsABrokenBusinessRule() {
+    void aDuplicateDocumentIsABrokenBusinessRule() {
         assertThat(new DuplicateCustomerException(TAX_ID))
                 .isInstanceOf(DomainException.class)
                 .hasMessageStartingWith("Ya eres cliente de Mon-A Bank")
