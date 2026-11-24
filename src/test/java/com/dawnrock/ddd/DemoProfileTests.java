@@ -50,7 +50,7 @@ class DemoProfileTests {
 
 	@Test
 	@DisplayName("Con el perfil demo, la API lista al administrador las tres cuentas de demostración")
-	void con_el_perfil_demo_la_api_lista_las_tres_cuentas_de_demostracion() throws Exception {
+	void withTheDemoProfileTheApiListsTheThreeDemoAccounts() throws Exception {
 		HttpResponse<String> response = listAccountsAs("admin");
 
 		assertThat(response.statusCode()).isEqualTo(200);
@@ -60,7 +60,7 @@ class DemoProfileTests {
 
 	@Test
 	@DisplayName("Con el perfil demo, la API lista a ada solo su cuenta")
-	void con_el_perfil_demo_la_api_lista_a_ada_solo_su_cuenta() throws Exception {
+	void withTheDemoProfileTheApiListsAdaOnlyHerAccount() throws Exception {
 		HttpResponse<String> response = listAccountsAs("ada");
 
 		assertThat(response.statusCode()).isEqualTo(200);
@@ -69,7 +69,7 @@ class DemoProfileTests {
 
 	@Test
 	@DisplayName("Con el perfil demo, los saldos reflejan los ingresos, retiradas y la transferencia de la demo")
-	void con_el_perfil_demo_los_saldos_reflejan_las_operaciones_de_la_demo() throws Exception {
+	void withTheDemoProfileTheBalancesReflectTheDemoOperations() throws Exception {
 		String body = listAccountsAs("admin").body();
 
 		assertThat(body)
@@ -80,7 +80,7 @@ class DemoProfileTests {
 
 	@Test
 	@DisplayName("Con el perfil demo, la API muestra en el ingreso de Ada la cuenta de Grace como contrapartida de la transferencia")
-	void con_el_perfil_demo_la_api_muestra_la_contrapartida_de_la_transferencia() throws Exception {
+	void withTheDemoProfileTheApiShowsTheTransferCounterpart() throws Exception {
 		JsonNode accounts = JSON.readTree(listAccountsAs("admin").body());
 		JsonNode ada = accountOf(accounts, "Ada Lovelace");
 		String graceIban = accountOf(accounts, "Grace Hopper").get("accountNumber").asString();
@@ -103,7 +103,7 @@ class DemoProfileTests {
 
 	@Test
 	@DisplayName("Con el perfil demo, la web muestra a Grace primero la transferencia a la cuenta de Ada")
-	void con_el_perfil_demo_la_web_muestra_primero_la_transferencia_a_ada() throws Exception {
+	void withTheDemoProfileTheWebShowsTheTransferToAdaFirst() throws Exception {
 		JsonNode accounts = JSON.readTree(listAccountsAs("admin").body());
 		String adaIban = accountOf(accounts, "Ada Lovelace").get("accountNumber").asString();
 		String graceId = accountOf(accounts, "Grace Hopper").get("id").asString();

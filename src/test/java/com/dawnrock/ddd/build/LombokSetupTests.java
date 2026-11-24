@@ -19,7 +19,7 @@ class LombokSetupTests {
 
     @Test
     @DisplayName("Lombok genera accesores fluidos al estilo record")
-    void lombok_genera_accesores_fluidos_al_estilo_record() {
+    void lombokGeneratesRecordStyleFluentAccessors() {
         Sample sample = new Sample("Ada Lovelace");
 
         assertThat(sample.name()).isEqualTo("Ada Lovelace");
@@ -27,7 +27,7 @@ class LombokSetupTests {
 
     @Test
     @DisplayName("Lombok no genera accesores con el prefijo get")
-    void lombok_no_genera_accesores_con_el_prefijo_get() {
+    void lombokDoesNotGenerateGetPrefixedAccessors() {
         assertThatExceptionOfType(NoSuchMethodException.class)
                 .isThrownBy(() -> Sample.class.getDeclaredMethod("getName"));
     }

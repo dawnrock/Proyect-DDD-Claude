@@ -28,7 +28,7 @@ class DomainConfigurationTests {
 
     @Test
     @DisplayName("Construye la factoría de cuentas con los puertos de numeración y de verificación de ingresos")
-    void construye_la_factoria_con_sus_dos_puertos() {
+    void buildsTheFactoryWithItsTwoPorts() {
         AccountNumber number = new AccountNumber("ES9121000418450200051332");
         CheckingAccountFactory factory =
                 configuration.checkingAccountFactory(() -> number, taxId -> Optional.empty());
@@ -41,20 +41,20 @@ class DomainConfigurationTests {
 
     @Test
     @DisplayName("Construye el servicio de dominio de las transferencias")
-    void construye_el_servicio_de_transferencias() {
+    void buildsTheTransferService() {
         assertThat(configuration.moneyTransferService()).isInstanceOf(MoneyTransferService.class);
     }
 
     @Test
     @DisplayName("Construye el servicio de revisión del segmento y el reloj en UTC")
-    void construye_el_servicio_de_revision_del_segmento_y_el_reloj() {
+    void buildsTheSegmentReviewServiceAndTheClock() {
         assertThat(configuration.segmentReviewService(taxId -> Optional.empty())).isNotNull();
         assertThat(configuration.clock().getZone()).isEqualTo(java.time.ZoneOffset.UTC);
     }
 
     @Test
     @DisplayName("Construye el servicio de aplicación, que ofrece los dos puertos de entrada")
-    void construye_el_servicio_de_aplicacion_con_los_dos_puertos_de_entrada() {
+    void buildsTheApplicationServiceWithBothInputPorts() {
         CheckingAccountFactory factory = configuration.checkingAccountFactory(
                 PersistenceTestAdapters.accountNumbers(), taxId -> Optional.empty());
 
@@ -69,7 +69,7 @@ class DomainConfigurationTests {
 
     @Test
     @DisplayName("Construye los consumidores de eventos de auditoría y de aviso al cliente")
-    void construye_los_consumidores_de_eventos() {
+    void buildsTheEventConsumers() {
         assertThat(configuration.auditLogListener()).isInstanceOf(AuditLogListener.class);
         assertThat(configuration.customerNotificationListener()).isInstanceOf(CustomerNotificationListener.class);
     }
