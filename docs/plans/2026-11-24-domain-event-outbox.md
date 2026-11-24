@@ -118,7 +118,7 @@ Technical decisions inside the user's choices (Claude, reversible):
 - **Acceptance criteria:**
   - [x] Publisher tests green; `./mvnw verify` green; `./mvnw spring-boot:run` logs the demo events' audit lines a couple of seconds after the start. (*Deviations:* the "inside a transaction" requirement is an explicit check (`TransactionSynchronizationManager.isActualTransactionActive()`, same `IllegalTransactionStateException`) instead of `@Transactional(propagation = MANDATORY)`, which only works through a Spring proxy that the adapter's minimal test context does not create; `OutboxRelay` is public so that `DddLabApplicationTests` can call `relayPending()`. With `spring-boot:run`, the demo's 11 audit lines appear on the `scheduling-1` thread, delivered by the relay)
 
-### [ ] T7 — A failing consumer does not break the use case (~10 min)
+### [x] T7 — A failing consumer does not break the use case (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/dawnrock/ddd/OutboxDeliveryTests.java`
@@ -127,7 +127,7 @@ Technical decisions inside the user's choices (Claude, reversible):
   1. A full-context test (root package, like `PersistenceRestartTests`) with **`app.events.outbox.relay-interval=1h`**, so that only the test runs the relay (otherwise the scheduled run, every 2 s, could add a second attempt between the call and the check and make the test flaky), and with an extra `@EventListener` that throws for `MoneyDeposited`: a deposit succeeds; after `relayPending()` the deposit event is still pending with one attempt, while the account-opened event was delivered.
   2. Sabotage: temporarily deliver synchronously again (call `ApplicationEventPublisher` from the publisher) and see the deposit fail; revert.
 - **Acceptance criteria:**
-  - [ ] The test passes; the sabotage makes it fail (checked).
+  - [x] The test passes; the sabotage makes it fail (checked). (the opening also records a `MoneyDeposited` for the initial deposit, so both deposits stay pending with one attempt; sabotage: calling Spring's `ApplicationEventPublisher` from the publisher again makes the use case fail with the consumer's exception; reverted)
 
 ### [ ] T8 — A committed event survives a restart (~10 min)
 
