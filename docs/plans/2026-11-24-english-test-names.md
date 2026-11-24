@@ -118,15 +118,15 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **Acceptance criteria:**
   - [x] Same as T3, for the package. (86 renamed; 1,004 tests, same as the baseline)
 
-### [ ] T8 — `adapter.in.web`, first half (~10 min)
+### [x] T8 — `adapter.in.web`, first half (~10 min)
 
 - **Layer:** tests
-- **Files:** the 5 files with the most methods in `.../adapter/in/web` (about 100 of 202)
+- **Files:** the 5 files with the most methods in `.../adapter/in/web` (about 100 of 202). *Deviation:* `AccountWebControllerTests` alone has 100 of the 202, so T8 is that file and T9 the other nine.
 - **Depends on:** T2
 - **What to do:**
   1. Same as T3.
 - **Acceptance criteria:**
-  - [ ] Same as T3, for those files.
+  - [x] Same as T3, for those files. (100 renamed in `AccountWebControllerTests`; 1,004 tests, same as the baseline)
 
 ### [ ] T9 — `adapter.in.web`, second half (~10 min)
 
