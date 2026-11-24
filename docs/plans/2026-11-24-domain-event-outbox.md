@@ -63,7 +63,7 @@ Technical decisions inside the user's choices (Claude, reversible):
   - [x] The repository test passes on H2 with Flyway and `ddl-auto=validate`.
   - [x] `./mvnw verify` green (the full context validates the new entity against V2; the static analysis passes). (*Deviation:* SpotBugs flagged the publication and retry fields as unused (`UUF_UNUSED_FIELD`) until the relay exists, so the entity's `markPublished` and `recordFailedAttempt` moved here from T3; the repository test uses them to set up its rows)
 
-### [ ] T2 — Event type registry and JSON (~10 min)
+### [x] T2 — Event type registry and JSON (~10 min)
 
 - **Layer:** adapter.out (event)
 - **Files:** `adapter/out/event/DomainEventTypes.java`, `DomainEventTypesTests.java`
@@ -72,7 +72,7 @@ Technical decisions inside the user's choices (Claude, reversible):
   1. Red: tests that every event (`CheckingAccountOpened`, `MoneyDeposited`, `MoneyWithdrawn`, `WithdrawalRejected`, `CustomerSegmentChanged`) survives `toJson` → `fromJson` unchanged; that the payload has only the record components (no `positive`/`monABank`); that an unknown type name fails with a clear message; and that every `DomainEvent` implementation in `domain.model` (imported with ArchUnit) is registered.
   2. Green: the registry (name ↔ class) and a Jackson 3 `JsonMapper` without is-getter detection.
 - **Acceptance criteria:**
-  - [ ] The four kinds of test pass; removing one event from the registry makes the scan test fail (checked).
+  - [x] The four kinds of test pass; removing one event from the registry makes the scan test fail (checked). (8 cases; sabotage: removing `WithdrawalRejected` from the registry fails the scan test and its round trip; reverted)
 
 ### [ ] T3 — The relay delivers pending events and counts failures (~10 min)
 
