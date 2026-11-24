@@ -53,7 +53,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 - **Acceptance criteria:**
   - [x] ADR written in English and listed in the README.
 
-### [ ] T2 — Checkstyle in `verify` (~10 min)
+### [x] T2 — Checkstyle in `verify` (~10 min)
 
 - **Layer:** build
 - **Files:** `pom.xml`, `checkstyle.xml`, `checkstyle-suppressions.xml`
@@ -62,7 +62,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
   1. `checkstyle.xml` with the course rules (`PackageName`, `TypeName`, `MethodName`, `ConstantName`, `MemberName`, `ParameterName`, `LocalVariableName`, `AbbreviationAsWordInName`, `MagicNumber`), plus `SuppressionFilter` pointing to `checkstyle-suppressions.xml`, which suppresses `MagicNumber` in `src/test`.
   2. Plugin with the Checkstyle 14.3.0 dependency, `includeTestSourceDirectory`, `consoleOutput`, and `check` bound to `verify`.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green with 0 Checkstyle violations.
+  - [x] `./mvnw verify` green with 0 Checkstyle violations. (*Deviation:* at `verify` the plugin also reads the sources Immutables generates in `target/generated-sources` (161 warnings), so `sourceDirectories` and `testSourceDirectories` limit it to `src/main/java` and `src/test/java`; the plan's *Generated code* note was only true for a run without compiling. Checked: a `snake_case` test method fails `MethodName` and a number in a test is not flagged)
 
 ### [ ] T3 — PMD and CPD in `verify`, with the baseline (~10 min)
 

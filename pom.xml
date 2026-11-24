@@ -37,6 +37,9 @@
         <webjars-locator-lite.version>1.1.5</webjars-locator-lite.version>
         <!-- spring-boot:run arranca con los datos de demostración (#11); -Dspring-boot.run.profiles=default lo evita -->
         <spring-boot.run.profiles>demo</spring-boot.run.profiles>
+        <!-- Análisis estático en ./mvnw verify (ADR 0020), con las versiones del curso de Clean Code -->
+        <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+        <checkstyle.version>14.3.0</checkstyle.version>
     </properties>
     <dependencies>
         <dependency>
@@ -236,6 +239,42 @@
                         </exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+            <!-- Análisis estático (ADR 0020): convenios de nombres y números mágicos del curso de Clean Code -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven-checkstyle-plugin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>${checkstyle.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <configLocation>checkstyle.xml</configLocation>
+                    <propertyExpansion>checkstyle.suppressions.file=${project.basedir}/checkstyle-suppressions.xml</propertyExpansion>
+                    <!-- Solo el código escrito a mano: el que genera Immutables en target/generated-sources no se puede corregir -->
+                    <sourceDirectories>
+                        <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                    </sourceDirectories>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <testSourceDirectories>
+                        <testSourceDirectory>${project.build.testSourceDirectory}</testSourceDirectory>
+                    </testSourceDirectories>
+                    <consoleOutput>true</consoleOutput>
+                    <violationSeverity>warning</violationSeverity>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>checkstyle</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
