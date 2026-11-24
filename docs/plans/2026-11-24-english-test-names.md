@@ -128,7 +128,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **Acceptance criteria:**
   - [x] Same as T3, for those files. (100 renamed in `AccountWebControllerTests`; 1,004 tests, same as the baseline)
 
-### [ ] T9 — `adapter.in.web`, second half (~10 min)
+### [x] T9 — `adapter.in.web`, second half (~10 min)
 
 - **Layer:** tests
 - **Files:** the other 5 files in `.../adapter/in/web`
@@ -136,7 +136,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **What to do:**
   1. Same as T3.
 - **Acceptance criteria:**
-  - [ ] Same as T3, for the whole package.
+  - [x] Same as T3, for the whole package. (102 renamed in the other nine files; the whole package is done; 1,004 tests, same as the baseline)
 
 ### [ ] T10 — `adapter.in.rest` (~10 min)
 

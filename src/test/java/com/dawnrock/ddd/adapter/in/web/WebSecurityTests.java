@@ -55,7 +55,7 @@ class WebSecurityTests {
 
     @Test
     @DisplayName("Una petición de htmx sin sesión recibe 401 con HX-Redirect al login, no la página de login (#125)")
-    void una_peticion_de_htmx_sin_sesion_recibe_hx_redirect_al_login() throws Exception {
+    void anHtmxRequestWithoutSessionGetsHxRedirectToLogin() throws Exception {
         mvc.perform(post("/accounts/" + UUID.randomUUID() + "/deposits").with(csrf())
                         .header("HX-Request", "true"))
                 .andExpect(status().isUnauthorized())
@@ -64,7 +64,7 @@ class WebSecurityTests {
 
     @Test
     @DisplayName("Un cierre de sesión con htmx sin token CSRF, como tras caducar la sesión, lleva al login con HX-Redirect (#126)")
-    void un_cierre_de_sesion_con_htmx_sin_token_csrf_lleva_al_login() throws Exception {
+    void anHtmxLogoutWithoutCsrfTokenLeadsToLogin() throws Exception {
         mvc.perform(post("/logout").header("HX-Request", "true").header("HX-Boosted", "true"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(header().string("HX-Redirect", "/login"));
@@ -72,7 +72,7 @@ class WebSecurityTests {
 
     @Test
     @DisplayName("La misma petición sin htmx sigue redirigiendo al login (#125)")
-    void la_misma_peticion_sin_htmx_sigue_redirigiendo_al_login() throws Exception {
+    void theSameRequestWithoutHtmxStillRedirectsToLogin() throws Exception {
         mvc.perform(post("/accounts/" + UUID.randomUUID() + "/deposits").with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"))
@@ -82,7 +82,7 @@ class WebSecurityTests {
     @Test
     @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("Una petición de htmx sin token CSRF, como tras caducar la sesión, recibe HX-Redirect al login (#125)")
-    void una_peticion_de_htmx_sin_token_csrf_recibe_hx_redirect_al_login() throws Exception {
+    void anHtmxRequestWithoutCsrfTokenGetsHxRedirectToLogin() throws Exception {
         mvc.perform(post("/accounts/" + UUID.randomUUID() + "/deposits").header("HX-Request", "true"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(header().string("HX-Redirect", "/login"));
@@ -93,7 +93,7 @@ class WebSecurityTests {
     @Test
     @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("Una petición de htmx sin el rol necesario recibe la página 403, sin HX-Redirect (#125)")
-    void una_peticion_de_htmx_sin_el_rol_necesario_recibe_la_pagina_403() throws Exception {
+    void anHtmxRequestWithoutTheRequiredRoleGetsThe403Page() throws Exception {
         mvc.perform(get("/accounts/new").header("HX-Request", "true"))
                 .andExpect(status().isForbidden())
                 .andExpect(forwardedUrl("/error/403"))
@@ -103,7 +103,7 @@ class WebSecurityTests {
     @Test
     @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("Una petición de htmx con un token CSRF inválido sigue recibiendo 403 (#125)")
-    void una_peticion_de_htmx_con_un_token_csrf_invalido_recibe_403() throws Exception {
+    void anHtmxRequestWithAnInvalidCsrfTokenGets403() throws Exception {
         mvc.perform(post("/accounts/" + UUID.randomUUID() + "/deposits").with(csrf().useInvalidToken())
                         .header("HX-Request", "true"))
                 .andExpect(status().isForbidden())
@@ -114,7 +114,7 @@ class WebSecurityTests {
 
     @Test
     @DisplayName("Un anónimo que pide el listado es redirigido al login")
-    void un_anonimo_que_pide_el_listado_es_redirigido_al_login() throws Exception {
+    void anAnonymousUserAskingForTheListIsRedirectedToLogin() throws Exception {
         mvc.perform(get("/"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
@@ -129,13 +129,13 @@ class WebSecurityTests {
             "/webjars/lucide-static/sprite.svg",
             "/vendor/motion/motion.js"})
     @DisplayName("Las librerías del frontend se sirven sin sesión y sin versión en la ruta (#124)")
-    void las_librerias_del_frontend_se_sirven_sin_sesion_y_sin_version_en_la_ruta(String path) throws Exception {
+    void frontendLibrariesAreServedWithoutSessionOrVersionInThePath(String path) throws Exception {
         mvc.perform(get(path)).andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("Las librerías del frontend se guardan en caché un año y las páginas no se guardan (#124)")
-    void las_librerias_del_frontend_se_guardan_en_cache_y_las_paginas_no() throws Exception {
+    void frontendLibrariesAreCachedAndPagesAreNot() throws Exception {
         mvc.perform(get("/webjars/bootstrap/css/bootstrap.min.css"))
                 .andExpect(header().string("Cache-Control", "max-age=31536000, public"));
         mvc.perform(get("/login"))
@@ -149,7 +149,7 @@ class WebSecurityTests {
 
     @Test
     @DisplayName("Tras 3 inicios de sesión fallidos, ni la contraseña correcta entra: lleva a /login?blocked (#130)")
-    void tras_3_inicios_de_sesion_fallidos_ni_la_contrasena_correcta_entra() throws Exception {
+    void afterThreeFailedLoginsNotEvenTheRightPasswordGetsIn() throws Exception {
         for (int i = 0; i < 3; i++) {
             mvc.perform(formLogin("ada", "mala", "198.51.100.7"))
                     .andExpect(redirectedUrl("/login?error"));
@@ -164,7 +164,7 @@ class WebSecurityTests {
 
     @Test
     @DisplayName("A través del proxy de Render y de Cloudflare, el bloqueo es para la IP del cliente y no para la de Cloudflare (#133)")
-    void a_traves_de_render_y_cloudflare_el_bloqueo_es_para_la_ip_del_cliente() throws Exception {
+    void throughRenderAndCloudflareTheLockoutIsForTheClientIp() throws Exception {
         for (int i = 0; i < 3; i++) {
             mvc.perform(behindCloudflare(formLogin("ada", "mala", "10.0.0.5"), "198.51.100.30"))
                     .andExpect(redirectedUrl("/login?error"));
@@ -192,7 +192,7 @@ class WebSecurityTests {
 
     @Test
     @DisplayName("La página de login es pública, lleva el token CSRF y el botón Entrar")
-    void la_pagina_de_login_es_publica_lleva_el_token_csrf_y_el_boton_entrar() throws Exception {
+    void theLoginPageIsPublicAndHasTheCsrfTokenAndTheLoginButton() throws Exception {
         mvc.perform(get("/login").param("form", ""))
                 .andExpect(status().isOk())
                 .andExpect(view().name("login"))
@@ -205,7 +205,7 @@ class WebSecurityTests {
 
     @Test
     @DisplayName("Con ?error el login muestra el mensaje de credenciales incorrectas")
-    void con_error_el_login_muestra_el_mensaje_de_credenciales_incorrectas() throws Exception {
+    void withErrorTheLoginShowsTheWrongCredentialsMessage() throws Exception {
         mvc.perform(get("/login").param("error", ""))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Usuario o contraseña incorrectos")));
@@ -213,7 +213,7 @@ class WebSecurityTests {
 
     @Test
     @DisplayName("Con ?logout el login muestra que se ha cerrado la sesión")
-    void con_logout_el_login_muestra_que_se_ha_cerrado_la_sesion() throws Exception {
+    void withLogoutTheLoginShowsThatTheSessionWasClosed() throws Exception {
         mvc.perform(get("/login").param("logout", ""))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Has cerrado la sesión")));
@@ -222,7 +222,7 @@ class WebSecurityTests {
     @Test
     @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("Cerrar la sesión (POST /logout con CSRF) redirige a /login?logout")
-    void cerrar_la_sesion_redirige_a_login_logout() throws Exception {
+    void loggingOutRedirectsToLoginLogout() throws Exception {
         mvc.perform(post("/logout").with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?logout"));
@@ -231,7 +231,7 @@ class WebSecurityTests {
     @Test
     @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("Un usuario que abre el formulario de alta recibe 403 y se le reenvía a la página 403")
-    void un_usuario_que_abre_el_formulario_de_alta_recibe_403_y_se_le_reenvia_a_la_pagina_403() throws Exception {
+    void aUserOpeningTheOpenAccountFormGets403AndIsForwardedToThe403Page() throws Exception {
         mvc.perform(get("/accounts/new"))
                 .andExpect(status().isForbidden())
                 .andExpect(forwardedUrl("/error/403"));
@@ -240,7 +240,7 @@ class WebSecurityTests {
     @Test
     @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("La página 403 se pinta con su estado y su plantilla")
-    void la_pagina_403_se_pinta_con_su_estado_y_su_plantilla() throws Exception {
+    void the403PageIsRenderedWithItsStatusAndTemplate() throws Exception {
         mvc.perform(get("/error/403"))
                 .andExpect(status().isForbidden())
                 .andExpect(view().name("error/403"))
@@ -250,7 +250,7 @@ class WebSecurityTests {
     @Test
     @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("Un usuario que envía el alta recibe 403")
-    void un_usuario_que_envia_el_alta_recibe_403() throws Exception {
+    void aUserSubmittingTheOpenAccountFormGets403() throws Exception {
         mvc.perform(post("/accounts/new").with(csrf()))
                 .andExpect(status().isForbidden());
     }
@@ -258,7 +258,7 @@ class WebSecurityTests {
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     @DisplayName("Un administrador abre el formulario de alta")
-    void un_administrador_abre_el_formulario_de_alta() throws Exception {
+    void anAdministratorOpensTheOpenAccountForm() throws Exception {
         mvc.perform(get("/accounts/new"))
                 .andExpect(status().isOk());
     }
@@ -266,7 +266,7 @@ class WebSecurityTests {
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     @DisplayName("Un POST sin token CSRF se rechaza con 403")
-    void un_post_sin_token_csrf_se_rechaza_con_403() throws Exception {
+    void aPostWithoutCsrfTokenIsRejectedWith403() throws Exception {
         mvc.perform(post("/accounts/new"))
                 .andExpect(status().isForbidden());
     }
