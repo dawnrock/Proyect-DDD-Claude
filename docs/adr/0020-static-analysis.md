@@ -1,6 +1,6 @@
 # 0020 · Static analysis in the build: Checkstyle, PMD/CPD and SpotBugs
 
-- **Status:** proposed · 2026-11-24
+- **Status:** accepted · 2026-11-24 (decided by the user after the Clean Code course analysis, #168)
 - **Issue:** #168 · **Related:** #166 (test names), #167 (magic numbers), [ADR 0009](0009-domain-without-lombok.md) (no Lombok in the domain)
 
 ## Context
@@ -42,6 +42,6 @@ The course's guidelines for adopting these tools: start with few rules, agree th
 
 - `./mvnw verify` takes about **8 s longer** (measured on 2026-11-24, two rounds on the same code: 64 → 69 s and 51 → 62 s). For a quick local run the four can be skipped with `-Dcheckstyle.skip -Dpmd.skip -Dcpd.skip -Dspotbugs.skip`; never in the CI.
 - New code must pass the three tools; Claude's skills and agents run `./mvnw verify` as the "done" check, so they get the same feedback.
-- HTML reports, for reading and for the course: `./mvnw checkstyle:checkstyle pmd:pmd pmd:cpd spotbugs:spotbugs` (in `target/reports` and `target/spotbugsXml.xml`), and `./mvnw spotbugs:gui`.
+- HTML reports, for reading and for the course: `./mvnw checkstyle:checkstyle pmd:pmd pmd:cpd spotbugs:spotbugs` (in `target/reports` and `target/spotbugsXml.xml`), and `./mvnw spotbugs:gui`. `-Dpmd.baseline=` turns the baseline off, so the PMD report also lists the smells that already existed (with it, the plugin leaves them out of the report too).
 - The SpotBugs exclusion matches the generated classes by their `@org.immutables.value.Generated` annotation, so a new Immutables value type needs no change. Checkstyle, PMD and CPD are limited to `src/main/java` and `src/test/java` (they would otherwise read `target/generated-sources` at `verify`).
 - Proven on 2026-11-24 by breaking each tool on purpose, one at a time: a magic number in `src/main` (Checkstyle), a method with 11 parameters (PMD `ExcessiveParameterList`) and an ignored `BigDecimal.add()` (SpotBugs `RV_RETURN_VALUE_IGNORED`) each fail the build.

@@ -144,7 +144,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 - **Acceptance criteria:**
   - [x] Each of the three changes fails the build with its rule; recorded in the commit or the PR. (1: Checkstyle, 1 violation; 2: PMD, 1 violation; 3: SpotBugs `RV_RETURN_VALUE_IGNORED`; all reverted. Time: ~8 s more per `verify`, written in the ADR)
 
-### [ ] T10 — Documentation and project status (~10 min)
+### [x] T10 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `CLAUDE.md`, `.claude/agents/revisor-ddd.md`, `docs/ia/arquitectura-ia.md`, `docs/adr/0020-static-analysis.md`, `docs/ia/pendientes.md`, `docs/ia/decisiones.md`, `docs/ia/estado-del-proyecto.md`, `docs/ia/historial.md`
@@ -154,7 +154,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
   2. `revisor-ddd`: it can read the reports in `target/` as input to its review.
   3. `pendientes.md`: one entry per baselined smell (two God classes, `CheckingAccount`, `reconstitute`, the two `validate()`). `decisiones.md`: tools, baseline and exclusions. ADR status `accepted`.
 - **Acceptance criteria:**
-  - [ ] The documents describe the tools and how to run them; status and history updated.
+  - [x] The documents describe the tools and how to run them; status and history updated. (the reports command was run: `target/reports/{checkstyle,pmd,cpd}.html` and `target/spotbugsXml.xml`; ADR 0020 accepted)
 
 ## Global acceptance criteria
 

@@ -15,7 +15,8 @@ Antes de tocar código, comprueba en qué rama estás (`git branch --show-curren
 ## Comandos
 
 ```bash
-./mvnw verify                      # compila + todos los tests (JUnit + ArchUnit). Es la comprobación de "terminado"
+./mvnw verify                      # compila + todos los tests (JUnit + ArchUnit) + análisis estático (Checkstyle, PMD/CPD, SpotBugs; ADR 0020). Es la comprobación de "terminado"
+./mvnw checkstyle:checkstyle pmd:pmd pmd:cpd spotbugs:spotbugs   # informes en target/ (tras compilar); -Dpmd.baseline= enseña también los smells de la línea base
 ./mvnw test -Dtest=CheckingAccountTests              # una clase de test
 ./mvnw test -Dtest='CheckingAccountTests#aRetail*'   # los métodos que empiezan así
 ./mvnw spring-boot:run             # arranca en :8080 con el perfil demo (tres cuentas y sus operaciones); GET /actuator/health → {"status":"UP"}
@@ -27,6 +28,7 @@ node scripts/graphify.mjs affected "<Clase>"         # quién depende de una cla
 
 - En Windows usa `mvnw.cmd`. Necesita Java 21 (`JAVA_HOME`).
 - H2 en memoria (`jdbc:h2:mem:ddd`), consola en `/h2-console`. La persistencia puede ser simulada (repositorios en memoria): es un proyecto de práctica.
+- Análisis estático (ADR 0020): las reglas están en `checkstyle.xml`, `pmd-ruleset.xml` y `spotbugs-exclude.xml`, y los smells que ya existían, en `pmd-baseline.properties`. Ante un falso positivo, exclusión acotada con un comentario que diga por qué; nunca se ignora un aviso ni se salta el análisis en el CI.
 
 ## Arquitectura por fase
 
