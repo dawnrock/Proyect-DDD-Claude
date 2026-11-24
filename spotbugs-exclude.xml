@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Exclusiones de SpotBugs (ADR 0020): acotadas por patrón y por clase, nunca un paquete entero, y cada una con su porqué -->
+<FindBugsFilter xmlns="https://github.com/spotbugs/filter/3.0.0">
+
+    <!-- Código que genera Immutables (lleva @org.immutables.value.Generated en el bytecode): no se puede corregir, se
+         regenera en cada compilación.
+         - AT_STALE_THREAD_WRITE_OF_PRIMITIVE: los campos *BuildStage de su InitShim los usa un solo hilo y solo
+           mientras se construye un objeto.
+         - EI_EXPOSE_REP: sus listas ya son copias no modificables (createUnmodifiableList en el constructor). -->
+    <Match>
+        <Annotation name="org.immutables.value.Generated"/>
+        <Bug pattern="AT_STALE_THREAD_WRITE_OF_PRIMITIVE,EI_EXPOSE_REP"/>
+    </Match>
+
+    <!-- Entidades JPA de los adaptadores de salida: Hibernate lee sus campos por reflexión (p. ej.
+         TransactionEntity.position, que ordena los movimientos con @OrderBy y tiene una restricción única). -->
+    <Match>
+        <Class name="~com\.dawnrock\.ddd\.adapter\.out\..*Entity"/>
+        <Bug pattern="URF_UNREAD_FIELD"/>
+    </Match>
+</FindBugsFilter>

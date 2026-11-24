@@ -119,7 +119,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 - **Acceptance criteria:**
   - [x] `JwtSupport` tests green (fallback key when the secret is missing). (7 `JwtSupportTests` green, including `withoutSecretARandomKeyIsGenerated`)
 
-### [ ] T8 — SpotBugs in `verify`, with narrow exclusions (~10 min)
+### [x] T8 — SpotBugs in `verify`, with narrow exclusions (~10 min)
 
 - **Layer:** build
 - **Files:** `pom.xml`, `spotbugs-exclude.xml`
@@ -130,8 +130,8 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
      - `URF_UNREAD_FIELD` in `~.*\.adapter\.out\..*Entity`: the JPA entities of every output adapter, not only `adapter.out.persistence`. The outbox of #165 adds `OutboxEventEntity` in `adapter.out.event`, with columns that only Hibernate reads.
   2. Plugin with `excludeFilterFile` and `check` bound to `verify` (after `compile`, since it reads bytecode).
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green with 0 SpotBugs bugs.
-  - [ ] Without the filter, the 15 excluded warnings come back, and only those.
+  - [x] `./mvnw verify` green with 0 SpotBugs bugs.
+  - [x] Without the filter, the 15 excluded warnings come back, and only those. (the filter matches the generated classes by `@org.immutables.value.Generated`, which SpotBugs supports, so no class list to maintain; without the filter: 12 `AT_STALE_THREAD_WRITE_OF_PRIMITIVE`, 2 `EI_EXPOSE_REP`, 1 `URF_UNREAD_FIELD`, and nothing else, since T4-T7 removed the other 8)
 
 ### [ ] T9 — Prove the rules fail the build, and measure (~10 min)
 
