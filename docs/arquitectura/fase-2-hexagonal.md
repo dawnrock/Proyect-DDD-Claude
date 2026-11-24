@@ -19,7 +19,7 @@ com.dawnrock.ddd
 │   │   ├── scheduler     SegmentReviewScheduler (daily segment review)
 │   │   └── web           Thymeleaf + Bootstrap, htmx, Alpine.js (ADR 0016)
 │   └── out
-│       ├── event         SpringDomainEventPublisher
+│       ├── event         OutboxDomainEventPublisher, OutboxRelay (outbox, ADR 0021)
 │       ├── persistence   JpaCheckingAccountRepository, JpaCustomerRepository, JpaAccountOwnershipRepository,
 │       │                 JpaCustomerOwnershipRepository, DatabaseAccountNumberSequence, TransactionalUnitOfWork (#150)
 │       └── taxagency     FakeTaxAgencyIncomeVerifier
@@ -67,7 +67,7 @@ Each adapter is tested without the hexagon (#21). `AdapterTestIsolationTests` (A
 | CLI runner | the real application service with the in-memory test doubles, without Spring | `DomainModelRunnerTests` |
 | Persistence (JPA) | port contracts (`*Contract`) against H2 in PostgreSQL mode, in a minimal shared Spring context (`JpaTestDatabase`: Flyway, JPA and Spring Data, each port call in its own transaction); not `@DataJpaTest`, because the contracts' `@Nested` classes would get the context of the contract (#150) | `JpaCheckingAccountRepositoryTests`, `JpaCustomerRepositoryTests`, `Jpa*OwnershipRepositoryTests`, `DatabaseAccountNumberSequenceTests`, `TransactionalUnitOfWorkTests`, `CheckingAccountMapperTests` |
 | Persistence (test doubles) | the same contracts over the in-memory doubles, which live in `src/test` and feed the fast tests of `application` through `PersistenceTestAdapters` (ADR 0019, option C) | `InMemoryCheckingAccountRepositoryTests`, `InMemoryAccountOwnershipRepositoryTests`, `InMemoryAccountNumberSequenceTests`, `InMemoryUnitOfWorkTests` |
-| Events | a minimal Spring context with only the adapter and a recording `@EventListener`; plus a unit test with a mocked `ApplicationEventPublisher` | `SpringDomainEventPublisherContextTests`, `SpringDomainEventPublisherTests` |
+| Events | the outbox adapter on a minimal JPA context (`OutboxTestDatabase`, like `JpaTestDatabase`): the publisher writes inside the transaction, the relay delivers, retries and cleans up with a mocked `ApplicationEventPublisher`; full-context checks for a failing consumer and a restart (#165) | `OutboxDomainEventPublisherTests`, `OutboxRelayTests`, `DomainEventTypesTests`, `OutboxDeliveryTests`, `OutboxRestartTests` |
 | Tax agency | the fake on its own | `FakeTaxAgencyIncomeVerifierTests` |
 
 Error paths of every endpoint, all with the ports mocked. With the ports mocked, an account that does not exist and one that belongs to someone else are the same case for the adapter: the service throws `AccountNotFoundException` for both (ADR 0008), and the ownership rule is tested in `CheckingAccountServiceOwnershipTests`:
@@ -83,7 +83,7 @@ Error paths of every endpoint, all with the ports mocked. With the ports mocked,
 
 ## Class → role
 
-State at the end of the phase: adapters behind input and output ports, domain events published after saving, accounts opened through the factory, demo data as a CLI input adapter, core built in `config` without Spring annotations.
+State at the end of the phase: adapters behind input and output ports, domain events stored in the outbox with their aggregate and delivered by a scheduled relay (#165, ADR 0021), accounts opened through the factory, demo data as a CLI input adapter, core built in `config` without Spring annotations.
 
 | Class | Package | Role in the architecture |
 | ----- | ------- | ------------------------ |
@@ -107,7 +107,9 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | `JpaAccountOwnershipRepository`, `JpaCustomerOwnershipRepository` | `adapter.out.persistence` | Output adapters (JPA, package-private, #150): implement `AccountOwnershipRepository` (ADR 0008) and `CustomerOwnershipRepository` (one username per customer, R30) |
 | `DatabaseAccountNumberSequence`, `MonABankIbans` | `adapter.out.persistence` | Output adapter (package-private, #150): implements `AccountNumberSequence` over the database sequence `account_number_seq`, so numbers survive a restart; `MonABankIbans` computes the IBAN (entity `9999`, branch `0001`) |
 | `TransactionalUnitOfWork` | `adapter.out.persistence` | Output adapter (package-private, #150): implements `UnitOfWork` as a database transaction inside one fair lock (#78), so a failed use case is rolled back |
-| `SpringDomainEventPublisher` | `adapter.out.event` | Output adapter (package-private): implements `DomainEventPublisher` over Spring's `ApplicationEventPublisher` |
+| `OutboxDomainEventPublisher` | `adapter.out.event` | Output adapter (package-private, #165, ADR 0021): implements `DomainEventPublisher` by storing each event in the `domain_event_outbox` table, in the transaction of its aggregate |
+| `OutboxRelay` | `adapter.out.event` | Scheduled relay (#165): delivers pending outbox events in order to the `@EventListener`s through Spring's `ApplicationEventPublisher`, at least once, with retries; cleans up old published events daily |
+| `DomainEventTypes` | `adapter.out.event` | Registry of the outbox: logical event name ↔ event class, and their JSON with Jackson |
 | `FakeTaxAgencyIncomeVerifier` | `adapter.out.taxagency` | Output adapter (simulated, package-private): implements `IncomeVerifier` with a fixed table |
 | `CheckingAccountService` | `application` | Application service: implements `CheckingAccountCommands` and `CheckingAccountQueries` (use cases and account ownership); uses the output ports only, opens accounts through `CheckingAccountFactory` and runs every use case inside a `UnitOfWork` and publishes the domain events of the saved accounts once the unit has finished (#78). Keeps its name (not `CheckingAccountApplicationService`): nobody outside `application` sees it. No Spring annotations: built in `config` |
 | `CheckingAccountCommands`, `CheckingAccountQueries` | `application` | Input ports: use cases that change accounts (open, sign up, open another account, regenerate an IBAN, deposit, withdraw, transfer) and that query them (list, detail, is a username taken) |

@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-24 (revised the same day: order and adjustments)
-- **Status:** draft
-- **Total estimate:** ~90 min (10 tasks)
+- **Status:** done
+- **Total estimate:** ~100 min (11 tasks)
 
 ## Goal
 
@@ -51,7 +51,7 @@ Technical decisions inside the user's choices (Claude, reversible):
 
 ## Tasks
 
-### [ ] T1 — Outbox table, entity and repository (~10 min)
+### [x] T1 — Outbox table, entity and repository (~10 min)
 
 - **Layer:** adapter.out (event) · db
 - **Files:** `src/main/resources/db/migration/V2__domain_event_outbox.sql`, `adapter/out/event/OutboxEventEntity.java`, `adapter/out/event/OutboxEventJpaRepository.java`, test `adapter/out/event/OutboxTestDatabase.java`, `OutboxEventJpaRepositoryTests.java`
@@ -60,10 +60,10 @@ Technical decisions inside the user's choices (Claude, reversible):
   1. Red: a test that saves two rows and reads the pending ones in `id` order, limited by a `Limit`, skipping published and failed rows.
   2. Green: migration, entity (package-private, Lombok allowed outside the domain) and `findByPublishedAtIsNullAndFailedAtIsNullOrderByIdAsc(Limit)`; `OutboxTestDatabase` with `@AutoConfigurationPackage` on `adapter.out.event` (same pattern as `JpaTestDatabase`).
 - **Acceptance criteria:**
-  - [ ] The repository test passes on H2 with Flyway and `ddl-auto=validate`.
-  - [ ] `./mvnw verify` green (the full context validates the new entity against V2; the static analysis passes).
+  - [x] The repository test passes on H2 with Flyway and `ddl-auto=validate`.
+  - [x] `./mvnw verify` green (the full context validates the new entity against V2; the static analysis passes). (*Deviation:* SpotBugs flagged the publication and retry fields as unused (`UUF_UNUSED_FIELD`) until the relay exists, so the entity's `markPublished` and `recordFailedAttempt` moved here from T3; the repository test uses them to set up its rows)
 
-### [ ] T2 — Event type registry and JSON (~10 min)
+### [x] T2 — Event type registry and JSON (~10 min)
 
 - **Layer:** adapter.out (event)
 - **Files:** `adapter/out/event/DomainEventTypes.java`, `DomainEventTypesTests.java`
@@ -72,9 +72,9 @@ Technical decisions inside the user's choices (Claude, reversible):
   1. Red: tests that every event (`CheckingAccountOpened`, `MoneyDeposited`, `MoneyWithdrawn`, `WithdrawalRejected`, `CustomerSegmentChanged`) survives `toJson` → `fromJson` unchanged; that the payload has only the record components (no `positive`/`monABank`); that an unknown type name fails with a clear message; and that every `DomainEvent` implementation in `domain.model` (imported with ArchUnit) is registered.
   2. Green: the registry (name ↔ class) and a Jackson 3 `JsonMapper` without is-getter detection.
 - **Acceptance criteria:**
-  - [ ] The four kinds of test pass; removing one event from the registry makes the scan test fail (checked).
+  - [x] The four kinds of test pass; removing one event from the registry makes the scan test fail (checked). (8 cases; sabotage: removing `WithdrawalRejected` from the registry fails the scan test and its round trip; reverted)
 
-### [ ] T3 — The relay delivers pending events and counts failures (~10 min)
+### [x] T3 — The relay delivers pending events and counts failures (~10 min)
 
 - **Layer:** adapter.out (event)
 - **Files:** `adapter/out/event/OutboxRelay.java`, `adapter/out/event/OutboxProperties.java`, `OutboxRelayTests.java`
@@ -83,9 +83,9 @@ Technical decisions inside the user's choices (Claude, reversible):
   1. Red: with rows inserted through the repository and a mocked `ApplicationEventPublisher`: pending events are delivered in order and marked published; published ones are not delivered again; when the publisher throws for one event, the others are still delivered, that row gets `attempts = 1` and `last_error`, and it is delivered on the next run; after `max-attempts` failures it gets `failed_at` and is not tried again.
   2. Green: `OutboxRelay.relayPending()` (`@Scheduled(fixedDelayString = "${app.events.outbox.relay-interval:2s}")`, guarded by a lock) and `OutboxProperties` (`app.events.outbox.*`, record with named default constants like `LoginAttemptsProperties`, `@EnableConfigurationProperties` in the adapter).
 - **Acceptance criteria:**
-  - [ ] Relay tests green; `./mvnw verify` green (the relay runs every 2 s on an empty outbox in the full context).
+  - [x] Relay tests green; `./mvnw verify` green (the relay runs every 2 s on an empty outbox in the full context). (4 cases. *Deviation:* `OutboxProperties` has `batchSize`, `maxAttempts` and `retention` with named defaults; the relay interval is read by `@Scheduled(fixedDelayString = "${app.events.outbox.relay-interval:2s}")` directly, so it is not a record component nor a `DEFAULT_RELAY_INTERVAL` constant)
 
-### [ ] T4 — The application publishes inside the unit of work (~10 min)
+### [x] T4 — The application publishes inside the unit of work (~10 min)
 
 - **Layer:** application
 - **Files:** `application/CheckingAccountService.java`, `domain/model/DomainEventPublisher.java` (Javadoc), `application/CheckingAccountServiceTests.java`
@@ -94,9 +94,9 @@ Technical decisions inside the user's choices (Claude, reversible):
   1. Red: turn the tests of the nested unit-of-work class around: the events are published **inside** the unit, after the last save; a use case that fails before or while saving publishes nothing (unchanged).
   2. Green: `inUnit` publishes the batches at the end of the work, inside `unitOfWork.execute`; update the Javadocs (`inUnit`, `DomainEventPublisher`: "inside the unit of work, so an outbox shares its transaction"). No new types in `CheckingAccountService` (PMD baseline).
 - **Acceptance criteria:**
-  - [ ] Application tests green; `./mvnw verify` green with the old `SpringDomainEventPublisher` (listeners are still called synchronously, now inside the transaction).
+  - [x] Application tests green; `./mvnw verify` green with the old `SpringDomainEventPublisher` (listeners are still called synchronously, now inside the transaction). (red: both unit-of-work tests failed with the old order; the second one, "the unit does not finish well", now checks that its events were published inside it, so they go away with the rollback; no new type in `CheckingAccountService`)
 
-### [ ] T5 — Old published events are cleaned up (~5 min)
+### [x] T5 — Old published events are cleaned up (~5 min)
 
 - **Layer:** adapter.out (event)
 - **Files:** `adapter/out/event/OutboxRelay.java`, `OutboxRelayTests.java`
@@ -105,9 +105,9 @@ Technical decisions inside the user's choices (Claude, reversible):
   1. Red: a published row older than the retention is deleted; a recent published row, a pending row and a failed row are kept.
   2. Green: `cleanUp()` with `@Scheduled(cron = "${app.events.outbox.clean-up-cron:0 30 3 * * *}")` and a derived delete query.
 - **Acceptance criteria:**
-  - [ ] Clean-up test green; `./mvnw verify` green.
+  - [x] Clean-up test green; `./mvnw verify` green.
 
-### [ ] T6 — The publisher writes to the outbox (replaces SpringDomainEventPublisher) (~10 min)
+### [x] T6 — The publisher writes to the outbox (replaces SpringDomainEventPublisher) (~10 min)
 
 - **Layer:** adapter.out (event)
 - **Files:** `adapter/out/event/OutboxDomainEventPublisher.java`, `OutboxDomainEventPublisherTests.java`; delete `SpringDomainEventPublisher.java`, `SpringDomainEventPublisherTests.java`, `SpringDomainEventPublisherContextTests.java`; `DddLabApplicationTests.java`
@@ -116,9 +116,9 @@ Technical decisions inside the user's choices (Claude, reversible):
   1. Red: publishing inside a committed transaction leaves one pending row per event, in order, with its type, account and JSON; inside a rolled-back transaction it leaves none; outside a transaction it fails (`IllegalTransactionStateException`).
   2. Green: the adapter (`@Transactional(propagation = MANDATORY)`), delete the old one and its tests. The `DddLabApplicationTests` test that checks a deposit reaches the audit consumer calls `OutboxRelay.relayPending()` before checking the log (it no longer arrives synchronously).
 - **Acceptance criteria:**
-  - [ ] Publisher tests green; `./mvnw verify` green; `./mvnw spring-boot:run` logs the demo events' audit lines a couple of seconds after the start.
+  - [x] Publisher tests green; `./mvnw verify` green; `./mvnw spring-boot:run` logs the demo events' audit lines a couple of seconds after the start. (*Deviations:* the "inside a transaction" requirement is an explicit check (`TransactionSynchronizationManager.isActualTransactionActive()`, same `IllegalTransactionStateException`) instead of `@Transactional(propagation = MANDATORY)`, which only works through a Spring proxy that the adapter's minimal test context does not create; `OutboxRelay` is public so that `DddLabApplicationTests` can call `relayPending()`. With `spring-boot:run`, the demo's 11 audit lines appear on the `scheduling-1` thread, delivered by the relay)
 
-### [ ] T7 — A failing consumer does not break the use case (~10 min)
+### [x] T7 — A failing consumer does not break the use case (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/dawnrock/ddd/OutboxDeliveryTests.java`
@@ -127,9 +127,9 @@ Technical decisions inside the user's choices (Claude, reversible):
   1. A full-context test (root package, like `PersistenceRestartTests`) with **`app.events.outbox.relay-interval=1h`**, so that only the test runs the relay (otherwise the scheduled run, every 2 s, could add a second attempt between the call and the check and make the test flaky), and with an extra `@EventListener` that throws for `MoneyDeposited`: a deposit succeeds; after `relayPending()` the deposit event is still pending with one attempt, while the account-opened event was delivered.
   2. Sabotage: temporarily deliver synchronously again (call `ApplicationEventPublisher` from the publisher) and see the deposit fail; revert.
 - **Acceptance criteria:**
-  - [ ] The test passes; the sabotage makes it fail (checked).
+  - [x] The test passes; the sabotage makes it fail (checked). (the opening also records a `MoneyDeposited` for the initial deposit, so both deposits stay pending with one attempt; sabotage: calling Spring's `ApplicationEventPublisher` from the publisher again makes the use case fail with the consumer's exception; reverted)
 
-### [ ] T8 — A committed event survives a restart (~10 min)
+### [x] T8 — A committed event survives a restart (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/dawnrock/ddd/OutboxRestartTests.java`
@@ -137,9 +137,9 @@ Technical decisions inside the user's choices (Claude, reversible):
 - **What to do:**
   1. Two starts on the same H2 database (pattern of `PersistenceRestartTests`) with `app.events.outbox.relay-interval=1h`: the first makes a deposit and stops before any relay run delivers it; the second, after `relayPending()`, logs `Auditoría · MoneyDeposited` for that account and leaves no pending rows.
 - **Acceptance criteria:**
-  - [ ] The test passes; with the second start skipped, the row is still pending (the first context really did not deliver it).
+  - [x] The test passes; with the second start skipped, the row is still pending (the first context really did not deliver it). (instead of skipping the second start, the test itself asserts 3 pending events and no audit line before the restart. *Deviation:* the relay's `@Scheduled` also has `initialDelayString` with the same interval: with `fixedDelay` alone the first run happens at startup and could deliver the deposit in the first context, making the test flaky)
 
-### [ ] T9 — Only the event adapter talks to Spring's event bus (~5 min)
+### [x] T9 — Only the event adapter talks to Spring's event bus (~5 min)
 
 - **Layer:** tests (ArchUnit)
 - **Files:** `src/test/java/com/dawnrock/ddd/HexagonalArchitectureTests.java`
@@ -148,9 +148,9 @@ Technical decisions inside the user's choices (Claude, reversible):
   1. Rule as an `@ArchTest` method in English camelCase, following #166 (`onlyTheEventAdapterPublishesToSpring`): no class outside `adapter.out.event` depends on `ApplicationEventPublisher`, so domain events can only reach the listeners through the outbox.
   2. Validate it by breaking it (inject `ApplicationEventPublisher` into a class of `application` temporarily) and revert.
 - **Acceptance criteria:**
-  - [ ] The rule passes and fails when broken (checked).
+  - [x] The rule passes and fails when broken (checked). (sabotage: an `ApplicationEventPublisher` reference added to `AuditLogListener` fails `onlyTheEventAdapterPublishesToSpring` and `theCoreDoesNotDependOnSpring`; reverted)
 
-### [ ] T10 — ADR and documentation (~10 min)
+### [x] T10 — ADR and documentation (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0021-domain-event-outbox.md`, `docs/adr/README.md`, `docs/arquitectura/fase-2-hexagonal.md`, `src/main/resources/application.properties`
@@ -160,31 +160,42 @@ Technical decisions inside the user's choices (Claude, reversible):
   2. `fase-2-hexagonal.md`: package tree, class table and test strategy row of `adapter.out.event`; "domain events published after saving" → "stored in the outbox with the aggregate and delivered by the relay". No diagram change (the events adapter is already in it).
   3. `application.properties`: the `app.events.outbox.*` keys with their defaults and a comment.
 - **Acceptance criteria:**
-  - [ ] Documentation in English and consistent with the code.
+  - [x] Documentation in English and consistent with the code. (the project status, decisions, pending items and history are updated here as well)
+
+### [x] T11 — Fixes from the review (~10 min)
+
+- **Layer:** adapter.out (event) · docs
+- **Files:** `adapter/out/event/OutboxRelay.java`, `OutboxRelayTests.java`, `AuditLogListener.java` (Javadoc), `docs/dominio/glosario.md`, `docs/arquitectura/comparativa-capas-hexagonal.md`, ADR 0021, `decisiones.md`
+- **Depends on:** T10
+- **What to do:**
+  1. `revisor-ddd` found that a consumer joining the delivery transaction (for example, one that calls a use case) and failing would mark it rollback-only: the commit threw `UnexpectedRollbackException`, the attempt was not saved and that event blocked the queue forever. Red: a test with such a consumer (`UnexpectedRollbackException`). Green: delivery and the record of a failed attempt run in separate transactions.
+  2. Stale references to `SpringDomainEventPublisher`: `AuditLogListener` Javadoc, the glossary and a text note under the diagram of `comparativa-capas-hexagonal.md` (the diagram shows the `v2-hexagonal` snapshot and is not changed without the user). The ADR and `decisiones.md` mention the redelivery after a partial failure.
+- **Acceptance criteria:**
+  - [x] The new relay test fails before the fix and passes after it; `./mvnw verify` green with 1,058 test cases.
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] A use case stores its events in the outbox in the same transaction as the aggregate; with a rollback none is left (T4, T6).
-- [ ] A committed event reaches the consumers even if the process restarts before delivering it (T8).
-- [ ] A consumer that throws does not make the use case fail nor lose the other events; the event is retried and, after 5 attempts, marked as failed (T3, T7).
-- [ ] The V2 migration applies on H2 and, on the next deploy, on Neon (checked after the merge with Render's logs or by the user).
-- [ ] The new code passes Checkstyle, PMD/CPD and SpotBugs (#168) with no new baseline entry or exclusion.
+- [x] A use case stores its events in the outbox in the same transaction as the aggregate; with a rollback none is left (T4, T6).
+- [x] A committed event reaches the consumers even if the process restarts before delivering it (T8).
+- [x] A consumer that throws does not make the use case fail nor lose the other events; the event is retried and, after 5 attempts, marked as failed (T3, T7).
+- [x] The V2 migration applies on H2 and, on the next deploy, on Neon (H2 checked; Neon on the next deploy, after the merge, with Render's logs or by the user).
+- [x] The new code passes Checkstyle, PMD/CPD and SpotBugs (#168) with no new baseline entry or exclusion.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit + static analysis).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (English camelCase + `@DisplayName` in Spanish, after #166).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): Jackson, Spring Data JPA and scheduling are already in the project.
-- [ ] If the API changes: n/a (no API change).
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a (outbox and relay are technical terms, explained in ADR 0021).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md` (replace "consumers are synchronous" of #17), pending items in `pendientes.md` (remove the synchronous-consumers note; add one instance and possible duplicates) and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit + static analysis).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (English camelCase + `@DisplayName` in Spanish, after #166).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): Jackson, Spring Data JPA and scheduling are already in the project.
+- [x] If the API changes: n/a (no API change).
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a (outbox and relay are technical terms, explained in ADR 0021).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md` (replace "consumers are synchronous" of #17), pending items in `pendientes.md` (remove the synchronous-consumers note; add one instance and possible duplicates) and a row in `historial.md`.
 
 ## Risks and open questions
 

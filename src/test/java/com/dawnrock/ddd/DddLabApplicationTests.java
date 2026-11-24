@@ -28,6 +28,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
 
 import com.dawnrock.ddd.adapter.in.cli.DomainModelRunner;
+import com.dawnrock.ddd.adapter.out.event.OutboxRelay;
 import com.dawnrock.ddd.application.Caller;
 import com.dawnrock.ddd.application.CheckingAccountCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
@@ -95,6 +96,8 @@ class DddLabApplicationTests {
 				.build()).id();
 
 		commands.deposit(admin, DepositCommand.builder().accountId(accountId).amount(new BigDecimal("25")).build());
+		// Desde #165 los eventos se guardan en el outbox y los entrega el relé, no la propia transacción
+		context.getBean(OutboxRelay.class).relayPending();
 
 		assertThat(output).contains("Auditoría · MoneyDeposited · cuenta " + accountId);
 	}
