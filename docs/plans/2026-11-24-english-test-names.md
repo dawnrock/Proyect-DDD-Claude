@@ -148,7 +148,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **Acceptance criteria:**
   - [x] Same as T3, for the package. (111 renamed; 1,023 test cases, class by class the same as the baseline)
 
-### [ ] T11 — `adapter.in.cli` and `adapter.in.scheduler` (~5 min)
+### [x] T11 — `adapter.in.cli` and `adapter.in.scheduler` (~5 min)
 
 - **Layer:** tests
 - **Files:** `.../adapter/in/cli` (1 file, 11 methods), `.../adapter/in/scheduler` (1 file, 1 method)
@@ -156,7 +156,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **What to do:**
   1. Same as T3.
 - **Acceptance criteria:**
-  - [ ] Same as T3, for the packages.
+  - [x] Same as T3, for the packages. (12 renamed; 1,023 test cases, class by class the same as the baseline)
 
 ### [ ] T12 — Root package, `config`, `build` and `support` (~10 min)
 
