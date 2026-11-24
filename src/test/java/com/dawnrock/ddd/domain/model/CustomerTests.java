@@ -18,7 +18,7 @@ class CustomerTests {
 
     @Test
     @DisplayName("Un cliente se registra con nombre, documento y correo, y recibe un id")
-    void un_cliente_se_registra_con_nombre_documento_y_correo() {
+    void aCustomerRegistersWithNameDocumentAndEmail() {
         Customer customer = Customer.register("Ada Lovelace", TAX_ID, EMAIL);
 
         assertThat(customer.id()).isNotNull();
@@ -29,14 +29,14 @@ class CustomerTests {
 
     @Test
     @DisplayName("El nombre del cliente se guarda sin espacios alrededor")
-    void el_nombre_del_cliente_se_guarda_sin_espacios_alrededor() {
+    void theCustomerNameIsStoredTrimmed() {
         assertThat(Customer.register("  Ada Lovelace ", TAX_ID, EMAIL).fullName()).isEqualTo("Ada Lovelace");
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"", "   "})
     @DisplayName("El nombre de un cliente no puede estar en blanco")
-    void el_nombre_de_un_cliente_no_puede_estar_en_blanco(String fullName) {
+    void aCustomerNameCannotBeBlank(String fullName) {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> Customer.register(fullName, TAX_ID, EMAIL))
                 .withMessage("El nombre del cliente no puede estar vacío");
@@ -44,7 +44,7 @@ class CustomerTests {
 
     @Test
     @DisplayName("El nombre, el documento y el correo de un cliente son obligatorios")
-    void los_datos_de_un_cliente_son_obligatorios() {
+    void theCustomerDataIsRequired() {
         assertThatExceptionOfType(NullPointerException.class)
                 .isThrownBy(() -> Customer.register(null, TAX_ID, EMAIL))
                 .withMessage("El nombre del cliente es obligatorio");
@@ -58,7 +58,7 @@ class CustomerTests {
 
     @Test
     @DisplayName("Dos clientes son iguales solo si tienen el mismo id")
-    void dos_clientes_son_iguales_solo_si_tienen_el_mismo_id() {
+    void twoCustomersAreEqualOnlyWithTheSameId() {
         Customer ada = Customer.register("Ada Lovelace", TAX_ID, EMAIL);
         Customer sameData = Customer.register("Ada Lovelace", TAX_ID, EMAIL);
 
@@ -67,7 +67,7 @@ class CustomerTests {
 
     @Test
     @DisplayName("Un documento duplicado es una regla de negocio incumplida con el documento en el mensaje (R30)")
-    void un_cliente_duplicado_es_una_regla_de_negocio_incumplida() {
+    void aDuplicateCustomerIsABrokenBusinessRule() {
         assertThat(new DuplicateCustomerException(TAX_ID))
                 .isInstanceOf(DomainException.class)
                 .hasMessageStartingWith("Ya eres cliente de Mon-A Bank")
@@ -76,7 +76,7 @@ class CustomerTests {
 
     @Test
     @DisplayName("Un cliente reconstituido conserva su identidad, su nombre, su documento y su correo")
-    void un_cliente_reconstituido_conserva_todos_sus_datos() {
+    void aReconstitutedCustomerKeepsAllItsData() {
         UUID id = UUID.randomUUID();
 
         Customer cliente = Customer.reconstitute(id, "Ada Lovelace", new TaxId("12345678Z"),
@@ -90,7 +90,7 @@ class CustomerTests {
 
     @Test
     @DisplayName("Un cliente no se reconstituye sin identidad ni con los datos que rechaza el alta")
-    void un_cliente_no_se_reconstituye_sin_sus_datos_obligatorios() {
+    void aCustomerIsNotReconstitutedWithoutItsRequiredData() {
         TaxId taxId = new TaxId("12345678Z");
         EmailAddress email = new EmailAddress("ada@example.com");
         assertThatThrownBy(

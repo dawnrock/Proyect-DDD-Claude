@@ -37,7 +37,7 @@ public abstract class CheckingAccountRepositoryContract {
 
         @Test
         @DisplayName("Una cuenta guardada se recupera por su id")
-        void una_cuenta_guardada_se_recupera_por_su_id() {
+        void aSavedAccountIsFoundById() {
             CheckingAccount cuenta = TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open();
 
             repository.save(cuenta);
@@ -47,13 +47,13 @@ public abstract class CheckingAccountRepositoryContract {
 
         @Test
         @DisplayName("Buscar una cuenta inexistente no devuelve nada")
-        void buscar_una_cuenta_inexistente_no_devuelve_nada() {
+        void findingAMissingAccountReturnsNothing() {
             assertThat(repository.findById(UUID.randomUUID())).isEmpty();
         }
 
         @Test
         @DisplayName("Guardar dos veces la misma cuenta no la duplica")
-        void guardar_dos_veces_la_misma_cuenta_no_la_duplica() {
+        void savingTheSameAccountTwiceDoesNotDuplicateIt() {
             CheckingAccount cuenta = TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open();
 
             repository.save(cuenta);
@@ -69,21 +69,21 @@ public abstract class CheckingAccountRepositoryContract {
 
         @Test
         @DisplayName("No se puede guardar una cuenta nula")
-        void no_se_puede_guardar_una_cuenta_nula() {
+        void aNullAccountCannotBeSaved() {
             assertThatNullPointerException()
                     .isThrownBy(() -> repository.save(null));
         }
 
         @Test
         @DisplayName("No se puede buscar por un id nulo")
-        void no_se_puede_buscar_por_un_id_nulo() {
+        void findingByANullIdIsRejected() {
             assertThatNullPointerException()
                     .isThrownBy(() -> repository.findById(null));
         }
 
         @Test
         @DisplayName("No se puede buscar por un número de cuenta nulo")
-        void no_se_puede_buscar_por_un_numero_de_cuenta_nulo() {
+        void findingByANullAccountNumberIsRejected() {
             assertThatNullPointerException()
                     .isThrownBy(() -> repository.findByAccountNumber(null));
         }
@@ -95,7 +95,7 @@ public abstract class CheckingAccountRepositoryContract {
 
         @Test
         @DisplayName("Una cuenta guardada se recupera por su número aunque se escriba con espacios")
-        void una_cuenta_guardada_se_recupera_por_su_numero_aunque_se_escriba_con_espacios() {
+        void aSavedAccountIsFoundByItsNumberEvenWrittenWithSpaces() {
             CheckingAccount cuenta = TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open();
             repository.save(cuenta);
 
@@ -105,7 +105,7 @@ public abstract class CheckingAccountRepositoryContract {
 
         @Test
         @DisplayName("Buscar un número de cuenta inexistente no devuelve nada")
-        void buscar_un_numero_de_cuenta_inexistente_no_devuelve_nada() {
+        void findingAMissingAccountNumberReturnsNothing() {
             repository.save(TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open());
 
             assertThat(repository.findByAccountNumber(new AccountNumber("ES7620770024003102575766"))).isEmpty();
@@ -113,7 +113,7 @@ public abstract class CheckingAccountRepositoryContract {
 
         @Test
         @DisplayName("No se puede guardar otra cuenta con un número ya usado")
-        void no_se_puede_guardar_otra_cuenta_con_un_numero_ya_usado() {
+        void anotherAccountWithAnAlreadyUsedNumberCannotBeSaved() {
             repository.save(TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open());
             CheckingAccount otra = TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open();
 
@@ -125,7 +125,7 @@ public abstract class CheckingAccountRepositoryContract {
 
         @Test
         @DisplayName("Volver a guardar la misma cuenta no se considera un número duplicado")
-        void volver_a_guardar_la_misma_cuenta_no_se_considera_un_numero_duplicado() {
+        void savingTheSameAccountAgainIsNotADuplicateNumber() {
             CheckingAccount cuenta = TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open();
             repository.save(cuenta);
 
@@ -139,13 +139,13 @@ public abstract class CheckingAccountRepositoryContract {
 
         @Test
         @DisplayName("Sin cuentas guardadas la lista está vacía")
-        void sin_cuentas_guardadas_la_lista_esta_vacia() {
+        void withNoSavedAccountsTheListIsEmpty() {
             assertThat(repository.findAll()).isEmpty();
         }
 
         @Test
         @DisplayName("Las cuentas se listan ordenadas por número de cuenta")
-        void las_cuentas_se_listan_ordenadas_por_numero_de_cuenta() {
+        void accountsAreListedSortedByAccountNumber() {
             CheckingAccount tercera =
                     repository.save(TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open());
             CheckingAccount primera =
@@ -159,7 +159,7 @@ public abstract class CheckingAccountRepositoryContract {
 
         @Test
         @DisplayName("La lista de cuentas no puede modificarse desde fuera del repositorio")
-        void la_lista_de_cuentas_no_puede_modificarse_desde_fuera_del_repositorio() {
+        void theAccountListCannotBeModifiedOutsideTheRepository() {
             repository.save(TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open());
 
             assertThatExceptionOfType(UnsupportedOperationException.class)
@@ -170,7 +170,7 @@ public abstract class CheckingAccountRepositoryContract {
 
     @Test
     @DisplayName("Tras cambiar el número de una cuenta, el antiguo no se resuelve y el nuevo sí (R32)")
-    void tras_cambiar_el_numero_de_una_cuenta_el_antiguo_no_se_resuelve_y_el_nuevo_si() {
+    void afterChangingAnAccountNumberTheOldOneNoLongerResolvesAndTheNewOneDoes() {
         AccountNumber old = new AccountNumber("ES9121000418450200051332");
         AccountNumber replacement = new AccountNumber("ES6699990001740000000001");
         CheckingAccount cuenta = repository.save(TestAccounts.anAccount().accountNumber(old.value()).open());

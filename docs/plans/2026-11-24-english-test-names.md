@@ -68,7 +68,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **Acceptance criteria:**
   - [x] `grep -rn "snake_case" .claude src/test/CLAUDE.md` only finds references to `UPPER_SNAKE_CASE` constants (none left; agents and other skills did not mention the convention).
 
-### [ ] T3 — `domain.model` (~10 min)
+### [x] T3 — `domain.model` (~10 min)
 
 - **Layer:** tests
 - **Files:** 14 files in `src/test/java/com/dawnrock/ddd/domain/model`, 125 methods
@@ -76,7 +76,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **What to do:**
   1. Rename each method following the naming rule. Do not change bodies or `@DisplayName`s.
 - **Acceptance criteria:**
-  - [ ] No `void [a-z]+_` method left in the package; per-class counts match the baseline; `./mvnw verify` green.
+  - [x] No `void [a-z]+_` method left in the package; per-class counts match the baseline; `./mvnw verify` green. (125 renamed; 84 classes, 1,004 tests, same as the baseline)
 
 ### [ ] T4 — `domain.service` (~5 min)
 

@@ -22,7 +22,7 @@ class TransactionTests {
 
         @Test
         @DisplayName("Un movimiento reconstituido conserva todos sus datos y su identidad")
-        void un_movimiento_reconstituido_conserva_todos_sus_datos_y_su_identidad() {
+        void aReconstitutedTransactionKeepsAllItsDataAndIdentity() {
             Transaction movimiento = Transaction.reconstitute(ID, ACCOUNT, TransactionType.WITHDRAWAL,
                     MonetaryAmount.euros("50.00"), OCCURRED_ON, COUNTERPART, TransactionStatus.REJECTED);
 
@@ -39,7 +39,7 @@ class TransactionTests {
 
         @Test
         @DisplayName("Un movimiento sin contrapartida se reconstituye sin ella")
-        void un_movimiento_sin_contrapartida_se_reconstituye_sin_ella() {
+        void aTransactionWithoutCounterpartIsReconstitutedWithoutOne() {
             Transaction movimiento = Transaction.reconstitute(ID, ACCOUNT, TransactionType.DEPOSIT,
                     MonetaryAmount.euros("10.00"), OCCURRED_ON, null, TransactionStatus.APPROVED);
 
@@ -49,7 +49,7 @@ class TransactionTests {
 
         @Test
         @DisplayName("Los datos obligatorios de un movimiento no pueden faltar al reconstituirlo")
-        void los_datos_obligatorios_de_un_movimiento_no_pueden_faltar_al_reconstituirlo() {
+        void aTransactionCannotBeReconstitutedWithoutItsRequiredData() {
             MonetaryAmount amount = MonetaryAmount.euros("10.00");
             assertThatThrownBy(() -> Transaction.reconstitute(null, ACCOUNT, TransactionType.DEPOSIT, amount,
                     OCCURRED_ON, null, TransactionStatus.APPROVED)).isInstanceOf(NullPointerException.class);
@@ -67,7 +67,7 @@ class TransactionTests {
 
         @Test
         @DisplayName("Un movimiento no se reconstituye con un importe que no es positivo")
-        void un_movimiento_no_se_reconstituye_con_un_importe_que_no_es_positivo() {
+        void aTransactionIsNotReconstitutedWithANonPositiveAmount() {
             assertThatThrownBy(() -> Transaction.reconstitute(ID, ACCOUNT, TransactionType.DEPOSIT,
                     MonetaryAmount.euros("0.00"), OCCURRED_ON, null, TransactionStatus.APPROVED))
                     .isInstanceOf(IllegalArgumentException.class)

@@ -38,7 +38,7 @@ class CheckingAccountReconstitutionTests {
 
     @Test
     @DisplayName("Una cuenta reconstituida conserva su identidad, su número, su titular, su saldo y sus movimientos")
-    void una_cuenta_reconstituida_conserva_todos_sus_datos() {
+    void aReconstitutedAccountKeepsAllItsData() {
         AccountHolder titular = holder(CustomerSegment.RETAIL);
         List<Transaction> movimientos = history(ID);
 
@@ -55,7 +55,7 @@ class CheckingAccountReconstitutionTests {
 
     @Test
     @DisplayName("Una cuenta reconstituida conserva la fecha de su próxima revisión de segmento")
-    void una_cuenta_reconstituida_conserva_la_fecha_de_su_proxima_revision() {
+    void aReconstitutedAccountKeepsItsNextReviewDate() {
         Instant review = Instant.parse("2027-05-03T10:15:30Z");
 
         CheckingAccount cuenta = CheckingAccount.reconstitute(ID, IBAN, holder(CustomerSegment.HIGH_NET_WORTH),
@@ -66,7 +66,7 @@ class CheckingAccountReconstitutionTests {
 
     @Test
     @DisplayName("Reconstituir una cuenta no registra eventos de dominio")
-    void reconstituir_una_cuenta_no_registra_eventos_de_dominio() {
+    void reconstitutingAnAccountRecordsNoDomainEvents() {
         CheckingAccount cuenta = CheckingAccount.reconstitute(ID, IBAN, holder(CustomerSegment.RETAIL),
                 MonetaryAmount.euros("1250.00"), null, history(ID));
 
@@ -75,7 +75,7 @@ class CheckingAccountReconstitutionTests {
 
     @Test
     @DisplayName("Una cuenta reconstituida sigue operando con sus reglas y registra los eventos nuevos")
-    void una_cuenta_reconstituida_sigue_operando_con_sus_reglas() {
+    void aReconstitutedAccountKeepsOperatingByItsRules() {
         CheckingAccount cuenta = CheckingAccount.reconstitute(ID, IBAN, holder(CustomerSegment.RETAIL),
                 MonetaryAmount.euros("1250.00"), null, history(ID));
 
@@ -91,7 +91,7 @@ class CheckingAccountReconstitutionTests {
 
     @Test
     @DisplayName("Una cuenta no se reconstituye si su saldo no cuadra con sus movimientos aprobados")
-    void una_cuenta_no_se_reconstituye_si_su_saldo_no_cuadra_con_sus_movimientos() {
+    void anAccountIsNotReconstitutedWhenItsBalanceDoesNotMatchItsTransactions() {
         assertThatThrownBy(() -> CheckingAccount.reconstitute(ID, IBAN, holder(CustomerSegment.RETAIL),
                 MonetaryAmount.euros("1300.00"), null, history(ID)))
                 .isInstanceOf(IllegalStateException.class)
@@ -100,7 +100,7 @@ class CheckingAccountReconstitutionTests {
 
     @Test
     @DisplayName("Una cuenta no se reconstituye con movimientos de otra cuenta")
-    void una_cuenta_no_se_reconstituye_con_movimientos_de_otra_cuenta() {
+    void anAccountIsNotReconstitutedWithAnotherAccountsTransactions() {
         assertThatThrownBy(() -> CheckingAccount.reconstitute(ID, IBAN, holder(CustomerSegment.RETAIL),
                 MonetaryAmount.euros("1250.00"), null, history(UUID.randomUUID())))
                 .isInstanceOf(IllegalStateException.class)
@@ -109,7 +109,7 @@ class CheckingAccountReconstitutionTests {
 
     @Test
     @DisplayName("Una cuenta no se reconstituye con un movimiento pendiente")
-    void una_cuenta_no_se_reconstituye_con_un_movimiento_pendiente() {
+    void anAccountIsNotReconstitutedWithAPendingTransaction() {
         List<Transaction> movimientos = List.of(
                 movement(ID, TransactionType.DEPOSIT, "100.00", TransactionStatus.PENDING, null));
 
@@ -121,7 +121,7 @@ class CheckingAccountReconstitutionTests {
 
     @Test
     @DisplayName("Los datos obligatorios de una cuenta no pueden faltar al reconstituirla")
-    void los_datos_obligatorios_de_una_cuenta_no_pueden_faltar_al_reconstituirla() {
+    void anAccountCannotBeReconstitutedWithoutItsRequiredData() {
         AccountHolder titular = holder(CustomerSegment.RETAIL);
         MonetaryAmount saldo = MonetaryAmount.euros("1250.00");
         List<Transaction> movimientos = history(ID);
@@ -139,7 +139,7 @@ class CheckingAccountReconstitutionTests {
 
     @Test
     @DisplayName("Una cuenta minorista no se reconstituye con una revisión de segmento pendiente")
-    void una_cuenta_minorista_no_se_reconstituye_con_una_revision_pendiente() {
+    void aRetailAccountIsNotReconstitutedWithAPendingReview() {
         assertThatThrownBy(() -> CheckingAccount.reconstitute(ID, IBAN, holder(CustomerSegment.RETAIL),
                 MonetaryAmount.euros("1250.00"), Instant.parse("2027-05-03T10:15:30Z"), history(ID)))
                 .isInstanceOf(IllegalStateException.class)
@@ -148,7 +148,7 @@ class CheckingAccountReconstitutionTests {
 
     @Test
     @DisplayName("Una cuenta no se reconstituye con dos movimientos con el mismo id")
-    void una_cuenta_no_se_reconstituye_con_movimientos_repetidos() {
+    void anAccountIsNotReconstitutedWithDuplicateTransactions() {
         Transaction deposito = movement(ID, TransactionType.DEPOSIT, "100.00", TransactionStatus.APPROVED, null);
 
         assertThatThrownBy(() -> CheckingAccount.reconstitute(ID, IBAN, holder(CustomerSegment.RETAIL),

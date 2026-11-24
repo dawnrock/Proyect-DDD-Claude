@@ -12,7 +12,7 @@ class EmailAddressTests {
 
     @Test
     @DisplayName("Un correo se normaliza: sin espacios alrededor y en minúsculas (R29)")
-    void un_correo_se_normaliza() {
+    void anEmailIsNormalised() {
         EmailAddress email = new EmailAddress("  Ada.Lovelace@Example.COM ");
         assertThat(email.value()).isEqualTo("ada.lovelace@example.com");
         assertThat(email).isEqualTo(new EmailAddress("ada.lovelace@example.com")).hasToString("ada.lovelace@example.com");
@@ -22,7 +22,7 @@ class EmailAddressTests {
     @ValueSource(strings = {"", "   ", "ada", "ada@", "@example.com", "ada@example", "ada@@example.com",
             "ada lovelace@example.com", "ada@exam ple.com"})
     @DisplayName("Un correo sin arroba, sin dominio o con espacios no llega a construirse (R29)")
-    void un_correo_mal_formado_no_llega_a_construirse(String value) {
+    void aMalformedEmailIsNeverBuilt(String value) {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> new EmailAddress(value))
                 .withMessage("El correo electrónico no es válido");
@@ -30,7 +30,7 @@ class EmailAddressTests {
 
     @Test
     @DisplayName("El correo es obligatorio")
-    void el_correo_es_obligatorio() {
+    void theEmailIsRequired() {
         assertThatExceptionOfType(NullPointerException.class)
                 .isThrownBy(() -> new EmailAddress(null))
                 .withMessage("El correo electrónico es obligatorio");

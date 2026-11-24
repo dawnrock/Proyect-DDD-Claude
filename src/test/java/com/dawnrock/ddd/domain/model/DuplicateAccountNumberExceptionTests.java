@@ -11,13 +11,13 @@ class DuplicateAccountNumberExceptionTests {
 
     @Test
     @DisplayName("Un número de cuenta duplicado es una regla de negocio incumplida")
-    void un_numero_de_cuenta_duplicado_es_una_regla_de_negocio_incumplida() {
+    void aDuplicateAccountNumberIsABrokenBusinessRule() {
         assertThat(new DuplicateAccountNumberException(ACCOUNT_NUMBER)).isInstanceOf(DomainException.class);
     }
 
     @Test
     @DisplayName("El mensaje en español incluye el número de cuenta normalizado")
-    void el_mensaje_en_espanol_incluye_el_numero_de_cuenta_normalizado() {
+    void theSpanishMessageIncludesTheNormalisedAccountNumber() {
         assertThat(new DuplicateAccountNumberException(ACCOUNT_NUMBER))
                 .hasMessage("Ya existe una cuenta con el número ES9121000418450200051332");
     }

@@ -20,7 +20,7 @@ class CheckingAccountTests {
 
     @Test
     @DisplayName("Una cuenta no puede abrirse por debajo del depósito inicial mínimo")
-    void una_cuenta_no_puede_abrirse_por_debajo_del_deposito_minimo() {
+    void anAccountCannotBeOpenedBelowTheMinimumDeposit() {
         AccountHolder titular = AccountHolder.register("Ada Lovelace", new TaxId("12345678Z"), CustomerSegment.RETAIL);
         
         assertThatExceptionOfType(InsufficientInitialDepositException.class)
@@ -30,7 +30,7 @@ class CheckingAccountTests {
 
     @Test
     @DisplayName("Al abrir la cuenta, el depósito inicial queda registrado como movimiento aprobado")
-    void al_abrir_la_cuenta_el_deposito_inicial_queda_registrado() {
+    void openingTheAccountRecordsTheInitialDeposit() {
         CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
 
         assertThat(cuenta.currentBalance()).isEqualTo(MonetaryAmount.euros("500.00"));
@@ -41,7 +41,7 @@ class CheckingAccountTests {
 
     @Test
     @DisplayName("Una retirada con saldo suficiente se aprueba y actualiza el saldo")
-    void una_retirada_con_saldo_suficiente_se_aprueba() {
+    void aWithdrawalWithEnoughBalanceIsApproved() {
         CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
         Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("200.00"));
         
@@ -52,7 +52,7 @@ class CheckingAccountTests {
 
     @Test
     @DisplayName("Un cliente minorista no puede dejar la cuenta en descubierto")
-    void un_cliente_minorista_no_puede_dejar_la_cuenta_en_descubierto() {
+    void aRetailCustomerCannotOverdrawTheAccount() {
         CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
         Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("600.00"));
 
@@ -63,7 +63,7 @@ class CheckingAccountTests {
 
     @Test
     @DisplayName("Un cliente de alto patrimonio puede dejar la cuenta en descubierto")
-    void un_cliente_de_alto_patrimonio_puede_dejar_la_cuenta_en_descubierto() {
+    void aHighNetWorthCustomerCanOverdrawTheAccount() {
         CheckingAccount cuenta =
                 TestAccounts.anAccount().segment(CustomerSegment.HIGH_NET_WORTH).initialDeposit("500.00").open();
         Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("900.00"));
@@ -74,7 +74,7 @@ class CheckingAccountTests {
 
     @Test
     @DisplayName("Ningún cliente puede superar el límite de descubierto")
-    void ningun_cliente_puede_superar_el_limite_de_descubierto() {
+    void noCustomerCanExceedTheOverdraftLimit() {
         CheckingAccount cuenta =
                 TestAccounts.anAccount().segment(CustomerSegment.HIGH_NET_WORTH).initialDeposit("500.00").open();
         Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("1600.00"));
@@ -90,7 +90,7 @@ class CheckingAccountTests {
             "HIGH_NET_WORTH, 1500.00, APPROVED, -1000.00",
             "HIGH_NET_WORTH, 1500.01, REJECTED, 500.00"
     })
-    void las_retiradas_en_el_limite_del_descubierto_dependen_del_segmento(
+    void withdrawalsAtTheOverdraftLimitDependOnTheSegment(
             CustomerSegment segmento, String importe, TransactionStatus estado, String saldoFinal) {
         CheckingAccount cuenta = TestAccounts.anAccount().segment(segmento).initialDeposit("500.00").open();
 
@@ -102,7 +102,7 @@ class CheckingAccountTests {
 
     @Test
     @DisplayName("Los importes de las operaciones deben ser positivos")
-    void los_importes_de_las_operaciones_deben_ser_positivos() {
+    void operationAmountsMustBePositive() {
         CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
 
         assertThatExceptionOfType(IllegalArgumentException.class)
@@ -116,7 +116,7 @@ class CheckingAccountTests {
 
     @Test
     @DisplayName("La cuenta sólo opera en la divisa con la que se abrió")
-    void la_cuenta_solo_opera_en_la_divisa_con_la_que_se_abrio() {
+    void theAccountOnlyOperatesInItsOpeningCurrency() {
         CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
         MonetaryAmount dolares = new MonetaryAmount(new BigDecimal("100.00"), Currency.getInstance("USD"));
         assertThatExceptionOfType(CurrencyMismatchException.class)
@@ -125,7 +125,7 @@ class CheckingAccountTests {
 
     @Test
     @DisplayName("Los movimientos no pueden manipularse desde fuera del agregado")
-    void los_movimientos_no_pueden_manipularse_desde_fuera_del_agregado() {
+    void transactionsCannotBeModifiedOutsideTheAggregate() {
         CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
 
         assertThatExceptionOfType(UnsupportedOperationException.class)
@@ -135,7 +135,7 @@ class CheckingAccountTests {
 
     @Test
     @DisplayName("Un movimiento ya resuelto no puede volver a resolverse")
-    void un_movimiento_ya_resuelto_no_puede_volver_a_resolverse() {
+    void aResolvedTransactionCannotBeResolvedAgain() {
         CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
 
         Transaction deposito = cuenta.transactions().get(0);
@@ -151,7 +151,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Abrir una cuenta registra el evento de cuenta abierta seguido del ingreso del depósito inicial")
-        void abrir_una_cuenta_registra_cuenta_abierta_y_el_ingreso_del_deposito_inicial() {
+        void openingAnAccountRecordsAccountOpenedAndTheInitialDeposit() {
             AccountHolder titular = AccountHolder.register("Ada Lovelace", new TaxId("12345678Z"), CustomerSegment.RETAIL);
 
             CheckingAccount cuenta = CheckingAccount.open(IBAN, titular, MonetaryAmount.euros("500.00"));
@@ -165,7 +165,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Un ingreso registra el evento de dinero ingresado con su movimiento")
-        void un_ingreso_registra_el_evento_de_dinero_ingresado_con_su_movimiento() {
+        void aDepositRecordsMoneyDepositedWithItsTransaction() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
             cuenta.pullDomainEvents();
 
@@ -177,7 +177,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Una retirada aprobada registra el evento de dinero retirado")
-        void una_retirada_aprobada_registra_el_evento_de_dinero_retirado() {
+        void anApprovedWithdrawalRecordsMoneyWithdrawn() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
             cuenta.pullDomainEvents();
 
@@ -189,7 +189,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Una retirada rechazada registra el evento de retirada rechazada y no el de dinero retirado")
-        void una_retirada_rechazada_registra_el_evento_de_retirada_rechazada() {
+        void aRejectedWithdrawalRecordsWithdrawalRejected() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
             cuenta.pullDomainEvents();
 
@@ -201,7 +201,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Recoger los eventos los vacía: una segunda recogida no devuelve nada")
-        void recoger_los_eventos_los_vacia() {
+        void pullingTheEventsEmptiesThem() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
             cuenta.deposit(MonetaryAmount.euros("25.00"));
 
@@ -211,7 +211,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Los eventos recogidos no pueden modificarse desde fuera del agregado")
-        void los_eventos_recogidos_no_pueden_modificarse() {
+        void pulledEventsCannotBeModified() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
 
             assertThatExceptionOfType(UnsupportedOperationException.class)
@@ -227,7 +227,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Una retirada para una transferencia aprobada guarda la cuenta de destino")
-        void una_retirada_de_transferencia_aprobada_guarda_el_destino() {
+        void anApprovedTransferWithdrawalKeepsTheDestination() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
 
             Transaction retirada = cuenta.tryWithdrawForTransfer(MonetaryAmount.euros("200.00"), OTHER_IBAN);
@@ -240,7 +240,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Una retirada para una transferencia rechazada también guarda la cuenta de destino")
-        void una_retirada_de_transferencia_rechazada_guarda_el_destino() {
+        void aRejectedTransferWithdrawalKeepsTheDestination() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
 
             Transaction retirada = cuenta.tryWithdrawForTransfer(MonetaryAmount.euros("600.00"), OTHER_IBAN);
@@ -252,7 +252,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Un ingreso de una transferencia guarda la cuenta de origen")
-        void un_ingreso_de_transferencia_guarda_el_origen() {
+        void aTransferDepositKeepsTheSource() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
 
             Transaction ingreso = cuenta.depositFromTransfer(MonetaryAmount.euros("200.00"), OTHER_IBAN);
@@ -265,7 +265,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Los movimientos de transferencia exigen una cuenta de contrapartida")
-        void los_movimientos_de_transferencia_exigen_contrapartida() {
+        void transferTransactionsRequireACounterpart() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
 
             assertThatExceptionOfType(NullPointerException.class)
@@ -276,7 +276,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Una cuenta no puede ser su propia contrapartida y no registra nada (R17)")
-        void una_cuenta_no_puede_ser_su_propia_contrapartida() {
+        void anAccountCannotBeItsOwnCounterpart() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
             cuenta.pullDomainEvents();
             AccountNumber propia = cuenta.accountNumber();
@@ -293,7 +293,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Un ingreso o una retirada normales y el depósito inicial no tienen contrapartida")
-        void los_movimientos_normales_no_tienen_contrapartida() {
+        void regularTransactionsHaveNoCounterpart() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
             cuenta.deposit(MonetaryAmount.euros("10.00"));
             cuenta.tryWithdraw(MonetaryAmount.euros("5.00"));
@@ -308,7 +308,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Un ingreso que lleva el saldo al patrimonio mínimo convierte al titular en alto patrimonio")
-        void un_ingreso_que_alcanza_el_patrimonio_minimo_promociona_al_titular() {
+        void aDepositReachingTheMinimumWealthPromotesTheHolder() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("99000.00").open();
 
             cuenta.deposit(MonetaryAmount.euros("1000.00"));
@@ -318,7 +318,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Un céntimo por debajo del patrimonio mínimo el titular sigue siendo minorista")
-        void un_centimo_por_debajo_del_patrimonio_minimo_el_titular_sigue_siendo_minorista() {
+        void oneCentBelowTheMinimumWealthTheHolderStaysRetail() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("99000.00").open();
 
             cuenta.deposit(MonetaryAmount.euros("999.99"));
@@ -328,7 +328,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Una cuenta abierta con el patrimonio mínimo por un titular minorista nace como alto patrimonio")
-        void una_cuenta_abierta_con_el_patrimonio_minimo_nace_como_alto_patrimonio() {
+        void anAccountOpenedWithTheMinimumWealthStartsAsHighNetWorth() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("100000.00").open();
 
             assertThat(cuenta.primaryHolder().isHighNetWorth()).isTrue();
@@ -345,7 +345,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Una retirada aprobada que deja una cuenta de alto patrimonio bajo el mínimo programa la revisión a un mes")
-        void una_retirada_que_deja_la_cuenta_bajo_el_minimo_programa_la_revision_a_un_mes() {
+        void aWithdrawalBelowTheMinimumSchedulesTheReviewInOneMonth() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
 
             Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
@@ -356,7 +356,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Una segunda retirada bajo el mínimo no mueve la revisión programada")
-        void una_segunda_retirada_bajo_el_minimo_no_mueve_la_revision() {
+        void aSecondWithdrawalBelowTheMinimumDoesNotMoveTheReview() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
             Transaction primera = cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
 
@@ -367,7 +367,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Un ingreso que recupera el patrimonio mínimo cancela la revisión programada")
-        void un_ingreso_que_recupera_el_patrimonio_minimo_cancela_la_revision() {
+        void aDepositRestoringTheMinimumWealthCancelsTheReview() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
             cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
 
@@ -378,7 +378,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Una retirada rechazada no programa ninguna revisión")
-        void una_retirada_rechazada_no_programa_ninguna_revision() {
+        void aRejectedWithdrawalSchedulesNoReview() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("100000.00").open();
 
             Transaction retirada = cuenta.tryWithdraw(MonetaryAmount.euros("200000.00"));
@@ -389,7 +389,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Una cuenta minorista no programa ninguna revisión al retirar")
-        void una_cuenta_minorista_no_programa_ninguna_revision_al_retirar() {
+        void aRetailAccountSchedulesNoReviewOnWithdrawal() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("500.00").open();
 
             cuenta.tryWithdraw(MonetaryAmount.euros("100.00"));
@@ -399,7 +399,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Un titular de alto patrimonio que abre bajo el mínimo tiene su primera revisión a los seis meses")
-        void un_titular_de_alto_patrimonio_que_abre_bajo_el_minimo_se_revisa_a_los_seis_meses() {
+        void aHighNetWorthHolderOpeningBelowTheMinimumIsReviewedAfterSixMonths() {
             CheckingAccount cuenta = TestAccounts.anAccount()
                     .segment(CustomerSegment.HIGH_NET_WORTH).initialDeposit("5000.00").open();
 
@@ -409,7 +409,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Una retirada no adelanta la primera revisión semestral")
-        void una_retirada_no_adelanta_la_primera_revision_semestral() {
+        void aWithdrawalDoesNotBringForwardTheFirstSixMonthReview() {
             CheckingAccount cuenta = TestAccounts.anAccount()
                     .segment(CustomerSegment.HIGH_NET_WORTH).initialDeposit("5000.00").open();
             Instant apertura = cuenta.transactions().get(0).occurredOn();
@@ -426,7 +426,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("La promoción a alto patrimonio registra un evento con la cuenta, el titular y el nuevo segmento")
-        void la_promocion_registra_un_evento_de_cambio_de_segmento() {
+        void thePromotionRecordsASegmentChangedEvent() {
             CheckingAccount cuenta = TestAccounts.anAccount().holderName("Ada Lovelace").initialDeposit("99000.00").open();
             cuenta.pullDomainEvents();
 
@@ -439,7 +439,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("La vuelta a minorista registra un evento con el momento de la revisión")
-        void la_vuelta_a_minorista_registra_un_evento_de_cambio_de_segmento() {
+        void theDemotionToRetailRecordsASegmentChangedEvent() {
             CheckingAccount cuenta = TestAccounts.anAccount().holderName("Ada Lovelace").initialDeposit("150000.00").open();
             cuenta.tryWithdraw(MonetaryAmount.euros("60000.00"));
             Instant revision = cuenta.nextSegmentReview().orElseThrow();
@@ -453,7 +453,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Un ingreso a un titular que ya es de alto patrimonio no registra ningún cambio de segmento")
-        void un_ingreso_a_un_titular_que_ya_es_de_alto_patrimonio_no_registra_cambio_de_segmento() {
+        void aDepositForAnAlreadyHighNetWorthHolderRecordsNoSegmentChange() {
             CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("150000.00").open();
             cuenta.pullDomainEvents();
 
@@ -472,7 +472,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Una cuenta acepta otro número de Mon-A Bank")
-        void una_cuenta_acepta_otro_numero_de_mon_a_bank() {
+        void anAccountAcceptsAnotherMonABankNumber() {
             CheckingAccount cuenta = TestAccounts.anAccount().accountNumber(MON_A_BANK_IBAN.value()).open();
 
             cuenta.reassignAccountNumber(OTHER_MON_A_BANK_IBAN);
@@ -482,7 +482,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Una cuenta no acepta un número que no es de Mon-A Bank")
-        void una_cuenta_no_acepta_un_numero_que_no_es_de_mon_a_bank() {
+        void anAccountRejectsANumberThatIsNotMonABank() {
             CheckingAccount cuenta = TestAccounts.anAccount().accountNumber(MON_A_BANK_IBAN.value()).open();
 
             assertThatExceptionOfType(IllegalArgumentException.class)
@@ -493,7 +493,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("Una cuenta no acepta el mismo número que ya tiene")
-        void una_cuenta_no_acepta_el_mismo_numero_que_ya_tiene() {
+        void anAccountRejectsTheNumberItAlreadyHas() {
             CheckingAccount cuenta = TestAccounts.anAccount().accountNumber(MON_A_BANK_IBAN.value()).open();
 
             assertThatExceptionOfType(IllegalArgumentException.class)
@@ -503,7 +503,7 @@ class CheckingAccountTests {
 
         @Test
         @DisplayName("El nuevo número es obligatorio")
-        void el_nuevo_numero_es_obligatorio() {
+        void theNewNumberIsRequired() {
             CheckingAccount cuenta = TestAccounts.anAccount().accountNumber(MON_A_BANK_IBAN.value()).open();
 
             assertThatExceptionOfType(NullPointerException.class)
