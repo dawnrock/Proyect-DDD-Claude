@@ -65,8 +65,12 @@ if (process.argv.length >= 4) {
   headPath = join(root, contractPath);
 }
 
-const base = readFileSync(basePath, 'utf8');
-const head = readFileSync(headPath, 'utf8');
+// Finales de línea a LF (#159): en Windows, con core.autocrlf=true, la copia de trabajo tiene CRLF mientras que git show
+// devuelve el contrato base con LF. Sin normalizar, `.` no casa con `\r` al buscar info.version y un contrato sin cambios
+// parecería distinto del de la base.
+const readContract = (path) => readFileSync(path, 'utf8').replace(/\r\n?/g, '\n');
+const base = readContract(basePath);
+const head = readContract(headPath);
 if (base === head) {
   console.log('✅ El contrato no cambia: no hace falta subir la versión.');
   process.exit(0);

@@ -39,6 +39,9 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
         run: git diff --name-only "origin/$BASE_REF...HEAD" | node scripts/check-project-status.mjs -
 
+      - name: Tests de los scripts (node:test)
+        run: node --test "scripts/*.test.mjs"
+
       - name: Reglas del dominio (Lombok / Immutables / dependencias)
         run: node .claude/skills/ddd-building-block/scripts/check-domain.mjs
 
