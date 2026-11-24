@@ -1,4 +1,4 @@
-package com.pronoide.ddd;
+package com.dawnrock.ddd;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

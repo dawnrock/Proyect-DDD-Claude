@@ -1,4 +1,4 @@
-package com.pronoide.ddd.domain.model;
+package com.dawnrock.ddd.domain.model;
 
 public enum CustomerSegment {
     RETAIL,
