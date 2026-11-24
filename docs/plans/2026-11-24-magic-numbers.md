@@ -120,7 +120,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
 - **Acceptance criteria:**
   - [x] `WebFormatTests` green without changes. (sabotage: `VISIBLE_IBAN_CHARACTERS = 3` makes `WebFormatTests` fail; reverted)
 
-### [ ] T8 — Final check and project status (~10 min)
+### [x] T8 — Final check and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `docs/ia/historial.md`
@@ -130,7 +130,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
   2. `./mvnw verify`, `check-domain.mjs`, and start with the `demo` profile to check that the demo IBANs and the health check are unchanged.
   3. Project status and a row in the history.
 - **Acceptance criteria:**
-  - [ ] 0 `MagicNumber` warnings in `src/main`; the number of tests is the baseline plus the new `DurationsTests`.
+  - [x] 0 `MagicNumber` warnings in `src/main`; the number of tests is the baseline plus the new `DurationsTests`. (Checkstyle: 0 `MagicNumber` in `src/main`; `./mvnw verify` green with 1,031 test cases = 1,023 + 8 of `DurationsTests`; `check-domain.mjs` OK; with `demo` the health check is UP and the demo IBANs are the same)
 
 ## Global acceptance criteria
 
