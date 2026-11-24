@@ -21,6 +21,9 @@ class DatabaseAccountNumberSequence implements AccountNumberSequence {
     @Override
     public AccountNumber next() {
         Long number = jdbc.queryForObject("select nextval('account_number_seq')", Long.class);
+        if (number == null) {
+            throw new IllegalStateException("La secuencia account_number_seq no ha devuelto ningún número de cuenta");
+        }
         return MonABankIbans.forAccount(number);
     }
 }

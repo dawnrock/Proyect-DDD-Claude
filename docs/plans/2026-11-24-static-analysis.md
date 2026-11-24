@@ -99,7 +99,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 - **Acceptance criteria:**
   - [x] The default tests of both properties pass before and after the change. (characterization test `LoginAttemptsTests.defaultValues`; sabotage: changing a default fails it; reverted)
 
-### [ ] T6 — `DatabaseAccountNumberSequence` with no null path (~5 min)
+### [x] T6 — `DatabaseAccountNumberSequence` with no null path (~5 min)
 
 - **Layer:** adapter.out
 - **Files:** `adapter/out/persistence/DatabaseAccountNumberSequence.java` and its test
@@ -107,7 +107,7 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 - **What to do:**
   1. `queryForObject` is declared as nullable. Turn a `null` into a clear error (`Objects.requireNonNull(number, "La secuencia de números de cuenta no devolvió ningún valor")` or `IllegalStateException`), following ch. 17 of the course: do not let `null` in.
 - **Acceptance criteria:**
-  - [ ] Existing persistence tests green.
+  - [x] Existing persistence tests green. (red: `NullPointerException` on unboxing; green: `IllegalStateException` naming the sequence; new test `aSequenceReturningNothingFailsWithAClearError`)
 
 ### [ ] T7 — `JwtSupport`: one `SecureRandom` (~5 min)
 
