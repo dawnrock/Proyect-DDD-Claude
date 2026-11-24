@@ -10,6 +10,9 @@ public record AccountNumber(String value) {
     /** Entidad (9999, inventada) y oficina (0001) de Mon-A Bank, tras {@code ES} y los dígitos de control. */
     private static final String MON_A_BANK_PREFIX = "99990001";
 
+    /** Posición donde empieza el BBAN (entidad, oficina, control y cuenta): tras {@code ES} y los dos dígitos de control. */
+    private static final int BBAN_OFFSET = 4;
+
     public AccountNumber {
         Objects.requireNonNull(value, "El número de cuenta es obligatorio");
         value = value.replace(" ", "").toUpperCase();
@@ -20,7 +23,7 @@ public record AccountNumber(String value) {
 
     /** Si lo ha generado Mon-A Bank: entidad {@code 9999} y oficina {@code 0001} (R31, R32). */
     public boolean isMonABank() {
-        return value.startsWith(MON_A_BANK_PREFIX, 4);
+        return value.startsWith(MON_A_BANK_PREFIX, BBAN_OFFSET);
     }
 
     @Override

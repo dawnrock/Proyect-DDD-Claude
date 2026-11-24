@@ -27,6 +27,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.dawnrock.ddd.adapter.in.ClientIpResolver;
 import com.dawnrock.ddd.adapter.in.CustomerRegistration;
+import com.dawnrock.ddd.adapter.in.Durations;
 import com.dawnrock.ddd.adapter.in.SignUpLimit;
 import com.dawnrock.ddd.adapter.in.TooManySignUpsException;
 import com.dawnrock.ddd.adapter.in.UsernameTakenException;
@@ -198,7 +199,7 @@ public class SignUpController {
 
     /** Aviso del límite de altas (#131, ADR 0018) con los minutos que faltan, redondeados hacia arriba. */
     static String tooManySignUps(Duration retryAfter) {
-        long minutes = Math.max(1, (retryAfter.toSeconds() + 59) / 60);
+        long minutes = Durations.minutesRoundedUp(retryAfter);
         return "Demasiadas altas de clientes en este momento. Inténtalo de nuevo dentro de %d %s."
                 .formatted(minutes, minutes == 1 ? "minuto" : "minutos");
     }

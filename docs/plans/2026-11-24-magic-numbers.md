@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-24
-- **Status:** draft
-- **Total estimate:** ~55 min (8 tasks)
+- **Status:** done
+- **Total estimate:** ~60 min (9 tasks)
 
 ## Goal
 
@@ -43,7 +43,7 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
 
 ## Tasks
 
-### [ ] T1 — Baseline (~5 min)
+### [x] T1 — Baseline (~5 min)
 
 - **Layer:** tests
 - **Files:** — (scratchpad only)
@@ -53,9 +53,9 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
   2. Run Checkstyle `MagicNumber` on `src/main` in a scratch copy: 19 warnings, with file and line.
   3. Check that each warning's behaviour is covered by the tests listed in *Safety net*.
 - **Acceptance criteria:**
-  - [ ] Baseline recorded: 19 warnings, each one mapped to the tests that cover it.
+  - [x] Baseline recorded: 19 warnings, each one mapped to the tests that cover it. (19 warnings confirmed on the code merged in #169; 1,023 test cases; each warning is covered by the tests of *Safety net*)
 
-### [ ] T2 — `TaxId`: control letter position and modulus (~5 min)
+### [x] T2 — `TaxId`: control letter position and modulus (~5 min)
 
 - **Layer:** domain
 - **Files:** `src/main/java/com/dawnrock/ddd/domain/model/TaxId.java`
@@ -64,9 +64,9 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
   1. `private static final int CONTROL_LETTER_POSITION = 8;` used in `charAt` and in `substring(1, CONTROL_LETTER_POSITION)`.
   2. `% 23` → `% CONTROL_LETTERS.length()`: the modulus is the number of letters in the table, so no extra constant is needed.
 - **Acceptance criteria:**
-  - [ ] `TaxIdTests` green without changes; `check-domain.mjs` without errors.
+  - [x] `TaxIdTests` green without changes; `check-domain.mjs` without errors. (sabotage: `CONTROL_LETTER_POSITION = 7` makes 9 `TaxIdTests` fail; reverted)
 
-### [ ] T3 — `AccountNumber`: where the BBAN starts (~5 min)
+### [x] T3 — `AccountNumber`: where the BBAN starts (~5 min)
 
 - **Layer:** domain
 - **Files:** `src/main/java/com/dawnrock/ddd/domain/model/AccountNumber.java`, `docs/dominio/glosario.md`
@@ -75,9 +75,9 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
   1. `private static final int BBAN_OFFSET = 4;` with a Javadoc (`ES` and the two IBAN check digits), used in `isMonABank()`.
   2. Add *BBAN* to the glossary if the name is kept.
 - **Acceptance criteria:**
-  - [ ] `AccountNumberTests` green without changes.
+  - [x] `AccountNumberTests` green without changes. (*BBAN* added to the glossary; sabotage: `BBAN_OFFSET = 3` makes `AccountNumberTests` fail; reverted)
 
-### [ ] T4 — `MonABankIbans`: CCC and IBAN moduli (~5 min)
+### [x] T4 — `MonABankIbans`: CCC and IBAN moduli (~5 min)
 
 - **Layer:** adapter.out
 - **Files:** `src/main/java/com/dawnrock/ddd/adapter/out/persistence/MonABankIbans.java`
@@ -86,9 +86,9 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
   1. `CCC_MODULUS = 11`: `digit = CCC_MODULUS - sum % CCC_MODULUS`; then `CCC_MODULUS → 0` and `CCC_MODULUS - 1 → 1`. `-1` is ignored by the rule; if the ternary chain still reads badly, extract it to a method with a name.
   2. `IBAN_MODULUS = BigInteger.valueOf(97)` and `IBAN_CHECK_BASE = 98`, keeping the ISO 13616 Javadoc.
 - **Acceptance criteria:**
-  - [ ] `MonABankIbansTests` and `InMemoryAccountNumberSequenceTests` green without changes; the demo IBANs (`ES8099990001450000000001`…) are the same.
+  - [x] `MonABankIbansTests` and `InMemoryAccountNumberSequenceTests` green without changes; the demo IBANs (`ES8099990001450000000001`…) are the same. (the "10 → 1, 11 → 0" rule went to a named method, `asSingleDigit`, as the plan's risk suggested; sabotages: `IBAN_CHECK_BASE = 97` fails 4 tests and dropping the "10 → 1" rule fails 10; reverted; the demo IBAN test of `MonABankIbansTests` is green)
 
-### [ ] T5 — `Durations`: waiting times rounded up (~10 min)
+### [x] T5 — `Durations`: waiting times rounded up (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `src/main/java/com/dawnrock/ddd/adapter/in/Durations.java`, `src/test/java/com/dawnrock/ddd/adapter/in/DurationsTests.java`
@@ -97,9 +97,9 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
   1. Red: tests (with the convention from #166) for `minutesRoundedUp`: exact minutes (30 min → 30), one second over (30 min 1 s → 31), under a minute (20 s → 1) and zero (→ 1). For `secondsRoundedUp`: exact (91 s → 91), one millisecond over (90.001 s → 91), under a second (→ 1). Use `@ParameterizedTest` + `@CsvSource`, as in `src/test/CLAUDE.md`.
   2. Green: `final class Durations` with a private constructor and the two static methods, without numeric literals other than 1.
 - **Acceptance criteria:**
-  - [ ] `DurationsTests` green; ArchUnit green (the class lives in `adapter.in`).
+  - [x] `DurationsTests` green; ArchUnit green (the class lives in `adapter.in`). (red: `Durations` did not exist; green: 8 cases; total 1,031 = 1,023 + 8)
 
-### [ ] T6 — Use `Durations` in the controllers and the REST handler (~5 min)
+### [x] T6 — Use `Durations` in the controllers and the REST handler (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/web/LoginController.java`, `adapter/in/web/SignUpController.java`, `adapter/in/rest/RestExceptionHandler.java`
@@ -108,9 +108,9 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
   1. `Math.max(1, (x.toSeconds() + 59) / 60)` → `Durations.minutesRoundedUp(x)` in `LoginController` and `SignUpController.tooManySignUps`.
   2. `Math.max(1, (retryAfter.toMillis() + 999) / 1000)` → `Durations.secondsRoundedUp(retryAfter)` in `RestExceptionHandler.tooManyRequests`.
 - **Acceptance criteria:**
-  - [ ] `LoginControllerTests`, `SignUpControllerTests`, `CustomerControllerTests` and `TokenControllerTests` green without changes.
+  - [x] `LoginControllerTests`, `SignUpControllerTests`, `CustomerControllerTests` and `TokenControllerTests` green without changes. (8 + 43 + 21 + 8 cases green, unchanged)
 
-### [ ] T7 — `WebFormat.maskedIban` (~5 min)
+### [x] T7 — `WebFormat.maskedIban` (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `src/main/java/com/dawnrock/ddd/adapter/in/web/WebFormat.java`
@@ -118,9 +118,9 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
 - **What to do:**
   1. `private static final int VISIBLE_IBAN_CHARACTERS = 4;` for the first and last characters that stay visible. The minimum length becomes `2 * VISIBLE_IBAN_CHARACTERS` (`2` is ignored by the rule and says what it means: both ends).
 - **Acceptance criteria:**
-  - [ ] `WebFormatTests` green without changes.
+  - [x] `WebFormatTests` green without changes. (sabotage: `VISIBLE_IBAN_CHARACTERS = 3` makes `WebFormatTests` fail; reverted)
 
-### [ ] T8 — Final check and project status (~10 min)
+### [x] T8 — Final check and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `docs/ia/historial.md`
@@ -130,29 +130,41 @@ Checkstyle's `MagicNumber` rule (Clean Code course, ch. 1 "Searchable names" and
   2. `./mvnw verify`, `check-domain.mjs`, and start with the `demo` profile to check that the demo IBANs and the health check are unchanged.
   3. Project status and a row in the history.
 - **Acceptance criteria:**
-  - [ ] 0 `MagicNumber` warnings in `src/main`; the number of tests is the baseline plus the new `DurationsTests`.
+  - [x] 0 `MagicNumber` warnings in `src/main`; the number of tests is the baseline plus the new `DurationsTests`. (Checkstyle: 0 `MagicNumber` in `src/main`; `./mvnw verify` green with 1,031 test cases = 1,023 + 8 of `DurationsTests`; `check-domain.mjs` OK; with `demo` the health check is UP and the demo IBANs are the same)
+
+### [x] T9 — Fixes from the review (~5 min)
+
+- **Layer:** adapter.in · adapter.out · docs
+- **Files:** `adapter/in/DurationsTests.java`, `adapter/out/persistence/MonABankIbans.java`, `docs/ia/pendientes.md`
+- **Depends on:** T8
+- **What to do:**
+  1. *Deviation found by `revisor-ddd`:* the old formulas truncated sub-second (minutes) or sub-millisecond (seconds) fractions before rounding up, so `PT30M0.5S` gave 30 minutes and `PT1.0005S` 1 second; `Durations` rounds up for real (31 and 2), which is what the old Javadoc already promised. Kept on purpose (a fraction of a second of difference) and pinned with cases `PT30M0.5S → 31`, `PT1.0005S → 2` and a negative duration (`PT-5S → 1`).
+  2. `asSingleDigit` names its parameter `rawCheckDigit` and its Javadoc says the value comes from `11 - remainder`, so the modulus and the value are not confused.
+  3. `pendientes.md`: numbers hidden where Checkstyle does not look (`"142800"`, the lengths inside the IBAN and NIF regexes).
+- **Acceptance criteria:**
+  - [x] `DurationsTests` 12 cases green; `./mvnw verify` green with 1,035 test cases.
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] Checkstyle `MagicNumber` gives 0 warnings in `src/main`.
-- [ ] The time conversions of the two controllers and the REST handler use a single named method.
-- [ ] The existing tests pass without changes: same IBANs, NIF validation, masking, minutes and `Retry-After`.
+- [x] Checkstyle `MagicNumber` gives 0 warnings in `src/main`.
+- [x] The time conversions of the two controllers and the REST handler use a single named method.
+- [x] The existing tests pass without changes: same IBANs, NIF validation, masking, minutes and `Retry-After` (except the sub-second rounding of T9, more faithful to "rounded up").
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (English camelCase + `@DisplayName` in Spanish, after #166).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: n/a (`Retry-After` keeps its value and format).
-- [ ] Any new business term is in `docs/dominio/glosario.md` (*BBAN*, if used).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (English camelCase + `@DisplayName` in Spanish, after #166).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: n/a (`Retry-After` keeps its value and format).
+- [x] Any new business term is in `docs/dominio/glosario.md` (*BBAN*, if used).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

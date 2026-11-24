@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.dawnrock.ddd.adapter.in.Durations;
 import com.dawnrock.ddd.adapter.in.LoginAttemptsProperties;
 
 /**
@@ -24,7 +25,7 @@ public class LoginController {
 
     public LoginController(LoginAttemptsProperties loginAttempts) {
         Duration lockout = loginAttempts.lockout();
-        this.lockoutMinutes = Math.max(1, (lockout.toSeconds() + 59) / 60);
+        this.lockoutMinutes = Durations.minutesRoundedUp(lockout);
     }
 
     @GetMapping("/login")

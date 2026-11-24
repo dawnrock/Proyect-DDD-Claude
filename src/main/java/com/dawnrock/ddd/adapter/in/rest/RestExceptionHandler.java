@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.dawnrock.ddd.adapter.in.Durations;
 import com.dawnrock.ddd.adapter.in.TooManyLoginAttemptsException;
 import com.dawnrock.ddd.adapter.in.TooManySignUpsException;
 import com.dawnrock.ddd.adapter.in.UsernameTakenException;
@@ -87,7 +88,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     /** 429 con {@code Retry-After} en segundos enteros, redondeado hacia arriba y nunca menos de uno. */
     private static ResponseEntity<ProblemDetail> tooManyRequests(Duration retryAfter, String title, String detail) {
-        long seconds = Math.max(1, (retryAfter.toMillis() + 999) / 1000);
+        long seconds = Durations.secondsRoundedUp(retryAfter);
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                 .header(HttpHeaders.RETRY_AFTER, String.valueOf(seconds))
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)

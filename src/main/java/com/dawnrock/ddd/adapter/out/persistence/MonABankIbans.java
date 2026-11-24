@@ -16,6 +16,12 @@ final class MonABankIbans {
     private static final String BRANCH = "0001";
     private static final int[] CCC_WEIGHTS = {1, 2, 4, 8, 5, 10, 9, 7, 3, 6};
     private static final long MAX_ACCOUNT = 9_999_999_999L;
+    /** Módulo del dígito de control del CCC. */
+    private static final int CCC_MODULUS = 11;
+    /** Módulo de los dígitos de control del IBAN (ISO 13616). */
+    private static final BigInteger IBAN_MODULUS = BigInteger.valueOf(97);
+    /** Los dígitos de control del IBAN son esta base menos el resto módulo 97. */
+    private static final int IBAN_CHECK_BASE = 98;
 
     private MonABankIbans() {
     }
@@ -37,13 +43,23 @@ final class MonABankIbans {
         for (int i = 0; i < CCC_WEIGHTS.length; i++) {
             sum += (tenDigits.charAt(i) - '0') * CCC_WEIGHTS[i];
         }
-        int digit = 11 - sum % 11;
-        return String.valueOf(digit == 11 ? 0 : digit == 10 ? 1 : digit);
+        return String.valueOf(asSingleDigit(CCC_MODULUS - sum % CCC_MODULUS));
+    }
+
+    /**
+     * El dígito de control del CCC es de una cifra. El valor sin ajustar ({@code 11 - resto}) va de 1 a 11: el 11 se
+     * escribe 0 y el 10 se escribe 1.
+     */
+    private static int asSingleDigit(int rawCheckDigit) {
+        if (rawCheckDigit == CCC_MODULUS) {
+            return 0;
+        }
+        return rawCheckDigit == CCC_MODULUS - 1 ? 1 : rawCheckDigit;
     }
 
     /** Dígitos de control del IBAN: 98 menos el resto módulo 97 del BBAN seguido de {@code ES00} en cifras. */
     private static String ibanCheckDigits(String bban) {
         BigInteger number = new BigInteger(bban + "142800");
-        return "%02d".formatted(98 - number.mod(BigInteger.valueOf(97)).intValue());
+        return "%02d".formatted(IBAN_CHECK_BASE - number.mod(IBAN_MODULUS).intValue());
     }
 }
