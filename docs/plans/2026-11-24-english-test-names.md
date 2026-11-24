@@ -56,7 +56,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **Acceptance criteria:**
   - [x] Baseline saved: total tests and per-class counts (84 classes, 1,004 tests, 0 skipped; Checkstyle 792 `MethodName` + 21 `ConstantName`).
 
-### [ ] T2 — New convention in `src/test/CLAUDE.md` and the templates (~5 min)
+### [x] T2 — New convention in `src/test/CLAUDE.md` and the templates (~5 min)
 
 - **Layer:** docs
 - **Files:** `src/test/CLAUDE.md`, `.claude/skills/ddd-building-block/templates/BuildingBlockTests.java.template`, `.claude/skills/plan-feature/assets/template.md`
@@ -66,7 +66,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
   2. Template `{{frase_en_snake_case}}` → a camelCase English placeholder, and the fixed criterion of `plan-feature` ("`snake_case` + `@DisplayName` in Spanish" → "English camelCase + `@DisplayName` in Spanish").
   3. Check that the agents (`backend-dev`, `web-dev`, `revisor-ddd`) and the other skills do not repeat the old convention (a grep found none on 2026-11-24).
 - **Acceptance criteria:**
-  - [ ] `grep -rn "snake_case" .claude src/test/CLAUDE.md` only finds references to `UPPER_SNAKE_CASE` constants.
+  - [x] `grep -rn "snake_case" .claude src/test/CLAUDE.md` only finds references to `UPPER_SNAKE_CASE` constants (none left; agents and other skills did not mention the convention).
 
 ### [ ] T3 — `domain.model` (~10 min)
 
