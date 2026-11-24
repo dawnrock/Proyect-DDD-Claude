@@ -192,7 +192,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **Acceptance criteria:**
   - [x] Every `Class#method` in the glossary resolves to an existing test method. (62 distinct references, including 2 to `*Contract` interfaces, all resolve; the `CLAUDE.md` example `CheckingAccountTests#aRetail*` was run)
 
-### [ ] T15 — Final check and project status (~5 min)
+### [x] T15 — Final check and project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `docs/ia/decisiones.md`, `docs/ia/historial.md`
@@ -202,7 +202,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
   2. Run Checkstyle again in the scratch copy: 0 `MethodName` and 0 `ConstantName`.
   3. `decisiones.md`: test naming convention (English camelCase + Spanish `@DisplayName`, ArchUnit rules as methods, #166). Project status and a row in the history.
 - **Acceptance criteria:**
-  - [ ] Same number of tests as the baseline; Checkstyle naming rules give 0 warnings in `src/test`.
+  - [x] Same number of tests as the baseline; Checkstyle naming rules give 0 warnings in `src/test`. (1,023 test cases, class by class the same as `origin/Hexagonal`; Checkstyle on a copy: 0 `MethodName`, 0 `ConstantName`, only the 267 `MagicNumber` left for #167 and #168)
 
 ## Global acceptance criteria
 
