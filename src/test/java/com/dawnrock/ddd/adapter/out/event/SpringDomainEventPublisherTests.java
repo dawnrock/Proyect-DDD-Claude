@@ -23,7 +23,7 @@ class SpringDomainEventPublisherTests {
 
     @Test
     @DisplayName("Entrega a Spring cada evento de dominio, en el orden en que ocurrieron")
-    void entrega_a_spring_cada_evento_de_dominio_en_orden() {
+    void deliversEachDomainEventToSpringInOrder() {
         UUID accountId = UUID.randomUUID();
         MoneyDeposited ingreso =
                 new MoneyDeposited(accountId, UUID.randomUUID(), MonetaryAmount.euros("50.00"), Instant.now());

@@ -26,7 +26,7 @@ class InMemoryAccountNumberSequenceTests extends AccountNumberSequenceContract {
 
     @Test
     @DisplayName("El IBAN generado es español y lleva la entidad 9999 de Mon-A Bank y la oficina 0001")
-    void el_iban_generado_lleva_banco_y_oficina() {
+    void theGeneratedIbanCarriesBankAndBranch() {
         String iban = sequence.next().value();
 
         assertThat(iban).startsWith("ES").hasSize(24);
@@ -36,7 +36,7 @@ class InMemoryAccountNumberSequenceTests extends AccountNumberSequenceContract {
 
     @Test
     @DisplayName("El IBAN generado lleva los dígitos de control nacionales correctos")
-    void el_iban_generado_lleva_los_digitos_de_control_nacionales_correctos() {
+    void theGeneratedIbanCarriesTheCorrectNationalCheckDigits() {
         IntStream.range(0, 50).forEach(i -> {
             String iban = sequence.next().value();
             String entityAndBranch = iban.substring(4, 12);
@@ -49,13 +49,13 @@ class InMemoryAccountNumberSequenceTests extends AccountNumberSequenceContract {
 
     @Test
     @DisplayName("El cálculo de control coincide con un IBAN real conocido (ES91 2100 0418 4502 0005 1332)")
-    void el_calculo_de_control_coincide_con_un_iban_conocido() {
+    void theCheckCalculationMatchesAKnownIban() {
         assertThat(controlDigit("0021000418") + controlDigit("0200051332")).isEqualTo("45");
     }
 
     @Test
     @DisplayName("Con hilos concurrentes no se repite ningún número")
-    void con_hilos_concurrentes_no_se_repite_ningun_numero() {
+    void concurrentThreadsNeverRepeatANumber() {
         Set<AccountNumber> generated = ConcurrentHashMap.newKeySet();
         IntStream.range(0, 500).parallel().forEach(i -> generated.add(sequence.next()));
 

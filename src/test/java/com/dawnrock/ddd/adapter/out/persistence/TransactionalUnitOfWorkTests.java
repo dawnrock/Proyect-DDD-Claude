@@ -34,7 +34,7 @@ class TransactionalUnitOfWorkTests extends UnitOfWorkContract {
 
     @Test
     @DisplayName("Lo guardado en una unidad que termina bien queda en la base")
-    void lo_guardado_en_una_unidad_que_termina_bien_queda_en_la_base() {
+    void whatASuccessfulUnitSavesStaysInTheDatabase() {
         CheckingAccount cuenta = TestAccounts.anAccount().open();
 
         unitOfWork.execute(() -> accounts.save(cuenta));
@@ -44,7 +44,7 @@ class TransactionalUnitOfWorkTests extends UnitOfWorkContract {
 
     @Test
     @DisplayName("Si una unidad falla, lo que guardó se deshace")
-    void si_una_unidad_falla_lo_que_guardo_se_deshace() {
+    void whenAUnitFailsWhatItSavedIsRolledBack() {
         CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("100.00").open();
         unitOfWork.execute(() -> accounts.save(cuenta));
 

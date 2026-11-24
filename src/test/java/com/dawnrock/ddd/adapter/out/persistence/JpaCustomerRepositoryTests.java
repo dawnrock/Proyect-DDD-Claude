@@ -34,7 +34,7 @@ class JpaCustomerRepositoryTests extends CustomerRepositoryContract {
 
     @Test
     @DisplayName("Un cliente se lee de la base con su identidad, su nombre y su correo")
-    void un_cliente_se_lee_de_la_base_con_todos_sus_datos() {
+    void aCustomerIsReadFromTheDatabaseWithAllItsData() {
         Customer ada = Customer.register("Ada Lovelace", new TaxId("12345678Z"), new EmailAddress("ada@example.com"));
         repository.save(ada);
 

@@ -26,7 +26,7 @@ class CustomerNotificationListenerTests {
 
     @Test
     @DisplayName("Avisa al cliente de un ingreso con su importe")
-    void avisa_al_cliente_de_un_ingreso(CapturedOutput output) {
+    void notifiesTheCustomerOfADeposit(CapturedOutput output) {
         listener.on(new MoneyDeposited(accountId, UUID.randomUUID(), MonetaryAmount.euros("25.00"), Instant.now()));
 
         assertThat(output).contains("Aviso al cliente", accountId.toString(), "ingresado", "25.00 EUR");
@@ -34,7 +34,7 @@ class CustomerNotificationListenerTests {
 
     @Test
     @DisplayName("Avisa al cliente de una retirada con su importe")
-    void avisa_al_cliente_de_una_retirada(CapturedOutput output) {
+    void notifiesTheCustomerOfAWithdrawal(CapturedOutput output) {
         listener.on(new MoneyWithdrawn(accountId, UUID.randomUUID(), MonetaryAmount.euros("200.00"), Instant.now()));
 
         assertThat(output).contains("Aviso al cliente", accountId.toString(), "retirado", "200.00 EUR");
@@ -42,7 +42,7 @@ class CustomerNotificationListenerTests {
 
     @Test
     @DisplayName("Avisa al cliente de que se ha rechazado una retirada")
-    void avisa_al_cliente_de_una_retirada_rechazada(CapturedOutput output) {
+    void notifiesTheCustomerOfARejectedWithdrawal(CapturedOutput output) {
         listener.on(new WithdrawalRejected(accountId, UUID.randomUUID(), MonetaryAmount.euros("600.00"), Instant.now()));
 
         assertThat(output).contains("Aviso al cliente", accountId.toString(), "rechazado", "600.00 EUR");
@@ -50,7 +50,7 @@ class CustomerNotificationListenerTests {
 
     @Test
     @DisplayName("Avisa al cliente de que pasa a alto patrimonio")
-    void avisa_al_cliente_de_que_pasa_a_alto_patrimonio(CapturedOutput output) {
+    void notifiesTheCustomerOfThePromotionToHighNetWorth(CapturedOutput output) {
         listener.on(new CustomerSegmentChanged(accountId, "Ada Lovelace", CustomerSegment.HIGH_NET_WORTH, Instant.now()));
 
         assertThat(output).contains("Aviso al cliente", accountId.toString(), "Ada Lovelace", "alto patrimonio");
@@ -58,7 +58,7 @@ class CustomerNotificationListenerTests {
 
     @Test
     @DisplayName("Avisa al cliente de que vuelve a minorista")
-    void avisa_al_cliente_de_que_vuelve_a_minorista(CapturedOutput output) {
+    void notifiesTheCustomerOfTheDemotionToRetail(CapturedOutput output) {
         listener.on(new CustomerSegmentChanged(accountId, "Ada Lovelace", CustomerSegment.RETAIL, Instant.now()));
 
         assertThat(output).contains("Aviso al cliente", accountId.toString(), "Ada Lovelace", "minorista");

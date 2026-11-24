@@ -20,7 +20,7 @@ class DatabaseAccountNumberSequenceTests extends AccountNumberSequenceContract {
 
     @Test
     @DisplayName("Una numeración nueva sobre la misma base sigue donde lo dejó la anterior, como tras un reinicio")
-    void una_numeracion_nueva_sobre_la_misma_base_sigue_donde_lo_dejo_la_anterior() {
+    void aNewSequenceOnTheSameDatabaseContinuesWhereThePreviousOneStopped() {
         AccountNumber last = sequence.next();
 
         AccountNumber afterRestart = createSequence().next();

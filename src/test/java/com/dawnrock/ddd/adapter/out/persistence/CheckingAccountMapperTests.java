@@ -28,7 +28,7 @@ class CheckingAccountMapperTests {
 
     @Test
     @DisplayName("Una cuenta pasa a su fila y vuelve sin cambiar ningún dato")
-    void una_cuenta_pasa_a_su_fila_y_vuelve_sin_cambiar_ningun_dato() {
+    void anAccountGoesToItsRowAndBackWithoutChangingAnyData() {
         CheckingAccount original = accountWithHistory();
 
         CheckingAccount leida = CheckingAccountMapper.toDomain(
@@ -49,7 +49,7 @@ class CheckingAccountMapperTests {
 
     @Test
     @DisplayName("Al guardar de nuevo una cuenta solo se añaden a su fila los movimientos nuevos")
-    void al_guardar_de_nuevo_solo_se_anaden_los_movimientos_nuevos() {
+    void savingAgainOnlyAddsTheNewTransactions() {
         CheckingAccount account = accountWithHistory();
         CheckingAccountEntity fila = CheckingAccountMapper.copyInto(account, new CheckingAccountEntity(account.id()));
         TransactionEntity primera = fila.transactions.getFirst();
