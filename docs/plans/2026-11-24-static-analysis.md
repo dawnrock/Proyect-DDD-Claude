@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-24
-- **Status:** in progress
-- **Total estimate:** ~80 min (10 tasks)
+- **Status:** done
+- **Total estimate:** ~85 min (11 tasks)
 
 ## Goal
 
@@ -156,28 +156,40 @@ The analysis run on 2026-11-24 in a scratch copy found 1,080 Checkstyle warnings
 - **Acceptance criteria:**
   - [x] The documents describe the tools and how to run them; status and history updated. (the reports command was run: `target/reports/{checkstyle,pmd,cpd}.html` and `target/spotbugsXml.xml`; ADR 0020 accepted)
 
+### [x] T11 — Fixes from the review (~5 min)
+
+- **Layer:** tests · docs
+- **Files:** `adapter/in/LoginAttemptsTests.java`, `pmd-baseline.properties`, `docs/adr/0020-static-analysis.md`
+- **Depends on:** T10
+- **What to do:**
+  1. `defaultValues` had been inserted between the Javadoc of `MovableClock` and the class: the Javadoc goes back to its class.
+  2. The baseline comment and the ADR said the baselined smells "stay in the report"; the plugin leaves them out (T3), so both now say so and point to `-Dpmd.baseline=`.
+  3. ADR: the baseline works by class and rule, not by method (a limit of the plugin), and the 4 `CT_CONSTRUCTOR_THROW` were in 3 classes (`Transaction` had two constructors).
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green with 1,037 test cases.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] `./mvnw verify` runs Checkstyle, PMD, CPD and SpotBugs and is green; the CI runs them through `./mvnw -B verify` with no new step.
-- [ ] A magic number, an 11-parameter method and an ignored `BigDecimal.add()` each fail the build (checked and reverted).
-- [ ] The SpotBugs exclusions and the PMD baseline are versioned, narrow (never a whole package) and commented.
-- [ ] The 4 real SpotBugs bugs and the 4 `CT_CONSTRUCTOR_THROW` are fixed, not excluded.
+- [x] `./mvnw verify` runs Checkstyle, PMD, CPD and SpotBugs and is green; the CI runs them through `./mvnw -B verify` with no new step.
+- [x] A magic number, an 11-parameter method and an ignored `BigDecimal.add()` each fail the build (checked and reverted).
+- [x] The SpotBugs exclusions and the PMD baseline are versioned, narrow (never a whole package) and commented.
+- [x] The 4 real SpotBugs bugs and the 4 `CT_CONSTRUCTOR_THROW` are fixed, not excluded.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (English camelCase + `@DisplayName` in Spanish, after #166).
-- [ ] No dependencies added beyond the planned ones: the three Maven plugins are justified in ADR 0020 (they are build plugins, not runtime dependencies).
-- [ ] If the API changes: n/a.
-- [ ] Any new business term is in `docs/dominio/glosario.md` (none expected).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit + static analysis): 1,037 test cases, 0 Checkstyle violations, 0 PMD failures, 0 SpotBugs bugs.
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (English camelCase + `@DisplayName` in Spanish, after #166).
+- [x] No dependencies added beyond the planned ones: the three Maven plugins are justified in ADR 0020 (they are build plugins, not runtime dependencies).
+- [x] If the API changes: n/a.
+- [x] Any new business term is in `docs/dominio/glosario.md` (none expected).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

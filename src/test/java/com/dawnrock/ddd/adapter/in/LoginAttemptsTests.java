@@ -137,7 +137,6 @@ class LoginAttemptsTests {
         assertThat(attempts.lockedFor(ADA, IP)).isEmpty();
     }
 
-    /** Reloj fijo que el test adelanta a mano. */
     @Test
     @DisplayName("Sin valores, 3 fallos por usuario, 10 por IP y 30 minutos de bloqueo")
     void defaultValues() {
@@ -148,6 +147,7 @@ class LoginAttemptsTests {
         assertThat(properties.lockout()).isEqualTo(Duration.ofMinutes(30));
     }
 
+    /** Reloj fijo que el test adelanta a mano. */
     private static final class MovableClock extends Clock {
 
         private Instant now;
