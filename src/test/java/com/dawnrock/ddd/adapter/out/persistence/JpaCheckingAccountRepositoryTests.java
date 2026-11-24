@@ -48,7 +48,7 @@ class JpaCheckingAccountRepositoryTests extends CheckingAccountRepositoryContrac
 
     @Test
     @DisplayName("Una cuenta se lee de la base con su saldo y sus movimientos, como otra instancia")
-    void una_cuenta_se_lee_de_la_base_con_su_saldo_y_sus_movimientos() {
+    void anAccountIsReadFromTheDatabaseWithItsBalanceAndTransactions() {
         CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("100.00").open();
         cuenta.deposit(MonetaryAmount.euros("25.00"));
         repository.save(cuenta);
@@ -62,7 +62,7 @@ class JpaCheckingAccountRepositoryTests extends CheckingAccountRepositoryContrac
 
     @Test
     @DisplayName("Un cambio en una cuenta no llega a la base hasta que se guarda")
-    void un_cambio_en_una_cuenta_no_llega_a_la_base_hasta_que_se_guarda() {
+    void aChangeToAnAccountDoesNotReachTheDatabaseUntilItIsSaved() {
         CheckingAccount cuenta = TestAccounts.anAccount().initialDeposit("100.00").open();
         repository.save(cuenta);
 

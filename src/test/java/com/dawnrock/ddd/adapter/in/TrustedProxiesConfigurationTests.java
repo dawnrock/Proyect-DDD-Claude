@@ -34,14 +34,14 @@ class TrustedProxiesConfigurationTests {
             "2400:cb00::1", "2606:4700::1", "2803:f800::1", "2405:b500::1", "2405:8100::1", "2a06:98c0::1", "2c0f:f248::1",
             "10.201.3.4", "127.0.0.1"})
     @DisplayName("Los nodos de Cloudflare y el proxy interno de Render son proxies de confianza")
-    void los_nodos_de_cloudflare_y_el_proxy_de_render_son_de_confianza(String proxy) throws IOException {
+    void cloudflareNodesAndTheRenderProxyAreTrusted(String proxy) throws IOException {
         assertThat(configuredResolver().resolve("10.201.3.4", "46.6.116.139, " + proxy)).isEqualTo("46.6.116.139");
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"46.6.116.139", "8.8.8.8", "2001:db8::1"})
     @DisplayName("Una IP pública que no es de Cloudflare no es un proxy de confianza")
-    void una_ip_publica_que_no_es_de_cloudflare_no_es_de_confianza(String client) throws IOException {
+    void aPublicIpNotFromCloudflareIsNotTrusted(String client) throws IOException {
         assertThat(configuredResolver().resolve("10.201.3.4", "203.0.113.9, " + client)).isEqualTo(client);
     }
 }

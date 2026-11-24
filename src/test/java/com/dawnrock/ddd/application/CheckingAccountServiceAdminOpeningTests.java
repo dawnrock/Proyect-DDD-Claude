@@ -75,7 +75,7 @@ class CheckingAccountServiceAdminOpeningTests {
 
     @Test
     @DisplayName("Un documento nuevo registra al cliente con su correo y su usuario, y el detalle los muestra")
-    void un_documento_nuevo_registra_al_cliente() {
+    void aNewDocumentRegistersTheCustomer() {
         AccountSummary summary = service.openAccount(ADMIN, command().build());
 
         assertThat(customers.findByTaxId(new TaxId("12345678Z"))).hasValueSatisfying(customer ->
@@ -88,7 +88,7 @@ class CheckingAccountServiceAdminOpeningTests {
 
     @Test
     @DisplayName("A un cliente existente se le abre otra cuenta indicando solo su documento")
-    void a_un_cliente_existente_se_le_abre_otra_cuenta_con_solo_su_documento() {
+    void anExistingCustomerGetsAnotherAccountWithOnlyTheirDocument() {
         AccountSummary first = service.openAccount(ADMIN, command().build());
 
         AccountSummary second = service.openAccount(ADMIN, OpenAccountCommand.builder()
@@ -101,7 +101,7 @@ class CheckingAccountServiceAdminOpeningTests {
 
     @Test
     @DisplayName("A un cliente existente se le abre otra cuenta repitiendo sus mismos datos")
-    void a_un_cliente_existente_se_le_abre_otra_cuenta_repitiendo_sus_datos() {
+    void anExistingCustomerGetsAnotherAccountRepeatingTheirData() {
         service.openAccount(ADMIN, command().build());
 
         service.openAccount(ADMIN, command().holderEmail(" ADA@example.com ").build());
@@ -114,7 +114,7 @@ class CheckingAccountServiceAdminOpeningTests {
             "correo, Ada Lovelace, ada@otro.example, ada",
             "usuario, Ada Lovelace, ada@example.com, grace"})
     @DisplayName("Unos datos distintos de los del cliente existente se rechazan y no se abre nada")
-    void unos_datos_distintos_de_los_del_cliente_existente_se_rechazan(String field, String name, String email,
+    void dataDifferentFromTheExistingCustomerIsRejected(String field, String name, String email,
                                                                          String username) {
         service.openAccount(ADMIN, command().build());
         OpenAccountCommand contradicting = command()
@@ -131,7 +131,7 @@ class CheckingAccountServiceAdminOpeningTests {
             "correo, Ada Lovelace, '', ada, El correo del titular es obligatorio para un cliente nuevo",
             "usuario, Ada Lovelace, ada@example.com, '', El usuario del titular es obligatorio para un cliente nuevo"})
     @DisplayName("A un cliente nuevo le faltan datos: se rechaza sin registrar ni abrir nada")
-    void a_un_cliente_nuevo_le_faltan_datos(String field, String name, String email, String username,
+    void aNewCustomerWithMissingDataIsRejected(String field, String name, String email, String username,
                                             String message) {
         OpenAccountCommand incomplete = command()
                 .holderName(name).holderEmail(email).ownerUsername(username).build();
@@ -145,7 +145,7 @@ class CheckingAccountServiceAdminOpeningTests {
 
     @Test
     @DisplayName("El usuario de otro cliente no se asigna a un cliente nuevo y no se abre nada")
-    void el_usuario_de_otro_cliente_no_se_asigna_a_un_cliente_nuevo() {
+    void anotherCustomersUsernameIsNotAssignedToANewCustomer() {
         service.openAccount(ADMIN, command().build());
         OpenAccountCommand stealing = other().ownerUsername("ada").build();
 
@@ -159,7 +159,7 @@ class CheckingAccountServiceAdminOpeningTests {
 
     @Test
     @DisplayName("El alta pública no puede usar el usuario que el administrador dio a un cliente")
-    void el_alta_publica_no_puede_usar_el_usuario_de_otro_cliente() {
+    void publicSignUpCannotUseAnotherCustomersUsername() {
         service.openAccount(ADMIN, command().build());
         SignUpCommand signUp = SignUpCommand.builder().fullName("Margaret Hamilton").taxId("00000000T")
                 .email("margaret@example.com").username("ada").initialDeposit(new BigDecimal("100")).build();
@@ -171,7 +171,7 @@ class CheckingAccountServiceAdminOpeningTests {
 
     @Test
     @DisplayName("Un cliente existente sin usuario asignado da un error de petición y no un error interno")
-    void un_cliente_existente_sin_usuario_da_un_error_de_peticion() {
+    void anExistingCustomerWithoutUsernameGivesARequestError() {
         customers.save(Customer.register("Ada Lovelace", new TaxId("12345678Z"),
                 new EmailAddress("ada@example.com")));
 
@@ -184,7 +184,7 @@ class CheckingAccountServiceAdminOpeningTests {
 
     @Test
     @DisplayName("Un depósito insuficiente no deja registrado al cliente nuevo")
-    void un_deposito_insuficiente_no_deja_registrado_al_cliente_nuevo() {
+    void anInsufficientDepositDoesNotRegisterTheNewCustomer() {
         OpenAccountCommand tooLow = command().initialDeposit(new BigDecimal("10")).build();
 
         assertThatExceptionOfType(InsufficientInitialDepositException.class)
@@ -195,7 +195,7 @@ class CheckingAccountServiceAdminOpeningTests {
 
     @Test
     @DisplayName("Un depósito en otra divisa no deja registrado al cliente nuevo")
-    void un_deposito_en_otra_divisa_no_deja_registrado_al_cliente_nuevo() {
+    void aDepositInAnotherCurrencyDoesNotRegisterTheNewCustomer() {
         OpenAccountCommand inDollars = command().currency("USD").build();
 
         assertThatExceptionOfType(CurrencyMismatchException.class)
@@ -205,7 +205,7 @@ class CheckingAccountServiceAdminOpeningTests {
 
     @Test
     @DisplayName("Un cliente abierto por el administrador puede abrir otra cuenta él mismo")
-    void un_cliente_abierto_por_el_administrador_puede_abrir_otra_cuenta() {
+    void aCustomerOpenedByTheAdministratorCanOpenAnotherAccount() {
         service.openAccount(ADMIN, command().build());
 
         AccountSummary another = service.openAnotherAccount(ADA,

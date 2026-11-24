@@ -3,10 +3,10 @@ package com.dawnrock.ddd;
 import static com.tngtech.archunit.core.domain.properties.CanBeAnnotated.Predicates.metaAnnotatedWith;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
+import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
-import com.tngtech.archunit.lang.ArchRule;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
@@ -25,8 +25,11 @@ class AdapterTestIsolationTests {
      * clase base. Límite asumido: no ve un {@code @WebMvcTest} que importe el núcleo con {@code @Import}.
      */
     @ArchTest
-    static final ArchRule los_tests_de_adaptadores_de_entrada_no_levantan_el_contexto_completo = noClasses()
-            .that().resideInAPackage("..adapter.in..")
-            .should().beMetaAnnotatedWith(SpringBootTest.class)
-            .orShould().beAssignableTo(metaAnnotatedWith(SpringBootTest.class));
+    static void inputAdapterTestsDoNotStartTheFullContext(JavaClasses classes) {
+        noClasses()
+                .that().resideInAPackage("..adapter.in..")
+                .should().beMetaAnnotatedWith(SpringBootTest.class)
+                .orShould().beAssignableTo(metaAnnotatedWith(SpringBootTest.class))
+                .check(classes);
+    }
 }

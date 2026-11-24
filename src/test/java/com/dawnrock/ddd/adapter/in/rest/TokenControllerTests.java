@@ -62,7 +62,7 @@ class TokenControllerTests {
 
     @Test
     @DisplayName("Con credenciales válidas responde 200 con un token Bearer que dura 15 minutos")
-    void con_credenciales_validas_responde_200_con_un_token_bearer() throws Exception {
+    void withValidCredentialsResponds200WithABearerToken() throws Exception {
         mvc.perform(post("/api/auth/token").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\": \"ada\", \"password\": \"demo\"}"))
                 .andExpect(status().isOk())
@@ -73,7 +73,7 @@ class TokenControllerTests {
 
     @Test
     @DisplayName("El token lleva el usuario como sub, sus roles, el emisor y la caducidad")
-    void el_token_lleva_el_usuario_sus_roles_el_emisor_y_la_caducidad() throws Exception {
+    void theTokenCarriesTheUserRolesIssuerAndExpiry() throws Exception {
         Jwt admin = decoder.decode(tokenFor("admin", "demo"));
         Jwt ada = decoder.decode(tokenFor("ada", "demo"));
 
@@ -87,7 +87,7 @@ class TokenControllerTests {
     @ParameterizedTest
     @CsvSource({"ada, incorrecta", "nadie, demo"})
     @DisplayName("Con una contraseña errónea o un usuario inexistente responde 401 con el mismo mensaje")
-    void con_credenciales_erroneas_responde_401_con_el_mismo_mensaje(String username, String password)
+    void withWrongCredentialsResponds401WithTheSameMessage(String username, String password)
             throws Exception {
         mvc.perform(post("/api/auth/token").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\": \"%s\", \"password\": \"%s\"}".formatted(username, password)))
@@ -100,7 +100,7 @@ class TokenControllerTests {
 
     @Test
     @DisplayName("Tras 3 fallos desde una IP, ni la contraseña correcta da token: 429 con Retry-After y sin revelar el usuario (#130)")
-    void tras_3_fallos_responde_429_con_retry_after() throws Exception {
+    void afterThreeFailuresResponds429WithRetryAfter() throws Exception {
         for (int i = 0; i < 3; i++) {
             mvc.perform(tokenRequest("ada", "incorrecta", "198.51.100.9"))
                     .andExpect(status().isUnauthorized());
@@ -126,7 +126,7 @@ class TokenControllerTests {
 
     @Test
     @DisplayName("A través del proxy de Render y de Cloudflare, el 429 es para la IP del cliente y no para la de Cloudflare (#133)")
-    void a_traves_de_render_y_cloudflare_el_429_es_para_la_ip_del_cliente() throws Exception {
+    void throughRenderAndCloudflareThe429IsForTheClientIp() throws Exception {
         for (int i = 0; i < 3; i++) {
             mvc.perform(tokenRequest("admin", "incorrecta", "10.0.0.5")
                             .header("X-Forwarded-For", "198.51.100.40, 104.22.136.75"))
@@ -150,14 +150,14 @@ class TokenControllerTests {
 
     @Test
     @DisplayName("Un método no declarado responde 405 sin pedir token")
-    void un_metodo_no_declarado_responde_405_sin_pedir_token() throws Exception {
+    void anUndeclaredMethodResponds405WithoutAskingForAToken() throws Exception {
         mvc.perform(get("/api/auth/token"))
                 .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     @DisplayName("Sin usuario o sin contraseña responde 400 con el error de cada campo")
-    void sin_usuario_o_sin_contrasena_responde_400() throws Exception {
+    void withoutUsernameOrPasswordResponds400() throws Exception {
         mvc.perform(post("/api/auth/token").contentType(MediaType.APPLICATION_JSON).content("{\"username\": \" \"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Petición no válida"))

@@ -36,7 +36,7 @@ class LoginAttemptsTests {
 
     @Test
     @DisplayName("Cada intento se reserva al empezar: el cuarto intento simultáneo ya encuentra el bloqueo")
-    void cada_intento_se_reserva_al_empezar() {
+    void eachAttemptIsReservedWhenItStarts() {
         assertThat(attempts.tryAttempt(ADA, IP)).isEmpty();
         assertThat(attempts.tryAttempt(ADA, IP)).isEmpty();
         assertThat(attempts.tryAttempt(ADA, IP)).isEmpty();
@@ -46,7 +46,7 @@ class LoginAttemptsTests {
 
     @Test
     @DisplayName("Un intento liberado, porque no falló la contraseña, no cuenta como fallo")
-    void un_intento_liberado_no_cuenta_como_fallo() {
+    void aReleasedAttemptDoesNotCountAsAFailure() {
         failTimes(ADA, IP, 2);
 
         attempts.tryAttempt(ADA, IP);
@@ -57,7 +57,7 @@ class LoginAttemptsTests {
 
     @Test
     @DisplayName("Un nombre de usuario larguísimo se recorta en la clave y no crece sin límite")
-    void un_nombre_de_usuario_larguisimo_se_recorta_en_la_clave() {
+    void aVeryLongUsernameIsTruncatedInTheKey() {
         String longName = "a".repeat(5_000);
         failTimes(longName, IP, 3);
 
@@ -66,13 +66,13 @@ class LoginAttemptsTests {
 
     @Test
     @DisplayName("Sin fallos no hay bloqueo")
-    void sin_fallos_no_hay_bloqueo() {
+    void withoutFailuresThereIsNoLockout() {
         assertThat(attempts.lockedFor(ADA, IP)).isEmpty();
     }
 
     @Test
     @DisplayName("Tras 3 fallos el usuario queda bloqueado desde esa IP 30 minutos, pero no desde otra")
-    void tras_3_fallos_el_usuario_queda_bloqueado_desde_esa_ip() {
+    void afterThreeFailuresTheUserIsLockedFromThatIp() {
         failTimes(ADA, IP, 2);
         assertThat(attempts.lockedFor(ADA, IP)).isEmpty();
 
@@ -84,7 +84,7 @@ class LoginAttemptsTests {
 
     @Test
     @DisplayName("Tras 10 fallos desde una IP con usuarios distintos, esa IP queda bloqueada para cualquier usuario")
-    void tras_10_fallos_desde_una_ip_queda_bloqueada_para_cualquier_usuario() {
+    void afterTenFailuresFromAnIpItIsLockedForAnyUser() {
         for (int i = 0; i < 10; i++) {
             attempts.tryAttempt("usuario" + i, IP);
         }
@@ -95,7 +95,7 @@ class LoginAttemptsTests {
 
     @Test
     @DisplayName("Un acceso correcto antes del límite reinicia el contador del usuario en esa IP")
-    void un_acceso_correcto_antes_del_limite_reinicia_el_contador() {
+    void aSuccessfulLoginBeforeTheLimitResetsTheCounter() {
         failTimes(ADA, IP, 2);
 
         attempts.succeeded(ADA, IP);
@@ -106,7 +106,7 @@ class LoginAttemptsTests {
 
     @Test
     @DisplayName("El bloqueo termina 30 minutos después del último fallo y el tiempo restante va bajando")
-    void el_bloqueo_termina_30_minutos_despues_del_ultimo_fallo() {
+    void theLockoutEndsThirtyMinutesAfterTheLastFailure() {
         failTimes(ADA, IP, 3);
 
         clock.advance(Duration.ofMinutes(20));
@@ -118,7 +118,7 @@ class LoginAttemptsTests {
 
     @Test
     @DisplayName("El usuario se compara sin distinguir mayúsculas")
-    void el_usuario_se_compara_sin_distinguir_mayusculas() {
+    void theUsernameIsComparedCaseInsensitively() {
         attempts.tryAttempt("Ada", IP);
         attempts.tryAttempt("ADA", IP);
         attempts.tryAttempt("ada", IP);
@@ -128,7 +128,7 @@ class LoginAttemptsTests {
 
     @Test
     @DisplayName("Los fallos más antiguos que la ventana de 30 minutos dejan de contar")
-    void los_fallos_antiguos_dejan_de_contar() {
+    void oldFailuresStopCounting() {
         failTimes(ADA, IP, 2);
         clock.advance(Duration.ofMinutes(31));
 

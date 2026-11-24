@@ -75,7 +75,7 @@
 - [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
 - [ ] The phase architecture is respected (layers: each layer only uses the one below / hexagonal: dependencies point to the hexagon), verified by ArchUnit.
 - [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (`snake_case` + `@DisplayName` in Spanish).
+- [ ] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
 - [ ] No dependencies added beyond the planned ones (or justified in an ADR).
 - [ ] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes (otherwise, "n/a").
 - [ ] Any new business term is in `docs/dominio/glosario.md`.

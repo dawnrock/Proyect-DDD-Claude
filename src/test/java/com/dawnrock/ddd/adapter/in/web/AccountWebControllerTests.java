@@ -93,7 +93,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("La página usa el tema oscuro de Bootstrap y carga htmx, Alpine.js, Motion y app.js desde la propia aplicación (#124)")
-        void la_pagina_usa_el_tema_oscuro_de_bootstrap_y_carga_las_librerias_del_frontend() throws Exception {
+        void thePageUsesBootstrapDarkThemeAndLoadsTheFrontendLibraries() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
 
             // Spring reescribe las rutas con la versión del WebJar (/webjars/bootstrap/5.3.8/...) o con el hash del contenido
@@ -113,7 +113,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Con cuentas, el listado muestra el saldo total y cada cuenta con iniciales, IBAN abreviado y saldo")
-        void con_cuentas_el_listado_muestra_el_saldo_total_y_cada_cuenta() throws Exception {
+        void withAccountsTheListShowsTheTotalBalanceAndEachAccount() throws Exception {
             UUID id = UUID.randomUUID();
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(
                     summary(id, "ES1234567890123456789012", "Ana Pérez", "150.00"),
@@ -144,7 +144,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("El listado muestra el segmento de cada cuenta junto al IBAN abreviado")
-        void el_listado_muestra_el_segmento_de_cada_cuenta() throws Exception {
+        void theListShowsEachAccountsSegment() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(
                     AccountSummary.builder().id(UUID.randomUUID()).accountNumber("ES1234567890123456789012")
                             .holderName("Ana Pérez").segment("HIGH_NET_WORTH")
@@ -159,7 +159,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Sin cuentas, el listado muestra el mensaje de estado vacío")
-        void sin_cuentas_el_listado_muestra_el_mensaje_de_estado_vacio() throws Exception {
+        void withoutAccountsTheListShowsTheEmptyStateMessage() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
 
             mvc.perform(get("/"))
@@ -170,7 +170,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("El pie de página indica solo la fase 2, arquitectura hexagonal, sin el nombre del proyecto")
-        void el_pie_de_pagina_indica_solo_la_fase_2_arquitectura_hexagonal() throws Exception {
+        void theFooterOnlyShowsPhaseTwoHexagonalArchitecture() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
 
             mvc.perform(get("/"))
@@ -194,7 +194,7 @@ class AccountWebControllerTests {
         @Test
         @WithMockUser(username = "ada", roles = "USER")
         @DisplayName("Un usuario consulta el detalle de su cuenta: el servicio recibe a ada como usuario")
-        void un_usuario_consulta_el_detalle_de_su_cuenta() throws Exception {
+        void aUserViewsTheirAccountDetails() throws Exception {
             when(queries.findAccount(ADA, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
@@ -205,7 +205,7 @@ class AccountWebControllerTests {
         @Test
         @WithMockUser(username = "ada", roles = "USER")
         @DisplayName("Un usuario que pide una cuenta ajena recibe la página 404")
-        void un_usuario_que_pide_una_cuenta_ajena_recibe_la_pagina_404() throws Exception {
+        void aUserAskingForAnotherUsersAccountGetsThe404Page() throws Exception {
             when(queries.findAccount(ADA, FOREIGN_ID)).thenThrow(new AccountNotFoundException(FOREIGN_ID));
 
             mvc.perform(get("/accounts/" + FOREIGN_ID))
@@ -218,7 +218,7 @@ class AccountWebControllerTests {
         @Test
         @WithMockUser(username = "ada", roles = "USER")
         @DisplayName("Un usuario que ingresa en una cuenta ajena recibe la página 404")
-        void un_usuario_que_ingresa_en_una_cuenta_ajena_recibe_la_pagina_404() throws Exception {
+        void aUserDepositingIntoAnotherUsersAccountGetsThe404Page() throws Exception {
             when(commands.deposit(eq(ADA), any())).thenThrow(new AccountNotFoundException(FOREIGN_ID));
 
             mvc.perform(post("/accounts/" + FOREIGN_ID + "/deposits").param("amount", "10.00").param("currency", "EUR"))
@@ -229,7 +229,7 @@ class AccountWebControllerTests {
         @Test
         @WithMockUser(username = "ada", roles = "USER")
         @DisplayName("Un usuario con varias cuentas ve el enlace «← Mis cuentas»")
-        void un_usuario_con_varias_cuentas_ve_el_enlace_mis_cuentas() throws Exception {
+        void aUserWithSeveralAccountsSeesTheMyAccountsLink() throws Exception {
             when(queries.findAccount(ADA, ACCOUNT_ID)).thenReturn(details());
             when(queries.listAccounts(ADA)).thenReturn(List.of(
                     ownAccount(ACCOUNT_ID, "ES1234567890123456789012", "Ada Lovelace"),
@@ -242,7 +242,7 @@ class AccountWebControllerTests {
         @Test
         @WithMockUser(username = "ada", roles = "USER")
         @DisplayName("Un usuario con una sola cuenta no ve enlace de vuelta")
-        void un_usuario_con_una_sola_cuenta_no_ve_enlace_de_vuelta() throws Exception {
+        void aUserWithASingleAccountSeesNoBackLink() throws Exception {
             when(queries.findAccount(ADA, ACCOUNT_ID)).thenReturn(details());
             when(queries.listAccounts(ADA)).thenReturn(List.of(
                     ownAccount(ACCOUNT_ID, "ES1234567890123456789012", "Ada Lovelace")));
@@ -254,7 +254,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una operación que el servicio prohíbe por el rol (403) se muestra con la página 403")
-        void una_operacion_prohibida_por_el_rol_se_muestra_con_la_pagina_403() throws Exception {
+        void anOperationForbiddenByTheRoleIsShownWithThe403Page() throws Exception {
             when(commands.deposit(any(Caller.class), any())).thenThrow(new ForbiddenOperationException("abrir cuentas"));
 
             mvc.perform(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "10.00").param("currency", "EUR"))
@@ -280,7 +280,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Toda página con sesión muestra el usuario y un botón Cerrar sesión que envía un POST con CSRF")
-        void toda_pagina_con_sesion_muestra_el_usuario_y_un_boton_cerrar_sesion_con_csrf() throws Exception {
+        void everyPageWithASessionShowsTheUserAndALogoutButtonWithCsrf() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
 
             mvc.perform(get("/"))
@@ -294,7 +294,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("La página 404 también lleva la cabecera con el usuario")
-        void la_pagina_404_tambien_lleva_la_cabecera_con_el_usuario() throws Exception {
+        void the404PageAlsoHasTheHeaderWithTheUser() throws Exception {
             when(queries.findAccount(any(Caller.class), any(UUID.class)))
                     .thenThrow(new AccountNotFoundException(UUID.randomUUID()));
 
@@ -306,7 +306,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("La página de login, anónima, no muestra el botón Cerrar sesión")
         @WithAnonymousUser
-        void la_pagina_de_login_anonima_no_muestra_el_boton_cerrar_sesion() throws Exception {
+        void theAnonymousLoginPageShowsNoLogoutButton() throws Exception {
             mvc.perform(get("/error/403"))
                     .andExpect(content().string(not(containsString("Cerrar sesión"))));
         }
@@ -321,7 +321,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("El administrador ve «Cuentas» con el botón de abrir cuenta y pide el listado como administrador")
-        void el_administrador_ve_cuentas_con_el_boton_de_abrir_cuenta() throws Exception {
+        void theAdministratorSeesAccountsWithTheOpenAccountButton() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(
                     ownAccount(ADA_ONE, "ES1234567890123456789012", "Ada Lovelace")));
 
@@ -337,7 +337,7 @@ class AccountWebControllerTests {
         @Test
         @WithMockUser(username = "ada", roles = "USER")
         @DisplayName("Un usuario con varias cuentas ve «Mis cuentas» sin abrir cuenta")
-        void un_usuario_con_varias_cuentas_ve_mis_cuentas_sin_abrir_cuenta() throws Exception {
+        void aUserWithSeveralAccountsSeesMyAccountsWithoutOpenAccount() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(
                     ownAccount(ADA_ONE, "ES1234567890123456789012", "Ada Lovelace"),
                     ownAccount(ADA_TWO, "ES9876543210987654321098", "Ada Lovelace")));
@@ -356,7 +356,7 @@ class AccountWebControllerTests {
         @Test
         @WithMockUser(username = "ada", roles = "USER")
         @DisplayName("Un usuario con una sola cuenta es redirigido a su detalle")
-        void un_usuario_con_una_sola_cuenta_es_redirigido_a_su_detalle() throws Exception {
+        void aUserWithASingleAccountIsRedirectedToItsDetails() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(
                     ownAccount(ADA_ONE, "ES1234567890123456789012", "Ada Lovelace")));
 
@@ -368,7 +368,7 @@ class AccountWebControllerTests {
         @Test
         @WithMockUser(username = "ada", roles = "USER")
         @DisplayName("Un usuario sin cuentas ve «Mis cuentas» con el mensaje de estado vacío y sin abrir cuenta")
-        void un_usuario_sin_cuentas_ve_mis_cuentas_con_el_mensaje_de_estado_vacio() throws Exception {
+        void aUserWithoutAccountsSeesMyAccountsWithTheEmptyStateMessage() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
 
             mvc.perform(get("/"))
@@ -380,7 +380,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un administrador con una sola cuenta sigue viendo el listado")
-        void un_administrador_con_una_sola_cuenta_sigue_viendo_el_listado() throws Exception {
+        void anAdministratorWithASingleAccountStillSeesTheList() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(
                     ownAccount(ADA_ONE, "ES1234567890123456789012", "Ada Lovelace")));
 
@@ -433,7 +433,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("El detalle muestra los datos de la cuenta, el segmento en español y sus movimientos")
-        void el_detalle_muestra_los_datos_de_la_cuenta_el_segmento_en_espanol_y_sus_movimientos() throws Exception {
+        void theDetailsShowTheAccountDataTheSpanishSegmentAndItsTransactions() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details(
                     transaction("DEPOSIT", "100.00", "APPROVED"),
                     transaction("WITHDRAWAL", "30.00", "APPROVED")));
@@ -454,7 +454,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una retirada con contrapartida se muestra como transferencia a la cuenta de destino")
-        void una_retirada_con_contrapartida_se_muestra_como_transferencia_a() throws Exception {
+        void aWithdrawalWithCounterpartIsShownAsTransferTo() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details(
                     transfer("WITHDRAWAL", "30.00", "APPROVED", "ES7921000813610123456789")));
 
@@ -465,7 +465,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un ingreso con contrapartida se muestra como transferencia desde la cuenta de origen")
-        void un_ingreso_con_contrapartida_se_muestra_como_transferencia_de() throws Exception {
+        void aDepositWithCounterpartIsShownAsTransferFrom() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details(
                     transfer("DEPOSIT", "30.00", "APPROVED", "ES7921000813610123456789")));
 
@@ -476,7 +476,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una transferencia rechazada conserva el estilo de rechazada y su etiqueta de transferencia")
-        void una_transferencia_rechazada_conserva_el_estilo_de_rechazada() throws Exception {
+        void aRejectedTransferKeepsTheRejectedStyle() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details(
                     transfer("WITHDRAWAL", "500.00", "REJECTED", "ES7921000813610123456789")));
 
@@ -488,7 +488,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Los movimientos se muestran del más reciente al más antiguo, aunque compartan instante")
-        void los_movimientos_se_muestran_del_mas_reciente_al_mas_antiguo() throws Exception {
+        void transactionsAreShownFromNewestToOldest() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details(
                     transaction("DEPOSIT", "111.00", "APPROVED"),
                     transaction("DEPOSIT", "222.00", "APPROVED"),
@@ -504,7 +504,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("El panel de la cuenta es el destino de htmx y cada formulario lo envía con hx-post sin perder action ni CSRF (#125)")
-        void el_panel_de_la_cuenta_es_el_destino_de_htmx() throws Exception {
+        void theAccountPanelIsTheHtmxTarget() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             String base = "/accounts/" + ACCOUNT_ID;
@@ -521,7 +521,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("El detalle enlaza de vuelta al listado")
-        void el_detalle_enlaza_de_vuelta_al_listado() throws Exception {
+        void theDetailsLinkBackToTheList() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
@@ -531,7 +531,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una retirada rechazada se muestra marcada como rechazada")
-        void una_retirada_rechazada_se_muestra_marcada_como_rechazada() throws Exception {
+        void aRejectedWithdrawalIsShownMarkedAsRejected() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details(
                     transaction("WITHDRAWAL", "500.00", "REJECTED")));
 
@@ -545,7 +545,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una cuenta sin movimientos muestra el mensaje de estado vacío")
-        void una_cuenta_sin_movimientos_muestra_el_mensaje_de_estado_vacio() throws Exception {
+        void anAccountWithoutTransactionsShowsTheEmptyStateMessage() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
@@ -555,7 +555,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una cuenta desconocida devuelve la página 404 con estado 404")
-        void una_cuenta_desconocida_devuelve_la_pagina_404_con_estado_404() throws Exception {
+        void anUnknownAccountReturnsThe404PageWithStatus404() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
@@ -566,7 +566,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Cada fila del listado enlaza con el detalle de su cuenta")
-        void cada_fila_del_listado_enlaza_con_el_detalle_de_su_cuenta() throws Exception {
+        void eachListRowLinksToItsAccountDetails() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(AccountSummary.builder()
                     .id(ACCOUNT_ID)
                     .accountNumber("ES1234567890123456789012")
@@ -592,7 +592,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("El detalle ofrece el formulario de ingreso con euro, dólar y libra, y el euro por defecto")
-        void el_detalle_ofrece_el_formulario_de_ingreso_con_euro_dolar_y_libra_y_el_euro_por_defecto()
+        void theDetailsOfferTheDepositFormWithEuroDollarAndPoundAndEuroByDefault()
                 throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
@@ -606,7 +606,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un ingreso válido llama al servicio con el comando esperado y redirige al detalle con un mensaje")
-        void un_ingreso_valido_llama_al_servicio_con_el_comando_esperado_y_redirige_al_detalle_con_un_mensaje()
+        void aValidDepositCallsTheServiceWithTheExpectedCommandAndRedirectsWithAMessage()
                 throws Exception {
             when(commands.deposit(any(Caller.class), any())).thenReturn(transaction("DEPOSIT", "50.00", "APPROVED"));
 
@@ -625,7 +625,7 @@ class AccountWebControllerTests {
         @ParameterizedTest
         @ValueSource(strings = {"0", "-5.00"})
         @DisplayName("Un importe no positivo vuelve al detalle con el error del campo y sin llamar al servicio")
-        void un_importe_no_positivo_vuelve_al_detalle_con_el_error_del_campo_y_sin_llamar_al_servicio(String amount)
+        void aNonPositiveAmountReturnsToTheDetailsWithTheFieldErrorWithoutCallingTheService(String amount)
                 throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
@@ -642,7 +642,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un importe ausente vuelve al detalle con el error del campo")
-        void un_importe_ausente_vuelve_al_detalle_con_el_error_del_campo() throws Exception {
+        void aMissingAmountReturnsToTheDetailsWithTheFieldError() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(post("/accounts/" + ACCOUNT_ID + "/deposits").param("currency", "EUR"))
@@ -654,7 +654,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Otra divisa vuelve al detalle con el mensaje del dominio y conserva el importe")
-        void otra_divisa_vuelve_al_detalle_con_el_mensaje_del_dominio_y_conserva_el_importe() throws Exception {
+        void anotherCurrencyReturnsToTheDetailsWithTheDomainMessageAndKeepsTheAmount() throws Exception {
             var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD"));
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
             when(commands.deposit(any(Caller.class), any())).thenThrow(error);
@@ -671,7 +671,7 @@ class AccountWebControllerTests {
         @ParameterizedTest
         @CsvSource({"0.001, EUR, El importe debe ser positivo", "10.00, XYZ, XYZ no es un c"})
         @DisplayName("Un importe que redondea a cero o una divisa inexistente vuelven al detalle con el error del command")
-        void un_importe_que_redondea_a_cero_o_una_divisa_inexistente_vuelven_al_detalle_con_el_error_del_command(
+        void anAmountRoundingToZeroOrAMissingCurrencyReturnsToTheDetailsWithTheCommandError(
                 String amount, String currency, String message) throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
@@ -688,7 +688,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un ingreso en una cuenta desconocida devuelve la página 404")
-        void un_ingreso_en_una_cuenta_desconocida_devuelve_la_pagina_404() throws Exception {
+        void aDepositIntoAnUnknownAccountReturnsThe404Page() throws Exception {
             when(commands.deposit(any(Caller.class), any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
 
             mvc.perform(ingresoDe("10.00", "EUR"))
@@ -708,7 +708,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un ingreso aprobado responde con el panel y el mensaje en el modelo, sin redirigir ni usar flash")
-        void un_ingreso_aprobado_responde_con_el_panel_y_el_mensaje() throws Exception {
+        void anApprovedDepositRespondsWithThePanelAndTheMessage() throws Exception {
             when(commands.deposit(any(Caller.class), any())).thenReturn(transaction("DEPOSIT", "50.00", "APPROVED"));
 
             mvc.perform(htmx(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "50.00").param("currency", "EUR")))
@@ -724,7 +724,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un importe de cero responde con el panel, el formulario de ingreso abierto y su error")
-        void un_importe_de_cero_responde_con_el_panel_y_el_formulario_abierto() throws Exception {
+        void aZeroAmountRespondsWithThePanelAndTheFormOpen() throws Exception {
             mvc.perform(htmx(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "0").param("currency", "EUR")))
                     .andExpect(status().isOk())
                     .andExpect(view().name("accounts/detail :: panel"))
@@ -736,7 +736,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un error del dominio responde con el panel y el mensaje del dominio en el formulario")
-        void un_error_del_dominio_responde_con_el_panel_y_su_mensaje() throws Exception {
+        void aDomainErrorRespondsWithThePanelAndItsMessage() throws Exception {
             var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD"));
             when(commands.deposit(any(Caller.class), any())).thenThrow(error);
 
@@ -759,7 +759,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("El detalle ofrece el formulario de retirada")
-        void el_detalle_ofrece_el_formulario_de_retirada() throws Exception {
+        void theDetailsOfferTheWithdrawalForm() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
@@ -768,7 +768,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una retirada aprobada redirige al detalle con un mensaje de éxito")
-        void una_retirada_aprobada_redirige_al_detalle_con_un_mensaje_de_exito() throws Exception {
+        void anApprovedWithdrawalRedirectsToTheDetailsWithASuccessMessage() throws Exception {
             when(commands.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "30.00", "APPROVED"));
 
             mvc.perform(retiradaDe("30.00", "EUR"))
@@ -786,7 +786,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una retirada rechazada redirige al detalle con un aviso de rechazo distinto del de éxito")
-        void una_retirada_rechazada_redirige_al_detalle_con_un_aviso_de_rechazo_distinto_del_de_exito()
+        void aRejectedWithdrawalRedirectsWithARejectionNoticeDifferentFromSuccess()
                 throws Exception {
             when(commands.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "500.00", "REJECTED"));
 
@@ -800,7 +800,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("El aviso de rechazo se pinta con el estilo de advertencia y no con el de éxito")
-        void el_aviso_de_rechazo_se_pinta_con_el_estilo_de_advertencia_y_no_con_el_de_exito() throws Exception {
+        void theRejectionNoticeUsesTheWarningStyleNotTheSuccessOne() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID).flashAttr("rejection", "Retirada de 500.00 EUR rechazada"))
@@ -811,7 +811,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un importe no positivo vuelve al detalle con el error del campo y sin llamar al servicio")
-        void un_importe_no_positivo_vuelve_al_detalle_con_el_error_del_campo_y_sin_llamar_al_servicio()
+        void aNonPositiveAmountReturnsToTheDetailsWithTheFieldErrorWithoutCallingTheService()
                 throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
@@ -827,7 +827,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Otra divisa vuelve al detalle con el mensaje del dominio y conserva el importe")
-        void otra_divisa_vuelve_al_detalle_con_el_mensaje_del_dominio_y_conserva_el_importe() throws Exception {
+        void anotherCurrencyReturnsToTheDetailsWithTheDomainMessageAndKeepsTheAmount() throws Exception {
             var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("GBP"));
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
             when(commands.withdraw(any(Caller.class), any())).thenThrow(error);
@@ -844,7 +844,7 @@ class AccountWebControllerTests {
         @ParameterizedTest
         @CsvSource({"0.001, EUR, El importe debe ser positivo", "10.00, XYZ, XYZ no es un c"})
         @DisplayName("Un importe que redondea a cero o una divisa inexistente vuelven al detalle con el error del command")
-        void un_importe_que_redondea_a_cero_o_una_divisa_inexistente_vuelven_al_detalle_con_el_error_del_command(
+        void anAmountRoundingToZeroOrAMissingCurrencyReturnsToTheDetailsWithTheCommandError(
                 String amount, String currency, String message) throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
@@ -861,7 +861,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una retirada en una cuenta desconocida devuelve la página 404")
-        void una_retirada_en_una_cuenta_desconocida_devuelve_la_pagina_404() throws Exception {
+        void aWithdrawalFromAnUnknownAccountReturnsThe404Page() throws Exception {
             when(commands.withdraw(any(Caller.class), any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
 
             mvc.perform(retiradaDe("10.00", "EUR"))
@@ -889,7 +889,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una retirada aprobada responde con el panel y el mensaje de éxito")
-        void una_retirada_aprobada_responde_con_el_panel_y_el_mensaje() throws Exception {
+        void anApprovedWithdrawalRespondsWithThePanelAndTheMessage() throws Exception {
             when(commands.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "30.00", "APPROVED"));
 
             mvc.perform(retirada("30.00"))
@@ -901,7 +901,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una retirada rechazada responde con el panel y el aviso de advertencia")
-        void una_retirada_rechazada_responde_con_el_panel_y_el_aviso() throws Exception {
+        void aRejectedWithdrawalRespondsWithThePanelAndTheNotice() throws Exception {
             when(commands.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "500.00", "REJECTED"));
 
             mvc.perform(retirada("500.00"))
@@ -914,7 +914,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un importe vacío responde con el panel y el formulario de retirada abierto")
-        void un_importe_vacio_responde_con_el_panel_y_el_formulario_abierto() throws Exception {
+        void anEmptyAmountRespondsWithThePanelAndTheFormOpen() throws Exception {
             mvc.perform(retirada(""))
                     .andExpect(status().isOk())
                     .andExpect(view().name("accounts/detail :: panel"))
@@ -930,7 +930,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("El destino es un campo de texto para el IBAN y el detalle no lista cuentas de otros clientes")
-        void el_destino_es_un_campo_de_texto_para_el_iban_y_no_lista_cuentas_de_otros_clientes() throws Exception {
+        void theTargetIsAnIbanTextFieldAndOtherCustomersAccountsAreNotListed() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(
                     ownAccount(ACCOUNT_ID, "ES1234567890123456789012", "Ana Pérez"),
@@ -952,7 +952,7 @@ class AccountWebControllerTests {
         @Test
         @WithMockUser(username = "ada", roles = "USER")
         @DisplayName("Un usuario con varias cuentas no ve el número de las demás en el detalle de una de ellas")
-        void un_usuario_con_varias_cuentas_no_ve_el_numero_de_las_demas_en_el_detalle() throws Exception {
+        void aUserWithSeveralAccountsDoesNotSeeTheOtherNumbersInTheDetails() throws Exception {
             when(queries.findAccount(ADA, ACCOUNT_ID)).thenReturn(details());
             when(queries.listAccounts(ADA)).thenReturn(List.of(
                     ownAccount(ACCOUNT_ID, "ES1234567890123456789012", "Ada Lovelace"),
@@ -990,7 +990,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una transferencia a un IBAN escrito llama al servicio con el comando esperado y redirige con un mensaje")
-        void una_transferencia_a_un_iban_escrito_llama_al_servicio_con_el_comando_esperado()
+        void aTransferToATypedIbanCallsTheServiceWithTheExpectedCommand()
                 throws Exception {
             when(commands.transfer(any(Caller.class), any())).thenReturn(transfer("25.00", "APPROVED"));
 
@@ -1012,7 +1012,7 @@ class AccountWebControllerTests {
         @Test
         @WithMockUser(username = "ada", roles = "USER")
         @DisplayName("Un usuario transfiere desde su cuenta: el servicio recibe a ada como usuario")
-        void un_usuario_transfiere_desde_su_cuenta() throws Exception {
+        void aUserTransfersFromTheirAccount() throws Exception {
             when(commands.transfer(eq(ADA), any())).thenReturn(transfer("25.00", "APPROVED"));
 
             mvc.perform(transferenciaDe(TARGET_IBAN, "25.00", "EUR"))
@@ -1024,7 +1024,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una transferencia rechazada redirige con un aviso de rechazo distinto del de éxito")
-        void una_transferencia_rechazada_redirige_con_un_aviso_de_rechazo_distinto_del_de_exito() throws Exception {
+        void aRejectedTransferRedirectsWithARejectionNoticeDifferentFromSuccess() throws Exception {
             when(commands.transfer(any(Caller.class), any())).thenReturn(transfer("900.00", "REJECTED"));
 
             mvc.perform(transferenciaDe(TARGET_IBAN, "900.00", "EUR"))
@@ -1038,7 +1038,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una divisa vacía se trata como el euro por defecto")
-        void una_divisa_vacia_se_trata_como_el_euro_por_defecto() throws Exception {
+        void anEmptyCurrencyIsTreatedAsTheDefaultEuro() throws Exception {
             when(commands.transfer(any(Caller.class), any())).thenReturn(transfer("25.00", "APPROVED"));
 
             mvc.perform(post("/accounts/" + ACCOUNT_ID + "/transfers")
@@ -1073,7 +1073,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Sin IBAN de destino vuelve al detalle con el error del campo y sin llamar al servicio")
-        void sin_iban_de_destino_vuelve_al_detalle_con_el_error_del_campo_y_sin_llamar_al_servicio()
+        void withoutTargetIbanReturnsToTheDetailsWithTheFieldErrorWithoutCallingTheService()
                 throws Exception {
             mvc.perform(transferenciaDe("", "25.00", "EUR"))
                     .andExpect(status().isOk())
@@ -1089,7 +1089,7 @@ class AccountWebControllerTests {
         @ParameterizedTest
         @ValueSource(strings = {"ES12-345", "ES12 3456", "FR7630006000011234567890189", "ES98765432109876543210981"})
         @DisplayName("Un IBAN mal formado vuelve al detalle con el error del campo, conserva lo escrito y no llama al servicio")
-        void un_iban_mal_formado_vuelve_al_detalle_con_el_error_del_campo(String iban) throws Exception {
+        void aMalformedIbanReturnsToTheDetailsWithTheFieldError(String iban) throws Exception {
             mvc.perform(transferenciaDe(iban, "25.00", "EUR"))
                     .andExpect(status().isOk())
                     .andExpect(view().name("accounts/detail"))
@@ -1104,7 +1104,7 @@ class AccountWebControllerTests {
         @ParameterizedTest
         @ValueSource(strings = {"0", "-5.00"})
         @DisplayName("Un importe no positivo vuelve al detalle con el error del campo y sin llamar al servicio")
-        void un_importe_no_positivo_vuelve_al_detalle_con_el_error_del_campo_y_sin_llamar_al_servicio(String amount)
+        void aNonPositiveAmountReturnsToTheDetailsWithTheFieldErrorWithoutCallingTheService(String amount)
                 throws Exception {
             mvc.perform(transferenciaDe(TARGET_IBAN, amount, "EUR"))
                     .andExpect(status().isOk())
@@ -1120,7 +1120,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Transferir a la misma cuenta vuelve al detalle con el mensaje del dominio")
-        void transferir_a_la_misma_cuenta_vuelve_al_detalle_con_el_mensaje_del_dominio() throws Exception {
+        void transferringToTheSameAccountReturnsToTheDetailsWithTheDomainMessage() throws Exception {
             var error = new SameAccountTransferException(new AccountNumber("ES1234567890123456789012"));
             when(commands.transfer(any(Caller.class), any())).thenThrow(error);
 
@@ -1134,7 +1134,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Otra divisa vuelve al detalle con el mensaje del dominio y conserva el importe")
-        void otra_divisa_vuelve_al_detalle_con_el_mensaje_del_dominio_y_conserva_el_importe() throws Exception {
+        void anotherCurrencyReturnsToTheDetailsWithTheDomainMessageAndKeepsTheAmount() throws Exception {
             var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD"));
             when(commands.transfer(any(Caller.class), any())).thenThrow(error);
 
@@ -1149,7 +1149,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un IBAN de destino que no existe se muestra en el formulario, no como página 404")
-        void un_iban_de_destino_que_no_existe_se_muestra_en_el_formulario_no_como_pagina_404() throws Exception {
+        void aMissingTargetIbanIsShownInTheFormNotAsA404Page() throws Exception {
             var error = new TargetAccountNotFoundException(TARGET_IBAN);
             when(commands.transfer(any(Caller.class), any())).thenThrow(error);
 
@@ -1164,7 +1164,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una cuenta de origen desconocida o ajena devuelve la página 404")
-        void una_cuenta_de_origen_desconocida_o_ajena_devuelve_la_pagina_404() throws Exception {
+        void anUnknownOrForeignSourceAccountReturnsThe404Page() throws Exception {
             when(commands.transfer(any(Caller.class), any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
 
             mvc.perform(transferenciaDe(TARGET_IBAN, "25.00", "EUR"))
@@ -1174,7 +1174,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un error de formato que solo detecta el servicio vuelve al formulario con su mensaje")
-        void un_error_de_formato_que_solo_detecta_el_servicio_vuelve_al_formulario_con_su_mensaje()
+        void aFormatErrorOnlyTheServiceDetectsReturnsToTheFormWithItsMessage()
                 throws Exception {
             when(commands.transfer(any(Caller.class), any())).thenThrow(new IllegalArgumentException("Dato inválido"));
 
@@ -1188,7 +1188,7 @@ class AccountWebControllerTests {
         @ParameterizedTest
         @CsvSource({"0.001, EUR, El importe debe ser positivo", "10.00, XYZ, XYZ no es un c"})
         @DisplayName("Un importe que redondea a cero o una divisa inexistente vuelven al detalle con el error del command")
-        void un_importe_que_redondea_a_cero_o_una_divisa_inexistente_vuelven_al_detalle_con_el_error_del_command(
+        void anAmountRoundingToZeroOrAMissingCurrencyReturnsToTheDetailsWithTheCommandError(
                 String amount, String currency, String message) throws Exception {
             mvc.perform(transferenciaDe(TARGET_IBAN, amount, currency))
                     .andExpect(status().isOk())
@@ -1218,7 +1218,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una transferencia aprobada responde con el panel, el mensaje y el formulario vacío")
-        void una_transferencia_aprobada_responde_con_el_panel_y_el_mensaje() throws Exception {
+        void anApprovedTransferRespondsWithThePanelAndTheMessage() throws Exception {
             when(commands.transfer(any(Caller.class), any())).thenReturn(transfer("25.00", "APPROVED"));
 
             mvc.perform(transferencia("25.00"))
@@ -1230,7 +1230,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una transferencia rechazada responde con el panel y el aviso de advertencia")
-        void una_transferencia_rechazada_responde_con_el_panel_y_el_aviso() throws Exception {
+        void aRejectedTransferRespondsWithThePanelAndTheNotice() throws Exception {
             when(commands.transfer(any(Caller.class), any())).thenReturn(transfer("900.00", "REJECTED"));
 
             mvc.perform(transferencia("900.00"))
@@ -1242,7 +1242,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un IBAN de destino que no existe responde con el panel y el error en su campo")
-        void un_iban_de_destino_que_no_existe_responde_con_el_panel_y_el_error_en_su_campo() throws Exception {
+        void aMissingTargetIbanRespondsWithThePanelAndTheErrorInItsField() throws Exception {
             var error = new TargetAccountNotFoundException(TARGET_IBAN);
             when(commands.transfer(any(Caller.class), any())).thenThrow(error);
 
@@ -1256,7 +1256,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una cuenta de origen ajena sigue respondiendo la página 404, también a htmx")
-        void una_cuenta_de_origen_ajena_sigue_respondiendo_404() throws Exception {
+        void aForeignSourceAccountStillResponds404() throws Exception {
             when(commands.transfer(any(Caller.class), any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
 
             mvc.perform(transferencia("25.00"))
@@ -1276,7 +1276,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Al abrir el detalle, ingresar, retirar y transferir son pastillas con el formulario cerrado")
-        void al_abrir_el_detalle_las_acciones_estan_cerradas() throws Exception {
+        void whenTheDetailsOpenTheActionsAreClosed() throws Exception {
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("<details id=\"deposit-action\">")))
@@ -1287,7 +1287,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Las acciones son un acordeón de Alpine.js con iconos de Lucide: abrir una cierra las demás (#124)")
-        void las_acciones_son_un_acordeon_de_alpine_con_iconos_de_lucide() throws Exception {
+        void theActionsAreAnAlpineAccordionWithLucideIcons() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
@@ -1302,7 +1302,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un error en el ingreso vuelve al detalle con solo el formulario de ingreso abierto")
-        void un_error_en_el_ingreso_abre_solo_ese_formulario() throws Exception {
+        void aDepositErrorOpensOnlyThatForm() throws Exception {
             mvc.perform(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "0").param("currency", "EUR"))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("<details id=\"deposit-action\" open=\"open\">")))
@@ -1312,7 +1312,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un error en la transferencia vuelve al detalle con solo el formulario de transferencia abierto")
-        void un_error_en_la_transferencia_abre_solo_ese_formulario() throws Exception {
+        void aTransferErrorOpensOnlyThatForm() throws Exception {
             mvc.perform(post("/accounts/" + ACCOUNT_ID + "/transfers").param("amount", "10.00").param("currency", "EUR"))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("<details id=\"transfer-action\" open=\"open\">")))
@@ -1346,7 +1346,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("El formulario muestra el NIF, la nota del IBAN generado y el euro por defecto, sin IBAN ni segmento")
-        void el_formulario_muestra_el_nif_y_no_pide_iban_ni_segmento() throws Exception {
+        void theFormShowsTheTaxIdAndDoesNotAskForIbanOrSegment() throws Exception {
             mvc.perform(get("/accounts/new"))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("name=\"holderName\"")))
@@ -1364,7 +1364,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un alta válida envía el NIF sin IBAN ni segmento y redirige al listado")
-        void un_alta_valida_envia_el_nif_sin_iban_ni_segmento_y_redirige_al_listado() throws Exception {
+        void aValidOpeningSendsTheTaxIdWithoutIbanOrSegmentAndRedirectsToTheList() throws Exception {
             when(commands.openAccount(any(Caller.class), any())).thenReturn(abierta("RETAIL"));
 
             mvc.perform(altaValida())
@@ -1384,7 +1384,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("El mensaje muestra el IBAN generado completo y el segmento Minorista")
-        void el_mensaje_muestra_el_iban_generado_y_el_segmento_minorista() throws Exception {
+        void theMessageShowsTheGeneratedIbanAndTheRetailSegment() throws Exception {
             when(commands.openAccount(any(Caller.class), any())).thenReturn(abierta("RETAIL"));
 
             mvc.perform(altaValida())
@@ -1394,7 +1394,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("El mensaje muestra el segmento Alto patrimonio cuando la fábrica lo calcula")
-        void el_mensaje_muestra_el_segmento_alto_patrimonio() throws Exception {
+        void theMessageShowsTheHighNetWorthSegment() throws Exception {
             when(commands.openAccount(any(Caller.class), any())).thenReturn(abierta("HIGH_NET_WORTH"));
 
             mvc.perform(altaValida())
@@ -1404,7 +1404,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un segmento desconocido se muestra tal cual")
-        void un_segmento_desconocido_se_muestra_tal_cual() throws Exception {
+        void anUnknownSegmentIsShownAsIs() throws Exception {
             when(commands.openAccount(any(Caller.class), any())).thenReturn(abierta("PRIVATE"));
 
             mvc.perform(altaValida())
@@ -1414,7 +1414,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("El formulario pide el usuario del titular")
-        void el_formulario_pide_el_usuario_del_titular() throws Exception {
+        void theFormAsksForTheHolderUsername() throws Exception {
             mvc.perform(get("/accounts/new"))
                     .andExpect(content().string(containsString("Usuario del titular")))
                     .andExpect(content().string(containsString("name=\"ownerUsername\"")));
@@ -1431,7 +1431,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Sin nombre, correo ni usuario el formulario llega al servicio: es él quien sabe si el cliente existe")
-        void sin_datos_del_cliente_el_formulario_llega_al_servicio() throws Exception {
+        void withoutCustomerDataTheFormReachesTheService() throws Exception {
             when(commands.openAccount(any(Caller.class), any())).thenThrow(new IllegalArgumentException(
                     "El usuario del titular es obligatorio para un cliente nuevo"));
 
@@ -1447,7 +1447,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un correo mal formado vuelve al formulario con el error del campo y sin llamar al servicio")
-        void un_correo_mal_formado_vuelve_al_formulario() throws Exception {
+        void aMalformedEmailReturnsToTheForm() throws Exception {
             mvc.perform(altaDe("12345678Z", "Ana Lopez", "100.00", "ana").param("holderEmail", "ana@"))
                     .andExpect(status().isOk())
                     .andExpect(model().attributeHasFieldErrors("form", "holderEmail"))
@@ -1458,7 +1458,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("El campo con error se marca como inválido de Bootstrap y su mensaje va debajo (#124)")
-        void el_campo_con_error_se_marca_como_invalido_de_bootstrap() throws Exception {
+        void theFieldWithAnErrorIsMarkedAsBootstrapInvalid() throws Exception {
             mvc.perform(altaDe("12345678Z", "Ana Lopez", "100.00", "ana").param("holderEmail", "ana@"))
                     .andExpect(status().isOk())
                     .andExpect(content().string(matchesPattern(
@@ -1471,7 +1471,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un usuario del titular con formato inválido vuelve al formulario y conserva lo escrito")
-        void un_usuario_del_titular_con_formato_invalido_vuelve_al_formulario() throws Exception {
+        void aHolderUsernameWithAnInvalidFormatReturnsToTheForm() throws Exception {
             mvc.perform(altaDe("12345678Z", "Ana Lopez", "100.00", "Ana Lopez"))
                     .andExpect(status().isOk())
                     .andExpect(model().attributeHasFieldErrors("form", "ownerUsername"))
@@ -1483,7 +1483,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Unos datos que contradicen al cliente existente vuelven al formulario con el mensaje del servicio")
-        void unos_datos_que_contradicen_al_cliente_existente_vuelven_al_formulario() throws Exception {
+        void dataContradictingTheExistingCustomerReturnsToTheForm() throws Exception {
             when(commands.openAccount(any(Caller.class), any())).thenThrow(new IllegalArgumentException(
                     "El documento 12345678Z ya es de un cliente: deja en blanco nombre, correo y usuario, o indica los suyos"));
 
@@ -1506,7 +1506,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un documento mal formado vuelve al formulario con el error del campo y conserva los datos")
-        void un_documento_mal_formado_vuelve_al_formulario_con_el_error_del_campo_y_conserva_los_datos()
+        void aMalformedDocumentReturnsToTheFormWithTheFieldErrorAndKeepsTheData()
                 throws Exception {
             mvc.perform(altaCon("1234-Z", "Ana Lopez", "100.00"))
                     .andExpect(status().isOk())
@@ -1520,7 +1520,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un depósito insuficiente vuelve al formulario con el mensaje del dominio y conserva los datos")
-        void un_deposito_insuficiente_vuelve_al_formulario_con_el_mensaje_del_dominio_y_conserva_los_datos()
+        void anInsufficientDepositReturnsToTheFormWithTheDomainMessageAndKeepsTheData()
                 throws Exception {
             var error = new InsufficientInitialDepositException(
                     MonetaryAmount.euros("10.00"), MonetaryAmount.euros("50.00"));
@@ -1538,7 +1538,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un número de cuenta generado y duplicado vuelve al formulario con el mensaje del dominio")
-        void un_numero_de_cuenta_duplicado_vuelve_al_formulario_con_el_mensaje_del_dominio() throws Exception {
+        void aDuplicateAccountNumberReturnsToTheFormWithTheDomainMessage() throws Exception {
             var error = new DuplicateAccountNumberException(new AccountNumber("ES1234567890123456789012"));
             when(commands.openAccount(any(Caller.class), any())).thenThrow(error);
 
@@ -1550,7 +1550,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una divisa bien formada pero inexistente vuelve al formulario con el error y sin llamar al servicio")
-        void una_divisa_bien_formada_pero_inexistente_vuelve_al_formulario_con_el_error_y_sin_llamar_al_servicio()
+        void aWellFormedButMissingCurrencyReturnsToTheFormWithoutCallingTheService()
                 throws Exception {
             mvc.perform(post("/accounts/new")
                             .param("holderTaxId", "12345678Z")
@@ -1579,7 +1579,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Sin errores, ningún campo del detalle lleva aria-invalid")
-        void sin_errores_ningun_campo_del_detalle_lleva_aria_invalid() throws Exception {
+        void withoutErrorsNoDetailsFieldHasAriaInvalid() throws Exception {
             String html = mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andReturn().getResponse().getContentAsString();
 
@@ -1588,7 +1588,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un ingreso de cero marca el importe como erróneo y lo liga a su mensaje")
-        void un_ingreso_de_cero_marca_el_importe_como_erroneo_y_lo_liga_a_su_mensaje() throws Exception {
+        void aZeroDepositMarksTheAmountAsInvalidAndLinksItToItsMessage() throws Exception {
             String html = mvc.perform(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "0").param("currency", "EUR"))
                     .andReturn().getResponse().getContentAsString();
 
@@ -1599,7 +1599,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una retirada sin importe marca el importe de la retirada como erróneo")
-        void una_retirada_sin_importe_marca_el_importe_como_erroneo() throws Exception {
+        void aWithdrawalWithoutAmountMarksTheAmountAsInvalid() throws Exception {
             String html = mvc.perform(post("/accounts/" + ACCOUNT_ID + "/withdrawals").param("currency", "EUR"))
                     .andReturn().getResponse().getContentAsString();
 
@@ -1608,7 +1608,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Con htmx, una transferencia sin IBAN responde el panel con el IBAN marcado como erróneo")
-        void con_htmx_una_transferencia_sin_iban_marca_el_iban_como_erroneo() throws Exception {
+        void withHtmxATransferWithoutIbanMarksTheIbanAsInvalid() throws Exception {
             String html = mvc.perform(htmx(post("/accounts/" + ACCOUNT_ID + "/transfers")
                             .param("targetAccountNumber", "").param("amount", "25.00").param("currency", "EUR")))
                     .andReturn().getResponse().getContentAsString();
@@ -1619,7 +1619,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una apertura sin documento ni depósito marca esos dos campos como erróneos y deja el resto sin marcar")
-        void una_apertura_sin_documento_ni_deposito_marca_esos_campos_como_erroneos() throws Exception {
+        void anOpeningWithoutDocumentOrDepositMarksThoseFieldsAsInvalid() throws Exception {
             String html = mvc.perform(post("/accounts/new").param("holderTaxId", "").param("initialDeposit", "0")
                             .param("currency", "EUR"))
                     .andReturn().getResponse().getContentAsString();
@@ -1634,7 +1634,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Una divisa inexistente marca la divisa del ingreso como errónea")
-        void una_divisa_inexistente_marca_la_divisa_como_erronea() throws Exception {
+        void aMissingCurrencyMarksTheCurrencyAsInvalid() throws Exception {
             String html = mvc.perform(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "10.00").param("currency", "xx"))
                     .andReturn().getResponse().getContentAsString();
 
@@ -1648,7 +1648,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("En el detalle, los importes y el IBAN de destino son obligatorios y el IBAN se escribe en mayúsculas")
-        void en_el_detalle_los_importes_y_el_iban_son_obligatorios() throws Exception {
+        void inTheDetailsTheAmountsAndTheIbanAreRequired() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
 
             String html = mvc.perform(get("/accounts/" + ACCOUNT_ID)).andReturn().getResponse().getContentAsString();
@@ -1662,7 +1662,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Al abrir cuenta, documento y depósito son obligatorios y los datos de cliente nuevo no")
-        void al_abrir_cuenta_documento_y_deposito_son_obligatorios() throws Exception {
+        void whenOpeningAnAccountDocumentAndDepositAreRequired() throws Exception {
             String html = mvc.perform(get("/accounts/new")).andReturn().getResponse().getContentAsString();
 
             assertThat(FieldTags.tag(html, "holderTaxId")).contains(" required").contains("autocapitalize=\"characters\"");
@@ -1684,7 +1684,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Un usuario del titular con mayúsculas y espacios alrededor se envía en minúsculas")
-        void un_usuario_del_titular_con_mayusculas_se_envia_en_minusculas() throws Exception {
+        void aHolderUsernameWithCapitalsIsSentInLowerCase() throws Exception {
             when(commands.openAccount(any(Caller.class), any())).thenReturn(cuentaAbierta());
 
             mvc.perform(post("/accounts/new").param("holderName", "Ana Pérez").param("holderTaxId", "12345678Z")
@@ -1699,7 +1699,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Sin usuario del titular, la apertura para un cliente existente sigue sin pedirlo")
-        void sin_usuario_del_titular_sigue_siendo_opcional() throws Exception {
+        void withoutHolderUsernameItIsStillOptional() throws Exception {
             when(commands.openAccount(any(Caller.class), any())).thenReturn(cuentaAbierta());
 
             mvc.perform(post("/accounts/new").param("holderTaxId", "12345678Z").param("ownerUsername", "")
@@ -1712,7 +1712,7 @@ class AccountWebControllerTests {
 
         @Test
         @DisplayName("Abrir cuenta explica el formato del usuario del titular bajo el campo y lo liga al campo")
-        void abrir_cuenta_explica_el_formato_del_usuario_del_titular() throws Exception {
+        void openAccountExplainsTheHolderUsernameFormat() throws Exception {
             String html = mvc.perform(get("/accounts/new")).andReturn().getResponse().getContentAsString();
 
             assertThat(html).containsPattern("<p class=\"form-text[^\"]*\" id=\"ownerUsername-help\">[^<]*guiones bajos o guiones[^<]*minúsculas");

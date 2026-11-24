@@ -44,7 +44,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Una IP puede dar 3 altas; la cuarta se rechaza con el tiempo que falta para que caduque la más antigua")
-        void la_cuarta_alta_de_una_ip_se_rechaza() {
+        void theFourthSignUpFromAnIpIsRejected() {
             limit.tryReserve(IP);
             clock.advance(Duration.ofMinutes(10));
             reserve(IP, 2);
@@ -54,7 +54,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Pasada la ventana desde el alta más antigua, la IP puede volver a darse de alta")
-        void pasada_la_ventana_la_ip_puede_volver() {
+        void afterTheWindowTheIpCanSignUpAgain() {
             reserve(IP, 3);
             clock.advance(Duration.ofHours(1));
 
@@ -63,7 +63,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Un alta rechazada no se anota: no alarga el bloqueo")
-        void un_alta_rechazada_no_se_anota() {
+        void aRejectedSignUpIsNotRecorded() {
             reserve(IP, 3);
             clock.advance(Duration.ofMinutes(30));
             limit.tryReserve(IP);
@@ -74,7 +74,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Una reserva devuelta, porque el alta falló, no cuenta")
-        void una_reserva_devuelta_no_cuenta() {
+        void aReturnedReservationDoesNotCount() {
             reserve(IP, 3);
             limit.release(IP);
 
@@ -83,7 +83,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Las IP son independientes mientras queda cupo global")
-        void las_ip_son_independientes() {
+        void ipsAreIndependent() {
             reserve(IP, 3);
 
             assertThat(limit.tryReserve(OTHER_IP)).isEmpty();
@@ -91,7 +91,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Consultar el límite no reserva nada")
-        void consultar_el_limite_no_reserva_nada() {
+        void checkingTheLimitReservesNothing() {
             reserve(IP, 2);
             assertThat(limit.lockedFor(IP)).isEmpty();
             assertThat(limit.lockedFor(IP)).isEmpty();
@@ -107,7 +107,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Lleno el cupo global con IP distintas, se rechaza cualquier IP, aunque no haya dado ningún alta")
-        void lleno_el_cupo_global_se_rechaza_cualquier_ip() {
+        void whenTheGlobalQuotaIsFullAnyIpIsRejected() {
             for (int i = 1; i <= 5; i++) {
                 assertThat(limit.tryReserve("198.51.100." + i)).isEmpty();
                 clock.advance(Duration.ofMinutes(1));
@@ -119,7 +119,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Una reserva devuelta libera también el cupo global")
-        void una_reserva_devuelta_libera_el_cupo_global() {
+        void aReturnedReservationAlsoFreesTheGlobalQuota() {
             for (int i = 1; i <= 5; i++) {
                 limit.tryReserve("198.51.100." + i);
             }
@@ -130,7 +130,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Con los dos límites llenos, el tiempo que falta es el más largo")
-        void con_los_dos_limites_llenos_el_tiempo_es_el_mas_largo() {
+        void withBothLimitsFullTheWaitIsTheLongest() {
             limit.tryReserve("198.51.100.1");
             limit.tryReserve("198.51.100.2");
             clock.advance(Duration.ofMinutes(20));
@@ -141,7 +141,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Pasada la ventana, el cupo global se libera")
-        void pasada_la_ventana_el_cupo_global_se_libera() {
+        void afterTheWindowTheGlobalQuotaIsFreed() {
             for (int i = 1; i <= 5; i++) {
                 limit.tryReserve("198.51.100." + i);
             }
@@ -157,7 +157,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Tras 2 fallos, la IP no puede reservar un alta hasta que caduque el más antiguo, y no se reserva nada")
-        void tras_los_fallos_la_ip_no_puede_reservar() {
+        void afterTheFailuresTheIpCannotReserve() {
             limit.recordFailure(IP);
             clock.advance(Duration.ofMinutes(15));
             limit.recordFailure(IP);
@@ -170,7 +170,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Un solo fallo no bloquea, y los fallos de una IP no afectan a otra")
-        void un_fallo_no_bloquea_y_las_ip_son_independientes() {
+        void oneFailureDoesNotLockAndIpsAreIndependent() {
             limit.recordFailure(IP);
             assertThat(limit.tryReserve(IP)).isEmpty();
 
@@ -180,7 +180,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Solo cuentan los últimos fallos: con 3 fallos y un máximo de 2, el bloqueo acaba cuando caduca el segundo")
-        void solo_cuentan_los_ultimos_fallos() {
+        void onlyTheLatestFailuresCount() {
             limit.recordFailure(IP);
             clock.advance(Duration.ofMinutes(10));
             limit.recordFailure(IP);
@@ -192,7 +192,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Pasada la ventana desde el último fallo, la IP vuelve a poder darse de alta")
-        void pasada_la_ventana_los_fallos_caducan() {
+        void afterTheWindowTheFailuresExpire() {
             limit.recordFailure(IP);
             limit.recordFailure(IP);
             clock.advance(Duration.ofHours(1));
@@ -203,7 +203,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Los fallos no gastan el cupo global de altas")
-        void los_fallos_no_gastan_el_cupo_global() {
+        void failuresDoNotUseTheGlobalQuota() {
             for (int i = 1; i <= 5; i++) {
                 limit.recordFailure("198.51.100." + i);
             }
@@ -213,7 +213,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Con los fallos y las altas de la IP llenos, el tiempo que falta es el más largo")
-        void con_fallos_y_altas_llenos_el_tiempo_es_el_mas_largo() {
+        void withFailuresAndSignUpsFullTheWaitIsTheLongest() {
             limit.recordFailure(IP);
             limit.recordFailure(IP);
             clock.advance(Duration.ofMinutes(50));
@@ -234,7 +234,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Sin valores, 3 altas por IP y 50 en total por hora")
-        void valores_por_defecto() {
+        void defaultValues() {
             SignUpLimitProperties properties = new SignUpLimitProperties(null, null, null, null);
 
             assertThat(properties.maxPerIp()).isEqualTo(3);
@@ -245,7 +245,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("Los límites y la ventana deben ser positivos")
-        void los_limites_deben_ser_positivos() {
+        void theLimitsMustBePositive() {
             assertThatIllegalStateException().isThrownBy(() -> new SignUpLimitProperties(0, 50, Duration.ofHours(1), 10));
             assertThatIllegalStateException().isThrownBy(() -> new SignUpLimitProperties(3, 0, Duration.ofHours(1), 10));
             assertThatIllegalStateException().isThrownBy(() -> new SignUpLimitProperties(3, 50, Duration.ZERO, 10));
@@ -254,7 +254,7 @@ class SignUpLimitTests {
 
         @Test
         @DisplayName("El cupo global no puede ser menor que el de una IP")
-        void el_cupo_global_no_puede_ser_menor_que_el_de_una_ip() {
+        void theGlobalQuotaCannotBeLowerThanThePerIpOne() {
             assertThatIllegalStateException().isThrownBy(() -> new SignUpLimitProperties(10, 5, Duration.ofHours(1), 10));
         }
     }

@@ -56,7 +56,7 @@ class CaseInsensitiveLoginTests {
     @ParameterizedTest
     @ValueSource(strings = {"elber", "Elber", "ELBER", " elber ", "\tElber "})
     @DisplayName("Un cliente dado de alta en minúsculas entra aunque escriba su usuario con mayúsculas o espacios")
-    void entra_aunque_escriba_su_usuario_con_mayusculas_o_espacios(String typed) {
+    void logsInEvenWhenTheUsernameIsTypedWithCapitalsOrSpaces(String typed) {
         Authentication result = login(typed, "contraseña");
 
         assertThat(result.isAuthenticated()).isTrue();
@@ -65,13 +65,13 @@ class CaseInsensitiveLoginTests {
 
     @Test
     @DisplayName("Con mayúsculas en el usuario, una contraseña errónea sigue rechazándose")
-    void con_mayusculas_una_contrasena_erronea_sigue_rechazandose() {
+    void withCapitalsAWrongPasswordIsStillRejected() {
         assertThatExceptionOfType(BadCredentialsException.class).isThrownBy(() -> login("Elber", "mala"));
     }
 
     @Test
     @DisplayName("Un usuario que no existe recibe el mismo error que una contraseña errónea")
-    void un_usuario_que_no_existe_recibe_el_mismo_error_que_una_contrasena_erronea() {
+    void aMissingUserGetsTheSameErrorAsAWrongPassword() {
         assertThatExceptionOfType(BadCredentialsException.class).isThrownBy(() -> login("Nadie", "contraseña"))
                 .withMessage(catchMessage(() -> login("Elber", "mala")));
     }

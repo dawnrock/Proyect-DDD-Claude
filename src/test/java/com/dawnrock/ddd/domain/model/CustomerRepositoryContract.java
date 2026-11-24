@@ -29,7 +29,7 @@ public abstract class CustomerRepositoryContract {
 
     @Test
     @DisplayName("Un cliente guardado se encuentra por su documento, aunque se escriba con espacios o minúsculas")
-    void un_cliente_guardado_se_encuentra_por_su_documento() {
+    void aSavedCustomerIsFoundByItsDocument() {
         Customer ada = ada();
         repository.save(ada);
 
@@ -38,7 +38,7 @@ public abstract class CustomerRepositoryContract {
 
     @Test
     @DisplayName("Un documento desconocido no devuelve nada")
-    void un_documento_desconocido_no_devuelve_nada() {
+    void anUnknownDocumentReturnsNothing() {
         repository.save(ada());
 
         assertThat(repository.findByTaxId(new TaxId("87654321X"))).isEmpty();
@@ -46,7 +46,7 @@ public abstract class CustomerRepositoryContract {
 
     @Test
     @DisplayName("Guardar otro cliente con el mismo documento se rechaza y no pisa al primero (R30)")
-    void guardar_otro_cliente_con_el_mismo_documento_se_rechaza() {
+    void savingAnotherCustomerWithTheSameDocumentIsRejected() {
         Customer ada = ada();
         repository.save(ada);
         Customer other = Customer.register("Otra Ada", new TaxId("12345678Z"), new EmailAddress("otra@example.com"));
@@ -57,7 +57,7 @@ public abstract class CustomerRepositoryContract {
 
     @Test
     @DisplayName("Guardar de nuevo al mismo cliente no es un duplicado")
-    void guardar_de_nuevo_al_mismo_cliente_no_es_un_duplicado() {
+    void savingTheSameCustomerAgainIsNotADuplicate() {
         Customer ada = ada();
         repository.save(ada);
 
@@ -67,7 +67,7 @@ public abstract class CustomerRepositoryContract {
 
     @Test
     @DisplayName("El cliente a guardar y el documento a buscar son obligatorios")
-    void el_cliente_y_el_documento_son_obligatorios() {
+    void theCustomerAndTheDocumentAreRequired() {
         assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> repository.save(null));
         assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> repository.findByTaxId(null));
     }

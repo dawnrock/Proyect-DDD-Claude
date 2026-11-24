@@ -60,7 +60,7 @@ class CheckingAccountServiceSignUpTests {
 
     @Test
     @DisplayName("El alta registra al cliente y abre su cuenta con un IBAN de Mon-A Bank a nombre de su usuario")
-    void el_alta_registra_al_cliente_y_abre_su_cuenta_con_un_iban_de_mon_a_bank() {
+    void signUpRegistersTheCustomerAndOpensTheirAccountWithAMonABankIban() {
         AccountSummary summary = service.signUp(signUp().build());
 
         assertThat(new AccountNumber(summary.accountNumber()).isMonABank()).isTrue();
@@ -74,7 +74,7 @@ class CheckingAccountServiceSignUpTests {
 
     @Test
     @DisplayName("El titular de la cuenta lleva el documento del cliente y el cliente ve su cuenta")
-    void el_titular_de_la_cuenta_lleva_el_documento_del_cliente() {
+    void theAccountHolderCarriesTheCustomerDocument() {
         AccountSummary summary = service.signUp(signUp().taxId(" 00000000 t ").build());
 
         assertThat(accounts.findById(summary.id()).orElseThrow().primaryHolder().taxId())
@@ -85,7 +85,7 @@ class CheckingAccountServiceSignUpTests {
 
     @Test
     @DisplayName("El segmento sale de los ingresos verificados por la agencia: 87654321X es de alto patrimonio")
-    void el_segmento_sale_de_los_ingresos_verificados_por_la_agencia() {
+    void theSegmentComesFromTheIncomeVerifiedByTheTaxAgency() {
         AccountSummary grace = service.signUp(signUp().fullName("Grace Hopper").taxId("87654321X")
                 .username("grace").build());
         AccountSummary margaret = service.signUp(signUp().build());
@@ -96,7 +96,7 @@ class CheckingAccountServiceSignUpTests {
 
     @Test
     @DisplayName("Un documento que ya es de un cliente se rechaza aunque cambie el correo, y no se abre nada (R30)")
-    void un_documento_que_ya_es_de_un_cliente_se_rechaza_aunque_cambie_el_correo() {
+    void aDocumentAlreadyBelongingToACustomerIsRejectedEvenWithAnotherEmail() {
         service.signUp(signUp().build());
 
         assertThatExceptionOfType(DuplicateCustomerException.class)
@@ -108,7 +108,7 @@ class CheckingAccountServiceSignUpTests {
 
     @Test
     @DisplayName("Un usuario que ya es de otro cliente se rechaza y no se abre nada (R30)")
-    void un_usuario_de_otro_cliente_se_rechaza_y_no_se_abre_nada() {
+    void anotherCustomersUsernameIsRejectedAndNothingIsOpened() {
         service.signUp(signUp().build());
 
         assertThatExceptionOfType(IllegalArgumentException.class)
@@ -120,7 +120,7 @@ class CheckingAccountServiceSignUpTests {
 
     @Test
     @DisplayName("Un usuario que ya es propietario de una cuenta se rechaza y no se abre nada (R30)")
-    void un_usuario_propietario_de_una_cuenta_se_rechaza_y_no_se_abre_nada() {
+    void aUsernameThatOwnsAnAccountIsRejectedAndNothingIsOpened() {
         owners.assign(java.util.UUID.randomUUID(), "margaret");
 
         assertThatExceptionOfType(IllegalArgumentException.class)
@@ -132,7 +132,7 @@ class CheckingAccountServiceSignUpTests {
 
     @Test
     @DisplayName("Un depósito inferior a 50 EUR se rechaza y no deja ni cliente ni cuenta (R1, R30)")
-    void un_deposito_insuficiente_no_deja_ni_cliente_ni_cuenta() {
+    void anInsufficientDepositLeavesNeitherCustomerNorAccount() {
         assertThatExceptionOfType(InsufficientInitialDepositException.class)
                 .isThrownBy(() -> service.signUp(signUp().initialDeposit(new BigDecimal("49.99")).build()));
 
@@ -143,7 +143,7 @@ class CheckingAccountServiceSignUpTests {
 
     @Test
     @DisplayName("Tras un alta fallida el mismo documento puede darse de alta con un depósito válido")
-    void tras_un_alta_fallida_el_mismo_documento_puede_darse_de_alta() {
+    void afterAFailedSignUpTheSameDocumentCanSignUp() {
         assertThatExceptionOfType(InsufficientInitialDepositException.class)
                 .isThrownBy(() -> service.signUp(signUp().initialDeposit(new BigDecimal("10")).build()));
 
@@ -152,7 +152,7 @@ class CheckingAccountServiceSignUpTests {
 
     @Test
     @DisplayName("Un depósito en otra divisa se rechaza y no deja nada guardado")
-    void un_deposito_en_otra_divisa_se_rechaza_y_no_deja_nada_guardado() {
+    void aDepositInAnotherCurrencyIsRejectedAndNothingIsSaved() {
         assertThatExceptionOfType(CurrencyMismatchException.class)
                 .isThrownBy(() -> service.signUp(signUp().currency("USD").build()));
 
@@ -162,7 +162,7 @@ class CheckingAccountServiceSignUpTests {
 
     @Test
     @DisplayName("Un documento con la letra de control incorrecta se rechaza y no deja nada guardado (R28)")
-    void un_documento_con_la_letra_incorrecta_se_rechaza() {
+    void aDocumentWithTheWrongLetterIsRejected() {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> service.signUp(signUp().taxId("00000000A").build()))
                 .withMessage("La letra de control del documento 00000000A no es correcta");
@@ -172,7 +172,7 @@ class CheckingAccountServiceSignUpTests {
 
     @Test
     @DisplayName("Dos altas reciben IBAN distintos")
-    void dos_altas_reciben_iban_distintos() {
+    void twoSignUpsGetDifferentIbans() {
         AccountSummary first = service.signUp(signUp().build());
         AccountSummary second = service.signUp(signUp().taxId("12345678Z").username("ada")
                 .email("ada@example.com").build());
@@ -182,7 +182,7 @@ class CheckingAccountServiceSignUpTests {
 
     @Test
     @DisplayName("Un usuario es de un cliente si tiene cliente asignado o ya es propietario de una cuenta")
-    void un_usuario_esta_tomado_si_tiene_cliente_o_cuenta() {
+    void aUsernameIsTakenWhenItHasACustomerOrAnAccount() {
         service.signUp(signUp().build());
         owners.assign(java.util.UUID.randomUUID(), "demo");
 

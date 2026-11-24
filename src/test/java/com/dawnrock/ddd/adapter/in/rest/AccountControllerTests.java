@@ -87,7 +87,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Una petición válida responde 201 con Location y el resumen de la cuenta")
-        void una_peticion_valida_responde_201_con_location_y_el_resumen_de_la_cuenta() throws Exception {
+        void aValidRequestResponds201WithLocationAndTheAccountSummary() throws Exception {
             given(commands.openAccount(any(Caller.class), any())).willReturn(summary());
 
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
@@ -103,7 +103,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("La respuesta lleva el segmento que ha calculado la factoría")
-        void la_respuesta_lleva_el_segmento_calculado() throws Exception {
+        void theResponseCarriesTheCalculatedSegment() throws Exception {
             given(commands.openAccount(any(Caller.class), any())).willReturn(
                     AccountSummary.builder().id(ID).accountNumber(IBAN).holderName("Grace Hopper")
                             .segment("HIGH_NET_WORTH").balance(new BigDecimal("5000.00")).currency("EUR").build());
@@ -118,7 +118,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("La petición se convierte en un command con EUR por defecto")
-        void la_peticion_se_convierte_en_un_command_con_eur_por_defecto() throws Exception {
+        void theRequestBecomesACommandWithEurByDefault() throws Exception {
             given(commands.openAccount(any(Caller.class), any())).willReturn(summary());
 
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
@@ -135,7 +135,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Una divisa indicada llega al command")
-        void una_divisa_indicada_llega_al_command() throws Exception {
+        void aGivenCurrencyReachesTheCommand() throws Exception {
             given(commands.openAccount(any(Caller.class), any())).willReturn(summary());
 
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
@@ -151,7 +151,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Sin documento del titular responde 400 con el error del campo y no llama al servicio")
-        void sin_documento_responde_400_con_el_error_del_campo_y_no_llama_al_servicio() throws Exception {
+        void withoutDocumentResponds400WithTheFieldErrorAndDoesNotCallTheService() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
                     {"holderName": "Ada Lovelace", "initialDeposit": 100, "ownerUsername": "ada"}"""))
                     .andExpect(status().isBadRequest())
@@ -164,7 +164,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Para un cliente existente basta el documento: nombre, correo y usuario llegan en blanco")
-        void para_un_cliente_existente_basta_el_documento() throws Exception {
+        void forAnExistingCustomerTheDocumentIsEnough() throws Exception {
             given(commands.openAccount(any(Caller.class), any())).willReturn(summary());
 
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
@@ -180,7 +180,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Unos datos que contradicen al cliente existente responden 400 con el mensaje del servicio")
-        void unos_datos_que_contradicen_al_cliente_existente_responden_400() throws Exception {
+        void dataContradictingTheExistingCustomerResponds400() throws Exception {
             given(commands.openAccount(any(Caller.class), any())).willThrow(new IllegalArgumentException(
                     "El documento 12345678Z ya es de un cliente: deja en blanco nombre, correo y usuario, o indica los suyos"));
 
@@ -191,7 +191,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Todos los campos mal formados aparecen en el mapa de errores")
-        void todos_los_campos_mal_formados_aparecen_en_el_mapa_de_errores() throws Exception {
+        void everyMalformedFieldAppearsInTheErrorMap() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
                     {"holderTaxId": "1234", "holderEmail": "ada@",
                      "initialDeposit": -5, "currency": "eur", "ownerUsername": "Ada L"}"""))
@@ -207,7 +207,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Un cuerpo vacío responde 400 solo con los campos siempre obligatorios")
-        void un_cuerpo_vacio_responde_400_solo_con_los_campos_siempre_obligatorios() throws Exception {
+        void anEmptyBodyResponds400OnlyWithTheAlwaysRequiredFields() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("{}"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.holderTaxId").exists())
@@ -222,7 +222,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("El cuerpo antiguo con IBAN y segmento pero sin documento responde 400 con el error del documento")
-        void el_cuerpo_antiguo_sin_nif_responde_400() throws Exception {
+        void theOldBodyWithoutTaxIdResponds400() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
                     {"accountNumber": "ES9121000418450200051332", "holderName": "Ada Lovelace",
                      "segment": "RETAIL", "initialDeposit": 100, "ownerUsername": "ada"}"""))
@@ -235,7 +235,7 @@ class AccountControllerTests {
         @ParameterizedTest(name = "depósito inicial {0}")
         @DisplayName("Un depósito inicial que redondea a cero o supera el máximo responde 400 con el error del campo")
         @ValueSource(strings = {"0.004", "1000000000.00", "1.7976931348623155E+308"})
-        void un_deposito_inicial_fuera_de_los_limites_responde_400(String deposit) throws Exception {
+        void anInitialDepositOutOfBoundsResponds400(String deposit) throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON)
                             .content(VALID_BODY.replace("\"initialDeposit\": 100.00", "\"initialDeposit\": " + deposit)))
                     .andExpect(status().isBadRequest())
@@ -247,7 +247,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Un depósito insuficiente responde 422 con el mensaje del dominio")
-        void un_deposito_insuficiente_responde_422_con_el_mensaje_del_dominio() throws Exception {
+        void anInsufficientDepositResponds422WithTheDomainMessage() throws Exception {
             given(commands.openAccount(any(Caller.class), any())).willThrow(new InsufficientInitialDepositException(
                     MonetaryAmount.euros("10.00"), MonetaryAmount.euros("50.00")));
 
@@ -260,7 +260,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Un número de cuenta duplicado responde 422")
-        void un_numero_de_cuenta_duplicado_responde_422() throws Exception {
+        void aDuplicateAccountNumberResponds422() throws Exception {
             given(commands.openAccount(any(Caller.class), any())).willThrow(new DuplicateAccountNumberException(new AccountNumber(IBAN)));
 
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
@@ -270,7 +270,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Una divisa bien formada pero desconocida que escapa a la validación responde 400")
-        void una_divisa_bien_formada_pero_desconocida_responde_400() throws Exception {
+        void aWellFormedButUnknownCurrencyResponds400() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
                     {"holderName": "Ada Lovelace", "holderTaxId": "12345678Z",
                      "initialDeposit": 100, "currency": "XYZ", "ownerUsername": "ada"}"""))
@@ -286,7 +286,7 @@ class AccountControllerTests {
         @ParameterizedTest(name = "{0} /api/accounts")
         @ValueSource(strings = {"QUERY", "PUT", "DELETE"})
         @DisplayName("Un método no declarado, también QUERY, responde 405 con la cabecera Allow")
-        void un_metodo_no_declarado_responde_405_con_la_cabecera_allow(String method) throws Exception {
+        void anUndeclaredMethodResponds405WithTheAllowHeader(String method) throws Exception {
             mvc.perform(request(HttpMethod.valueOf(method), "/api/accounts"))
                     .andExpect(status().isMethodNotAllowed())
                     .andExpect(header().string("Allow", containsString("GET")));
@@ -305,7 +305,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Sin credenciales cualquier operación responde 401 No autenticado y no llama al servicio")
         @WithAnonymousUser
-        void sin_credenciales_cualquier_operacion_responde_401_no_autenticado() throws Exception {
+        void withoutCredentialsAnyOperationResponds401() throws Exception {
             mvc.perform(get("/api/accounts"))
                     .andExpect(status().isUnauthorized())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
@@ -320,7 +320,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Un usuario que abre una cuenta recibe 403 Acceso denegado y no llama al servicio")
         @WithMockUser(username = "ada", roles = "USER")
-        void un_usuario_que_abre_una_cuenta_recibe_403_acceso_denegado() throws Exception {
+        void aUserOpeningAnAccountGets403() throws Exception {
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
                     .andExpect(status().isForbidden())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
@@ -332,7 +332,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Si el servicio lanza ForbiddenOperationException la respuesta es 403 Acceso denegado")
-        void si_el_servicio_lanza_forbidden_operation_exception_la_respuesta_es_403() throws Exception {
+        void whenTheServiceThrowsForbiddenOperationExceptionTheResponseIs403() throws Exception {
             given(commands.openAccount(any(Caller.class), any())).willThrow(new ForbiddenOperationException("abrir cuentas"));
 
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
@@ -344,7 +344,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Un usuario consulta una cuenta ajena: el servicio la trata como inexistente y responde 404")
         @WithMockUser(username = "ada", roles = "USER")
-        void un_usuario_consulta_una_cuenta_ajena_responde_404() throws Exception {
+        void aUserViewingAnotherUsersAccountGets404() throws Exception {
             given(queries.findAccount(ADA, ID)).willThrow(new AccountNotFoundException(ID));
 
             mvc.perform(get("/api/accounts/{id}", ID))
@@ -355,7 +355,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("El controlador pasa al servicio el Caller construido con la autenticación")
         @WithMockUser(username = "ada", roles = "USER")
-        void el_controlador_pasa_al_servicio_el_caller_de_la_autenticacion() throws Exception {
+        void theControllerPassesTheCallerFromTheAuthenticationToTheService() throws Exception {
             given(queries.listAccounts(ADA)).willReturn(List.of(summary()));
 
             mvc.perform(get("/api/accounts"))
@@ -365,7 +365,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Un administrador abre la cuenta y el command lleva el usuario propietario")
-        void un_administrador_abre_la_cuenta_y_el_command_lleva_el_usuario_propietario() throws Exception {
+        void anAdministratorOpensTheAccountAndTheCommandCarriesTheOwner() throws Exception {
             given(commands.openAccount(eq(ADMIN), any())).willReturn(summary());
 
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
@@ -383,7 +383,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Responde 200 con un array de resúmenes")
-        void responde_200_con_un_array_de_resumenes() throws Exception {
+        void responds200WithAnArrayOfSummaries() throws Exception {
             given(queries.listAccounts(any(Caller.class))).willReturn(List.of(summary()));
 
             mvc.perform(get("/api/accounts"))
@@ -396,7 +396,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Sin cuentas responde 200 con un array vacío")
-        void sin_cuentas_responde_200_con_un_array_vacio() throws Exception {
+        void withoutAccountsResponds200WithAnEmptyArray() throws Exception {
             given(queries.listAccounts(any(Caller.class))).willReturn(List.of());
 
             mvc.perform(get("/api/accounts"))
@@ -411,7 +411,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Responde 200 con el detalle y sus movimientos")
-        void responde_200_con_el_detalle_y_sus_movimientos() throws Exception {
+        void responds200WithTheDetailsAndTheirTransactions() throws Exception {
             UUID transactionId = UUID.fromString("66666666-7777-8888-9999-000000000000");
             given(queries.findAccount(any(Caller.class), eq(ID))).willReturn(AccountDetails.builder()
                     .id(ID).accountNumber(IBAN).holderName("Ada Lovelace").holderTaxId("12345678Z")
@@ -439,7 +439,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Un movimiento de transferencia lleva counterpartAccountNumber y los demás no incluyen la clave")
-        void un_movimiento_de_transferencia_lleva_la_contrapartida_y_los_demas_no_incluyen_la_clave() throws Exception {
+        void aTransferTransactionCarriesTheCounterpartAndTheOthersOmitTheKey() throws Exception {
             given(queries.findAccount(any(Caller.class), eq(ID))).willReturn(AccountDetails.builder()
                     .id(ID).accountNumber(IBAN).holderName("Ada Lovelace").segment("RETAIL")
                     .balance(new BigDecimal("0.00")).currency("EUR")
@@ -460,7 +460,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Un id desconocido responde 404 Recurso inexistente")
-        void un_id_desconocido_responde_404_recurso_inexistente() throws Exception {
+        void anUnknownIdResponds404() throws Exception {
             given(queries.findAccount(any(Caller.class), eq(ID))).willThrow(new AccountNotFoundException(ID));
 
             mvc.perform(get("/api/accounts/{id}", ID))
@@ -472,7 +472,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Un id que no es un UUID responde 400")
-        void un_id_que_no_es_un_uuid_responde_400() throws Exception {
+        void anIdThatIsNotAUuidResponds400() throws Exception {
             mvc.perform(get("/api/accounts/{id}", "no-es-un-uuid"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.title").value("Petición no válida"));
@@ -495,7 +495,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Una petición válida responde 201 con el movimiento y sin Location")
-        void una_peticion_valida_responde_201_con_el_movimiento_y_sin_location() throws Exception {
+        void aValidRequestResponds201WithTheTransactionAndNoLocation() throws Exception {
             given(commands.deposit(any(Caller.class), any())).willReturn(approvedDeposit());
 
             mvc.perform(post("/api/accounts/{id}/deposits", ID).contentType(MediaType.APPLICATION_JSON).content(BODY))
@@ -516,7 +516,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Sin divisa se usa EUR")
-        void sin_divisa_se_usa_eur() throws Exception {
+        void withoutCurrencyEurIsUsed() throws Exception {
             given(commands.deposit(any(Caller.class), any())).willReturn(approvedDeposit());
 
             mvc.perform(post("/api/accounts/{id}/deposits", ID).contentType(MediaType.APPLICATION_JSON)
@@ -531,7 +531,7 @@ class AccountControllerTests {
         @ParameterizedTest(name = "importe {0}")
         @DisplayName("Un importe que redondea a cero o supera el máximo responde 400 con el error del campo")
         @ValueSource(strings = {"0.004", "1000000000.00", "1.7976931348623155E+308"})
-        void un_importe_fuera_de_los_limites_responde_400_con_el_error_del_campo(String amount) throws Exception {
+        void anAmountOutOfBoundsResponds400WithTheFieldError(String amount) throws Exception {
             mvc.perform(post("/api/accounts/{id}/deposits", ID).contentType(MediaType.APPLICATION_JSON)
                     .content("{\"amount\": " + amount + "}"))
                     .andExpect(status().isBadRequest())
@@ -544,7 +544,7 @@ class AccountControllerTests {
         @ParameterizedTest(name = "importe {0}")
         @DisplayName("Un importe cero o negativo responde 400 con el error del campo")
         @ValueSource(strings = {"0", "-5"})
-        void un_importe_cero_o_negativo_responde_400_con_el_error_del_campo(String amount) throws Exception {
+        void aZeroOrNegativeAmountResponds400WithTheFieldError(String amount) throws Exception {
             mvc.perform(post("/api/accounts/{id}/deposits", ID).contentType(MediaType.APPLICATION_JSON)
                     .content("{\"amount\": " + amount + "}"))
                     .andExpect(status().isBadRequest())
@@ -556,7 +556,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Sin importe y con la divisa mal formada responde 400 con ambos errores")
-        void sin_importe_y_con_la_divisa_mal_formada_responde_400_con_ambos_errores() throws Exception {
+        void withoutAmountAndAMalformedCurrencyResponds400WithBothErrors() throws Exception {
             mvc.perform(post("/api/accounts/{id}/deposits", ID).contentType(MediaType.APPLICATION_JSON)
                     .content("{\"currency\": \"eur\"}"))
                     .andExpect(status().isBadRequest())
@@ -568,7 +568,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Una cuenta desconocida responde 404 Recurso inexistente")
-        void una_cuenta_desconocida_responde_404_recurso_inexistente() throws Exception {
+        void anUnknownAccountResponds404() throws Exception {
             given(commands.deposit(any(Caller.class), any())).willThrow(new AccountNotFoundException(ID));
 
             mvc.perform(post("/api/accounts/{id}/deposits", ID).contentType(MediaType.APPLICATION_JSON).content(BODY))
@@ -578,7 +578,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Una divisa distinta a la de la cuenta responde 422 Regla de negocio incumplida")
-        void una_divisa_distinta_a_la_de_la_cuenta_responde_422() throws Exception {
+        void aCurrencyDifferentFromTheAccountsResponds422() throws Exception {
             given(commands.deposit(any(Caller.class), any())).willThrow(
                     new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD")));
 
@@ -590,7 +590,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Una divisa bien formada pero desconocida responde 400")
-        void una_divisa_bien_formada_pero_desconocida_responde_400() throws Exception {
+        void aWellFormedButUnknownCurrencyResponds400() throws Exception {
             mvc.perform(post("/api/accounts/{id}/deposits", ID).contentType(MediaType.APPLICATION_JSON)
                     .content("{\"amount\": 10, \"currency\": \"XYZ\"}"))
                     .andExpect(status().isBadRequest())
@@ -612,7 +612,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Una retirada aprobada responde 201 con el movimiento APPROVED y sin Location")
-        void una_retirada_aprobada_responde_201_con_el_movimiento_approved_y_sin_location() throws Exception {
+        void anApprovedWithdrawalResponds201WithTheApprovedTransactionAndNoLocation() throws Exception {
             given(commands.withdraw(any(Caller.class), any())).willReturn(withdrawal("APPROVED"));
 
             mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
@@ -632,7 +632,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Una retirada rechazada no es un error: responde 201 con el movimiento REJECTED")
-        void una_retirada_rechazada_responde_201_con_el_movimiento_rejected() throws Exception {
+        void aRejectedWithdrawalResponds201WithTheRejectedTransaction() throws Exception {
             given(commands.withdraw(any(Caller.class), any())).willReturn(withdrawal("REJECTED"));
 
             mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
@@ -644,7 +644,7 @@ class AccountControllerTests {
         @ParameterizedTest(name = "importe {0}")
         @DisplayName("Un importe que redondea a cero o supera el máximo responde 400 con el error del campo")
         @ValueSource(strings = {"0.004", "1000000000.00", "1.7976931348623155E+308"})
-        void un_importe_fuera_de_los_limites_responde_400_con_el_error_del_campo(String amount) throws Exception {
+        void anAmountOutOfBoundsResponds400WithTheFieldError(String amount) throws Exception {
             mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
                     .content("{\"amount\": " + amount + "}"))
                     .andExpect(status().isBadRequest())
@@ -657,7 +657,7 @@ class AccountControllerTests {
         @ParameterizedTest(name = "importe {0}")
         @DisplayName("Un importe cero o negativo responde 400 con el error del campo")
         @ValueSource(strings = {"0", "-5"})
-        void un_importe_cero_o_negativo_responde_400_con_el_error_del_campo(String amount) throws Exception {
+        void aZeroOrNegativeAmountResponds400WithTheFieldError(String amount) throws Exception {
             mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
                     .content("{\"amount\": " + amount + "}"))
                     .andExpect(status().isBadRequest())
@@ -669,7 +669,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Una cuenta desconocida responde 404 Recurso inexistente")
-        void una_cuenta_desconocida_responde_404_recurso_inexistente() throws Exception {
+        void anUnknownAccountResponds404() throws Exception {
             given(commands.withdraw(any(Caller.class), any())).willThrow(new AccountNotFoundException(ID));
 
             mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
@@ -680,7 +680,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Una divisa distinta a la de la cuenta responde 422 Regla de negocio incumplida")
-        void una_divisa_distinta_a_la_de_la_cuenta_responde_422() throws Exception {
+        void aCurrencyDifferentFromTheAccountsResponds422() throws Exception {
             given(commands.withdraw(any(Caller.class), any())).willThrow(
                     new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD")));
 
@@ -691,7 +691,7 @@ class AccountControllerTests {
         }
         @Test
         @DisplayName("Con la divisa mal formada responde 400 con el error del campo")
-        void con_la_divisa_mal_formada_responde_400_con_el_error_del_campo() throws Exception {
+        void aMalformedCurrencyResponds400WithTheFieldError() throws Exception {
             mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
                     .content("{\"amount\": 10, \"currency\": \"eur\"}"))
                     .andExpect(status().isBadRequest())
@@ -702,7 +702,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Una divisa bien formada pero desconocida responde 400")
-        void una_divisa_bien_formada_pero_desconocida_responde_400() throws Exception {
+        void aWellFormedButUnknownCurrencyResponds400() throws Exception {
             mvc.perform(post("/api/accounts/{id}/withdrawals", ID).contentType(MediaType.APPLICATION_JSON)
                     .content("{\"amount\": 10, \"currency\": \"XYZ\"}"))
                     .andExpect(status().isBadRequest())
@@ -719,7 +719,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Un administrador recibe 200 con el resumen y el IBAN nuevo")
-        void un_administrador_recibe_200_con_el_resumen_y_el_iban_nuevo() throws Exception {
+        void anAdministratorGets200WithTheSummaryAndTheNewIban() throws Exception {
             given(commands.regenerateAccountNumber(ADMIN, ID)).willReturn(
                     AccountSummary.builder().id(ID).accountNumber(NEW_IBAN).holderName("Ada Lovelace")
                             .segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build());
@@ -733,7 +733,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Un cliente recibe 403 Acceso denegado y no se llama al puerto")
         @WithMockUser(username = "ada", roles = "USER")
-        void un_cliente_recibe_403_acceso_denegado() throws Exception {
+        void aCustomerGets403() throws Exception {
             mvc.perform(post("/api/accounts/{id}/account-number", ID))
                     .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.title").value("Acceso denegado"))
@@ -745,7 +745,7 @@ class AccountControllerTests {
         @Test
         @DisplayName("Sin credenciales responde 401 No autenticado")
         @WithAnonymousUser
-        void sin_credenciales_responde_401() throws Exception {
+        void withoutCredentialsResponds401() throws Exception {
             mvc.perform(post("/api/accounts/{id}/account-number", ID))
                     .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.title").value("No autenticado"));
@@ -755,7 +755,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Si el puerto lanza ForbiddenOperationException la respuesta es 403")
-        void si_el_puerto_lanza_forbidden_operation_exception_la_respuesta_es_403() throws Exception {
+        void whenThePortThrowsForbiddenOperationExceptionTheResponseIs403() throws Exception {
             given(commands.regenerateAccountNumber(any(Caller.class), any()))
                     .willThrow(new ForbiddenOperationException("generar un nuevo número de cuenta"));
 
@@ -766,7 +766,7 @@ class AccountControllerTests {
 
         @Test
         @DisplayName("Una cuenta desconocida responde 404 Recurso inexistente")
-        void una_cuenta_desconocida_responde_404() throws Exception {
+        void anUnknownAccountResponds404() throws Exception {
             given(commands.regenerateAccountNumber(any(Caller.class), any())).willThrow(new AccountNotFoundException(ID));
 
             mvc.perform(post("/api/accounts/{id}/account-number", ID))

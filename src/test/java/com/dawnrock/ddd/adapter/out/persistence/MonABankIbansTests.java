@@ -18,13 +18,13 @@ class MonABankIbansTests {
             "2, ES1099990001410000000002",
             "3, ES8899990001440000000003"})
     @DisplayName("El número secuencial de una cuenta da el mismo IBAN de Mon-A Bank que la demo")
-    void el_numero_secuencial_da_el_iban_de_mon_a_bank(long number, String iban) {
+    void theSequentialNumberGivesTheMonABankIban(long number, String iban) {
         assertThat(MonABankIbans.forAccount(number)).isEqualTo(new AccountNumber(iban));
     }
 
     @Test
     @DisplayName("El número secuencial de una cuenta es positivo y cabe en diez dígitos")
-    void el_numero_secuencial_es_positivo_y_cabe_en_diez_digitos() {
+    void theSequentialNumberIsPositiveAndFitsInTenDigits() {
         assertThatIllegalArgumentException().isThrownBy(() -> MonABankIbans.forAccount(0));
         assertThatIllegalArgumentException().isThrownBy(() -> MonABankIbans.forAccount(10_000_000_000L));
     }

@@ -28,7 +28,7 @@ class LoginControllerTests {
 
     @Test
     @DisplayName("Con ?blocked, el login muestra el formulario y el aviso de bloqueo con los minutos configurados (#130)")
-    void con_blocked_el_login_muestra_el_aviso_de_bloqueo() throws Exception {
+    void withBlockedTheLoginShowsTheLockoutNotice() throws Exception {
         mvc.perform(get("/login").param("blocked", ""))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("name=\"username\"")))
@@ -39,7 +39,7 @@ class LoginControllerTests {
 
     @Test
     @DisplayName("El login navega con htmx y la configuración de htmx no guarda copias de las páginas (#126)")
-    void el_login_navega_con_htmx_y_no_guarda_copias_de_las_paginas() throws Exception {
+    void theLoginNavigatesWithHtmxAndDoesNotCachePages() throws Exception {
         mvc.perform(get("/login").param("form", ""))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("hx-boost=\"true\" hx-swap=\"innerHTML transition:true\"")))
@@ -49,7 +49,7 @@ class LoginControllerTests {
 
     @Test
     @DisplayName("Sin parámetros, /login muestra las dos puertas y ningún campo de formulario")
-    void sin_parametros_login_muestra_las_dos_puertas_y_ningun_campo() throws Exception {
+    void withoutParametersLoginShowsBothDoorsAndNoField() throws Exception {
         mvc.perform(get("/login"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("login"))
@@ -63,7 +63,7 @@ class LoginControllerTests {
 
     @Test
     @DisplayName("Con ?form, /login muestra el formulario de acceso con el enlace de vuelta a las puertas")
-    void con_form_login_muestra_el_formulario_con_enlace_de_vuelta() throws Exception {
+    void withFormLoginShowsTheFormWithABackLink() throws Exception {
         mvc.perform(get("/login").param("form", ""))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("name=\"username\"")))
@@ -77,7 +77,7 @@ class LoginControllerTests {
 
     @Test
     @DisplayName("Con ?error, /login muestra el formulario con el mensaje de credenciales incorrectas")
-    void con_error_login_muestra_el_formulario_con_el_mensaje() throws Exception {
+    void withErrorLoginShowsTheFormWithTheMessage() throws Exception {
         mvc.perform(get("/login").param("error", ""))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Usuario o contraseña incorrectos")))
@@ -87,7 +87,7 @@ class LoginControllerTests {
 
     @Test
     @DisplayName("Con ?logout, /login muestra el aviso de sesión cerrada junto a las puertas")
-    void con_logout_login_muestra_el_aviso_junto_a_las_puertas() throws Exception {
+    void withLogoutLoginShowsTheNoticeNextToTheDoors() throws Exception {
         mvc.perform(get("/login").param("logout", ""))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Has cerrado la sesión")))
@@ -97,7 +97,7 @@ class LoginControllerTests {
 
     @Test
     @DisplayName("El usuario del login no se escribe con mayúscula inicial ni con corrector, y se autocompleta (#146)")
-    void el_usuario_del_login_no_se_escribe_con_mayuscula_ni_corrector() throws Exception {
+    void theLoginUsernameHasNoAutoCapitalisationOrSpellCheck() throws Exception {
         String html = mvc.perform(get("/login").param("form", "")).andReturn().getResponse().getContentAsString();
 
         assertThat(FieldTags.tag(html, "username"))
@@ -109,7 +109,7 @@ class LoginControllerTests {
 
     @Test
     @DisplayName("La contraseña del login tiene el botón «Mostrar contraseña», oculto sin JavaScript (#146)")
-    void la_contrasena_del_login_tiene_el_boton_mostrar_contrasena() throws Exception {
+    void theLoginPasswordHasTheShowPasswordButton() throws Exception {
         String html = mvc.perform(get("/login").param("form", "")).andReturn().getResponse().getContentAsString();
 
         FieldTags.assertPasswordToggle(html, "password");

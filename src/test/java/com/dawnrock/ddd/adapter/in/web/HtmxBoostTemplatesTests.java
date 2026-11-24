@@ -25,7 +25,7 @@ class HtmxBoostTemplatesTests {
 
     @Test
     @DisplayName("Toda página completa lleva hx-boost con transición en su body")
-    void toda_pagina_completa_lleva_hx_boost_en_su_body() throws IOException {
+    void everyFullPageHasHxBoostInItsBody() throws IOException {
         Resource[] templates = new PathMatchingResourcePatternResolver().getResources("classpath:templates/**/*.html");
         List<String> fullPages = new ArrayList<>();
         List<String> withoutBoost = new ArrayList<>();

@@ -32,7 +32,7 @@ class ProdProfileTests {
 
     @Test
     @DisplayName("Con el perfil prod y sin SPRING_DATASOURCE_URL la aplicación no arranca")
-    void con_el_perfil_prod_y_sin_url_de_la_base_la_aplicacion_no_arranca() {
+    void withTheProdProfileAndNoDatabaseUrlTheApplicationDoesNotStart() {
         // El marcador ${SPRING_DATASOURCE_URL} queda sin resolver y no es una URL de JDBC: falla al crear la conexión
         assertThatThrownBy(() -> prod().run().close())
                 .hasStackTraceContaining("'url' must start with \"jdbc\"");
@@ -40,7 +40,7 @@ class ProdProfileTests {
 
     @Test
     @DisplayName("Con el perfil prod la aplicación usa la base que dicen las variables SPRING_DATASOURCE_*")
-    void con_el_perfil_prod_la_aplicacion_usa_la_base_de_las_variables() {
+    void withTheProdProfileTheApplicationUsesTheDatabaseFromTheVariables() {
         String url = "jdbc:h2:mem:" + UUID.randomUUID() + ";MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1";
         try (ConfigurableApplicationContext context = prod().run("--SPRING_DATASOURCE_URL=" + url,
                 "--SPRING_DATASOURCE_USERNAME=sa", "--SPRING_DATASOURCE_PASSWORD=")) {
@@ -51,7 +51,7 @@ class ProdProfileTests {
 
     @Test
     @DisplayName("Con el perfil prod la conexión tiene tiempos de espera aunque la URL no los lleve")
-    void con_el_perfil_prod_la_conexion_tiene_tiempos_de_espera_aunque_la_url_no_los_lleve() {
+    void withTheProdProfileTheConnectionHasTimeoutsEvenIfTheUrlHasNone() {
         String url = "jdbc:h2:mem:" + UUID.randomUUID() + ";MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1";
         try (ConfigurableApplicationContext context = prod().run("--SPRING_DATASOURCE_URL=" + url,
                 "--SPRING_DATASOURCE_USERNAME=sa", "--SPRING_DATASOURCE_PASSWORD=")) {
@@ -69,7 +69,7 @@ class ProdProfileTests {
 
     @Test
     @DisplayName("Con el perfil prod una base que no contesta hace fallar el arranque en segundos, sin colgarlo")
-    void con_el_perfil_prod_una_base_que_no_contesta_hace_fallar_el_arranque_sin_colgarlo() throws IOException {
+    void withTheProdProfileAnUnresponsiveDatabaseFailsTheStartupWithoutHanging() throws IOException {
         // Acepta la conexión TCP y nunca contesta, como el cómputo de Neon que no despertaba el 2026-11-23 (#156)
         try (ServerSocket silentDatabase = new ServerSocket(0, 1, InetAddress.getLoopbackAddress())) {
             String url = "jdbc:postgresql://127.0.0.1:" + silentDatabase.getLocalPort() + "/monabank";

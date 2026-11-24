@@ -63,7 +63,7 @@ class RegenerateAccountNumberWebTests {
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     @DisplayName("El administrador ve «Generar nuevo IBAN» con un paso de confirmación en la página")
-    void el_administrador_ve_generar_nuevo_iban_con_confirmacion() throws Exception {
+    void theAdministratorSeesGenerateNewIbanWithConfirmation() throws Exception {
         when(queries.findAccount(ADMIN, ID)).thenReturn(details());
 
         mvc.perform(get("/accounts/" + ID))
@@ -77,7 +77,7 @@ class RegenerateAccountNumberWebTests {
     @Test
     @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("Un cliente no ve «Generar nuevo IBAN»")
-    void un_cliente_no_ve_generar_nuevo_iban() throws Exception {
+    void aCustomerDoesNotSeeGenerateNewIban() throws Exception {
         when(queries.findAccount(ADA, ID)).thenReturn(details());
 
         mvc.perform(get("/accounts/" + ID))
@@ -89,7 +89,7 @@ class RegenerateAccountNumberWebTests {
     @Test
     @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("Un cliente que envía el cambio recibe 403 y no se llama al servicio")
-    void un_cliente_que_envia_el_cambio_recibe_403() throws Exception {
+    void aCustomerSendingTheChangeGets403() throws Exception {
         mvc.perform(post("/accounts/" + ID + "/account-number").with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(forwardedUrl("/error/403"));
@@ -100,7 +100,7 @@ class RegenerateAccountNumberWebTests {
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     @DisplayName("El envío sin token CSRF se rechaza con 403")
-    void el_envio_sin_token_csrf_se_rechaza_con_403() throws Exception {
+    void aSubmissionWithoutCsrfTokenIsRejectedWith403() throws Exception {
         mvc.perform(post("/accounts/" + ID + "/account-number"))
                 .andExpect(status().isForbidden());
 
@@ -110,7 +110,7 @@ class RegenerateAccountNumberWebTests {
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     @DisplayName("El administrador cambia el IBAN, vuelve al detalle y ve el aviso con el IBAN nuevo")
-    void el_administrador_cambia_el_iban_y_vuelve_al_detalle_con_el_aviso() throws Exception {
+    void theAdministratorChangesTheIbanAndReturnsToTheDetailsWithTheNotice() throws Exception {
         when(commands.regenerateAccountNumber(ADMIN, ID)).thenReturn(AccountSummary.builder().id(ID)
                 .accountNumber("ES6499990001810000000002").holderName("Ada Lovelace")
                 .segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build());
@@ -126,7 +126,7 @@ class RegenerateAccountNumberWebTests {
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     @DisplayName("Con htmx, el administrador recibe el panel con el aviso y el IBAN nuevo, sin redirigir (#125)")
-    void con_htmx_el_administrador_recibe_el_panel_con_el_iban_nuevo() throws Exception {
+    void withHtmxTheAdministratorGetsThePanelWithTheNewIban() throws Exception {
         String newIban = "ES6499990001810000000002";
         when(commands.regenerateAccountNumber(ADMIN, ID)).thenReturn(AccountSummary.builder().id(ID)
                 .accountNumber(newIban).holderName("Ada Lovelace")
@@ -144,7 +144,7 @@ class RegenerateAccountNumberWebTests {
     @Test
     @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("Con htmx, un cliente que envía el cambio sigue recibiendo 403 (#125)")
-    void con_htmx_un_cliente_sigue_recibiendo_403() throws Exception {
+    void withHtmxACustomerStillGets403() throws Exception {
         mvc.perform(post("/accounts/" + ID + "/account-number").with(csrf()).header("HX-Request", "true"))
                 .andExpect(status().isForbidden());
 
@@ -154,7 +154,7 @@ class RegenerateAccountNumberWebTests {
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     @DisplayName("Una cuenta inexistente muestra la página 404")
-    void una_cuenta_inexistente_muestra_la_pagina_404() throws Exception {
+    void aMissingAccountShowsThe404Page() throws Exception {
         when(commands.regenerateAccountNumber(ADMIN, ID)).thenThrow(new AccountNotFoundException(ID));
 
         mvc.perform(post("/accounts/" + ID + "/account-number").with(csrf()))

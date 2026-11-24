@@ -44,7 +44,7 @@ class PersistenceRestartTests {
 
     @Test
     @DisplayName("Tras un reinicio siguen el cliente dado de alta, su cuenta y su usuario, y la demo no se duplica")
-    void tras_un_reinicio_siguen_el_cliente_su_cuenta_y_su_usuario() {
+    void afterARestartTheCustomerTheirAccountAndTheirUserRemain() {
         AccountSummary signedUp;
         try (ConfigurableApplicationContext first = start()) {
             assertThat(accounts(first)).hasSize(3);

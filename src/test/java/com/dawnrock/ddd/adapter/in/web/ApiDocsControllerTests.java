@@ -26,7 +26,7 @@ class ApiDocsControllerTests {
     @Test
     @WithAnonymousUser
     @DisplayName("/api-docs lleva sin credenciales a la página de Swagger UI")
-    void api_docs_lleva_sin_credenciales_a_la_pagina_de_swagger_ui() throws Exception {
+    void apiDocsLeadsToTheSwaggerUiPageWithoutCredentials() throws Exception {
         mvc.perform(get("/api-docs"))
                 .andExpect(status().isFound())
                 .andExpect(redirectedUrl("/api-docs/index.html"));

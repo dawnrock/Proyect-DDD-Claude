@@ -47,7 +47,7 @@ class SecuritySupportTests {
 
     @Test
     @DisplayName("Un usuario creado en el alta sigue existiendo tras un reinicio sobre la misma base (#150)")
-    void un_usuario_creado_en_el_alta_sigue_existiendo_tras_un_reinicio() {
+    void aUserCreatedOnSignUpSurvivesARestart() {
         users(List.of(), "", "").createUser(User.withUsername("lin").password(encoder.encode("contraseña"))
                 .roles("USER").build());
 
@@ -60,7 +60,7 @@ class SecuritySupportTests {
 
     @Test
     @DisplayName("Arrancar dos veces no duplica los usuarios configurados y aplica su contraseña y su rol actuales")
-    void arrancar_dos_veces_no_duplica_los_usuarios_configurados() {
+    void startingTwiceDoesNotDuplicateTheConfiguredUsers() {
         users(List.of(new SecurityUsersProperties.User("ada", encoder.encode("vieja"), "USER")), "jefa", "secreta");
 
         UserDetailsService secondStart = users(
@@ -74,7 +74,7 @@ class SecuritySupportTests {
 
     @Test
     @DisplayName("Los usuarios configurados entran con su contraseña y su rol")
-    void los_usuarios_configurados_entran_con_su_contrasena_y_su_rol() {
+    void theConfiguredUsersLogInWithTheirPasswordAndRole() {
         UserDetails ada = users(List.of(new SecurityUsersProperties.User("ada", encoder.encode("demo"), "USER")), "", "")
                 .loadUserByUsername("ada");
 
@@ -84,7 +84,7 @@ class SecuritySupportTests {
 
     @Test
     @DisplayName("Las variables de entorno añaden un administrador")
-    void las_variables_de_entorno_anaden_un_administrador() {
+    void theEnvironmentVariablesAddAnAdministrator() {
         UserDetails admin = users(List.of(), "jefa", "secreta").loadUserByUsername("jefa");
 
         assertThat(encoder.matches("secreta", admin.getPassword())).isTrue();
@@ -93,14 +93,14 @@ class SecuritySupportTests {
 
     @Test
     @DisplayName("Sin perfil demo ni variables no hay usuarios")
-    void sin_perfil_demo_ni_variables_no_hay_usuarios() {
+    void withoutDemoProfileOrVariablesThereAreNoUsers() {
         assertThatThrownBy(() -> users(List.of(), "", "").loadUserByUsername("admin"))
                 .isInstanceOf(UsernameNotFoundException.class);
     }
 
     @Test
     @DisplayName("Un usuario que no cumple el formato no deja arrancar la aplicación")
-    void un_usuario_que_no_cumple_el_formato_no_deja_arrancar() {
+    void aUsernameWithTheWrongFormatStopsTheStartup() {
         assertThatIllegalStateException()
                 .isThrownBy(() -> users(List.of(new SecurityUsersProperties.User("Ada", "x", "USER")), "", ""))
                 .withMessageContaining("Ada");
@@ -108,7 +108,7 @@ class SecuritySupportTests {
 
     @Test
     @DisplayName("Quien pide es administrador si tiene el rol ADMIN")
-    void quien_pide_es_administrador_si_tiene_el_rol_admin() {
+    void theCallerIsAnAdministratorWhenTheyHaveTheAdminRole() {
         Caller admin = CurrentCaller.from(UsernamePasswordAuthenticationToken.authenticated(
                 "admin", null, AuthorityUtils.createAuthorityList("ROLE_ADMIN")));
         Caller ada = CurrentCaller.from(UsernamePasswordAuthenticationToken.authenticated(

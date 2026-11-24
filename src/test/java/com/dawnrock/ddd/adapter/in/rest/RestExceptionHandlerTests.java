@@ -33,7 +33,7 @@ class RestExceptionHandlerTests {
 
         @Test
         @DisplayName("Una regla de negocio incumplida se traduce en un 422 con el mensaje del dominio")
-        void una_regla_de_negocio_incumplida_se_traduce_en_un_422_con_el_mensaje_del_dominio() throws Exception {
+        void aBrokenBusinessRuleBecomesA422WithTheDomainMessage() throws Exception {
             mvc.perform(get("/test/errors/business-rule"))
                     .andExpect(status().isUnprocessableContent())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
@@ -50,7 +50,7 @@ class RestExceptionHandlerTests {
 
         @Test
         @DisplayName("Un recurso inexistente se traduce en un 404")
-        void un_recurso_inexistente_se_traduce_en_un_404() throws Exception {
+        void aMissingResourceBecomesA404() throws Exception {
             mvc.perform(get("/test/errors/not-found"))
                     .andExpect(status().isNotFound())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
@@ -65,7 +65,7 @@ class RestExceptionHandlerTests {
 
         @Test
         @DisplayName("Una operación reservada a administradores se traduce en un 403 Acceso denegado")
-        void una_operacion_reservada_a_administradores_se_traduce_en_un_403() throws Exception {
+        void anAdministratorOnlyOperationBecomesA403() throws Exception {
             mvc.perform(get("/test/errors/forbidden"))
                     .andExpect(status().isForbidden())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
@@ -81,7 +81,7 @@ class RestExceptionHandlerTests {
 
         @Test
         @DisplayName("Un argumento que el dominio rechaza se traduce en un 400 y no en un 500")
-        void un_argumento_que_el_dominio_rechaza_se_traduce_en_un_400_y_no_en_un_500() throws Exception {
+        void anArgumentTheDomainRejectsBecomesA400NotA500() throws Exception {
             mvc.perform(get("/test/errors/invalid-argument"))
                     .andExpect(status().isBadRequest())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
@@ -91,7 +91,7 @@ class RestExceptionHandlerTests {
 
         @Test
         @DisplayName("Un cuerpo que no pasa la validación se traduce en un 400 con los campos que fallan")
-        void un_cuerpo_que_no_pasa_la_validacion_se_traduce_en_un_400_con_los_campos_que_fallan() throws Exception {
+        void aBodyFailingValidationBecomesA400WithTheFailingFields() throws Exception {
             mvc.perform(post("/test/errors/validation")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"holderName\": \"\", \"amount\": 0}"))
@@ -104,7 +104,7 @@ class RestExceptionHandlerTests {
 
         @Test
         @DisplayName("Un cuerpo JSON mal formado se traduce en un 400 con el título del contrato")
-        void un_cuerpo_json_mal_formado_se_traduce_en_un_400_con_el_titulo_del_contrato() throws Exception {
+        void aMalformedJsonBodyBecomesA400WithTheContractTitle() throws Exception {
             mvc.perform(post("/test/errors/validation")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"holderName\": "))
@@ -120,7 +120,7 @@ class RestExceptionHandlerTests {
 
         @Test
         @DisplayName("Un cuerpo que no es JSON se traduce en un 415 con el título y el detalle en español")
-        void un_cuerpo_que_no_es_json_se_traduce_en_un_415_en_espanol() throws Exception {
+        void aNonJsonBodyBecomesA415InSpanish() throws Exception {
             mvc.perform(post("/test/errors/validation")
                             .contentType(MediaType.TEXT_PLAIN)
                             .content("hola"))

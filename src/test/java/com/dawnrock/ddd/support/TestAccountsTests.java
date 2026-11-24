@@ -13,7 +13,7 @@ class TestAccountsTests {
 
     @Test
     @DisplayName("Sin indicar nada abre una cuenta minorista con 100,00 €")
-    void sin_indicar_nada_abre_una_cuenta_minorista_con_100_euros() {
+    void withNothingGivenItOpensARetailAccountWith100Euros() {
         CheckingAccount account = TestAccounts.anAccount().open();
 
         assertThat(account.accountNumber().value()).isEqualTo(TestAccounts.DEFAULT_ACCOUNT_NUMBER);
@@ -24,7 +24,7 @@ class TestAccountsTests {
 
     @Test
     @DisplayName("Cada dato de la cuenta se puede cambiar")
-    void cada_dato_de_la_cuenta_se_puede_cambiar() {
+    void eachAccountDataCanBeChanged() {
         CheckingAccount account = TestAccounts.anAccount()
                 .accountNumber("ES7921000813610123456789")
                 .holderName("Grace Hopper")

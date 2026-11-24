@@ -84,7 +84,7 @@ class DddLabApplicationTests {
 	@Test
 	@ExtendWith(OutputCaptureExtension.class)
 	@DisplayName("Un ingreso llega al consumidor de auditoría a través del publicador de eventos")
-	void un_ingreso_llega_al_consumidor_de_auditoria(CapturedOutput output) {
+	void aDepositReachesTheAuditConsumer(CapturedOutput output) {
 		Caller admin = Caller.builder().username("admin").admin(true).build();
 		UUID accountId = commands.openAccount(admin, OpenAccountCommand.builder()
 				.holderName("Ada Lovelace")
@@ -101,7 +101,7 @@ class DddLabApplicationTests {
 
 	@Test
 	@DisplayName("El contexto tiene un único servicio detrás de los dos puertos de entrada y los dos consumidores de eventos")
-	void el_contexto_cablea_el_nucleo_desde_config() {
+	void theContextWiresTheCoreFromConfig() {
 		assertThat(context.getBeansOfType(CheckingAccountCommands.class)).hasSize(1);
 		assertThat(context.getBean(CheckingAccountCommands.class)).isSameAs(context.getBean(CheckingAccountQueries.class));
 		assertThat(context.getBeansOfType(AuditLogListener.class)).hasSize(1);
@@ -110,13 +110,13 @@ class DddLabApplicationTests {
 
 	@Test
 	@DisplayName("Sin el perfil demo no se cargan los datos de demostración")
-	void sin_el_perfil_demo_no_se_cargan_los_datos_de_demostracion() {
+	void withoutTheDemoProfileNoDemoDataIsLoaded() {
 		assertThat(context.getBeansOfType(DomainModelRunner.class)).isEmpty();
 	}
 
 	@Test
 	@DisplayName("Una página inexistente muestra la página 404 propia de la web")
-	void una_pagina_inexistente_muestra_la_pagina_404_propia_de_la_web() throws Exception {
+	void aMissingPageShowsTheWebsOwn404Page() throws Exception {
 		HttpResponse<String> response = page("/no-existe");
 
 		assertThat(response.statusCode()).isEqualTo(404);
@@ -126,7 +126,7 @@ class DddLabApplicationTests {
 
 	@Test
 	@DisplayName("Una ruta inexistente de la API sigue respondiendo en JSON")
-	void una_ruta_inexistente_de_la_api_sigue_respondiendo_en_json() throws Exception {
+	void aMissingApiRouteStillRespondsInJson() throws Exception {
 		HttpResponse<String> response = get("/api/no-existe", "application/json");
 
 		assertThat(response.statusCode()).isEqualTo(404);
@@ -139,7 +139,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Una cuenta abierta por la API se consulta por su id y aparece en el listado web")
-		void una_cuenta_abierta_por_la_api_se_consulta_por_su_id_y_aparece_en_el_listado_web() throws Exception {
+		void anAccountOpenedThroughTheApiIsFoundByIdAndAppearsInTheWebList() throws Exception {
 			HttpResponse<String> created = post("/api/accounts", "application/json", """
 					{"holderName": "Ada Lovelace", "holderTaxId": "12345678Z", "holderEmail": "ada@example.com",
 					 "initialDeposit": 100.00, "ownerUsername": "ada"}""");
@@ -158,7 +158,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Una cuenta abierta desde el formulario web redirige al listado y aparece en él")
-		void una_cuenta_abierta_desde_el_formulario_web_redirige_al_listado_y_aparece_en_el() throws Exception {
+		void anAccountOpenedFromTheWebFormRedirectsToTheListAndAppearsInIt() throws Exception {
 			HttpResponse<String> response = submitForm("EUR");
 
 			assertThat(response.statusCode()).isEqualTo(302);
@@ -170,7 +170,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Un depósito en otra divisa vuelve al formulario con el mensaje del dominio")
-		void un_deposito_en_otra_divisa_vuelve_al_formulario_con_el_mensaje_del_dominio() throws Exception {
+		void aDepositInAnotherCurrencyReturnsToTheFormWithTheDomainMessage() throws Exception {
 			HttpResponse<String> response = submitForm("USD");
 
 			assertThat(response.statusCode()).isEqualTo(200);
@@ -179,7 +179,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Por la API, la factoría decide el segmento con los ingresos que verifica la agencia tributaria")
-		void por_la_api_la_factoria_decide_el_segmento_con_los_ingresos_verificados() throws Exception {
+		void throughTheApiTheFactoryDecidesTheSegmentFromTheVerifiedIncome() throws Exception {
 			HttpResponse<String> highIncome = post("/api/accounts", "application/json", """
 					{"holderName": "Grace Hopper", "holderTaxId": "87654321X", "holderEmail": "grace@example.com",
 					 "initialDeposit": 100.00, "ownerUsername": "grace"}""");
@@ -197,7 +197,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Desde la web, el aviso del alta muestra el IBAN generado y el segmento calculado")
-		void desde_la_web_el_aviso_del_alta_muestra_el_iban_generado_y_el_segmento() throws Exception {
+		void fromTheWebTheOpeningNoticeShowsTheGeneratedIbanAndTheSegment() throws Exception {
 			String form = "holderName=Grace+Hopper&holderTaxId=87654321X&holderEmail=grace%40example.com&ownerUsername=grace"
 					+ "&initialDeposit=75.00&currency=EUR";
 			assertThat(submit("/accounts/new", form).statusCode()).isEqualTo(302);
@@ -219,7 +219,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Por la API, un ingreso se aprueba y una retirada sin saldo se registra como rechazada y se ve en el detalle web")
-		void por_la_api_un_ingreso_se_aprueba_y_una_retirada_sin_saldo_se_registra_como_rechazada() throws Exception {
+		void throughTheApiADepositIsApprovedAndAWithdrawalWithoutBalanceIsRecordedAsRejected() throws Exception {
 			String account = openAccount();
 
 			HttpResponse<String> deposit = post(account + "/deposits", "application/json", "{\"amount\": 50.00}");
@@ -235,7 +235,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Desde la web, un ingreso y una retirada rechazada redirigen al detalle con su mensaje")
-		void desde_la_web_un_ingreso_y_una_retirada_rechazada_redirigen_al_detalle_con_su_mensaje() throws Exception {
+		void fromTheWebADepositAndARejectedWithdrawalRedirectToTheDetailsWithTheirMessage() throws Exception {
 			String detail = webPath(openAccount());
 
 			HttpResponse<String> deposit = submit(detail + "/deposits", "amount=25.00&currency=EUR");
@@ -250,7 +250,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Una cuenta inexistente es la página 404 en la web y un ProblemDetail 404 en la API")
-		void una_cuenta_inexistente_es_la_pagina_404_en_la_web_y_un_problem_detail_404_en_la_api() throws Exception {
+		void aMissingAccountIsThe404PageOnTheWebAndA404ProblemDetailOnTheApi() throws Exception {
 			String unknown = "/api/accounts/" + java.util.UUID.randomUUID();
 
 			HttpResponse<String> web = page(webPath(unknown));
@@ -271,7 +271,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Por la API, una transferencia aprobada mueve el saldo y una rechazada no llega al destino")
-		void por_la_api_una_transferencia_aprobada_mueve_el_saldo_y_una_rechazada_no_llega_al_destino() throws Exception {
+		void throughTheApiAnApprovedTransferMovesTheBalanceAndARejectedOneDoesNotReachTheTarget() throws Exception {
 			String source = openAccount();
 			String target = openAccount();
 
@@ -290,7 +290,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Por la API, una transferencia a la misma cuenta es una regla de negocio incumplida")
-		void por_la_api_una_transferencia_a_la_misma_cuenta_es_una_regla_de_negocio_incumplida() throws Exception {
+		void throughTheApiATransferToTheSameAccountIsABrokenBusinessRule() throws Exception {
 			String account = openAccount();
 
 			HttpResponse<String> response = transfer(account, ibanOf(account), "10.00");
@@ -302,7 +302,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Desde la web, una transferencia redirige al detalle con su mensaje y el destino recibe el ingreso")
-		void desde_la_web_una_transferencia_redirige_al_detalle_con_su_mensaje_y_el_destino_recibe_el_ingreso()
+		void fromTheWebATransferRedirectsToTheDetailsAndTheTargetGetsTheDeposit()
 				throws Exception {
 			String sourceApi = openAccount();
 			String targetApi = openAccount();
@@ -339,7 +339,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Sin sesión, la web lleva al login y la API responde 401 con un ProblemDetail")
-		void sin_sesion_la_web_lleva_al_login_y_la_api_responde_401() throws Exception {
+		void withoutSessionTheWebLeadsToLoginAndTheApiResponds401() throws Exception {
 			HttpResponse<String> web = anonymous("/");
 			HttpResponse<String> api = http.send(HttpRequest.newBuilder(URI.create(url("/api/accounts")))
 					.header("Accept", "application/json").GET().build(), HttpResponse.BodyHandlers.ofString());
@@ -353,7 +353,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Un usuario con una sola cuenta entra directamente en ella y una cuenta ajena es un 404")
-		void un_usuario_con_una_sola_cuenta_entra_en_ella_y_una_ajena_es_un_404() throws Exception {
+		void aUserWithASingleAccountEntersItAndAForeignOneIsA404() throws Exception {
 			String alansPath = openAccountFor("alan");
 			String othersPath = openAccountFor("grace");
 			String alans = idOf(alansPath);
@@ -373,7 +373,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Por la API, un usuario no abre cuentas (403), no ve las ajenas (404) y transfiere por IBAN")
-		void por_la_api_un_usuario_no_abre_cuentas_no_ve_las_ajenas_y_transfiere_por_iban() throws Exception {
+		void throughTheApiAUserCannotOpenAccountsCannotSeeOthersAndTransfersByIban() throws Exception {
 			String graces = idOf(openAccountFor("grace"));
 			String adasPath = openAccountFor("ada");
 			String adas = idOf(adasPath);
@@ -396,7 +396,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("La consola H2 es solo para administradores y la salud pública no muestra detalles")
-		void la_consola_h2_es_solo_para_administradores_y_la_salud_publica_no_muestra_detalles() throws Exception {
+		void theH2ConsoleIsAdministratorOnlyAndThePublicHealthShowsNoDetails() throws Exception {
 			HttpResponse<String> console = send(loginAs("ada"), "/h2-console/");
 			HttpResponse<String> health = get("/actuator/health", "application/json");
 
@@ -465,7 +465,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Detrás de un proxy cuenta la IP de X-Forwarded-For: bloqueada esa, otra IP de la misma usuaria entra")
-		void detras_de_un_proxy_cuenta_la_ip_de_x_forwarded_for() throws Exception {
+		void behindAProxyTheXForwardedForIpCounts() throws Exception {
 			for (int i = 0; i < 3; i++) {
 				assertThat(login("grace", "mala", "203.0.113.5")).endsWith("/login?error");
 			}
@@ -476,7 +476,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Detrás de Cloudflare cuenta la IP del cliente, no la del nodo de Cloudflare (#133)")
-		void detras_de_cloudflare_cuenta_la_ip_del_cliente() throws Exception {
+		void behindCloudflareTheClientIpCounts() throws Exception {
 			String cloudflareEdge = "104.22.136.75";
 			for (int i = 0; i < 3; i++) {
 				assertThat(login("alan", "mala", "198.51.100.20, " + cloudflareEdge)).endsWith("/login?error");
@@ -514,7 +514,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Por la web, «Ada» entra como ada")
-		void por_la_web_ada_con_mayuscula_entra_como_ada() throws Exception {
+		void throughTheWebAdaWithACapitalLogsInAsAda() throws Exception {
 			CookieManager cookies = new CookieManager();
 			HttpClient client = HttpClient.newBuilder().cookieHandler(cookies).build();
 			HttpResponse<String> form = client.send(HttpRequest.newBuilder(URI.create(url("/login?form")))
@@ -540,7 +540,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Por la API, « ADA » recibe un token cuyo sub es ada")
-		void por_la_api_ada_en_mayusculas_recibe_un_token_de_ada() throws Exception {
+		void throughTheApiAdaInCapitalsGetsATokenForAda() throws Exception {
 			String bearer = ApiTokens.bearer(http, url(""), " ADA ", PASSWORD);
 
 			String payload = bearer.substring("Bearer ".length()).split("\\.")[1];
@@ -560,7 +560,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Por la web: dos puertas, alta en tres pasos, sesión iniciada, otra cuenta y de nuevo a entrar")
-		void por_la_web_el_alta_en_tres_pasos_deja_la_sesion_iniciada_y_permite_abrir_otra_cuenta() throws Exception {
+		void throughTheWebTheThreeStepSignUpLogsInAndAllowsOpeningAnotherAccount() throws Exception {
 			HttpClient visitor = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
 			assertThat(send(visitor, "/login").body()).contains("Quiero ser cliente").contains("Ya soy cliente");
 
@@ -590,7 +590,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Por la web, un documento que ya es de un cliente vuelve al paso 1 con «Ya eres cliente»")
-		void por_la_web_un_documento_de_cliente_vuelve_al_paso_1() throws Exception {
+		void throughTheWebACustomersDocumentReturnsToStep1() throws Exception {
 			signUp(HttpClient.newBuilder().cookieHandler(new CookieManager()).build(), "Z7654321H", "dorothy");
 			HttpClient again = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
 
@@ -607,7 +607,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Por la API: alta pública, el cliente ve su cuenta, transfiere y no puede darse de alta dos veces")
-		void por_la_api_el_alta_publica_crea_cliente_cuenta_y_usuario() throws Exception {
+		void throughTheApiThePublicSignUpCreatesCustomerAccountAndUser() throws Exception {
 			HttpResponse<String> created = publicSignUp(REST_DOCUMENT, "katherine.johnson@example.com", "katherine");
 
 			assertThat(created.statusCode()).isEqualTo(201);
@@ -631,7 +631,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Por la API, el administrador abre otra cuenta a un cliente existente indicando solo su documento")
-		void por_la_api_el_administrador_abre_otra_cuenta_a_un_cliente_existente_con_solo_su_documento()
+		void throughTheApiTheAdministratorOpensAnotherAccountForAnExistingCustomerWithOnlyTheirDocument()
 				throws Exception {
 			openAccount();
 
@@ -719,13 +719,13 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Un GET de la API con Content-Type multipart sin delimitador responde 200")
-		void un_get_de_la_api_con_multipart_sin_delimitador_responde_200() throws Exception {
+		void anApiGetWithMultipartWithoutBoundaryResponds200() throws Exception {
 			assertThat(multipart("GET", "/api/accounts", null, "application/json").statusCode()).isEqualTo(200);
 		}
 
 		@Test
 		@DisplayName("Un POST de la API con Content-Type multipart sin delimitador responde 415 ProblemDetail")
-		void un_post_de_la_api_con_multipart_sin_delimitador_responde_415() throws Exception {
+		void anApiPostWithMultipartWithoutBoundaryResponds415() throws Exception {
 			String deposits = openAccount().replaceFirst("^https?://[^/]+", "") + "/deposits";
 
 			HttpResponse<String> response = multipart("POST", deposits, "{\"amount\": 10.00}", "application/json");
@@ -737,7 +737,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("Una página de la web con Content-Type multipart sin delimitador responde 200")
-		void una_pagina_de_la_web_con_multipart_sin_delimitador_responde_200() throws Exception {
+		void aWebPageWithMultipartWithoutBoundaryResponds200() throws Exception {
 			HttpResponse<String> response = http.send(HttpRequest.newBuilder(URI.create(url("/login")))
 					.header("Content-Type", MULTIPART).header("Accept", "text/html")
 					.method("GET", HttpRequest.BodyPublishers.noBody()).build(), HttpResponse.BodyHandlers.ofString());
@@ -762,7 +762,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("El contrato OpenAPI se sirve sin credenciales en /openapi.yaml")
-		void el_contrato_openapi_se_sirve_sin_credenciales() throws Exception {
+		void theOpenApiContractIsServedWithoutCredentials() throws Exception {
 			HttpResponse<String> response = http.send(HttpRequest.newBuilder(URI.create(url("/openapi.yaml"))).GET().build(),
 					HttpResponse.BodyHandlers.ofString());
 
@@ -772,7 +772,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("/api-docs lleva sin credenciales hasta la página de Swagger UI")
-		void api_docs_lleva_sin_credenciales_hasta_la_pagina() throws Exception {
+		void apiDocsLeadsToThePageWithoutCredentials() throws Exception {
 			HttpClient following = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
 
 			HttpResponse<String> response = following.send(HttpRequest.newBuilder(URI.create(url("/api-docs"))).GET().build(),
@@ -785,7 +785,7 @@ class DddLabApplicationTests {
 
 		@Test
 		@DisplayName("La página de Swagger UI se sirve sin credenciales y carga el contrato escrito a mano")
-		void la_pagina_de_swagger_ui_se_sirve_sin_credenciales() throws Exception {
+		void theSwaggerUiPageIsServedWithoutCredentials() throws Exception {
 			HttpResponse<String> response = http.send(HttpRequest.newBuilder(URI.create(url("/api-docs/index.html"))).GET().build(),
 					HttpResponse.BodyHandlers.ofString());
 

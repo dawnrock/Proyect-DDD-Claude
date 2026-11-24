@@ -27,7 +27,7 @@ class AccessibleFieldErrorsTemplatesTests {
 
     @Test
     @DisplayName("Todo campo que puede marcarse como erróneo lleva aria-invalid y aria-describedby, y su mensaje un id")
-    void todo_campo_que_puede_marcarse_como_erroneo_lleva_aria_invalid_y_aria_describedby() throws IOException {
+    void everyFieldThatCanBeMarkedInvalidHasAriaInvalidAndAriaDescribedby() throws IOException {
         Resource[] templates = new PathMatchingResourcePatternResolver().getResources("classpath:templates/**/*.html");
         int checked = 0;
         List<String> problems = new ArrayList<>();

@@ -28,7 +28,7 @@ class ImmutablesSetupTests {
 
         @Test
         @DisplayName("Genera un builder con el nombre del tipo sin el sufijo Def")
-        void genera_un_builder_con_el_nombre_del_tipo_sin_el_sufijo_def() {
+        void generatesABuilderNamedAfterTheTypeWithoutTheDefSuffix() {
             SampleCommand command = SampleCommand.builder()
                     .holderName("Ada Lovelace")
                     .amount(new BigDecimal("50.00"))
@@ -40,7 +40,7 @@ class ImmutablesSetupTests {
 
         @Test
         @DisplayName("Dos instancias con los mismos valores son iguales")
-        void dos_instancias_con_los_mismos_valores_son_iguales() {
+        void twoInstancesWithTheSameValuesAreEqual() {
             SampleCommand one = SampleCommand.builder().holderName("Ada").amount(BigDecimal.TEN).build();
             SampleCommand other = SampleCommand.builder().holderName("Ada").amount(BigDecimal.TEN).build();
 
@@ -49,7 +49,7 @@ class ImmutablesSetupTests {
 
         @Test
         @DisplayName("No se puede construir sin un atributo obligatorio")
-        void no_se_puede_construir_sin_un_atributo_obligatorio() {
+        void cannotBeBuiltWithoutARequiredAttribute() {
             assertThatExceptionOfType(IllegalStateException.class)
                     .isThrownBy(() -> SampleCommand.builder().holderName("Ada").build())
                     .withMessageContaining("amount");

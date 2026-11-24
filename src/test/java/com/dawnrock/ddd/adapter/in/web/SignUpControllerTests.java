@@ -93,7 +93,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("El progreso del alta es una barra de Bootstrap accesible con el paso actual (#124)")
-        void el_progreso_del_alta_es_una_barra_de_bootstrap_accesible() throws Exception {
+        void theSignUpProgressIsAnAccessibleBootstrapBar() throws Exception {
             mvc.perform(get("/signup"))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("role=\"progressbar\"")))
@@ -105,7 +105,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("La página es pública, lleva el token CSRF y los tres campos")
-        void la_pagina_es_publica_lleva_el_token_csrf_y_los_tres_campos() throws Exception {
+        void thePageIsPublicAndHasTheCsrfTokenAndTheThreeFields() throws Exception {
             mvc.perform(get("/signup"))
                     .andExpect(status().isOk())
                     .andExpect(view().name("signup/data"))
@@ -118,7 +118,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Sin enviar nada, los errores de campo se quedan en el paso 1")
-        void sin_enviar_nada_los_errores_de_campo_se_quedan_en_el_paso_1() throws Exception {
+        void submittingNothingKeepsTheFieldErrorsOnStep1() throws Exception {
             mvc.perform(post("/signup"))
                     .andExpect(status().isOk())
                     .andExpect(view().name("signup/data"))
@@ -128,7 +128,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Un documento o un correo mal formados se quedan en el paso 1 con su mensaje")
-        void un_documento_o_un_correo_mal_formados_se_quedan_en_el_paso_1() throws Exception {
+        void aMalformedDocumentOrEmailStaysOnStep1() throws Exception {
             mvc.perform(post("/signup").param("fullName", "Margaret").param("taxId", "abc")
                             .param("email", "sin-arroba"))
                     .andExpect(status().isOk())
@@ -140,7 +140,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Con datos válidos redirige al paso 2")
-        void con_datos_validos_redirige_al_paso_2() throws Exception {
+        void withValidDataItRedirectsToStep2() throws Exception {
             mvc.perform(validStep1(post("/signup")))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/signup/access"));
@@ -148,14 +148,14 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Un POST sin token CSRF se rechaza con 403")
-        void un_post_sin_token_csrf_se_rechaza_con_403() throws Exception {
+        void aPostWithoutCsrfTokenIsRejectedWith403() throws Exception {
             mvc.perform(MockMvcRequestBuilders.post("/signup").param("fullName", "Margaret"))
                     .andExpect(status().isForbidden());
         }
 
         @Test
         @DisplayName("Volver al paso 1 conserva los datos ya escritos")
-        void volver_al_paso_1_conserva_los_datos_ya_escritos() throws Exception {
+        void goingBackToStep1KeepsTheDataAlreadyTyped() throws Exception {
             MockHttpSession session = new MockHttpSession();
             mvc.perform(validStep1(post("/signup")).session(session))
                     .andExpect(redirectedUrl("/signup/access"));
@@ -187,7 +187,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Entrar en el paso 2 sin haber hecho el 1 redirige a /signup")
-        void entrar_en_el_paso_2_sin_haber_hecho_el_1_redirige_a_signup() throws Exception {
+        void enteringStep2WithoutStep1RedirectsToSignUp() throws Exception {
             mvc.perform(get("/signup/access"))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/signup"));
@@ -198,7 +198,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Tras el paso 1, la página pide usuario, contraseña y repetición, y deja volver atrás")
-        void tras_el_paso_1_la_pagina_pide_usuario_contrasena_y_repeticion() throws Exception {
+        void afterStep1ThePageAsksForUsernamePasswordAndRepetition() throws Exception {
             mvc.perform(get("/signup/access").session(sessionAfterStep1()))
                     .andExpect(status().isOk())
                     .andExpect(view().name("signup/access"))
@@ -212,7 +212,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Un usuario mal formado, una contraseña corta o una repetición distinta se quedan en el paso 2")
-        void los_errores_de_campo_se_quedan_en_el_paso_2() throws Exception {
+        void fieldErrorsStayOnStep2() throws Exception {
             MockHttpSession session = sessionAfterStep1();
 
             mvc.perform(post("/signup/access").session(session).param("username", "Ab")
@@ -231,7 +231,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Una repetición distinta marca como inválida solo la repetición, y una contraseña corta la contraseña (#124)")
-        void los_campos_de_contrasena_con_error_se_marcan_como_invalidos() throws Exception {
+        void passwordFieldsWithErrorsAreMarkedInvalid() throws Exception {
             MockHttpSession session = sessionAfterStep1();
 
             mvc.perform(post("/signup/access").session(session).param("username", "margaret")
@@ -246,7 +246,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Con datos válidos redirige al paso 3")
-        void con_datos_validos_redirige_al_paso_3() throws Exception {
+        void withValidDataItRedirectsToStep3() throws Exception {
             mvc.perform(validStep2(post("/signup/access")).session(sessionAfterStep1()))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/signup/account"));
@@ -254,7 +254,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("La contraseña no aparece nunca en el HTML, ni tras un error ni al volver al paso 2")
-        void la_contrasena_no_aparece_nunca_en_el_html() throws Exception {
+        void thePasswordNeverAppearsInTheHtml() throws Exception {
             MockHttpSession session = sessionAfterStep1();
 
             mvc.perform(post("/signup/access").session(session).param("username", "margaret")
@@ -272,7 +272,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Volver al paso 1 desde el 2 conserva los datos personales")
-        void volver_al_paso_1_desde_el_2_conserva_los_datos_personales() throws Exception {
+        void goingBackToStep1FromStep2KeepsThePersonalData() throws Exception {
             MockHttpSession session = sessionAfterStep1();
             mvc.perform(get("/signup").session(session))
                     .andExpect(content().string(containsString("value=\"Margaret Hamilton\"")));
@@ -302,7 +302,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Sin haber completado los pasos anteriores, el paso 3 redirige a /signup")
-        void sin_haber_completado_los_pasos_anteriores_el_paso_3_redirige_a_signup() throws Exception {
+        void withoutThePreviousStepsStep3RedirectsToSignUp() throws Exception {
             mvc.perform(get("/signup/account"))
                     .andExpect(redirectedUrl("/signup"));
             mvc.perform(get("/signup/account").session(sessionAfterStep1()))
@@ -314,7 +314,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("La página muestra el resumen, pide el depósito y la aceptación, y no pinta la contraseña")
-        void la_pagina_muestra_el_resumen_pide_el_deposito_y_la_aceptacion() throws Exception {
+        void thePageShowsTheSummaryAndAsksForTheDepositAndTheAcceptance() throws Exception {
             mvc.perform(get("/signup/account").session(sessionAfterStep2()))
                     .andExpect(status().isOk())
                     .andExpect(view().name("signup/account"))
@@ -332,7 +332,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Sin depósito ni aceptación, los errores se quedan en el paso 3 y no se llama al alta")
-        void sin_deposito_ni_aceptacion_los_errores_se_quedan_en_el_paso_3() throws Exception {
+        void withoutDepositOrAcceptanceTheErrorsStayOnStep3() throws Exception {
             mvc.perform(post("/signup/account").session(sessionAfterStep2()))
                     .andExpect(status().isOk())
                     .andExpect(view().name("signup/account"))
@@ -343,7 +343,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Un depósito no positivo se queda en el paso 3")
-        void un_deposito_no_positivo_se_queda_en_el_paso_3() throws Exception {
+        void aNonPositiveDepositStaysOnStep3() throws Exception {
             mvc.perform(post("/signup/account").session(sessionAfterStep2()).param("initialDeposit", "0")
                             .param("conditionsAccepted", "true"))
                     .andExpect(status().isOk())
@@ -353,7 +353,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Con todo correcto da de alta con los datos de los tres pasos y redirige a la cuenta con la bienvenida")
-        void con_todo_correcto_da_de_alta_y_redirige_a_la_cuenta_con_la_bienvenida() throws Exception {
+        void withEverythingRightItSignsUpAndRedirectsToTheAccountWithTheWelcome() throws Exception {
             UUID id = UUID.randomUUID();
             when(registration.register(any(SignUpCommand.class), eq("clave-secreta-1"), any())).thenReturn(openedAccount(id));
 
@@ -375,7 +375,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Un cliente que ya existe vuelve al paso 1 con el mensaje y el enlace para entrar")
-        void un_cliente_que_ya_existe_vuelve_al_paso_1_con_el_mensaje_y_el_enlace_para_entrar() throws Exception {
+        void anExistingCustomerReturnsToStep1WithTheMessageAndTheLoginLink() throws Exception {
             var error = new DuplicateCustomerException(new TaxId("12345678Z"));
             when(registration.register(any(SignUpCommand.class), any(), any())).thenThrow(error);
             MockHttpSession session = sessionAfterStep2();
@@ -393,7 +393,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Un usuario ocupado vuelve al paso 2 con el mensaje")
-        void un_usuario_ocupado_vuelve_al_paso_2_con_el_mensaje() throws Exception {
+        void aTakenUsernameReturnsToStep2WithTheMessage() throws Exception {
             var error = new UsernameTakenException("margaret");
             when(registration.register(any(SignUpCommand.class), any(), any())).thenThrow(error);
             MockHttpSession session = sessionAfterStep2();
@@ -408,7 +408,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Un documento con la letra de control mal (IllegalArgumentException) vuelve al paso 1 con el mensaje del dominio")
-        void un_documento_con_la_letra_mal_vuelve_al_paso_1_con_el_mensaje_del_dominio() throws Exception {
+        void aDocumentWithTheWrongLetterReturnsToStep1WithTheDomainMessage() throws Exception {
             when(registration.register(any(SignUpCommand.class), any(), any()))
                     .thenThrow(new IllegalArgumentException("La letra del documento no es correcta"));
 
@@ -420,7 +420,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Un depósito insuficiente o una divisa distinta del euro se quedan en el paso 3 con el mensaje del dominio")
-        void un_deposito_insuficiente_o_una_divisa_distinta_se_quedan_en_el_paso_3() throws Exception {
+        void anInsufficientDepositOrAnotherCurrencyStayOnStep3() throws Exception {
             MockHttpSession session = sessionAfterStep2();
             var insufficient = new InsufficientInitialDepositException(
                     MonetaryAmount.euros("10.00"), MonetaryAmount.euros("50.00"));
@@ -455,7 +455,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Antes de terminar el alta, la cuenta pide iniciar sesión")
-        void antes_de_terminar_el_alta_la_cuenta_pide_iniciar_sesion() throws Exception {
+        void beforeFinishingTheSignUpTheAccountAsksToLogIn() throws Exception {
             mvc.perform(get("/accounts/" + UUID.randomUUID()).session(sessionAfterStep2()))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/login"));
@@ -463,7 +463,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Tras el POST final, la misma sesión abre el detalle como el cliente nuevo y ve la bienvenida")
-        void tras_el_post_final_la_misma_sesion_abre_el_detalle_como_el_cliente_nuevo() throws Exception {
+        void afterTheFinalPostTheSameSessionOpensTheDetailsAsTheNewCustomer() throws Exception {
             UUID id = UUID.randomUUID();
             when(registration.register(any(SignUpCommand.class), any(), any())).thenReturn(openedAccount(id));
             when(queries.findAccount(any(Caller.class), eq(id))).thenReturn(details(id));
@@ -487,7 +487,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Terminado el alta se borra el asistente: no quedan datos ni contraseña en la sesión")
-        void terminado_el_alta_se_borra_el_asistente() throws Exception {
+        void onceSignedUpTheWizardIsCleared() throws Exception {
             UUID id = UUID.randomUUID();
             when(registration.register(any(SignUpCommand.class), any(), any())).thenReturn(openedAccount(id));
             MockHttpSession session = sessionAfterStep2();
@@ -500,7 +500,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Si el alta falla, la sesión no queda iniciada")
-        void si_el_alta_falla_la_sesion_no_queda_iniciada() throws Exception {
+        void whenTheSignUpFailsTheSessionIsNotLoggedIn() throws Exception {
             when(registration.register(any(SignUpCommand.class), any(), any()))
                     .thenThrow(new UsernameTakenException("margaret"));
             MockHttpSession session = sessionAfterStep2();
@@ -519,7 +519,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Superado el límite, el paso 3 se queda con el aviso y los minutos que faltan, sin iniciar sesión")
-        void superado_el_limite_el_paso_3_se_queda_con_el_aviso() throws Exception {
+        void overTheLimitStep3StaysWithTheNotice() throws Exception {
             when(registration.register(any(SignUpCommand.class), any(), any()))
                     .thenThrow(new TooManySignUpsException(Duration.ofSeconds(25 * 60 + 1)));
             MockHttpSession session = sessionAfterStep2();
@@ -538,7 +538,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("El alta de la web cuenta para la IP del cliente detrás de Render y Cloudflare")
-        void el_alta_de_la_web_cuenta_para_la_ip_del_cliente() throws Exception {
+        void theWebSignUpCountsForTheClientIp() throws Exception {
             when(registration.register(any(SignUpCommand.class), any(), any())).thenReturn(openedAccount(UUID.randomUUID()));
 
             mvc.perform(validStep3(post("/signup/account")).session(sessionAfterStep2())
@@ -554,7 +554,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Con el límite lleno, el paso 1 ya muestra el aviso al entrar")
-        void con_el_limite_lleno_el_paso_1_muestra_el_aviso_al_entrar() throws Exception {
+        void withTheLimitFullStep1ShowsTheNoticeOnEntry() throws Exception {
             when(signUpLimit.lockedFor("198.51.100.40")).thenReturn(Optional.of(Duration.ofMinutes(10)));
 
             mvc.perform(get("/signup").with(from("198.51.100.40")))
@@ -567,7 +567,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Con el límite lleno, el paso 1 no deja seguir: el paso 2 vuelve al 1 y no se reserva nada")
-        void con_el_limite_lleno_el_paso_1_no_deja_seguir() throws Exception {
+        void withTheLimitFullStep1DoesNotLetYouContinue() throws Exception {
             when(signUpLimit.lockedFor("198.51.100.40")).thenReturn(Optional.of(Duration.ofSeconds(30)));
             MockHttpSession session = new MockHttpSession();
 
@@ -584,7 +584,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Con cupo, el paso 1 sigue al paso 2 como siempre")
-        void con_cupo_el_paso_1_sigue_al_paso_2() throws Exception {
+        void withQuotaStep1MovesOnToStep2() throws Exception {
             mvc.perform(validStep1(post("/signup")).with(from("198.51.100.40")))
                     .andExpect(redirectedUrl("/signup/access"));
         }
@@ -603,7 +603,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("En el paso 1, un nombre vacío marca el nombre como erróneo y deja el resto sin marcar")
-        void en_el_paso_1_un_nombre_vacio_marca_el_nombre_como_erroneo() throws Exception {
+        void onStep1ABlankNameMarksTheNameAsInvalid() throws Exception {
             String html = mvc.perform(post("/signup").param("fullName", "").param("taxId", "12345678Z")
                             .param("email", "margaret@example.com"))
                     .andReturn().getResponse().getContentAsString();
@@ -615,7 +615,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("En el paso 2, una contraseña corta marca la contraseña como errónea y no la repetición")
-        void en_el_paso_2_una_contrasena_corta_marca_la_contrasena_como_erronea() throws Exception {
+        void onStep2AShortPasswordMarksThePasswordAsInvalid() throws Exception {
             String html = mvc.perform(post("/signup/access").session(sessionAfterStep1()).param("username", "margaret")
                             .param("password", "corta").param("passwordRepetition", "corta"))
                     .andReturn().getResponse().getContentAsString();
@@ -627,7 +627,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("En el paso 3, no aceptar las condiciones las marca como erróneas")
-        void en_el_paso_3_no_aceptar_las_condiciones_las_marca_como_erroneas() throws Exception {
+        void onStep3NotAcceptingTheTermsMarksThemAsInvalid() throws Exception {
             String html = mvc.perform(post("/signup/account").session(sessionAfterStep2())
                             .param("initialDeposit", "100.00").param("currency", "EUR"))
                     .andReturn().getResponse().getContentAsString();
@@ -643,7 +643,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("En el paso 1, nombre, documento y correo son obligatorios, pasan al siguiente campo y el documento va en mayúsculas")
-        void en_el_paso_1_los_campos_son_obligatorios_y_pasan_al_siguiente() throws Exception {
+        void onStep1TheFieldsAreRequiredAndMoveToTheNextOne() throws Exception {
             String html = mvc.perform(get("/signup")).andReturn().getResponse().getContentAsString();
 
             for (String id : List.of("fullName", "taxId", "email")) {
@@ -654,7 +654,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("En el paso 2, usuario y contraseñas son obligatorios y pasan al siguiente campo")
-        void en_el_paso_2_usuario_y_contrasenas_son_obligatorios() throws Exception {
+        void onStep2UsernameAndPasswordsAreRequired() throws Exception {
             String html = mvc.perform(get("/signup/access").session(sessionAfterStep1()))
                     .andReturn().getResponse().getContentAsString();
 
@@ -665,7 +665,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("En el paso 3, depósito y condiciones son obligatorios y el depósito termina el formulario")
-        void en_el_paso_3_deposito_y_condiciones_son_obligatorios() throws Exception {
+        void onStep3DepositAndTermsAreRequired() throws Exception {
             String html = mvc.perform(get("/signup/account").session(sessionAfterStep2()))
                     .andReturn().getResponse().getContentAsString();
 
@@ -675,7 +675,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("En el paso 2, cada contraseña tiene su botón «Mostrar contraseña», oculto sin JavaScript")
-        void en_el_paso_2_cada_contrasena_tiene_su_boton_mostrar_contrasena() throws Exception {
+        void onStep2EachPasswordHasItsShowPasswordButton() throws Exception {
             String html = mvc.perform(get("/signup/access").session(sessionAfterStep1()))
                     .andReturn().getResponse().getContentAsString();
 
@@ -685,7 +685,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("En el paso 2, una contraseña corta sigue mostrando su error junto al botón")
-        void en_el_paso_2_una_contrasena_corta_sigue_mostrando_su_error() throws Exception {
+        void onStep2AShortPasswordStillShowsItsError() throws Exception {
             String html = mvc.perform(post("/signup/access").session(sessionAfterStep1()).param("username", "margaret")
                             .param("password", "corta").param("passwordRepetition", "corta"))
                     .andReturn().getResponse().getContentAsString();
@@ -700,7 +700,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Un usuario con mayúsculas y espacios alrededor pasa al paso 3 y se da de alta en minúsculas")
-        void un_usuario_con_mayusculas_se_da_de_alta_en_minusculas() throws Exception {
+        void aUsernameWithCapitalsSignsUpInLowerCase() throws Exception {
             when(registration.register(any(SignUpCommand.class), eq("clave-secreta-1"), any()))
                     .thenReturn(openedAccount(UUID.randomUUID()));
             MockHttpSession session = sessionAfterStep1();
@@ -718,7 +718,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("Un usuario con tildes o ñ se sigue rechazando con el mensaje que explica el formato")
-        void un_usuario_con_tildes_o_enye_se_sigue_rechazando() throws Exception {
+        void aUsernameWithAccentsOrEnyeIsStillRejected() throws Exception {
             mvc.perform(post("/signup/access").session(sessionAfterStep1()).param("username", "Íñigo")
                             .param("password", "clave-secreta-1").param("passwordRepetition", "clave-secreta-1"))
                     .andExpect(status().isOk())
@@ -730,7 +730,7 @@ class SignUpControllerTests {
 
         @Test
         @DisplayName("El paso 2 explica el formato del usuario bajo el campo y lo liga al campo, también junto al error")
-        void el_paso_2_explica_el_formato_del_usuario() throws Exception {
+        void step2ExplainsTheUsernameFormat() throws Exception {
             MockHttpSession session = sessionAfterStep1();
             String html = mvc.perform(get("/signup/access").session(session)).andReturn().getResponse().getContentAsString();
 

@@ -28,7 +28,7 @@ public abstract class AccountNumberSequenceContract {
 
     @Test
     @DisplayName("Los números generados no se repiten")
-    void los_numeros_generados_no_se_repiten() {
+    void generatedNumbersAreNeverRepeated() {
         List<AccountNumber> generated = IntStream.range(0, 100).mapToObj(i -> sequence.next()).toList();
 
         assertThat(generated).doesNotHaveDuplicates();
@@ -36,7 +36,7 @@ public abstract class AccountNumberSequenceContract {
 
     @Test
     @DisplayName("Los números generados son IBAN españoles que superan la comprobación módulo 97")
-    void los_numeros_generados_son_iban_espanoles_validos() {
+    void generatedNumbersAreValidSpanishIbans() {
         IntStream.range(0, 50).forEach(i -> {
             String iban = sequence.next().value();
             assertThat(iban).startsWith("ES").hasSize(24);

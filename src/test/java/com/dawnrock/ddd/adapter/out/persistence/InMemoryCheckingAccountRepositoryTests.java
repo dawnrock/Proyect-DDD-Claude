@@ -20,7 +20,7 @@ class InMemoryCheckingAccountRepositoryTests extends CheckingAccountRepositoryCo
 
     @Test
     @DisplayName("El repositorio guarda la propia cuenta, no una copia")
-    void el_repositorio_guarda_la_propia_cuenta_no_una_copia() {
+    void theRepositoryStoresTheAccountItselfNotACopy() {
         CheckingAccount cuenta = TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open();
         repository.save(cuenta);
 

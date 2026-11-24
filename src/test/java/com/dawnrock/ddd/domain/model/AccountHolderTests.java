@@ -10,7 +10,7 @@ class AccountHolderTests {
 
     @Test
     @DisplayName("Dos titulares con los mismos datos son entidades distintas")
-    void dos_titulares_con_los_mismos_datos_son_entidades_distintas() {
+    void twoHoldersWithTheSameDataAreDifferentEntities() {
         AccountHolder uno = AccountHolder.register("Ada Lovelace", new TaxId("12345678Z"), CustomerSegment.RETAIL);
         AccountHolder otro = AccountHolder.register("Ada Lovelace", new TaxId("12345678Z"), CustomerSegment.RETAIL);
         assertThat(uno).isNotEqualTo(otro);
@@ -19,7 +19,7 @@ class AccountHolderTests {
 
     @Test
     @DisplayName("Un titular mantiene su identidad aunque cambien sus atributos")
-    void un_titular_mantiene_su_identidad_aunque_cambien_sus_atributos() {
+    void aHolderKeepsItsIdentityWhenItsAttributesChange() {
         AccountHolder titular = AccountHolder.register("Ada Lovelace", new TaxId("12345678Z"), CustomerSegment.RETAIL);
         UUID identidad = titular.id();
         titular.rename("Ada Byron");
@@ -31,7 +31,7 @@ class AccountHolderTests {
 
     @Test
     @DisplayName("El nombre del titular es obligatorio al darlo de alta")
-    void el_nombre_del_titular_es_obligatorio_al_darlo_de_alta() {
+    void theHolderNameIsRequiredOnRegistration() {
         assertThatThrownBy(() -> AccountHolder.register(null, new TaxId("12345678Z"), CustomerSegment.RETAIL))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("El nombre del titular es obligatorio");
@@ -42,7 +42,7 @@ class AccountHolderTests {
 
     @Test
     @DisplayName("Un cambio de nombre vacío se rechaza y el titular conserva el nombre anterior")
-    void un_cambio_de_nombre_vacio_se_rechaza_y_conserva_el_anterior() {
+    void aBlankRenameIsRejectedAndThePreviousNameIsKept() {
         AccountHolder titular = AccountHolder.register("Ada Lovelace", new TaxId("12345678Z"), CustomerSegment.RETAIL);
 
         assertThatThrownBy(() -> titular.rename(null)).isInstanceOf(NullPointerException.class);
@@ -53,7 +53,7 @@ class AccountHolderTests {
 
     @Test
     @DisplayName("El titular conserva el NIF con el que se dio de alta")
-    void el_titular_conserva_el_nif_con_el_que_se_dio_de_alta() {
+    void theHolderKeepsTheTaxIdItWasRegisteredWith() {
         AccountHolder titular = AccountHolder.register("Ada Lovelace", new TaxId("12345678z"), CustomerSegment.RETAIL);
 
         assertThat(titular.taxId()).isEqualTo(new TaxId("12345678Z"));
@@ -61,7 +61,7 @@ class AccountHolderTests {
 
     @Test
     @DisplayName("El NIF del titular es obligatorio")
-    void el_nif_del_titular_es_obligatorio() {
+    void theHolderTaxIdIsRequired() {
         assertThatThrownBy(() -> AccountHolder.register("Ada Lovelace", null, CustomerSegment.RETAIL))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("El NIF del titular es obligatorio");
@@ -69,7 +69,7 @@ class AccountHolderTests {
 
     @Test
     @DisplayName("Un titular de alto patrimonio puede volver a ser minorista")
-    void un_titular_de_alto_patrimonio_puede_volver_a_ser_minorista() {
+    void aHighNetWorthHolderCanBeDemotedToRetail() {
         AccountHolder titular =
                 AccountHolder.register("Grace Hopper", new TaxId("87654321X"), CustomerSegment.HIGH_NET_WORTH);
 
@@ -80,7 +80,7 @@ class AccountHolderTests {
 
     @Test
     @DisplayName("Un titular reconstituido conserva su identidad, su nombre, su NIF y su segmento")
-    void un_titular_reconstituido_conserva_su_identidad_su_nombre_su_nif_y_su_segmento() {
+    void aReconstitutedHolderKeepsItsIdentityNameTaxIdAndSegment() {
         UUID id = UUID.randomUUID();
         AccountHolder titular = AccountHolder.reconstitute(id, "Grace Hopper", new TaxId("87654321X"),
                 CustomerSegment.HIGH_NET_WORTH);
@@ -93,7 +93,7 @@ class AccountHolderTests {
 
     @Test
     @DisplayName("Un titular no se reconstituye sin identidad, sin NIF, sin segmento ni con un nombre vacío")
-    void un_titular_no_se_reconstituye_sin_sus_datos_obligatorios() {
+    void aHolderIsNotReconstitutedWithoutItsRequiredData() {
         TaxId taxId = new TaxId("87654321X");
         assertThatThrownBy(() -> AccountHolder.reconstitute(null, "Grace Hopper", taxId, CustomerSegment.RETAIL))
                 .isInstanceOf(NullPointerException.class);

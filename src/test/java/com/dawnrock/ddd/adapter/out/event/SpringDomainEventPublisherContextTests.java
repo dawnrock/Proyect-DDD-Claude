@@ -77,7 +77,7 @@ class SpringDomainEventPublisherContextTests {
 
     @Test
     @DisplayName("Los eventos publicados por el puerto llegan al oyente de Spring en el orden en que ocurrieron")
-    void los_eventos_publicados_llegan_al_oyente_en_orden() {
+    void publishedEventsReachTheListenerInOrder() {
         publisher.publishAll(List.of(deposit, withdrawal));
 
         assertThat(listener.received).containsExactly(deposit, withdrawal);
@@ -85,7 +85,7 @@ class SpringDomainEventPublisherContextTests {
 
     @Test
     @DisplayName("Un oyente de un tipo de evento solo recibe ese tipo")
-    void un_oyente_de_un_tipo_de_evento_solo_recibe_ese_tipo() {
+    void aListenerForOneEventTypeOnlyReceivesThatType() {
         publisher.publishAll(List.of(deposit, withdrawal));
 
         assertThat(listener.deposits).containsExactly(deposit);

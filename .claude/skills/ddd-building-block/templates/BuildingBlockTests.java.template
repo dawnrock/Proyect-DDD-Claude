@@ -17,7 +17,7 @@ class {{Name}}Tests {
 
         @Test
         @DisplayName("{{Frase completa de lo que se espera}}")
-        void {{frase_en_snake_case}}() {
+        void {{expectedBehaviourInEnglishCamelCase}}() {
             // Given / When / Then
         }
     }
@@ -27,12 +27,12 @@ class {{Name}}Tests {
         "{{entrada}}, {{esperado}}",
     })
     @DisplayName("{{Casos límite}}")
-    void {{casos_limite}}(String input, String expected) {
+    void {{edgeCasesInEnglishCamelCase}}(String input, String expected) {
     }
 
     @Test
     @DisplayName("{{No se puede crear un ... inválido}}")
-    void {{no_se_puede_crear_invalido}}() {
+    void {{cannotCreateAnInvalidOneInEnglishCamelCase}}() {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> {{Name}}.of(null));
     }

@@ -44,7 +44,7 @@ class JwtSupportTests {
 
     @Test
     @DisplayName("Un token firmado con la clave se valida y conserva sus claims")
-    void un_token_firmado_con_la_clave_se_valida_y_conserva_sus_claims() {
+    void aTokenSignedWithTheKeyIsValidatedAndKeepsItsClaims() {
         Jwt jwt = decoder.decode(validToken(key));
 
         assertThat(jwt.getSubject()).isEqualTo("ada");
@@ -53,7 +53,7 @@ class JwtSupportTests {
 
     @Test
     @DisplayName("Un token firmado con otra clave se rechaza")
-    void un_token_firmado_con_otra_clave_se_rechaza() {
+    void aTokenSignedWithAnotherKeyIsRejected() {
         String foreign = validToken(JwtSupport.signingKey("otro-secreto-distinto-de-al-menos-32-bytes"));
 
         assertThatExceptionOfType(JwtException.class).isThrownBy(() -> decoder.decode(foreign));
@@ -61,7 +61,7 @@ class JwtSupportTests {
 
     @Test
     @DisplayName("Un token caducado se rechaza")
-    void un_token_caducado_se_rechaza() {
+    void anExpiredTokenIsRejected() {
         Instant past = Instant.now().minus(1, ChronoUnit.HOURS);
         String expired = token(key, "ddd-lab", past, past.plus(15, ChronoUnit.MINUTES));
 
@@ -70,7 +70,7 @@ class JwtSupportTests {
 
     @Test
     @DisplayName("Un token de otro emisor se rechaza")
-    void un_token_de_otro_emisor_se_rechaza() {
+    void aTokenFromAnotherIssuerIsRejected() {
         Instant now = Instant.now();
         String other = token(key, "otro-emisor", now, now.plus(15, ChronoUnit.MINUTES));
 
@@ -79,7 +79,7 @@ class JwtSupportTests {
 
     @Test
     @DisplayName("Un secreto de menos de 32 bytes impide arrancar con un mensaje claro")
-    void un_secreto_corto_impide_arrancar() {
+    void aShortSecretStopsTheStartup() {
         assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(() -> JwtSupport.signingKey("corto"))
                 .withMessageContaining("APP_JWT_SECRET debe tener al menos 32 bytes");
@@ -87,7 +87,7 @@ class JwtSupportTests {
 
     @Test
     @DisplayName("Sin secreto se genera una clave aleatoria distinta en cada arranque")
-    void sin_secreto_se_genera_una_clave_aleatoria() {
+    void withoutSecretARandomKeyIsGenerated() {
         SecretKey first = JwtSupport.signingKey("");
         SecretKey second = JwtSupport.signingKey(null);
 
@@ -96,7 +96,7 @@ class JwtSupportTests {
 
     @Test
     @DisplayName("Sin configuración, un token dura 15 minutos y el emisor es ddd-lab")
-    void sin_configuracion_un_token_dura_15_minutos() {
+    void withoutConfigurationATokenLastsFifteenMinutes() {
         JwtProperties defaults = new JwtProperties(null, null, null);
 
         assertThat(defaults.ttl()).hasMinutes(15);

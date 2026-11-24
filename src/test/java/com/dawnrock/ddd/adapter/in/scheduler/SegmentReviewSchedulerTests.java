@@ -18,7 +18,7 @@ class SegmentReviewSchedulerTests {
 
     @Test
     @DisplayName("La tarea programada pide la revisión de segmentos por el puerto de entrada y anota el resultado")
-    void la_tarea_programada_pide_la_revision_por_el_puerto_de_entrada(CapturedOutput output) {
+    void theScheduledTaskRequestsTheReviewThroughTheInputPort(CapturedOutput output) {
         CheckingAccountCommands commands = mock(CheckingAccountCommands.class);
         given(commands.reviewSegments()).willReturn(2);
 
