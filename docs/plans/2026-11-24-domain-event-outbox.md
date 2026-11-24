@@ -150,7 +150,7 @@ Technical decisions inside the user's choices (Claude, reversible):
 - **Acceptance criteria:**
   - [x] The rule passes and fails when broken (checked). (sabotage: an `ApplicationEventPublisher` reference added to `AuditLogListener` fails `onlyTheEventAdapterPublishesToSpring` and `theCoreDoesNotDependOnSpring`; reverted)
 
-### [ ] T10 — ADR and documentation (~10 min)
+### [x] T10 — ADR and documentation (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0021-domain-event-outbox.md`, `docs/adr/README.md`, `docs/arquitectura/fase-2-hexagonal.md`, `src/main/resources/application.properties`
@@ -160,7 +160,7 @@ Technical decisions inside the user's choices (Claude, reversible):
   2. `fase-2-hexagonal.md`: package tree, class table and test strategy row of `adapter.out.event`; "domain events published after saving" → "stored in the outbox with the aggregate and delivered by the relay". No diagram change (the events adapter is already in it).
   3. `application.properties`: the `app.events.outbox.*` keys with their defaults and a comment.
 - **Acceptance criteria:**
-  - [ ] Documentation in English and consistent with the code.
+  - [x] Documentation in English and consistent with the code. (the project status, decisions, pending items and history are updated here as well)
 
 ## Global acceptance criteria
 
