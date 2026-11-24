@@ -15,7 +15,7 @@ class StatusViewsTests {
     @ParameterizedTest(name = "{0}: aprobado={1}, rechazado={2}")
     @CsvSource({"APPROVED, true, false", "REJECTED, false, true", "PENDING, false, false"})
     @DisplayName("El movimiento dice si está aprobado o rechazado según su estado")
-    void el_movimiento_dice_si_esta_aprobado_o_rechazado(String status, boolean approved, boolean rejected) {
+    void theTransactionSaysWhetherItIsApprovedOrRejected(String status, boolean approved, boolean rejected) {
         TransactionSummary transaction = TransactionSummary.builder().id(UUID.randomUUID()).type("WITHDRAWAL")
                 .amount(BigDecimal.TEN).currency("EUR").occurredOn(Instant.now()).status(status).build();
 
@@ -26,7 +26,7 @@ class StatusViewsTests {
     @ParameterizedTest(name = "{0}: aprobada={1}, rechazada={2}")
     @CsvSource({"APPROVED, true, false", "REJECTED, false, true"})
     @DisplayName("La transferencia dice si está aprobada o rechazada según su estado")
-    void la_transferencia_dice_si_esta_aprobada_o_rechazada(String status, boolean approved, boolean rejected) {
+    void theTransferSaysWhetherItIsApprovedOrRejected(String status, boolean approved, boolean rejected) {
         TransferSummary transfer = TransferSummary.builder().sourceAccountId(UUID.randomUUID())
                 .sourceAccountNumber("ES7921000418450200051332").targetAccountId(UUID.randomUUID())
                 .targetAccountNumber("ES7921000418450200051333").amount(BigDecimal.TEN).currency("EUR")

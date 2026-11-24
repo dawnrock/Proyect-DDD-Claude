@@ -103,7 +103,7 @@ class CheckingAccountServiceTests {
 
     @Test
     @DisplayName("El servicio ofrece los casos de uso por sus puertos de entrada de commands y de queries")
-    void el_servicio_ofrece_los_casos_de_uso_por_sus_puertos_de_entrada_de_commands_y_de_queries() {
+    void theServiceOffersTheUseCasesThroughItsCommandAndQueryInputPorts() {
         assertThat(service).isInstanceOf(CheckingAccountCommands.class).isInstanceOf(CheckingAccountQueries.class);
     }
 
@@ -122,7 +122,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Con NIF la cuenta recibe un IBAN generado y el resumen lo devuelve")
-        void con_nif_la_cuenta_recibe_un_iban_generado() {
+        void withATaxIdTheAccountGetsAGeneratedIban() {
             AccountSummary summary = service.openAccount(ADMIN, byTaxId("87654321X").build());
 
             assertThat(summary.accountNumber()).startsWith("ES").hasSize(24);
@@ -131,7 +131,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Con ingresos verificados por encima del umbral el resumen es de alto patrimonio")
-        void con_ingresos_altos_el_resumen_es_de_alto_patrimonio() {
+        void withHighIncomeTheSummaryIsHighNetWorth() {
             AccountSummary summary = service.openAccount(ADMIN, byTaxId("87654321X").build());
 
             assertThat(summary.segment()).isEqualTo("HIGH_NET_WORTH");
@@ -139,7 +139,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Con ingresos bajos o un NIF desconocido el resumen es minorista")
-        void con_ingresos_bajos_o_nif_desconocido_el_resumen_es_minorista() {
+        void withLowIncomeOrAnUnknownTaxIdTheSummaryIsRetail() {
             assertThat(service.openAccount(ADMIN, byTaxId("12345678Z").build()).segment()).isEqualTo("RETAIL");
             assertThat(service.openAccount(ADMIN, byTaxId("99999999R").holderName("Alan Turing")
                     .holderEmail("alan@example.com").ownerUsername("alan").build()).segment()).isEqualTo("RETAIL");
@@ -147,7 +147,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Un número generado que ya está en uso se rechaza y no se guarda")
-        void un_numero_generado_en_uso_se_rechaza() {
+        void aGeneratedNumberAlreadyInUseIsRejected() {
             String used = service.openAccount(ADMIN, command().build()).accountNumber();
             CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
                     publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
@@ -162,7 +162,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Con NIF se publican los eventos de apertura y se asigna el propietario")
-        void con_nif_se_publican_los_eventos_y_se_asigna_el_propietario() {
+        void withATaxIdTheEventsArePublishedAndTheOwnerIsAssigned() {
             clearInvocations(publisher);
 
             AccountSummary summary = service.openAccount(ADMIN, byTaxId("87654321X").build());
@@ -175,7 +175,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Un depósito válido abre la cuenta, la guarda y devuelve su resumen")
-        void un_deposito_valido_abre_la_cuenta_la_guarda_y_devuelve_su_resumen() {
+        void aValidDepositOpensSavesAndReturnsTheAccountSummary() {
             AccountSummary summary = service.openAccount(ADMIN, command().build());
 
             assertThat(summary.holderName()).isEqualTo("Ada Lovelace");
@@ -187,7 +187,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Un depósito en otra divisa se rechaza y no se guarda")
-        void un_deposito_en_otra_divisa_se_rechaza_y_no_se_guarda() {
+        void aDepositInAnotherCurrencyIsRejectedAndNotSaved() {
             OpenAccountCommand inDollars = command().currency("USD").build();
 
             assertThatExceptionOfType(CurrencyMismatchException.class)
@@ -197,7 +197,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Un depósito por debajo del mínimo se rechaza también con NIF")
-        void un_deposito_bajo_se_rechaza_tambien_con_nif() {
+        void aLowDepositIsRejectedAlsoWithATaxId() {
             OpenAccountCommand tooLow = byTaxId("87654321X").initialDeposit(new BigDecimal("49.99")).build();
 
             assertThatExceptionOfType(InsufficientInitialDepositException.class)
@@ -212,7 +212,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Una cuenta existente se devuelve con el depósito inicial entre sus movimientos")
-        void una_cuenta_existente_se_devuelve_con_el_deposito_inicial_entre_sus_movimientos() {
+        void anExistingAccountIsReturnedWithTheInitialDepositAmongItsTransactions() {
             AccountSummary opened = service.openAccount(ADMIN, highNetWorthCommand().build());
 
             AccountDetails details = service.findAccount(ADMIN, opened.id());
@@ -234,7 +234,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Una cuenta desconocida lanza AccountNotFoundException")
-        void una_cuenta_desconocida_lanza_account_not_found_exception() {
+        void anUnknownAccountThrowsAccountNotFoundException() {
             UUID unknown = UUID.randomUUID();
 
             assertThatExceptionOfType(AccountNotFoundException.class)
@@ -249,13 +249,13 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Sin cuentas devuelve una lista vacía")
-        void sin_cuentas_devuelve_una_lista_vacia() {
+        void withNoAccountsReturnsAnEmptyList() {
             assertThat(service.listAccounts(ADMIN)).isEmpty();
         }
 
         @Test
         @DisplayName("Varias cuentas se devuelven ordenadas por número de cuenta, con su segmento")
-        void varias_cuentas_se_devuelven_ordenadas_por_numero_de_cuenta() {
+        void severalAccountsAreReturnedSortedByAccountNumber() {
             AccountSummary grace = service.openAccount(ADMIN, highNetWorthCommand().build());
             AccountSummary ada = service.openAccount(ADMIN, command().build());
 
@@ -275,7 +275,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Un ingreso aprobado actualiza el saldo y aparece entre los movimientos")
-        void un_ingreso_aprobado_actualiza_el_saldo_y_aparece_entre_los_movimientos() {
+        void anApprovedDepositUpdatesTheBalanceAndAppearsAmongTheTransactions() {
             UUID id = service.openAccount(ADMIN, command().build()).id();
 
             TransactionSummary transaction = service.deposit(ADMIN, 
@@ -293,7 +293,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Una cuenta desconocida lanza AccountNotFoundException")
-        void una_cuenta_desconocida_lanza_account_not_found_exception() {
+        void anUnknownAccountThrowsAccountNotFoundException() {
             UUID unknown = UUID.randomUUID();
             DepositCommand command = DepositCommand.builder().accountId(unknown).amount(BigDecimal.TEN).build();
 
@@ -304,7 +304,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Un ingreso en otra divisa lanza CurrencyMismatchException y no cambia el saldo")
-        void un_ingreso_en_otra_divisa_lanza_currency_mismatch_exception_y_no_cambia_el_saldo() {
+        void aDepositInAnotherCurrencyThrowsCurrencyMismatchExceptionAndKeepsTheBalance() {
             UUID id = service.openAccount(ADMIN, command().build()).id();
             DepositCommand dollars =
                     DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).currency("USD").build();
@@ -329,7 +329,7 @@ class CheckingAccountServiceTests {
                 "HIGH_NET_WORTH, 1100.00, APPROVED, -1000.00",
                 "HIGH_NET_WORTH, 1100.01, REJECTED, 100.00"
         })
-        void las_retiradas_en_el_limite_del_descubierto_dependen_del_segmento(
+        void withdrawalsAtTheOverdraftLimitDependOnTheSegment(
                 String segment, String amount, String status, String finalBalance) {
             UUID id = service.openAccount(ADMIN,
                     ("HIGH_NET_WORTH".equals(segment) ? highNetWorthCommand() : command()).build()).id();
@@ -345,7 +345,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Una retirada rechazada no cambia el saldo pero queda registrada")
-        void una_retirada_rechazada_no_cambia_el_saldo_pero_queda_registrada() {
+        void aRejectedWithdrawalKeepsTheBalanceButIsRecorded() {
             UUID id = service.openAccount(ADMIN, command().build()).id();
 
             TransactionSummary transaction = service.withdraw(ADMIN, 
@@ -363,7 +363,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Una cuenta desconocida lanza AccountNotFoundException")
-        void una_cuenta_desconocida_lanza_account_not_found_exception() {
+        void anUnknownAccountThrowsAccountNotFoundException() {
             UUID unknown = UUID.randomUUID();
             WithdrawCommand command = WithdrawCommand.builder().accountId(unknown).amount(BigDecimal.TEN).build();
 
@@ -374,7 +374,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Una retirada en otra divisa lanza CurrencyMismatchException y no cambia el saldo")
-        void una_retirada_en_otra_divisa_lanza_currency_mismatch_exception_y_no_cambia_el_saldo() {
+        void aWithdrawalInAnotherCurrencyThrowsCurrencyMismatchExceptionAndKeepsTheBalance() {
             UUID id = service.openAccount(ADMIN, command().build()).id();
             WithdrawCommand dollars =
                     WithdrawCommand.builder().accountId(id).amount(BigDecimal.TEN).currency("USD").build();
@@ -393,7 +393,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Abrir una cuenta publica cuenta abierta y el ingreso inicial después de guardarla")
-        void abrir_una_cuenta_publica_sus_eventos_despues_de_guardarla() {
+        void openingAnAccountPublishesItsEventsAfterSavingIt() {
             service.openAccount(ADMIN, command().build());
 
             InOrder order = inOrder(repository, publisher);
@@ -405,7 +405,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Un ingreso publica el evento de dinero ingresado después de guardar la cuenta")
-        void un_ingreso_publica_su_evento_despues_de_guardar() {
+        void aDepositPublishesItsEventAfterSaving() {
             UUID id = service.openAccount(ADMIN, command().build()).id();
             clearInvocations(repository, publisher);
 
@@ -420,7 +420,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Una retirada rechazada publica el evento de retirada rechazada")
-        void una_retirada_rechazada_publica_su_evento() {
+        void aRejectedWithdrawalPublishesItsEvent() {
             UUID id = service.openAccount(ADMIN, command().build()).id();
             clearInvocations(publisher);
 
@@ -432,7 +432,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Si guardar la cuenta falla, no se publica ningún evento")
-        void si_guardar_la_cuenta_falla_no_se_publica_ningun_evento() {
+        void whenSavingTheAccountFailsNoEventIsPublished() {
             UUID id = service.openAccount(ADMIN, command().build()).id();
             clearInvocations(publisher);
             doThrow(new IllegalStateException("fallo al guardar")).when(repository).save(any(CheckingAccount.class));
@@ -444,7 +444,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Un caso de uso que falla antes de guardar no publica nada")
-        void un_caso_de_uso_que_falla_antes_de_guardar_no_publica_nada() {
+        void aUseCaseFailingBeforeSavingPublishesNothing() {
             String used = service.openAccount(ADMIN, command().build()).accountNumber();
             CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
                     publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
@@ -488,7 +488,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Una transferencia aprobada publica la retirada del origen y el ingreso del destino tras guardarlas")
-        void una_transferencia_aprobada_publica_sus_eventos_tras_guardar_ambas_cuentas() {
+        void anApprovedTransferPublishesItsEventsAfterSavingBothAccounts() {
             clearInvocations(publisher);
 
             service.transfer(ADMIN, transfer(sourceId, targetNumber, "200"));
@@ -503,7 +503,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Una transferencia rechazada solo publica la retirada rechazada del origen")
-        void una_transferencia_rechazada_solo_publica_la_retirada_rechazada() {
+        void aRejectedTransferOnlyPublishesTheRejectedWithdrawal() {
             clearInvocations(publisher);
 
             service.transfer(ADMIN, transfer(sourceId, targetNumber, "5000"));
@@ -515,7 +515,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Una transferencia aprobada actualiza los saldos de las dos cuentas y guarda ambas")
-        void una_transferencia_aprobada_actualiza_los_saldos_y_guarda_ambas_cuentas() {
+        void anApprovedTransferUpdatesTheBalancesAndSavesBothAccounts() {
             TransferSummary summary = service.transfer(ADMIN, transfer(sourceId, targetNumber, "200"));
 
             assertThat(summary.status()).isEqualTo("APPROVED");
@@ -538,7 +538,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Tras una transferencia, el detalle de ambas cuentas muestra la contrapartida solo en sus movimientos")
-        void tras_una_transferencia_el_detalle_muestra_la_contrapartida_solo_en_sus_movimientos() {
+        void afterATransferTheDetailsShowTheCounterpartOnlyInItsTransactions() {
             service.transfer(ADMIN, transfer(sourceId, targetNumber, "200"));
 
             List<TransactionSummary> inSource = service.findAccount(ADMIN, sourceId).transactions();
@@ -551,7 +551,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Una transferencia rechazada deja la contrapartida en la retirada rechazada del origen")
-        void una_transferencia_rechazada_deja_la_contrapartida_en_la_retirada_rechazada() {
+        void aRejectedTransferKeepsTheCounterpartInTheRejectedWithdrawal() {
             service.transfer(ADMIN, transfer(sourceId, targetNumber, "600"));
 
             assertThat(service.findAccount(ADMIN, sourceId).transactions()).last()
@@ -561,7 +561,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Un ingreso o una retirada normales no llevan contrapartida")
-        void un_ingreso_o_una_retirada_normales_no_llevan_contrapartida() {
+        void regularDepositsAndWithdrawalsHaveNoCounterpart() {
             TransactionSummary deposit = service.deposit(ADMIN,
                     DepositCommand.builder().accountId(sourceId).amount(new BigDecimal("10")).build());
 
@@ -570,7 +570,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Una transferencia rechazada se devuelve como REJECTED y no cambia ningún saldo")
-        void una_transferencia_rechazada_se_devuelve_como_rejected_y_no_cambia_los_saldos() {
+        void aRejectedTransferIsReturnedAsRejectedAndKeepsTheBalances() {
             TransferSummary summary = service.transfer(ADMIN, transfer(sourceId, targetNumber, "600"));
 
             assertThat(summary.status()).isEqualTo("REJECTED");
@@ -583,7 +583,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Una cuenta de origen desconocida lanza AccountNotFoundException y no guarda nada")
-        void una_cuenta_de_origen_desconocida_lanza_account_not_found_exception() {
+        void anUnknownSourceAccountThrowsAccountNotFoundException() {
             UUID unknown = UUID.randomUUID();
 
             assertThatExceptionOfType(AccountNotFoundException.class)
@@ -594,7 +594,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Un número de cuenta de destino desconocido lanza TargetAccountNotFoundException y no mueve dinero")
-        void un_numero_de_cuenta_de_destino_desconocido_lanza_target_account_not_found_exception() {
+        void anUnknownTargetAccountNumberThrowsTargetAccountNotFoundException() {
             assertThatExceptionOfType(TargetAccountNotFoundException.class)
                     .isThrownBy(() -> service.transfer(ADMIN, transfer(sourceId, "es00 0000 0000 0000 0000 0099", "10")))
                     .withMessageContaining("ES0000000000000000000099");
@@ -605,7 +605,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Transferir a la misma cuenta lanza SameAccountTransferException y no registra movimientos")
-        void transferir_a_la_misma_cuenta_lanza_same_account_transfer_exception() {
+        void transferringToTheSameAccountThrowsSameAccountTransferException() {
             assertThatExceptionOfType(SameAccountTransferException.class)
                     .isThrownBy(() -> service.transfer(ADMIN, transfer(sourceId, sourceNumber, "10")));
             assertThat(service.findAccount(ADMIN, sourceId).transactions()).hasSize(1);
@@ -614,7 +614,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Una transferencia en otra divisa lanza CurrencyMismatchException y no cambia los saldos")
-        void una_transferencia_en_otra_divisa_lanza_currency_mismatch_exception() {
+        void aTransferInAnotherCurrencyThrowsCurrencyMismatchException() {
             TransferCommand dollars = TransferCommand.builder()
                     .sourceAccountId(sourceId)
                     .targetAccountNumber(targetNumber)
@@ -674,7 +674,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Los eventos se publican cuando la unidad de trabajo ha terminado, nunca dentro")
-        void los_eventos_se_publican_al_terminar_la_unidad() {
+        void eventsArePublishedWhenTheUnitFinishes() {
             UUID id = recorded.openAccount(ADMIN, command().build()).id();
             recorded.deposit(ADMIN, DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).build());
 
@@ -684,7 +684,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Si la unidad de trabajo no termina bien, no se publica ningún evento")
-        void si_la_unidad_no_termina_bien_no_se_publica_nada() {
+        void whenTheUnitDoesNotFinishWellNothingIsPublished() {
             UUID id = recorded.openAccount(ADMIN, command().build()).id();
             publications = 0;
             unit.failOnFinish = true;
@@ -713,7 +713,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Tras un mes bajo el mínimo y sin ingresos altos, la retirada se evalúa ya como minorista")
-        void tras_un_mes_bajo_el_minimo_y_sin_ingresos_altos_la_retirada_se_evalua_como_minorista() {
+        void afterAMonthBelowTheMinimumWithoutHighIncomeTheWithdrawalIsEvaluatedAsRetail() {
             UUID id = cuentaEnDescubierto(command());
             clock.advance(Duration.ofDays(32));
 
@@ -723,7 +723,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Antes de un mes la retirada sigue contando con el descubierto de alto patrimonio")
-        void antes_de_un_mes_la_retirada_sigue_contando_con_el_descubierto() {
+        void beforeAMonthTheWithdrawalStillCountsOnTheOverdraft() {
             UUID id = cuentaEnDescubierto(command());
             clock.advance(Duration.ofDays(20));
 
@@ -733,7 +733,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Tras un mes bajo el mínimo, un titular con ingresos altos verificados conserva el segmento")
-        void tras_un_mes_bajo_el_minimo_un_titular_con_ingresos_altos_conserva_el_segmento() {
+        void afterAMonthBelowTheMinimumAHolderWithHighIncomeKeepsTheSegment() {
             UUID id = cuentaEnDescubierto(highNetWorthCommand());
             clock.advance(Duration.ofDays(32));
 
@@ -743,7 +743,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Tras un mes bajo el mínimo y sin ingresos altos, la transferencia se evalúa ya como minorista")
-        void tras_un_mes_bajo_el_minimo_y_sin_ingresos_altos_la_transferencia_se_evalua_como_minorista() {
+        void afterAMonthBelowTheMinimumWithoutHighIncomeTheTransferIsEvaluatedAsRetail() {
             UUID id = cuentaEnDescubierto(command());
             String target = service.openAccount(ADMIN, highNetWorthCommand().build()).accountNumber();
             clock.advance(Duration.ofDays(32));
@@ -775,7 +775,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Pasado un mes, solo vuelve a minorista el titular que sigue bajo el mínimo, y se publica su cambio de segmento")
-        void pasado_un_mes_solo_vuelve_a_minorista_el_titular_que_sigue_bajo_el_minimo() {
+        void afterAMonthOnlyTheHolderStillBelowTheMinimumIsDemotedToRetail() {
             clock.advance(Duration.ofDays(32));
 
             int demoted = service.reviewSegments();
@@ -794,7 +794,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Antes de un mes la revisión no cambia ningún segmento ni publica eventos")
-        void antes_de_un_mes_la_revision_no_cambia_ningun_segmento() {
+        void beforeAMonthTheReviewChangesNoSegment() {
             clock.advance(Duration.ofDays(20));
 
             assertThat(service.reviewSegments()).isZero();
@@ -809,7 +809,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Una retirada no válida sobre una cuenta con la revisión vencida deja al titular en minorista y publica el cambio")
-        void una_retirada_no_valida_no_pierde_la_revision_vencida() {
+        void anInvalidWithdrawalDoesNotLoseTheDueReview() {
             UUID id = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("100000")).build()).id();
             service.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("500")).build());
             clock.advance(Duration.ofDays(32));
@@ -825,7 +825,7 @@ class CheckingAccountServiceTests {
 
         @Test
         @DisplayName("Una transferencia no válida sobre una cuenta con la revisión vencida deja al titular en minorista y publica el cambio")
-        void una_transferencia_no_valida_no_pierde_la_revision_vencida() {
+        void anInvalidTransferDoesNotLoseTheDueReview() {
             AccountSummary source = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("100000")).build());
             service.withdraw(ADMIN,
                     WithdrawCommand.builder().accountId(source.id()).amount(new BigDecimal("500")).build());

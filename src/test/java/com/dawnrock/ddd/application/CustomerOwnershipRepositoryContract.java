@@ -30,7 +30,7 @@ public abstract class CustomerOwnershipRepositoryContract {
 
     @Test
     @DisplayName("El usuario asignado a un cliente se recupera por su documento y el cliente por su usuario")
-    void el_usuario_asignado_se_recupera_en_los_dos_sentidos() {
+    void theAssignedUsernameIsFoundBothWays() {
         repository.assign(ADA, "ada");
 
         assertThat(repository.usernameOf(ADA)).contains("ada");
@@ -39,7 +39,7 @@ public abstract class CustomerOwnershipRepositoryContract {
 
     @Test
     @DisplayName("Un cliente o un usuario sin asignar no devuelven nada")
-    void un_cliente_o_un_usuario_sin_asignar_no_devuelven_nada() {
+    void anUnassignedCustomerOrUsernameReturnsNothing() {
         repository.assign(ADA, "ada");
 
         assertThat(repository.usernameOf(ALAN)).isEmpty();
@@ -48,7 +48,7 @@ public abstract class CustomerOwnershipRepositoryContract {
 
     @Test
     @DisplayName("Un usuario que es de otro cliente se rechaza y no pisa la asignación (R30)")
-    void un_usuario_de_otro_cliente_se_rechaza() {
+    void anotherCustomersUsernameIsRejected() {
         repository.assign(ADA, "ada");
 
         assertThatExceptionOfType(IllegalArgumentException.class)
@@ -60,7 +60,7 @@ public abstract class CustomerOwnershipRepositoryContract {
 
     @Test
     @DisplayName("Asignar de nuevo el mismo par no cambia nada")
-    void asignar_de_nuevo_el_mismo_par_no_cambia_nada() {
+    void assigningTheSamePairAgainChangesNothing() {
         repository.assign(ADA, "ada");
 
         repository.assign(ADA, "ada");
@@ -71,7 +71,7 @@ public abstract class CustomerOwnershipRepositoryContract {
 
     @Test
     @DisplayName("Asignar otro usuario a un cliente sustituye al anterior y libera el antiguo")
-    void asignar_otro_usuario_a_un_cliente_sustituye_al_anterior() {
+    void assigningAnotherUsernameToACustomerReplacesThePreviousOne() {
         repository.assign(ADA, "ada");
 
         repository.assign(ADA, "lovelace");
@@ -83,7 +83,7 @@ public abstract class CustomerOwnershipRepositoryContract {
 
     @Test
     @DisplayName("El documento y el usuario son obligatorios")
-    void el_documento_y_el_usuario_son_obligatorios() {
+    void theDocumentAndTheUsernameAreRequired() {
         assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> repository.assign(null, "ada"));
         assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> repository.assign(ADA, null));
         assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> repository.usernameOf(null));

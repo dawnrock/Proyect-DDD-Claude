@@ -72,7 +72,7 @@ class CheckingAccountServiceOwnershipTests {
 
         @Test
         @DisplayName("Un administrador abre la cuenta y queda registrada a nombre del usuario propietario")
-        void un_administrador_abre_la_cuenta_y_queda_registrada_a_nombre_del_propietario() {
+        void anAdministratorOpensTheAccountInTheOwnersName() {
             AccountSummary summary = service.openAccount(ADMIN, command("ada").build());
 
             assertThat(summary.accountNumber()).startsWith("ES").hasSize(24);
@@ -81,7 +81,7 @@ class CheckingAccountServiceOwnershipTests {
 
         @Test
         @DisplayName("Un usuario que no es administrador no puede abrir cuentas y no se guarda nada")
-        void un_usuario_que_no_es_administrador_no_puede_abrir_cuentas() {
+        void aNonAdministratorCannotOpenAccounts() {
             OpenAccountCommand open = command("ada").build();
 
             assertThatExceptionOfType(ForbiddenOperationException.class)
@@ -91,7 +91,7 @@ class CheckingAccountServiceOwnershipTests {
 
         @Test
         @DisplayName("Abrir una cuenta sin usuario propietario lanza IllegalArgumentException y no se guarda nada")
-        void abrir_una_cuenta_sin_usuario_propietario_lanza_illegal_argument_exception() {
+        void openingAnAccountWithoutAnOwnerThrowsIllegalArgumentException() {
             OpenAccountCommand withoutOwner = command("").build();
 
             assertThatExceptionOfType(IllegalArgumentException.class)
@@ -102,7 +102,7 @@ class CheckingAccountServiceOwnershipTests {
 
         @Test
         @DisplayName("Un nombre de usuario inválido lo rechaza el command al construirse")
-        void un_nombre_de_usuario_invalido_lo_rechaza_el_command() {
+        void anInvalidUsernameIsRejectedByTheCommand() {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> command("Ada Lovelace").build());
         }
@@ -125,14 +125,14 @@ class CheckingAccountServiceOwnershipTests {
 
         @Test
         @DisplayName("Un administrador lista todas las cuentas, también las que no tienen propietario")
-        void un_administrador_lista_todas_las_cuentas() {
+        void anAdministratorListsAllAccounts() {
             assertThat(service.listAccounts(ADMIN)).extracting(AccountSummary::id)
                     .containsExactlyInAnyOrder(adas.id(), graces.id(), orphan.id());
         }
 
         @Test
         @DisplayName("Un usuario lista solo sus cuentas, ordenadas por número de cuenta")
-        void un_usuario_lista_solo_sus_cuentas() {
+        void aUserListsOnlyTheirAccounts() {
             AccountSummary second = service.openAccount(ADMIN, command("ada").build());
 
             assertThat(service.listAccounts(ADA)).extracting(AccountSummary::accountNumber)
@@ -141,26 +141,26 @@ class CheckingAccountServiceOwnershipTests {
 
         @Test
         @DisplayName("Un usuario sin cuentas obtiene una lista vacía")
-        void un_usuario_sin_cuentas_obtiene_una_lista_vacia() {
+        void aUserWithoutAccountsGetsAnEmptyList() {
             assertThat(service.listAccounts(Caller.builder().username("alan").admin(false).build())).isEmpty();
         }
 
         @Test
         @DisplayName("Un administrador consulta cualquier cuenta")
-        void un_administrador_consulta_cualquier_cuenta() {
+        void anAdministratorViewsAnyAccount() {
             assertThat(service.findAccount(ADMIN, graces.id()).accountNumber()).isEqualTo(graces.accountNumber());
             assertThat(service.findAccount(ADMIN, orphan.id()).id()).isEqualTo(orphan.id());
         }
 
         @Test
         @DisplayName("Un usuario consulta su cuenta")
-        void un_usuario_consulta_su_cuenta() {
+        void aUserViewsTheirAccount() {
             assertThat(service.findAccount(ADA, adas.id()).accountNumber()).isEqualTo(adas.accountNumber());
         }
 
         @Test
         @DisplayName("Una cuenta ajena no se encuentra: AccountNotFoundException")
-        void una_cuenta_ajena_no_se_encuentra() {
+        void anotherUsersAccountIsNotFound() {
             assertThatExceptionOfType(AccountNotFoundException.class)
                     .isThrownBy(() -> service.findAccount(ADA, graces.id()))
                     .withMessageContaining(graces.id().toString());
@@ -168,14 +168,14 @@ class CheckingAccountServiceOwnershipTests {
 
         @Test
         @DisplayName("Una cuenta sin propietario no se encuentra para un usuario")
-        void una_cuenta_sin_propietario_no_se_encuentra_para_un_usuario() {
+        void anAccountWithoutOwnerIsNotFoundForAUser() {
             assertThatExceptionOfType(AccountNotFoundException.class)
                     .isThrownBy(() -> service.findAccount(ADA, orphan.id()));
         }
 
         @Test
         @DisplayName("Una cuenta inexistente no se encuentra, ni para un administrador")
-        void una_cuenta_inexistente_no_se_encuentra() {
+        void aMissingAccountIsNotFound() {
             assertThatExceptionOfType(AccountNotFoundException.class)
                     .isThrownBy(() -> service.findAccount(ADMIN, UUID.randomUUID()));
         }
@@ -223,7 +223,7 @@ class CheckingAccountServiceOwnershipTests {
 
         @Test
         @DisplayName("El llamador de sistema (la demo) ingresa, retira y transfiere en cuentas de otros usuarios")
-        void el_llamador_de_sistema_opera_cuentas_de_otros_usuarios() {
+        void theSystemCallerOperatesOtherUsersAccounts() {
             Caller system = CallerDef.system();
 
             service.deposit(system, deposit(adas));
@@ -236,21 +236,21 @@ class CheckingAccountServiceOwnershipTests {
 
         @Test
         @DisplayName("Un usuario ingresa en su cuenta")
-        void un_usuario_ingresa_en_su_cuenta() {
+        void aUserDepositsIntoTheirAccount() {
             assertThat(service.deposit(ADA, deposit(adas)).status()).isEqualTo("APPROVED");
             assertThat(balanceOf(adas)).isEqualByComparingTo("600.00");
         }
 
         @Test
         @DisplayName("Un usuario retira de su cuenta")
-        void un_usuario_retira_de_su_cuenta() {
+        void aUserWithdrawsFromTheirAccount() {
             assertThat(service.withdraw(ADA, withdraw(adas)).status()).isEqualTo("APPROVED");
             assertThat(balanceOf(adas)).isEqualByComparingTo("400.00");
         }
 
         @Test
         @DisplayName("Un administrador opera en cualquier cuenta, también sin propietario")
-        void un_administrador_opera_en_cualquier_cuenta() {
+        void anAdministratorOperatesOnAnyAccount() {
             service.deposit(ADMIN, deposit(graces));
             service.withdraw(ADMIN, withdraw(orphan));
 
@@ -260,7 +260,7 @@ class CheckingAccountServiceOwnershipTests {
 
         @Test
         @DisplayName("Ingresar en una cuenta ajena lanza AccountNotFoundException y no cambia el saldo")
-        void ingresar_en_una_cuenta_ajena_lanza_account_not_found_exception() {
+        void depositingIntoAnotherUsersAccountThrowsAccountNotFoundException() {
             assertThatExceptionOfType(AccountNotFoundException.class)
                     .isThrownBy(() -> service.deposit(ADA, deposit(graces)));
             assertThat(balanceOf(graces)).isEqualByComparingTo("500.00");
@@ -268,7 +268,7 @@ class CheckingAccountServiceOwnershipTests {
 
         @Test
         @DisplayName("Retirar de una cuenta ajena o sin propietario lanza AccountNotFoundException")
-        void retirar_de_una_cuenta_ajena_lanza_account_not_found_exception() {
+        void withdrawingFromAnotherUsersAccountThrowsAccountNotFoundException() {
             assertThatExceptionOfType(AccountNotFoundException.class)
                     .isThrownBy(() -> service.withdraw(ADA, withdraw(graces)));
             assertThatExceptionOfType(AccountNotFoundException.class)
@@ -279,7 +279,7 @@ class CheckingAccountServiceOwnershipTests {
 
         @Test
         @DisplayName("Un usuario transfiere de su cuenta al IBAN de otro cliente, escrito con espacios y minúsculas")
-        void un_usuario_transfiere_al_iban_de_otro_cliente() {
+        void aUserTransfersToAnotherCustomersIban() {
             TransferSummary summary = service.transfer(ADA, transfer(adas, spaced(graces.accountNumber())));
 
             assertThat(summary.status()).isEqualTo("APPROVED");
@@ -290,13 +290,13 @@ class CheckingAccountServiceOwnershipTests {
 
         @Test
         @DisplayName("Un administrador transfiere desde cualquier cuenta")
-        void un_administrador_transfiere_desde_cualquier_cuenta() {
+        void anAdministratorTransfersFromAnyAccount() {
             assertThat(service.transfer(ADMIN, transfer(graces, adas.accountNumber())).status()).isEqualTo("APPROVED");
         }
 
         @Test
         @DisplayName("Transferir desde una cuenta ajena lanza AccountNotFoundException y no mueve dinero")
-        void transferir_desde_una_cuenta_ajena_lanza_account_not_found_exception() {
+        void transferringFromAnotherUsersAccountThrowsAccountNotFoundException() {
             assertThatExceptionOfType(AccountNotFoundException.class)
                     .isThrownBy(() -> service.transfer(ADA, transfer(graces, adas.accountNumber())));
             assertThat(balanceOf(adas)).isEqualByComparingTo("500.00");
@@ -305,7 +305,7 @@ class CheckingAccountServiceOwnershipTests {
 
         @Test
         @DisplayName("Transferir a un IBAN inexistente lanza TargetAccountNotFoundException y no mueve dinero")
-        void transferir_a_un_iban_inexistente_lanza_target_account_not_found_exception() {
+        void transferringToAMissingIbanThrowsTargetAccountNotFoundException() {
             assertThatExceptionOfType(TargetAccountNotFoundException.class)
                     .isThrownBy(() -> service.transfer(ADA, transfer(adas, "ES1000000000000000000001")))
                     .withMessageContaining("ES1000000000000000000001");
@@ -314,7 +314,7 @@ class CheckingAccountServiceOwnershipTests {
 
         @Test
         @DisplayName("Con origen ajeno y destino inexistente gana el origen: AccountNotFoundException")
-        void con_origen_ajeno_y_destino_inexistente_gana_el_origen() {
+        void withAForeignSourceAndAMissingTargetTheSourceErrorWins() {
             assertThatExceptionOfType(AccountNotFoundException.class)
                     .isThrownBy(() -> service.transfer(ADA, transfer(graces, "ES1000000000000000000001")))
                     .isNotInstanceOf(TargetAccountNotFoundException.class);
@@ -322,7 +322,7 @@ class CheckingAccountServiceOwnershipTests {
 
         @Test
         @DisplayName("Transferir a la propia cuenta sigue siendo una regla del dominio")
-        void transferir_a_la_propia_cuenta_sigue_siendo_una_regla_del_dominio() {
+        void transferringToTheSameAccountIsStillADomainRule() {
             assertThatExceptionOfType(com.dawnrock.ddd.domain.model.SameAccountTransferException.class)
                     .isThrownBy(() -> service.transfer(ADA, transfer(adas, adas.accountNumber())));
         }

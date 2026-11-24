@@ -53,7 +53,7 @@ class CheckingAccountServiceConcurrencyTests {
 
     @Test
     @DisplayName("Transferencias e ingresos simultáneos sobre las mismas cuentas no pierden dinero ni movimientos")
-    void transferencias_e_ingresos_simultaneos_no_pierden_dinero_ni_movimientos() throws Exception {
+    void concurrentTransfersAndDepositsLoseNeitherMoneyNorTransactions() throws Exception {
         for (int round = 0; round < ROUNDS; round++) {
             runRound();
         }

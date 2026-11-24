@@ -22,13 +22,13 @@ public abstract class UnitOfWorkContract {
 
     @Test
     @DisplayName("La unidad de trabajo ejecuta el trabajo y devuelve su resultado")
-    void la_unidad_ejecuta_el_trabajo_y_devuelve_su_resultado() {
+    void theUnitRunsTheWorkAndReturnsItsResult() {
         assertThat(unitOfWork().execute(() -> "hecho")).isEqualTo("hecho");
     }
 
     @Test
     @DisplayName("Si el trabajo falla, la excepción se propaga y la siguiente unidad se ejecuta")
-    void si_el_trabajo_falla_la_excepcion_se_propaga_y_la_siguiente_unidad_se_ejecuta() {
+    void whenTheWorkFailsTheExceptionPropagatesAndTheNextUnitRuns() {
         UnitOfWork unit = unitOfWork();
 
         assertThatExceptionOfType(IllegalStateException.class)
@@ -41,7 +41,7 @@ public abstract class UnitOfWorkContract {
 
     @Test
     @DisplayName("Una unidad abierta dentro de otra en el mismo hilo no se bloquea")
-    void una_unidad_dentro_de_otra_no_se_bloquea() throws Exception {
+    void aUnitInsideAnotherDoesNotBlock() throws Exception {
         UnitOfWork unit = unitOfWork();
         ExecutorService pool = Executors.newSingleThreadExecutor();
         try {
@@ -54,7 +54,7 @@ public abstract class UnitOfWorkContract {
 
     @Test
     @DisplayName("Mientras una unidad se ejecuta, otra lanzada desde otro hilo espera a que termine")
-    void dos_unidades_no_se_solapan() throws Exception {
+    void twoUnitsDoNotOverlap() throws Exception {
         UnitOfWork unit = unitOfWork();
         CountDownLatch firstInside = new CountDownLatch(1);
         CountDownLatch releaseFirst = new CountDownLatch(1);

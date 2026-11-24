@@ -25,7 +25,7 @@ class OpenAccountCommandTests {
 
     @Test
     @DisplayName("Basta el documento y el depósito: nombre, correo y usuario quedan en blanco y la divisa es EUR")
-    void basta_el_documento_y_el_deposito() {
+    void theDocumentAndTheDepositAreEnough() {
         OpenAccountCommand command = validCommand().build();
 
         assertThat(command.holderTaxId()).isEqualTo("12345678Z");
@@ -38,13 +38,13 @@ class OpenAccountCommandTests {
 
     @Test
     @DisplayName("Una divisa ISO 4217 distinta de EUR se acepta: es el dominio quien la rechaza")
-    void una_divisa_iso_4217_distinta_de_eur_se_acepta() {
+    void anIso4217CurrencyOtherThanEurIsAccepted() {
         assertThat(validCommand().currency("USD").build().currency()).isEqualTo("USD");
     }
 
     @Test
     @DisplayName("Los datos de un cliente nuevo se aceptan junto al documento")
-    void los_datos_de_un_cliente_nuevo_se_aceptan() {
+    void aNewCustomersDataIsAccepted() {
         OpenAccountCommand command = validCommand()
                 .holderName("Ada Lovelace").holderEmail("ada@example.com").ownerUsername("ada").build();
 
@@ -55,7 +55,7 @@ class OpenAccountCommandTests {
     @ParameterizedTest
     @ValueSource(strings = {"ada", "ada@", "ada@example", "ada @example.com"})
     @DisplayName("Un correo indicado debe tener un formato válido")
-    void un_correo_indicado_debe_tener_un_formato_valido(String email) {
+    void aGivenEmailMustHaveAValidFormat(String email) {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().holderEmail(email).build())
                 .withMessage("El correo electrónico no es válido");
@@ -64,7 +64,7 @@ class OpenAccountCommandTests {
     @ParameterizedTest
     @CsvSource({"0", "0.00", "-1", "-50.00"})
     @DisplayName("El depósito inicial debe ser positivo")
-    void el_deposito_inicial_debe_ser_positivo(String deposit) {
+    void theInitialDepositMustBePositive(String deposit) {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().initialDeposit(new BigDecimal(deposit)).build())
                 .withMessage("El depósito inicial debe ser positivo");
@@ -73,7 +73,7 @@ class OpenAccountCommandTests {
     @ParameterizedTest
     @ValueSource(strings = {"", "eur", "XYZ", "EU", "EURO"})
     @DisplayName("La divisa debe ser un código ISO 4217 válido")
-    void la_divisa_debe_ser_un_codigo_iso_4217_valido(String currency) {
+    void theCurrencyMustBeAValidIso4217Code(String currency) {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().currency(currency).build())
                 .withMessage("La divisa %s no es un código ISO 4217 válido".formatted(currency));
@@ -82,7 +82,7 @@ class OpenAccountCommandTests {
     @ParameterizedTest
     @ValueSource(strings = {"", "   "})
     @DisplayName("El NIF del titular es obligatorio")
-    void el_nif_del_titular_es_obligatorio(String taxId) {
+    void theHolderTaxIdIsRequired(String taxId) {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().holderTaxId(taxId).build())
                 .withMessage("El documento debe ser un DNI o un NIE");
@@ -91,7 +91,7 @@ class OpenAccountCommandTests {
     @ParameterizedTest
     @ValueSource(strings = {"1234567Z", "123456789", "ABCDEFGHZ", "12345678-Z"})
     @DisplayName("El documento debe ser un DNI o un NIE")
-    void el_nif_debe_tener_8_digitos_y_una_letra(String taxId) {
+    void theTaxIdMustBeADniOrANie(String taxId) {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().holderTaxId(taxId).build())
                 .withMessage("El documento debe ser un DNI o un NIE");
@@ -99,7 +99,7 @@ class OpenAccountCommandTests {
 
     @Test
     @DisplayName("El NIF admite espacios y minúsculas, que normaliza el dominio")
-    void el_nif_admite_espacios_y_minusculas() {
+    void theTaxIdAcceptsSpacesAndLowerCase() {
         assertThat(validCommand().holderTaxId(" 12345678 z ").build().holderTaxId()).isEqualTo(" 12345678 z ");
     }
 
@@ -121,7 +121,7 @@ class OpenAccountCommandTests {
         @ParameterizedTest
         @ValueSource(strings = {"0.001", "0.004"})
         @DisplayName("Un depósito inicial que redondea a cero se rechaza en el command, antes de llegar al dominio")
-        void un_deposito_inicial_que_redondea_a_cero_se_rechaza(String deposit) {
+        void anInitialDepositRoundingToZeroIsRejected(String deposit) {
             for (Function<String, Object> opening : List.of(OPEN, SIGN_UP, ANOTHER)) {
                 assertThatIllegalArgumentException()
                         .isThrownBy(() -> opening.apply(deposit))
@@ -132,7 +132,7 @@ class OpenAccountCommandTests {
         @ParameterizedTest
         @ValueSource(strings = {"999999999.991", "1000000000.00"})
         @DisplayName("Un depósito inicial que supera el máximo de 999.999.999,99 se rechaza")
-        void un_deposito_inicial_que_supera_el_maximo_se_rechaza(String deposit) {
+        void anInitialDepositAboveTheMaximumIsRejected(String deposit) {
             for (Function<String, Object> opening : List.of(OPEN, SIGN_UP, ANOTHER)) {
                 assertThatIllegalArgumentException()
                         .isThrownBy(() -> opening.apply(deposit))
@@ -143,7 +143,7 @@ class OpenAccountCommandTests {
         @ParameterizedTest
         @ValueSource(strings = {"0.005", "999999999.99"})
         @DisplayName("Un depósito inicial entre el mínimo redondeado y el máximo se acepta: el mínimo de 50 EUR lo exige el dominio")
-        void un_deposito_inicial_entre_los_limites_se_acepta(String deposit) {
+        void anInitialDepositWithinTheLimitsIsAccepted(String deposit) {
             for (Function<String, Object> opening : List.of(OPEN, SIGN_UP, ANOTHER)) {
                 assertThat(opening.apply(deposit)).isNotNull();
             }
@@ -158,7 +158,7 @@ class OpenAccountCommandTests {
 
         @Test
         @DisplayName("Un usuario del titular mal formado se rechaza con un mensaje que nombra todos los caracteres aceptados")
-        void un_usuario_del_titular_mal_formado_nombra_todos_los_caracteres() {
+        void aMalformedHolderUsernameNamesAllTheCharacters() {
             assertThatIllegalArgumentException()
                     .isThrownBy(() -> validCommand().holderName("Ada Lovelace").holderEmail("ada@example.com")
                             .ownerUsername("Ab").build())
@@ -167,7 +167,7 @@ class OpenAccountCommandTests {
 
         @Test
         @DisplayName("Un usuario del alta mal formado se rechaza con un mensaje que nombra todos los caracteres aceptados")
-        void un_usuario_del_alta_mal_formado_nombra_todos_los_caracteres() {
+        void aMalformedSignUpUsernameNamesAllTheCharacters() {
             assertThatIllegalArgumentException()
                     .isThrownBy(() -> SignUpCommand.builder().fullName("Margaret Hamilton").taxId("00000000T")
                             .email("margaret@example.com").username("Ab").initialDeposit(new BigDecimal("100.00")).build())

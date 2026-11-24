@@ -54,7 +54,7 @@ class CheckingAccountServiceAnotherAccountTests {
 
     @Test
     @DisplayName("El cliente acaba con dos cuentas de IBAN distintos y de Mon-A Bank, y las dos se listan")
-    void el_cliente_acaba_con_dos_cuentas_con_iban_distintos() {
+    void theCustomerEndsUpWithTwoAccountsWithDifferentIbans() {
         AccountSummary second = service.openAnotherAccount(ADA, deposit("200.00"));
 
         assertThat(second.accountNumber()).isNotEqualTo(first.accountNumber());
@@ -66,7 +66,7 @@ class CheckingAccountServiceAnotherAccountTests {
 
     @Test
     @DisplayName("El titular de la nueva cuenta copia el nombre y el documento del cliente")
-    void el_titular_copia_el_nombre_y_el_documento_del_cliente() {
+    void theHolderCopiesTheCustomerNameAndDocument() {
         AccountSummary second = service.openAnotherAccount(ADA, deposit("200.00"));
 
         assertThat(second.holderName()).isEqualTo("Ada Lovelace");
@@ -76,7 +76,7 @@ class CheckingAccountServiceAnotherAccountTests {
 
     @Test
     @DisplayName("Quien no es cliente no puede abrir otra cuenta, y no se crea nada")
-    void quien_no_es_cliente_no_puede_abrir_otra_cuenta() {
+    void aNonCustomerCannotOpenAnotherAccount() {
         assertThatExceptionOfType(NotACustomerException.class)
                 .isThrownBy(() -> service.openAnotherAccount(GRACE, deposit("200.00")))
                 .withMessageContaining("grace");
@@ -85,7 +85,7 @@ class CheckingAccountServiceAnotherAccountTests {
 
     @Test
     @DisplayName("Un administrador no puede abrir otra cuenta aunque su usuario coincida con el de un cliente")
-    void un_administrador_no_puede_abrir_otra_cuenta() {
+    void anAdministratorCannotOpenAnotherAccount() {
         Caller adminNamedAda = Caller.builder().username("ada").admin(true).build();
 
         assertThatExceptionOfType(NotACustomerException.class)
@@ -97,7 +97,7 @@ class CheckingAccountServiceAnotherAccountTests {
 
     @Test
     @DisplayName("Un depósito inferior a 50 EUR se rechaza y no se abre la cuenta (R1)")
-    void un_deposito_insuficiente_se_rechaza() {
+    void anInsufficientDepositIsRejected() {
         assertThatExceptionOfType(InsufficientInitialDepositException.class)
                 .isThrownBy(() -> service.openAnotherAccount(ADA, deposit("10.00")));
         assertThat(service.listAccounts(ADA)).hasSize(1);
@@ -105,7 +105,7 @@ class CheckingAccountServiceAnotherAccountTests {
 
     @Test
     @DisplayName("Un depósito en otra divisa se rechaza y no se abre la cuenta")
-    void un_deposito_en_otra_divisa_se_rechaza() {
+    void aDepositInAnotherCurrencyIsRejected() {
         assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> service.openAnotherAccount(ADA,
                 OpenAnotherAccountCommand.builder().initialDeposit(new BigDecimal("200")).currency("USD").build()));
         assertThat(service.listAccounts(ADA)).hasSize(1);

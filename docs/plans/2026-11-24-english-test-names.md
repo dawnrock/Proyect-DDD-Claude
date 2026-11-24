@@ -88,7 +88,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **Acceptance criteria:**
   - [x] Same as T3, for the package. (22 renamed; 1,004 tests, same as the baseline)
 
-### [ ] T5 — `application` (~10 min)
+### [x] T5 — `application` (~10 min)
 
 - **Layer:** tests
 - **Files:** 13 files in `.../application`, 152 methods
@@ -96,7 +96,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **What to do:**
   1. Same as T3. `CheckingAccountServiceTests` has the most methods. If the task goes over 10 minutes, split it into its own commit.
 - **Acceptance criteria:**
-  - [ ] Same as T3, for the package.
+  - [x] Same as T3, for the package. (152 renamed; 1,004 tests, same as the baseline)
 
 ### [ ] T6 — `application.listener` and `adapter.out.*` (~5 min)
 

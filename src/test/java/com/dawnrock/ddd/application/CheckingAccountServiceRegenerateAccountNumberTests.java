@@ -48,7 +48,7 @@ class CheckingAccountServiceRegenerateAccountNumberTests {
 
     @Test
     @DisplayName("El administrador recibe el resumen con un IBAN nuevo de Mon-A Bank y la cuenta lo conserva")
-    void el_administrador_recibe_el_resumen_con_un_iban_nuevo() {
+    void theAdministratorGetsTheSummaryWithANewIban() {
         AccountSummary regenerated = service.regenerateAccountNumber(ADMIN, account.id());
 
         assertThat(regenerated.id()).isEqualTo(account.id());
@@ -59,7 +59,7 @@ class CheckingAccountServiceRegenerateAccountNumberTests {
 
     @Test
     @DisplayName("El IBAN antiguo deja de resolverse y el nuevo se resuelve")
-    void el_iban_antiguo_deja_de_resolverse_y_el_nuevo_se_resuelve() {
+    void theOldIbanNoLongerResolvesAndTheNewOneDoes() {
         AccountSummary regenerated = service.regenerateAccountNumber(ADMIN, account.id());
 
         assertThat(accounts.findByAccountNumber(new AccountNumber(account.accountNumber()))).isEmpty();
@@ -69,7 +69,7 @@ class CheckingAccountServiceRegenerateAccountNumberTests {
 
     @Test
     @DisplayName("Una cuenta con un IBAN de otro banco pasa a tener uno de Mon-A Bank")
-    void una_cuenta_con_un_iban_de_otro_banco_pasa_a_tener_uno_de_mon_a_bank() {
+    void anAccountWithAnotherBanksIbanGetsAMonABankOne() {
         UUID id = accounts.save(TestAccounts.anAccount().initialDeposit("500.00").open()).id();
 
         AccountSummary regenerated = service.regenerateAccountNumber(ADMIN, id);
@@ -79,7 +79,7 @@ class CheckingAccountServiceRegenerateAccountNumberTests {
 
     @Test
     @DisplayName("Un cliente no puede regenerar el IBAN y la cuenta no cambia")
-    void un_cliente_no_puede_regenerar_el_iban() {
+    void aCustomerCannotRegenerateTheIban() {
         assertThatExceptionOfType(ForbiddenOperationException.class)
                 .isThrownBy(() -> service.regenerateAccountNumber(ADA, account.id()));
 
@@ -88,7 +88,7 @@ class CheckingAccountServiceRegenerateAccountNumberTests {
 
     @Test
     @DisplayName("Un id desconocido da cuenta no encontrada")
-    void un_id_desconocido_da_cuenta_no_encontrada() {
+    void anUnknownIdGivesAccountNotFound() {
         UUID unknown = UUID.randomUUID();
 
         assertThatExceptionOfType(AccountNotFoundException.class)
@@ -97,7 +97,7 @@ class CheckingAccountServiceRegenerateAccountNumberTests {
 
     @Test
     @DisplayName("Si el número generado ya lo usa otra cuenta, se rechaza y la cuenta conserva el suyo")
-    void si_el_numero_generado_ya_esta_en_uso_la_cuenta_conserva_el_suyo() {
+    void whenTheGeneratedNumberIsAlreadyUsedTheAccountKeepsItsOwn() {
         UUID id = accounts.save(TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open()).id();
         AccountNumber used = new AccountNumber("ES9121000418450200051332");
         CheckingAccountService faulty = new CheckingAccountService(accounts, PersistenceTestAdapters.ownership(),
