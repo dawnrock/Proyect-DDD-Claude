@@ -64,7 +64,7 @@ class ThrottledAuthenticationProviderTests {
 
     @Test
     @DisplayName("Una contraseña errónea cuenta como fallo y se relanza el error del delegado")
-    void una_contrasena_erronea_cuenta_como_fallo_y_se_relanza() {
+    void aWrongPasswordCountsAsAFailureAndIsRethrown() {
         failTimes("ada", 1);
 
         assertThat(delegate.calls).isEqualTo(1);
@@ -73,7 +73,7 @@ class ThrottledAuthenticationProviderTests {
 
     @Test
     @DisplayName("Un acceso correcto devuelve la autenticación del delegado y reinicia los fallos")
-    void un_acceso_correcto_devuelve_la_autenticacion_y_reinicia_los_fallos() {
+    void aSuccessfulLoginReturnsTheAuthenticationAndResetsTheFailures() {
         failTimes("ada", 2);
 
         Authentication result = provider.authenticate(login("ada", StubDelegate.PASSWORD, IP));
@@ -85,7 +85,7 @@ class ThrottledAuthenticationProviderTests {
 
     @Test
     @DisplayName("Bloqueado, rechaza con el tiempo restante sin comprobar la contraseña, aunque sea la correcta")
-    void bloqueado_rechaza_sin_comprobar_la_contrasena() {
+    void whenLockedItRejectsWithoutCheckingThePassword() {
         failTimes("ada", 3);
         int callsBefore = delegate.calls;
 
@@ -97,7 +97,7 @@ class ThrottledAuthenticationProviderTests {
 
     @Test
     @DisplayName("Un usuario que no existe se bloquea igual y con el mismo mensaje que uno que existe")
-    void un_usuario_que_no_existe_se_bloquea_igual() {
+    void aMissingUserIsLockedTheSameWay() {
         failTimes("ada", 3);
         failTimes("nadie", 3);
 
@@ -110,7 +110,7 @@ class ThrottledAuthenticationProviderTests {
 
     @Test
     @DisplayName("Diez intentos simultáneos con contraseñas erróneas: solo 3 llegan a comprobar la contraseña")
-    void diez_intentos_simultaneos_solo_3_llegan_a_comprobar_la_contrasena() throws Exception {
+    void tenConcurrentAttemptsOnlyThreeReachThePasswordCheck() throws Exception {
         CountDownLatch release = new CountDownLatch(1);
         delegate.gate = release;
         ExecutorService pool = Executors.newFixedThreadPool(10);
@@ -143,7 +143,7 @@ class ThrottledAuthenticationProviderTests {
 
     @Test
     @DisplayName("Un rechazo que no es de credenciales, como una cuenta deshabilitada, no cuenta como fallo")
-    void un_rechazo_que_no_es_de_credenciales_no_cuenta_como_fallo() {
+    void aRejectionThatIsNotAboutCredentialsDoesNotCountAsAFailure() {
         delegate.failure = new DisabledException("Cuenta deshabilitada");
 
         for (int i = 0; i < 5; i++) {
@@ -156,7 +156,7 @@ class ThrottledAuthenticationProviderTests {
 
     @Test
     @DisplayName("Sin detalles de la petición, la IP cuenta como desconocida")
-    void sin_detalles_la_ip_cuenta_como_desconocida() {
+    void withoutDetailsTheIpCountsAsUnknown() {
         assertThatExceptionOfType(BadCredentialsException.class)
                 .isThrownBy(() -> provider.authenticate(login("ada", "mala", null)));
 
@@ -175,7 +175,7 @@ class ThrottledAuthenticationProviderTests {
 
     @Test
     @DisplayName("El delegado recibe el usuario normalizado, con la misma contraseña y la misma IP (#157)")
-    void el_delegado_recibe_el_usuario_normalizado_con_la_misma_ip() {
+    void theDelegateGetsTheNormalisedUsernameWithTheSameIp() {
         Authentication result = provider.authenticate(login(" Ada ", StubDelegate.PASSWORD, IP));
 
         assertThat(result.getName()).isEqualTo("ada");
@@ -187,7 +187,7 @@ class ThrottledAuthenticationProviderTests {
 
     @Test
     @DisplayName("Los fallos con mayúsculas en el usuario cuentan para el mismo usuario en minúsculas (#157)")
-    void los_fallos_con_mayusculas_cuentan_para_el_mismo_usuario() {
+    void failuresWithCapitalsCountForTheSameUser() {
         failTimes("Ada", 2);
         failTimes(" ADA", 1);
 

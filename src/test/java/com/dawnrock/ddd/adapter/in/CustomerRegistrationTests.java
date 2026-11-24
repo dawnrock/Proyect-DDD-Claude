@@ -92,7 +92,7 @@ class CustomerRegistrationTests {
 
     @Test
     @DisplayName("El alta abre la cuenta y crea un usuario USER que puede autenticarse con su contraseña")
-    void el_alta_abre_la_cuenta_y_crea_un_usuario_que_puede_autenticarse() {
+    void signUpOpensTheAccountAndCreatesAUserWhoCanAuthenticate() {
         AccountSummary summary = registration.register(signUp().build(), PASSWORD, IP);
 
         assertThat(summary.holderName()).isEqualTo("Margaret Hamilton");
@@ -108,7 +108,7 @@ class CustomerRegistrationTests {
 
     @Test
     @DisplayName("La contraseña se guarda cifrada, nunca en claro")
-    void la_contrasena_se_guarda_cifrada() {
+    void thePasswordIsStoredHashed() {
         registration.register(signUp().build(), PASSWORD, IP);
 
         UserDetails user = users.loadUserByUsername("margaret");
@@ -118,7 +118,7 @@ class CustomerRegistrationTests {
 
     @Test
     @DisplayName("Un usuario que ya existe se rechaza antes de abrir nada")
-    void un_usuario_que_ya_existe_se_rechaza_antes_de_abrir_nada() {
+    void anExistingUserIsRejectedBeforeOpeningAnything() {
         registration.register(signUp().build(), PASSWORD, IP);
 
         SignUpCommand other = signUp().fullName("Otra Persona").taxId("12345678Z").email("otra@example.com").build();
@@ -130,7 +130,7 @@ class CustomerRegistrationTests {
 
     @Test
     @DisplayName("El usuario que el administrador dio a un cliente no se puede tomar en el alta, aunque aún no pueda entrar")
-    void el_usuario_de_un_cliente_sin_login_no_se_puede_tomar_en_el_alta() {
+    void theUsernameOfACustomerWithoutLoginCannotBeTakenOnSignUp() {
         service.openAccount(ADMIN, OpenAccountCommand.builder()
                 .holderTaxId("12345678Z").holderName("Ada Lovelace").holderEmail("ada@example.com")
                 .ownerUsername("margaret").initialDeposit(new BigDecimal("100")).build());
@@ -143,7 +143,7 @@ class CustomerRegistrationTests {
 
     @Test
     @DisplayName("Una contraseña de menos de 8 caracteres se rechaza y no se abre nada")
-    void una_contrasena_corta_se_rechaza_y_no_se_abre_nada() {
+    void aShortPasswordIsRejectedAndNothingIsOpened() {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> registration.register(signUp().build(), "corta12", IP))
                 .withMessage("La contraseña debe tener al menos 8 caracteres");
@@ -154,7 +154,7 @@ class CustomerRegistrationTests {
 
     @Test
     @DisplayName("Si el alta falla por un cliente duplicado no se crea ningún usuario")
-    void si_el_alta_falla_por_un_cliente_duplicado_no_se_crea_ningun_usuario() {
+    void whenSignUpFailsForADuplicateCustomerNoUserIsCreated() {
         registration.register(signUp().build(), PASSWORD, IP);
 
         SignUpCommand sameDocument = signUp().username("otra").email("otra@example.com").build();
@@ -166,7 +166,7 @@ class CustomerRegistrationTests {
 
     @Test
     @DisplayName("Si el alta falla por un depósito insuficiente no queda ni cuenta ni usuario")
-    void si_el_alta_falla_por_un_deposito_insuficiente_no_queda_ni_cuenta_ni_usuario() {
+    void whenSignUpFailsForAnInsufficientDepositNeitherAccountNorUserRemains() {
         SignUpCommand poor = signUp().initialDeposit(new BigDecimal("10")).build();
 
         assertThatExceptionOfType(InsufficientInitialDepositException.class)
@@ -178,7 +178,7 @@ class CustomerRegistrationTests {
 
     @Test
     @DisplayName("Si al crear el usuario ya lo ha tomado otro, se informa como usuario ocupado")
-    void si_al_crear_el_usuario_ya_lo_ha_tomado_otro_se_informa_como_usuario_ocupado() {
+    void whenTheUsernameIsTakenWhileCreatingTheUserItIsReportedAsTaken() {
         InMemoryUserDetailsManager racing = new InMemoryUserDetailsManager() {
             private boolean firstCheck = true;
 
@@ -201,7 +201,7 @@ class CustomerRegistrationTests {
 
     @Test
     @DisplayName("Con altas simultáneas del mismo usuario solo una prospera")
-    void con_altas_simultaneas_del_mismo_usuario_solo_una_prospera() throws Exception {
+    void withConcurrentSignUpsOfTheSameUserOnlyOneSucceeds() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(4);
         try {
             List<Callable<Boolean>> calls = List.of(
@@ -229,7 +229,7 @@ class CustomerRegistrationTests {
 
     @Test
     @DisplayName("Un usuario desconocido no existe antes del alta")
-    void un_usuario_desconocido_no_existe_antes_del_alta() {
+    void anUnknownUserDoesNotExistBeforeSignUp() {
         assertThatExceptionOfType(UsernameNotFoundException.class)
                 .isThrownBy(() -> users.loadUserByUsername("margaret"));
     }
@@ -245,7 +245,7 @@ class CustomerRegistrationTests {
 
         @Test
         @DisplayName("Superado el límite de la IP, se rechaza con el tiempo que falta y no se abre nada ni se crea usuario")
-        void superado_el_limite_de_la_ip_se_rechaza_sin_abrir_nada() {
+        void overTheIpLimitTheSignUpIsRejectedWithoutOpeningAnything() {
             registration.register(signUp().build(), PASSWORD, IP);
 
             SignUpCommand other = signUp().taxId("12345678Z").username("otra").email("otra@example.com").build();
@@ -259,7 +259,7 @@ class CustomerRegistrationTests {
 
         @Test
         @DisplayName("Superado el límite total con IP distintas, se rechaza también una IP nueva")
-        void superado_el_limite_total_se_rechaza_una_ip_nueva() {
+        void overTheTotalLimitANewIpIsRejectedToo() {
             registration.register(signUp().build(), PASSWORD, "198.51.100.1");
             registration.register(signUp().taxId("12345678Z").username("otra").email("otra@example.com").build(),
                     PASSWORD, "198.51.100.2");
@@ -272,7 +272,7 @@ class CustomerRegistrationTests {
 
         @Test
         @DisplayName("Un alta que falla (usuario ocupado, cliente duplicado, contraseña corta) no gasta el cupo")
-        void un_alta_que_falla_no_gasta_el_cupo() {
+        void aFailedSignUpDoesNotUseTheQuota() {
             registration.register(signUp().build(), PASSWORD, "198.51.100.1");
 
             assertThatExceptionOfType(UsernameTakenException.class).isThrownBy(() -> registration.register(
@@ -290,7 +290,7 @@ class CustomerRegistrationTests {
 
         @Test
         @DisplayName("Si el cliente ya se creó y falla la creación del usuario, el alta sigue contando: ocupa memoria")
-        void si_el_cliente_ya_se_creo_y_falla_el_usuario_el_alta_sigue_contando() {
+        void whenTheCustomerWasCreatedAndTheUserFailsTheSignUpStillCounts() {
             InMemoryUserDetailsManager failing = new InMemoryUserDetailsManager() {
                 @Override
                 public void createUser(UserDetails user) {
@@ -323,7 +323,7 @@ class CustomerRegistrationTests {
 
         @Test
         @DisplayName("Tras 2 altas con un usuario ocupado o un documento existente, ni un alta válida desde esa IP prospera")
-        void tras_dos_fallos_que_revelan_datos_ni_un_alta_valida_prospera() {
+        void afterTwoFailuresRevealingDataNotEvenAValidSignUpSucceeds() {
             assertThatExceptionOfType(UsernameTakenException.class)
                     .isThrownBy(() -> registration.register(another().username("margaret").build(), PASSWORD, IP));
             assertThatExceptionOfType(DuplicateCustomerException.class)
@@ -340,7 +340,7 @@ class CustomerRegistrationTests {
 
         @Test
         @DisplayName("Una contraseña corta o un depósito insuficiente no cuentan como sondeo")
-        void una_contrasena_corta_o_un_deposito_insuficiente_no_cuentan() {
+        void aShortPasswordOrAnInsufficientDepositDoNotCount() {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> registration.register(another().build(), "corta12", IP));
             assertThatExceptionOfType(InsufficientInitialDepositException.class).isThrownBy(() -> registration.register(
@@ -354,7 +354,7 @@ class CustomerRegistrationTests {
 
         @Test
         @DisplayName("Un usuario que se ocupa solo al crearlo, con el cliente ya guardado, no cuenta como sondeo")
-        void un_usuario_ocupado_al_crearlo_no_cuenta_como_sondeo() {
+        void aUsernameTakenWhileCreatingItDoesNotCountAsProbing() {
             InMemoryUserDetailsManager racing = new InMemoryUserDetailsManager() {
                 private boolean firstCheck = true;
 

@@ -16,7 +16,7 @@ class ClientIpAuthenticationDetailsSourceTests {
 
     @Test
     @DisplayName("Con varias cabeceras X-Forwarded-For se unen en orden: la del cliente no puede elegir su IP")
-    void con_varias_cabeceras_x_forwarded_for_se_unen_en_orden() {
+    void severalXForwardedForHeadersAreJoinedInOrder() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setRemoteAddr("10.0.0.5");
         // La primera la escribe el cliente; la segunda, Cloudflare, con la IP real del cliente
@@ -28,7 +28,7 @@ class ClientIpAuthenticationDetailsSourceTests {
 
     @Test
     @DisplayName("Sin cabecera, la IP es la de la conexión, y la sesión se conserva")
-    void sin_cabecera_la_ip_es_la_de_la_conexion_y_la_sesion_se_conserva() {
+    void withoutHeaderTheIpIsTheConnectionsAndTheSessionIsKept() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setRemoteAddr("46.6.116.139");
         String sessionId = request.getSession(true).getId();

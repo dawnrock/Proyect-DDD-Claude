@@ -108,7 +108,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **Acceptance criteria:**
   - [x] Same as T3, for the packages. (26 renamed; 1,004 tests, same as the baseline)
 
-### [ ] T7 — `adapter.in` support classes (~10 min)
+### [x] T7 — `adapter.in` support classes (~10 min)
 
 - **Layer:** tests
 - **Files:** 11 files directly in `.../adapter/in`, 86 methods
@@ -116,7 +116,7 @@ Test methods are named in Spanish `snake_case` (792 methods in 79 files) and rep
 - **What to do:**
   1. Same as T3.
 - **Acceptance criteria:**
-  - [ ] Same as T3, for the package.
+  - [x] Same as T3, for the package. (86 renamed; 1,004 tests, same as the baseline)
 
 ### [ ] T8 — `adapter.in.web`, first half (~10 min)
 
