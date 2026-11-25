@@ -2,6 +2,7 @@
 
 - **Issue:** [#6](https://github.com/dawnrock/Proyect-DDD-Claude/issues/6) · **Plan:** on the issue (removed from `docs/plans/`; in the git history)
 - **Status:** frozen at `dbc59e5`
+- **Since #174 (application services split by use case):** on `Hexagonal`, `deposit` and `withdraw` belong to the input port `MoneyMovementCommands`, implemented by `MoneyMovementService`. `Monolithic` keeps the concrete `CheckingAccountService` described here.
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed, clarifications merged by the lead)
 
 Builds on the frozen contract of #5 (`open-query-list-accounts.md`): `CheckingAccountService`, `AccountDetails`, `TransactionSummary`, `AccountNotFoundException` and the shared presentation validation are reused as they are.

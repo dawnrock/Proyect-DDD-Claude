@@ -191,17 +191,17 @@ Package-private collaborators cannot be built in `config`, so each service keeps
 - **Acceptance criteria:**
   - [x] Baseline without those two lines; `./mvnw verify` green; `./mvnw pmd:pmd -Dpmd.baseline=` shows no `GodClass` or `CouplingBetweenObjects` in the new classes. (./mvnw pmd:pmd -Dpmd.baseline= only lists the four classes still in the baseline)
 
-### [ ] T12 — Architecture and contract documents (~10 min)
+### [x] T12 — Architecture and contract documents (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/arquitectura/fase-2-hexagonal.md`, `docs/arquitectura/comparativa-capas-hexagonal.md`, the contracts listed in *Context*
 - **Depends on:** T11
 - **What to do:**
   1. Component table of phase 2: the four ports, the four services and the shared collaborators; testing table (adapters mock the new ports); ArchUnit rule text.
-  2. Contracts: replace `CheckingAccountCommands`/`CheckingAccountService` with the port that owns each use case.
+  2. Contracts: they are frozen (ADR 0007), so their bodies keep the names agreed then; each gets a "Since #174" line under its status naming the port and service that own its use cases now, like the ADR 0015 note in `login-roles.md`. The comparison of both phases gets the same kind of note instead of changing its diagrams (diagrams are shown to the user before they change). The glossary names the new services and test classes.
   3. `node scripts/graphify.mjs update .`.
 - **Acceptance criteria:**
-  - [ ] `grep -rn "CheckingAccountCommands\|CheckingAccountService" docs/arquitectura docs/contracts` finds nothing except a historical note.
+  - [x] `grep -rn "CheckingAccountCommands\|CheckingAccountService" docs/arquitectura/fase-2-hexagonal.md docs/dominio` finds only the history of #16; every contract that names them has its "Since #174" note. (Graphify is not installed in this container, so the graph was not regenerated)
 
 ### [ ] T13 — Project status (~5 min)
 

@@ -2,6 +2,7 @@
 
 - **Issue:** [#18](https://github.com/dawnrock/Proyect-DDD-Claude/issues/18) · **Plan:** on the issue (removed from `docs/plans/`; in the git history)
 - **Status:** frozen at `bc31fa7`
+- **Since #174 (application services split by use case):** `openAccount` belongs to the input port `AccountOpeningCommands`, implemented by `AccountOpeningService`; `CheckingAccountCommands` and `CheckingAccountService` no longer exist. Signatures, commands and views are unchanged.
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed with clarifications, merged by the lead)
 
 Replaces the open-account part of `open-query-list-accounts.md` (#5) and keeps the ownership rules of `login-roles.md` (#50). Querying and listing do not change.

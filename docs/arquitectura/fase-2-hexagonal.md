@@ -50,7 +50,7 @@ com.dawnrock.ddd
   | Application services (input ports, ownership port, listeners) | `application` |
   | Adapters, one per technology, that do not know each other | `adapter.in.cli`, `adapter.in.rest`, `adapter.in.web`, `adapter.in.scheduler`, `adapter.out.persistence`, `adapter.out.event`, `adapter.out.taxagency` |
 
-  The shared security support in the root of `adapter.in`, `config` and the boot class sit outside the rings. Explicit rules complete the onion: output adapters only implement ports of the hexagon and know `application` only through interfaces; input ports (`*Commands`, `*Queries`) are interfaces and input adapters never use `CheckingAccountService`; input adapters only know `DomainException` from the domain; nobody outside `adapter.in` depends on it, and its shared security support does not know `cli`, `rest` or `web`; only `adapter.out` knows the output adapters; nobody depends on `config`; only adapters and `config` depend on Spring web, HTTP, MVC or data; the core does not depend on Spring (except `@EventListener` in `application.listener`); the domain only depends on the JDK (no `org.immutables`) and has no public setters; the ADR 0008 security rules; every class belongs to the hexagon, an adapter or `config`. `DomainIsolationTests` (both phases) and `AdapterTestIsolationTests` (test code, #21) complete them.
+  The shared security support in the root of `adapter.in`, `config` and the boot class sit outside the rings. Explicit rules complete the onion: output adapters only implement ports of the hexagon and know `application` only through interfaces; input ports (`*Commands`, `*Queries`) are interfaces and nobody but `application` and `config` uses a service that implements an input port, and those services are `*Service` classes of `application` (#174); input adapters only know `DomainException` from the domain; nobody outside `adapter.in` depends on it, and its shared security support does not know `cli`, `rest` or `web`; only `adapter.out` knows the output adapters; nobody depends on `config`; only adapters and `config` depend on Spring web, HTTP, MVC or data; the core does not depend on Spring (except `@EventListener` in `application.listener`); the domain only depends on the JDK (no `org.immutables`) and has no public setters; the ADR 0008 security rules; every class belongs to the hexagon, an adapter or `config`. `DomainIsolationTests` (both phases) and `AdapterTestIsolationTests` (test code, #21) complete them.
 
 ## Persistence (#150, ADR 0019)
 
@@ -62,15 +62,15 @@ Each adapter is tested without the hexagon (#21). `AdapterTestIsolationTests` (A
 
 | Adapter | How | Test class |
 | ------- | --- | ---------- |
-| REST controllers | `@WebMvcTest` with `CheckingAccountCommands`/`CheckingAccountQueries` mocked (`@MockitoBean`) | `AccountControllerTests`, `TransferControllerTests`, `RestExceptionHandlerTests` |
+| REST controllers | `@WebMvcTest` with the input ports they use (`AccountOpeningCommands`, `MoneyMovementCommands`, `CheckingAccountQueries`) mocked (`@MockitoBean`) | `AccountControllerTests`, `TransferControllerTests`, `RestExceptionHandlerTests` |
 | Web controllers | `@WebMvcTest` with the ports mocked | `AccountWebControllerTests`, `WebSecurityTests` |
-| CLI runner | the real application service with the in-memory test doubles, without Spring | `DomainModelRunnerTests` |
+| CLI runner | the real application services with the in-memory test doubles (`ApplicationServicesFixture`), without Spring | `DomainModelRunnerTests` |
 | Persistence (JPA) | port contracts (`*Contract`) against H2 in PostgreSQL mode, in a minimal shared Spring context (`JpaTestDatabase`: Flyway, JPA and Spring Data, each port call in its own transaction); not `@DataJpaTest`, because the contracts' `@Nested` classes would get the context of the contract (#150) | `JpaCheckingAccountRepositoryTests`, `JpaCustomerRepositoryTests`, `Jpa*OwnershipRepositoryTests`, `DatabaseAccountNumberSequenceTests`, `TransactionalUnitOfWorkTests`, `CheckingAccountMapperTests` |
 | Persistence (test doubles) | the same contracts over the in-memory doubles, which live in `src/test` and feed the fast tests of `application` through `PersistenceTestAdapters` (ADR 0019, option C) | `InMemoryCheckingAccountRepositoryTests`, `InMemoryAccountOwnershipRepositoryTests`, `InMemoryAccountNumberSequenceTests`, `InMemoryUnitOfWorkTests` |
 | Events | the outbox adapter on a minimal JPA context (`OutboxTestDatabase`, like `JpaTestDatabase`): the publisher writes inside the transaction, the relay delivers, retries and cleans up with a mocked `ApplicationEventPublisher`; full-context checks for a failing consumer and a restart (#165) | `OutboxDomainEventPublisherTests`, `OutboxRelayTests`, `DomainEventTypesTests`, `OutboxDeliveryTests`, `OutboxRestartTests` |
 | Tax agency | the fake on its own | `FakeTaxAgencyIncomeVerifierTests` |
 
-Error paths of every endpoint, all with the ports mocked. With the ports mocked, an account that does not exist and one that belongs to someone else are the same case for the adapter: the service throws `AccountNotFoundException` for both (ADR 0008), and the ownership rule is tested in `CheckingAccountServiceOwnershipTests`:
+Error paths of every endpoint, all with the ports mocked. With the ports mocked, an account that does not exist and one that belongs to someone else are the same case for the adapter: the service throws `AccountNotFoundException` for both (ADR 0008), and the ownership rule is tested in `AccountOwnershipTests`:
 
 | Endpoint | 404 | 422 | 400 |
 | -------- | --- | --- | --- |
@@ -111,21 +111,22 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | `OutboxRelay` | `adapter.out.event` | Scheduled relay (#165): delivers pending outbox events in order to the `@EventListener`s through Spring's `ApplicationEventPublisher`, at least once, with retries; cleans up old published events daily |
 | `DomainEventTypes` | `adapter.out.event` | Registry of the outbox: logical event name ↔ event class, and their JSON with Jackson |
 | `FakeTaxAgencyIncomeVerifier` | `adapter.out.taxagency` | Output adapter (simulated, package-private): implements `IncomeVerifier` with a fixed table |
-| `CheckingAccountService` | `application` | Application service: implements `CheckingAccountCommands` and `CheckingAccountQueries` (use cases and account ownership); uses the output ports only, opens accounts through `CheckingAccountFactory` and runs every use case inside a `UnitOfWork` and publishes the domain events of the saved accounts once the unit has finished (#78). Keeps its name (not `CheckingAccountApplicationService`): nobody outside `application` sees it. No Spring annotations: built in `config` |
-| `CheckingAccountCommands`, `CheckingAccountQueries` | `application` | Input ports: use cases that change accounts (open, sign up, open another account, regenerate an IBAN, deposit, withdraw, transfer) and that query them (list, detail, is a username taken) |
+| `AccountOpeningService`, `MoneyMovementService`, `AccountSegmentReviewService`, `CheckingAccountQueryService` | `application` | Application services, one per input port (#174): opening, money movements, periodic segment review and queries. They use the output ports only, apply account ownership, open accounts through `CheckingAccountFactory`, run every use case inside a `UnitOfWork` and publish the domain events of the saved accounts once the unit has finished (#78). `AccountSegmentReviewService` is named so because the domain already has `SegmentReviewService`. No Spring annotations: built in `config`, and nobody else sees them |
+| `AccountOpeningCommands`, `MoneyMovementCommands`, `SegmentReviewCommands`, `CheckingAccountQueries` | `application` | Input ports, one per group of use cases (#174): open accounts (admin opening, sign-up, another account, regenerate an IBAN), move money (deposit, withdraw, transfer), review segments (scheduled) and query (list, detail, is a username taken). Each input adapter depends only on the ports it uses |
+| `AccountUnitOfWork` + `AccountChanges`, `AccountAccess`, `AccountOpener`, `CustomerDirectory`, `UsernameAvailability`, `DueSegmentReview`, `AccountViews` | `application` | Package-private collaborators shared by the services (#174): unit of work that publishes the events of the saved accounts, loading accounts by owner (ADR 0008), the steps of opening an account, customers and their username (R30), the due segment review, and the mapping to views |
 | `AccountOwnershipRepository` | `application` | Output port: account ownership. In `application`, not `domain.model`, because the user's identity never reaches the domain (ADR 0008) |
 | `CustomerOwnershipRepository` | `application` | Output port (#103): customer ↔ username, in `application` for the same reason (ADR 0012) |
 | `UnitOfWork` | `application` | Output port: runs a use case as one unit (load, change, save); in `application` because the boundary of a use case is an application concern (#78) |
 | `*CommandDef`, `*SummaryDef`, `AccountDetailsDef`, `CallerDef`, `ApplicationValue`, `CommandValidation` | `application` | Commands, views and `Caller` (Immutables) and their validation |
 | `AuditLogListener`, `CustomerNotificationListener` | `application.listener` | Domain event consumers: audit log and simulated customer notification. Declared in `config`; they keep `@EventListener`, the only Spring dependency allowed in the core (events reach them through Spring) |
 | `NotFoundException`, `AccountNotFoundException`, `TargetAccountNotFoundException`, `ForbiddenOperationException`, `OperationNotAllowedException`, `NotACustomerException` | `application` | Application errors |
-| `DomainModelRunner` | `adapter.in.cli` | Input adapter (CLI): with the `demo` profile, opens the demo accounts and runs a deposit, two withdrawals (approved and rejected) and a transfer through `CheckingAccountCommands`, with a `[demo]` trace per use case |
+| `DomainModelRunner` | `adapter.in.cli` | Input adapter (CLI): with the `demo` profile, opens the demo accounts and runs a deposit, two withdrawals (approved and rejected) and a transfer through `AccountOpeningCommands` and `MoneyMovementCommands`, with a `[demo]` trace per use case |
 | `CheckingAccount` | `domain.model` | Aggregate root; records its domain events (`pullDomainEvents`); `open` is package-private, used only by the factory |
 | `CheckingAccountFactory` | `domain.model` | Factory: number + segment from the verified income (R20), also for a registered customer (#103); built in `config` |
 | `Customer` | `domain.model` | Aggregate (#103): a Mon-A Bank customer, identified by their document, with name and e-mail |
 | `SegmentReviewService` | `domain.service` | Domain service (#98): when the segment review of an account is due, verifies the income again through the `IncomeVerifier` port and tells the aggregate the result; built in `config` |
 | `CustomerSegmentChanged` | `domain.model` | Domain event recorded by the aggregate on every promotion and demotion |
-| `SegmentReviewScheduler` | `adapter.in.scheduler` | Input adapter (scheduled task, #98): every day calls `CheckingAccountCommands.reviewSegments()`; here the clock is who calls the hexagon. Scheduling is enabled in `config.SchedulingConfiguration` |
+| `SegmentReviewScheduler` | `adapter.in.scheduler` | Input adapter (scheduled task, #98): every day calls `SegmentReviewCommands.reviewSegments()`; here the clock is who calls the hexagon. Scheduling is enabled in `config.SchedulingConfiguration` |
 | `Clock` (bean in `config`) | `config` | The time the application gives to the domain (`SegmentReviewService.review(account, now)`); a JDK type, so no port is needed |
 | `AccountNumberSequence`, `IncomeVerifier` | `domain.model` | Output ports: account numbering and income verification |
 | `DomainEvent`, `CheckingAccountOpened`, `MoneyDeposited`, `MoneyWithdrawn`, `WithdrawalRejected` | `domain.model` | Domain events (`record`) |
@@ -137,7 +138,7 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | `CustomerSegment`, `TransactionStatus`, `TransactionType` | `domain.model` | Domain enumerations; the segment is decided by the factory |
 | `DomainException` and its subclasses (`CurrencyMismatchException`, `DuplicateAccountNumberException`, `DuplicateCustomerException`, `InsufficientInitialDepositException`, `SameAccountTransferException`) | `domain.model` | Business rule violations (422) |
 | `MoneyTransferService` | `domain.service` | Domain service (transfers, R17-R19); built in `config` |
-| `DomainConfiguration` | `config` | `@Configuration` that builds the core (`MoneyTransferService`, `CheckingAccountFactory`, `CheckingAccountService`, the listeners) and hands it the output adapters by their ports |
+| `DomainConfiguration` | `config` | `@Configuration` that builds the core (`MoneyTransferService`, `CheckingAccountFactory`, the four application services, the listeners) and hands it the output adapters by their ports |
 | `DddLabApplication` | root | Spring Boot entry point |
 
 ## Issues of the phase
@@ -146,7 +147,7 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | ----- | ----- | -- |
 | #14 | Reorganise the packages for the hexagonal architecture | #61 |
 | #15 | Output port `CheckingAccountRepository` and in-memory adapter | #62 |
-| #16 | Input ports `CheckingAccountCommands` and `CheckingAccountQueries` | #63 |
+| #16 | Input ports `CheckingAccountCommands` and `CheckingAccountQueries` (split by use case in #174) | #63 |
 | #17 | Domain events: publishing and consumers | #64 |
 | #18 | Account factory with numbering and income verification ports (back + web, *team*) | #65 |
 | #19 | Command-line input adapter | #66 |
