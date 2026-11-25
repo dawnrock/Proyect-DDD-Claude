@@ -225,7 +225,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
   - [x] No horizontal scroll at 360 px; text contrast ≥ 4.5:1; focus visible everywhere.
 - **Found and fixed:** in the grid track, the closed actions' content shared the open form's row and caught its clicks (now `display: none` while closed); the balance watermark overflowed 8 px at 360 px (now clipped); masked IBANs were cut on the admin cards at 390 px (tighter card padding); the green tint of the backdrop and watermarks was lowered so the A reads darkened.
 
-### [ ] T16 — Docs and project status (~10 min)
+### [x] T16 — Docs and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/brand/README.md`, `docs/ia/estado-del-proyecto.md`, `docs/ia/historial.md`, `docs/ia/decisiones.md`, `docs/ia/pendientes.md`
@@ -234,7 +234,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
   1. Brand README: a "Web interface" section with the tokens, the slant, the glyphs and where each one is used.
   2. Status: #185 done and next step; decision (direction C, Sora, backdrop on entry screens); pending (the `details` track fallback if used, anything found in T15); history row.
 - **Acceptance criteria:**
-  - [ ] The CI's project-status check passes.
+  - [x] The CI's project-status check passes.
 
 ## Global acceptance criteria
 

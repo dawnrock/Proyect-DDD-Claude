@@ -19,6 +19,25 @@ The bank's name is written **monA Bank**: «monA» sounds like *money*, and the 
 
 A 3-second animation before the login doors: twelve positive banking and stock-market words (Maximize, Markets · Optimism · Net gain · Affluence, Assets · Bull, Bonus · Alpha · Next · Key, Keep) lose their endings, their initials fly to the letters of the logo, and the chart is painted from left to right. Once per browser session, skipped with reduced motion, without JavaScript or if the font does not load.
 
+## Web interface
+
+Chosen by the user on 2026-11-25 from three sketched directions (issue #185, [ADR 0023](../adr/0023-brand-ui.md)): **C · The A**. The slant of the A's legs is the shape of the interface and the logo's chart gives the icons. Everything lives in `static/css/app.css` (on top of Bootstrap) and `templates/fragments/brand.html`.
+
+| Token | Value | Use |
+| ----- | ----- | --- |
+| ground | `#212529` | Page background |
+| surface | `#2b3035` | Cards, forms, inactive actions |
+| line | `#343a40` | Dividers |
+| ink / ink-2 | `#eef0f2` / `#b9c0c7` | Text / secondary text |
+| flat | `#8b949c` | Neutral, rejected movements |
+| drop | `#f0545c` | Money out: withdrawals, outgoing transfers |
+| rise | `#1fc8b0` | Money in and the main action |
+
+- **Type:** Tektur for headings, buttons, balances, amounts and IBANs; Sora for the rest.
+- **Slant:** about 12.4°, the A's legs. Buttons (`.btn-slant` with `rise`, `light`, `drop`, `surface`) are parallelograms drawn by a skewed `::before`, so the focus outline follows the shape. Account cards (`.card-slant`) have their right edge slanted like the A's right leg.
+- **Glyphs** (`fragments/brand`): `rise`, the A's leg with its arrow, for money in; `drop`, the n's bar and stem, for money out, grey when rejected; `watermark`, the A in outline behind account cards and the balance; `backdrop`, the darkened A bigger than the screen behind the entry screens (login doors, login form, sign-up steps).
+- **Screens:** the doors have no header, only the logo, the greeting and the two doors without icons, centred over the backdrop. The account actions are a track of interlocked parallelograms; the open one fills with its colour (rise, drop or ink) and its form goes below.
+
 ## Prototypes
 
 [`prototypes/`](prototypes/) holds the two approved prototypes, kept as reference for the implementation. They load Tektur from Google Fonts and are never served by the application.
