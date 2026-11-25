@@ -46,5 +46,14 @@
         </div>
     </form>
 </main>
+<th:block th:unless="${showForm}">
+<!--/* Intro de la marca (#178, ADR 0022): oculta hasta que intro.js decide reproducirla. El import map da al módulo
+     la URL versionada de la geometría, como Thymeleaf hace con el resto de recursos. */-->
+<div class="splash" id="splash" role="img" aria-label="monA Bank" hidden>
+    <canvas aria-hidden="true"></canvas>
+</div>
+<script type="importmap" th:inline="javascript">{"imports":{"brand-geometry":[[@{/js/brand-geometry.js}]]}}</script>
+<script type="module" th:src="@{/js/intro.js}"></script>
+</th:block>
 </body>
 </html>

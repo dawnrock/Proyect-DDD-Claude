@@ -75,6 +75,35 @@ class LoginControllerTests {
     }
 
     @Test
+    @DisplayName("Las puertas del login traen la intro de monA Bank oculta, con su lienzo y su script; el formulario, no (#178)")
+    void theLoginDoorsBringTheHiddenIntroWithItsCanvasAndScript() throws Exception {
+        mvc.perform(get("/login"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(matchesPattern(
+                        "(?s).*<div class=\"splash\" id=\"splash\" role=\"img\" aria-label=\"monA Bank\" hidden>\\s*"
+                                + "<canvas aria-hidden=\"true\"></canvas>\\s*</div>.*")))
+                .andExpect(content().string(matchesPattern(
+                        "(?s).*<script type=\"importmap\">\\{\"imports\":\\{\"brand-geometry\":\"\\\\?/js\\\\?/brand-geometry-[0-9a-f]{32}\\.js\"\\}\\}</script>.*")))
+                .andExpect(content().string(matchesPattern(
+                        "(?s).*<script type=\"module\" src=\"/js/intro-[0-9a-f]{32}\\.js\"></script>.*")));
+        mvc.perform(get("/login").param("form", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("id=\"splash\""))))
+                .andExpect(content().string(not(containsString("intro"))));
+    }
+
+    @Test
+    @DisplayName("El script de la intro se sirve como JavaScript, que es lo que exige un módulo (#178)")
+    void theIntroScriptIsServedAsJavaScript() throws Exception {
+        mvc.perform(get("/js/intro.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/javascript"));
+        mvc.perform(get("/js/brand-geometry.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/javascript"));
+    }
+
+    @Test
     @DisplayName("Con ?form, /login muestra el formulario de acceso con el enlace de vuelta a las puertas")
     void withFormLoginShowsTheFormWithABackLink() throws Exception {
         mvc.perform(get("/login").param("form", ""))

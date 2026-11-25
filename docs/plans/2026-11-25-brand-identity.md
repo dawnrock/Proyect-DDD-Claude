@@ -173,7 +173,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] No «Mon-A» in `src/main/resources/templates` (guarded by `BrandNameTemplatesTests`).
 
-### [ ] T12 — Intro markup and script (~10 min)
+### [x] T12 — Intro markup and script (~10 min)
 
 - **Layer:** adapter.in.web (templates + static)
 - **Files:** `login.html`, `src/main/resources/static/js/intro.js`, `app.css`, `LoginControllerTests`
@@ -183,7 +183,7 @@ Decisions taken in this plan:
   2. `intro.js`: port the prototype (`docs/brand/prototypes/intro.html`): words layout, timeline, flyers and logo layer, importing `brand-geometry.js`. The splash starts `hidden` and the script shows it only when it will run: not seen in this session (`sessionStorage`, guarded with try/catch), no `prefers-reduced-motion: reduce`, and Tektur loads (`document.fonts.load` + `check`); otherwise the page shows as today. Esc or a click removes it.
   3. `app.css`: `.splash` full-screen over the page with the body background; nothing for reduced motion beyond the script check.
 - **Acceptance criteria:**
-  - [ ] The test passes; manual check in the browser (`./mvnw spring-boot:run`): first visit plays the intro, «Volver» from the form does not, reduced motion and JavaScript off show the doors directly.
+  - [x] The test passes; manual check in the browser (`./mvnw spring-boot:run`): first visit plays the intro, «Volver» from the form does not, reduced motion and JavaScript off show the doors directly. Checked with Playwright on desktop and mobile; a full reload in the same session does not replay it either, and the console shows no errors.
 
 ### [ ] T13 — Contract and glossary texts (~5 min)
 
