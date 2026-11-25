@@ -471,7 +471,7 @@ class CheckingAccountTests {
         private static final AccountNumber OTHER_MON_A_BANK_IBAN = new AccountNumber("ES6699990001740000000002");
 
         @Test
-        @DisplayName("Una cuenta acepta otro número de Mon-A Bank")
+        @DisplayName("Una cuenta acepta otro número de monA Bank")
         void anAccountAcceptsAnotherMonABankNumber() {
             CheckingAccount cuenta = TestAccounts.anAccount().accountNumber(MON_A_BANK_IBAN.value()).open();
 
@@ -481,13 +481,13 @@ class CheckingAccountTests {
         }
 
         @Test
-        @DisplayName("Una cuenta no acepta un número que no es de Mon-A Bank")
+        @DisplayName("Una cuenta no acepta un número que no es de monA Bank")
         void anAccountRejectsANumberThatIsNotMonABank() {
             CheckingAccount cuenta = TestAccounts.anAccount().accountNumber(MON_A_BANK_IBAN.value()).open();
 
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> cuenta.reassignAccountNumber(IBAN))
-                    .withMessage("El número de cuenta ES9121000418450200051332 no es de Mon-A Bank");
+                    .withMessage("El número de cuenta ES9121000418450200051332 no es de monA Bank");
             assertThat(cuenta.accountNumber()).isEqualTo(MON_A_BANK_IBAN);
         }
 

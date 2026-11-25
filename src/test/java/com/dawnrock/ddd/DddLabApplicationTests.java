@@ -609,7 +609,7 @@ class DddLabApplicationTests {
 			assertThat(duplicate.statusCode()).isEqualTo(302);
 			assertThat(duplicate.headers().firstValue("Location"))
 					.hasValueSatisfying(location -> assertThat(location).endsWith("/signup"));
-			assertThat(send(again, "/signup").body()).contains("Ya eres cliente de Mon-A Bank");
+			assertThat(send(again, "/signup").body()).contains("Ya eres cliente de monA Bank");
 			assertThat(login("dorothy2", NEW_PASSWORD).headers().firstValue("Location"))
 					.as("el alta rechazada no crea el usuario")
 					.hasValueSatisfying(location -> assertThat(location).contains("error"));
@@ -636,7 +636,7 @@ class DddLabApplicationTests {
 
 			HttpResponse<String> duplicate = publicSignUp(REST_DOCUMENT, "otra.direccion@example.com", "katherine2");
 			assertThat(duplicate.statusCode()).isEqualTo(422);
-			assertThat(duplicate.body()).contains("Ya eres cliente de Mon-A Bank");
+			assertThat(duplicate.body()).contains("Ya eres cliente de monA Bank");
 		}
 
 		@Test

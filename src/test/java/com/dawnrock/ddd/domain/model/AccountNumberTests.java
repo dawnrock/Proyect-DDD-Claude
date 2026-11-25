@@ -17,13 +17,13 @@ class AccountNumberTests {
     }
 
     @Test
-    @DisplayName("Un IBAN con la entidad 9999 y la oficina 0001 es de Mon-A Bank (R31)")
+    @DisplayName("Un IBAN con la entidad 9999 y la oficina 0001 es de monA Bank (R31)")
     void anIbanWithBank9999AndBranch0001IsMonABank() {
         assertThat(new AccountNumber("ES6699990001740000000001").isMonABank()).isTrue();
     }
 
     @Test
-    @DisplayName("Un IBAN de otra entidad u oficina no es de Mon-A Bank (R31)")
+    @DisplayName("Un IBAN de otra entidad u oficina no es de monA Bank (R31)")
     void anIbanFromAnotherBankOrBranchIsNotMonABank() {
         assertThat(new AccountNumber("ES9121000418450200051332").isMonABank()).isFalse();
         assertThat(new AccountNumber("ES6699990002740000000001").isMonABank()).isFalse();

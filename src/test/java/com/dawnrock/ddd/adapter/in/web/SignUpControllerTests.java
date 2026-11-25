@@ -401,7 +401,7 @@ class SignUpControllerTests {
 
             mvc.perform(get("/signup").session(session).flashAttr("signUpError", error.getMessage())
                             .flashAttr("duplicateCustomer", true))
-                    .andExpect(content().string(containsString("Ya eres cliente de Mon-A Bank")))
+                    .andExpect(content().string(containsString("Ya eres cliente de monA Bank")))
                     .andExpect(content().string(containsString("href=\"/login?form\"")));
         }
 

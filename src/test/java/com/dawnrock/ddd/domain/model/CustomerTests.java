@@ -70,7 +70,7 @@ class CustomerTests {
     void aDuplicateDocumentIsABrokenBusinessRule() {
         assertThat(new DuplicateCustomerException(TAX_ID))
                 .isInstanceOf(DomainException.class)
-                .hasMessageStartingWith("Ya eres cliente de Mon-A Bank")
+                .hasMessageStartingWith("Ya eres cliente de monA Bank")
                 .hasMessageContaining("12345678Z");
     }
 

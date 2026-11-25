@@ -142,7 +142,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Both tests pass; the login form (`/login?form`) has no stacked logo.
 
-### [ ] T9 — Name in domain messages (~5 min)
+### [x] T9 — Name in domain messages (~5 min)
 
 - **Layer:** domain
 - **Files:** `DuplicateCustomerException`, `CheckingAccount` (R32 message), `CustomerTests`, `CheckingAccountTests`
@@ -150,7 +150,7 @@ Decisions taken in this plan:
 - **What to do:**
   1. Change the expected messages in the tests to «monA Bank», see them fail, change the two messages. Update `@DisplayName`s that name the bank.
 - **Acceptance criteria:**
-  - [ ] Domain tests green; `check-domain.mjs` without errors.
+  - [x] Domain tests green; `check-domain.mjs` without errors.
 
 ### [ ] T10 — Name in application and web messages (~10 min)
 
