@@ -88,7 +88,7 @@ The PMD baseline (#168, ADR 0020) flags `CyclomaticComplexity` 11 in `OpenAccoun
 - **Acceptance criteria:**
   - [x] `SignUpCommandTests`, `SignUpControllerTests` and `CustomerControllerTests` green without changes. Committed together with T4: the opening command uses the new `SignUpCommandDef.EMAIL_MESSAGE`, so the e-mail message is also defined once.
 
-### [ ] T6 — Out of the PMD baseline and project status (~5 min)
+### [x] T6 — Out of the PMD baseline and project status (~5 min)
 
 - **Layer:** build · docs
 - **Files:** `pmd-baseline.properties`, `docs/ia/estado-del-proyecto.md`, `pendientes.md`, `historial.md`
@@ -97,7 +97,7 @@ The PMD baseline (#168, ADR 0020) flags `CyclomaticComplexity` 11 in `OpenAccoun
   1. Remove both lines (and their comment); `./mvnw verify` runs PMD without them and stays green.
   2. Status files: issue done, the PMD baseline pending item keeps only `CheckingAccount` (#182), history row.
 - **Acceptance criteria:**
-  - [ ] `pmd-baseline.properties` has no line for the two commands and `./mvnw verify` is green.
+  - [x] `pmd-baseline.properties` has no line for the two commands and `./mvnw verify` is green (sabotage: with the old `validate()` PMD fails with complexity 11 in both).
 
 ## Global acceptance criteria
 
