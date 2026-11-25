@@ -65,7 +65,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
   - [x] The font is served without authentication; the test passes.
   - [x] Licence and README next to the file.
 
-### [ ] T2 — ADR 0023: the brand's UI language (~10 min)
+### [x] T2 — ADR 0023: the brand's UI language (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0023-brand-ui.md`, `docs/adr/README.md`, `docs/adr/0016-web-frontend-libraries.md`, `docs/adr/0022-brand-identity.md`
@@ -74,7 +74,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
   1. ADR 0023 (status accepted, chosen by the user with sketches on 2026-11-25): direction C, tokens, slanted shapes, brand glyphs, the big A backdrop on entry screens, Sora vendored and why (no WebJar, OFL), Bootstrap kept as the base with a brand layer in `app.css`; alternatives (directions A and B, system font, a new CSS framework); consequences (Tektur and Sora on every page, about 12 + 25 KB, cached a year).
   2. Index row in the ADR README; Sora row in ADR 0016's table; in ADR 0022, Tektur is now downloaded on every page, not only by the intro.
 - **Acceptance criteria:**
-  - [ ] ADR in English, linked from the index; 0016 and 0022 point to it.
+  - [x] ADR in English, linked from the index; 0016 and 0022 point to it.
 
 ### [ ] T3 — Tokens, typefaces and header (~10 min)
 
