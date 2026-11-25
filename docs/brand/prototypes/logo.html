@@ -1,0 +1,109 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Tektur:wght@400;700&display=block" rel="stylesheet">
+<style>
+  body { margin: 0; background: #212529; }
+  canvas { display: block; width: 900px; height: 440px; }
+</style></head><body>
+<canvas id="logo" width="1800" height="880"></canvas>
+<script>
+// Logo de monA Bank con Tektur: una gráfica recorre las letras por dentro.
+//   m, o  → gris: mercado plano
+//   n     → rojo: cae por la pata derecha hasta el suelo
+//   A     → blanca; su pata izquierda se prolonga en una flecha turquesa: la subida
+const q = new URLSearchParams(location.search);
+const COLORS = { flat: q.get('gray') || '#8b949c', drop: q.get('red') || '#f0545c', rise: q.get('green') || '#1fc8b0' };
+const FONT = 'Tektur', W_NAME = 700, W_KIND = 400, DPR = 2;
+
+const mask = (ch, size) => {
+  const c = document.createElement('canvas'), x = c.getContext('2d');
+  x.font = `${W_NAME} ${size}px "${FONT}"`;
+  const m = x.measureText(ch), w = Math.ceil(m.width) + 4, h = Math.ceil(size * 1.3);
+  c.width = w; c.height = h; x.font = `${W_NAME} ${size}px "${FONT}"`; x.fillStyle = '#fff';
+  const base = Math.round(size); x.fillText(ch, 2, base);
+  const d = x.getImageData(0, 0, w, h).data;
+  return { w, h, base, adv: m.width, ink: (px, py) => px >= 0 && py >= 0 && px < w && py < h && d[(py * w + px) * 4 + 3] > 128 };
+};
+const topLine = (mk, T, to = 1) => {
+  const pts = [];
+  for (let px = 0; px < mk.w * to; px += 2) {
+    let y0 = -1; for (let py = 0; py < mk.h; py++) if (mk.ink(px, py)) { y0 = py; break; }
+    if (y0 < 0) continue;
+    let y1 = y0; while (y1 < y0 + T && mk.ink(px, y1)) y1++;
+    pts.push([px, (y0 + y1) / 2]);
+  }
+  return pts;
+};
+const strokeT = (mk) => { const px = Math.round(mk.w / 2); let y0 = 0; while (!mk.ink(px, y0)) y0++; let y1 = y0; while (mk.ink(px, y1)) y1++; return y1 - y0; };
+// recta x = a·y + b por mínimos cuadrados
+const fit = (pts) => {
+  const n = pts.length, my = pts.reduce((s, p) => s + p[1], 0) / n, mx = pts.reduce((s, p) => s + p[0], 0) / n;
+  let num = 0, den = 0; pts.forEach(([x, y]) => { num += (y - my) * (x - mx); den += (y - my) ** 2; });
+  const a = num / den; return { a, b: mx - a * my, x: (y) => a * y + mx - a * my };
+};
+
+(async () => {
+  await document.fonts.load(`${W_NAME} 100px "${FONT}"`); await document.fonts.load(`${W_KIND} 100px "${FONT}"`);
+  const cv = document.getElementById('logo'), x = cv.getContext('2d'); x.scale(DPR, DPR);
+  const size = 190, ox = 150, base = 330;
+  // «mon» un par de tamaños por debajo de la A, para que la A destaque
+  const MON = +(q.get('mon') ?? .75);
+  const sizes = [size * MON, size * MON, size * MON, size];
+  const mks = [...'monA'].map((ch, i) => mask(ch, sizes[i]));
+  const T = strokeT(mks[1]);
+  x.fillStyle = '#eef0f2';
+  let cx = ox; const pos = [];
+  [...'monA'].forEach((ch, i) => { x.font = `${W_NAME} ${sizes[i]}px "${FONT}"`; x.fillText(ch, cx, base); pos.push(cx - 2); cx += mks[i].adv; });
+  const at = (i, [px, py]) => [pos[i] + px, base - mks[i].base + py];
+
+  // trazos pintados solo dentro de las letras
+  const paint = (pts, color) => {
+    x.save(); x.globalCompositeOperation = 'source-atop';
+    x.strokeStyle = color; x.lineWidth = T * 1.4; x.lineJoin = 'round'; x.lineCap = 'butt';
+    x.beginPath(); pts.forEach(([px, py], i) => i ? x.lineTo(px, py) : x.moveTo(px, py)); x.stroke(); x.restore();
+  };
+  // m y o, en gris
+  paint([0, 1].flatMap((i) => topLine(mks[i], T).map((p) => at(i, p))), COLORS.flat);
+  // n, en rojo: su arco y la caída por la pata derecha
+  const n = mks[2], nTop = topLine(n, T, .8), nStem = [];
+  for (let py = Math.round(nTop.at(-1)[1]); py <= n.base; py += 2) {
+    let r = n.w - 1; while (r > 0 && !n.ink(r, py)) r--; if (r === 0) continue; let l = r; while (l > 0 && n.ink(l, py)) l--; nStem.push([(l + r) / 2, py]); }
+  nStem.push([nStem.at(-1)[0], nStem.at(-1)[1] + T]);   // el trazo llega hasta el suelo, sin filo blanco
+  paint([...nTop, ...nStem].map((p) => at(2, p)), COLORS.drop);
+
+  // A: la flecha prolonga su pata izquierda, con su mismo grosor e inclinación
+  const A = mks[3];
+  let top = 0; while (![...Array(A.w).keys()].some((px) => A.ink(px, top))) top++;
+  const outer = [], inner = [];
+  for (let py = A.base - T; py > top + (A.base - top) * .45; py -= 1) {
+    let l = 0; while (l < A.w && !A.ink(l, py)) l++; let r = l; while (r < A.w && A.ink(r, py)) r++;
+    outer.push([l, py]); inner.push([r, py]);
+  }
+  // fuera las filas del travesaño (allí la franja izquierda llega hasta la otra pata)
+  const widths = outer.map((p, i) => inner[i][0] - p[0]).sort((a, b) => a - b), wMed = widths[widths.length >> 2];
+  const keep = outer.map((p, i) => inner[i][0] - p[0] <= wMed * 1.25);
+  const L1 = fit(outer.filter((_, i) => keep[i])), L2 = fit(inner.filter((_, i) => keep[i]));
+  const len = size * +(q.get('arrow') ?? .18), yTop = top - len;   // largo del asta sobre el vértice
+  const g = (y, L) => at(3, [L.x(y), y]);
+  // pata izquierda en turquesa, de la base al vértice (recortada por la propia letra)
+  const pad = { x: (y) => L1.x(y) - 3 };
+  const legFill = [g(A.base + 2, pad), g(top, pad), g(top, L2), g(A.base + 2, L2)];
+  x.save(); x.globalCompositeOperation = 'source-atop'; x.fillStyle = COLORS.rise;
+  x.beginPath(); legFill.forEach(([px, py], i) => i ? x.lineTo(px, py) : x.moveTo(px, py)); x.fill(); x.restore();
+  const shaft = [g(top + 1, L1), g(yTop, L1), g(yTop, L2), g(top + 1, L2)];
+  x.fillStyle = COLORS.rise; x.beginPath(); shaft.forEach(([px, py], i) => i ? x.lineTo(px, py) : x.moveTo(px, py)); x.fill();
+  // punta: perpendicular a la dirección de la pata, unas 2,6 veces su grosor
+  const [ax, ay] = g(yTop, L1), [bx, by] = g(yTop, L2), mx = (ax + bx) / 2, my = (ay + by) / 2;
+  const dir = (() => { const [p0x, p0y] = g(top, { x: (y) => (L1.x(y) + L2.x(y)) / 2 }); const dx = mx - p0x, dy = my - p0y, k = Math.hypot(dx, dy); return [dx / k, dy / k]; })();
+  const perp = [-dir[1], dir[0]], thick = Math.abs((bx - ax) * perp[0] + (by - ay) * perp[1]);
+  const half = thick * 1.3, head = thick * 1.9;
+  x.beginPath();
+  x.moveTo(mx + perp[0] * half, my + perp[1] * half);
+  x.lineTo(mx + dir[0] * head, my + dir[1] * head);
+  x.lineTo(mx - perp[0] * half, my - perp[1] * half); x.fill();
+
+  // Bank, fino y gris, bajo la A
+  x.font = `${W_KIND} ${size * .3}px "${FONT}"`; x.fillStyle = '#b9c0c7';
+  const bw = x.measureText('Bank').width; x.fillText('Bank', cx - bw, base + size * .36);
+  document.body.dataset.ready = 1;
+})();
+</script></body></html>
