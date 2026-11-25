@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-25
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~120 min (13 tasks)
 
 ## Goal
@@ -66,7 +66,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
 
 ## Tasks
 
-### [ ] T1 — Baseline (~5 min)
+### [x] T1 — Baseline (~5 min)
 
 - **Layer:** tests
 - **Files:** — (scratchpad only)
@@ -76,7 +76,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
   2. `./mvnw pmd:pmd -Dpmd.baseline=` and record WMC and coupling of `CheckingAccountService` and of `CheckingAccountServiceTests`.
   3. `node scripts/graphify.mjs affected "CheckingAccountCommands"` and `"CheckingAccountService"`: confirm the file list above.
 - **Acceptance criteria:**
-  - [ ] Test count and PMD metrics recorded; affected files confirmed.
+  - [x] Test count and PMD metrics recorded; affected files confirmed. (1,035 test cases green; PMD: CheckingAccountService WMC 53, ATFD 19, TCC 10.8 %, coupling 35; CheckingAccountServiceTests coupling over 20; Graphify not installed in this container, affected files confirmed with grep)
 
 ### [ ] T2 — Test fixture for the application services (~10 min)
 
