@@ -2,6 +2,12 @@
 
 Changes to `docs/api/openapi.yaml`, newest first. Versioning policy: [ADR 0014](../adr/0014-contract-versioning.md) (major for an incompatible change as `oasdiff breaking` reports it, minor for a compatible addition, patch for documentation only). The CI checks the bump on every pull request.
 
+## 2.2.4 · 2026-11-25 (#178)
+
+Documentation only.
+
+- **Bank name:** descriptions, summaries and the `DuplicateCustomer` example write the bank's name as «monA Bank» instead of «Mon-A Bank», like the web and the error messages ([ADR 0022](../adr/0022-brand-identity.md)). No field, value format or status changes.
+
 ## 2.2.3 · 2026-11-24 (#157)
 
 Documentation only.

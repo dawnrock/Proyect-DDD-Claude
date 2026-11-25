@@ -185,7 +185,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The test passes; manual check in the browser (`./mvnw spring-boot:run`): first visit plays the intro, «Volver» from the form does not, reduced motion and JavaScript off show the doors directly. Checked with Playwright on desktop and mobile; a full reload in the same session does not replay it either, and the console shows no errors.
 
-### [ ] T13 — Contract and glossary texts (~5 min)
+### [x] T13 — Contract and glossary texts (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`, `docs/api/CHANGELOG.md`, `docs/dominio/glosario.md`
@@ -195,7 +195,7 @@ Decisions taken in this plan:
   2. Glossary: same rename in the definitions; add «monA Bank» as the bank's name if a row fits.
   3. `npx @redocly/cli lint docs/api/openapi.yaml`.
 - **Acceptance criteria:**
-  - [ ] Lint without errors; `check-contract-version.mjs` passes against `Hexagonal`.
+  - [x] Lint without errors; `check-contract-version.mjs` passes against `Hexagonal` (2.2.3 → 2.2.4).
 
 ### [ ] T14 — ADR 0022 and project status (~10 min)
 

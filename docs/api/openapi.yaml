@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Proyect-DDD-Claude · Checking accounts API
-  version: 2.2.3
+  version: 2.2.4
   description: |
     Versioned with SemVer (ADR 0014); the changes are in `docs/api/CHANGELOG.md`.
 
@@ -53,7 +53,7 @@ tags:
   - name: transfers
     description: Transfers between accounts (#7).
   - name: customers
-    description: Mon-A Bank customer sign-up (#95).
+    description: monA Bank customer sign-up (#95).
   - name: auth
     description: Access tokens for the API (#122).
 paths:
@@ -165,7 +165,7 @@ paths:
       operationId: openAccount
       summary: Open a checking account with its initial deposit (admin only)
       description: |
-        Only an admin opens accounts (403 otherwise). The bank assigns the IBAN (Mon-A Bank: entity `9999`, branch `0001`).
+        Only an admin opens accounts (403 otherwise). The bank assigns the IBAN (monA Bank: entity `9999`, branch `0001`).
         The holder is identified by `holderTaxId`: if it already belongs to a customer, the account is opened for that
         customer and their user, and `holderName`, `holderEmail` and `ownerUsername` must be absent, blank or equal to
         the customer's (400 otherwise); if not, those three fields are required and the holder is registered as a customer.
@@ -174,7 +174,7 @@ paths:
         (the holder is `HIGH_NET_WORTH` only above 100,000.00 EUR; an unknown tax id opens a `RETAIL` account).
         Since #98 the balance also counts: a holder becomes `HIGH_NET_WORTH` as soon as the account balance reaches
         100,000.00 EUR, and may go back to `RETAIL` after a review (see the `segment` property). Generated IBANs carry
-        the entity code `9999` and branch `0001` of Mon-A Bank.
+        the entity code `9999` and branch `0001` of monA Bank.
       requestBody:
         required: true
         content:
@@ -311,7 +311,7 @@ paths:
     post:
       tags: [customers]
       operationId: signUp
-      summary: Become a Mon-A Bank customer (public)
+      summary: Become a monA Bank customer (public)
       description: |
         Registers the customer, opens their first account with an IBAN assigned by the bank and creates their user
         (role USER), all at once and without administrator approval. No credentials are needed. The new user can then
@@ -695,7 +695,7 @@ components:
           format: uuid
         accountNumber:
           type: string
-          description: Normalized IBAN, always assigned by the bank (Mon-A Bank, entity 9999, branch 0001).
+          description: Normalized IBAN, always assigned by the bank (monA Bank, entity 9999, branch 0001).
           examples: [ES8099990001450000000001]
         holderName:
           type: string
@@ -940,7 +940,7 @@ components:
                 type: about:blank
                 title: Regla de negocio incumplida
                 status: 422
-                detail: 'Ya eres cliente de Mon-A Bank: ya hay un cliente con el documento 12345678Z. Entra con tu usuario'
+                detail: 'Ya eres cliente de monA Bank: ya hay un cliente con el documento 12345678Z. Entra con tu usuario'
     UnsupportedMediaType:
       description: The request body is not JSON.
       content:
