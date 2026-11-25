@@ -76,7 +76,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
 - **Acceptance criteria:**
   - [x] ADR in English, linked from the index; 0016 and 0022 point to it.
 
-### [ ] T3 — Tokens, typefaces and header (~10 min)
+### [x] T3 — Tokens, typefaces and header (~10 min)
 
 - **Layer:** adapter.in (static + templates)
 - **Files:** `static/css/app.css`, `templates/fragments/layout.html`, `AccountListControllerTests.java`
@@ -87,7 +87,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
   3. Header: logo, user and "Cerrar sesión" restyled (same markup the header test matches).
   4. Test: the head preloads Tektur and Sora.
 - **Acceptance criteria:**
-  - [ ] The existing header test still passes; the preload test passes.
+  - [x] The existing header test still passes; the preload test passes.
 
 ### [ ] T4 — Brand fragments: glyphs and the A (~10 min)
 

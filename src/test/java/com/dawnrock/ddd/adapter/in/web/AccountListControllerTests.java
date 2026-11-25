@@ -131,6 +131,21 @@ class AccountListControllerTests extends AccountWebTestSupport {
         }
 
         @Test
+        @DisplayName("Todas las páginas precargan las tipografías de la marca, Tektur y Sora, con su URL versionada (#185)")
+        void everyPagePreloadsTheBrandTypefaces() throws Exception {
+            when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
+
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<link rel=\"preload\" href=\"/vendor/tektur/tektur-latin-wght-normal-[0-9a-f]{32}\\.woff2\""
+                                    + " as=\"font\" type=\"font/woff2\" crossorigin>.*")))
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<link rel=\"preload\" href=\"/vendor/sora/sora-latin-wght-normal-[0-9a-f]{32}\\.woff2\""
+                                    + " as=\"font\" type=\"font/woff2\" crossorigin>.*")));
+        }
+
+        @Test
         @DisplayName("La web no tiene pie de página: ni la fase ni la arquitectura del proyecto (#178)")
         void thePageHasNoFooterWithThePhaseOrTheArchitecture() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
