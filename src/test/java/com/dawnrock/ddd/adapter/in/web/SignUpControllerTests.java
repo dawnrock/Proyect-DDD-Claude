@@ -58,8 +58,8 @@ import com.dawnrock.ddd.adapter.in.TooManySignUpsException;
 import com.dawnrock.ddd.adapter.in.UsernameTakenException;
 
 /** Alta de cliente en tres pasos (#95): datos personales, acceso y cuenta. */
-@WebMvcTest({SignUpController.class, AccountWebController.class})
-@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class, TestUsers.class})
+@WebMvcTest({SignUpController.class, AccountDetailController.class})
+@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class, TestUsers.class, AccountDetailView.class})
 class SignUpControllerTests {
 
     @Autowired

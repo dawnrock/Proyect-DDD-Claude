@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
@@ -25,54 +24,25 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.dawnrock.ddd.application.AccountDetails;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.AccountOpeningCommands;
-import com.dawnrock.ddd.application.MoneyMovementCommands;
-import com.dawnrock.ddd.application.CheckingAccountQueries;
 import com.dawnrock.ddd.application.NotACustomerException;
 import com.dawnrock.ddd.application.OpenAnotherAccountCommand;
 import com.dawnrock.ddd.domain.model.CurrencyMismatchException;
 import com.dawnrock.ddd.domain.model.InsufficientInitialDepositException;
 import com.dawnrock.ddd.domain.model.MonetaryAmount;
-import com.dawnrock.ddd.adapter.in.SecuritySupport;
-import com.dawnrock.ddd.adapter.in.TestUsers;
 
 /** «Abrir otra cuenta» para clientes (#95): el botón, el formulario de solo depósito y el rechazo al administrador. */
-@WebMvcTest(AccountWebController.class)
-@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class, TestUsers.class})
+@WebMvcTest({AnotherAccountWebController.class, AccountListController.class, AccountDetailController.class})
 @WithMockUser(username = "ada", roles = "USER")
-class AnotherAccountWebTests {
+class AnotherAccountWebControllerTests extends AccountWebTestSupport {
 
-    private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
     private static final UUID FIRST = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
     private static final UUID SECOND = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
-
-    @Autowired
-    private MockMvc mvc;
-
-    @MockitoBean
-    private AccountOpeningCommands commands;
-
-    @MockitoBean
-    private MoneyMovementCommands movements;
-
-    @MockitoBean
-    private CheckingAccountQueries queries;
-
-    private static MockHttpServletRequestBuilder post(String url) {
-        return MockMvcRequestBuilders.post(url).with(csrf());
-    }
 
     private static AccountSummary account(UUID id, String iban) {
         return AccountSummary.builder().id(id).accountNumber(iban).holderName("Ada Lovelace")
