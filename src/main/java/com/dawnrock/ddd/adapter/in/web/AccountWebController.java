@@ -53,11 +53,6 @@ public class AccountWebController {
 
     private final AccountDetailView detailView;
 
-    @GetMapping("/accounts/{id}")
-    public String detail(@PathVariable UUID id, Authentication authentication, Model model) {
-        return detailView.render(id, CurrentCaller.from(authentication), model, false);
-    }
-
     @PostMapping("/accounts/{id}/account-number")
     public String regenerateAccountNumber(@PathVariable UUID id, Model model, RedirectAttributes redirect,
                                           Authentication authentication,

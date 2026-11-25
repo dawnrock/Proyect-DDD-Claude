@@ -107,7 +107,7 @@
 - **Acceptance criteria:**
   - [x] Moved tests pass; `./mvnw verify` green. (the shared test data (callers, ids, summaries, htmx and asset matchers) moved to AccountWebTestSupport; tests that still reach GET / name AccountListController too; 1,049 test cases, unchanged)
 
-### [ ] T5 — `AccountDetailController` (~10 min)
+### [x] T5 — `AccountDetailController` (~10 min)
 
 - **Layer:** adapter.in · tests
 - **Files:** `AccountDetailController.java` (new), `AccountWebController.java`, `AccountDetailControllerTests.java` (moved groups)
@@ -115,7 +115,7 @@
 - **What to do:**
   1. Move `GET /accounts/{id}`; move `Detalle`, `DetalleConUsuario`, `FormularioDeTransferencia` and `Acciones`.
 - **Acceptance criteria:**
-  - [ ] Moved tests pass; a 404 for someone else's account is unchanged.
+  - [x] Moved tests pass; a 404 for someone else's account is unchanged. (1,049 test cases, unchanged; until T11 the moved tests also name AccountWebController, which still serves the operations)
 
 ### [ ] T6 — `DepositWebController` (~10 min)
 

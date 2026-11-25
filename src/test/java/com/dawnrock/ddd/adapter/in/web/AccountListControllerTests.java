@@ -28,7 +28,7 @@ import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
 
 /** Inicio de la web (#177): listado de cuentas, inicio según el rol y cabecera con el usuario. */
-@WebMvcTest({AccountListController.class, AccountWebController.class})
+@WebMvcTest({AccountListController.class, AccountWebController.class, AccountDetailController.class})
 @WithMockUser(username = "admin", roles = "ADMIN")
 class AccountListControllerTests extends AccountWebTestSupport {
 
