@@ -6,7 +6,7 @@
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-25
 - **Status:** in progress
-- **Total estimate:** ~120 min (14 tasks)
+- **Total estimate:** ~125 min (15 tasks)
 
 ## Goal
 
@@ -208,6 +208,16 @@ Decisions taken in this plan:
   3. Status files: issue done, decision row, pending items (no browser test of the intro; `/favicon.ico` still unanswered by a file), history row.
 - **Acceptance criteria:**
   - [x] `node scripts/check-project-status.mjs` passes on the PR's diff.
+
+### [x] T15 — Review fixes (~5 min)
+
+- **Layer:** docs
+- **Files:** `docs/arquitectura/fase-2-hexagonal.md`, `README.md`, `docs/ia/decisiones.md`
+- **Depends on:** T14
+- **What to do:**
+  1. `revisor-ddd` found no blocking issue; it pointed at «Mon-A Bank» left in the documentation. Living documents (phase-2 architecture, README, the current decision on generated IBANs) now say «monA Bank». Historical records stay as written: ADR 0012 (an accepted ADR; ADR 0022 records the rename), the frozen #103 contract (ADR 0007) and the `docs/analysis/` snapshots.
+- **Acceptance criteria:**
+  - [x] No «Mon-A Bank» in living documentation.
 
 ## Global acceptance criteria
 
