@@ -120,7 +120,8 @@ public class AccountOpeningService implements AccountOpeningCommands {
     @Override
     public AccountSummary openAnotherAccount(Caller caller, OpenAnotherAccountCommand command) {
         return accountUnit.execute(changes -> {
-            CheckingAccount opened = opener.prepare(directory.customerOf(caller), command.initialDeposit(), command.currency());
+            Customer customer = directory.customerOf(caller);
+            CheckingAccount opened = opener.prepare(customer, command.initialDeposit(), command.currency());
             return opener.save(opened, caller.username(), changes);
         });
     }

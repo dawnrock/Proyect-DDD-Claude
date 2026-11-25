@@ -57,9 +57,9 @@ public class DomainConfiguration {
     /** Implementa {@code CheckingAccountQueries}; los adaptadores de entrada reciben cada servicio por su puerto. */
     @Bean
     public CheckingAccountQueryService checkingAccountQueryService(CheckingAccountRepository repository,
-                                                         AccountOwnershipRepository ownership,
-                                                         UnitOfWork unitOfWork, CustomerRepository customers,
-                                                         CustomerOwnershipRepository customerOwnership) {
+                                                                   AccountOwnershipRepository ownership,
+                                                                   UnitOfWork unitOfWork, CustomerRepository customers,
+                                                                   CustomerOwnershipRepository customerOwnership) {
         return new CheckingAccountQueryService(repository, ownership, unitOfWork, customers, customerOwnership);
     }
 

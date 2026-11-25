@@ -29,8 +29,8 @@ public class CheckingAccountQueryService implements CheckingAccountQueries {
 
     /** Recibe sus colaboradores ya construidos: los entrega {@code config.DomainConfiguration}. */
     public CheckingAccountQueryService(CheckingAccountRepository repository, AccountOwnershipRepository ownership,
-                                  UnitOfWork unitOfWork, CustomerRepository customers,
-                                  CustomerOwnershipRepository customerOwnership) {
+                                       UnitOfWork unitOfWork, CustomerRepository customers,
+                                       CustomerOwnershipRepository customerOwnership) {
         this.repository = repository;
         this.unitOfWork = unitOfWork;
         this.access = new AccountAccess(repository, ownership);
@@ -60,7 +60,8 @@ public class CheckingAccountQueryService implements CheckingAccountQueries {
     }
 
     private String holderEmail(CheckingAccount account) {
-        return customers.findByTaxId(account.primaryHolder().taxId()).map(customer -> customer.email().value()).orElse("");
+        return customers.findByTaxId(account.primaryHolder().taxId())
+                .map(customer -> customer.email().value())
+                .orElse("");
     }
-
 }

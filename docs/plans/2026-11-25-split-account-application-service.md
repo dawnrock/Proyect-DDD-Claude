@@ -6,7 +6,7 @@
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-25
 - **Status:** in progress
-- **Total estimate:** ~120 min (13 tasks)
+- **Total estimate:** ~125 min (14 tasks)
 
 ## Goal
 
@@ -202,6 +202,16 @@ Package-private collaborators cannot be built in `config`, so each service keeps
   3. `node scripts/graphify.mjs update .`.
 - **Acceptance criteria:**
   - [x] `grep -rn "CheckingAccountCommands\|CheckingAccountService" docs/arquitectura/fase-2-hexagonal.md docs/dominio` finds only the history of #16; every contract that names them has its "Since #174" note. (Graphify is not installed in this container, so the graph was not regenerated)
+
+### [x] T14 — Review fixes (~5 min)
+
+- **Layer:** application · config · tests
+- **Files:** `CheckingAccountQueryService.java`, `AccountOpeningService.java`, `DomainConfiguration.java`, `HexagonalArchitectureTests.java`
+- **Depends on:** T12
+- **What to do:**
+  1. Fix the formatting found by `revisor-ddd` (no blocking findings): parameters indented for the old names, lines over 120 characters, and the Javadoc of `PORT_PACKAGES` left above the new predicate.
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green; the other review notes go to `pendientes.md` in T13.
 
 ### [ ] T13 — Project status (~5 min)
 

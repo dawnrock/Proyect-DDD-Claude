@@ -66,14 +66,14 @@ class HexagonalArchitectureTests {
                 .check(classes);
     }
 
-    /** Donde viven los puertos: los de salida en {@code domain.model}; el de propiedad, en {@code application}. */
-    /** Clases (no interfaces) que implementan un puerto de entrada: un {@code *Commands} o {@code *Queries} de application. */
+    /** Clases (no interfaces) que implementan un puerto de entrada: un {@code *Commands} o {@code *Queries}. */
     private static final DescribedPredicate<JavaClass> INPUT_PORT_IMPLEMENTATIONS = describe(
             "implementan un puerto de entrada",
             javaClass -> !javaClass.isInterface() && javaClass.getAllRawInterfaces().stream().anyMatch(port ->
                     port.getPackageName().startsWith("com.dawnrock.ddd.application")
                             && (port.getSimpleName().endsWith("Commands") || port.getSimpleName().endsWith("Queries"))));
 
+    /** Donde viven los puertos: los de salida en {@code domain.model}; el de propiedad, en {@code application}. */
     private static final List<String> PORT_PACKAGES =
             List.of("com.dawnrock.ddd.domain.model", "com.dawnrock.ddd.application");
 
