@@ -6,7 +6,7 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Component;
 
 import com.dawnrock.ddd.application.AccountSummary;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
 import com.dawnrock.ddd.application.SignUpCommand;
 import com.dawnrock.ddd.domain.model.DuplicateCustomerException;
@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
  * Alta de un cliente con su usuario, compartida por los adaptadores web y REST. La aplicación no conoce Spring
  * Security, así que las credenciales se quedan en los adaptadores de entrada: comprueba que el usuario está libre (en
  * los usuarios y con {@code CheckingAccountQueries.isUsernameTaken}), pide el alta al puerto
- * {@code CheckingAccountCommands.signUp} y, si va bien, crea el usuario con rol {@code USER} y su contraseña cifrada. Si
+ * {@code AccountOpeningCommands.signUp} y, si va bien, crea el usuario con rol {@code USER} y su contraseña cifrada. Si
  * el caso de uso falla, no se crea ningún usuario. Antes de nada reserva un hueco en {@link SignUpLimit} para la IP del
  * cliente (#131, ADR 0018) y lo devuelve si el alta falla: solo cuentan las altas que crean un cliente. Un alta que
  * falla porque el usuario o el documento ya existen cuenta, además, para el límite de sondeo (#139). Contrato:
@@ -30,7 +30,7 @@ public class CustomerRegistration {
     /** Contraseña mínima del alta. */
     public static final int MINIMUM_PASSWORD_LENGTH = 8;
 
-    private final CheckingAccountCommands commands;
+    private final AccountOpeningCommands commands;
     private final CheckingAccountQueries queries;
     private final UserDetailsManager users;
     private final PasswordEncoder passwordEncoder;

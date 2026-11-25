@@ -2,7 +2,6 @@ package com.dawnrock.ddd.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.Clock;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,19 +15,15 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
-import com.dawnrock.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
-import com.dawnrock.ddd.domain.model.CheckingAccountFactory;
 import com.dawnrock.ddd.domain.model.DomainEventPublisher;
-import com.dawnrock.ddd.domain.service.MoneyTransferService;
-import com.dawnrock.ddd.domain.service.SegmentReviewService;
+import com.dawnrock.ddd.support.ApplicationServicesFixture;
 
 /**
  * Operaciones simultáneas sobre las mismas cuentas (#78): el servicio real con los adaptadores en memoria, sin Spring.
  * Muchos hilos transfieren a la vez entre dos cuentas en los dos sentidos e ingresan en ellas; al terminar, el dinero
  * tiene que cuadrar y no puede faltar ningún movimiento.
  */
-class CheckingAccountServiceConcurrencyTests {
+class MoneyMovementServiceConcurrencyTests {
 
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
     private static final int THREADS = 8;
@@ -37,17 +32,13 @@ class CheckingAccountServiceConcurrencyTests {
     private static final BigDecimal INITIAL = new BigDecimal("100000.00");
     private static final BigDecimal ONE = new BigDecimal("1.00");
 
-    private static CheckingAccountService newService() {
+    private static ApplicationServicesFixture newServices() {
         DomainEventPublisher ignoreEvents = events -> { };
-        return new CheckingAccountService(PersistenceTestAdapters.accounts(), PersistenceTestAdapters.ownership(),
-                ignoreEvents, new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(),
-                        TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(),
-                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
+        return ApplicationServicesFixture.builder().publisher(ignoreEvents).build();
     }
 
-    private static AccountSummary open(CheckingAccountService service, String holder, String taxId, String owner) {
-        return service.openAccount(ADMIN, OpenAccountCommand.builder().holderName(holder).holderTaxId(taxId)
+    private static AccountSummary open(AccountOpeningCommands opening, String holder, String taxId, String owner) {
+        return opening.openAccount(ADMIN, OpenAccountCommand.builder().holderName(holder).holderTaxId(taxId)
                 .holderEmail(owner + "@example.com").initialDeposit(INITIAL).ownerUsername(owner).build());
     }
 
@@ -60,20 +51,21 @@ class CheckingAccountServiceConcurrencyTests {
     }
 
     private void runRound() throws Exception {
-        CheckingAccountService service = newService();
-        AccountSummary ada = open(service, "Ada Lovelace", "12345678Z", "ada");
-        AccountSummary alan = open(service, "Alan Turing", "11111111H", "alan");
+        ApplicationServicesFixture services = newServices();
+        CheckingAccountQueryService service = services.queryService();
+        AccountSummary ada = open(services.accountOpeningService(), "Ada Lovelace", "12345678Z", "ada");
+        AccountSummary alan = open(services.accountOpeningService(), "Alan Turing", "11111111H", "alan");
 
         ExecutorService pool = Executors.newFixedThreadPool(THREADS);
         try {
-            runConcurrently(service, ada, alan, pool);
+            runConcurrently(services.moneyMovementService(), ada, alan, pool);
         } finally {
             pool.shutdownNow();
         }
         assertBalancesAndTransactions(service, ada, alan);
     }
 
-    private static void runConcurrently(CheckingAccountService service, AccountSummary ada, AccountSummary alan,
+    private static void runConcurrently(MoneyMovementCommands movements, AccountSummary ada, AccountSummary alan,
                                         ExecutorService pool) throws Exception {
         CountDownLatch start = new CountDownLatch(1);
         List<Future<?>> results = new ArrayList<>();
@@ -81,11 +73,11 @@ class CheckingAccountServiceConcurrencyTests {
             Callable<Void> worker = () -> {
                 start.await();
                 for (int i = 0; i < OPERATIONS_PER_THREAD; i++) {
-                    service.transfer(ADMIN, TransferCommand.builder().sourceAccountId(ada.id())
+                    movements.transfer(ADMIN, TransferCommand.builder().sourceAccountId(ada.id())
                             .targetAccountNumber(alan.accountNumber()).amount(ONE).build());
-                    service.transfer(ADMIN, TransferCommand.builder().sourceAccountId(alan.id())
+                    movements.transfer(ADMIN, TransferCommand.builder().sourceAccountId(alan.id())
                             .targetAccountNumber(ada.accountNumber()).amount(ONE).build());
-                    service.deposit(ADMIN, DepositCommand.builder().accountId(ada.id()).amount(ONE).build());
+                    movements.deposit(ADMIN, DepositCommand.builder().accountId(ada.id()).amount(ONE).build());
                 }
                 return null;
             };
@@ -97,7 +89,7 @@ class CheckingAccountServiceConcurrencyTests {
         }
     }
 
-    private static void assertBalancesAndTransactions(CheckingAccountService service, AccountSummary ada,
+    private static void assertBalancesAndTransactions(CheckingAccountQueryService service, AccountSummary ada,
                                                       AccountSummary alan) {
         int operations = THREADS * OPERATIONS_PER_THREAD;
         AccountDetails adaDetails = service.findAccount(ADMIN, ada.id());

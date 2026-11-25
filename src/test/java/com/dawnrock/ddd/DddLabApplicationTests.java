@@ -30,7 +30,9 @@ import org.springframework.context.ApplicationContext;
 import com.dawnrock.ddd.adapter.in.cli.DomainModelRunner;
 import com.dawnrock.ddd.adapter.out.event.OutboxRelay;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
+import com.dawnrock.ddd.application.SegmentReviewCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
 import com.dawnrock.ddd.application.DepositCommand;
 import com.dawnrock.ddd.application.OpenAccountCommand;
@@ -76,7 +78,10 @@ class DddLabApplicationTests {
 	private ApplicationContext context;
 
 	@Autowired
-	private CheckingAccountCommands commands;
+	private AccountOpeningCommands commands;
+
+	@Autowired
+	private MoneyMovementCommands movements;
 
 	@Test
 	void contextLoads() {
@@ -95,7 +100,7 @@ class DddLabApplicationTests {
 				.ownerUsername("ada")
 				.build()).id();
 
-		commands.deposit(admin, DepositCommand.builder().accountId(accountId).amount(new BigDecimal("25")).build());
+		movements.deposit(admin, DepositCommand.builder().accountId(accountId).amount(new BigDecimal("25")).build());
 		// Desde #165 los eventos se guardan en el outbox y los entrega el relé, no la propia transacción
 		context.getBean(OutboxRelay.class).relayPending();
 
@@ -103,10 +108,12 @@ class DddLabApplicationTests {
 	}
 
 	@Test
-	@DisplayName("El contexto tiene un único servicio detrás de los dos puertos de entrada y los dos consumidores de eventos")
+	@DisplayName("El contexto tiene un único servicio detrás de cada puerto de entrada y los dos consumidores de eventos")
 	void theContextWiresTheCoreFromConfig() {
-		assertThat(context.getBeansOfType(CheckingAccountCommands.class)).hasSize(1);
-		assertThat(context.getBean(CheckingAccountCommands.class)).isSameAs(context.getBean(CheckingAccountQueries.class));
+		assertThat(context.getBeansOfType(AccountOpeningCommands.class)).hasSize(1);
+		assertThat(context.getBeansOfType(CheckingAccountQueries.class)).hasSize(1);
+		assertThat(context.getBeansOfType(MoneyMovementCommands.class)).hasSize(1);
+		assertThat(context.getBeansOfType(SegmentReviewCommands.class)).hasSize(1);
 		assertThat(context.getBeansOfType(AuditLogListener.class)).hasSize(1);
 		assertThat(context.getBeansOfType(CustomerNotificationListener.class)).hasSize(1);
 	}

@@ -46,7 +46,8 @@ import com.dawnrock.ddd.adapter.in.SecuritySupport;
 import com.dawnrock.ddd.adapter.in.TestUsers;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
 
 /**
@@ -80,7 +81,10 @@ class ApiSecurityTests {
     private JwtEncoder encoder;
 
     @MockitoBean
-    private CheckingAccountCommands commands;
+    private AccountOpeningCommands commands;
+
+    @MockitoBean
+    private MoneyMovementCommands movements;
 
     @MockitoBean
     private CheckingAccountQueries queries;
@@ -156,7 +160,7 @@ class ApiSecurityTests {
                             .contentType(MediaType.APPLICATION_JSON).content(OPEN_BODY))
                     .andExpect(status().isForbidden());
             verify(queries).listAccounts(Caller.builder().username("ada").admin(false).build());
-            verifyNoInteractions(commands);
+            verifyNoInteractions(commands, movements);
         }
 
         @Test
@@ -166,7 +170,7 @@ class ApiSecurityTests {
                             .contentType(MediaType.APPLICATION_JSON).content(OPEN_BODY))
                     .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.title").value("Acceso denegado"));
-            verifyNoInteractions(commands);
+            verifyNoInteractions(commands, movements);
         }
     }
 

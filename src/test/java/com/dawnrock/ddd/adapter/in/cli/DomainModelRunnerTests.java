@@ -2,9 +2,7 @@ package com.dawnrock.ddd.adapter.in.cli;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.mockito.Mockito.mock;
 
-import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,31 +18,27 @@ import com.dawnrock.ddd.application.AccountDetails;
 import com.dawnrock.ddd.application.AccountOwnershipRepository;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.CallerDef;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
-import com.dawnrock.ddd.application.CheckingAccountService;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
+import com.dawnrock.ddd.application.CheckingAccountQueryService;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.TransactionSummary;
-import com.dawnrock.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
-import com.dawnrock.ddd.domain.model.DomainEventPublisher;
 import com.dawnrock.ddd.domain.model.CheckingAccountFactory;
-import com.dawnrock.ddd.domain.service.MoneyTransferService;
-import com.dawnrock.ddd.domain.service.SegmentReviewService;
+import com.dawnrock.ddd.support.ApplicationServicesFixture;
 
 @ExtendWith(OutputCaptureExtension.class)
 class DomainModelRunnerTests {
 
     private final AccountOwnershipRepository ownership = PersistenceTestAdapters.ownership();
-    private final CheckingAccountService service =
-            new CheckingAccountService(PersistenceTestAdapters.accounts(), ownership, mock(DomainEventPublisher.class),
-                    new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(),
-                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
-    /** El runner solo recibe el puerto de commands; el servicio concreto se usa aquí solo para consultar. */
-    private final CheckingAccountCommands commands = service;
+    private final ApplicationServicesFixture services = ApplicationServicesFixture.builder().ownership(ownership).build();
+    private final CheckingAccountQueryService service = services.queryService();
+    /** El runner solo recibe los puertos de entrada; el servicio concreto se usa aquí también para consultar. */
+    private final AccountOpeningCommands commands = services.accountOpeningService();
+    private final MoneyMovementCommands movements = services.moneyMovementService();
 
     @Test
     @DisplayName("Al arrancar abre tres cuentas de demostración con el caso de uso, una de ellas de alto patrimonio")
     void onStartupItOpensThreeDemoAccountsWithTheUseCase() {
-        new DomainModelRunner(commands, service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands, movements, service).run(new DefaultApplicationArguments());
 
         List<AccountSummary> accounts = service.listAccounts(CallerDef.system());
         assertThat(accounts).hasSize(3);
@@ -56,7 +50,7 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("Cada cuenta de demostración queda a nombre de su usuario: ada, grace y alan")
     void eachDemoAccountBelongsToItsUser() {
-        new DomainModelRunner(commands, service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands, movements, service).run(new DefaultApplicationArguments());
 
         assertThat(service.listAccounts(CallerDef.system()))
                 .extracting(AccountSummary::holderName, account -> ownership.ownerOf(account.id()).orElse(null))
@@ -69,12 +63,14 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("El segmento lo decide la agencia tributaria: sin ingresos verificados las tres cuentas son minoristas")
     void theTaxAgencyDecidesTheSegment() {
-        CheckingAccountService withoutIncomes = new CheckingAccountService(PersistenceTestAdapters.accounts(), ownership,
-                mock(DomainEventPublisher.class), new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), taxId -> Optional.empty()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(),
-                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
+        ApplicationServicesFixture withoutIncomesServices = ApplicationServicesFixture.builder()
+                .ownership(ownership)
+                .factory(new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), taxId -> Optional.empty()))
+                .build();
+        CheckingAccountQueryService withoutIncomes = withoutIncomesServices.queryService();
 
-        new DomainModelRunner(withoutIncomes, withoutIncomes).run(new DefaultApplicationArguments());
+        new DomainModelRunner(withoutIncomesServices.accountOpeningService(),
+                withoutIncomesServices.moneyMovementService(), withoutIncomes).run(new DefaultApplicationArguments());
 
         assertThat(withoutIncomes.listAccounts(CallerDef.system()))
                 .extracting(AccountSummary::segment).containsOnly("RETAIL");
@@ -83,7 +79,7 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("Las cuentas de demostración llevan un IBAN generado y distinto")
     void theDemoAccountsCarryAGeneratedIban() {
-        new DomainModelRunner(commands, service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands, movements, service).run(new DefaultApplicationArguments());
 
         assertThat(service.listAccounts(CallerDef.system())).extracting(AccountSummary::accountNumber)
                 .doesNotHaveDuplicates().allMatch(number -> number.startsWith("ES") && number.startsWith("99990001", 4));
@@ -92,7 +88,7 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("Deja una traza legible de cada apertura: IBAN generado, titular, segmento, saldo y propietario")
     void itLogsAReadableLineForEachOpening(CapturedOutput output) {
-        new DomainModelRunner(commands, service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands, movements, service).run(new DefaultApplicationArguments());
 
         assertThat(output)
                 .containsPattern("\\[demo\\] Abrir cuenta · ES\\d{22} · Ada Lovelace · Minorista · 1000\\.00 EUR · propietario ada")
@@ -103,7 +99,7 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("Termina con un resumen de cuántas cuentas de demostración ha abierto")
     void itEndsWithASummaryOfTheOpenedAccounts(CapturedOutput output) {
-        new DomainModelRunner(commands, service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands, movements, service).run(new DefaultApplicationArguments());
 
         assertThat(output).contains("[demo] 3 cuentas de demostración abiertas");
     }
@@ -120,7 +116,7 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("Tras abrir las cuentas, la demo ingresa en la de Ada y retira de la de Alan una vez con éxito y otra sin saldo")
     void afterOpeningTheAccountsTheDemoDepositsAndWithdraws() {
-        new DomainModelRunner(commands, service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands, movements, service).run(new DefaultApplicationArguments());
 
         assertThat(detailsOf("Ada Lovelace").transactions())
                 .extracting(TransactionSummary::type, TransactionSummary::status, t -> t.amount().toPlainString())
@@ -137,7 +133,7 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("Deja una traza de cada ingreso y retirada con el IBAN, el importe y su resultado")
     void itLogsEachDepositAndWithdrawal(CapturedOutput output) {
-        new DomainModelRunner(commands, service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands, movements, service).run(new DefaultApplicationArguments());
 
         assertThat(output)
                 .containsPattern("\\[demo\\] Ingresar · ES\\d{22} · 200\\.00 EUR · aprobado")
@@ -148,7 +144,7 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("La demo transfiere de Grace a Ada usando el IBAN generado de Ada")
     void theDemoTransfersFromGraceToAdaWithTheGeneratedIban() {
-        new DomainModelRunner(commands, service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands, movements, service).run(new DefaultApplicationArguments());
 
         assertThat(detailsOf("Grace Hopper").balance()).isEqualByComparingTo("4700.00");
         assertThat(detailsOf("Ada Lovelace").balance()).isEqualByComparingTo("1500.00");
@@ -157,7 +153,7 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("Deja una traza de la transferencia con los dos IBAN, el importe y su resultado")
     void itLogsTheTransfer(CapturedOutput output) {
-        new DomainModelRunner(commands, service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands, movements, service).run(new DefaultApplicationArguments());
 
         String adaIban = detailsOf("Ada Lovelace").accountNumber();
         String graceIban = detailsOf("Grace Hopper").accountNumber();
@@ -168,9 +164,9 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("Si ya hay cuentas, por ejemplo tras un reinicio con la base persistente, no vuelve a cargar la demo (#150)")
     void whenThereAreAlreadyAccountsTheDemoIsNotLoadedAgain(CapturedOutput output) {
-        new DomainModelRunner(commands, service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands, movements, service).run(new DefaultApplicationArguments());
 
-        new DomainModelRunner(commands, service).run(new DefaultApplicationArguments());
+        new DomainModelRunner(commands, movements, service).run(new DefaultApplicationArguments());
 
         assertThat(service.listAccounts(CallerDef.system())).hasSize(3);
         assertThat(detailsOf("Ada Lovelace").balance()).isEqualByComparingTo("1500.00");

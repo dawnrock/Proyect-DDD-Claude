@@ -19,7 +19,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.dawnrock.ddd.adapter.out.event.OutboxRelay;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.DepositCommand;
 import com.dawnrock.ddd.application.OpenAccountCommand;
 import com.dawnrock.ddd.domain.model.MoneyDeposited;
@@ -36,7 +37,10 @@ class OutboxDeliveryTests {
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
 
     @Autowired
-    private CheckingAccountCommands commands;
+    private AccountOpeningCommands commands;
+
+    @Autowired
+    private MoneyMovementCommands movements;
 
     @Autowired
     private OutboxRelay relay;
@@ -55,7 +59,7 @@ class OutboxDeliveryTests {
                 .ownerUsername("ada")
                 .build()).id();
 
-        assertThatNoException().isThrownBy(() -> commands.deposit(ADMIN,
+        assertThatNoException().isThrownBy(() -> movements.deposit(ADMIN,
                 DepositCommand.builder().accountId(accountId).amount(new BigDecimal("25")).build()));
 
         relay.relayPending();

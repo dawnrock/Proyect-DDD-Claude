@@ -2,6 +2,7 @@
 
 - **Issue:** [#5](https://github.com/dawnrock/Proyect-DDD-Claude/issues/5) · **Plan:** on the issue (removed from `docs/plans/`; in the git history)
 - **Status:** frozen at `9bd7290`
+- **Since #174 (application services split by use case):** on `Hexagonal`, opening belongs to `AccountOpeningCommands` (`AccountOpeningService`) and listing and detail to `CheckingAccountQueries` (`CheckingAccountQueryService`). `Monolithic` keeps the concrete `CheckingAccountService` described here.
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed with clarifications, merged by the lead)
 
 > **Superseded for opening accounts** by [`account-factory.md`](account-factory.md) (#18): the IBAN is generated and the segment is computed, so `accountNumber` and `segment` are no longer inputs of `OpenAccountCommand`, `OpenAccountRequest` or `OpenAccountForm`. Querying and listing below still apply.

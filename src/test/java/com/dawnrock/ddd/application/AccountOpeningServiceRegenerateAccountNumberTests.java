@@ -2,10 +2,8 @@ package com.dawnrock.ddd.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
-import java.time.Clock;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,39 +15,34 @@ import com.dawnrock.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.dawnrock.ddd.domain.model.AccountNumber;
 import com.dawnrock.ddd.domain.model.CheckingAccountFactory;
 import com.dawnrock.ddd.domain.model.CheckingAccountRepository;
-import com.dawnrock.ddd.domain.model.DomainEventPublisher;
-import com.dawnrock.ddd.domain.service.MoneyTransferService;
-import com.dawnrock.ddd.domain.service.SegmentReviewService;
 import com.dawnrock.ddd.support.TestAccounts;
+import com.dawnrock.ddd.support.ApplicationServicesFixture;
 
 /** El administrador sustituye el IBAN de una cuenta por otro que genera el banco (R32). */
-class CheckingAccountServiceRegenerateAccountNumberTests {
+class AccountOpeningServiceRegenerateAccountNumberTests {
 
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
     private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
 
     private CheckingAccountRepository accounts;
-    private CheckingAccountService service;
+    private CheckingAccountQueryService service;
+    private AccountOpeningCommands opening;
     private AccountSummary account;
 
     @BeforeEach
     void setUp() {
         accounts = PersistenceTestAdapters.accounts();
-        service = new CheckingAccountService(accounts, PersistenceTestAdapters.ownership(),
-                mock(DomainEventPublisher.class),
-                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(),
-                        TaxAgencyTestAdapters.incomeVerifier()),
-                new MoneyTransferService(), new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()),
-                Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(), PersistenceTestAdapters.customers(),
-                PersistenceTestAdapters.customerOwnership());
-        account = service.signUp(SignUpCommand.builder().fullName("Ada Lovelace").taxId("12345678Z")
+        ApplicationServicesFixture fixture = ApplicationServicesFixture.builder().accounts(accounts).build();
+        service = fixture.queryService();
+        opening = fixture.accountOpeningService();
+        account = opening.signUp(SignUpCommand.builder().fullName("Ada Lovelace").taxId("12345678Z")
                 .email("ada@example.com").username("ada").initialDeposit(new BigDecimal("1000")).build());
     }
 
     @Test
     @DisplayName("El administrador recibe el resumen con un IBAN nuevo de Mon-A Bank y la cuenta lo conserva")
     void theAdministratorGetsTheSummaryWithANewIban() {
-        AccountSummary regenerated = service.regenerateAccountNumber(ADMIN, account.id());
+        AccountSummary regenerated = opening.regenerateAccountNumber(ADMIN, account.id());
 
         assertThat(regenerated.id()).isEqualTo(account.id());
         assertThat(regenerated.accountNumber()).isNotEqualTo(account.accountNumber());
@@ -60,7 +53,7 @@ class CheckingAccountServiceRegenerateAccountNumberTests {
     @Test
     @DisplayName("El IBAN antiguo deja de resolverse y el nuevo se resuelve")
     void theOldIbanNoLongerResolvesAndTheNewOneDoes() {
-        AccountSummary regenerated = service.regenerateAccountNumber(ADMIN, account.id());
+        AccountSummary regenerated = opening.regenerateAccountNumber(ADMIN, account.id());
 
         assertThat(accounts.findByAccountNumber(new AccountNumber(account.accountNumber()))).isEmpty();
         assertThat(accounts.findByAccountNumber(new AccountNumber(regenerated.accountNumber())))
@@ -72,7 +65,7 @@ class CheckingAccountServiceRegenerateAccountNumberTests {
     void anAccountWithAnotherBanksIbanGetsAMonABankOne() {
         UUID id = accounts.save(TestAccounts.anAccount().initialDeposit("500.00").open()).id();
 
-        AccountSummary regenerated = service.regenerateAccountNumber(ADMIN, id);
+        AccountSummary regenerated = opening.regenerateAccountNumber(ADMIN, id);
 
         assertThat(new AccountNumber(regenerated.accountNumber()).isMonABank()).isTrue();
     }
@@ -81,7 +74,7 @@ class CheckingAccountServiceRegenerateAccountNumberTests {
     @DisplayName("Un cliente no puede regenerar el IBAN y la cuenta no cambia")
     void aCustomerCannotRegenerateTheIban() {
         assertThatExceptionOfType(ForbiddenOperationException.class)
-                .isThrownBy(() -> service.regenerateAccountNumber(ADA, account.id()));
+                .isThrownBy(() -> opening.regenerateAccountNumber(ADA, account.id()));
 
         assertThat(service.findAccount(ADA, account.id()).accountNumber()).isEqualTo(account.accountNumber());
     }
@@ -92,7 +85,7 @@ class CheckingAccountServiceRegenerateAccountNumberTests {
         UUID unknown = UUID.randomUUID();
 
         assertThatExceptionOfType(AccountNotFoundException.class)
-                .isThrownBy(() -> service.regenerateAccountNumber(ADMIN, unknown));
+                .isThrownBy(() -> opening.regenerateAccountNumber(ADMIN, unknown));
     }
 
     @Test
@@ -100,13 +93,11 @@ class CheckingAccountServiceRegenerateAccountNumberTests {
     void whenTheGeneratedNumberIsAlreadyUsedTheAccountKeepsItsOwn() {
         UUID id = accounts.save(TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open()).id();
         AccountNumber used = new AccountNumber("ES9121000418450200051332");
-        CheckingAccountService faulty = new CheckingAccountService(accounts, PersistenceTestAdapters.ownership(),
-                mock(DomainEventPublisher.class),
-                new CheckingAccountFactory(() -> new AccountNumber(account.accountNumber()),
-                        TaxAgencyTestAdapters.incomeVerifier()),
-                new MoneyTransferService(), new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()),
-                Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(), PersistenceTestAdapters.customers(),
-                PersistenceTestAdapters.customerOwnership());
+        AccountOpeningService faulty = ApplicationServicesFixture.builder()
+                .accounts(accounts)
+                .factory(new CheckingAccountFactory(() -> new AccountNumber(account.accountNumber()), TaxAgencyTestAdapters.incomeVerifier()))
+                .build()
+                .accountOpeningService();
 
         assertThatExceptionOfType(com.dawnrock.ddd.domain.model.DuplicateAccountNumberException.class)
                 .isThrownBy(() -> faulty.regenerateAccountNumber(ADMIN, id));

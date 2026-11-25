@@ -11,7 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.SegmentReviewCommands;
 
 @ExtendWith(OutputCaptureExtension.class)
 class SegmentReviewSchedulerTests {
@@ -19,7 +19,7 @@ class SegmentReviewSchedulerTests {
     @Test
     @DisplayName("La tarea programada pide la revisión de segmentos por el puerto de entrada y anota el resultado")
     void theScheduledTaskRequestsTheReviewThroughTheInputPort(CapturedOutput output) {
-        CheckingAccountCommands commands = mock(CheckingAccountCommands.class);
+        SegmentReviewCommands commands = mock(SegmentReviewCommands.class);
         given(commands.reviewSegments()).willReturn(2);
 
         new SegmentReviewScheduler(commands).reviewSegments();

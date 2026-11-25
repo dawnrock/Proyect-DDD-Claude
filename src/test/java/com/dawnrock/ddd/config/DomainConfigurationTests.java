@@ -9,8 +9,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
+import com.dawnrock.ddd.application.SegmentReviewCommands;
 import com.dawnrock.ddd.application.listener.AuditLogListener;
 import com.dawnrock.ddd.application.listener.CustomerNotificationListener;
 import com.dawnrock.ddd.domain.model.AccountNumber;
@@ -53,18 +55,48 @@ class DomainConfigurationTests {
     }
 
     @Test
-    @DisplayName("Construye el servicio de aplicación, que ofrece los dos puertos de entrada")
-    void buildsTheApplicationServiceWithBothInputPorts() {
+    @DisplayName("Construye la apertura de cuentas, que ofrece su puerto de entrada")
+    void buildsTheAccountOpeningWithItsInputPort() {
         CheckingAccountFactory factory = configuration.checkingAccountFactory(
                 PersistenceTestAdapters.accountNumbers(), taxId -> Optional.empty());
 
-        Object service = configuration.checkingAccountService(PersistenceTestAdapters.accounts(),
+        Object service = configuration.accountOpeningService(PersistenceTestAdapters.accounts(),
                 PersistenceTestAdapters.ownership(), mock(DomainEventPublisher.class), factory,
-                configuration.moneyTransferService(), configuration.segmentReviewService(taxId -> Optional.empty()),
-                configuration.clock(), PersistenceTestAdapters.unitOfWork(), PersistenceTestAdapters.customers(),
+                PersistenceTestAdapters.unitOfWork(), PersistenceTestAdapters.customers(),
                 PersistenceTestAdapters.customerOwnership());
 
-        assertThat(service).isInstanceOf(CheckingAccountCommands.class).isInstanceOf(CheckingAccountQueries.class);
+        assertThat(service).isInstanceOf(AccountOpeningCommands.class);
+    }
+
+    @Test
+    @DisplayName("Construye las consultas de cuentas, que ofrecen su puerto de entrada")
+    void buildsTheAccountQueriesWithTheirInputPort() {
+        Object service = configuration.checkingAccountQueryService(PersistenceTestAdapters.accounts(),
+                PersistenceTestAdapters.ownership(), PersistenceTestAdapters.unitOfWork(),
+                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
+
+        assertThat(service).isInstanceOf(CheckingAccountQueries.class);
+    }
+
+    @Test
+    @DisplayName("Construye los movimientos de dinero, que ofrecen su puerto de entrada")
+    void buildsTheMoneyMovementsWithTheirInputPort() {
+        Object service = configuration.moneyMovementService(PersistenceTestAdapters.accounts(),
+                PersistenceTestAdapters.ownership(), mock(DomainEventPublisher.class),
+                configuration.moneyTransferService(), configuration.segmentReviewService(taxId -> Optional.empty()),
+                configuration.clock(), PersistenceTestAdapters.unitOfWork());
+
+        assertThat(service).isInstanceOf(MoneyMovementCommands.class);
+    }
+
+    @Test
+    @DisplayName("Construye la revisión periódica de segmentos, que ofrece su puerto de entrada")
+    void buildsTheSegmentReviewWithItsInputPort() {
+        Object service = configuration.accountSegmentReviewService(PersistenceTestAdapters.accounts(),
+                mock(DomainEventPublisher.class), configuration.segmentReviewService(taxId -> Optional.empty()),
+                configuration.clock(), PersistenceTestAdapters.unitOfWork());
+
+        assertThat(service).isInstanceOf(SegmentReviewCommands.class);
     }
 
     @Test

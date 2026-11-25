@@ -16,6 +16,7 @@ import static com.tngtech.archunit.library.Architectures.onionArchitecture;
 
 import java.util.List;
 
+import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ImportOption;
@@ -28,7 +29,6 @@ import com.tngtech.archunit.lang.SimpleConditionEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 
-import com.dawnrock.ddd.application.CheckingAccountService;
 import com.dawnrock.ddd.domain.model.DomainException;
 
 /**
@@ -65,6 +65,13 @@ class HexagonalArchitectureTests {
                 .ignoreDependency(resideInAnyPackage(ADAPTER_IN_SUPPORT, "com.dawnrock.ddd.config.."), alwaysTrue())
                 .check(classes);
     }
+
+    /** Clases (no interfaces) que implementan un puerto de entrada: un {@code *Commands} o {@code *Queries}. */
+    private static final DescribedPredicate<JavaClass> INPUT_PORT_IMPLEMENTATIONS = describe(
+            "implementan un puerto de entrada",
+            javaClass -> !javaClass.isInterface() && javaClass.getAllRawInterfaces().stream().anyMatch(port ->
+                    port.getPackageName().startsWith("com.dawnrock.ddd.application")
+                            && (port.getSimpleName().endsWith("Commands") || port.getSimpleName().endsWith("Queries"))));
 
     /** Donde viven los puertos: los de salida en {@code domain.model}; el de propiedad, en {@code application}. */
     private static final List<String> PORT_PACKAGES =
@@ -109,15 +116,29 @@ class HexagonalArchitectureTests {
     }
 
     /**
-     * #16 y #19: los adaptadores de entrada (REST, web y CLI) usan los puertos {@code CheckingAccountCommands} y
-     * {@code CheckingAccountQueries}, nunca la clase que los implementa. Se nombra por clase para que un renombrado
-     * rompa la compilación en lugar de dejar la regla vacía.
+     * #16, #19 y #174: los adaptadores de entrada (y cualquiera fuera de {@code application}) usan los puertos de
+     * entrada, nunca el servicio que los implementa; solo {@code config} lo construye. Se busca por lo que hace la clase
+     * (implementar un puerto de entrada), no por su nombre, para que un servicio nuevo quede cubierto sin tocar la regla.
      */
     @ArchTest
-    static void inputAdaptersOnlyKnowTheInputPorts(JavaClasses classes) {
+    static void onlyConfigKnowsTheServicesBehindTheInputPorts(JavaClasses classes) {
         noClasses()
-                .that().resideInAPackage("..adapter.in..")
-                .should().dependOnClassesThat().areAssignableTo(CheckingAccountService.class)
+                .that().resideOutsideOfPackages("..application..", "..config..")
+                .should().dependOnClassesThat(INPUT_PORT_IMPLEMENTATIONS)
+                .check(classes);
+    }
+
+    /**
+     * Los servicios que implementan los puertos de entrada viven en {@code application} y se llaman {@code *Service}.
+     * Como ArchUnit falla si la regla no encuentra ninguna clase, también asegura que el predicado de la regla anterior
+     * no se ha quedado vacío.
+     */
+    @ArchTest
+    static void inputPortImplementationsAreApplicationServices(JavaClasses classes) {
+        classes()
+                .that(INPUT_PORT_IMPLEMENTATIONS)
+                .should().resideInAPackage("..application..")
+                .andShould().haveSimpleNameEndingWith("Service")
                 .check(classes);
     }
 

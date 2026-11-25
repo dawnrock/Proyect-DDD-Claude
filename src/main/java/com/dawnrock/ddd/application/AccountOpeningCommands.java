@@ -3,11 +3,12 @@ package com.dawnrock.ddd.application;
 import java.util.UUID;
 
 /**
- * Puerto de entrada de los casos de uso que cambian cuentas: abrir, ingresar, retirar y transferir. Los adaptadores de
- * entrada (REST, web, demo) dependen de este puerto y no de la clase que lo implementa ({@code CheckingAccountService}).
- * Cada caso de uso recibe quién lo pide ({@link Caller}) y aplica la propiedad de las cuentas (ADR 0008).
+ * Puerto de entrada de los casos de uso que abren cuentas: apertura del administrador, alta de clientes, otra cuenta
+ * del cliente y regeneración del IBAN (#174). Los adaptadores de entrada (REST, web, demo, alta de clientes) dependen
+ * de este puerto y no de la clase que lo implementa ({@code AccountOpeningService}). Cada caso de uso recibe quién lo
+ * pide ({@link Caller}) y aplica la propiedad de las cuentas (ADR 0008).
  */
-public interface CheckingAccountCommands {
+public interface AccountOpeningCommands {
 
     /**
      * Abre una cuenta con su depósito inicial para {@code command.ownerUsername()}, que será su propietario. Solo un
@@ -20,36 +21,6 @@ public interface CheckingAccountCommands {
      * @throws com.dawnrock.ddd.domain.model.CurrencyMismatchException si el depósito no está en euros
      */
     AccountSummary openAccount(Caller caller, OpenAccountCommand command);
-
-    /**
-     * Ingresa un importe en la cuenta y la guarda. Contrato: {@code docs/contracts/deposits-withdrawals.md}.
-     *
-     * @throws AccountNotFoundException si la cuenta no existe o no es de quien lo pide (y no es administrador)
-     * @throws com.dawnrock.ddd.domain.model.CurrencyMismatchException si el importe no está en la divisa de la cuenta
-     */
-    TransactionSummary deposit(Caller caller, DepositCommand command);
-
-    /**
-     * Intenta retirar un importe de la cuenta y la guarda. Una retirada que dejaría la cuenta por debajo de lo
-     * permitido no es un error: se devuelve el movimiento con estado {@code REJECTED} y el saldo no cambia.
-     *
-     * @throws AccountNotFoundException si la cuenta no existe o no es de quien lo pide (y no es administrador)
-     * @throws com.dawnrock.ddd.domain.model.CurrencyMismatchException si el importe no está en la divisa de la cuenta
-     */
-    TransactionSummary withdraw(Caller caller, WithdrawCommand command);
-
-    /**
-     * Transfiere desde una cuenta de quien lo pide a cualquier cuenta existente, indicada por su número
-     * ({@code command.targetAccountNumber()}, que se normaliza como {@code AccountNumber}), y guarda las dos. Una
-     * transferencia que la cuenta de origen no permite no es un error: se devuelve con estado {@code REJECTED} y ningún
-     * saldo cambia. Contratos: {@code docs/contracts/money-transfers.md} y {@code login-roles.md}.
-     *
-     * @throws AccountNotFoundException si el origen no existe o no es de quien lo pide (y no es administrador)
-     * @throws TargetAccountNotFoundException si no existe ninguna cuenta con el número de destino
-     * @throws com.dawnrock.ddd.domain.model.SameAccountTransferException si origen y destino son la misma cuenta
-     * @throws com.dawnrock.ddd.domain.model.CurrencyMismatchException si el importe no está en la divisa de las cuentas
-     */
-    TransferSummary transfer(Caller caller, TransferCommand command);
 
     /**
      * Da de alta a un cliente nuevo de Mon-A Bank y le abre su primera cuenta, a nombre de {@code command.username()},
@@ -83,13 +54,4 @@ public interface CheckingAccountCommands {
      * @throws AccountNotFoundException si la cuenta no existe
      */
     AccountSummary regenerateAccountNumber(Caller caller, UUID id);
-
-    /**
-     * Revisa el segmento de todas las cuentas a las que les toca: vuelve a verificar los ingresos del titular y lo
-     * devuelve a minorista si ya no le corresponde el alto patrimonio. Es un proceso interno, sin {@link Caller}: lo
-     * dispara la tarea programada.
-     *
-     * @return cuántos titulares han vuelto a minorista
-     */
-    int reviewSegments();
 }

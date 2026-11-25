@@ -33,7 +33,7 @@ import com.dawnrock.ddd.adapter.in.SecuritySupport;
 import com.dawnrock.ddd.adapter.in.TestUsers;
 import com.dawnrock.ddd.application.AccountNotFoundException;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.TargetAccountNotFoundException;
 import com.dawnrock.ddd.application.TransferCommand;
 import com.dawnrock.ddd.application.TransferSummary;
@@ -58,7 +58,7 @@ class TransferControllerTests {
     private MockMvc mvc;
 
     @MockitoBean
-    private CheckingAccountCommands commands;
+    private MoneyMovementCommands movements;
 
     private static TransferSummary transfer(String status) {
         return TransferSummary.builder()
@@ -76,13 +76,13 @@ class TransferControllerTests {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.title").value("No autenticado"));
 
-        verifyNoInteractions(commands);
+        verifyNoInteractions(movements);
     }
 
     @Test
     @DisplayName("Una transferencia aprobada responde 201 con la transferencia APPROVED y sin Location")
     void anApprovedTransferResponds201WithTheApprovedTransferAndNoLocation() throws Exception {
-        given(commands.transfer(any(Caller.class), any())).willReturn(transfer("APPROVED"));
+        given(movements.transfer(any(Caller.class), any())).willReturn(transfer("APPROVED"));
 
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(BODY))
                 .andExpect(status().isCreated())
@@ -97,7 +97,7 @@ class TransferControllerTests {
                 .andExpect(jsonPath("$.status").value("APPROVED"));
 
         ArgumentCaptor<TransferCommand> captor = ArgumentCaptor.forClass(TransferCommand.class);
-        verify(commands).transfer(any(Caller.class), captor.capture());
+        verify(movements).transfer(any(Caller.class), captor.capture());
         assertThat(captor.getValue().sourceAccountId()).isEqualTo(SOURCE_ID);
         assertThat(captor.getValue().targetAccountNumber()).isEqualTo(TARGET_IBAN);
         assertThat(captor.getValue().amount()).isEqualByComparingTo("25.00");
@@ -107,7 +107,7 @@ class TransferControllerTests {
     @Test
     @DisplayName("Una transferencia rechazada no es un error: responde 201 con la transferencia REJECTED")
     void aRejectedTransferResponds201WithTheRejectedTransfer() throws Exception {
-        given(commands.transfer(any(Caller.class), any())).willReturn(transfer("REJECTED"));
+        given(movements.transfer(any(Caller.class), any())).willReturn(transfer("REJECTED"));
 
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(BODY))
                 .andExpect(status().isCreated())
@@ -117,7 +117,7 @@ class TransferControllerTests {
     @Test
     @DisplayName("Sin divisa se usa EUR por defecto")
     void withoutCurrencyEurIsUsedByDefault() throws Exception {
-        given(commands.transfer(any(Caller.class), any())).willReturn(transfer("APPROVED"));
+        given(movements.transfer(any(Caller.class), any())).willReturn(transfer("APPROVED"));
         String body = """
                 {"sourceAccountId": "%s", "targetAccountNumber": "%s", "amount": 25.00}"""
                 .formatted(SOURCE_ID, TARGET_IBAN);
@@ -126,7 +126,7 @@ class TransferControllerTests {
                 .andExpect(status().isCreated());
 
         ArgumentCaptor<TransferCommand> captor = ArgumentCaptor.forClass(TransferCommand.class);
-        verify(commands).transfer(any(Caller.class), captor.capture());
+        verify(movements).transfer(any(Caller.class), captor.capture());
         assertThat(captor.getValue().currency()).isEqualTo("EUR");
     }
 
@@ -141,7 +141,7 @@ class TransferControllerTests {
                 .andExpect(jsonPath("$.title").value("Petición no válida"))
                 .andExpect(jsonPath("$.errors.amount").exists());
 
-        verifyNoInteractions(commands);
+        verifyNoInteractions(movements);
     }
 
     @ParameterizedTest(name = "cuerpo {0}")
@@ -164,7 +164,7 @@ class TransferControllerTests {
                 .andExpect(jsonPath("$.title").value("Petición no válida"))
                 .andExpect(jsonPath("$.errors").isMap());
 
-        verifyNoInteractions(commands);
+        verifyNoInteractions(movements);
     }
 
     @ParameterizedTest(name = "IBAN {0}")
@@ -180,7 +180,7 @@ class TransferControllerTests {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.targetAccountNumber").exists());
 
-        verifyNoInteractions(commands);
+        verifyNoInteractions(movements);
     }
 
     @Test
@@ -191,13 +191,13 @@ class TransferControllerTests {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.targetAccountNumber").exists());
 
-        verifyNoInteractions(commands);
+        verifyNoInteractions(movements);
     }
 
     @Test
     @DisplayName("Un IBAN con espacios y minúsculas se acepta y llega tal como se escribió al command")
     void anIbanWithSpacesAndLowerCaseIsAccepted() throws Exception {
-        given(commands.transfer(any(Caller.class), any())).willReturn(transfer("APPROVED"));
+        given(movements.transfer(any(Caller.class), any())).willReturn(transfer("APPROVED"));
         String body = """
                 {"sourceAccountId": "%s", "targetAccountNumber": " es79 2100 0813 6101 2345 6789 ", "amount": 10}"""
                 .formatted(SOURCE_ID);
@@ -206,7 +206,7 @@ class TransferControllerTests {
                 .andExpect(status().isCreated());
 
         ArgumentCaptor<TransferCommand> captor = ArgumentCaptor.forClass(TransferCommand.class);
-        verify(commands).transfer(any(Caller.class), captor.capture());
+        verify(movements).transfer(any(Caller.class), captor.capture());
         assertThat(captor.getValue().targetAccountNumber()).isEqualToIgnoringWhitespace("es79210008136101234567 89");
     }
 
@@ -215,19 +215,19 @@ class TransferControllerTests {
     @DisplayName("Un usuario puede transferir: el servicio recibe su Caller de usuario")
     void aUserCanTransferWithTheirCaller() throws Exception {
         Caller ada = Caller.builder().username("ada").admin(false).build();
-        given(commands.transfer(any(Caller.class), any())).willReturn(transfer("APPROVED"));
+        given(movements.transfer(any(Caller.class), any())).willReturn(transfer("APPROVED"));
 
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(BODY))
                 .andExpect(status().isCreated());
 
-        verify(commands).transfer(org.mockito.ArgumentMatchers.eq(ada), any());
+        verify(movements).transfer(org.mockito.ArgumentMatchers.eq(ada), any());
     }
 
     @Test
     @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("Una cuenta de origen ajena responde 404 Recurso inexistente")
     void aForeignSourceAccountResponds404() throws Exception {
-        given(commands.transfer(any(Caller.class), any())).willThrow(new AccountNotFoundException(SOURCE_ID));
+        given(movements.transfer(any(Caller.class), any())).willThrow(new AccountNotFoundException(SOURCE_ID));
 
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(BODY))
                 .andExpect(status().isNotFound())
@@ -237,7 +237,7 @@ class TransferControllerTests {
     @Test
     @DisplayName("Un IBAN de destino inexistente responde 404 Recurso inexistente")
     void aMissingTargetIbanResponds404() throws Exception {
-        given(commands.transfer(any(Caller.class), any())).willThrow(new TargetAccountNotFoundException(TARGET_IBAN));
+        given(movements.transfer(any(Caller.class), any())).willThrow(new TargetAccountNotFoundException(TARGET_IBAN));
 
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(BODY))
                 .andExpect(status().isNotFound())
@@ -248,7 +248,7 @@ class TransferControllerTests {
     @Test
     @DisplayName("Una cuenta desconocida responde 404 Recurso inexistente")
     void anUnknownAccountResponds404() throws Exception {
-        given(commands.transfer(any(Caller.class), any())).willThrow(new AccountNotFoundException(TARGET_ID));
+        given(movements.transfer(any(Caller.class), any())).willThrow(new AccountNotFoundException(TARGET_ID));
 
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(BODY))
                 .andExpect(status().isNotFound())
@@ -258,7 +258,7 @@ class TransferControllerTests {
     @Test
     @DisplayName("Transferir a la misma cuenta responde 422 Regla de negocio incumplida")
     void transferringToTheSameAccountResponds422() throws Exception {
-        given(commands.transfer(any(Caller.class), any()))
+        given(movements.transfer(any(Caller.class), any()))
                 .willThrow(new SameAccountTransferException(new AccountNumber("ES9121000418450200051332")));
 
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(BODY))
@@ -269,7 +269,7 @@ class TransferControllerTests {
     @Test
     @DisplayName("Una divisa distinta a la de las cuentas responde 422 Regla de negocio incumplida")
     void aCurrencyDifferentFromTheAccountsResponds422() throws Exception {
-        given(commands.transfer(any(Caller.class), any())).willThrow(
+        given(movements.transfer(any(Caller.class), any())).willThrow(
                 new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD")));
 
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(BODY))

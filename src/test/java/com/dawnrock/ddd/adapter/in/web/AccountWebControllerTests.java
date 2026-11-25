@@ -59,7 +59,8 @@ import com.dawnrock.ddd.application.TransferSummary;
 import com.dawnrock.ddd.application.WithdrawCommand;
 import com.dawnrock.ddd.domain.model.CurrencyMismatchException;
 import com.dawnrock.ddd.application.TransactionSummary;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
 import com.dawnrock.ddd.application.OpenAccountCommand;
 import com.dawnrock.ddd.domain.model.AccountNumber;
@@ -82,7 +83,10 @@ class AccountWebControllerTests {
     }
 
     @MockitoBean
-    private CheckingAccountCommands commands;
+    private AccountOpeningCommands commands;
+
+    @MockitoBean
+    private MoneyMovementCommands movements;
 
     @MockitoBean
     private CheckingAccountQueries queries;
@@ -219,7 +223,7 @@ class AccountWebControllerTests {
         @WithMockUser(username = "ada", roles = "USER")
         @DisplayName("Un usuario que ingresa en una cuenta ajena recibe la página 404")
         void aUserDepositingIntoAnotherUsersAccountGetsThe404Page() throws Exception {
-            when(commands.deposit(eq(ADA), any())).thenThrow(new AccountNotFoundException(FOREIGN_ID));
+            when(movements.deposit(eq(ADA), any())).thenThrow(new AccountNotFoundException(FOREIGN_ID));
 
             mvc.perform(post("/accounts/" + FOREIGN_ID + "/deposits").param("amount", "10.00").param("currency", "EUR"))
                     .andExpect(status().isNotFound())
@@ -255,7 +259,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Una operación que el servicio prohíbe por el rol (403) se muestra con la página 403")
         void anOperationForbiddenByTheRoleIsShownWithThe403Page() throws Exception {
-            when(commands.deposit(any(Caller.class), any())).thenThrow(new ForbiddenOperationException("abrir cuentas"));
+            when(movements.deposit(any(Caller.class), any())).thenThrow(new ForbiddenOperationException("abrir cuentas"));
 
             mvc.perform(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "10.00").param("currency", "EUR"))
                     .andExpect(status().isForbidden())
@@ -608,14 +612,14 @@ class AccountWebControllerTests {
         @DisplayName("Un ingreso válido llama al servicio con el comando esperado y redirige al detalle con un mensaje")
         void aValidDepositCallsTheServiceWithTheExpectedCommandAndRedirectsWithAMessage()
                 throws Exception {
-            when(commands.deposit(any(Caller.class), any())).thenReturn(transaction("DEPOSIT", "50.00", "APPROVED"));
+            when(movements.deposit(any(Caller.class), any())).thenReturn(transaction("DEPOSIT", "50.00", "APPROVED"));
 
             mvc.perform(ingresoDe("50.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
                     .andExpect(flash().attribute("message", "Ingreso de 50,00 € aprobado"));
 
-            verify(commands).deposit(ADMIN, DepositCommand.builder()
+            verify(movements).deposit(ADMIN, DepositCommand.builder()
                     .accountId(ACCOUNT_ID)
                     .amount(new BigDecimal("50.00"))
                     .currency("EUR")
@@ -637,7 +641,7 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("El importe debe ser positivo")))
                     .andExpect(content().string(containsString("ES1234567890123456789012")));
 
-            verify(commands, never()).deposit(any(Caller.class), any());
+            verify(movements, never()).deposit(any(Caller.class), any());
         }
 
         @Test
@@ -649,7 +653,7 @@ class AccountWebControllerTests {
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("El importe es obligatorio")));
 
-            verify(commands, never()).deposit(any(Caller.class), any());
+            verify(movements, never()).deposit(any(Caller.class), any());
         }
 
         @Test
@@ -657,7 +661,7 @@ class AccountWebControllerTests {
         void anotherCurrencyReturnsToTheDetailsWithTheDomainMessageAndKeepsTheAmount() throws Exception {
             var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD"));
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
-            when(commands.deposit(any(Caller.class), any())).thenThrow(error);
+            when(movements.deposit(any(Caller.class), any())).thenThrow(error);
 
             mvc.perform(ingresoDe("75.50", "USD"))
                     .andExpect(status().isOk())
@@ -683,13 +687,13 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString(message)))
                     .andExpect(content().string(containsString(amount)));
 
-            verify(commands, never()).deposit(any(Caller.class), any());
+            verify(movements, never()).deposit(any(Caller.class), any());
         }
 
         @Test
         @DisplayName("Un ingreso en una cuenta desconocida devuelve la página 404")
         void aDepositIntoAnUnknownAccountReturnsThe404Page() throws Exception {
-            when(commands.deposit(any(Caller.class), any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
+            when(movements.deposit(any(Caller.class), any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
 
             mvc.perform(ingresoDe("10.00", "EUR"))
                     .andExpect(status().isNotFound())
@@ -709,7 +713,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Un ingreso aprobado responde con el panel y el mensaje en el modelo, sin redirigir ni usar flash")
         void anApprovedDepositRespondsWithThePanelAndTheMessage() throws Exception {
-            when(commands.deposit(any(Caller.class), any())).thenReturn(transaction("DEPOSIT", "50.00", "APPROVED"));
+            when(movements.deposit(any(Caller.class), any())).thenReturn(transaction("DEPOSIT", "50.00", "APPROVED"));
 
             mvc.perform(htmx(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "50.00").param("currency", "EUR")))
                     .andExpect(status().isOk())
@@ -731,14 +735,14 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("<details id=\"deposit-action\" open=\"open\">")))
                     .andExpect(content().string(containsString("class=\"invalid-feedback\"")));
 
-            verifyNoInteractions(commands);
+            verifyNoInteractions(commands, movements);
         }
 
         @Test
         @DisplayName("Un error del dominio responde con el panel y el mensaje del dominio en el formulario")
         void aDomainErrorRespondsWithThePanelAndItsMessage() throws Exception {
             var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD"));
-            when(commands.deposit(any(Caller.class), any())).thenThrow(error);
+            when(movements.deposit(any(Caller.class), any())).thenThrow(error);
 
             mvc.perform(htmx(post("/accounts/" + ACCOUNT_ID + "/deposits").param("amount", "10.00").param("currency", "USD")))
                     .andExpect(status().isOk())
@@ -769,7 +773,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Una retirada aprobada redirige al detalle con un mensaje de éxito")
         void anApprovedWithdrawalRedirectsToTheDetailsWithASuccessMessage() throws Exception {
-            when(commands.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "30.00", "APPROVED"));
+            when(movements.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "30.00", "APPROVED"));
 
             mvc.perform(retiradaDe("30.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
@@ -777,7 +781,7 @@ class AccountWebControllerTests {
                     .andExpect(flash().attribute("message", "Retirada de 30,00 € aprobada"))
                     .andExpect(flash().attributeCount(1));
 
-            verify(commands).withdraw(ADMIN, WithdrawCommand.builder()
+            verify(movements).withdraw(ADMIN, WithdrawCommand.builder()
                     .accountId(ACCOUNT_ID)
                     .amount(new BigDecimal("30.00"))
                     .currency("EUR")
@@ -788,7 +792,7 @@ class AccountWebControllerTests {
         @DisplayName("Una retirada rechazada redirige al detalle con un aviso de rechazo distinto del de éxito")
         void aRejectedWithdrawalRedirectsWithARejectionNoticeDifferentFromSuccess()
                 throws Exception {
-            when(commands.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "500.00", "REJECTED"));
+            when(movements.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "500.00", "REJECTED"));
 
             mvc.perform(retiradaDe("500.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
@@ -822,7 +826,7 @@ class AccountWebControllerTests {
                     .andExpect(model().attributeHasNoErrors("depositForm"))
                     .andExpect(content().string(containsString("El importe debe ser positivo")));
 
-            verify(commands, never()).withdraw(any(Caller.class), any());
+            verify(movements, never()).withdraw(any(Caller.class), any());
         }
 
         @Test
@@ -830,7 +834,7 @@ class AccountWebControllerTests {
         void anotherCurrencyReturnsToTheDetailsWithTheDomainMessageAndKeepsTheAmount() throws Exception {
             var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("GBP"));
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
-            when(commands.withdraw(any(Caller.class), any())).thenThrow(error);
+            when(movements.withdraw(any(Caller.class), any())).thenThrow(error);
 
             mvc.perform(retiradaDe("20.25", "GBP"))
                     .andExpect(status().isOk())
@@ -856,13 +860,13 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString(message)))
                     .andExpect(content().string(containsString(amount)));
 
-            verify(commands, never()).withdraw(any(Caller.class), any());
+            verify(movements, never()).withdraw(any(Caller.class), any());
         }
 
         @Test
         @DisplayName("Una retirada en una cuenta desconocida devuelve la página 404")
         void aWithdrawalFromAnUnknownAccountReturnsThe404Page() throws Exception {
-            when(commands.withdraw(any(Caller.class), any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
+            when(movements.withdraw(any(Caller.class), any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
 
             mvc.perform(retiradaDe("10.00", "EUR"))
                     .andExpect(status().isNotFound())
@@ -890,7 +894,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Una retirada aprobada responde con el panel y el mensaje de éxito")
         void anApprovedWithdrawalRespondsWithThePanelAndTheMessage() throws Exception {
-            when(commands.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "30.00", "APPROVED"));
+            when(movements.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "30.00", "APPROVED"));
 
             mvc.perform(retirada("30.00"))
                     .andExpect(status().isOk())
@@ -902,7 +906,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Una retirada rechazada responde con el panel y el aviso de advertencia")
         void aRejectedWithdrawalRespondsWithThePanelAndTheNotice() throws Exception {
-            when(commands.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "500.00", "REJECTED"));
+            when(movements.withdraw(any(Caller.class), any())).thenReturn(transaction("WITHDRAWAL", "500.00", "REJECTED"));
 
             mvc.perform(retirada("500.00"))
                     .andExpect(status().isOk())
@@ -920,7 +924,7 @@ class AccountWebControllerTests {
                     .andExpect(view().name("accounts/detail :: panel"))
                     .andExpect(content().string(containsString("<details id=\"withdrawal-action\" open=\"open\">")));
 
-            verifyNoInteractions(commands);
+            verifyNoInteractions(commands, movements);
         }
     }
 
@@ -992,7 +996,7 @@ class AccountWebControllerTests {
         @DisplayName("Una transferencia a un IBAN escrito llama al servicio con el comando esperado y redirige con un mensaje")
         void aTransferToATypedIbanCallsTheServiceWithTheExpectedCommand()
                 throws Exception {
-            when(commands.transfer(any(Caller.class), any())).thenReturn(transfer("25.00", "APPROVED"));
+            when(movements.transfer(any(Caller.class), any())).thenReturn(transfer("25.00", "APPROVED"));
 
             mvc.perform(transferenciaDe("es98 7654 3210 9876 5432 1098", "25.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
@@ -1001,7 +1005,7 @@ class AccountWebControllerTests {
                             "Transferencia de 25,00 € a ES98\u00A0••••\u00A01098 aprobada"))
                     .andExpect(flash().attributeCount(1));
 
-            verify(commands).transfer(ADMIN, TransferCommand.builder()
+            verify(movements).transfer(ADMIN, TransferCommand.builder()
                     .sourceAccountId(ACCOUNT_ID)
                     .targetAccountNumber("es98 7654 3210 9876 5432 1098")
                     .amount(new BigDecimal("25.00"))
@@ -1013,19 +1017,19 @@ class AccountWebControllerTests {
         @WithMockUser(username = "ada", roles = "USER")
         @DisplayName("Un usuario transfiere desde su cuenta: el servicio recibe a ada como usuario")
         void aUserTransfersFromTheirAccount() throws Exception {
-            when(commands.transfer(eq(ADA), any())).thenReturn(transfer("25.00", "APPROVED"));
+            when(movements.transfer(eq(ADA), any())).thenReturn(transfer("25.00", "APPROVED"));
 
             mvc.perform(transferenciaDe(TARGET_IBAN, "25.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID));
 
-            verify(commands).transfer(eq(ADA), any());
+            verify(movements).transfer(eq(ADA), any());
         }
 
         @Test
         @DisplayName("Una transferencia rechazada redirige con un aviso de rechazo distinto del de éxito")
         void aRejectedTransferRedirectsWithARejectionNoticeDifferentFromSuccess() throws Exception {
-            when(commands.transfer(any(Caller.class), any())).thenReturn(transfer("900.00", "REJECTED"));
+            when(movements.transfer(any(Caller.class), any())).thenReturn(transfer("900.00", "REJECTED"));
 
             mvc.perform(transferenciaDe(TARGET_IBAN, "900.00", "EUR"))
                     .andExpect(status().is3xxRedirection())
@@ -1039,7 +1043,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Una divisa vacía se trata como el euro por defecto")
         void anEmptyCurrencyIsTreatedAsTheDefaultEuro() throws Exception {
-            when(commands.transfer(any(Caller.class), any())).thenReturn(transfer("25.00", "APPROVED"));
+            when(movements.transfer(any(Caller.class), any())).thenReturn(transfer("25.00", "APPROVED"));
 
             mvc.perform(post("/accounts/" + ACCOUNT_ID + "/transfers")
                             .param("targetAccountNumber", TARGET_IBAN)
@@ -1047,7 +1051,7 @@ class AccountWebControllerTests {
                             .param("currency", ""))
                     .andExpect(status().is3xxRedirection());
 
-            verify(commands).transfer(ADMIN, TransferCommand.builder()
+            verify(movements).transfer(ADMIN, TransferCommand.builder()
                     .sourceAccountId(ACCOUNT_ID)
                     .targetAccountNumber(TARGET_IBAN)
                     .amount(new BigDecimal("25.00"))
@@ -1083,7 +1087,7 @@ class AccountWebControllerTests {
                     .andExpect(model().attributeHasNoErrors("withdrawalForm"))
                     .andExpect(content().string(containsString("Escribe el número de cuenta de destino")));
 
-            verify(commands, never()).transfer(any(Caller.class), any());
+            verify(movements, never()).transfer(any(Caller.class), any());
         }
 
         @ParameterizedTest
@@ -1098,7 +1102,7 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("value=\"" + iban + "\"")))
                     .andExpect(content().string(containsString("<details id=\"transfer-action\" open=\"open\">")));
 
-            verify(commands, never()).transfer(any(Caller.class), any());
+            verify(movements, never()).transfer(any(Caller.class), any());
         }
 
         @ParameterizedTest
@@ -1115,14 +1119,14 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("El importe debe ser positivo")))
                     .andExpect(content().string(containsString("value=\"" + TARGET_IBAN + "\"")));
 
-            verify(commands, never()).transfer(any(Caller.class), any());
+            verify(movements, never()).transfer(any(Caller.class), any());
         }
 
         @Test
         @DisplayName("Transferir a la misma cuenta vuelve al detalle con el mensaje del dominio")
         void transferringToTheSameAccountReturnsToTheDetailsWithTheDomainMessage() throws Exception {
             var error = new SameAccountTransferException(new AccountNumber("ES1234567890123456789012"));
-            when(commands.transfer(any(Caller.class), any())).thenThrow(error);
+            when(movements.transfer(any(Caller.class), any())).thenThrow(error);
 
             mvc.perform(transferenciaDe("ES1234567890123456789012", "25.00", "EUR"))
                     .andExpect(status().isOk())
@@ -1136,7 +1140,7 @@ class AccountWebControllerTests {
         @DisplayName("Otra divisa vuelve al detalle con el mensaje del dominio y conserva el importe")
         void anotherCurrencyReturnsToTheDetailsWithTheDomainMessageAndKeepsTheAmount() throws Exception {
             var error = new CurrencyMismatchException(Currency.getInstance("EUR"), Currency.getInstance("USD"));
-            when(commands.transfer(any(Caller.class), any())).thenThrow(error);
+            when(movements.transfer(any(Caller.class), any())).thenThrow(error);
 
             mvc.perform(transferenciaDe(TARGET_IBAN, "20.25", "USD"))
                     .andExpect(status().isOk())
@@ -1151,7 +1155,7 @@ class AccountWebControllerTests {
         @DisplayName("Un IBAN de destino que no existe se muestra en el formulario, no como página 404")
         void aMissingTargetIbanIsShownInTheFormNotAsA404Page() throws Exception {
             var error = new TargetAccountNotFoundException(TARGET_IBAN);
-            when(commands.transfer(any(Caller.class), any())).thenThrow(error);
+            when(movements.transfer(any(Caller.class), any())).thenThrow(error);
 
             mvc.perform(transferenciaDe(TARGET_IBAN, "25.00", "EUR"))
                     .andExpect(status().isOk())
@@ -1165,7 +1169,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Una cuenta de origen desconocida o ajena devuelve la página 404")
         void anUnknownOrForeignSourceAccountReturnsThe404Page() throws Exception {
-            when(commands.transfer(any(Caller.class), any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
+            when(movements.transfer(any(Caller.class), any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
 
             mvc.perform(transferenciaDe(TARGET_IBAN, "25.00", "EUR"))
                     .andExpect(status().isNotFound())
@@ -1176,7 +1180,7 @@ class AccountWebControllerTests {
         @DisplayName("Un error de formato que solo detecta el servicio vuelve al formulario con su mensaje")
         void aFormatErrorOnlyTheServiceDetectsReturnsToTheFormWithItsMessage()
                 throws Exception {
-            when(commands.transfer(any(Caller.class), any())).thenThrow(new IllegalArgumentException("Dato inválido"));
+            when(movements.transfer(any(Caller.class), any())).thenThrow(new IllegalArgumentException("Dato inválido"));
 
             mvc.perform(transferenciaDe(TARGET_IBAN, "25.00", "EUR"))
                     .andExpect(status().isOk())
@@ -1198,7 +1202,7 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString(message)))
                     .andExpect(content().string(containsString(amount)));
 
-            verify(commands, never()).transfer(any(Caller.class), any());
+            verify(movements, never()).transfer(any(Caller.class), any());
         }
     }
 
@@ -1219,7 +1223,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Una transferencia aprobada responde con el panel, el mensaje y el formulario vacío")
         void anApprovedTransferRespondsWithThePanelAndTheMessage() throws Exception {
-            when(commands.transfer(any(Caller.class), any())).thenReturn(transfer("25.00", "APPROVED"));
+            when(movements.transfer(any(Caller.class), any())).thenReturn(transfer("25.00", "APPROVED"));
 
             mvc.perform(transferencia("25.00"))
                     .andExpect(status().isOk())
@@ -1231,7 +1235,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Una transferencia rechazada responde con el panel y el aviso de advertencia")
         void aRejectedTransferRespondsWithThePanelAndTheNotice() throws Exception {
-            when(commands.transfer(any(Caller.class), any())).thenReturn(transfer("900.00", "REJECTED"));
+            when(movements.transfer(any(Caller.class), any())).thenReturn(transfer("900.00", "REJECTED"));
 
             mvc.perform(transferencia("900.00"))
                     .andExpect(status().isOk())
@@ -1244,7 +1248,7 @@ class AccountWebControllerTests {
         @DisplayName("Un IBAN de destino que no existe responde con el panel y el error en su campo")
         void aMissingTargetIbanRespondsWithThePanelAndTheErrorInItsField() throws Exception {
             var error = new TargetAccountNotFoundException(TARGET_IBAN);
-            when(commands.transfer(any(Caller.class), any())).thenThrow(error);
+            when(movements.transfer(any(Caller.class), any())).thenThrow(error);
 
             mvc.perform(transferencia("25.00"))
                     .andExpect(status().isOk())
@@ -1257,7 +1261,7 @@ class AccountWebControllerTests {
         @Test
         @DisplayName("Una cuenta de origen ajena sigue respondiendo la página 404, también a htmx")
         void aForeignSourceAccountStillResponds404() throws Exception {
-            when(commands.transfer(any(Caller.class), any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
+            when(movements.transfer(any(Caller.class), any())).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
 
             mvc.perform(transferencia("25.00"))
                     .andExpect(status().isNotFound())
@@ -1453,7 +1457,7 @@ class AccountWebControllerTests {
                     .andExpect(model().attributeHasFieldErrors("form", "holderEmail"))
                     .andExpect(content().string(containsString("El correo electrónico no es válido")));
 
-            verifyNoInteractions(commands, queries);
+            verifyNoInteractions(commands, movements, queries);
         }
 
         @Test
@@ -1478,7 +1482,7 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("minúsculas sin tildes ni ñ, dígitos, puntos, guiones bajos o guiones")))
                     .andExpect(content().string(containsString("Ana Lopez")));
 
-            verifyNoInteractions(commands, queries);
+            verifyNoInteractions(commands, movements, queries);
         }
 
         @Test
@@ -1515,7 +1519,7 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("1234-Z")))
                     .andExpect(content().string(containsString("Ana Lopez")));
 
-            verifyNoInteractions(commands, queries);
+            verifyNoInteractions(commands, movements, queries);
         }
 
         @Test
@@ -1564,7 +1568,7 @@ class AccountWebControllerTests {
                     .andExpect(content().string(containsString("XYZ no es un c")))
                     .andExpect(content().string(containsString("Ana Lopez")));
 
-            verifyNoInteractions(commands, queries);
+            verifyNoInteractions(commands, movements, queries);
         }
     }
 

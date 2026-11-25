@@ -24,8 +24,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.dawnrock.ddd.application.AccountDetails;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.DepositCommand;
 import com.dawnrock.ddd.application.NotACustomerException;
 import com.dawnrock.ddd.application.OpenAccountCommand;
@@ -63,7 +64,9 @@ public class AccountWebController {
 
     private static final List<String> CURRENCIES = List.of("EUR", "USD", "GBP");
 
-    private final CheckingAccountCommands commands;
+    private final AccountOpeningCommands commands;
+
+    private final MoneyMovementCommands movements;
 
     private final CheckingAccountQueries queries;
 
@@ -118,7 +121,7 @@ public class AccountWebController {
             }
             if (command != null) {
                 try {
-                    TransactionSummary deposit = commands.deposit(caller, command);
+                    TransactionSummary deposit = movements.deposit(caller, command);
                     return notice(id, htmx, MESSAGE,
                             "Ingreso de %s aprobado".formatted(fmt.money(deposit.amount(), deposit.currency())),
                             caller, model, redirect);
@@ -145,7 +148,7 @@ public class AccountWebController {
             }
             if (command != null) {
                 try {
-                    TransactionSummary withdrawal = commands.withdraw(caller, command);
+                    TransactionSummary withdrawal = movements.withdraw(caller, command);
                     String amount = fmt.money(withdrawal.amount(), withdrawal.currency());
                     if (withdrawal.rejected()) {
                         return notice(id, htmx, REJECTION,
@@ -182,7 +185,7 @@ public class AccountWebController {
             }
             if (command != null) {
                 try {
-                    TransferSummary transfer = commands.transfer(caller, command);
+                    TransferSummary transfer = movements.transfer(caller, command);
                     String amount = fmt.money(transfer.amount(), transfer.currency());
                     String target = fmt.maskedIban(transfer.targetAccountNumber());
                     if (transfer.rejected()) {

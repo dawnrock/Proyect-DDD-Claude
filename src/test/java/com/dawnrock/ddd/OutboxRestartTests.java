@@ -17,7 +17,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.dawnrock.ddd.adapter.out.event.OutboxRelay;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.DepositCommand;
 import com.dawnrock.ddd.application.OpenAccountCommand;
 
@@ -52,7 +53,7 @@ class OutboxRestartTests {
     void aDepositCommittedBeforeARestartReachesTheAuditConsumerAfterIt(CapturedOutput output) {
         UUID accountId;
         try (ConfigurableApplicationContext first = start()) {
-            CheckingAccountCommands commands = first.getBean(CheckingAccountCommands.class);
+            AccountOpeningCommands commands = first.getBean(AccountOpeningCommands.class);
             accountId = commands.openAccount(ADMIN, OpenAccountCommand.builder()
                     .holderName("Grace Hopper")
                     .holderTaxId("87654321X")
@@ -60,7 +61,7 @@ class OutboxRestartTests {
                     .initialDeposit(new BigDecimal("100"))
                     .ownerUsername("grace")
                     .build()).id();
-            commands.deposit(ADMIN, DepositCommand.builder().accountId(accountId).amount(new BigDecimal("25")).build());
+            first.getBean(MoneyMovementCommands.class).deposit(ADMIN, DepositCommand.builder().accountId(accountId).amount(new BigDecimal("25")).build());
 
             assertThat(pendingEvents(first)).as("el primer arranque no ha entregado nada").isEqualTo(3);
         }

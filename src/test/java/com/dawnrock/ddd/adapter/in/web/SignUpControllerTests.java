@@ -41,7 +41,8 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import com.dawnrock.ddd.application.AccountDetails;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
 import com.dawnrock.ddd.application.SignUpCommand;
 import com.dawnrock.ddd.domain.model.CurrencyMismatchException;
@@ -68,7 +69,10 @@ class SignUpControllerTests {
     private CustomerRegistration registration;
 
     @MockitoBean
-    private CheckingAccountCommands commands;
+    private AccountOpeningCommands commands;
+
+    @MockitoBean
+    private MoneyMovementCommands movements;
 
     @MockitoBean
     private CheckingAccountQueries queries;

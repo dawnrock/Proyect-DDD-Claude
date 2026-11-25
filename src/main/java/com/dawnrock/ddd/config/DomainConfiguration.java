@@ -5,9 +5,12 @@ import java.time.Clock;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.dawnrock.ddd.application.AccountOpeningService;
 import com.dawnrock.ddd.application.AccountOwnershipRepository;
-import com.dawnrock.ddd.application.CheckingAccountService;
+import com.dawnrock.ddd.application.AccountSegmentReviewService;
+import com.dawnrock.ddd.application.CheckingAccountQueryService;
 import com.dawnrock.ddd.application.CustomerOwnershipRepository;
+import com.dawnrock.ddd.application.MoneyMovementService;
 import com.dawnrock.ddd.application.UnitOfWork;
 import com.dawnrock.ddd.application.listener.AuditLogListener;
 import com.dawnrock.ddd.application.listener.CustomerNotificationListener;
@@ -51,17 +54,45 @@ public class DomainConfiguration {
         return new CheckingAccountFactory(numbering, incomeVerifier);
     }
 
-    /** Implementa los puertos de entrada; los adaptadores de entrada lo reciben por ellos, nunca por su clase. */
+    /** Implementa {@code CheckingAccountQueries}; los adaptadores de entrada reciben cada servicio por su puerto. */
     @Bean
-    public CheckingAccountService checkingAccountService(CheckingAccountRepository repository,
-                                                         AccountOwnershipRepository ownership,
-                                                         DomainEventPublisher publisher, CheckingAccountFactory factory,
-                                                         MoneyTransferService transferService,
-                                                         SegmentReviewService segmentReview, Clock clock,
-                                                         UnitOfWork unitOfWork, CustomerRepository customers,
-                                                         CustomerOwnershipRepository customerOwnership) {
-        return new CheckingAccountService(repository, ownership, publisher, factory, transferService, segmentReview,
-                clock, unitOfWork, customers, customerOwnership);
+    public CheckingAccountQueryService checkingAccountQueryService(CheckingAccountRepository repository,
+                                                                   AccountOwnershipRepository ownership,
+                                                                   UnitOfWork unitOfWork, CustomerRepository customers,
+                                                                   CustomerOwnershipRepository customerOwnership) {
+        return new CheckingAccountQueryService(repository, ownership, unitOfWork, customers, customerOwnership);
+    }
+
+    /** Implementa {@code AccountOpeningCommands}: apertura, alta de clientes, otra cuenta y regeneración del IBAN. */
+    @Bean
+    public AccountOpeningService accountOpeningService(CheckingAccountRepository repository,
+                                                       AccountOwnershipRepository ownership,
+                                                       DomainEventPublisher publisher, CheckingAccountFactory factory,
+                                                       UnitOfWork unitOfWork, CustomerRepository customers,
+                                                       CustomerOwnershipRepository customerOwnership) {
+        return new AccountOpeningService(repository, ownership, publisher, factory, unitOfWork, customers,
+                customerOwnership);
+    }
+
+    /** Implementa {@code MoneyMovementCommands}: ingresos, retiradas y transferencias. */
+    @Bean
+    public MoneyMovementService moneyMovementService(CheckingAccountRepository repository,
+                                                     AccountOwnershipRepository ownership,
+                                                     DomainEventPublisher publisher,
+                                                     MoneyTransferService transferService,
+                                                     SegmentReviewService segmentReview, Clock clock,
+                                                     UnitOfWork unitOfWork) {
+        return new MoneyMovementService(repository, ownership, publisher, transferService, segmentReview, clock,
+                unitOfWork);
+    }
+
+    /** Implementa {@code SegmentReviewCommands}: la revisión periódica de segmentos que dispara la tarea programada. */
+    @Bean
+    public AccountSegmentReviewService accountSegmentReviewService(CheckingAccountRepository repository,
+                                                                   DomainEventPublisher publisher,
+                                                                   SegmentReviewService segmentReview, Clock clock,
+                                                                   UnitOfWork unitOfWork) {
+        return new AccountSegmentReviewService(repository, publisher, segmentReview, clock, unitOfWork);
     }
 
     /** Consumidores de los eventos de dominio: Spring les entrega cada evento por su {@code @EventListener}. */
