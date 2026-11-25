@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-25
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~125 min (16 tasks)
 
 ## Goal
@@ -52,7 +52,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
 
 ## Tasks
 
-### [ ] T1 — Vendor Sora (~10 min)
+### [x] T1 — Vendor Sora (~10 min)
 
 - **Layer:** build
 - **Files:** `src/main/resources/static/vendor/sora/{sora-latin-wght-normal.woff2,OFL.txt,README.md}`, `LoginControllerTests.java`
@@ -62,8 +62,8 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
   2. `README.md` like Tektur's: version, origin, integrity, how to upgrade.
   3. Test: `GET /vendor/sora/sora-latin-wght-normal.woff2` answers 200 with `font/woff2` and is public (no login).
 - **Acceptance criteria:**
-  - [ ] The font is served without authentication; the test passes.
-  - [ ] Licence and README next to the file.
+  - [x] The font is served without authentication; the test passes.
+  - [x] Licence and README next to the file.
 
 ### [ ] T2 — ADR 0023: the brand's UI language (~10 min)
 
