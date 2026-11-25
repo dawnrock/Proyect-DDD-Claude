@@ -100,7 +100,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
 - **Acceptance criteria:**
   - [x] Four fragments; the test passes.
 
-### [ ] T5 — Slanted buttons, fields and focus (~10 min)
+### [x] T5 — Slanted buttons, fields and focus (~10 min)
 
 - **Layer:** adapter.in (static)
 - **Files:** `static/css/app.css`
@@ -110,7 +110,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
   2. Visible focus: `clip-path` cuts `outline`, so the focus ring goes on a non-clipped wrapper or with `filter: drop-shadow` over `:focus-visible`; checked with the keyboard.
   3. Hover transitions only with `prefers-reduced-motion: no-preference`.
 - **Acceptance criteria:**
-  - [ ] A scratch page or the running app shows the four variants with a visible focus at 390 px and 1280 px (Playwright screenshot).
+  - [x] A scratch page or the running app shows the four variants with a visible focus at 390 px and 1280 px (Playwright screenshot).
 
 ### [ ] T6 — Welcome doors over the big A (~10 min)
 

@@ -140,6 +140,115 @@ h1, .h1, .h2, .h3 { font-weight: 600; letter-spacing: -0.005em; }
 .backdrop-a { fill: #262b30; stroke: #30363c; stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
 .backdrop-rise { fill: var(--mona-rise); opacity: 0.12; }
 
+/* Botones en paralelogramo con la inclinación de la A (#185). La forma es un ::before sesgado y no un clip-path,
+   para que el contorno de foco siga el paralelogramo en lugar de quedar recortado. */
+.btn-slant {
+    --slant-bg: var(--mona-surface);
+    --slant-bg-hover: var(--mona-surface-hover);
+    --slant-fg: var(--mona-ink);
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: 3rem;
+    padding: 0.65rem 1.75rem;
+    border: 0;
+    background: none;
+    color: var(--slant-fg);
+    font-family: var(--mona-display);
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+}
+.btn-slant::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--slant-bg);
+    transform: skewX(-12.4deg);
+}
+.btn-slant:hover, .btn-slant:focus-visible { color: var(--slant-fg); }
+.btn-slant:hover::before { background-color: var(--slant-bg-hover); }
+.btn-slant:focus-visible { outline: none; }
+.btn-slant:focus-visible::before { outline: 2px solid var(--mona-ink); outline-offset: 3px; }
+.btn-slant:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn-slant-rise { --slant-bg: var(--mona-rise); --slant-bg-hover: #45d9c4; --slant-fg: var(--mona-on-accent); }
+.btn-slant-light { --slant-bg: var(--mona-ink); --slant-bg-hover: #ffffff; --slant-fg: var(--mona-on-accent); }
+.btn-slant-drop { --slant-bg: var(--mona-drop); --slant-bg-hover: #f4767c; --slant-fg: var(--mona-on-accent); }
+.btn-slant-surface { --slant-bg: var(--mona-surface); --slant-bg-hover: var(--mona-surface-hover); --slant-fg: var(--mona-ink); }
+
+/* Las puertas del login (#185): bloques en paralelogramo a todo el ancho, con título y una línea de ayuda. */
+.door {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.2rem;
+    width: 100%;
+    min-height: 5.25rem;
+    padding: 0.85rem 2.5rem 0.85rem 2.25rem;
+    text-align: left;
+}
+.door-title { font-size: 1.25rem; font-weight: 700; }
+.door-hint { font-family: var(--mona-text); font-weight: 400; font-size: 0.8125rem; opacity: 0.8; }
+
+/* Tarjetas con el borde derecho inclinado como la pata derecha de la A (#185). El foco se marca por dentro, porque el
+   clip-path recortaría el contorno. */
+.card-slant {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 5.75rem;
+    padding: 1.1rem 3rem 1.1rem 1.25rem;
+    background-color: var(--mona-surface);
+    color: var(--mona-ink);
+    text-decoration: none;
+    clip-path: polygon(0 0, calc(100% - 1.25rem) 0, 100% 100%, 0 100%);
+}
+.card-slant > :not(.watermark) { position: relative; }
+.card-slant .watermark { height: 140%; top: -15%; right: 2rem; }
+a.card-slant:hover { background-color: var(--mona-surface-hover); color: var(--mona-ink); }
+a.card-slant:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--mona-ink); background-color: var(--mona-surface-hover); }
+
+/* Superficies, campos y avisos con la paleta de la marca y sin esquinas redondeadas. */
+.card { --bs-card-bg: var(--mona-surface); --bs-card-border-width: 0; --bs-card-border-radius: 0; --bs-card-inner-border-radius: 0; }
+.form-control, .form-select {
+    min-height: 3rem;
+    background-color: var(--mona-ground);
+    border: 1.5px solid var(--mona-line-strong);
+    color: var(--mona-ink);
+}
+.form-control:focus, .form-select:focus {
+    background-color: var(--mona-ground);
+    border-color: var(--mona-rise);
+    box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
+    color: var(--mona-ink);
+}
+.form-control::placeholder { color: var(--mona-ink-3); }
+.input-group .btn-outline-secondary { border: 1.5px solid var(--mona-line-strong); color: var(--mona-ink-2); }
+.form-check-input:checked { background-color: var(--mona-rise); border-color: var(--mona-rise); }
+.form-text { color: var(--mona-ink-2); }
+.alert { border-width: 0; }
+.signup-progress { background-color: var(--mona-surface); }
+.signup-progress .progress-bar { background-color: var(--mona-rise); }
+
+@media (prefers-reduced-motion: no-preference) {
+    .btn-slant::before, a.card-slant { transition: background-color 0.15s ease-out; }
+}
+
+/* Logo apilado en las bienvenidas del login y del alta (#178): decorativo, el título ya nombra al banco. */
+.brand-welcome { display: block; width: min(18rem, 70%); height: auto; margin: 0.5rem auto 2rem; }
+
 /* Intro de la marca (#178): capa a pantalla completa sobre las puertas del login, del color de fondo de la web. */
 .splash { position: fixed; inset: 0; z-index: 1080; background-color: var(--bs-body-bg); }
 .splash canvas { display: block; width: 100%; height: 100%; }
