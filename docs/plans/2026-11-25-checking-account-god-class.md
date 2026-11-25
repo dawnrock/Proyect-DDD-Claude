@@ -62,7 +62,7 @@ Both new classes are package-private: only the aggregate uses them, so the hexag
 - **Acceptance criteria:**
   - [x] Every reconstitution message and the order of the checks are fixed by tests; sabotage seen red and reverted.
 
-### [ ] T2 — TransactionHistory (~10 min)
+### [x] T2 — TransactionHistory (~10 min)
 
 - **Layer:** domain
 - **Files:** `TransactionHistory.java`, `TransactionHistoryTests.java`
@@ -71,7 +71,7 @@ Both new classes are package-private: only the aggregate uses them, so the hexag
   1. Tests first (POJO): a new history is empty; `add` keeps the order and returns the transaction; the list it gives is a copy; `restore` keeps a valid stored history and rejects, with today's messages, a repeated transaction, one of another account, a pending one, a `null` list and a balance that does not match the approved movements (rejected withdrawals do not count).
   2. Write it, with `restore` split in `requireStorable` and `approvedBalance` so no method is above PMD's threshold.
 - **Acceptance criteria:**
-  - [ ] `TransactionHistoryTests` green; `check-domain.mjs` without errors.
+  - [x] `TransactionHistoryTests` green; `check-domain.mjs` without errors.
 
 ### [ ] T3 — CheckingAccount on TransactionHistory (~5 min)
 
