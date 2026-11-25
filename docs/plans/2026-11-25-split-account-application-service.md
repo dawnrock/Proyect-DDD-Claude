@@ -89,7 +89,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
 - **Acceptance criteria:**
   - [x] No test builds `CheckingAccountService` directly; `./mvnw verify` green with the same number of tests. (14 constructions in 9 test classes replaced; 1,035 test cases green)
 
-### [ ] T3 — Extract `AccountViews` (~5 min)
+### [x] T3 — Extract `AccountViews` (~5 min)
 
 - **Layer:** application
 - **Files:** `AccountViews.java` (new), `CheckingAccountService.java`
@@ -97,7 +97,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
 - **What to do:**
   1. Move `toSummary`, `toTransaction`, `toDetails` (the e-mail as a parameter) and the `TransferSummary` building to a package-private final class with static methods.
 - **Acceptance criteria:**
-  - [ ] `CheckingAccountService` has no mapping code; `StatusViewsTests` and the service tests pass unchanged.
+  - [x] `CheckingAccountService` has no mapping code; `StatusViewsTests` and the service tests pass unchanged. (also takes toAmount; 1,035 test cases green)
 
 ### [ ] T4 — Extract `AccountUnitOfWork` and `AccountChanges` (~10 min)
 

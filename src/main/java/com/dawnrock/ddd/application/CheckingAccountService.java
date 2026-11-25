@@ -1,13 +1,12 @@
 package com.dawnrock.ddd.application;
 
-import java.math.BigDecimal;
 import java.time.Clock;
 import java.util.ArrayList;
-import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+
 
 import com.dawnrock.ddd.domain.model.AccountNumber;
 import com.dawnrock.ddd.domain.model.CheckingAccount;
@@ -20,7 +19,6 @@ import com.dawnrock.ddd.domain.model.DomainEventPublisher;
 import com.dawnrock.ddd.domain.model.DuplicateAccountNumberException;
 import com.dawnrock.ddd.domain.model.DuplicateCustomerException;
 import com.dawnrock.ddd.domain.model.EmailAddress;
-import com.dawnrock.ddd.domain.model.MonetaryAmount;
 import com.dawnrock.ddd.domain.model.TaxId;
 import com.dawnrock.ddd.domain.model.Transaction;
 import com.dawnrock.ddd.domain.service.MoneyTransferService;
@@ -90,7 +88,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         Customer customer = existing.orElseGet(() -> newCustomer(taxId, command));
         String owner = existing.isPresent() ? ownerOfExisting(customer, command) : command.ownerUsername();
 
-        CheckingAccount opened = factory.open(customer, toAmount(command.initialDeposit(), command.currency()));
+        CheckingAccount opened = factory.open(customer, AccountViews.toAmount(command.initialDeposit(), command.currency()));
         requireUnused(opened.accountNumber());
         if (existing.isEmpty()) {
             if (usernameTaken(owner)) {
@@ -101,7 +99,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         }
         CheckingAccount account = save(opened, events);
         ownership.assign(account.id(), owner);
-        return toSummary(account);
+        return AccountViews.toSummary(account);
     }
 
     /** Un cliente nuevo desde el alta del administrador: nombre, correo y usuario son obligatorios. */
@@ -155,7 +153,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         return inUnit(events -> {
             TaxId taxId = new TaxId(command.taxId());
             Customer customer = Customer.register(command.fullName(), taxId, new EmailAddress(command.email()));
-            CheckingAccount opened = factory.open(customer, toAmount(command.initialDeposit(), command.currency()));
+            CheckingAccount opened = factory.open(customer, AccountViews.toAmount(command.initialDeposit(), command.currency()));
             requireUnused(opened.accountNumber());
             customers.findByTaxId(taxId).ifPresent(existing -> {
                 throw new DuplicateCustomerException(taxId);
@@ -167,7 +165,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
             customerOwnership.assign(taxId, command.username());
             CheckingAccount account = save(opened, events);
             ownership.assign(account.id(), command.username());
-            return toSummary(account);
+            return AccountViews.toSummary(account);
         });
     }
 
@@ -176,11 +174,11 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         return inUnit(events -> {
             Customer customer = customerOf(caller);
             CheckingAccount opened =
-                    factory.open(customer, toAmount(command.initialDeposit(), command.currency()));
+                    factory.open(customer, AccountViews.toAmount(command.initialDeposit(), command.currency()));
             requireUnused(opened.accountNumber());
             CheckingAccount account = save(opened, events);
             ownership.assign(account.id(), caller.username());
-            return toSummary(account);
+            return AccountViews.toSummary(account);
         });
     }
 
@@ -204,7 +202,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
             AccountNumber generated = factory.nextAccountNumber();
             requireUnused(generated);
             account.reassignAccountNumber(generated);
-            return toSummary(save(account, events));
+            return AccountViews.toSummary(save(account, events));
         });
     }
 
@@ -222,22 +220,25 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     public List<AccountSummary> listAccounts(Caller caller) {
         return unitOfWork.execute(() -> repository.findAll().stream()
                 .filter(account -> canAccess(caller, account.id()))
-                .map(CheckingAccountService::toSummary)
+                .map(AccountViews::toSummary)
                 .toList());
     }
 
     @Override
     public AccountDetails findAccount(Caller caller, UUID id) {
-        return unitOfWork.execute(() -> toDetails(loadFor(caller, id)));
+        return unitOfWork.execute(() -> {
+            CheckingAccount account = loadFor(caller, id);
+            return AccountViews.toDetails(account, holderEmail(account));
+        });
     }
 
     @Override
     public TransactionSummary deposit(Caller caller, DepositCommand command) {
         return inUnit(events -> {
             CheckingAccount account = loadFor(caller, command.accountId());
-            Transaction transaction = account.deposit(toAmount(command.amount(), command.currency()));
+            Transaction transaction = account.deposit(AccountViews.toAmount(command.amount(), command.currency()));
             save(account, events);
-            return toTransaction(transaction);
+            return AccountViews.toTransaction(transaction);
         });
     }
 
@@ -246,9 +247,9 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         reviewSegmentBeforeDebit(caller, command.accountId());
         return inUnit(events -> {
             CheckingAccount account = loadFor(caller, command.accountId());
-            Transaction transaction = account.tryWithdraw(toAmount(command.amount(), command.currency()));
+            Transaction transaction = account.tryWithdraw(AccountViews.toAmount(command.amount(), command.currency()));
             save(account, events);
-            return toTransaction(transaction);
+            return AccountViews.toTransaction(transaction);
         });
     }
 
@@ -264,19 +265,10 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         CheckingAccount target = repository.findByAccountNumber(targetNumber)
                 .orElseThrow(() -> new TargetAccountNotFoundException(targetNumber.value()));
         Transaction withdrawal =
-                transferService.transfer(source, target, toAmount(command.amount(), command.currency()));
+                transferService.transfer(source, target, AccountViews.toAmount(command.amount(), command.currency()));
         save(source, events);
         save(target, events);
-        return TransferSummary.builder()
-                .sourceAccountId(source.id())
-                .sourceAccountNumber(source.accountNumber().value())
-                .targetAccountId(target.id())
-                .targetAccountNumber(target.accountNumber().value())
-                .amount(withdrawal.amount().amount())
-                .currency(withdrawal.amount().currency().getCurrencyCode())
-                .occurredOn(withdrawal.occurredOn())
-                .status(withdrawal.status().name())
-                .build();
+        return AccountViews.toTransfer(source, target, withdrawal);
     }
 
     @Override
@@ -348,53 +340,15 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         private final List<List<DomainEvent>> batches = new ArrayList<>();
     }
 
+    private String holderEmail(CheckingAccount account) {
+        return customers.findByTaxId(account.primaryHolder().taxId()).map(customer -> customer.email().value()).orElse("");
+    }
+
     private boolean canAccess(Caller caller, UUID accountId) {
         return caller.admin() || ownership.ownerOf(accountId).filter(caller.username()::equals).isPresent();
     }
 
     private CheckingAccount load(UUID id) {
         return repository.findById(id).orElseThrow(() -> new AccountNotFoundException(id));
-    }
-
-    private static MonetaryAmount toAmount(BigDecimal amount, String currency) {
-        return new MonetaryAmount(amount, Currency.getInstance(currency));
-    }
-
-    private AccountDetails toDetails(CheckingAccount account) {
-        TaxId taxId = account.primaryHolder().taxId();
-        return AccountDetails.builder()
-                .id(account.id())
-                .accountNumber(account.accountNumber().value())
-                .holderName(account.primaryHolder().fullName())
-                .holderTaxId(taxId.value())
-                .holderEmail(customers.findByTaxId(taxId).map(customer -> customer.email().value()).orElse(""))
-                .segment(account.primaryHolder().segment().name())
-                .balance(account.currentBalance().amount())
-                .currency(account.currentBalance().currency().getCurrencyCode())
-                .transactions(account.transactions().stream().map(CheckingAccountService::toTransaction).toList())
-                .build();
-    }
-
-    private static TransactionSummary toTransaction(Transaction transaction) {
-        return TransactionSummary.builder()
-                .id(transaction.id())
-                .type(transaction.type().name())
-                .amount(transaction.amount().amount())
-                .currency(transaction.amount().currency().getCurrencyCode())
-                .occurredOn(transaction.occurredOn())
-                .status(transaction.status().name())
-                .counterpartAccountNumber(transaction.counterpart().map(AccountNumber::value))
-                .build();
-    }
-
-    private static AccountSummary toSummary(CheckingAccount account) {
-        return AccountSummary.builder()
-                .id(account.id())
-                .accountNumber(account.accountNumber().value())
-                .holderName(account.primaryHolder().fullName())
-                .segment(account.primaryHolder().segment().name())
-                .balance(account.currentBalance().amount())
-                .currency(account.currentBalance().currency().getCurrencyCode())
-                .build();
     }
 }
