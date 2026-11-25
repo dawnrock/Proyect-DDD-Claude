@@ -188,15 +188,15 @@
 - **Acceptance criteria:**
   - [x] `./mvnw pmd:pmd -Dpmd.baseline=` only lists `CheckingAccount`, `OpenAccountCommandDef` and `SignUpCommandDef`. (no new warning)
 
-### [ ] T13 — Documents (~5 min)
+### [x] T13 — Documents (~5 min)
 
 - **Layer:** docs
-- **Files:** `docs/arquitectura/fase-2-hexagonal.md`, `docs/ia/decisiones.md`
+- **Files:** `docs/arquitectura/fase-2-hexagonal.md`, `docs/ia/decisiones.md`, `docs/arquitectura/comparativa-capas-hexagonal.md` (its "Since #174" note)
 - **Depends on:** T12
 - **What to do:**
   1. Component and test tables of phase 2 name the new controllers and `AccountDetailView`; the #125 decision names `AccountDetailView.notice`.
 - **Acceptance criteria:**
-  - [ ] `grep -rn AccountWebController docs/arquitectura docs/ia/decisiones.md` finds only history.
+  - [x] `grep -rn AccountWebController docs/arquitectura docs/ia/decisiones.md` finds only history. (only the history of #177 and the comparison note name it)
 
 ### [ ] T14 — Project status (~5 min)
 
