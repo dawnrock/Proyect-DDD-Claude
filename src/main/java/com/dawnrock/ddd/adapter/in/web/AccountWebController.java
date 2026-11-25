@@ -53,15 +53,6 @@ public class AccountWebController {
 
     private final AccountDetailView detailView;
 
-    @PostMapping("/accounts/{id}/account-number")
-    public String regenerateAccountNumber(@PathVariable UUID id, Model model, RedirectAttributes redirect,
-                                          Authentication authentication,
-                                          @RequestHeader(name = HtmxLoginRedirect.HX_REQUEST, defaultValue = "false") boolean htmx) {
-        Caller caller = CurrentCaller.from(authentication);
-        AccountSummary account = commands.regenerateAccountNumber(caller, id);
-        return detailView.notice(id, htmx, AccountDetailView.MESSAGE, "Nuevo IBAN asignado: " + account.accountNumber(), caller, model, redirect);
-    }
-
     @GetMapping("/accounts/another")
     public String anotherAccountForm(Model model, Authentication authentication) {
         Caller caller = CurrentCaller.from(authentication);

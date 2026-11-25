@@ -147,7 +147,7 @@
 - **Acceptance criteria:**
   - [x] Moved tests pass. (1,049 test cases, unchanged)
 
-### [ ] T9 — `AccountNumberWebController` (~5 min)
+### [x] T9 — `AccountNumberWebController` (~5 min)
 
 - **Layer:** adapter.in · tests
 - **Files:** `AccountNumberWebController.java` (new), `AccountWebController.java`, `RegenerateAccountNumberWebTests.java` → `AccountNumberWebControllerTests.java`
@@ -155,7 +155,7 @@
 - **What to do:**
   1. Move `POST /accounts/{id}/account-number` (administrator only, unchanged).
 - **Acceptance criteria:**
-  - [ ] Renamed tests pass.
+  - [x] Renamed tests pass. (1,049 test cases, unchanged)
 
 ### [ ] T10 — `OpenAccountWebController` (~10 min)
 

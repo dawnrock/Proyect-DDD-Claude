@@ -36,7 +36,7 @@ import com.dawnrock.ddd.domain.model.DuplicateAccountNumberException;
 import com.dawnrock.ddd.domain.model.InsufficientInitialDepositException;
 import com.dawnrock.ddd.domain.model.MonetaryAmount;
 
-@WebMvcTest({AccountWebController.class, AccountDetailController.class, DepositWebController.class, WithdrawalWebController.class, TransferWebController.class, AccountListController.class})
+@WebMvcTest({AccountWebController.class, AccountDetailController.class, DepositWebController.class, WithdrawalWebController.class, TransferWebController.class, AccountNumberWebController.class, AccountListController.class})
 @WithMockUser(username = "admin", roles = "ADMIN")
 class AccountWebControllerTests extends AccountWebTestSupport {
 
