@@ -2,7 +2,7 @@
 
 > **Read it at the start of every session.** It is the entry point to carry on without depending on earlier conversations, and it is kept **short on purpose**: it is loaded in every session. **It is updated in every PR that closes an issue** (CI checks it).
 
-- **Last updated:** 2026-11-24 · PR #172 (#165, domain event outbox)
+- **Last updated:** 2026-11-25 · deploy checks of #156, #159 and #165 (no issue)
 - **Active branch:** `Hexagonal`, the repository's default branch; phase 2 is marked by the `v2-hexagonal` tag and work continues on the branch. `Monolithic` frozen at the `v1-monolito` tag (exceptions authorised by the user: the Render deployment, #86, the footer, #91, and the twins #99 and #95); `master` frozen.
 
 ## Where we are
@@ -15,7 +15,7 @@
 
 ## Next step
 
-1. OAuth / Auth0 (issue to open), or the refactorings listed by the PMD baseline (`pendientes.md`), as Clean Code practice. The user still has to check a Render deploy with the plain Neon URL (#156) and, optionally, the contract version rule on Windows (#159); both in `pendientes.md`. The next Render deploy applies the Flyway `V2` migration (outbox) on Neon.
+1. OAuth / Auth0 (issue to open), or the refactorings listed by the PMD baseline (`pendientes.md`), as Clean Code practice. Render runs with the plain Neon URL since 2026-11-25 (#156 checked) and Neon has the Flyway `V2` migration (outbox, #165).
 
 Both branches are live on Render (guide `docs/deploy/render.md`).
 
