@@ -25,21 +25,47 @@ final class CommandValidation {
         }
     }
 
+    /** Exige que {@code value} cumpla {@code pattern}; si no, lo rechaza con {@code message}. */
+    static void requireMatching(String value, String pattern, String message) {
+        if (!value.matches(pattern)) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    /** Como {@link #requireMatching}, pero un campo opcional vacío o en blanco se acepta sin mirar el patrón. */
+    static void requireMatchingIfPresent(String value, String pattern, String message) {
+        if (!value.isBlank()) {
+            requireMatching(value, pattern, message);
+        }
+    }
+
+    /** Exige que {@code value} no esté vacío ni en blanco; si lo está, lo rechaza con {@code message}. */
+    static void requireNotBlank(String value, String message) {
+        if (value.isBlank()) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    /** Exige que {@code code} sea un código ISO 4217 válido; es el único sitio con el mensaje de divisa no válida. */
+    static void requireIsoCurrency(String code) {
+        if (!isIsoCurrency(code)) {
+            throw new IllegalArgumentException("La divisa %s no es un código ISO 4217 válido".formatted(code));
+        }
+    }
+
     /**
      * Exige una divisa ISO 4217 válida y un importe positivo después de redondearlo (HALF_UP) a los decimales de esa
      * divisa, igual que hace {@code MonetaryAmount}, y no mayor que {@link #MAX_AMOUNT} tal como llega (sin redondear,
      * igual que el {@code @DecimalMax} de la API y el {@code maximum} del contrato).
      */
     static void requireValidMovement(BigDecimal amount, String currency) {
-        if (!isIsoCurrency(currency)) {
-            throw new IllegalArgumentException("La divisa %s no es un código ISO 4217 válido".formatted(currency));
-        }
+        requireIsoCurrency(currency);
         requireValidAmount(amount, currency, "El importe");
     }
 
     /**
      * Mismas reglas de importe para el depósito inicial de una apertura. La divisa ya debe ser un código ISO 4217
-     * válido: cada command la comprueba antes con su propio mensaje.
+     * válido: cada command la comprueba antes con {@link #requireIsoCurrency}.
      */
     static void requireValidInitialDeposit(BigDecimal amount, String currency) {
         requireValidAmount(amount, currency, "El depósito inicial");

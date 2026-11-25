@@ -57,7 +57,7 @@ The PMD baseline (#168, ADR 0020) flags `CyclomaticComplexity` 11 in `OpenAccoun
 - **Acceptance criteria:**
   - [x] The order of both commands is fixed by tests; sabotage seen red and reverted.
 
-### [ ] T3 — Named checks in CommandValidation (~10 min)
+### [x] T3 — Named checks in CommandValidation (~10 min)
 
 - **Layer:** application
 - **Files:** `CommandValidation.java`, `src/test/java/com/dawnrock/ddd/application/CommandValidationTests.java` (new)
@@ -66,7 +66,7 @@ The PMD baseline (#168, ADR 0020) flags `CyclomaticComplexity` 11 in `OpenAccoun
   1. Tests first: `requireMatching(value, pattern, message)` throws `IllegalArgumentException(message)` when the value does not match; `requireMatchingIfPresent` accepts an empty or blank value; `requireNotBlank(value, message)`; `requireIsoCurrency(code)` with the current message.
   2. Write them; `requireValidMovement` uses `requireIsoCurrency`, so its message is defined once.
 - **Acceptance criteria:**
-  - [ ] The new tests pass; `MovementCommandsTests` unchanged and green; the currency message appears once in `src/main`.
+  - [x] The new tests pass; `MovementCommandsTests` unchanged and green; the currency message appears once in `src/main` (after T4 and T5). Deviation: `OpenAnotherAccountCommandDef` also wrote the message, so it uses `requireIsoCurrency` too, with a new `OpenAnotherAccountCommandTests` that passes before and after the change.
 
 ### [ ] T4 — validate() of the opening command (~5 min)
 

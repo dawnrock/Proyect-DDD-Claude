@@ -21,9 +21,7 @@ public interface OpenAnotherAccountCommandDef {
 
     @Value.Check
     default void validate() {
-        if (!CommandValidation.isIsoCurrency(currency())) {
-            throw new IllegalArgumentException("La divisa %s no es un código ISO 4217 válido".formatted(currency()));
-        }
+        CommandValidation.requireIsoCurrency(currency());
         CommandValidation.requireValidInitialDeposit(initialDeposit(), currency());
     }
 }
