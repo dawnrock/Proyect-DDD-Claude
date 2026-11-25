@@ -282,3 +282,11 @@ main.welcome {
 .account-balance { font-size: 1.2rem; }
 .page-cta { display: flex; flex-direction: column; gap: 0.75rem; padding-inline: 0.4rem; }
 .page-cta .btn-slant { width: 100%; min-height: 3.5rem; font-size: 1.05rem; }
+
+/* Detalle de cuenta (#185): titular y segmento, IBAN y el saldo grande, con la A de marca de agua detrás. */
+.account-summary { position: relative; isolation: isolate; padding-top: 0.25rem; }
+.account-summary > :not(.watermark) { position: relative; }
+.account-summary .watermark { height: 13rem; top: -2.5rem; right: -1.5rem; z-index: -1; }
+.account-holder { margin: 0 0 0.25rem; font-family: var(--mona-text); font-size: 0.95rem; font-weight: 500; color: var(--mona-ink-2); }
+.account-iban { margin: 0 0 1rem; font-size: 0.95rem; color: var(--mona-ink-2); }
+.account-summary .balance { margin: 0 0 0.5rem; }

@@ -157,7 +157,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
 - **Acceptance criteria:**
   - [x] List tests pass for admin and customer.
 
-### [ ] T10 — Account detail: summary (~5 min)
+### [x] T10 — Account detail: summary (~5 min)
 
 - **Layer:** adapter.in (templates)
 - **Files:** `templates/accounts/detail.html`
@@ -165,7 +165,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
 - **What to do:**
   1. Holder · segment, IBAN (`<span class="text-nowrap">` kept), balance in Tektur with class `balance`, watermark behind; notices restyled.
 - **Acceptance criteria:**
-  - [ ] Detail and IBAN regeneration tests pass unchanged.
+  - [x] Detail and IBAN regeneration tests pass unchanged.
 
 ### [ ] T11 — Account detail: action track (~10 min)
 

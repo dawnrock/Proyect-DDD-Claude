@@ -11,12 +11,14 @@
         <div th:if="${message}" class="alert alert-success d-flex align-items-center gap-2" role="status"><svg th:replace="~{fragments/icons :: icon('circle-check')}"></svg><span th:text="${message}">Ingreso aprobado</span></div>
         <div th:if="${rejection}" class="alert alert-warning d-flex align-items-center gap-2" role="alert"><svg th:replace="~{fragments/icons :: icon('triangle-alert')}"></svg><span th:text="${rejection}">Retirada rechazada</span></div>
 
-        <div class="mb-4">
-            <h1 class="small fw-normal text-body-secondary mb-1"><span th:text="${account.holderName()}">Titular</span> · <span class="text-nowrap" th:text="${account.accountNumber()}">ES00</span></h1>
-            <p class="display-5 fw-semibold text-nowrap mb-1" th:text="${@fmt.money(account.balance(), account.currency())}">0,00 €</p>
+        <!--/* Resumen de la cuenta (#185): titular y segmento, IBAN y saldo en Tektur, con la A de marca de agua. */-->
+        <section class="account-summary mb-4">
+            <svg th:replace="~{fragments/brand :: watermark}"></svg>
+            <h1 class="account-holder"><span th:text="${account.holderName()}">Titular</span> · <span th:text="${@fmt.segment(account.segment())}">Minorista</span></h1>
+            <p class="iban account-iban"><span class="text-nowrap" th:text="${account.accountNumber()}">ES00</span></p>
+            <p class="balance" th:text="${@fmt.money(account.balance(), account.currency())}">0,00 €</p>
             <p class="small text-body-secondary mb-0" th:if="${!#strings.isEmpty(account.holderTaxId())}"><span th:text="${account.holderTaxId()}">12345678Z</span><span th:if="${!#strings.isEmpty(account.holderEmail())}"> · <span th:text="${account.holderEmail()}">ada@example.com</span></span></p>
-            <p class="small text-body-secondary mb-0" th:text="${@fmt.segment(account.segment())}">Minorista</p>
-        </div>
+        </section>
 
         <!--/* Cada acción es un <details>: se abre sin JavaScript y el servidor la deja abierta si su formulario vuelve con
              errores. Alpine.js (actionPanels, en app.js) solo añade que abrir una cierre las demás. */-->
