@@ -32,8 +32,18 @@ final class CommandValidation {
         }
     }
 
-    /** Como {@link #requireMatching}, pero un campo opcional vacío o en blanco se acepta sin mirar el patrón. */
+    /**
+     * Como {@link #requireMatching}, para un campo opcional: vacío (su valor por defecto, no indicado) se acepta sin
+     * mirar el patrón; en blanco sí se comprueba.
+     */
     static void requireMatchingIfPresent(String value, String pattern, String message) {
+        if (!value.isEmpty()) {
+            requireMatching(value, pattern, message);
+        }
+    }
+
+    /** Como {@link #requireMatchingIfPresent}, pero un valor en blanco también cuenta como no indicado. */
+    static void requireMatchingUnlessBlank(String value, String pattern, String message) {
         if (!value.isBlank()) {
             requireMatching(value, pattern, message);
         }

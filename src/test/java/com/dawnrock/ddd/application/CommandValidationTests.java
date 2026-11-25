@@ -23,17 +23,28 @@ class CommandValidationTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "   ", "123"})
-    @DisplayName("Un texto opcional vacío o en blanco pasa sin mirar el patrón; uno que lo cumple, también")
-    void anOptionalTextThatIsBlankOrMatchesPasses(String value) {
+    @ValueSource(strings = {"", "123"})
+    @DisplayName("Un texto opcional vacío pasa sin mirar el patrón; uno que lo cumple, también")
+    void anOptionalTextThatIsEmptyOrMatchesPasses(String value) {
         assertThatNoException().isThrownBy(() -> CommandValidation.requireMatchingIfPresent(value, DIGITS, "Mal"));
     }
 
-    @Test
-    @DisplayName("Un texto opcional indicado que no cumple el patrón se rechaza con el mensaje dado")
-    void anOptionalTextGivenThatDoesNotMatchIsRejected() {
+    @ParameterizedTest
+    @ValueSource(strings = {"   ", "12a"})
+    @DisplayName("Un texto opcional en blanco o que no cumple el patrón se rechaza con el mensaje dado")
+    void anOptionalTextThatIsBlankOrDoesNotMatchIsRejected(String value) {
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> CommandValidation.requireMatchingIfPresent("12a", DIGITS, "Mal"))
+                .isThrownBy(() -> CommandValidation.requireMatchingIfPresent(value, DIGITS, "Mal"))
+                .withMessage("Mal");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "   ", "123"})
+    @DisplayName("Con la variante que admite blancos, un texto vacío o en blanco cuenta como no indicado")
+    void withTheBlankVariantAnEmptyOrBlankTextCountsAsNotGiven(String value) {
+        assertThatNoException().isThrownBy(() -> CommandValidation.requireMatchingUnlessBlank(value, DIGITS, "Mal"));
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> CommandValidation.requireMatchingUnlessBlank("12a", DIGITS, "Mal"))
                 .withMessage("Mal");
     }
 

@@ -98,6 +98,15 @@ class OpenAccountCommandTests {
     }
 
     @Test
+    @DisplayName("Un correo en blanco cuenta como no indicado; un usuario del titular en blanco, no: se rechaza")
+    void aBlankEmailCountsAsNotGivenButABlankOwnerUsernameIsRejected() {
+        assertThat(validCommand().holderEmail("   ").build().holderEmail()).isEqualTo("   ");
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> validCommand().ownerUsername("   ").build())
+                .withMessage(OpenAccountCommandDef.OWNER_USERNAME_MESSAGE);
+    }
+
+    @Test
     @DisplayName("Con varios datos mal, se informa la primera regla en orden: documento, correo, usuario, divisa y depósito")
     void withSeveralWrongFieldsTheFirstRuleInOrderIsReported() {
         OpenAccountCommand.Builder command = OpenAccountCommand.builder()

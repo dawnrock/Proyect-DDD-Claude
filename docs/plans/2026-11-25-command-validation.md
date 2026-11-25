@@ -68,7 +68,7 @@ The PMD baseline (#168, ADR 0020) flags `CyclomaticComplexity` 11 in `OpenAccoun
 - **Acceptance criteria:**
   - [x] The new tests pass; `MovementCommandsTests` unchanged and green; the currency message appears once in `src/main` (after T4 and T5). Deviation: `OpenAnotherAccountCommandDef` also wrote the message, so it uses `requireIsoCurrency` too, with a new `OpenAnotherAccountCommandTests` that passes before and after the change.
 
-### [ ] T4 — validate() of the opening command (~5 min)
+### [x] T4 — validate() of the opening command (~5 min)
 
 - **Layer:** application
 - **Files:** `OpenAccountCommandDef.java`
@@ -76,9 +76,9 @@ The PMD baseline (#168, ADR 0020) flags `CyclomaticComplexity` 11 in `OpenAccoun
 - **What to do:**
   1. `validate()` becomes five calls in the same order: document, e-mail if present, owner username if present, currency, initial deposit.
 - **Acceptance criteria:**
-  - [ ] `OpenAccountCommandTests` (with T2's order test) and the web/REST tests green without changes.
+  - [x] `OpenAccountCommandTests` (with T2's order test) and the web/REST tests green without changes. While doing it, a characterization test caught that the old code treats a blank e-mail as not given but validates a blank owner username: `requireMatchingIfPresent` skips only the empty value and `requireMatchingUnlessBlank` also the blank one. The test passes on the old code and failed on the first version of the new one.
 
-### [ ] T5 — validate() of the sign-up command (~5 min)
+### [x] T5 — validate() of the sign-up command (~5 min)
 
 - **Layer:** application
 - **Files:** `SignUpCommandDef.java`
@@ -86,7 +86,7 @@ The PMD baseline (#168, ADR 0020) flags `CyclomaticComplexity` 11 in `OpenAccoun
 - **What to do:**
   1. `validate()` becomes six calls in the same order: name, document, e-mail, username, currency, initial deposit.
 - **Acceptance criteria:**
-  - [ ] `SignUpCommandTests`, `SignUpControllerTests` and `CustomerControllerTests` green without changes.
+  - [x] `SignUpCommandTests`, `SignUpControllerTests` and `CustomerControllerTests` green without changes. Committed together with T4: the opening command uses the new `SignUpCommandDef.EMAIL_MESSAGE`, so the e-mail message is also defined once.
 
 ### [ ] T6 — Out of the PMD baseline and project status (~5 min)
 
