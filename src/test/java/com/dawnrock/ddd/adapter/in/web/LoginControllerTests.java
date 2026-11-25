@@ -77,6 +77,17 @@ class LoginControllerTests {
     }
 
     @Test
+    @DisplayName("El formulario de acceso también va sobre la A de fondo, con la cabecera y «Entrar» en turquesa (#185)")
+    void theLoginFormSitsOverTheBigAWithTheHeader() throws Exception {
+        mvc.perform(get("/login").param("form", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<div class=\"backdrop\" aria-hidden=\"true\">")))
+                .andExpect(content().string(containsString("navbar-brand")))
+                .andExpect(content().string(matchesPattern(
+                        "(?s).*<button class=\"btn-slant btn-slant-rise\" type=\"submit\">Entrar</button>.*")));
+    }
+
+    @Test
     @DisplayName("Las puertas del login no llevan iconos: solo su título y la línea que explica cada una (#185)")
     void theLoginDoorsCarryNoIcons() throws Exception {
         mvc.perform(get("/login"))

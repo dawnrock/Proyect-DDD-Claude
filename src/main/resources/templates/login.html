@@ -2,8 +2,9 @@
 <html lang="es" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Acceso')}"></head>
 <body class="d-flex flex-column min-vh-100" hx-boost="true" hx-swap="innerHTML transition:true">
-<!--/* Las puertas (#185, ADR 0023) van sin cabecera: el logo está en el centro, sobre la A oscurecida de fondo. */-->
-<th:block th:unless="${showForm}"><div th:replace="~{fragments/brand :: backdrop}"></div></th:block>
+<!--/* Las pantallas de entrada (#185, ADR 0023) van sobre la A oscurecida de fondo. Las puertas, sin cabecera: el logo
+     está en el centro. */-->
+<div th:replace="~{fragments/brand :: backdrop}"></div>
 <th:block th:if="${showForm}"><header th:replace="~{fragments/layout :: header}"></header></th:block>
 <main class="app-container mx-auto w-100 px-3 pb-5" th:classappend="${showForm} ? '' : 'welcome'">
     <h1 class="h3 fw-semibold mb-4" th:if="${showForm}">Acceso</h1>
@@ -36,7 +37,7 @@
         </div>
 
         <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-primary d-inline-flex align-items-center gap-2" type="submit"><svg th:replace="~{fragments/icons :: icon('log-in')}"></svg>Entrar</button>
+            <button class="btn-slant btn-slant-rise" type="submit">Entrar</button>
             <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1" th:href="@{/login}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg>Volver</a>
         </div>
     </form>

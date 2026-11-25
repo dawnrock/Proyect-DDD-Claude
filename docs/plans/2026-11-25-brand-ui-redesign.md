@@ -124,7 +124,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
 - **Acceptance criteria:**
   - [x] Login tests pass, intro tests included.
 
-### [ ] T7 — Login form over the big A (~5 min)
+### [x] T7 — Login form over the big A (~5 min)
 
 - **Layer:** adapter.in (templates)
 - **Files:** `templates/login.html`, `LoginControllerTests.java`
@@ -133,7 +133,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
   1. Form view: backdrop, form on `surface`, «Entrar» as `.btn-slant-rise`, «Volver» as a secondary link; password toggle restyled (same fragment).
   2. Test: the form view has the backdrop.
 - **Acceptance criteria:**
-  - [ ] Login tests pass; the error and blocked notices still show.
+  - [x] Login tests pass; the error and blocked notices still show.
 
 ### [ ] T8 — Sign-up steps over the big A (~10 min)
 
