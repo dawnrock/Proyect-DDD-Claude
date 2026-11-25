@@ -202,7 +202,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
 - **Acceptance criteria:**
   - [x] Checked in the browser (Playwright, `reducedMotion` on and off): after a deposit with htmx, Motion animates `.balance` and `.movement`; with reduced motion, nothing.
 
-### [ ] T14 — Remaining screens (~10 min)
+### [x] T14 — Remaining screens (~10 min)
 
 - **Layer:** adapter.in (templates)
 - **Files:** `templates/accounts/new.html`, `templates/accounts/another.html`, `templates/error/403.html`, `templates/error/404.html`
@@ -210,7 +210,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
 - **What to do:**
   1. Headings, forms and buttons with the new classes; error pages with `.btn-slant-light` to go home.
 - **Acceptance criteria:**
-  - [ ] Opening, another-account and error tests pass.
+  - [x] Opening, another-account and error tests pass.
 
 ### [ ] T15 — Visual check against the sketches (~10 min)
 
