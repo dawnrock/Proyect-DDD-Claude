@@ -83,13 +83,4 @@ public interface CheckingAccountCommands {
      * @throws AccountNotFoundException si la cuenta no existe
      */
     AccountSummary regenerateAccountNumber(Caller caller, UUID id);
-
-    /**
-     * Revisa el segmento de todas las cuentas a las que les toca: vuelve a verificar los ingresos del titular y lo
-     * devuelve a minorista si ya no le corresponde el alto patrimonio. Es un proceso interno, sin {@link Caller}: lo
-     * dispara la tarea programada.
-     *
-     * @return cuántos titulares han vuelto a minorista
-     */
-    int reviewSegments();
 }

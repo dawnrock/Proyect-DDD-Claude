@@ -265,19 +265,6 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         return AccountViews.toTransfer(source, target, withdrawal);
     }
 
-    @Override
-    public int reviewSegments() {
-        return accountUnit.execute(changes -> {
-            int demoted = 0;
-            for (CheckingAccount account : repository.findAll()) {
-                if (dueSegmentReview.reviewIfDue(account, changes)) {
-                    demoted++;
-                }
-            }
-            return demoted;
-        });
-    }
-
     /**
      * Revisa el segmento de la cuenta antes de un cargo, en su propia unidad de trabajo: así el descubierto se decide
      * con el segmento que corresponde hoy y, si el cargo falla después, la revisión ya está guardada y su evento

@@ -56,8 +56,7 @@ import com.dawnrock.ddd.support.ApplicationServicesFixture;
 class CheckingAccountServiceTests {
 
 
-    /** Los casos de uso se piden como administrador; la propiedad se prueba en CheckingAccountServiceOwnershipTests. */
-    private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+    private static final Caller ADMIN = ServiceTestSupport.ADMIN;
 
     private CheckingAccountRepository repository;
     private DomainEventPublisher publisher;
@@ -78,28 +77,16 @@ class CheckingAccountServiceTests {
                 .service();
     }
 
-    /** Eventos publicados en cada llamada a {@code publishAll}, en orden. */
-    @SuppressWarnings("unchecked")
     private List<List<DomainEvent>> publishedBatches() {
-        ArgumentCaptor<List<DomainEvent>> captor = ArgumentCaptor.forClass(List.class);
-        verify(publisher, atLeast(0)).publishAll(captor.capture());
-        return captor.getAllValues();
+        return ServiceTestSupport.publishedBatches(publisher);
     }
 
-    /** Titular minorista por NIF (40.000 € verificados); el IBAN lo genera la factoría. */
     private static OpenAccountCommand.Builder command() {
-        return OpenAccountCommand.builder()
-                .holderName("Ada Lovelace")
-                .holderTaxId("12345678Z")
-                .holderEmail("ada@example.com")
-                .initialDeposit(new BigDecimal("100"))
-                .ownerUsername("ada");
+        return ServiceTestSupport.retailOpening();
     }
 
-    /** Titular de alto patrimonio por NIF (250.000 € verificados). */
     private static OpenAccountCommand.Builder highNetWorthCommand() {
-        return command().holderName("Grace Hopper").holderTaxId("87654321X").holderEmail("grace@example.com")
-                .ownerUsername("grace");
+        return ServiceTestSupport.highNetWorthOpening();
     }
 
     @Test
@@ -762,53 +749,6 @@ class CheckingAccountServiceTests {
 
             assertThat(transferencia.status()).isEqualTo("REJECTED");
             assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("RETAIL");
-        }
-    }
-
-    @Nested
-    @DisplayName("Revisión periódica de segmentos")
-    class ReviewSegments {
-
-        private UUID belowMinimum;
-        private UUID aboveMinimum;
-        private UUID retail;
-
-        @BeforeEach
-        void tresCuentas() {
-            belowMinimum = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("100000")).build()).id();
-            service.withdraw(ADMIN, WithdrawCommand.builder().accountId(belowMinimum).amount(new BigDecimal("500")).build());
-            aboveMinimum = service.openAccount(ADMIN, command().initialDeposit(new BigDecimal("100000")).build()).id();
-            retail = service.openAccount(ADMIN, command().build()).id();
-            clearInvocations(publisher);
-        }
-
-        @Test
-        @DisplayName("Pasado un mes, solo vuelve a minorista el titular que sigue bajo el mínimo, y se publica su cambio de segmento")
-        void afterAMonthOnlyTheHolderStillBelowTheMinimumIsDemotedToRetail() {
-            clock.advance(Duration.ofDays(32));
-
-            int demoted = service.reviewSegments();
-
-            assertThat(demoted).isEqualTo(1);
-            assertThat(service.findAccount(ADMIN, belowMinimum).segment()).isEqualTo("RETAIL");
-            assertThat(service.findAccount(ADMIN, aboveMinimum).segment()).isEqualTo("HIGH_NET_WORTH");
-            assertThat(service.findAccount(ADMIN, retail).segment()).isEqualTo("RETAIL");
-            assertThat(publishedBatches().stream().flatMap(List::stream))
-                    .singleElement()
-                    .isInstanceOfSatisfying(CustomerSegmentChanged.class, event -> {
-                        assertThat(event.accountId()).isEqualTo(belowMinimum);
-                        assertThat(event.segment()).isEqualTo(CustomerSegment.RETAIL);
-                    });
-        }
-
-        @Test
-        @DisplayName("Antes de un mes la revisión no cambia ningún segmento ni publica eventos")
-        void beforeAMonthTheReviewChangesNoSegment() {
-            clock.advance(Duration.ofDays(20));
-
-            assertThat(service.reviewSegments()).isZero();
-            assertThat(service.findAccount(ADMIN, belowMinimum).segment()).isEqualTo("HIGH_NET_WORTH");
-            assertThat(publishedBatches().stream().flatMap(List::stream)).isEmpty();
         }
     }
 

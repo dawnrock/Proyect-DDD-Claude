@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
 import com.dawnrock.ddd.application.CheckingAccountCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
+import com.dawnrock.ddd.application.SegmentReviewCommands;
 import com.dawnrock.ddd.application.listener.AuditLogListener;
 import com.dawnrock.ddd.application.listener.CustomerNotificationListener;
 import com.dawnrock.ddd.domain.model.AccountNumber;
@@ -65,6 +66,16 @@ class DomainConfigurationTests {
                 PersistenceTestAdapters.customerOwnership());
 
         assertThat(service).isInstanceOf(CheckingAccountCommands.class).isInstanceOf(CheckingAccountQueries.class);
+    }
+
+    @Test
+    @DisplayName("Construye la revisión periódica de segmentos, que ofrece su puerto de entrada")
+    void buildsTheSegmentReviewWithItsInputPort() {
+        Object service = configuration.accountSegmentReviewService(PersistenceTestAdapters.accounts(),
+                mock(DomainEventPublisher.class), configuration.segmentReviewService(taxId -> Optional.empty()),
+                configuration.clock(), PersistenceTestAdapters.unitOfWork());
+
+        assertThat(service).isInstanceOf(SegmentReviewCommands.class);
     }
 
     @Test

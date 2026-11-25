@@ -122,7 +122,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
 - **Acceptance criteria:**
   - [x] `CheckingAccountService` only orchestrates; `CheckingAccountServiceOwnershipTests` and the segment review tests pass unchanged. (1,038 test cases green)
 
-### [ ] T6 — `SegmentReviewCommands` and `AccountSegmentReviewService` (~10 min)
+### [x] T6 — `SegmentReviewCommands` and `AccountSegmentReviewService` (~10 min)
 
 - **Layer:** application · adapter.in · config
 - **Files:** `SegmentReviewCommands.java`, `AccountSegmentReviewService.java` (new), `CheckingAccountCommands.java`, `CheckingAccountService.java`, `SegmentReviewScheduler.java`, `DomainConfiguration.java`, the fixture, `SegmentReviewSchedulerTests.java`, segment review tests moved to `AccountSegmentReviewServiceTests.java`
@@ -132,7 +132,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
   2. New service on `AccountUnitOfWork` + `DueSegmentReview`; bean in `config`; the scheduler depends on the new port.
   3. Move the `reviewSegments` tests to the new test class.
 - **Acceptance criteria:**
-  - [ ] Scheduler and segment review tests pass against the new port; `./mvnw verify` green.
+  - [x] Scheduler and segment review tests pass against the new port; `./mvnw verify` green. (test helpers shared in ServiceTestSupport so CPD finds no duplication; DomainConfigurationTests checks the new bean; 1,039 test cases green)
 
 ### [ ] T7 — `MoneyMovementCommands` and `MoneyMovementService` (~15 min)
 

@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.dawnrock.ddd.application.AccountOwnershipRepository;
+import com.dawnrock.ddd.application.AccountSegmentReviewService;
 import com.dawnrock.ddd.application.CheckingAccountService;
 import com.dawnrock.ddd.application.CustomerOwnershipRepository;
 import com.dawnrock.ddd.application.UnitOfWork;
@@ -62,6 +63,15 @@ public class DomainConfiguration {
                                                          CustomerOwnershipRepository customerOwnership) {
         return new CheckingAccountService(repository, ownership, publisher, factory, transferService, segmentReview,
                 clock, unitOfWork, customers, customerOwnership);
+    }
+
+    /** Implementa {@code SegmentReviewCommands}: la revisión periódica de segmentos que dispara la tarea programada. */
+    @Bean
+    public AccountSegmentReviewService accountSegmentReviewService(CheckingAccountRepository repository,
+                                                                   DomainEventPublisher publisher,
+                                                                   SegmentReviewService segmentReview, Clock clock,
+                                                                   UnitOfWork unitOfWork) {
+        return new AccountSegmentReviewService(repository, publisher, segmentReview, clock, unitOfWork);
     }
 
     /** Consumidores de los eventos de dominio: Spring les entrega cada evento por su {@code @EventListener}. */

@@ -7,6 +7,7 @@ import java.time.Clock;
 import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
 import com.dawnrock.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.dawnrock.ddd.application.AccountOwnershipRepository;
+import com.dawnrock.ddd.application.AccountSegmentReviewService;
 import com.dawnrock.ddd.application.CheckingAccountService;
 import com.dawnrock.ddd.application.CustomerOwnershipRepository;
 import com.dawnrock.ddd.application.UnitOfWork;
@@ -55,5 +56,10 @@ public final class ApplicationServicesFixture {
     public CheckingAccountService service() {
         return new CheckingAccountService(accounts, ownership, publisher, factory, new MoneyTransferService(),
                 segmentReview, clock, unitOfWork, customers, customerOwnership);
+    }
+
+    /** La revisión periódica de segmentos sobre los mismos colaboradores. */
+    public AccountSegmentReviewService segmentReviewService() {
+        return new AccountSegmentReviewService(accounts, publisher, segmentReview, clock, unitOfWork);
     }
 }
