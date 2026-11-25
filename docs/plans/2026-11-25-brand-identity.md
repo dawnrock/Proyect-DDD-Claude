@@ -85,7 +85,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] `node --test "scripts/*.test.mjs"` passes, the new file included.
 
-### [ ] T4 — SVG generator and the three logos (~10 min)
+### [x] T4 — SVG generator and the three logos (~10 min)
 
 - **Layer:** build
 - **Files:** `scripts/build-brand.mjs`, `src/main/resources/static/brand/{monabank-horizontal,monabank-stacked,favicon}.svg`, `scripts/README.md`
@@ -95,8 +95,8 @@ Decisions taken in this plan:
   2. It writes each SVG: glyph paths in `#eef0f2`, one `<clipPath>` per painted letter, the grey and red polylines, the green leg polygon (clipped) and the arrow (not clipped), «Bank» in `#b9c0c7`; a tight `viewBox`; `role="img"` and `<title>monA Bank</title>`. The favicon is the A, its green leg and the arrow on a square `viewBox`.
   3. Run it, commit the SVGs, and document the command in `scripts/README.md` (needs Node 22 and internet; not part of the build).
 - **Acceptance criteria:**
-  - [ ] The SVGs open in a browser and match `docs/brand/prototypes/logo.html` (screenshot side by side shown to the user).
-  - [ ] Re-running the script produces the same files (deterministic).
+  - [x] The SVGs open in a browser and match `docs/brand/prototypes/logo.html` (screenshot side by side shown to the user).
+  - [x] Re-running the script produces the same files (deterministic).
 
 ### [ ] T5 — `/brand/**` public (~5 min)
 
