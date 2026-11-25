@@ -97,7 +97,7 @@
 - **Acceptance criteria:**
   - [x] The detail, htmx and Post/Redirect/Get tests pass unchanged. (1,049 test cases, unchanged)
 
-### [ ] T4 — `AccountListController` (~5 min)
+### [x] T4 — `AccountListController` (~5 min)
 
 - **Layer:** adapter.in · tests
 - **Files:** `AccountListController.java` (new), `AccountWebController.java`, `AccountListControllerTests.java` (moved groups)
@@ -105,7 +105,7 @@
 - **What to do:**
   1. Move `GET /` and `totalsByCurrency`; move `Listado`, `InicioSegunElRol` and `Cabecera`.
 - **Acceptance criteria:**
-  - [ ] Moved tests pass; `./mvnw verify` green.
+  - [x] Moved tests pass; `./mvnw verify` green. (the shared test data (callers, ids, summaries, htmx and asset matchers) moved to AccountWebTestSupport; tests that still reach GET / name AccountListController too; 1,049 test cases, unchanged)
 
 ### [ ] T5 — `AccountDetailController` (~10 min)
 

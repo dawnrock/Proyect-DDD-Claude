@@ -1,14 +1,7 @@
 package com.dawnrock.ddd.adapter.in.web;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -21,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.dawnrock.ddd.application.AccountDetails;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
 import com.dawnrock.ddd.application.AccountOpeningCommands;
@@ -60,26 +52,6 @@ public class AccountWebController {
     private final WebFormat fmt;
 
     private final AccountDetailView detailView;
-
-    @GetMapping("/")
-    public String list(Authentication authentication, Model model) {
-        Caller caller = CurrentCaller.from(authentication);
-        List<AccountSummary> accounts = queries.listAccounts(caller);
-        if (!caller.admin() && accounts.size() == 1) {
-            return AccountDetailView.redirectToDetail(accounts.get(0).id());
-        }
-        model.addAttribute("admin", caller.admin());
-        model.addAttribute("customer", AccountDetailView.isCustomer(caller, accounts));
-        model.addAttribute("accounts", accounts);
-        model.addAttribute("totals", totalsByCurrency(accounts));
-        return "accounts/list";
-    }
-
-    /** Saldo total de las cuentas, sumado por divisa (no se mezclan divisas). */
-    private static Map<String, BigDecimal> totalsByCurrency(List<AccountSummary> accounts) {
-        return accounts.stream().collect(Collectors.groupingBy(AccountSummary::currency, TreeMap::new,
-                Collectors.reducing(BigDecimal.ZERO, AccountSummary::balance, BigDecimal::add)));
-    }
 
     @GetMapping("/accounts/{id}")
     public String detail(@PathVariable UUID id, Authentication authentication, Model model) {
