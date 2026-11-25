@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-25
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~60 min (6 tasks)
 
 ## Goal
@@ -120,23 +120,23 @@ Both new classes are package-private: only the aggregate uses them, so the hexag
 
 **Specific:**
 
-- [ ] `CheckingAccount` without `GodClass` or `CyclomaticComplexity`, and no new PMD warning in `domain.model`.
-- [ ] Same public API, events, messages and order: the existing domain, persistence and end-to-end tests pass unchanged.
-- [ ] The new objects have their own POJO tests and satisfy `DomainIsolationTests` and `check-domain.mjs`.
+- [x] `CheckingAccount` without `GodClass` or `CyclomaticComplexity`, and no new PMD warning in `domain.model`.
+- [x] Same public API, events, messages and order: the existing domain, persistence and end-to-end tests pass unchanged.
+- [x] The new objects have their own POJO tests and satisfy `DomainIsolationTests` and `check-domain.mjs`.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: … (n/a: no API change).
-- [ ] Any new business term is in `docs/dominio/glosario.md`.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: … (n/a: no API change).
+- [x] Any new business term is in `docs/dominio/glosario.md`.
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
