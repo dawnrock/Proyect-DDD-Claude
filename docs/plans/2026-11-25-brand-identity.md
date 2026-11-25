@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-25
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~120 min (14 tasks)
 
 ## Goal
@@ -51,7 +51,7 @@ Decisions taken in this plan:
 
 ## Tasks
 
-### [ ] T1 — Brand prototypes as reference (~5 min)
+### [x] T1 — Brand prototypes as reference (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/brand/prototypes/intro.html`, `docs/brand/prototypes/logo.html`, `docs/brand/README.md`
@@ -60,7 +60,7 @@ Decisions taken in this plan:
   1. Copy the two prototypes (done in this plan's commit; `logo.html` with the approved arrow, 18 %).
   2. `README.md`: what each one is, the spec above, and that they load Tektur from Google Fonts (reference only, never served).
 - **Acceptance criteria:**
-  - [ ] Opening `docs/brand/prototypes/intro.html` in a browser plays the approved intro.
+  - [x] Opening `docs/brand/prototypes/intro.html` in a browser plays the approved intro.
 
 ### [ ] T2 — Vendor Tektur (~10 min)
 
