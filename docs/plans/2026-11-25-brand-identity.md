@@ -131,7 +131,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] No template references `:: footer`; the test passes.
 
-### [ ] T8 — Stacked logo on the welcome screens (~5 min)
+### [x] T8 — Stacked logo on the welcome screens (~5 min)
 
 - **Layer:** adapter.in.web (templates)
 - **Files:** `login.html`, `signup/data.html`, `LoginControllerTests`, `SignUpControllerTests`
@@ -140,7 +140,7 @@ Decisions taken in this plan:
   1. Tests: the login doors (`/login` without `form`) and the sign-up's first step show `monabank-stacked.svg` with `alt=""` (decorative: the `h1` already names the bank) and the `h1` reads «Bienvenido a monA Bank» / «Hazte cliente de monA Bank».
   2. The `<img>` above the `h1`, centred, max width ~18 rem.
 - **Acceptance criteria:**
-  - [ ] Both tests pass; the login form (`/login?form`) has no stacked logo.
+  - [x] Both tests pass; the login form (`/login?form`) has no stacked logo.
 
 ### [ ] T9 — Name in domain messages (~5 min)
 

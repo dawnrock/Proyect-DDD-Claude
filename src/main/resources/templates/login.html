@@ -4,7 +4,8 @@
 <body class="d-flex flex-column min-vh-100" hx-boost="true" hx-swap="innerHTML transition:true">
 <header th:replace="~{fragments/layout :: header}"></header>
 <main class="app-container mx-auto w-100 px-3 pb-5">
-    <h1 class="h3 fw-semibold mb-4" th:text="${showForm} ? 'Acceso' : 'Bienvenido a Mon-A Bank'">Acceso</h1>
+    <img class="brand-welcome" th:unless="${showForm}" th:src="@{/brand/monabank-stacked.svg}" alt="">
+    <h1 class="h3 fw-semibold mb-4" th:text="${showForm} ? 'Acceso' : 'Bienvenido a monA Bank'">Acceso</h1>
     <div class="alert alert-success d-flex align-items-center gap-2" role="status" th:if="${param.logout}"><svg th:replace="~{fragments/icons :: icon('circle-check')}"></svg>Has cerrado la sesión</div>
 
     <div class="row row-cols-1 row-cols-sm-2 g-3" th:unless="${showForm}">

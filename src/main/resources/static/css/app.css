@@ -52,3 +52,6 @@
 
 /* Logo de monA Bank en la cabecera (#178): el SVG horizontal, a la altura de la barra de navegación. */
 .brand-logo { height: 2rem; width: auto; display: block; }
+
+/* Logo apilado en las bienvenidas del login y del alta (#178): decorativo, el título ya nombra al banco. */
+.brand-welcome { display: block; width: min(18rem, 70%); height: auto; margin: 0.5rem auto 2rem; }
