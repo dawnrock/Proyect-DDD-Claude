@@ -20,8 +20,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.25rem;
+    height: 2.25rem;
     border-radius: 50%;
     background-color: var(--mona-ground);
     font-size: 0.875rem;
@@ -52,6 +52,9 @@
     .actions > details { display: contents; }
     .actions > details > summary { grid-row: 1; }
     .actions > details::details-content { grid-column: 1 / -1; grid-row: 2; }
+    /* El contenido de una acción cerrada comparte esa segunda fila: fuera de la maqueta, para que no tape el formulario
+       abierto ni reciba sus clics. */
+    .actions > details:not([open])::details-content { display: none; pointer-events: none; }
 }
 
 /* Acciones secundarias bajo la pista: abrir otra cuenta y generar un IBAN nuevo. */
@@ -187,7 +190,7 @@ h1, .h1, .h2, .h3 { font-weight: 600; letter-spacing: -0.005em; }
 .backdrop { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
 .backdrop svg { position: absolute; left: 50%; top: -20vh; height: 130vh; width: auto; transform: translateX(-50%); }
 .backdrop-a { fill: #262b30; stroke: #30363c; stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
-.backdrop-rise { fill: var(--mona-rise); opacity: 0.12; }
+.backdrop-rise { fill: var(--mona-rise); opacity: 0.08; }
 
 /* Botones en paralelogramo con la inclinación de la A (#185). La forma es un ::before sesgado y no un clip-path,
    para que el contorno de foco siga el paralelogramo en lugar de quedar recortado. */
@@ -256,9 +259,9 @@ h1, .h1, .h2, .h3 { font-weight: 600; letter-spacing: -0.005em; }
     overflow: hidden;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
     min-height: 5.75rem;
-    padding: 1.1rem 3rem 1.1rem 1.25rem;
+    padding: 1rem 2.25rem 1rem 1rem;
     background-color: var(--mona-surface);
     color: var(--mona-ink);
     text-decoration: none;
@@ -266,6 +269,8 @@ h1, .h1, .h2, .h3 { font-weight: 600; letter-spacing: -0.005em; }
 }
 .card-slant > :not(.watermark) { position: relative; }
 .card-slant .watermark { height: 140%; top: -15%; right: 2rem; }
+.card-slant .watermark-rise { opacity: 0.1; }
+.card-slant .iban { font-size: 0.95rem; letter-spacing: 0.02em; white-space: nowrap; }
 a.card-slant:hover { background-color: var(--mona-surface-hover); color: var(--mona-ink); }
 a.card-slant:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--mona-ink); background-color: var(--mona-surface-hover); }
 
@@ -318,14 +323,15 @@ main.welcome {
 /* Listado de cuentas (#185): saldo total grande, tarjetas inclinadas y la acción principal a todo el ancho. */
 .total-balance { font-size: clamp(2.25rem, 10vw, 3rem); line-height: 1.05; letter-spacing: -0.015em; }
 .account-cards { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
-.account-balance { font-size: 1.2rem; }
+.account-balance { font-size: 1.1rem; }
 .page-cta { display: flex; flex-direction: column; gap: 0.75rem; padding-inline: 0.4rem; }
 .page-cta .btn-slant { width: 100%; min-height: 3.5rem; font-size: 1.05rem; }
 
 /* Detalle de cuenta (#185): titular y segmento, IBAN y el saldo grande, con la A de marca de agua detrás. */
-.account-summary { position: relative; isolation: isolate; padding-top: 0.25rem; }
+.account-summary { position: relative; isolation: isolate; overflow: hidden; padding-top: 0.25rem; }
 .account-summary > :not(.watermark) { position: relative; }
-.account-summary .watermark { height: 13rem; top: -2.5rem; right: -1.5rem; z-index: -1; }
+.account-summary .watermark { height: 12rem; top: -1rem; right: -0.5rem; z-index: -1; }
+.account-summary .watermark-rise { opacity: 0.1; }
 .account-holder { margin: 0 0 0.25rem; font-family: var(--mona-text); font-size: 0.95rem; font-weight: 500; color: var(--mona-ink-2); }
 .account-iban { margin: 0 0 1rem; font-size: 0.95rem; color: var(--mona-ink-2); }
 .account-summary .balance { margin: 0 0 0.5rem; }

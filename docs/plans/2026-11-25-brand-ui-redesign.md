@@ -212,7 +212,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
 - **Acceptance criteria:**
   - [x] Opening, another-account and error tests pass.
 
-### [ ] T15 — Visual check against the sketches (~10 min)
+### [x] T15 — Visual check against the sketches (~10 min)
 
 - **Layer:** tests
 - **Files:** none committed (scratch Playwright script)
@@ -222,7 +222,8 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
   2. Keyboard pass: every door, action and button shows its focus.
   3. Show the screenshots to the user before the PR.
 - **Acceptance criteria:**
-  - [ ] No horizontal scroll at 360 px; text contrast ≥ 4.5:1; focus visible everywhere.
+  - [x] No horizontal scroll at 360 px; text contrast ≥ 4.5:1; focus visible everywhere.
+- **Found and fixed:** in the grid track, the closed actions' content shared the open form's row and caught its clicks (now `display: none` while closed); the balance watermark overflowed 8 px at 360 px (now clipped); masked IBANs were cut on the admin cards at 390 px (tighter card padding); the green tint of the backdrop and watermarks was lowered so the A reads darkened.
 
 ### [ ] T16 — Docs and project status (~10 min)
 
