@@ -123,6 +123,23 @@ h1, .h1, .h2, .h3 { font-weight: 600; letter-spacing: -0.005em; }
 .app-header .btn-link { color: var(--mona-ink-2); text-decoration: none; min-height: 44px; }
 .app-header .btn-link:hover, .app-header .btn-link:focus-visible { color: var(--mona-ink); }
 
+/* Glifos de la marca (fragments/brand): la subida de la A y la caída de la n, del alto del texto o algo más. */
+.glyph { display: inline-block; flex: none; height: 1.5em; width: auto; vertical-align: -0.3em; }
+.glyph-rise { color: var(--mona-rise); }
+.glyph-drop { color: var(--mona-drop); height: 1.1em; vertical-align: -0.15em; }
+
+/* La A en contorno como marca de agua, detrás del contenido de su contenedor (que lleva position: relative). */
+.watermark { position: absolute; pointer-events: none; z-index: 0; height: 160%; width: auto; right: 1.5rem; top: -25%; }
+.watermark-a { fill: none; stroke: #30363c; stroke-width: 2.5px; vector-effect: non-scaling-stroke; }
+.watermark-rise { fill: var(--mona-rise); opacity: 0.16; }
+
+/* La A oscurecida y más grande que la pantalla detrás de las pantallas de entrada (#185): fija, centrada y cortada
+   por arriba, como en el boceto aprobado. */
+.backdrop { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.backdrop svg { position: absolute; left: 50%; top: -20vh; height: 130vh; width: auto; transform: translateX(-50%); }
+.backdrop-a { fill: #262b30; stroke: #30363c; stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
+.backdrop-rise { fill: var(--mona-rise); opacity: 0.12; }
+
 /* Intro de la marca (#178): capa a pantalla completa sobre las puertas del login, del color de fondo de la web. */
 .splash { position: fixed; inset: 0; z-index: 1080; background-color: var(--bs-body-bg); }
 .splash canvas { display: block; width: 100%; height: 100%; }

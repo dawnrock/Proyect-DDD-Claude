@@ -89,7 +89,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
 - **Acceptance criteria:**
   - [x] The existing header test still passes; the preload test passes.
 
-### [ ] T4 — Brand fragments: glyphs and the A (~10 min)
+### [x] T4 — Brand fragments: glyphs and the A (~10 min)
 
 - **Layer:** adapter.in (templates)
 - **Files:** `templates/fragments/brand.html` (new), `BrandGlyphsTemplatesTests.java` (new)
@@ -98,7 +98,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
   1. Fragments with inline SVG taken from the logo outlines (same coordinates as `static/brand/`), `aria-hidden="true"`, coloured with `currentColor`: `rise` (A leg + arrow), `drop` (the n's bar and stem), `watermark` (the A in outline with a faint green leg) and `backdrop` (the A bigger than the viewport, darkened, `position: fixed`, behind the content).
   2. Test that renders each fragment through a tiny template (or reads the file) and checks it is decorative (`aria-hidden`) and has no fixed colour.
 - **Acceptance criteria:**
-  - [ ] Four fragments; the test passes.
+  - [x] Four fragments; the test passes.
 
 ### [ ] T5 — Slanted buttons, fields and focus (~10 min)
 
