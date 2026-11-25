@@ -120,7 +120,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Every page shows the logo and the favicon; no «Cuentas corrientes» left in templates.
 
-### [ ] T7 — Remove the phase footer (~5 min)
+### [x] T7 — Remove the phase footer (~5 min)
 
 - **Layer:** adapter.in.web (templates)
 - **Files:** `fragments/layout.html` and every template with `fragments/layout :: footer` (`login.html`, `signup/*`, `accounts/*`, `error/*`), `AccountListControllerTests`
@@ -129,7 +129,7 @@ Decisions taken in this plan:
   1. Replace `theFooterOnlyShowsPhaseTwoHexagonalArchitecture` with a test that the page has no `<footer>` and no «arquitectura hexagonal».
   2. Delete the `footer` fragment and its uses; keep the pages' layout (`min-vh-100` body without `mt-auto` footer).
 - **Acceptance criteria:**
-  - [ ] No template references `:: footer`; the test passes.
+  - [x] No template references `:: footer`; the test passes.
 
 ### [ ] T8 — Stacked logo on the welcome screens (~5 min)
 

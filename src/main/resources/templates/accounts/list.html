@@ -30,6 +30,5 @@
     <p th:if="${accounts.isEmpty() and admin}" class="text-body-secondary">Todavía no hay cuentas. Abre la primera.</p>
     <p th:if="${accounts.isEmpty() and !admin}" class="text-body-secondary">Todavía no tienes cuentas.</p>
 </main>
-<footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>

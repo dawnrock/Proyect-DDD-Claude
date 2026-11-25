@@ -131,15 +131,15 @@ class AccountListControllerTests extends AccountWebTestSupport {
         }
 
         @Test
-        @DisplayName("El pie de página indica solo la fase 2, arquitectura hexagonal, sin el nombre del proyecto")
-        void theFooterOnlyShowsPhaseTwoHexagonalArchitecture() throws Exception {
+        @DisplayName("La web no tiene pie de página: ni la fase ni la arquitectura del proyecto (#178)")
+        void thePageHasNoFooterWithThePhaseOrTheArchitecture() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
 
             mvc.perform(get("/"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("Fase 2 · arquitectura hexagonal")))
-                    .andExpect(content().string(not(containsString("Proyect-DDD-Claude"))))
-                    .andExpect(content().string(not(containsStringIgnoringCase("fase 1"))));
+                    .andExpect(content().string(not(containsString("<footer"))))
+                    .andExpect(content().string(not(containsStringIgnoringCase("arquitectura hexagonal"))))
+                    .andExpect(content().string(not(containsString("Proyect-DDD-Claude"))));
         }
     }
 
