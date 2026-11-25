@@ -1,11 +1,9 @@
 package com.dawnrock.ddd.application;
 
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 
 
 import com.dawnrock.ddd.domain.model.AccountNumber;
@@ -14,7 +12,6 @@ import com.dawnrock.ddd.domain.model.CheckingAccountFactory;
 import com.dawnrock.ddd.domain.model.CheckingAccountRepository;
 import com.dawnrock.ddd.domain.model.Customer;
 import com.dawnrock.ddd.domain.model.CustomerRepository;
-import com.dawnrock.ddd.domain.model.DomainEvent;
 import com.dawnrock.ddd.domain.model.DomainEventPublisher;
 import com.dawnrock.ddd.domain.model.DuplicateAccountNumberException;
 import com.dawnrock.ddd.domain.model.DuplicateCustomerException;
@@ -47,12 +44,12 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
 
     private final CheckingAccountRepository repository;
     private final AccountOwnershipRepository ownership;
-    private final DomainEventPublisher publisher;
     private final CheckingAccountFactory factory;
     private final MoneyTransferService transferService;
     private final SegmentReviewService segmentReview;
     private final Clock clock;
     private final UnitOfWork unitOfWork;
+    private final AccountUnitOfWork accountUnit;
     private final CustomerRepository customers;
     private final CustomerOwnershipRepository customerOwnership;
 
@@ -64,22 +61,22 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
                                   CustomerOwnershipRepository customerOwnership) {
         this.repository = repository;
         this.ownership = ownership;
-        this.publisher = publisher;
         this.factory = factory;
         this.transferService = transferService;
         this.segmentReview = segmentReview;
         this.clock = clock;
         this.unitOfWork = unitOfWork;
+        this.accountUnit = new AccountUnitOfWork(unitOfWork, repository, publisher);
         this.customers = customers;
         this.customerOwnership = customerOwnership;
     }
 
     @Override
     public AccountSummary openAccount(Caller caller, OpenAccountCommand command) {
-        return inUnit(events -> open(caller, command, events));
+        return accountUnit.execute(changes -> open(caller, command, changes));
     }
 
-    private AccountSummary open(Caller caller, OpenAccountCommand command, Events events) {
+    private AccountSummary open(Caller caller, OpenAccountCommand command, AccountChanges changes) {
         if (!caller.admin()) {
             throw new ForbiddenOperationException("abrir cuentas");
         }
@@ -97,7 +94,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
             customers.save(customer);
             customerOwnership.assign(taxId, owner);
         }
-        CheckingAccount account = save(opened, events);
+        CheckingAccount account = changes.save(opened);
         ownership.assign(account.id(), owner);
         return AccountViews.toSummary(account);
     }
@@ -150,7 +147,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
      */
     @Override
     public AccountSummary signUp(SignUpCommand command) {
-        return inUnit(events -> {
+        return accountUnit.execute(changes -> {
             TaxId taxId = new TaxId(command.taxId());
             Customer customer = Customer.register(command.fullName(), taxId, new EmailAddress(command.email()));
             CheckingAccount opened = factory.open(customer, AccountViews.toAmount(command.initialDeposit(), command.currency()));
@@ -163,7 +160,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
             }
             customers.save(customer);
             customerOwnership.assign(taxId, command.username());
-            CheckingAccount account = save(opened, events);
+            CheckingAccount account = changes.save(opened);
             ownership.assign(account.id(), command.username());
             return AccountViews.toSummary(account);
         });
@@ -171,12 +168,12 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
 
     @Override
     public AccountSummary openAnotherAccount(Caller caller, OpenAnotherAccountCommand command) {
-        return inUnit(events -> {
+        return accountUnit.execute(changes -> {
             Customer customer = customerOf(caller);
             CheckingAccount opened =
                     factory.open(customer, AccountViews.toAmount(command.initialDeposit(), command.currency()));
             requireUnused(opened.accountNumber());
-            CheckingAccount account = save(opened, events);
+            CheckingAccount account = changes.save(opened);
             ownership.assign(account.id(), caller.username());
             return AccountViews.toSummary(account);
         });
@@ -197,12 +194,12 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         if (!caller.admin()) {
             throw new ForbiddenOperationException("generar un nuevo número de cuenta");
         }
-        return inUnit(events -> {
+        return accountUnit.execute(changes -> {
             CheckingAccount account = load(id);
             AccountNumber generated = factory.nextAccountNumber();
             requireUnused(generated);
             account.reassignAccountNumber(generated);
-            return AccountViews.toSummary(save(account, events));
+            return AccountViews.toSummary(changes.save(account));
         });
     }
 
@@ -234,10 +231,10 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
 
     @Override
     public TransactionSummary deposit(Caller caller, DepositCommand command) {
-        return inUnit(events -> {
+        return accountUnit.execute(changes -> {
             CheckingAccount account = loadFor(caller, command.accountId());
             Transaction transaction = account.deposit(AccountViews.toAmount(command.amount(), command.currency()));
-            save(account, events);
+            changes.save(account);
             return AccountViews.toTransaction(transaction);
         });
     }
@@ -245,10 +242,10 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     @Override
     public TransactionSummary withdraw(Caller caller, WithdrawCommand command) {
         reviewSegmentBeforeDebit(caller, command.accountId());
-        return inUnit(events -> {
+        return accountUnit.execute(changes -> {
             CheckingAccount account = loadFor(caller, command.accountId());
             Transaction transaction = account.tryWithdraw(AccountViews.toAmount(command.amount(), command.currency()));
-            save(account, events);
+            changes.save(account);
             return AccountViews.toTransaction(transaction);
         });
     }
@@ -256,27 +253,27 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     @Override
     public TransferSummary transfer(Caller caller, TransferCommand command) {
         reviewSegmentBeforeDebit(caller, command.sourceAccountId());
-        return inUnit(events -> transfer(caller, command, events));
+        return accountUnit.execute(changes -> transfer(caller, command, changes));
     }
 
-    private TransferSummary transfer(Caller caller, TransferCommand command, Events events) {
+    private TransferSummary transfer(Caller caller, TransferCommand command, AccountChanges changes) {
         CheckingAccount source = loadFor(caller, command.sourceAccountId());
         AccountNumber targetNumber = new AccountNumber(command.targetAccountNumber());
         CheckingAccount target = repository.findByAccountNumber(targetNumber)
                 .orElseThrow(() -> new TargetAccountNotFoundException(targetNumber.value()));
         Transaction withdrawal =
                 transferService.transfer(source, target, AccountViews.toAmount(command.amount(), command.currency()));
-        save(source, events);
-        save(target, events);
+        changes.save(source);
+        changes.save(target);
         return AccountViews.toTransfer(source, target, withdrawal);
     }
 
     @Override
     public int reviewSegments() {
-        return inUnit(events -> {
+        return accountUnit.execute(changes -> {
             int demoted = 0;
             for (CheckingAccount account : repository.findAll()) {
-                if (reviewSegment(account, events)) {
+                if (reviewSegment(account, changes)) {
                     demoted++;
                 }
             }
@@ -290,17 +287,17 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
      * publicado.
      */
     private void reviewSegmentBeforeDebit(Caller caller, UUID accountId) {
-        inUnit(events -> reviewSegment(loadFor(caller, accountId), events));
+        accountUnit.execute(changes -> reviewSegment(loadFor(caller, accountId), changes));
     }
 
     /** Revisa el segmento si le toca y guarda la cuenta. Devuelve si el titular ha vuelto a minorista. */
-    private boolean reviewSegment(CheckingAccount account, Events events) {
+    private boolean reviewSegment(CheckingAccount account, AccountChanges changes) {
         if (!account.segmentReviewDue(clock.instant())) {
             return false;
         }
         boolean wasHighNetWorth = account.primaryHolder().isHighNetWorth();
         segmentReview.review(account, clock.instant());
-        save(account, events);
+        changes.save(account);
         return wasHighNetWorth && !account.primaryHolder().isHighNetWorth();
     }
 
@@ -311,33 +308,6 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
             throw new AccountNotFoundException(id);
         }
         return account;
-    }
-
-    /**
-     * Ejecuta el caso de uso dentro de la unidad de trabajo y, al final del trabajo y todavía dentro de ella, publica los
-     * eventos de cada cuenta guardada, una llamada por cuenta y en el orden en que se guardaron. Así el outbox los guarda
-     * en la misma transacción que las cuentas (#165, ADR 0021): si la unidad no termina bien, desaparecen con ella. Si
-     * el caso de uso falla antes, no publica nada.
-     */
-    private <T> T inUnit(Function<Events, T> work) {
-        Events events = new Events();
-        return unitOfWork.execute(() -> {
-            T result = work.apply(events);
-            events.batches.forEach(publisher::publishAll);
-            return result;
-        });
-    }
-
-    /** Guarda la cuenta y recoge los eventos que ha registrado, para publicarlos al final de la unidad. */
-    private CheckingAccount save(CheckingAccount account, Events events) {
-        CheckingAccount saved = repository.save(account);
-        events.batches.add(account.pullDomainEvents());
-        return saved;
-    }
-
-    /** Eventos pendientes de publicar de un caso de uso: un lote por cuenta guardada. */
-    private static final class Events {
-        private final List<List<DomainEvent>> batches = new ArrayList<>();
     }
 
     private String holderEmail(CheckingAccount account) {

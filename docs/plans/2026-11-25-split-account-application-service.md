@@ -99,7 +99,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
 - **Acceptance criteria:**
   - [x] `CheckingAccountService` has no mapping code; `StatusViewsTests` and the service tests pass unchanged. (also takes toAmount; 1,035 test cases green)
 
-### [ ] T4 — Extract `AccountUnitOfWork` and `AccountChanges` (~10 min)
+### [x] T4 — Extract `AccountUnitOfWork` and `AccountChanges` (~10 min)
 
 - **Layer:** application
 - **Files:** `AccountUnitOfWork.java`, `AccountChanges.java` (new), `AccountUnitOfWorkTests.java` (new), `CheckingAccountService.java`
@@ -108,7 +108,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
   1. TDD: tests for the collaborator with a recording `DomainEventPublisher` and the in-memory `UnitOfWork`: one `publishAll` per saved account, in save order, inside the unit; nothing published if the work throws.
   2. Move `inUnit`, `save` and `Events` there; the service uses it.
 - **Acceptance criteria:**
-  - [ ] New tests pass; the outbox tests (`OutboxDeliveryTests`, `OutboxRestartTests`) and the event tests of the service pass unchanged.
+  - [x] New tests pass; the outbox tests (`OutboxDeliveryTests`, `OutboxRestartTests`) and the event tests of the service pass unchanged. (3 new tests, red first because the class did not exist; 1,038 test cases green, outbox tests unchanged)
 
 ### [ ] T5 — Extract `AccountAccess`, `UsernameAvailability` and `DueSegmentReview` (~10 min)
 
