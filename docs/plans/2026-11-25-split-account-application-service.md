@@ -169,16 +169,16 @@ Package-private collaborators cannot be built in `config`, so each service keeps
 - **Acceptance criteria:**
   - [x] No reference to `CheckingAccountService` left in `src/`; `./mvnw verify` green with the same number of test cases as T1 (plus the new ones of T4). (compared with a clean run of origin/Hexagonal: 1,042 unique test cases before, 1,048 after; the only two gone are the old both-ports checks, replaced by one check per port)
 
-### [ ] T10 — ArchUnit: no adapter depends on an application service (~5 min)
+### [x] T10 — ArchUnit: no adapter depends on an application service (~5 min)
 
 - **Layer:** tests
 - **Files:** `HexagonalArchitectureTests.java`
 - **Depends on:** T9
 - **What to do:**
-  1. Replace the rule on `CheckingAccountService` with one on classes of `application` whose name ends in `Service`: only `application` and `config` may depend on them.
+  1. Replace the rule on `CheckingAccountService` with one on the classes that implement an input port (found by what they do, not by name): only `application` and `config` may depend on them. A second rule requires those classes to be `*Service` in `application`, and, since ArchUnit fails on a rule with no classes, it also guards the first rule's predicate against matching nothing.
   2. Validate it by making a REST controller depend on `MoneyMovementService`: the rule fails; revert.
 - **Acceptance criteria:**
-  - [ ] Rule broken on purpose and restored; `./mvnw verify` green.
+  - [x] Rule broken on purpose and restored; `./mvnw verify` green. (a field of type MoneyMovementService in TransferController made onlyConfigKnowsTheServicesBehindTheInputPorts fail; reverted, green)
 
 ### [ ] T11 — PMD baseline (~5 min)
 
