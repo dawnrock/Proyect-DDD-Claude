@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.function.UnaryOperator;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -91,5 +93,25 @@ class SignUpCommandTests {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().initialDeposit(new BigDecimal("1000000000.00")).build())
                 .withMessage("El depósito inicial no puede superar 999999999.99");
+    }
+
+    @Test
+    @DisplayName("Con varios datos mal, se informa la primera regla en orden: nombre, documento, correo, usuario, divisa y depósito")
+    void withSeveralWrongFieldsTheFirstRuleInOrderIsReported() {
+        SignUpCommand.Builder command = SignUpCommand.builder()
+                .fullName("").taxId("x").email("x").username("X").currency("eur").initialDeposit(BigDecimal.ZERO);
+        List<UnaryOperator<SignUpCommand.Builder>> fixes = List.of(
+                b -> b.fullName("Ada Lovelace"), b -> b.taxId("12345678Z"), b -> b.email("ada@example.com"),
+                b -> b.username("ada"), b -> b.currency("EUR"));
+        List<String> messages = List.of("El nombre y apellidos son obligatorios", "El documento debe ser un DNI o un NIE",
+                "El correo electrónico no es válido", OpenAccountCommandDef.USERNAME_MESSAGE,
+                "La divisa eur no es un código ISO 4217 válido", "El depósito inicial debe ser positivo");
+
+        for (int i = 0; i < messages.size(); i++) {
+            assertThatIllegalArgumentException().isThrownBy(command::build).withMessage(messages.get(i));
+            if (i < fixes.size()) {
+                fixes.get(i).apply(command);
+            }
+        }
     }
 }

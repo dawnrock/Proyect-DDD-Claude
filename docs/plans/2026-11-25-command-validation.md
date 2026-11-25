@@ -46,7 +46,7 @@ The PMD baseline (#168, ADR 0020) flags `CyclomaticComplexity` 11 in `OpenAccoun
 - **Acceptance criteria:**
   - [x] Every rule of `SignUpCommandDef.validate()` has a test with its message; sabotage seen red and reverted (each rule broken alone fails all its tests).
 
-### [ ] T2 — Characterization: order of the rules (~5 min)
+### [x] T2 — Characterization: order of the rules (~5 min)
 
 - **Layer:** tests
 - **Files:** `SignUpCommandTests.java`, `OpenAccountCommandTests.java`
@@ -55,7 +55,7 @@ The PMD baseline (#168, ADR 0020) flags `CyclomaticComplexity` 11 in `OpenAccoun
   1. A command with every field wrong reports the first rule; fixing that field reports the next one, and so on (sign-up: name, document, e-mail, username, currency, deposit; opening: document, e-mail, owner username, currency, deposit).
   2. Sabotage: swap two `if`s temporarily, see the red, revert.
 - **Acceptance criteria:**
-  - [ ] The order of both commands is fixed by tests; sabotage seen red and reverted.
+  - [x] The order of both commands is fixed by tests; sabotage seen red and reverted.
 
 ### [ ] T3 — Named checks in CommandValidation (~10 min)
 

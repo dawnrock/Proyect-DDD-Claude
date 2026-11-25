@@ -98,6 +98,26 @@ class OpenAccountCommandTests {
     }
 
     @Test
+    @DisplayName("Con varios datos mal, se informa la primera regla en orden: documento, correo, usuario, divisa y depósito")
+    void withSeveralWrongFieldsTheFirstRuleInOrderIsReported() {
+        OpenAccountCommand.Builder command = OpenAccountCommand.builder()
+                .holderTaxId("x").holderEmail("x").ownerUsername("X").currency("eur").initialDeposit(BigDecimal.ZERO);
+        List<Function<OpenAccountCommand.Builder, OpenAccountCommand.Builder>> fixes = List.of(
+                b -> b.holderTaxId("12345678Z"), b -> b.holderEmail("ada@example.com"), b -> b.ownerUsername("ada"),
+                b -> b.currency("EUR"));
+        List<String> messages = List.of("El documento debe ser un DNI o un NIE", "El correo electrónico no es válido",
+                OpenAccountCommandDef.OWNER_USERNAME_MESSAGE, "La divisa eur no es un código ISO 4217 válido",
+                "El depósito inicial debe ser positivo");
+
+        for (int i = 0; i < messages.size(); i++) {
+            assertThatIllegalArgumentException().isThrownBy(command::build).withMessage(messages.get(i));
+            if (i < fixes.size()) {
+                fixes.get(i).apply(command);
+            }
+        }
+    }
+
+    @Test
     @DisplayName("El NIF admite espacios y minúsculas, que normaliza el dominio")
     void theTaxIdAcceptsSpacesAndLowerCase() {
         assertThat(validCommand().holderTaxId(" 12345678 z ").build().holderTaxId()).isEqualTo(" 12345678 z ");
