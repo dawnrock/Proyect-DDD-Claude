@@ -17,13 +17,14 @@ Crea el puerto/adaptador pedido: $ARGUMENTS
 | | Lado de entrada (driving) | Lado de salida (driven) |
 | - | - | - |
 | Quién inicia | El exterior (usuario, REST, CLI, test) | La aplicación necesita algo de fuera |
-| Puerto | Interfaz en `application` (`CheckingAccountCommands`, `CheckingAccountQueries`) | Interfaz en `domain.model` (`CheckingAccountRepository`, `DomainEventPublisher`, `IncomeVerifier`) |
+| Puerto | Interfaz en `application`, una por grupo de casos de uso (`AccountOpeningCommands`, `MoneyMovementCommands`, `SegmentReviewCommands`, `CheckingAccountQueries`) | Interfaz en `domain.model` (`CheckingAccountRepository`, `DomainEventPublisher`, `IncomeVerifier`) |
 | Adaptador | `adapter.in.<tecnología>`: **usa** el puerto y traduce la petición | `adapter.out.<tecnología>`: **implementa** el puerto |
 | Datos | Recibe/devuelve DTOs propios (Immutables o `record`); nunca expone agregados | Traduce entre el modelo y la tecnología |
 
 - Las dependencias apuntan siempre hacia el hexágono; los adaptadores no se conocen entre sí.
 - Los adaptadores de salida son **package-private** salvo lo que necesite `config`.
 - El cableado puerto → adaptador está en `config` (`DomainConfiguration`), no en el dominio.
+- Cada puerto de entrada lo implementa un único servicio `*Service` de `application` (`AccountOpeningService`, `MoneyMovementService`…), que construye `config`. Un caso de uso nuevo va al puerto de su grupo o a uno nuevo con su servicio (#174). Los adaptadores de entrada reciben solo los puertos que usan, nunca el servicio: lo comprueba `HexagonalArchitectureTests`.
 - Los adaptadores simulados (en memoria, agencia tributaria ficticia) son válidos: llevan el sufijo `InMemory` o `Fake` y lo indican en su Javadoc.
 
 ## Procedimiento
