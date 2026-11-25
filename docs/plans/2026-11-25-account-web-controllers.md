@@ -77,7 +77,7 @@
 - **Acceptance criteria:**
   - [x] Test cases and PMD metrics recorded. (./mvnw clean verify green: 1,049 unique test cases; PMD on AccountWebController: WMC 58, ATFD 28, TCC 11.1 %, coupling 28)
 
-### [ ] T2 — Base class for the account web tests (~10 min)
+### [x] T2 — Base class for the account web tests (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/dawnrock/ddd/adapter/in/web/AccountWebTestSupport.java` (new), `AccountWebControllerTests.java`, `AnotherAccountWebTests.java`, `RegenerateAccountNumberWebTests.java`
@@ -85,7 +85,7 @@
 - **What to do:**
   1. Move the `@MockitoBean` ports, `MockMvc`, the CSRF `post` helper and the `@Import` list to an abstract base class; the three test classes extend it.
 - **Acceptance criteria:**
-  - [ ] Same test cases as T1; `./mvnw verify` green.
+  - [x] Same test cases as T1; `./mvnw verify` green. (RegenerateAccountNumberWebTests writes MockMvcRequestBuilders.post in full, so its request without a CSRF token keeps having none)
 
 ### [ ] T3 — Extract `AccountDetailView` (~10 min)
 

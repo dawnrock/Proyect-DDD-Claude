@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
@@ -21,43 +20,22 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.dawnrock.ddd.application.AccountDetails;
 import com.dawnrock.ddd.application.AccountNotFoundException;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.AccountOpeningCommands;
-import com.dawnrock.ddd.application.MoneyMovementCommands;
-import com.dawnrock.ddd.application.CheckingAccountQueries;
-import com.dawnrock.ddd.adapter.in.SecuritySupport;
-import com.dawnrock.ddd.adapter.in.TestUsers;
 
 /** El administrador sustituye el IBAN de una cuenta por otro generado (#95, R31); un cliente no puede. */
 @WebMvcTest(AccountWebController.class)
-@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class, TestUsers.class})
-class RegenerateAccountNumberWebTests {
+class RegenerateAccountNumberWebTests extends AccountWebTestSupport {
 
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
     private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
     private static final UUID ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
-
-    @Autowired
-    private MockMvc mvc;
-
-    @MockitoBean
-    private AccountOpeningCommands commands;
-
-    @MockitoBean
-    private MoneyMovementCommands movements;
-
-    @MockitoBean
-    private CheckingAccountQueries queries;
 
     private static AccountDetails details() {
         return AccountDetails.builder().id(ID).accountNumber("ES2199990001220000000001").holderName("Ada Lovelace")
@@ -94,7 +72,7 @@ class RegenerateAccountNumberWebTests {
     @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("Un cliente que envía el cambio recibe 403 y no se llama al servicio")
     void aCustomerSendingTheChangeGets403() throws Exception {
-        mvc.perform(post("/accounts/" + ID + "/account-number").with(csrf()))
+        mvc.perform(MockMvcRequestBuilders.post("/accounts/" + ID + "/account-number").with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(forwardedUrl("/error/403"));
 
@@ -105,7 +83,7 @@ class RegenerateAccountNumberWebTests {
     @WithMockUser(username = "admin", roles = "ADMIN")
     @DisplayName("El envío sin token CSRF se rechaza con 403")
     void aSubmissionWithoutCsrfTokenIsRejectedWith403() throws Exception {
-        mvc.perform(post("/accounts/" + ID + "/account-number"))
+        mvc.perform(MockMvcRequestBuilders.post("/accounts/" + ID + "/account-number"))
                 .andExpect(status().isForbidden());
 
         verifyNoInteractions(commands, movements, queries);
@@ -119,7 +97,7 @@ class RegenerateAccountNumberWebTests {
                 .accountNumber("ES6499990001810000000002").holderName("Ada Lovelace")
                 .segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build());
 
-        mvc.perform(post("/accounts/" + ID + "/account-number").with(csrf()))
+        mvc.perform(MockMvcRequestBuilders.post("/accounts/" + ID + "/account-number").with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/accounts/" + ID))
                 .andExpect(flash().attribute("message", "Nuevo IBAN asignado: ES6499990001810000000002"));
@@ -138,7 +116,7 @@ class RegenerateAccountNumberWebTests {
         when(queries.findAccount(ADMIN, ID)).thenReturn(AccountDetails.builder().id(ID).accountNumber(newIban)
                 .holderName("Ada Lovelace").segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build());
 
-        mvc.perform(post("/accounts/" + ID + "/account-number").with(csrf()).header("HX-Request", "true"))
+        mvc.perform(MockMvcRequestBuilders.post("/accounts/" + ID + "/account-number").with(csrf()).header("HX-Request", "true"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("accounts/detail :: panel"))
                 .andExpect(model().attribute("message", "Nuevo IBAN asignado: " + newIban))
@@ -149,7 +127,7 @@ class RegenerateAccountNumberWebTests {
     @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("Con htmx, un cliente que envía el cambio sigue recibiendo 403 (#125)")
     void withHtmxACustomerStillGets403() throws Exception {
-        mvc.perform(post("/accounts/" + ID + "/account-number").with(csrf()).header("HX-Request", "true"))
+        mvc.perform(MockMvcRequestBuilders.post("/accounts/" + ID + "/account-number").with(csrf()).header("HX-Request", "true"))
                 .andExpect(status().isForbidden());
 
         verifyNoInteractions(commands, movements, queries);
@@ -161,7 +139,7 @@ class RegenerateAccountNumberWebTests {
     void aMissingAccountShowsThe404Page() throws Exception {
         when(commands.regenerateAccountNumber(ADMIN, ID)).thenThrow(new AccountNotFoundException(ID));
 
-        mvc.perform(post("/accounts/" + ID + "/account-number").with(csrf()))
+        mvc.perform(MockMvcRequestBuilders.post("/accounts/" + ID + "/account-number").with(csrf()))
                 .andExpect(status().isNotFound())
                 .andExpect(view().name("error/404"));
     }

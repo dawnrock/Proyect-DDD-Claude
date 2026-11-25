@@ -14,7 +14,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -35,18 +34,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 
-import com.dawnrock.ddd.adapter.in.SecuritySupport;
-import com.dawnrock.ddd.adapter.in.TestUsers;
 import com.dawnrock.ddd.application.AccountDetails;
 import com.dawnrock.ddd.application.AccountNotFoundException;
 import com.dawnrock.ddd.application.AccountSummary;
@@ -59,9 +51,6 @@ import com.dawnrock.ddd.application.TransferSummary;
 import com.dawnrock.ddd.application.WithdrawCommand;
 import com.dawnrock.ddd.domain.model.CurrencyMismatchException;
 import com.dawnrock.ddd.application.TransactionSummary;
-import com.dawnrock.ddd.application.AccountOpeningCommands;
-import com.dawnrock.ddd.application.MoneyMovementCommands;
-import com.dawnrock.ddd.application.CheckingAccountQueries;
 import com.dawnrock.ddd.application.OpenAccountCommand;
 import com.dawnrock.ddd.domain.model.AccountNumber;
 import com.dawnrock.ddd.domain.model.DuplicateAccountNumberException;
@@ -70,26 +59,8 @@ import com.dawnrock.ddd.domain.model.MonetaryAmount;
 import com.dawnrock.ddd.domain.model.SameAccountTransferException;
 
 @WebMvcTest(AccountWebController.class)
-@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class, TestUsers.class})
 @WithMockUser(username = "admin", roles = "ADMIN")
-class AccountWebControllerTests {
-
-    @Autowired
-    private MockMvc mvc;
-
-    /** POST con token CSRF: la cadena web lo exige (ADR 0008). */
-    private static MockHttpServletRequestBuilder post(String url) {
-        return MockMvcRequestBuilders.post(url).with(csrf());
-    }
-
-    @MockitoBean
-    private AccountOpeningCommands commands;
-
-    @MockitoBean
-    private MoneyMovementCommands movements;
-
-    @MockitoBean
-    private CheckingAccountQueries queries;
+class AccountWebControllerTests extends AccountWebTestSupport {
 
     @Nested
     @DisplayName("Listado de cuentas")
