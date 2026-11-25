@@ -62,33 +62,6 @@ public class AccountWebController {
         return detailView.notice(id, htmx, AccountDetailView.MESSAGE, "Nuevo IBAN asignado: " + account.accountNumber(), caller, model, redirect);
     }
 
-    @PostMapping("/accounts/{id}/deposits")
-    public String deposit(@PathVariable UUID id, @Valid @ModelAttribute("depositForm") MovementForm form,
-                          BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication,
-                          @RequestHeader(name = HtmxLoginRedirect.HX_REQUEST, defaultValue = "false") boolean htmx) {
-        Caller caller = CurrentCaller.from(authentication);
-        if (!result.hasErrors()) {
-            DepositCommand command = null;
-            try {
-                command = DepositCommand.builder()
-                        .accountId(id).amount(form.getAmount()).currency(form.getCurrency()).build();
-            } catch (IllegalArgumentException e) {
-                result.reject("invalid", e.getMessage());
-            }
-            if (command != null) {
-                try {
-                    TransactionSummary deposit = movements.deposit(caller, command);
-                    return detailView.notice(id, htmx, AccountDetailView.MESSAGE,
-                            "Ingreso de %s aprobado".formatted(fmt.money(deposit.amount(), deposit.currency())),
-                            caller, model, redirect);
-                } catch (DomainException e) {
-                    result.reject("domain", e.getMessage());
-                }
-            }
-        }
-        return detailView.render(id, caller, model, htmx);
-    }
-
     @PostMapping("/accounts/{id}/withdrawals")
     public String withdraw(@PathVariable UUID id, @Valid @ModelAttribute("withdrawalForm") MovementForm form,
                            BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication,

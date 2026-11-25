@@ -117,7 +117,7 @@
 - **Acceptance criteria:**
   - [x] Moved tests pass; a 404 for someone else's account is unchanged. (1,049 test cases, unchanged; until T11 the moved tests also name AccountWebController, which still serves the operations)
 
-### [ ] T6 — `DepositWebController` (~10 min)
+### [x] T6 — `DepositWebController` (~10 min)
 
 - **Layer:** adapter.in · tests
 - **Files:** `DepositWebController.java` (new), `AccountWebController.java`, `DepositWebControllerTests.java`, `WebSecurityTests.java` (posts deposits)
@@ -125,7 +125,7 @@
 - **What to do:**
   1. Move `POST /accounts/{id}/deposits`; move `Ingresos` and `IngresosConHtmx`; `WebSecurityTests` names the deposit controller.
 - **Acceptance criteria:**
-  - [ ] Moved tests and `WebSecurityTests` pass.
+  - [x] Moved tests and `WebSecurityTests` pass. (1,049 test cases, unchanged)
 
 ### [ ] T7 — `WithdrawalWebController` (~10 min)
 
