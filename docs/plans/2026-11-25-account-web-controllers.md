@@ -178,7 +178,7 @@
 - **Acceptance criteria:**
   - [x] No reference to `AccountWebController` left in `src/`; `./mvnw verify` green with the T1 test cases, only moved between classes. (each web test names only the controllers whose routes it calls, found from its URLs and confirmed by a green run; 1,049 test cases, only moved between classes)
 
-### [ ] T12 — PMD baseline (~5 min)
+### [x] T12 — PMD baseline (~5 min)
 
 - **Layer:** build
 - **Files:** `pmd-baseline.properties`
@@ -186,7 +186,7 @@
 - **What to do:**
   1. Remove the `AccountWebController` line; `./mvnw verify` with no new warning. If a new controller or test class trips a rule, split it further rather than add it to the baseline.
 - **Acceptance criteria:**
-  - [ ] `./mvnw pmd:pmd -Dpmd.baseline=` only lists `CheckingAccount`, `OpenAccountCommandDef` and `SignUpCommandDef`.
+  - [x] `./mvnw pmd:pmd -Dpmd.baseline=` only lists `CheckingAccount`, `OpenAccountCommandDef` and `SignUpCommandDef`. (no new warning)
 
 ### [ ] T13 — Documents (~5 min)
 
