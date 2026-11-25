@@ -252,3 +252,19 @@ a.card-slant:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--mo
 /* Intro de la marca (#178): capa a pantalla completa sobre las puertas del login, del color de fondo de la web. */
 .splash { position: fixed; inset: 0; z-index: 1080; background-color: var(--bs-body-bg); }
 .splash canvas { display: block; width: 100%; height: 100%; }
+
+/* Bienvenida del login (#185): sin cabecera, con el logo, el saludo y las dos puertas centrados sobre la A de fondo. */
+main.welcome {
+    flex: 1 0 auto;
+    max-width: 26rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2.5rem;
+    padding-top: 2.5rem;
+}
+.welcome-head { display: flex; flex-direction: column; align-items: center; gap: 1.4rem; text-align: center; }
+.brand-hero { display: block; width: min(15rem, 62vw); height: auto; }
+.welcome-title { margin: 0; font-size: 1.75rem; line-height: 1.15; }
+.doors { width: 100%; display: flex; flex-direction: column; gap: 0.9rem; padding-inline: 0.5rem; }

@@ -112,7 +112,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
 - **Acceptance criteria:**
   - [x] A scratch page or the running app shows the four variants with a visible focus at 390 px and 1280 px (Playwright screenshot).
 
-### [ ] T6 — Welcome doors over the big A (~10 min)
+### [x] T6 — Welcome doors over the big A (~10 min)
 
 - **Layer:** adapter.in (templates)
 - **Files:** `templates/login.html`, `LoginControllerTests.java`
@@ -122,7 +122,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
   2. The intro layer, import map and module stay untouched.
   3. Update the welcome test (it expects the stacked logo) and add one: the doors page has the backdrop, both doors link to `/signup` and `/login?form`, and no header.
 - **Acceptance criteria:**
-  - [ ] Login tests pass, intro tests included.
+  - [x] Login tests pass, intro tests included.
 
 ### [ ] T7 — Login form over the big A (~5 min)
 

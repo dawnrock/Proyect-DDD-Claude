@@ -63,15 +63,28 @@ class LoginControllerTests {
     }
 
     @Test
-    @DisplayName("La bienvenida del login muestra el logo apilado de monA Bank sobre su título; el formulario, no (#178)")
-    void theLoginWelcomeShowsTheStackedLogoAboveItsTitle() throws Exception {
+    @DisplayName("La bienvenida del login va sin cabecera: la A de fondo y, en el centro, el logo, el título y las dos puertas (#185)")
+    void theLoginWelcomeCentresLogoTitleAndDoorsOverTheBigA() throws Exception {
         mvc.perform(get("/login"))
                 .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<div class=\"backdrop\" aria-hidden=\"true\">")))
                 .andExpect(content().string(matchesPattern(
-                        "(?s).*<img [^>]*src=\"/brand/monabank-stacked[^\"]*\\.svg\"[^>]*alt=\"\".*<h1[^>]*>Bienvenido a monA Bank</h1>.*")));
-        mvc.perform(get("/login").param("form", ""))
+                        "(?s).*<img [^>]*src=\"/brand/monabank-horizontal[^\"]*\\.svg\"[^>]*alt=\"\".*"
+                                + "<h1[^>]*>Bienvenido a monA Bank</h1>.*"
+                                + "<a class=\"btn-slant btn-slant-rise door\" href=\"/signup\">.*Quiero ser cliente.*"
+                                + "<a class=\"btn-slant btn-slant-light door\" href=\"/login\\?form\">.*Ya soy cliente.*")))
+                .andExpect(content().string(not(containsString("navbar-brand"))));
+    }
+
+    @Test
+    @DisplayName("Las puertas del login no llevan iconos: solo su título y la línea que explica cada una (#185)")
+    void theLoginDoorsCarryNoIcons() throws Exception {
+        mvc.perform(get("/login"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(not(containsString("monabank-stacked"))));
+                .andExpect(content().string(not(matchesPattern(
+                        "(?s).*<a class=\"btn-slant[^\"]*door\"[^>]*>(?:(?!</a>).)*<svg.*"))))
+                .andExpect(content().string(containsString("Abre tu cuenta en tres pasos.")))
+                .andExpect(content().string(containsString("Entra con tu usuario y tu contraseña.")));
     }
 
     @Test
