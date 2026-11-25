@@ -131,7 +131,7 @@ class DddLabApplicationTests {
 
 		assertThat(response.statusCode()).isEqualTo(404);
 		assertThat(response.headers().firstValue("Content-Type")).hasValueSatisfying(type -> assertThat(type).startsWith("text/html"));
-		assertThat(response.body()).contains("Página no encontrada").contains("Cuentas corrientes");
+		assertThat(response.body()).contains("Página no encontrada").contains("monA Bank").doesNotContain("Cuentas corrientes");
 	}
 
 	@Test

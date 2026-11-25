@@ -3,6 +3,7 @@ package com.dawnrock.ddd.adapter.in.web;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -111,6 +112,22 @@ class AccountListControllerTests extends AccountWebTestSupport {
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("Todavía no hay cuentas")))
                     .andExpect(content().string(containsString("Abrir cuenta")));
+        }
+
+        @Test
+        @DisplayName("La cabecera lleva el logo de monA Bank, la pestaña su favicon y el título acaba en el nombre del banco (#178)")
+        void theHeaderShowsTheBrandLogoWithFaviconAndTitle() throws Exception {
+            when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
+
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<a class=\"navbar-brand[^\"]*\" href=\"/\">\\s*<img src=\"/brand/monabank-horizontal[^\"]*\\.svg\""
+                                    + "[^>]*alt=\"monA Bank\".*")))
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<link rel=\"icon\" type=\"image/svg\\+xml\" href=\"/brand/favicon[^\"]*\\.svg\">.*")))
+                    .andExpect(content().string(matchesPattern("(?s).*<title>[^<]* · monA Bank</title>.*")))
+                    .andExpect(content().string(not(containsString("Cuentas corrientes"))));
         }
 
         @Test

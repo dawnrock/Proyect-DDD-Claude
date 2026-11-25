@@ -109,7 +109,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The test passes; other public/private rules unchanged.
 
-### [ ] T6 — Header logo, favicon and page title (~10 min)
+### [x] T6 — Header logo, favicon and page title (~10 min)
 
 - **Layer:** adapter.in.web (templates)
 - **Files:** `fragments/layout.html`, `AccountListControllerTests`, `DddLabApplicationTests`
@@ -118,7 +118,7 @@ Decisions taken in this plan:
   1. Tests first: the home page has `<img ... alt="monA Bank">` pointing at `monabank-horizontal.svg` inside the navbar brand, `<link rel="icon" ... favicon.svg>`, and a title ending in «· monA Bank»; the 404 page (`DddLabApplicationTests`, today «Cuentas corrientes») shows «monA Bank».
   2. `head`: `<link rel="icon" type="image/svg+xml" th:href="@{/brand/favicon.svg}">` and `th:text="${title} + ' · monA Bank'"`. `header`: the logo `<img>` (height ~1.75 rem) replaces the `landmark` icon and «Cuentas corrientes».
 - **Acceptance criteria:**
-  - [ ] Every page shows the logo and the favicon; no «Cuentas corrientes» left in templates.
+  - [x] Every page shows the logo and the favicon; no «Cuentas corrientes» left in templates.
 
 ### [ ] T7 — Remove the phase footer (~5 min)
 
