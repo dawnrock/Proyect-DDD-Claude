@@ -1,53 +1,36 @@
 package com.dawnrock.ddd.adapter.in.web;
 
-import java.util.Objects;
-import java.util.UUID;
-
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.dawnrock.ddd.adapter.in.CurrentCaller;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.AccountOpeningCommands;
-import com.dawnrock.ddd.application.CheckingAccountQueries;
-import com.dawnrock.ddd.application.MoneyMovementCommands;
-import com.dawnrock.ddd.application.DepositCommand;
 import com.dawnrock.ddd.application.NotACustomerException;
-import com.dawnrock.ddd.application.OpenAccountCommand;
 import com.dawnrock.ddd.application.OpenAnotherAccountCommand;
-import com.dawnrock.ddd.application.TargetAccountNotFoundException;
-import com.dawnrock.ddd.application.TransactionSummary;
-import com.dawnrock.ddd.application.TransferCommand;
-import com.dawnrock.ddd.application.TransferSummary;
-import com.dawnrock.ddd.application.WithdrawCommand;
 import com.dawnrock.ddd.domain.model.DomainException;
-import com.dawnrock.ddd.adapter.in.CurrentCaller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-/** Pantallas web de las cuentas corrientes: listado, alta, detalle, ingresos y retiradas. */
+/**
+ * Otra cuenta para el cliente que la pide, indicando solo el depósito (#103, #177): el titular sale de sus datos de
+ * cliente. Quien no es cliente, también el administrador, recibe la página 403.
+ */
 @Controller
 @RequiredArgsConstructor
-public class AccountWebController {
+public class AnotherAccountWebController {
 
     private static final String ANOTHER_VIEW = "accounts/another";
 
     private final AccountOpeningCommands commands;
-
-    private final MoneyMovementCommands movements;
-
-    private final CheckingAccountQueries queries;
-
-    private final WebFormat fmt;
 
     private final AccountDetailView detailView;
 
@@ -58,7 +41,7 @@ public class AccountWebController {
             throw new NotACustomerException(caller.username());
         }
         model.addAttribute("form", new AnotherAccountForm());
-        addFormOptions(model);
+        model.addAttribute("currencies", AccountDetailView.CURRENCIES);
         return ANOTHER_VIEW;
     }
 
@@ -69,29 +52,29 @@ public class AccountWebController {
         if (caller.admin()) {
             throw new NotACustomerException(caller.username());
         }
-        OpenAnotherAccountCommand command = null;
-        if (!result.hasErrors()) {
-            try {
-                command = OpenAnotherAccountCommand.builder()
-                        .initialDeposit(form.getInitialDeposit()).currency(form.getCurrency()).build();
-            } catch (IllegalArgumentException e) {
-                result.reject("invalid", e.getMessage());
-            }
-        }
+        OpenAnotherAccountCommand command = result.hasErrors() ? null : toCommand(form, result);
         if (command != null) {
             try {
                 AccountSummary account = commands.openAnotherAccount(caller, command);
-                redirect.addFlashAttribute("message", "Nueva cuenta abierta. Tu IBAN es " + account.accountNumber());
+                redirect.addFlashAttribute(AccountDetailView.MESSAGE,
+                        "Nueva cuenta abierta. Tu IBAN es " + account.accountNumber());
                 return AccountDetailView.redirectToDetail(account.id());
             } catch (DomainException e) {
                 result.reject("domain", e.getMessage());
             }
         }
-        addFormOptions(model);
+        model.addAttribute("currencies", AccountDetailView.CURRENCIES);
         return ANOTHER_VIEW;
     }
 
-    private void addFormOptions(Model model) {
-        model.addAttribute("currencies", AccountDetailView.CURRENCIES);
+    /** El command, o {@code null} con el error en el formulario si lo rechaza (red de seguridad de la validación). */
+    private static OpenAnotherAccountCommand toCommand(AnotherAccountForm form, BindingResult result) {
+        try {
+            return OpenAnotherAccountCommand.builder()
+                    .initialDeposit(form.getInitialDeposit()).currency(form.getCurrency()).build();
+        } catch (IllegalArgumentException e) {
+            result.reject("invalid", e.getMessage());
+            return null;
+        }
     }
 }

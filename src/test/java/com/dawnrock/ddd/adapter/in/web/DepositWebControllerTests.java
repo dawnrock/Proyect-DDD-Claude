@@ -36,7 +36,7 @@ import com.dawnrock.ddd.application.DepositCommand;
 import com.dawnrock.ddd.domain.model.CurrencyMismatchException;
 
 /** Ingresos desde el detalle de la cuenta (#177), con y sin htmx. */
-@WebMvcTest({DepositWebController.class, WithdrawalWebController.class, TransferWebController.class, AccountNumberWebController.class, OpenAccountWebController.class, AccountDetailController.class, AccountWebController.class})
+@WebMvcTest({DepositWebController.class, AccountDetailController.class})
 @WithMockUser(username = "admin", roles = "ADMIN")
 class DepositWebControllerTests extends AccountWebTestSupport {
 

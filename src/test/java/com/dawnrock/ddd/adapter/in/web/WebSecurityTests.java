@@ -35,7 +35,8 @@ import com.dawnrock.ddd.adapter.in.SecuritySupport;
 import com.dawnrock.ddd.adapter.in.TestUsers;
 
 /** Reglas de la cadena de seguridad web (ADR 0008, #50): acceso, CSRF y rol de administrador. */
-@WebMvcTest({AccountWebController.class, AccountDetailController.class, DepositWebController.class, WithdrawalWebController.class, TransferWebController.class, AccountNumberWebController.class, OpenAccountWebController.class, AccountListController.class, LoginController.class, AccessDeniedController.class})
+@WebMvcTest({LoginController.class, AccessDeniedController.class, AccountListController.class,
+        DepositWebController.class, OpenAccountWebController.class})
 @Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class, TestUsers.class, AccountDetailView.class})
 // Una usuaria real (contraseña «demo», el hash del perfil demo) para los inicios de sesión con el formulario (#130)
 @TestPropertySource(properties = {

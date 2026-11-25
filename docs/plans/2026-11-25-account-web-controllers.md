@@ -34,7 +34,7 @@
 | `TransferWebController` | `POST /accounts/{id}/transfers` | `MoneyMovementCommands` |
 | `AccountNumberWebController` | `POST /accounts/{id}/account-number` | `AccountOpeningCommands` |
 | `OpenAccountWebController` | `GET`/`POST /accounts/new` | `AccountOpeningCommands` |
-| `AnotherAccountWebController` | `GET`/`POST /accounts/another` | `AccountOpeningCommands`, `CheckingAccountQueries` |
+| `AnotherAccountWebController` | `GET`/`POST /accounts/another` | `AccountOpeningCommands` (the customer check through `AccountDetailView`) |
 
 **Shared component `AccountDetailView`** (`@Component`, package-private): takes `renderDetail`, `notice`, `backLabel`, `isCustomer`, `redirectToDetail` and the currency list from the controller. It depends on `CheckingAccountQueries` (the detail and the customer check). The literal routes `/accounts/new` and `/accounts/another` keep winning over `/accounts/{id}`: Spring ranks patterns across controllers, not inside one.
 
@@ -167,7 +167,7 @@
 - **Acceptance criteria:**
   - [x] Moved tests pass. (1,049 test cases, unchanged)
 
-### [ ] T11 — `AnotherAccountWebController`; delete `AccountWebController` (~10 min)
+### [x] T11 — `AnotherAccountWebController`; delete `AccountWebController` (~10 min)
 
 - **Layer:** adapter.in · tests
 - **Files:** `AnotherAccountWebController.java` (new), `AccountWebController.java` (deleted), `AnotherAccountWebTests.java` → `AnotherAccountWebControllerTests.java`, `AccountFormsAccessibilityTests.java` (the two remaining groups), `SignUpControllerTests.java`, `WebSecurityTests.java`
@@ -176,7 +176,7 @@
   1. Move `GET`/`POST /accounts/another`; delete the old controller and its test class once empty.
   2. `SignUpControllerTests` and `WebSecurityTests` name the controllers they reach.
 - **Acceptance criteria:**
-  - [ ] No reference to `AccountWebController` left in `src/`; `./mvnw verify` green with the T1 test cases, only moved between classes.
+  - [x] No reference to `AccountWebController` left in `src/`; `./mvnw verify` green with the T1 test cases, only moved between classes. (each web test names only the controllers whose routes it calls, found from its URLs and confirmed by a green run; 1,049 test cases, only moved between classes)
 
 ### [ ] T12 — PMD baseline (~5 min)
 

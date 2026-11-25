@@ -35,7 +35,7 @@ import com.dawnrock.ddd.domain.model.InsufficientInitialDepositException;
 import com.dawnrock.ddd.domain.model.MonetaryAmount;
 
 /** Alta de cuenta por el administrador (#177): formulario, errores y usuario del titular en minúsculas. */
-@WebMvcTest({OpenAccountWebController.class, AccountListController.class})
+@WebMvcTest(OpenAccountWebController.class)
 @WithMockUser(username = "admin", roles = "ADMIN")
 class OpenAccountWebControllerTests extends AccountWebTestSupport {
 

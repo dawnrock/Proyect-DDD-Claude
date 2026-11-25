@@ -13,9 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.security.test.context.support.WithMockUser;
 
-@WebMvcTest({AccountWebController.class, AccountDetailController.class, DepositWebController.class, WithdrawalWebController.class, TransferWebController.class, AccountNumberWebController.class, OpenAccountWebController.class, AccountListController.class})
+/**
+ * Accesibilidad de los formularios de cuentas (#145, #146), que reparten varios controladores (#177): errores ligados a
+ * su campo, foco en el primero y campos obligatorios con el teclado adecuado en el móvil.
+ */
+@WebMvcTest({AccountDetailController.class, DepositWebController.class, WithdrawalWebController.class,
+        TransferWebController.class, OpenAccountWebController.class})
 @WithMockUser(username = "admin", roles = "ADMIN")
-class AccountWebControllerTests extends AccountWebTestSupport {
+class AccountFormsAccessibilityTests extends AccountWebTestSupport {
 
     @Nested
     @DisplayName("Errores accesibles en los formularios de cuentas (#145)")
