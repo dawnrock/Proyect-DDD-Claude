@@ -4,11 +4,9 @@ import java.time.Instant;
 import java.time.Period;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 public class CheckingAccount {
@@ -23,7 +21,7 @@ public class CheckingAccount {
     private final UUID id;
     private AccountNumber accountNumber;
     private final AccountHolder primaryHolder;
-    private final List<Transaction> transactions = new ArrayList<>();
+    private final TransactionHistory transactions;
     private final List<DomainEvent> domainEvents = new ArrayList<>();
     private MonetaryAmount currentBalance;
     private Instant nextSegmentReview;
@@ -35,15 +33,17 @@ public class CheckingAccount {
         this.accountNumber = accountNumber;
         this.primaryHolder = primaryHolder;
         this.currentBalance = MonetaryAmount.zero(initialDeposit.currency());
+        this.transactions = new TransactionHistory();
     }
 
     private CheckingAccount(UUID id, AccountNumber accountNumber, AccountHolder primaryHolder,
-                            MonetaryAmount currentBalance, Instant nextSegmentReview) {
+                            MonetaryAmount currentBalance, Instant nextSegmentReview, TransactionHistory transactions) {
         this.id = id;
         this.accountNumber = accountNumber;
         this.primaryHolder = primaryHolder;
         this.currentBalance = currentBalance;
         this.nextSegmentReview = nextSegmentReview;
+        this.transactions = transactions;
     }
 
     /**
@@ -60,39 +60,15 @@ public class CheckingAccount {
     public static CheckingAccount reconstitute(UUID id, AccountNumber accountNumber, AccountHolder primaryHolder,
                                                MonetaryAmount currentBalance, Instant nextSegmentReview,
                                                List<Transaction> transactions) {
-        CheckingAccount account = new CheckingAccount(
-                Objects.requireNonNull(id, "El id de la cuenta es obligatorio"),
-                Objects.requireNonNull(accountNumber, "El número de cuenta es obligatorio"),
-                Objects.requireNonNull(primaryHolder, "El titular de la cuenta es obligatorio"),
-                Objects.requireNonNull(currentBalance, "El saldo de la cuenta es obligatorio"),
-                nextSegmentReview);
+        Objects.requireNonNull(id, "El id de la cuenta es obligatorio");
+        Objects.requireNonNull(accountNumber, "El número de cuenta es obligatorio");
+        Objects.requireNonNull(primaryHolder, "El titular de la cuenta es obligatorio");
+        Objects.requireNonNull(currentBalance, "El saldo de la cuenta es obligatorio");
         if (nextSegmentReview != null && !primaryHolder.isHighNetWorth()) {
             throw new IllegalStateException("Solo una cuenta de alto patrimonio tiene revisión de segmento pendiente");
         }
-        MonetaryAmount expected = MonetaryAmount.zero(currentBalance.currency());
-        Set<UUID> ids = new HashSet<>();
-        for (Transaction transaction : Objects.requireNonNull(transactions, "Los movimientos son obligatorios")) {
-            if (!ids.add(transaction.id())) {
-                throw new IllegalStateException("Una cuenta guardada no repite movimientos");
-            }
-            if (!id.equals(transaction.accountId())) {
-                throw new IllegalStateException("Un movimiento de la cuenta reconstituida pertenece a otra cuenta");
-            }
-            if (transaction.status() == TransactionStatus.PENDING) {
-                throw new IllegalStateException("Una cuenta guardada no tiene movimientos pendientes");
-            }
-            if (transaction.isApproved()) {
-                expected = transaction.type() == TransactionType.DEPOSIT
-                        ? expected.add(transaction.amount())
-                        : expected.subtract(transaction.amount());
-            }
-            account.transactions.add(transaction);
-        }
-        if (!expected.equals(currentBalance)) {
-            throw new IllegalStateException("El saldo guardado %s no cuadra con los movimientos aprobados (%s)"
-                    .formatted(currentBalance, expected));
-        }
-        return account;
+        TransactionHistory history = TransactionHistory.restore(id, transactions, currentBalance);
+        return new CheckingAccount(id, accountNumber, primaryHolder, currentBalance, nextSegmentReview, history);
     }
 
     /**
@@ -217,7 +193,7 @@ public class CheckingAccount {
     }
 
     public List<Transaction> transactions() {
-        return List.copyOf(transactions);
+        return transactions.asList();
     }
 
     /** Entrega los eventos registrados desde la última recogida y los olvida, para no publicarlos dos veces. */
@@ -275,8 +251,7 @@ public class CheckingAccount {
     }
 
     private Transaction register(Transaction transaction) {
-        transactions.add(transaction);
-        return transaction;
+        return transactions.add(transaction);
     }
 
     /** El evento de apertura va antes que el del depósito inicial, pero comparte su instante. */

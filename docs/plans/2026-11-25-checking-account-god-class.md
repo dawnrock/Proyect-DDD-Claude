@@ -73,7 +73,7 @@ Both new classes are package-private: only the aggregate uses them, so the hexag
 - **Acceptance criteria:**
   - [x] `TransactionHistoryTests` green; `check-domain.mjs` without errors.
 
-### [ ] T3 — CheckingAccount on TransactionHistory (~5 min)
+### [x] T3 — CheckingAccount on TransactionHistory (~5 min)
 
 - **Layer:** domain
 - **Files:** `CheckingAccount.java`
@@ -81,7 +81,7 @@ Both new classes are package-private: only the aggregate uses them, so the hexag
 - **What to do:**
   1. The aggregate keeps a `TransactionHistory`; `register`, `transactions()` and `reconstitute` use it. `reconstitute` keeps its order: required data, segment review, `TransactionHistory.restore`.
 - **Acceptance criteria:**
-  - [ ] All domain, persistence and end-to-end tests green without changes.
+  - [x] All domain, persistence and end-to-end tests green without changes.
 
 ### [ ] T4 — AccountSegment (~15 min)
 
