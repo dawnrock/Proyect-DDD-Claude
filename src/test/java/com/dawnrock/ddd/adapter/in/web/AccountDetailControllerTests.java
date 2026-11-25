@@ -327,16 +327,23 @@ class AccountDetailControllerTests extends AccountWebTestSupport {
         }
 
         @Test
-        @DisplayName("Las acciones son un acordeón de Alpine.js con iconos de Lucide: abrir una cierra las demás (#124)")
-        void theActionsAreAnAlpineAccordionWithLucideIcons() throws Exception {
-            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
-
+        @DisplayName("Las acciones son un acordeón de Alpine.js: abrir una cierra las demás (#124)")
+        void theActionsAreAnAlpineAccordion() throws Exception {
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("x-data=\"actionPanels\"")))
-                    .andExpect(content().string(containsString("x-on:toggle.capture=\"closeOthers($event)\"")))
-                    .andExpect(content().string(containsString("#arrow-down-to-line\"></use></svg>Ingresar</summary>")))
-                    .andExpect(content().string(containsString("#arrow-up-from-line\"></use></svg>Retirar</summary>")))
+                    .andExpect(content().string(containsString("x-on:toggle.capture=\"closeOthers($event)\"")));
+        }
+
+        @Test
+        @DisplayName("Ingresar lleva la subida de la A y retirar la caída de la n; transferir y generar IBAN, sus iconos (#185)")
+        void depositAndWithdrawalCarryTheBrandGlyphs() throws Exception {
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<summary class=\"btn-slant action-toggle\"><svg class=\"glyph glyph-rise\"[^>]*>.*?</svg>Ingresar</summary>.*")))
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<summary class=\"btn-slant action-toggle\"><svg class=\"glyph glyph-drop\"[^>]*>.*?</svg>Retirar</summary>.*")))
                     .andExpect(content().string(containsString("#arrow-left-right\"></use></svg>Transferir</summary>")))
                     .andExpect(content().string(containsString("#refresh-cw\"></use></svg>Generar nuevo IBAN</summary>")));
         }

@@ -22,20 +22,10 @@
 
         <!--/* Cada acción es un <details>: se abre sin JavaScript y el servidor la deja abierta si su formulario vuelve con
              errores. Alpine.js (actionPanels, en app.js) solo añade que abrir una cierre las demás. */-->
-        <div class="actions d-flex flex-wrap gap-2 mb-4" x-data="actionPanels" x-on:toggle.capture="closeOthers($event)">
-            <details id="regenerate-action" th:if="${admin}">
-                <summary class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><svg th:replace="~{fragments/icons :: icon('refresh-cw')}"></svg>Generar nuevo IBAN</summary>
-                <form class="card card-body mt-2" th:action="@{/accounts/{id}/account-number(id=${account.id()})}" th:hx-post="@{/accounts/{id}/account-number(id=${account.id()})}" method="post">
-                    <p>Se sustituirá el IBAN actual por otro generado por monA Bank. El IBAN anterior dejará de funcionar.</p>
-                    <div><button class="btn btn-warning" type="submit">Confirmar</button></div>
-                </form>
-            </details>
-            <!--/* Enlace dentro del panel: sin destino propio heredaría el del panel y se pintaría dentro de él (#126) */-->
-            <a class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" id="another-account" th:if="${customer}" th:href="@{/accounts/another}" hx-target="body" hx-swap="innerHTML transition:true"><svg th:replace="~{fragments/icons :: icon('plus')}"></svg>Abrir otra cuenta</a>
-
+        <div class="actions mb-3" x-data="actionPanels" x-on:toggle.capture="closeOthers($event)">
             <details id="deposit-action" th:object="${depositForm}" th:open="${#fields.hasAnyErrors()}">
-                <summary class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><svg th:replace="~{fragments/icons :: icon('arrow-down-to-line')}"></svg>Ingresar</summary>
-                <form class="card card-body mt-2" th:action="@{/accounts/{id}/deposits(id=${account.id()})}" th:hx-post="@{/accounts/{id}/deposits(id=${account.id()})}" th:object="${depositForm}" method="post" novalidate>
+                <summary class="btn-slant action-toggle"><svg th:replace="~{fragments/brand :: rise}"></svg>Ingresar</summary>
+                <form class="card card-body action-form" th:action="@{/accounts/{id}/deposits(id=${account.id()})}" th:hx-post="@{/accounts/{id}/deposits(id=${account.id()})}" th:object="${depositForm}" method="post" novalidate>
                     <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:each="err : ${#fields.globalErrors()}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${err}">Error</span></div>
                     <div class="mb-3">
                         <label class="form-label" for="deposit-amount">Importe</label>
@@ -49,13 +39,13 @@
                         </select>
                         <p class="invalid-feedback" id="deposit-currency-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
                     </div>
-                    <div><button class="btn btn-primary" type="submit">Ingresar</button></div>
+                    <div><button class="btn-slant btn-slant-rise" type="submit">Ingresar</button></div>
                 </form>
             </details>
 
             <details id="withdrawal-action" th:object="${withdrawalForm}" th:open="${#fields.hasAnyErrors()}">
-                <summary class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><svg th:replace="~{fragments/icons :: icon('arrow-up-from-line')}"></svg>Retirar</summary>
-                <form class="card card-body mt-2" th:action="@{/accounts/{id}/withdrawals(id=${account.id()})}" th:hx-post="@{/accounts/{id}/withdrawals(id=${account.id()})}" th:object="${withdrawalForm}" method="post" novalidate>
+                <summary class="btn-slant action-toggle"><svg th:replace="~{fragments/brand :: drop}"></svg>Retirar</summary>
+                <form class="card card-body action-form" th:action="@{/accounts/{id}/withdrawals(id=${account.id()})}" th:hx-post="@{/accounts/{id}/withdrawals(id=${account.id()})}" th:object="${withdrawalForm}" method="post" novalidate>
                     <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:each="err : ${#fields.globalErrors()}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${err}">Error</span></div>
                     <div class="mb-3">
                         <label class="form-label" for="withdrawal-amount">Importe</label>
@@ -69,13 +59,13 @@
                         </select>
                         <p class="invalid-feedback" id="withdrawal-currency-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
                     </div>
-                    <div><button class="btn btn-primary" type="submit">Retirar</button></div>
+                    <div><button class="btn-slant btn-slant-drop" type="submit">Retirar</button></div>
                 </form>
             </details>
 
             <details id="transfer-action" th:object="${transferForm}" th:open="${#fields.hasAnyErrors()}">
-                <summary class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><svg th:replace="~{fragments/icons :: icon('arrow-left-right')}"></svg>Transferir</summary>
-                <form class="card card-body mt-2" th:action="@{/accounts/{id}/transfers(id=${account.id()})}" th:hx-post="@{/accounts/{id}/transfers(id=${account.id()})}" th:object="${transferForm}" method="post" novalidate>
+                <summary class="btn-slant action-toggle"><svg th:replace="~{fragments/icons :: icon('arrow-left-right')}"></svg>Transferir</summary>
+                <form class="card card-body action-form" th:action="@{/accounts/{id}/transfers(id=${account.id()})}" th:hx-post="@{/accounts/{id}/transfers(id=${account.id()})}" th:object="${transferForm}" method="post" novalidate>
                     <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:each="err : ${#fields.globalErrors()}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${err}">Error</span></div>
                     <div class="mb-3">
                         <label class="form-label" for="transfer-target">IBAN de destino</label>
@@ -94,9 +84,22 @@
                         </select>
                         <p class="invalid-feedback" id="transfer-currency-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
                     </div>
-                    <div><button class="btn btn-primary" type="submit">Transferir</button></div>
+                    <div><button class="btn-slant btn-slant-light" type="submit">Transferir</button></div>
                 </form>
             </details>
+        </div>
+
+        <!--/* Acciones secundarias, bajo la pista: abrir otra cuenta (cliente) y generar un IBAN nuevo (administrador). */-->
+        <div class="secondary-actions mb-4">
+            <details id="regenerate-action" th:if="${admin}">
+                <summary class="btn-slant btn-slant-surface secondary-toggle"><svg th:replace="~{fragments/icons :: icon('refresh-cw')}"></svg>Generar nuevo IBAN</summary>
+                <form class="card card-body action-form" th:action="@{/accounts/{id}/account-number(id=${account.id()})}" th:hx-post="@{/accounts/{id}/account-number(id=${account.id()})}" method="post">
+                    <p>Se sustituirá el IBAN actual por otro generado por monA Bank. El IBAN anterior dejará de funcionar.</p>
+                    <div><button class="btn-slant btn-slant-drop" type="submit">Confirmar</button></div>
+                </form>
+            </details>
+            <!--/* Enlace dentro del panel: sin destino propio heredaría el del panel y se pintaría dentro de él (#126) */-->
+            <a class="btn-slant btn-slant-surface" id="another-account" th:if="${customer}" th:href="@{/accounts/another}" hx-target="body" hx-swap="innerHTML transition:true"><svg th:replace="~{fragments/icons :: icon('plus')}"></svg>Abrir otra cuenta</a>
         </div>
 
         <h2 class="h6 fw-semibold mb-3">Movimientos</h2>

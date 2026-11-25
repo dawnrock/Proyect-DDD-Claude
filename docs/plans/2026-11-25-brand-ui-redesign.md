@@ -167,7 +167,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
 - **Acceptance criteria:**
   - [x] Detail and IBAN regeneration tests pass unchanged.
 
-### [ ] T11 — Account detail: action track (~10 min)
+### [x] T11 — Account detail: action track (~10 min)
 
 - **Layer:** adapter.in (templates + static)
 - **Files:** `templates/accounts/detail.html`, `static/css/app.css`, `AccountDetailControllerTests.java`
@@ -177,8 +177,8 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
   2. Submit buttons with the action's colour; «Abrir otra cuenta» and the admin's «Generar nuevo IBAN» as secondary actions under the track; the IBAN confirmation button is `.btn-slant-drop`, since it invalidates the current IBAN.
   3. Test: each summary carries its glyph; the `open` tests keep passing.
 - **Acceptance criteria:**
-  - [ ] All operation tests (deposit, withdrawal, transfer, IBAN) pass, htmx fragment included.
-  - [ ] Works without JavaScript (the details open by themselves).
+  - [x] All operation tests (deposit, withdrawal, transfer, IBAN) pass, htmx fragment included.
+  - [x] Works without JavaScript (the details open by themselves).
 
 ### [ ] T12 — Account detail: transactions with brand glyphs (~10 min)
 

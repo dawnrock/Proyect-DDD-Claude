@@ -28,15 +28,37 @@
     font-weight: 600;
 }
 
-/* Acciones del detalle de cuenta: cada <summary> es un botón y el panel abierto ocupa toda la fila, tras los botones. */
-.actions summary { list-style: none; }
-.actions summary::-webkit-details-marker { display: none; }
-.actions details[open] { order: 10; flex-basis: 100%; }
-.actions details[open] > summary {
-    color: var(--bs-btn-active-color);
-    background-color: var(--bs-btn-active-bg);
-    border-color: var(--bs-btn-active-border-color);
+/* Acciones del detalle de cuenta (#185): una pista de paralelogramos encajados, Ingresar, Retirar y Transferir. Cada una
+   es un <details> (se abre sin JavaScript); la abierta se rellena con su color y su formulario va debajo, a todo el
+   ancho. Sin soporte de ::details-content, la fila se parte y la acción abierta baja a su propia fila, como antes. */
+.actions summary, .secondary-actions summary { list-style: none; }
+.actions summary::-webkit-details-marker, .secondary-actions summary::-webkit-details-marker { display: none; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.5rem 0.45rem; padding-inline: 0.4rem; }
+.actions > details { flex: 1 1 0; min-width: 0; }
+.actions > details[open] { order: 10; flex-basis: 100%; }
+.action-toggle { width: 100%; min-height: 3.5rem; padding-inline: 1rem; }
+#deposit-action { --action-accent: var(--mona-rise); }
+#withdrawal-action { --action-accent: var(--mona-drop); }
+#transfer-action { --action-accent: var(--mona-ink); }
+.actions details[open] > .action-toggle {
+    --slant-bg: var(--action-accent);
+    --slant-bg-hover: var(--action-accent);
+    --slant-fg: var(--mona-on-accent);
 }
+.actions details[open] > .action-toggle .glyph { color: inherit; }
+.action-form { margin-top: 0.6rem; }
+@supports selector(::details-content) {
+    .actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .actions > details { display: contents; }
+    .actions > details > summary { grid-row: 1; }
+    .actions > details::details-content { grid-column: 1 / -1; grid-row: 2; }
+}
+
+/* Acciones secundarias bajo la pista: abrir otra cuenta y generar un IBAN nuevo. */
+.secondary-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; padding-inline: 0.4rem; }
+.secondary-actions > details[open] { flex-basis: 100%; }
+.secondary-actions .btn-slant { min-height: 2.75rem; font-size: 0.9rem; }
+.secondary-actions details[open] > summary { --slant-bg: var(--mona-surface-hover); }
 
 /* Movimiento rechazado: no cambió el saldo, así que su importe va tachado. */
 .row-rejected .row-amount { color: var(--bs-secondary-color); text-decoration: line-through; }
