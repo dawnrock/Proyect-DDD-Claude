@@ -4,7 +4,7 @@ package com.dawnrock.ddd.domain.model;
 public class DuplicateCustomerException extends DomainException {
 
     public DuplicateCustomerException(TaxId taxId) {
-        super("Ya eres cliente de Mon-A Bank: ya hay un cliente con el documento %s. Entra con tu usuario"
+        super("Ya eres cliente de monA Bank: ya hay un cliente con el documento %s. Entra con tu usuario"
                 .formatted(taxId));
     }
 }

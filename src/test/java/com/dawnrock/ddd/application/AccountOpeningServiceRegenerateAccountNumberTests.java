@@ -40,7 +40,7 @@ class AccountOpeningServiceRegenerateAccountNumberTests {
     }
 
     @Test
-    @DisplayName("El administrador recibe el resumen con un IBAN nuevo de Mon-A Bank y la cuenta lo conserva")
+    @DisplayName("El administrador recibe el resumen con un IBAN nuevo de monA Bank y la cuenta lo conserva")
     void theAdministratorGetsTheSummaryWithANewIban() {
         AccountSummary regenerated = opening.regenerateAccountNumber(ADMIN, account.id());
 
@@ -61,7 +61,7 @@ class AccountOpeningServiceRegenerateAccountNumberTests {
     }
 
     @Test
-    @DisplayName("Una cuenta con un IBAN de otro banco pasa a tener uno de Mon-A Bank")
+    @DisplayName("Una cuenta con un IBAN de otro banco pasa a tener uno de monA Bank")
     void anAccountWithAnotherBanksIbanGetsAMonABankOne() {
         UUID id = accounts.save(TestAccounts.anAccount().initialDeposit("500.00").open()).id();
 

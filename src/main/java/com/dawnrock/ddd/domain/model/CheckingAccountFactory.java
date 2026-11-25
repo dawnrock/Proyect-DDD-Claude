@@ -33,7 +33,7 @@ public final class CheckingAccountFactory {
         return open(customer.fullName(), customer.taxId(), initialDeposit);
     }
 
-    /** Un número de cuenta nuevo de Mon-A Bank, para sustituir el de una cuenta existente (R32). */
+    /** Un número de cuenta nuevo de monA Bank, para sustituir el de una cuenta existente (R32). */
     public AccountNumber nextAccountNumber() {
         return numbering.next();
     }

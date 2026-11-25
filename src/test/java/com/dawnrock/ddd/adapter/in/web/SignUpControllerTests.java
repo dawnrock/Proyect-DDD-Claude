@@ -2,6 +2,7 @@ package com.dawnrock.ddd.adapter.in.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -105,6 +106,15 @@ class SignUpControllerTests {
                     .andExpect(content().string(containsString("style=\"width: 33%\"")))
                     // #126: con nombre de transición de vista, la barra crece de un paso al siguiente
                     .andExpect(content().string(containsString("<div class=\"progress-bar signup-progress-bar\"")));
+        }
+
+        @Test
+        @DisplayName("El primer paso del alta muestra el logo apilado de monA Bank sobre su título (#178)")
+        void theFirstStepShowsTheStackedLogoAboveItsTitle() throws Exception {
+            mvc.perform(get("/signup"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<img [^>]*src=\"/brand/monabank-stacked[^\"]*\\.svg\"[^>]*alt=\"\".*<h1[^>]*>Hazte cliente de monA Bank</h1>.*")));
         }
 
         @Test
@@ -365,7 +375,7 @@ class SignUpControllerTests {
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + id))
                     .andExpect(flash().attribute("message",
-                            "Te damos la bienvenida a Mon-A Bank. Tu IBAN es ES2199990001220000000001"));
+                            "Te damos la bienvenida a monA Bank. Tu IBAN es ES2199990001220000000001"));
 
             ArgumentCaptor<SignUpCommand> command = ArgumentCaptor.forClass(SignUpCommand.class);
             verify(registration).register(command.capture(), eq("clave-secreta-1"), any());
@@ -391,7 +401,7 @@ class SignUpControllerTests {
 
             mvc.perform(get("/signup").session(session).flashAttr("signUpError", error.getMessage())
                             .flashAttr("duplicateCustomer", true))
-                    .andExpect(content().string(containsString("Ya eres cliente de Mon-A Bank")))
+                    .andExpect(content().string(containsString("Ya eres cliente de monA Bank")))
                     .andExpect(content().string(containsString("href=\"/login?form\"")));
         }
 
@@ -480,7 +490,7 @@ class SignUpControllerTests {
             mvc.perform(get("/accounts/" + id).session(session))
                     .andExpect(status().isOk())
                     .andExpect(view().name("accounts/detail"))
-                    .andExpect(content().string(containsString("Te damos la bienvenida a Mon-A Bank. Tu IBAN es ES2199990001220000000001")))
+                    .andExpect(content().string(containsString("Te damos la bienvenida a monA Bank. Tu IBAN es ES2199990001220000000001")))
                     .andExpect(content().string(containsString("margaret")));
 
             ArgumentCaptor<Caller> caller = ArgumentCaptor.forClass(Caller.class);

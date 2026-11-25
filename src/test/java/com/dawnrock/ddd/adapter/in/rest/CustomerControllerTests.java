@@ -200,7 +200,7 @@ class CustomerControllerTests {
         mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.title").value("Regla de negocio incumplida"))
-                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.startsWith("Ya eres cliente de Mon-A Bank")));
+                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.startsWith("Ya eres cliente de monA Bank")));
     }
 
     @Test

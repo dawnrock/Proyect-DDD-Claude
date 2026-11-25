@@ -3,6 +3,7 @@ package com.dawnrock.ddd.adapter.in.web;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -114,15 +115,31 @@ class AccountListControllerTests extends AccountWebTestSupport {
         }
 
         @Test
-        @DisplayName("El pie de página indica solo la fase 2, arquitectura hexagonal, sin el nombre del proyecto")
-        void theFooterOnlyShowsPhaseTwoHexagonalArchitecture() throws Exception {
+        @DisplayName("La cabecera lleva el logo de monA Bank, la pestaña su favicon y el título acaba en el nombre del banco (#178)")
+        void theHeaderShowsTheBrandLogoWithFaviconAndTitle() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
 
             mvc.perform(get("/"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("Fase 2 · arquitectura hexagonal")))
-                    .andExpect(content().string(not(containsString("Proyect-DDD-Claude"))))
-                    .andExpect(content().string(not(containsStringIgnoringCase("fase 1"))));
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<a class=\"navbar-brand[^\"]*\" href=\"/\">\\s*<img src=\"/brand/monabank-horizontal[^\"]*\\.svg\""
+                                    + "[^>]*alt=\"monA Bank\".*")))
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<link rel=\"icon\" type=\"image/svg\\+xml\" href=\"/brand/favicon[^\"]*\\.svg\">.*")))
+                    .andExpect(content().string(matchesPattern("(?s).*<title>[^<]* · monA Bank</title>.*")))
+                    .andExpect(content().string(not(containsString("Cuentas corrientes"))));
+        }
+
+        @Test
+        @DisplayName("La web no tiene pie de página: ni la fase ni la arquitectura del proyecto (#178)")
+        void thePageHasNoFooterWithThePhaseOrTheArchitecture() throws Exception {
+            when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
+
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(not(containsString("<footer"))))
+                    .andExpect(content().string(not(containsStringIgnoringCase("arquitectura hexagonal"))))
+                    .andExpect(content().string(not(containsString("Proyect-DDD-Claude"))));
         }
     }
 

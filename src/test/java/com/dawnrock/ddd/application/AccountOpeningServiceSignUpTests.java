@@ -57,7 +57,7 @@ class AccountOpeningServiceSignUpTests {
     }
 
     @Test
-    @DisplayName("El alta registra al cliente y abre su cuenta con un IBAN de Mon-A Bank a nombre de su usuario")
+    @DisplayName("El alta registra al cliente y abre su cuenta con un IBAN de monA Bank a nombre de su usuario")
     void signUpRegistersTheCustomerAndOpensTheirAccountWithAMonABankIban() {
         AccountSummary summary = opening.signUp(signUp().build());
 

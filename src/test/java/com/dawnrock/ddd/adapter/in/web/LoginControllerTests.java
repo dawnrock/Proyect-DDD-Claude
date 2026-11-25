@@ -2,6 +2,7 @@ package com.dawnrock.ddd.adapter.in.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -59,6 +60,47 @@ class LoginControllerTests {
                 .andExpect(content().string(containsString("href=\"/signup\"")))
                 .andExpect(content().string(not(containsString("name=\"username\""))))
                 .andExpect(content().string(not(containsString("name=\"password\""))));
+    }
+
+    @Test
+    @DisplayName("La bienvenida del login muestra el logo apilado de monA Bank sobre su título; el formulario, no (#178)")
+    void theLoginWelcomeShowsTheStackedLogoAboveItsTitle() throws Exception {
+        mvc.perform(get("/login"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(matchesPattern(
+                        "(?s).*<img [^>]*src=\"/brand/monabank-stacked[^\"]*\\.svg\"[^>]*alt=\"\".*<h1[^>]*>Bienvenido a monA Bank</h1>.*")));
+        mvc.perform(get("/login").param("form", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("monabank-stacked"))));
+    }
+
+    @Test
+    @DisplayName("Las puertas del login traen la intro de monA Bank oculta, con su lienzo y su script; el formulario, no (#178)")
+    void theLoginDoorsBringTheHiddenIntroWithItsCanvasAndScript() throws Exception {
+        mvc.perform(get("/login"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(matchesPattern(
+                        "(?s).*<div class=\"splash\" id=\"splash\" role=\"img\" aria-label=\"monA Bank\" hidden>\\s*"
+                                + "<canvas aria-hidden=\"true\"></canvas>\\s*</div>.*")))
+                .andExpect(content().string(matchesPattern(
+                        "(?s).*<script type=\"importmap\">\\{\"imports\":\\{\"brand-geometry\":\"\\\\?/js\\\\?/brand-geometry-[0-9a-f]{32}\\.js\"\\}\\}</script>.*")))
+                .andExpect(content().string(matchesPattern(
+                        "(?s).*<script type=\"module\" src=\"/js/intro-[0-9a-f]{32}\\.js\"></script>.*")));
+        mvc.perform(get("/login").param("form", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("id=\"splash\""))))
+                .andExpect(content().string(not(containsString("intro"))));
+    }
+
+    @Test
+    @DisplayName("El script de la intro se sirve como JavaScript, que es lo que exige un módulo (#178)")
+    void theIntroScriptIsServedAsJavaScript() throws Exception {
+        mvc.perform(get("/js/intro.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/javascript"));
+        mvc.perform(get("/js/brand-geometry.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/javascript"));
     }
 
     @Test

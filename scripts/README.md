@@ -1,6 +1,6 @@
 # scripts/
 
-Scripts deterministas que usan las skills, los hooks y el CI. Solo necesitan Node 18+ (sin dependencias npm), `gh` para las issues y, para `contract-test.mjs`, Java 21 y Schemathesis.
+Scripts deterministas que usan las skills, los hooks y el CI. Solo necesitan Node 18+ (sin dependencias npm), `gh` para las issues y, para `contract-test.mjs`, Java 21 y Schemathesis; `build-brand.mjs` necesita Node 22 y descarga sus paquetes de npm al ejecutarse.
 
 ## seed-issues.mjs
 
@@ -95,4 +95,14 @@ Lee los contratos con finales de línea LF o CRLF (#159): en Windows, con `core.
 
 ```bash
 node --test "scripts/*.test.mjs"
+```
+
+## build-brand.mjs
+
+Genera los SVG del logo de monA Bank (#178, [ADR 0022](../docs/adr/0022-brand-identity.md)) en `src/main/resources/static/brand/`: `monabank-stacked.svg` (bienvenidas), `monabank-horizontal.svg` (cabecera) y `favicon.svg`. Las letras van como trazos, y la gráfica se calcula con `static/js/brand-geometry.js`, el mismo módulo que usa la intro del login; sus tests (`brand-geometry.test.mjs`) también los ejecuta el CI.
+
+No forma parte del build: se ejecuta a mano cuando cambia el logo o la tipografía, y los SVG se suben al repositorio. Es el único script que descarga paquetes de npm: necesita Node 22 e internet, y baja con `npm pack` (que comprueba la integridad contra el registro) `opentype.js` 2.0.0 y las instancias estáticas 400 y 700 de `@fontsource/tektur` 5.3.0 a una carpeta temporal que borra al acabar. Es determinista: con las mismas versiones, genera los mismos archivos.
+
+```bash
+node scripts/build-brand.mjs
 ```

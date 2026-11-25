@@ -232,14 +232,14 @@ public class CheckingAccount {
     }
 
     /**
-     * Sustituye el número de cuenta por otro que haya generado Mon-A Bank y que sea distinto del actual (R32). Que no
+     * Sustituye el número de cuenta por otro que haya generado monA Bank y que sea distinto del actual (R32). Que no
      * lo use otra cuenta no lo sabe el agregado: lo comprueba el repositorio al guardar.
      */
     public void reassignAccountNumber(AccountNumber newAccountNumber) {
         Objects.requireNonNull(newAccountNumber, "El número de cuenta es obligatorio");
         if (!newAccountNumber.isMonABank()) {
             throw new IllegalArgumentException(
-                    "El número de cuenta %s no es de Mon-A Bank".formatted(newAccountNumber));
+                    "El número de cuenta %s no es de monA Bank".formatted(newAccountNumber));
         }
         if (newAccountNumber.equals(accountNumber)) {
             throw new IllegalArgumentException("La cuenta ya tiene el número %s".formatted(accountNumber));

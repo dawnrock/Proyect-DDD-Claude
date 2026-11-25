@@ -6,7 +6,7 @@
 <main class="app-container mx-auto w-100 px-3 pb-5">
     <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1 mb-3" th:href="@{/}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg>Volver</a>
     <h1 class="h3 fw-semibold mb-2">Abrir otra cuenta</h1>
-    <p class="text-body-secondary">La abrimos a tu nombre y le asignamos un IBAN de Mon-A Bank. Solo necesitamos el depósito inicial.</p>
+    <p class="text-body-secondary">La abrimos a tu nombre y le asignamos un IBAN de monA Bank. Solo necesitamos el depósito inicial.</p>
     <form class="card card-body" th:action="@{/accounts/another}" th:object="${form}" method="post" novalidate>
         <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:each="err : ${#fields.globalErrors()}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${err}">Error</span></div>
 
@@ -30,6 +30,5 @@
         </div>
     </form>
 </main>
-<footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>

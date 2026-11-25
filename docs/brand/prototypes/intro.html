@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>monA Bank · intro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tektur:wght@400..900&display=block" rel="stylesheet">
+<style>
+  :root { --ink: #212529; }
+  html, body { margin: 0; height: 100%; background: var(--ink); color: #eef0f2;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  /* Página de debajo: la bienvenida que hoy tiene /login */
+  .page { max-width: 720px; margin: 0 auto; padding: 24px 16px; }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; padding-bottom: 16px;
+    border-bottom: 1px solid #495057; margin-bottom: 24px; }
+  h1 { font-size: 1.5rem; font-weight: 600; margin: 0 0 24px; }
+  .doors { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .door { border: 1px solid #495057; border-radius: 6px; padding: 16px; background: #2b3035; }
+  .door b { display: block; margin-bottom: 4px; }
+  .door span { font-size: .875rem; color: #adb5bd; }
+
+  .splash { position: fixed; inset: 0; z-index: 10; background: var(--ink); }
+  .splash canvas { display: block; width: 100%; height: 100%; }
+  @media (prefers-reduced-motion: reduce) { .splash { display: none; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="brand">🏛 Cuentas corrientes</div>
+  <h1>Bienvenido a monA Bank</h1>
+  <div class="doors">
+    <div class="door"><b>Ya soy cliente</b><span>Entra con tu usuario y tu contraseña.</span></div>
+    <div class="door"><b>Quiero ser cliente</b><span>Abre tu cuenta en tres pasos.</span></div>
+  </div>
+</div>
+
+<div class="splash" id="splash" role="img" aria-label="monA Bank"><canvas id="stage" aria-hidden="true"></canvas></div>
+
+<script>
+(async () => {
+  'use strict';
+  const splash = document.getElementById('splash');
+  const q = new URLSearchParams(location.search);
+  const frameMode = q.has('frame');
+  // Una vez por sesión del navegador; con movimiento reducido, nunca.
+  const SEEN = 'monabank:intro';
+  const seen = () => { try { return sessionStorage.getItem(SEEN) === '1'; } catch { return false; } };
+  if (!frameMode && (seen() || matchMedia('(prefers-reduced-motion: reduce)').matches)) { splash.remove(); return; }
+  try { sessionStorage.setItem(SEEN, '1'); } catch { /* sin almacenamiento: se verá en cada visita */ }
+
+  const FONT = 'Tektur';
+  try {
+    await Promise.all([document.fonts.load(`900 40px "${FONT}"`), document.fonts.load(`400 40px "${FONT}"`)]);
+  } catch { splash.remove(); return; }
+  if (!document.fonts.check(`700 40px "${FONT}"`)) { splash.remove(); return; }
+
+  const DURATION = 3000;
+  const COLORS = { paper: '#eef0f2', mist: '#b9c0c7', flat: '#8b949c', drop: '#f0545c', rise: '#1fc8b0' };
+  // Palabras de cada letra del logo, en orden: m o n A (monA) · B a n k (Bank)
+  const WORDS = [['Maximize', 'Markets'], ['Optimism'], ['Net gain'], ['Affluence', 'Assets'],
+    ['Bull', 'Bonus'], ['Alpha'], ['Next'], ['Key', 'Keep']];
+
+  const cv = document.getElementById('stage'), ctx = cv.getContext('2d');
+  const DPR = Math.min(devicePixelRatio || 1, 2);
+  const W = innerWidth, H = innerHeight;
+  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+  const font = (w, s) => `${Math.round(w / 10) * 10} ${s}px "${FONT}"`;
+  let seed = 23;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+  // =====================================================================================
+  // Logo: «mon» al 75 % de la A, «Bank» debajo. Se analizan los glifos para pintar la gráfica.
+  // =====================================================================================
+  const S = Math.min(W * 0.86 / 2.25, H * 0.33, 270);
+  const MON = 0.75, KIND = S * 0.3, ARROW = 0.18;
+  const LOGO = [...'monA'].map((ch, i) => ({ ch, size: i < 3 ? S * MON : S, weight: 700, color: COLORS.paper }))
+    .concat([...'Bank'].map((ch) => ({ ch, size: KIND, weight: 400, color: COLORS.mist, kind: true })));
+
+  const off = document.createElement('canvas'), ox = off.getContext('2d', { willReadFrequently: true });
+  const mask = (ch, size) => {
+    ox.font = font(700, size);
+    const m = ox.measureText(ch), w = Math.ceil(m.width) + 4, h = Math.ceil(size * 1.3);
+    off.width = w; off.height = h; ox.font = font(700, size); ox.fillStyle = '#fff';
+    const base = Math.round(size); ox.fillText(ch, 2, base);
+    const d = ox.getImageData(0, 0, w, h).data;
+    return { w, h, base, adv: m.width, ink: (px, py) => px >= 0 && py >= 0 && px < w && py < h && d[(py * w + px) * 4 + 3] > 128 };
+  };
+  const mks = LOGO.slice(0, 4).map((l) => mask(l.ch, l.size));
+  // posición de cada letra (origen de fillText, línea base común)
+  ctx.font = font(400, KIND);
+  const kindW = ctx.measureText('Bank').width;
+  const nameW = mks.reduce((s, m) => s + m.adv, 0);
+  const aTop = mks[3].base - (() => { let t = 0; while (![...Array(mks[3].w).keys()].some((px) => mks[3].ink(px, t))) t++; return t; })();
+  const blockTop = aTop + S * ARROW + S * 0.2, blockBottom = KIND * 1.25;   // flecha encima, Bank debajo
+  const base = Math.round(H / 2 + (blockTop - blockBottom) / 2);
+  let x0 = Math.round((W - nameW) / 2);
+  LOGO.slice(0, 4).forEach((l, i) => { l.x = x0; l.y = base; x0 += mks[i].adv; });
+  let kx = x0 - kindW;
+  LOGO.slice(4).forEach((l) => { l.x = kx; l.y = base + KIND * 1.2; ctx.font = font(400, KIND); kx += ctx.measureText(l.ch).width; });
+
+  // --- geometría de la gráfica, en coordenadas de pantalla ---
+  const at = (i, [px, py]) => [LOGO[i].x - 2 + px, base - mks[i].base + py];
+  const strokeT = (mk) => { const px = Math.round(mk.w / 2); let y0 = 0; while (!mk.ink(px, y0)) y0++; let y1 = y0; while (mk.ink(px, y1)) y1++; return y1 - y0; };
+  const T = strokeT(mks[1]);
+  const topLine = (mk, to = 1) => {
+    const pts = [];
+    for (let px = 0; px < mk.w * to; px += 2) {
+      let y0 = -1; for (let py = 0; py < mk.h; py++) if (mk.ink(px, py)) { y0 = py; break; }
+      if (y0 < 0) continue;
+      let y1 = y0; while (y1 < y0 + T && mk.ink(px, y1)) y1++;
+      pts.push([px, (y0 + y1) / 2]);
+    }
+    return pts;
+  };
+  const flatPath = [0, 1].flatMap((i) => topLine(mks[i]).map((p) => at(i, p)));
+  const n = mks[2], nTop = topLine(n, .8), nStem = [];
+  for (let py = Math.round(nTop.at(-1)[1]); py <= n.base; py += 2) {
+    let r = n.w - 1; while (r > 0 && !n.ink(r, py)) r--; if (r === 0) continue;
+    let l = r; while (l > 0 && n.ink(l, py)) l--; nStem.push([(l + r) / 2, py]);
+  }
+  nStem.push([nStem.at(-1)[0], nStem.at(-1)[1] + T]);
+  const dropPath = [...nTop, ...nStem].map((p) => at(2, p));
+  // pata izquierda de la A: dos rectas (borde exterior e interior) ajustadas por mínimos cuadrados
+  const fit = (pts) => { const k = pts.length, my = pts.reduce((s, p) => s + p[1], 0) / k, mx = pts.reduce((s, p) => s + p[0], 0) / k;
+    let num = 0, den = 0; pts.forEach(([x, y]) => { num += (y - my) * (x - mx); den += (y - my) ** 2; }); const a = num / den; return (y) => a * y + mx - a * my; };
+  const A = mks[3];
+  let top = 0; while (![...Array(A.w).keys()].some((px) => A.ink(px, top))) top++;
+  const outer = [], inner = [];
+  for (let py = A.base - T; py > top + (A.base - top) * .45; py--) {
+    let l = 0; while (l < A.w && !A.ink(l, py)) l++; let r = l; while (r < A.w && A.ink(r, py)) r++;
+    outer.push([l, py]); inner.push([r, py]);
+  }
+  const widths = outer.map((p, i) => inner[i][0] - p[0]).sort((a, b) => a - b), wq = widths[widths.length >> 2];
+  const keep = outer.map((p, i) => inner[i][0] - p[0] <= wq * 1.25);
+  const L1 = fit(outer.filter((_, i) => keep[i])), L2 = fit(inner.filter((_, i) => keep[i]));
+  const g = (y, L) => at(3, [L(y), y]);
+  const legBottom = A.base + 2, yTip = top - S * ARROW;
+
+  const lengthOf = (pts) => pts.reduce((s, p, i) => s + (i ? Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]) : 0), 0);
+  const partial = (pts, f) => {   // los primeros f·100 % del recorrido
+    const total = lengthOf(pts) * f, out = [pts[0]]; let acc = 0;
+    for (let i = 1; i < pts.length; i++) {
+      const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+      if (acc + d >= total) { const k = (total - acc) / d; out.push([pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * k, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * k]); return out; }
+      acc += d; out.push(pts[i]);
+    }
+    return out;
+  };
+  const poly = (c, pts) => { c.beginPath(); pts.forEach(([px, py], i) => i ? c.lineTo(px, py) : c.moveTo(px, py)); };
+
+  // capa del logo: letras blancas + gráfica pintada por dentro hasta el progreso indicado
+  const layer = document.createElement('canvas'); layer.width = cv.width; layer.height = cv.height;
+  const lx = layer.getContext('2d');
+  const drawLogo = (pFlat, pDrop, pLeg, pArrow) => {
+    lx.setTransform(1, 0, 0, 1, 0, 0); lx.clearRect(0, 0, layer.width, layer.height); lx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    LOGO.slice(0, 4).forEach((l) => { lx.font = font(l.weight, l.size); lx.fillStyle = l.color; lx.fillText(l.ch, l.x, l.y); });
+    lx.save(); lx.globalCompositeOperation = 'source-atop'; lx.lineWidth = T * 1.4; lx.lineJoin = 'round'; lx.lineCap = 'butt';
+    if (pFlat > 0) { lx.strokeStyle = COLORS.flat; poly(lx, partial(flatPath, pFlat)); lx.stroke(); }
+    if (pDrop > 0) { lx.strokeStyle = COLORS.drop; poly(lx, partial(dropPath, pDrop)); lx.stroke(); }
+    if (pLeg > 0) {   // la pata se llena de abajo arriba
+      const y = legBottom + (top - legBottom) * pLeg, pad = (yy) => L1(yy) - 3;
+      lx.fillStyle = COLORS.rise; poly(lx, [g(legBottom, pad), g(y, pad), g(y, L2), g(legBottom, L2)]); lx.fill();
+    }
+    lx.restore();
+    if (pArrow > 0) {   // el asta crece desde el vértice y la punta aparece al final
+      const yEnd = top + (yTip - top) * Math.min(1, pArrow / .7);
+      lx.fillStyle = COLORS.rise; poly(lx, [g(top + 1, L1), g(yEnd, L1), g(yEnd, L2), g(top + 1, L2)]); lx.fill();
+      const head = Math.max(0, (pArrow - .55) / .45);
+      if (head > 0) {
+        const [ax, ay] = g(yEnd, L1), [bx, by] = g(yEnd, L2), mx = (ax + bx) / 2, my = (ay + by) / 2;
+        const mid = (yy) => (L1(yy) + L2(yy)) / 2, [p0x, p0y] = g(top, mid), k = Math.hypot(mx - p0x, my - p0y) || 1;
+        const dir = [(mx - p0x) / k, (my - p0y) / k], perp = [-dir[1], dir[0]];
+        const thick = Math.abs((bx - ax) * perp[0] + (by - ay) * perp[1]), half = thick * 1.3 * head, len = thick * 1.9 * head;
+        poly(lx, [[mx + perp[0] * half, my + perp[1] * half], [mx + dir[0] * len, my + dir[1] * len], [mx - perp[0] * half, my - perp[1] * half]]); lx.fill();
+      }
+    }
+    LOGO.slice(4).forEach((l) => { lx.font = font(l.weight, l.size); lx.fillStyle = l.color; lx.fillText(l.ch, l.x, l.y); });
+  };
+
+  // =====================================================================================
+  // Palabras: pocas, pegadas entre sí y con tamaños muy dispares
+  // =====================================================================================
+  const unit = Math.min(Math.sqrt(W * H), W * 1.1);
+  const items = WORDS.flatMap((list, li) => list.map((text) => ({ text, li })));
+  const TIER = { Optimism: 0, Affluence: 0, Maximize: 1, Bull: 1, Key: 1, Markets: 2, 'Net gain': 2, Alpha: 2,
+    Assets: 3, Bonus: 3, Next: 3, Keep: 3 };
+  const RANGE = [H > W ? [.25, .29] : [.2, .23], [.17, .2], [.1, .12], [.05, .065]];
+  const deg = Math.PI / 180;
+  items.forEach((it) => {
+    it.tier = TIER[it.text];
+    const [lo, hi] = RANGE[it.tier];
+    it.size = unit * (lo + rnd() * (hi - lo));
+    it.weight = it.tier === 0 ? 900 : [400, 600, 800][Math.floor(rnd() * 3)];
+    ctx.font = font(it.weight, it.size);
+    it.width = ctx.measureText(it.text).width;
+    const r = rnd(), portrait = H > W * 1.2;
+    it.angle = it.tier === 0 ? (portrait ? (rnd() < .5 ? -1 : 1) * (55 + rnd() * 20) : (rnd() - .5) * 50) * deg
+      : r < (portrait ? .45 : .25) ? (rnd() < .5 ? -1 : 1) * (80 + rnd() * 10) * deg   // casi verticales
+      : (rnd() - .5) * 110 * deg;
+    // que quepa entera ya girada (en móvil, las grandes aprovechan el alto de la pantalla)
+    const pc = Math.abs(Math.cos(it.angle)), ps = Math.abs(Math.sin(it.angle));
+    const fitK = Math.min(1, W * .95 / (it.width * pc + it.size * ps), H * .9 / (it.width * ps + it.size * pc));
+    if (fitK < 1) { it.size *= fitK; ctx.font = font(it.weight, it.size); it.width = ctx.measureText(it.text).width; }
+    it.offsets = [...it.text].map((_, k) => ctx.measureText(it.text.slice(0, k)).width);
+  });
+  items.sort((a, b) => a.tier - b.tier);
+  const circlesOf = (it, x, y) => {
+    const r = it.size * .4, k = Math.max(2, Math.ceil(it.width / (r * 1.15)));
+    const c = Math.cos(it.angle), s = Math.sin(it.angle);
+    return Array.from({ length: k }, (_, j) => { const along = (j + .5) * it.width / k, down = it.size * .45;
+      return [x + along * c - down * s, y + along * s + down * c, r]; });
+  };
+  const CELL = 28, cols = Math.ceil(W / CELL), rows = Math.ceil(H / CELL), covered = new Uint8Array(cols * rows);
+  const cellsOf = (circles) => { const out = new Set(); circles.forEach(([cx, cy, r]) => {
+    for (let gx = Math.floor((cx - r) / CELL); gx <= Math.floor((cx + r) / CELL); gx++)
+      for (let gy = Math.floor((cy - r) / CELL); gy <= Math.floor((cy + r) / CELL); gy++)
+        if (gx >= 0 && gy >= 0 && gx < cols && gy < rows) out.add(gy * cols + gx); }); return out; };
+  const M = 12, inside = ([px, py], m = M) => px > m && py > m && px < W - m && py < H - m;
+  const placed = [];
+  items.forEach((it, idx) => {
+    let best = null;
+    // pasadas: estricta; sin exigir que toque a otra; con más solape; y, como último recurso, solo que quepa
+    // entera y que ninguna inicial quede tapada
+    for (let pass = 0; pass < 4 && !best; pass++) {
+      // solo se prueban posiciones en las que la palabra, ya girada, cabe entera en pantalla
+      const c = Math.cos(it.angle), sn = Math.sin(it.angle);
+      const box = [[0, 0], [it.width, 0], [0, it.size], [it.width, it.size]].map(([a, b]) => [a * c - b * sn, a * sn + b * c]);
+      const bx0 = M - Math.min(...box.map((p) => p[0])), bx1 = W - M - Math.max(...box.map((p) => p[0]));
+      const by0 = M - Math.min(...box.map((p) => p[1])), by1 = H - M - Math.max(...box.map((p) => p[1]));
+      const span = (a, b, f) => b > a ? a + (b - a) * f : (a + b) / 2;
+      for (let tries = 0; tries < 1500; tries++) {
+        // la primera, en una franja (apaisado: arriba, para dejar sitio a la otra enorme); el resto, en cualquier sitio
+        const x = span(bx0, bx1, idx === 0 ? rnd() * .3 : rnd());
+        const y = span(by0, by1, idx === 0 ? (H > W ? .3 + rnd() * .4 : rnd() * .25) : rnd());
+        const mine = circlesOf(it, x, y);
+        let hits = 0, worst = 0;
+        for (const p of placed) {
+          const limit = (p.tier === it.tier ? .35 : p.tier === 0 ? 1.25 : .85) * (pass === 2 ? 1.4 : 1);
+          for (const [px, py, pr] of p.circles) for (const [mx, my, mr] of mine) {
+            const depth = (pr + mr - Math.hypot(px - mx, py - my)) / Math.min(pr, mr);
+            if (depth > 0) { hits++; worst = Math.max(worst, depth / limit); }
+          }
+        }
+        if (worst > 1 && pass < 3) continue;
+        // ninguna inicial queda tapada: ni la de esta palabra ni las de las ya colocadas
+        const [ix, iy, ir] = mine[0];
+        if (placed.some((p) => p.circles.some(([px, py, pr]) => Math.hypot(px - ix, py - iy) < (pr + ir) * .8))) continue;
+        if (placed.some((p) => mine.some(([mx, my, mr]) => Math.hypot(p.circles[0][0] - mx, p.circles[0][1] - my) < (p.circles[0][2] + mr) * .8))) continue;
+        if (pass === 0 && idx > 0 && hits === 0) continue;   // acopladas: cada palabra toca al menos a otra
+        const cells = cellsOf(mine); let fresh = 0; cells.forEach((c) => { if (!covered[c]) fresh++; });
+        const score = fresh * 1.6 + Math.min(hits, 4) * 3 + rnd() * 6 - (pass === 3 ? worst * 200 : 0);   // último recurso: el menor solape
+        if (!best || score > best.score) best = { x, y, score, circles: mine, cells };
+        if (tries > 500 && best && pass < 3) break;
+      }
+    }
+    if (!best) { const x = M + rnd() * Math.max(1, W - it.width - 2 * M), y = M + rnd() * (H - it.size - 2 * M);
+      best = { x, y, circles: circlesOf(it, x, y), cells: new Set() }; console.warn('sin hueco para', it.text); }
+    best.cells.forEach((c) => { covered[c] = 1; });
+    Object.assign(it, best); placed.push(it);
+  });
+  items.forEach((it) => {
+    const tg = LOGO[it.li];
+    it.to = tg;
+    // origen (línea base) de la palabra y de su inicial
+    const c = Math.cos(it.angle), s = Math.sin(it.angle), b = it.size * .8;
+    it.ox = it.x - b * s; it.oy = it.y + b * c;
+    it.enter = rnd() * 330;
+    it.erase = 640 + rnd() * 140;
+    it.fly = 950 + it.li * 30 + rnd() * 60;
+    it.alpha = [.36, .62, .84, .95][it.tier];
+  });
+
+  // =====================================================================================
+  // Guion (ms)
+  //    0– 600  entran las palabras          640–1000  se borran las terminaciones
+  //  950–1840  las iniciales vuelan al logo: se enderezan, cambian de tamaño, peso y caja
+  // 1860–2480  la gráfica: gris (m, o) → caída roja (n) → subida turquesa (A) → flecha
+  // 2480–2650  el logo, quieto                2650–3000  la capa se desvanece
+  // =====================================================================================
+  const clamp = (v) => Math.min(1, Math.max(0, v));
+  const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+  const easeInOut = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const easeInOutQuart = (t) => t < .5 ? 8 * t ** 4 : 1 - Math.pow(-2 * t + 2, 4) / 2;
+  const LANDED = Math.max(...items.map((it) => it.fly)) + 620;
+  const G0 = LANDED + 20;
+
+  const render = (t) => {
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.textBaseline = 'alphabetic';
+    if (t < LANDED) {
+      items.forEach((it) => {   // palabras (la inicial, mientras no despegue)
+        const enter = easeOut(clamp((t - it.enter) / 260));
+        if (enter <= 0) return;
+        const n = it.text.length;
+        ctx.save(); ctx.translate(it.ox, it.oy); ctx.rotate(it.angle);
+        ctx.translate(0, (1 - enter) * it.size * .3);
+        ctx.font = font(it.weight, it.size); ctx.fillStyle = COLORS.mist;
+        [...it.text].forEach((ch, k) => {
+          if (k === 0) { if (t >= it.fly) return; ctx.globalAlpha = enter * it.alpha; ctx.fillText(ch, 0, 0); return; }
+          const e = easeOut(clamp((t - it.erase - (n - 1 - k) * 22) / 150));
+          if (e >= 1) return;
+          ctx.globalAlpha = enter * it.alpha * (1 - e);
+          ctx.fillText(ch, it.offsets[k], e * it.size * .22);
+        });
+        ctx.restore();
+      });
+      items.forEach((it) => {   // iniciales en vuelo
+        if (t < it.fly) return;
+        const f = easeInOutQuart(clamp((t - it.fly) / 620)), tg = it.to;
+        const x = it.ox + (tg.x - it.ox) * f, y = it.oy + (tg.y - it.oy) * f;
+        const size = it.size + (tg.size - it.size) * f, weight = it.weight + (tg.weight - it.weight) * f;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(it.angle * (1 - f)); ctx.font = font(weight, size);
+        const a = it.alpha + (1 - it.alpha) * f, sw = clamp((f - .35) / .3);
+        const from = it.text[0];
+        if (from !== tg.ch) { ctx.globalAlpha = a * (1 - sw); ctx.fillStyle = COLORS.paper; ctx.fillText(from, 0, 0); }
+        ctx.globalAlpha = from !== tg.ch ? a * sw : a;
+        ctx.fillStyle = tg.color; ctx.fillText(tg.ch, 0, 0);
+        ctx.restore();
+      });
+    } else {
+      const seg = (a, d, e = easeInOut) => e(clamp((t - G0 - a) / d));
+      drawLogo(seg(0, 200), seg(200, 150), seg(350, 150), seg(500, 120, easeOut));
+      ctx.globalAlpha = 1; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(layer, 0, 0);
+    }
+    splash.style.opacity = 1 - easeInOut(clamp((t - 2650) / 350));
+  };
+
+  window.__render = render;
+  if (frameMode) { render(+q.get('frame')); document.body.dataset.ready = '1'; return; }
+
+  let t0 = null, raf;
+  const finish = () => { cancelAnimationFrame(raf); splash.remove(); };
+  const tick = (now) => { t0 ??= now; const t = now - t0; render(Math.min(t, DURATION)); if (t < DURATION) raf = requestAnimationFrame(tick); else finish(); };
+  raf = requestAnimationFrame(tick);
+  // Sin botón: quien tenga prisa puede quitarla con Esc o con un clic
+  splash.addEventListener('click', finish);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') finish(); }, { once: true });
+})();
+</script>
+</body>
+</html>

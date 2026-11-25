@@ -22,8 +22,8 @@ import com.dawnrock.ddd.adapter.in.TooManyLoginAttemptsException;
  * administradores y la página 403 propia. A htmx, una sesión caducada le responde 401 con {@code HX-Redirect}
  * al login ({@link HtmxLoginRedirect}, #125).
  *
- * <p>Públicos: {@code /login}, los estilos, los scripts y las librerías del frontend (ADR 0016), la salud del
- * actuator y las páginas de error. El resto exige sesión.
+ * <p>Públicos: {@code /login}, los estilos, los scripts y las librerías del frontend (ADR 0016), los logos de la
+ * marca ({@code /brand/**}, ADR 0022), la salud del actuator y las páginas de error. El resto exige sesión.
  */
 @Configuration
 public class WebSecurityConfig {
@@ -34,7 +34,7 @@ public class WebSecurityConfig {
             throws Exception {
         return http
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/login", "/signup/**", "/css/**", "/js/**", "/webjars/**", "/vendor/**", "/actuator/health", "/error", "/error/**",
+                        .requestMatchers("/login", "/signup/**", "/css/**", "/js/**", "/webjars/**", "/vendor/**", "/brand/**", "/actuator/health", "/error", "/error/**",
                                 "/openapi.yaml", "/api-docs", "/api-docs/**").permitAll()
                         // /accounts/another: cualquier sesión; el administrador recibe 403 del propio controlador
                         .requestMatchers("/accounts/new").hasRole("ADMIN")

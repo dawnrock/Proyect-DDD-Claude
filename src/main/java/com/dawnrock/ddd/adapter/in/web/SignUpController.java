@@ -39,7 +39,7 @@ import com.dawnrock.ddd.domain.model.DuplicateCustomerException;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Alta de cliente de Mon-A Bank en tres pasos (#95, #103). El estado del asistente es un {@link SignUpForm} en la
+ * Alta de cliente de monA Bank en tres pasos (#95, #103). El estado del asistente es un {@link SignUpForm} en la
  * sesión del servidor; entrar en un paso sin haber completado los anteriores lleva a {@code /signup}. Contrato:
  * {@code docs/contracts/customer-sign-up.md}.
  */
@@ -149,7 +149,7 @@ public class SignUpController {
             status.setComplete();
             signIn(username, request, response);
             redirect.addFlashAttribute("message",
-                    "Te damos la bienvenida a Mon-A Bank. Tu IBAN es " + account.accountNumber());
+                    "Te damos la bienvenida a monA Bank. Tu IBAN es " + account.accountNumber());
             return "redirect:/accounts/" + account.id();
         } catch (TooManySignUpsException e) {
             result.reject("tooManySignUps", tooManySignUps(e.retryAfter()));

@@ -124,7 +124,7 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | `DomainModelRunner` | `adapter.in.cli` | Input adapter (CLI): with the `demo` profile, opens the demo accounts and runs a deposit, two withdrawals (approved and rejected) and a transfer through `AccountOpeningCommands` and `MoneyMovementCommands`, with a `[demo]` trace per use case |
 | `CheckingAccount` | `domain.model` | Aggregate root; records its domain events (`pullDomainEvents`); `open` is package-private, used only by the factory |
 | `CheckingAccountFactory` | `domain.model` | Factory: number + segment from the verified income (R20), also for a registered customer (#103); built in `config` |
-| `Customer` | `domain.model` | Aggregate (#103): a Mon-A Bank customer, identified by their document, with name and e-mail |
+| `Customer` | `domain.model` | Aggregate (#103): a monA Bank customer, identified by their document, with name and e-mail |
 | `SegmentReviewService` | `domain.service` | Domain service (#98): when the segment review of an account is due, verifies the income again through the `IncomeVerifier` port and tells the aggregate the result; built in `config` |
 | `CustomerSegmentChanged` | `domain.model` | Domain event recorded by the aggregate on every promotion and demotion |
 | `SegmentReviewScheduler` | `adapter.in.scheduler` | Input adapter (scheduled task, #98): every day calls `SegmentReviewCommands.reviewSegments()`; here the clock is who calls the hexagon. Scheduling is enabled in `config.SchedulingConfiguration` |

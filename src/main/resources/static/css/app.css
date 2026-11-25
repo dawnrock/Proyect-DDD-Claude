@@ -38,3 +38,24 @@
 @media (prefers-reduced-motion: no-preference) {
     .signup-progress-bar { view-transition-name: signup-progress; }
 }
+
+/* Tipografía de la marca monA Bank (#178, ADR 0022): solo se descarga cuando algo la usa (la intro del login). */
+@font-face {
+    font-family: "Tektur";
+    font-style: normal;
+    font-weight: 400 900;
+    font-display: block;
+    src: url("/vendor/tektur/tektur-latin-wght-normal.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+        U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Logo de monA Bank en la cabecera (#178): el SVG horizontal, a la altura de la barra de navegación. */
+.brand-logo { height: 2rem; width: auto; display: block; }
+
+/* Logo apilado en las bienvenidas del login y del alta (#178): decorativo, el título ya nombra al banco. */
+.brand-welcome { display: block; width: min(18rem, 70%); height: auto; margin: 0.5rem auto 2rem; }
+
+/* Intro de la marca (#178): capa a pantalla completa sobre las puertas del login, del color de fondo de la web. */
+.splash { position: fixed; inset: 0; z-index: 1080; background-color: var(--bs-body-bg); }
+.splash canvas { display: block; width: 100%; height: 100%; }

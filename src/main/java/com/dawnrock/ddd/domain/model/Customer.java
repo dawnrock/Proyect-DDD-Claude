@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Cliente de Mon-A Bank: la persona que se identifica por su documento y puede tener varias cuentas. No conoce a los
+ * Cliente de monA Bank: la persona que se identifica por su documento y puede tener varias cuentas. No conoce a los
  * usuarios (el dominio no conoce a nadie): la relación cliente-usuario vive en el puerto de salida
  * {@code CustomerOwnershipRepository}, de {@code application}. Que dos clientes no compartan documento (R30) lo
  * garantiza el repositorio y lo comprueban los casos de uso.

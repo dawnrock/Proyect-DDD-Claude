@@ -139,6 +139,23 @@ class WebSecurityTests {
     }
 
     @Test
+    @DisplayName("La tipografía Tektur de la marca se sirve sin sesión y como fuente woff2 (#178)")
+    void theBrandTypefaceIsServedWithoutSessionAsWoff2() throws Exception {
+        mvc.perform(get("/vendor/tektur/tektur-latin-wght-normal.woff2"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("font/woff2"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/brand/favicon.svg", "/brand/monabank-horizontal.svg", "/brand/monabank-stacked.svg"})
+    @DisplayName("Los logos de monA Bank se sirven sin sesión como imágenes SVG (#178)")
+    void theBrandLogosAreServedWithoutSessionAsSvg(String path) throws Exception {
+        mvc.perform(get(path))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("image/svg+xml"));
+    }
+
+    @Test
     @DisplayName("Las librerías del frontend se guardan en caché un año y las páginas no se guardan (#124)")
     void frontendLibrariesAreCachedAndPagesAreNot() throws Exception {
         mvc.perform(get("/webjars/bootstrap/css/bootstrap.min.css"))

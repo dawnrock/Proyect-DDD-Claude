@@ -131,7 +131,7 @@ class DddLabApplicationTests {
 
 		assertThat(response.statusCode()).isEqualTo(404);
 		assertThat(response.headers().firstValue("Content-Type")).hasValueSatisfying(type -> assertThat(type).startsWith("text/html"));
-		assertThat(response.body()).contains("Página no encontrada").contains("Cuentas corrientes");
+		assertThat(response.body()).contains("Página no encontrada").contains("monA Bank").doesNotContain("Cuentas corrientes");
 	}
 
 	@Test
@@ -560,7 +560,7 @@ class DddLabApplicationTests {
 	}
 
 	@Nested
-	@DisplayName("Alta de cliente de Mon-A Bank con el servicio real (#103)")
+	@DisplayName("Alta de cliente de monA Bank con el servicio real (#103)")
 	class CustomerSignUp {
 
 		/** NIE válido que no usa ningún otro test del contexto compartido. */
@@ -581,7 +581,7 @@ class DddLabApplicationTests {
 			assertThat(firstAccount).contains("/accounts/").doesNotContain("login");
 			HttpResponse<String> detail = send(visitor, path(firstAccount));
 			assertThat(detail.statusCode()).isEqualTo(200);
-			assertThat(detail.body()).contains("Te damos la bienvenida a Mon-A Bank")
+			assertThat(detail.body()).contains("Te damos la bienvenida a monA Bank")
 					.containsPattern("ES\\d{2}99990001\\d{12}");
 
 			HttpResponse<String> another = postForm(visitor, "/accounts/another", "initialDeposit=60.00&currency=EUR");
@@ -609,7 +609,7 @@ class DddLabApplicationTests {
 			assertThat(duplicate.statusCode()).isEqualTo(302);
 			assertThat(duplicate.headers().firstValue("Location"))
 					.hasValueSatisfying(location -> assertThat(location).endsWith("/signup"));
-			assertThat(send(again, "/signup").body()).contains("Ya eres cliente de Mon-A Bank");
+			assertThat(send(again, "/signup").body()).contains("Ya eres cliente de monA Bank");
 			assertThat(login("dorothy2", NEW_PASSWORD).headers().firstValue("Location"))
 					.as("el alta rechazada no crea el usuario")
 					.hasValueSatisfying(location -> assertThat(location).contains("error"));
@@ -636,7 +636,7 @@ class DddLabApplicationTests {
 
 			HttpResponse<String> duplicate = publicSignUp(REST_DOCUMENT, "otra.direccion@example.com", "katherine2");
 			assertThat(duplicate.statusCode()).isEqualTo(422);
-			assertThat(duplicate.body()).contains("Ya eres cliente de Mon-A Bank");
+			assertThat(duplicate.body()).contains("Ya eres cliente de monA Bank");
 		}
 
 		@Test

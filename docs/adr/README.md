@@ -22,6 +22,7 @@
 | [0019](0019-real-persistence.md) | Real persistence: PostgreSQL (Neon) in production, H2 locally | Accepted |
 | [0020](0020-static-analysis.md) | Static analysis in the build: Checkstyle, PMD/CPD and SpotBugs | Accepted |
 | [0021](0021-domain-event-outbox.md) | Domain event outbox with a scheduled relay | Accepted |
+| [0022](0022-brand-identity.md) | monA Bank brand identity: logo, intro and typeface | Accepted |
 
 ADR 0011 (the `integration` layer) only exists on `Monolithic`: it applies to phase 1.
 

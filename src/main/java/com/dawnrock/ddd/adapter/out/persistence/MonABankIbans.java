@@ -5,8 +5,8 @@ import java.math.BigInteger;
 import com.dawnrock.ddd.domain.model.AccountNumber;
 
 /**
- * IBAN de Mon-A Bank a partir del número secuencial de la cuenta (#150, compartido por las numeraciones). Cada IBAN
- * lleva la entidad {@code 9999} de Mon-A Bank (inventada), la oficina {@code 0001}, los dígitos de control nacionales
+ * IBAN de monA Bank a partir del número secuencial de la cuenta (#150, compartido por las numeraciones). Cada IBAN
+ * lleva la entidad {@code 9999} de monA Bank (inventada), la oficina {@code 0001}, los dígitos de control nacionales
  * calculados con el algoritmo del CCC español, el número de cuenta de 10 dígitos y los dígitos de control del IBAN
  * (ISO 13616, módulo 97).
  */

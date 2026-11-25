@@ -25,7 +25,7 @@ class InMemoryAccountNumberSequenceTests extends AccountNumberSequenceContract {
     }
 
     @Test
-    @DisplayName("El IBAN generado es español y lleva la entidad 9999 de Mon-A Bank y la oficina 0001")
+    @DisplayName("El IBAN generado es español y lleva la entidad 9999 de monA Bank y la oficina 0001")
     void theGeneratedIbanCarriesBankAndBranch() {
         String iban = sequence.next().value();
 

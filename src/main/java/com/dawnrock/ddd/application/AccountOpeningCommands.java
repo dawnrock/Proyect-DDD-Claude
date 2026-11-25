@@ -23,7 +23,7 @@ public interface AccountOpeningCommands {
     AccountSummary openAccount(Caller caller, OpenAccountCommand command);
 
     /**
-     * Da de alta a un cliente nuevo de Mon-A Bank y le abre su primera cuenta, a nombre de {@code command.username()},
+     * Da de alta a un cliente nuevo de monA Bank y le abre su primera cuenta, a nombre de {@code command.username()},
      * con un IBAN que asigna el banco. El segmento lo deciden sus ingresos verificados (#98). Lo pide un visitante sin
      * sesión a través de {@code adapter.in.CustomerRegistration}, que crea después su usuario. Todo o nada, en una
      * unidad de trabajo: si la apertura falla no queda ni el cliente ni la propiedad. Contrato:

@@ -5,7 +5,8 @@
 <header th:replace="~{fragments/layout :: header}"></header>
 <main class="app-container mx-auto w-100 px-3 pb-5">
     <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1 mb-3" th:href="@{/login}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg>Volver</a>
-    <h1 class="h3 fw-semibold mb-3">Hazte cliente de Mon-A Bank</h1>
+    <img class="brand-welcome" th:src="@{/brand/monabank-stacked.svg}" alt="">
+    <h1 class="h3 fw-semibold mb-3">Hazte cliente de monA Bank</h1>
     <nav th:replace="~{signup/progress :: progress(1)}"></nav>
 
     <form class="card card-body" th:action="@{/signup}" th:object="${signUpForm}" method="post" novalidate>
@@ -38,6 +39,5 @@
         </div>
     </form>
 </main>
-<footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>
