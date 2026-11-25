@@ -20,7 +20,7 @@ import com.dawnrock.ddd.application.MoneyMovementCommands;
  * configuración web que importan y el POST con token CSRF. Cada test nombra en {@code @WebMvcTest} los controladores
  * que alcanza.
  */
-@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class, TestUsers.class})
+@Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class, TestUsers.class, AccountDetailView.class})
 abstract class AccountWebTestSupport {
 
     @Autowired

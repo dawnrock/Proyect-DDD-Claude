@@ -49,20 +49,7 @@ public class AccountWebController {
 
     private static final String FORM_VIEW = "accounts/new";
 
-    private static final String DETAIL_VIEW = "accounts/detail";
-
-    /** Fragmento del detalle que htmx sustituye tras cada operación (#125). */
-    private static final String DETAIL_PANEL = DETAIL_VIEW + " :: panel";
-
-    /** Aviso de una operación aprobada (alerta de éxito en la plantilla). */
-    private static final String MESSAGE = "message";
-
-    /** Aviso de una operación rechazada (alerta de advertencia en la plantilla). */
-    private static final String REJECTION = "rejection";
-
     private static final String ANOTHER_VIEW = "accounts/another";
-
-    private static final List<String> CURRENCIES = List.of("EUR", "USD", "GBP");
 
     private final AccountOpeningCommands commands;
 
@@ -72,15 +59,17 @@ public class AccountWebController {
 
     private final WebFormat fmt;
 
+    private final AccountDetailView detailView;
+
     @GetMapping("/")
     public String list(Authentication authentication, Model model) {
         Caller caller = CurrentCaller.from(authentication);
         List<AccountSummary> accounts = queries.listAccounts(caller);
         if (!caller.admin() && accounts.size() == 1) {
-            return redirectToDetail(accounts.get(0).id());
+            return AccountDetailView.redirectToDetail(accounts.get(0).id());
         }
         model.addAttribute("admin", caller.admin());
-        model.addAttribute("customer", isCustomer(caller, accounts));
+        model.addAttribute("customer", AccountDetailView.isCustomer(caller, accounts));
         model.addAttribute("accounts", accounts);
         model.addAttribute("totals", totalsByCurrency(accounts));
         return "accounts/list";
@@ -94,7 +83,7 @@ public class AccountWebController {
 
     @GetMapping("/accounts/{id}")
     public String detail(@PathVariable UUID id, Authentication authentication, Model model) {
-        return renderDetail(id, CurrentCaller.from(authentication), model, false);
+        return detailView.render(id, CurrentCaller.from(authentication), model, false);
     }
 
     @PostMapping("/accounts/{id}/account-number")
@@ -103,7 +92,7 @@ public class AccountWebController {
                                           @RequestHeader(name = HtmxLoginRedirect.HX_REQUEST, defaultValue = "false") boolean htmx) {
         Caller caller = CurrentCaller.from(authentication);
         AccountSummary account = commands.regenerateAccountNumber(caller, id);
-        return notice(id, htmx, MESSAGE, "Nuevo IBAN asignado: " + account.accountNumber(), caller, model, redirect);
+        return detailView.notice(id, htmx, AccountDetailView.MESSAGE, "Nuevo IBAN asignado: " + account.accountNumber(), caller, model, redirect);
     }
 
     @PostMapping("/accounts/{id}/deposits")
@@ -122,7 +111,7 @@ public class AccountWebController {
             if (command != null) {
                 try {
                     TransactionSummary deposit = movements.deposit(caller, command);
-                    return notice(id, htmx, MESSAGE,
+                    return detailView.notice(id, htmx, AccountDetailView.MESSAGE,
                             "Ingreso de %s aprobado".formatted(fmt.money(deposit.amount(), deposit.currency())),
                             caller, model, redirect);
                 } catch (DomainException e) {
@@ -130,7 +119,7 @@ public class AccountWebController {
                 }
             }
         }
-        return renderDetail(id, caller, model, htmx);
+        return detailView.render(id, caller, model, htmx);
     }
 
     @PostMapping("/accounts/{id}/withdrawals")
@@ -151,18 +140,18 @@ public class AccountWebController {
                     TransactionSummary withdrawal = movements.withdraw(caller, command);
                     String amount = fmt.money(withdrawal.amount(), withdrawal.currency());
                     if (withdrawal.rejected()) {
-                        return notice(id, htmx, REJECTION,
+                        return detailView.notice(id, htmx, AccountDetailView.REJECTION,
                                 "Retirada de %s rechazada: el saldo resultante no está permitido para esta cuenta"
                                         .formatted(amount), caller, model, redirect);
                     }
-                    return notice(id, htmx, MESSAGE, "Retirada de %s aprobada".formatted(amount),
+                    return detailView.notice(id, htmx, AccountDetailView.MESSAGE, "Retirada de %s aprobada".formatted(amount),
                             caller, model, redirect);
                 } catch (DomainException e) {
                     result.reject("domain", e.getMessage());
                 }
             }
         }
-        return renderDetail(id, caller, model, htmx);
+        return detailView.render(id, caller, model, htmx);
     }
 
     @PostMapping("/accounts/{id}/transfers")
@@ -189,12 +178,12 @@ public class AccountWebController {
                     String amount = fmt.money(transfer.amount(), transfer.currency());
                     String target = fmt.maskedIban(transfer.targetAccountNumber());
                     if (transfer.rejected()) {
-                        return notice(id, htmx, REJECTION,
+                        return detailView.notice(id, htmx, AccountDetailView.REJECTION,
                                 ("Transferencia de %s a %s rechazada: el saldo resultante no está permitido "
                                         + "para la cuenta de origen").formatted(amount, target),
                                 caller, model, redirect);
                     }
-                    return notice(id, htmx, MESSAGE, "Transferencia de %s a %s aprobada".formatted(amount, target),
+                    return detailView.notice(id, htmx, AccountDetailView.MESSAGE, "Transferencia de %s a %s aprobada".formatted(amount, target),
                             caller, model, redirect);
                 } catch (TargetAccountNotFoundException e) {
                     // El IBAN de destino lo ha escrito el usuario: se avisa en el formulario, no con la página 404.
@@ -205,83 +194,13 @@ public class AccountWebController {
                 }
             }
         }
-        return renderDetail(id, caller, model, htmx);
-    }
-
-    /**
-     * Resultado de una operación correcta (#125). A htmx se le responde el panel con el aviso en el modelo y los
-     * formularios vacíos; sin htmx, el aviso va como atributo flash y se redirige al detalle (Post/Redirect/Get).
-     */
-    private String notice(UUID id, boolean htmx, String kind, String text, Caller caller, Model model,
-                          RedirectAttributes redirect) {
-        if (!htmx) {
-            redirect.addFlashAttribute(kind, text);
-            return redirectToDetail(id);
-        }
-        // El formulario enviado y su BindingResult repintarían los valores escritos: se quitan para empezar de cero
-        for (String form : List.of("depositForm", "withdrawalForm", "transferForm")) {
-            model.asMap().remove(form);
-            model.asMap().remove(BindingResult.MODEL_KEY_PREFIX + form);
-        }
-        model.addAttribute(kind, text);
-        return renderDetail(id, caller, model, true);
-    }
-
-    /**
-     * Pinta el detalle; los formularios que no vienen del envío actual se crean vacíos. A htmx solo se le devuelve el
-     * panel de la cuenta, que sustituye al que tiene la página (#125).
-     */
-    private String renderDetail(UUID id, Caller caller, Model model, boolean htmx) {
-        if (!model.containsAttribute("depositForm")) {
-            model.addAttribute("depositForm", new MovementForm());
-        }
-        if (!model.containsAttribute("withdrawalForm")) {
-            model.addAttribute("withdrawalForm", new MovementForm());
-        }
-        if (!model.containsAttribute("transferForm")) {
-            model.addAttribute("transferForm", new TransferForm());
-        }
-        // Primero la cuenta: una ajena es un 404 sin consultar nada más
-        AccountDetails account = queries.findAccount(caller, id);
-        // Una consulta más al listado para saber si es cliente (contrato customer-sign-up): el administrador no la hace
-        List<AccountSummary> own = caller.admin() ? List.of() : queries.listAccounts(caller);
-        model.addAttribute("account", account);
-        // application devuelve los movimientos del más antiguo al más reciente; la web los pinta al revés. Se invierte
-        // una copia, sin ordenar por fecha: dos movimientos pueden compartir instante.
-        List<TransactionSummary> newestFirst = new ArrayList<>(List.copyOf(account.transactions()));
-        Collections.reverse(newestFirst);
-        model.addAttribute("transactions", newestFirst);
-        model.addAttribute("admin", caller.admin());
-        model.addAttribute("backLabel", backLabel(caller, own));
-        model.addAttribute("customer", isCustomer(caller, own));
-        model.addAttribute("currencies", CURRENCIES);
-        return htmx ? DETAIL_PANEL : DETAIL_VIEW;
-    }
-
-    /**
-     * Texto del enlace de vuelta al inicio: «Cuentas» para el administrador, «Mis cuentas» para un usuario con varias
-     * cuentas y ninguno con una sola (su inicio es este mismo detalle).
-     */
-    private String backLabel(Caller caller, List<AccountSummary> own) {
-        if (caller.admin()) {
-            return "Cuentas";
-        }
-        return own.size() > 1 ? "Mis cuentas" : null;
-    }
-
-    /** Un cliente es quien no es administrador y tiene alguna cuenta (contrato customer-sign-up). */
-    private static boolean isCustomer(Caller caller, List<AccountSummary> accounts) {
-        return !caller.admin() && !accounts.isEmpty();
-    }
-
-    private static String redirectToDetail(UUID id) {
-        return "redirect:/accounts/" + id;
+        return detailView.render(id, caller, model, htmx);
     }
 
     @GetMapping("/accounts/another")
     public String anotherAccountForm(Model model, Authentication authentication) {
         Caller caller = CurrentCaller.from(authentication);
-        if (!isCustomer(caller, caller.admin() ? List.of() : queries.listAccounts(caller))) {
+        if (!detailView.isCustomer(caller)) {
             throw new NotACustomerException(caller.username());
         }
         model.addAttribute("form", new AnotherAccountForm());
@@ -309,7 +228,7 @@ public class AccountWebController {
             try {
                 AccountSummary account = commands.openAnotherAccount(caller, command);
                 redirect.addFlashAttribute("message", "Nueva cuenta abierta. Tu IBAN es " + account.accountNumber());
-                return redirectToDetail(account.id());
+                return AccountDetailView.redirectToDetail(account.id());
             } catch (DomainException e) {
                 result.reject("domain", e.getMessage());
             }
@@ -364,6 +283,6 @@ public class AccountWebController {
     }
 
     private void addFormOptions(Model model) {
-        model.addAttribute("currencies", List.of("EUR", "USD", "GBP"));
+        model.addAttribute("currencies", AccountDetailView.CURRENCIES);
     }
 }

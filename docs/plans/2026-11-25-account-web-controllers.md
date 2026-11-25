@@ -87,15 +87,15 @@
 - **Acceptance criteria:**
   - [x] Same test cases as T1; `./mvnw verify` green. (RegenerateAccountNumberWebTests writes MockMvcRequestBuilders.post in full, so its request without a CSRF token keeps having none)
 
-### [ ] T3 — Extract `AccountDetailView` (~10 min)
+### [x] T3 — Extract `AccountDetailView` (~10 min)
 
 - **Layer:** adapter.in
-- **Files:** `AccountDetailView.java` (new), `AccountWebController.java`, `AccountWebTestSupport.java` (imports it)
+- **Files:** `AccountDetailView.java` (new), `AccountWebController.java`, `AccountWebTestSupport.java`, `WebSecurityTests.java` and `SignUpControllerTests.java` (they import it)
 - **Depends on:** T2
 - **What to do:**
   1. Move `renderDetail`, `notice`, `backLabel`, `isCustomer`, `redirectToDetail` and the currencies to the component; the controller delegates.
 - **Acceptance criteria:**
-  - [ ] The detail, htmx and Post/Redirect/Get tests pass unchanged.
+  - [x] The detail, htmx and Post/Redirect/Get tests pass unchanged. (1,049 test cases, unchanged)
 
 ### [ ] T4 — `AccountListController` (~5 min)
 
