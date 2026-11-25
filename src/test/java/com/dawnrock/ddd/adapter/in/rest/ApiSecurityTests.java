@@ -46,7 +46,7 @@ import com.dawnrock.ddd.adapter.in.SecuritySupport;
 import com.dawnrock.ddd.adapter.in.TestUsers;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
 import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
 
@@ -81,7 +81,7 @@ class ApiSecurityTests {
     private JwtEncoder encoder;
 
     @MockitoBean
-    private CheckingAccountCommands commands;
+    private AccountOpeningCommands commands;
 
     @MockitoBean
     private MoneyMovementCommands movements;

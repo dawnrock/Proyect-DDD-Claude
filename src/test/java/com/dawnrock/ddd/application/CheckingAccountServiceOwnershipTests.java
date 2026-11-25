@@ -29,6 +29,7 @@ class CheckingAccountServiceOwnershipTests {
     private CheckingAccountRepository accounts;
     private AccountOwnershipRepository owners;
     private CheckingAccountService service;
+    private AccountOpeningCommands opening;
     private MoneyMovementCommands movements;
 
     @BeforeEach
@@ -37,6 +38,7 @@ class CheckingAccountServiceOwnershipTests {
         owners = PersistenceTestAdapters.ownership();
         ApplicationServicesFixture fixture = ApplicationServicesFixture.builder().accounts(accounts).ownership(owners).build();
         service = fixture.service();
+        opening = fixture.accountOpeningService();
         movements = fixture.moneyMovementService();
     }
 
@@ -67,7 +69,7 @@ class CheckingAccountServiceOwnershipTests {
         @Test
         @DisplayName("Un administrador abre la cuenta y queda registrada a nombre del usuario propietario")
         void anAdministratorOpensTheAccountInTheOwnersName() {
-            AccountSummary summary = service.openAccount(ADMIN, command("ada").build());
+            AccountSummary summary = opening.openAccount(ADMIN, command("ada").build());
 
             assertThat(summary.accountNumber()).startsWith("ES").hasSize(24);
             assertThat(owners.ownerOf(summary.id())).contains("ada");
@@ -79,7 +81,7 @@ class CheckingAccountServiceOwnershipTests {
             OpenAccountCommand open = command("ada").build();
 
             assertThatExceptionOfType(ForbiddenOperationException.class)
-                    .isThrownBy(() -> service.openAccount(ADA, open));
+                    .isThrownBy(() -> opening.openAccount(ADA, open));
             assertThat(accounts.findAll()).isEmpty();
         }
 
@@ -89,7 +91,7 @@ class CheckingAccountServiceOwnershipTests {
             OpenAccountCommand withoutOwner = command("").build();
 
             assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> service.openAccount(ADMIN, withoutOwner))
+                    .isThrownBy(() -> opening.openAccount(ADMIN, withoutOwner))
                     .withMessageContaining("usuario del titular es obligatorio");
             assertThat(accounts.findAll()).isEmpty();
         }
@@ -112,8 +114,8 @@ class CheckingAccountServiceOwnershipTests {
 
         @BeforeEach
         void openAccounts() {
-            adas = service.openAccount(ADMIN, command("ada").build());
-            graces = service.openAccount(ADMIN, command("grace").build());
+            adas = opening.openAccount(ADMIN, command("ada").build());
+            graces = opening.openAccount(ADMIN, command("grace").build());
             orphan = openWithoutOwner("ES6000491500051234567892");
         }
 
@@ -127,7 +129,7 @@ class CheckingAccountServiceOwnershipTests {
         @Test
         @DisplayName("Un usuario lista solo sus cuentas, ordenadas por número de cuenta")
         void aUserListsOnlyTheirAccounts() {
-            AccountSummary second = service.openAccount(ADMIN, command("ada").build());
+            AccountSummary second = opening.openAccount(ADMIN, command("ada").build());
 
             assertThat(service.listAccounts(ADA)).extracting(AccountSummary::accountNumber)
                     .containsExactly(adas.accountNumber(), second.accountNumber());
@@ -185,8 +187,8 @@ class CheckingAccountServiceOwnershipTests {
 
         @BeforeEach
         void openAccounts() {
-            adas = service.openAccount(ADMIN, command("ada").build());
-            graces = service.openAccount(ADMIN, command("grace").build());
+            adas = opening.openAccount(ADMIN, command("ada").build());
+            graces = opening.openAccount(ADMIN, command("grace").build());
             orphan = openWithoutOwner("ES6000491500051234567892");
         }
 

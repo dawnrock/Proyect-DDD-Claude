@@ -24,7 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.dawnrock.ddd.application.AccountDetails;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
 import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.DepositCommand;
@@ -64,7 +64,7 @@ public class AccountWebController {
 
     private static final List<String> CURRENCIES = List.of("EUR", "USD", "GBP");
 
-    private final CheckingAccountCommands commands;
+    private final AccountOpeningCommands commands;
 
     private final MoneyMovementCommands movements;
 

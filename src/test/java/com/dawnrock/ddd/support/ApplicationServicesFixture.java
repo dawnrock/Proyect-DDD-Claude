@@ -6,6 +6,7 @@ import java.time.Clock;
 
 import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
 import com.dawnrock.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
+import com.dawnrock.ddd.application.AccountOpeningService;
 import com.dawnrock.ddd.application.AccountOwnershipRepository;
 import com.dawnrock.ddd.application.AccountSegmentReviewService;
 import com.dawnrock.ddd.application.CheckingAccountService;
@@ -55,7 +56,12 @@ public final class ApplicationServicesFixture {
 
     /** El servicio de aplicación con estos colaboradores. */
     public CheckingAccountService service() {
-        return new CheckingAccountService(accounts, ownership, publisher, factory, unitOfWork, customers,
+        return new CheckingAccountService(accounts, ownership, unitOfWork, customers, customerOwnership);
+    }
+
+    /** Apertura, alta de clientes, otra cuenta y regeneración del IBAN sobre los mismos colaboradores. */
+    public AccountOpeningService accountOpeningService() {
+        return new AccountOpeningService(accounts, ownership, publisher, factory, unitOfWork, customers,
                 customerOwnership);
     }
 

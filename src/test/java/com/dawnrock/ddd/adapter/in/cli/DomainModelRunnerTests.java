@@ -18,7 +18,7 @@ import com.dawnrock.ddd.application.AccountDetails;
 import com.dawnrock.ddd.application.AccountOwnershipRepository;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.CallerDef;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
 import com.dawnrock.ddd.application.CheckingAccountService;
 import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.TransactionSummary;
@@ -32,7 +32,7 @@ class DomainModelRunnerTests {
     private final ApplicationServicesFixture services = ApplicationServicesFixture.builder().ownership(ownership).build();
     private final CheckingAccountService service = services.service();
     /** El runner solo recibe los puertos de entrada; el servicio concreto se usa aquí también para consultar. */
-    private final CheckingAccountCommands commands = service;
+    private final AccountOpeningCommands commands = services.accountOpeningService();
     private final MoneyMovementCommands movements = services.moneyMovementService();
 
     @Test
@@ -69,7 +69,8 @@ class DomainModelRunnerTests {
                 .build();
         CheckingAccountService withoutIncomes = withoutIncomesServices.service();
 
-        new DomainModelRunner(withoutIncomes, withoutIncomesServices.moneyMovementService(), withoutIncomes).run(new DefaultApplicationArguments());
+        new DomainModelRunner(withoutIncomesServices.accountOpeningService(),
+                withoutIncomesServices.moneyMovementService(), withoutIncomes).run(new DefaultApplicationArguments());
 
         assertThat(withoutIncomes.listAccounts(CallerDef.system()))
                 .extracting(AccountSummary::segment).containsOnly("RETAIL");

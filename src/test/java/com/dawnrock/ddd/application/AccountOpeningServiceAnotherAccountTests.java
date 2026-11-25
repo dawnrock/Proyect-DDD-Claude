@@ -18,7 +18,7 @@ import com.dawnrock.ddd.domain.model.TaxId;
 import com.dawnrock.ddd.support.ApplicationServicesFixture;
 
 /** Abrir otra cuenta un cliente que ya tiene una: el titular sale de sus datos de cliente. */
-class CheckingAccountServiceAnotherAccountTests {
+class AccountOpeningServiceAnotherAccountTests {
 
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
     private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
@@ -26,13 +26,16 @@ class CheckingAccountServiceAnotherAccountTests {
 
     private CheckingAccountRepository accounts;
     private CheckingAccountService service;
+    private AccountOpeningCommands opening;
     private AccountSummary first;
 
     @BeforeEach
     void setUp() {
         accounts = PersistenceTestAdapters.accounts();
-        service = ApplicationServicesFixture.builder().accounts(accounts).build().service();
-        first = service.signUp(SignUpCommand.builder().fullName("Ada Lovelace").taxId("12345678Z")
+        ApplicationServicesFixture fixture = ApplicationServicesFixture.builder().accounts(accounts).build();
+        service = fixture.service();
+        opening = fixture.accountOpeningService();
+        first = opening.signUp(SignUpCommand.builder().fullName("Ada Lovelace").taxId("12345678Z")
                 .email("ada@example.com").username("ada").initialDeposit(new BigDecimal("1000")).build());
     }
 
@@ -43,7 +46,7 @@ class CheckingAccountServiceAnotherAccountTests {
     @Test
     @DisplayName("El cliente acaba con dos cuentas de IBAN distintos y de Mon-A Bank, y las dos se listan")
     void theCustomerEndsUpWithTwoAccountsWithDifferentIbans() {
-        AccountSummary second = service.openAnotherAccount(ADA, deposit("200.00"));
+        AccountSummary second = opening.openAnotherAccount(ADA, deposit("200.00"));
 
         assertThat(second.accountNumber()).isNotEqualTo(first.accountNumber());
         assertThat(new AccountNumber(second.accountNumber()).isMonABank()).isTrue();
@@ -55,7 +58,7 @@ class CheckingAccountServiceAnotherAccountTests {
     @Test
     @DisplayName("El titular de la nueva cuenta copia el nombre y el documento del cliente")
     void theHolderCopiesTheCustomerNameAndDocument() {
-        AccountSummary second = service.openAnotherAccount(ADA, deposit("200.00"));
+        AccountSummary second = opening.openAnotherAccount(ADA, deposit("200.00"));
 
         assertThat(second.holderName()).isEqualTo("Ada Lovelace");
         assertThat(accounts.findById(second.id()).orElseThrow().primaryHolder().taxId())
@@ -66,7 +69,7 @@ class CheckingAccountServiceAnotherAccountTests {
     @DisplayName("Quien no es cliente no puede abrir otra cuenta, y no se crea nada")
     void aNonCustomerCannotOpenAnotherAccount() {
         assertThatExceptionOfType(NotACustomerException.class)
-                .isThrownBy(() -> service.openAnotherAccount(GRACE, deposit("200.00")))
+                .isThrownBy(() -> opening.openAnotherAccount(GRACE, deposit("200.00")))
                 .withMessageContaining("grace");
         assertThat(accounts.findAll()).hasSize(1);
     }
@@ -77,9 +80,9 @@ class CheckingAccountServiceAnotherAccountTests {
         Caller adminNamedAda = Caller.builder().username("ada").admin(true).build();
 
         assertThatExceptionOfType(NotACustomerException.class)
-                .isThrownBy(() -> service.openAnotherAccount(ADMIN, deposit("200.00")));
+                .isThrownBy(() -> opening.openAnotherAccount(ADMIN, deposit("200.00")));
         assertThatExceptionOfType(NotACustomerException.class)
-                .isThrownBy(() -> service.openAnotherAccount(adminNamedAda, deposit("200.00")));
+                .isThrownBy(() -> opening.openAnotherAccount(adminNamedAda, deposit("200.00")));
         assertThat(accounts.findAll()).hasSize(1);
     }
 
@@ -87,14 +90,14 @@ class CheckingAccountServiceAnotherAccountTests {
     @DisplayName("Un depósito inferior a 50 EUR se rechaza y no se abre la cuenta (R1)")
     void anInsufficientDepositIsRejected() {
         assertThatExceptionOfType(InsufficientInitialDepositException.class)
-                .isThrownBy(() -> service.openAnotherAccount(ADA, deposit("10.00")));
+                .isThrownBy(() -> opening.openAnotherAccount(ADA, deposit("10.00")));
         assertThat(service.listAccounts(ADA)).hasSize(1);
     }
 
     @Test
     @DisplayName("Un depósito en otra divisa se rechaza y no se abre la cuenta")
     void aDepositInAnotherCurrencyIsRejected() {
-        assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> service.openAnotherAccount(ADA,
+        assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> opening.openAnotherAccount(ADA,
                 OpenAnotherAccountCommand.builder().initialDeposit(new BigDecimal("200")).currency("USD").build()));
         assertThat(service.listAccounts(ADA)).hasSize(1);
     }

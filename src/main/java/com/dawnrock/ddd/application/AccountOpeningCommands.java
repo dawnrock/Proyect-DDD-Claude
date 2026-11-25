@@ -4,11 +4,11 @@ import java.util.UUID;
 
 /**
  * Puerto de entrada de los casos de uso que abren cuentas: apertura del administrador, alta de clientes, otra cuenta
- * del cliente y regeneración del IBAN. Los adaptadores de
- * entrada (REST, web, demo) dependen de este puerto y no de la clase que lo implementa ({@code CheckingAccountService}).
- * Cada caso de uso recibe quién lo pide ({@link Caller}) y aplica la propiedad de las cuentas (ADR 0008).
+ * del cliente y regeneración del IBAN (#174). Los adaptadores de entrada (REST, web, demo, alta de clientes) dependen
+ * de este puerto y no de la clase que lo implementa ({@code AccountOpeningService}). Cada caso de uso recibe quién lo
+ * pide ({@link Caller}) y aplica la propiedad de las cuentas (ADR 0008).
  */
-public interface CheckingAccountCommands {
+public interface AccountOpeningCommands {
 
     /**
      * Abre una cuenta con su depósito inicial para {@code command.ownerUsername()}, que será su propietario. Solo un

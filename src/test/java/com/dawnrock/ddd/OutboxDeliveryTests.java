@@ -19,7 +19,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.dawnrock.ddd.adapter.out.event.OutboxRelay;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
 import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.DepositCommand;
 import com.dawnrock.ddd.application.OpenAccountCommand;
@@ -37,7 +37,7 @@ class OutboxDeliveryTests {
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
 
     @Autowired
-    private CheckingAccountCommands commands;
+    private AccountOpeningCommands commands;
 
     @Autowired
     private MoneyMovementCommands movements;

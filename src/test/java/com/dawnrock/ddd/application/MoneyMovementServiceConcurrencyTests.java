@@ -37,8 +37,8 @@ class MoneyMovementServiceConcurrencyTests {
         return ApplicationServicesFixture.builder().publisher(ignoreEvents).build();
     }
 
-    private static AccountSummary open(CheckingAccountService service, String holder, String taxId, String owner) {
-        return service.openAccount(ADMIN, OpenAccountCommand.builder().holderName(holder).holderTaxId(taxId)
+    private static AccountSummary open(AccountOpeningCommands opening, String holder, String taxId, String owner) {
+        return opening.openAccount(ADMIN, OpenAccountCommand.builder().holderName(holder).holderTaxId(taxId)
                 .holderEmail(owner + "@example.com").initialDeposit(INITIAL).ownerUsername(owner).build());
     }
 
@@ -53,8 +53,8 @@ class MoneyMovementServiceConcurrencyTests {
     private void runRound() throws Exception {
         ApplicationServicesFixture services = newServices();
         CheckingAccountService service = services.service();
-        AccountSummary ada = open(service, "Ada Lovelace", "12345678Z", "ada");
-        AccountSummary alan = open(service, "Alan Turing", "11111111H", "alan");
+        AccountSummary ada = open(services.accountOpeningService(), "Ada Lovelace", "12345678Z", "ada");
+        AccountSummary alan = open(services.accountOpeningService(), "Alan Turing", "11111111H", "alan");
 
         ExecutorService pool = Executors.newFixedThreadPool(THREADS);
         try {

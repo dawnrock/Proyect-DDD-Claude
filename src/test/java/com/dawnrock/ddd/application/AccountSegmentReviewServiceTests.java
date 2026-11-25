@@ -29,6 +29,7 @@ class AccountSegmentReviewServiceTests {
     private final MutableClock clock = new MutableClock();
     private final DomainEventPublisher publisher = mock(DomainEventPublisher.class);
     private CheckingAccountService service;
+    private AccountOpeningCommands opening;
     private SegmentReviewCommands segmentReview;
     private MoneyMovementCommands movements;
     private UUID belowMinimum;
@@ -42,6 +43,7 @@ class AccountSegmentReviewServiceTests {
                 .clock(clock)
                 .build();
         service = fixture.service();
+        opening = fixture.accountOpeningService();
         segmentReview = fixture.segmentReviewService();
         movements = fixture.moneyMovementService();
         openThreeAccounts();
@@ -49,10 +51,10 @@ class AccountSegmentReviewServiceTests {
 
     /** Tres cuentas: una de alto patrimonio que baja del mínimo, otra que sigue por encima y una minorista. */
     private void openThreeAccounts() {
-        belowMinimum = service.openAccount(ADMIN, retailOpening().initialDeposit(new BigDecimal("100000")).build()).id();
+        belowMinimum = opening.openAccount(ADMIN, retailOpening().initialDeposit(new BigDecimal("100000")).build()).id();
         movements.withdraw(ADMIN, WithdrawCommand.builder().accountId(belowMinimum).amount(new BigDecimal("500")).build());
-        aboveMinimum = service.openAccount(ADMIN, retailOpening().initialDeposit(new BigDecimal("100000")).build()).id();
-        retail = service.openAccount(ADMIN, retailOpening().build()).id();
+        aboveMinimum = opening.openAccount(ADMIN, retailOpening().initialDeposit(new BigDecimal("100000")).build()).id();
+        retail = opening.openAccount(ADMIN, retailOpening().build()).id();
         clearInvocations(publisher);
     }
 

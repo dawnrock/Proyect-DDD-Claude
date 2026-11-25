@@ -29,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
 import com.dawnrock.ddd.application.CheckingAccountService;
@@ -51,6 +52,7 @@ class CustomerRegistrationTests {
     private InMemoryUserDetailsManager users;
     private CustomerRegistration registration;
     private CheckingAccountService service;
+    private AccountOpeningCommands opening;
     private SignUpLimit limit;
 
     @BeforeEach
@@ -66,8 +68,10 @@ class CustomerRegistrationTests {
 
     private CustomerRegistration registrationWith(InMemoryUserDetailsManager manager, SignUpLimitProperties limits) {
         limit = new SignUpLimit(limits, Clock.fixed(Instant.parse("2026-11-23T10:00:00Z"), ZoneOffset.UTC));
-        service = ApplicationServicesFixture.builder().accounts(accounts).build().service();
-        return new CustomerRegistration(service, service, manager, encoder, limit);
+        ApplicationServicesFixture fixture = ApplicationServicesFixture.builder().accounts(accounts).build();
+        service = fixture.service();
+        opening = fixture.accountOpeningService();
+        return new CustomerRegistration(opening, service, manager, encoder, limit);
     }
 
     private static SignUpCommand.Builder signUp() {
@@ -120,7 +124,7 @@ class CustomerRegistrationTests {
     @Test
     @DisplayName("El usuario que el administrador dio a un cliente no se puede tomar en el alta, aunque aún no pueda entrar")
     void theUsernameOfACustomerWithoutLoginCannotBeTakenOnSignUp() {
-        service.openAccount(ADMIN, OpenAccountCommand.builder()
+        opening.openAccount(ADMIN, OpenAccountCommand.builder()
                 .holderTaxId("12345678Z").holderName("Ada Lovelace").holderEmail("ada@example.com")
                 .ownerUsername("margaret").initialDeposit(new BigDecimal("100")).build());
 

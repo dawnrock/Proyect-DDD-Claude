@@ -17,7 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.dawnrock.ddd.adapter.out.event.OutboxRelay;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
 import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.DepositCommand;
 import com.dawnrock.ddd.application.OpenAccountCommand;
@@ -53,7 +53,7 @@ class OutboxRestartTests {
     void aDepositCommittedBeforeARestartReachesTheAuditConsumerAfterIt(CapturedOutput output) {
         UUID accountId;
         try (ConfigurableApplicationContext first = start()) {
-            CheckingAccountCommands commands = first.getBean(CheckingAccountCommands.class);
+            AccountOpeningCommands commands = first.getBean(AccountOpeningCommands.class);
             accountId = commands.openAccount(ADMIN, OpenAccountCommand.builder()
                     .holderName("Grace Hopper")
                     .holderTaxId("87654321X")

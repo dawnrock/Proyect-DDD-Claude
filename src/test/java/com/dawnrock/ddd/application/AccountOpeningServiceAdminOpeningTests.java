@@ -26,7 +26,7 @@ import com.dawnrock.ddd.support.ApplicationServicesFixture;
  * Alta de cuenta del administrador para un cliente nuevo o existente, identificado por su documento (contrato
  * {@code docs/contracts/customer-sign-up.md}). Adaptadores en memoria reales.
  */
-class CheckingAccountServiceAdminOpeningTests {
+class AccountOpeningServiceAdminOpeningTests {
 
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
     private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
@@ -35,18 +35,20 @@ class CheckingAccountServiceAdminOpeningTests {
     private CustomerRepository customers;
     private CustomerOwnershipRepository customerOwners;
     private CheckingAccountService service;
+    private AccountOpeningCommands opening;
 
     @BeforeEach
     void setUp() {
         accounts = PersistenceTestAdapters.accounts();
         customers = PersistenceTestAdapters.customers();
         customerOwners = PersistenceTestAdapters.customerOwnership();
-        service = ApplicationServicesFixture.builder()
+        ApplicationServicesFixture fixture = ApplicationServicesFixture.builder()
                 .accounts(accounts)
                 .customers(customers)
                 .customerOwnership(customerOwners)
-                .build()
-                .service();
+                .build();
+        service = fixture.service();
+        opening = fixture.accountOpeningService();
     }
 
     private static OpenAccountCommand.Builder command() {
@@ -70,7 +72,7 @@ class CheckingAccountServiceAdminOpeningTests {
     @Test
     @DisplayName("Un documento nuevo registra al cliente con su correo y su usuario, y el detalle los muestra")
     void aNewDocumentRegistersTheCustomer() {
-        AccountSummary summary = service.openAccount(ADMIN, command().build());
+        AccountSummary summary = opening.openAccount(ADMIN, command().build());
 
         assertThat(customers.findByTaxId(new TaxId("12345678Z"))).hasValueSatisfying(customer ->
                 assertThat(customer.email().value()).isEqualTo("ada@example.com"));
@@ -83,9 +85,9 @@ class CheckingAccountServiceAdminOpeningTests {
     @Test
     @DisplayName("A un cliente existente se le abre otra cuenta indicando solo su documento")
     void anExistingCustomerGetsAnotherAccountWithOnlyTheirDocument() {
-        AccountSummary first = service.openAccount(ADMIN, command().build());
+        AccountSummary first = opening.openAccount(ADMIN, command().build());
 
-        AccountSummary second = service.openAccount(ADMIN, OpenAccountCommand.builder()
+        AccountSummary second = opening.openAccount(ADMIN, OpenAccountCommand.builder()
                 .holderTaxId(" 12345678 z ").initialDeposit(new BigDecimal("75")).build());
 
         assertThat(second.holderName()).isEqualTo("Ada Lovelace");
@@ -96,9 +98,9 @@ class CheckingAccountServiceAdminOpeningTests {
     @Test
     @DisplayName("A un cliente existente se le abre otra cuenta repitiendo sus mismos datos")
     void anExistingCustomerGetsAnotherAccountRepeatingTheirData() {
-        service.openAccount(ADMIN, command().build());
+        opening.openAccount(ADMIN, command().build());
 
-        service.openAccount(ADMIN, command().holderEmail(" ADA@example.com ").build());
+        opening.openAccount(ADMIN, command().holderEmail(" ADA@example.com ").build());
 
         assertThat(service.listAccounts(ADA)).hasSize(2);
     }
@@ -110,12 +112,12 @@ class CheckingAccountServiceAdminOpeningTests {
     @DisplayName("Unos datos distintos de los del cliente existente se rechazan y no se abre nada")
     void dataDifferentFromTheExistingCustomerIsRejected(String field, String name, String email,
                                                                          String username) {
-        service.openAccount(ADMIN, command().build());
+        opening.openAccount(ADMIN, command().build());
         OpenAccountCommand contradicting = command()
                 .holderName(name).holderEmail(email).ownerUsername(username).build();
 
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> service.openAccount(ADMIN, contradicting))
+                .isThrownBy(() -> opening.openAccount(ADMIN, contradicting))
                 .withMessageContaining("ya es de un cliente");
         assertThat(accounts.findAll()).hasSize(1);
     }
@@ -131,7 +133,7 @@ class CheckingAccountServiceAdminOpeningTests {
                 .holderName(name).holderEmail(email).ownerUsername(username).build();
 
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> service.openAccount(ADMIN, incomplete))
+                .isThrownBy(() -> opening.openAccount(ADMIN, incomplete))
                 .withMessage(message);
         assertThat(accounts.findAll()).isEmpty();
         assertThat(customers.findByTaxId(new TaxId("12345678Z"))).isEmpty();
@@ -140,11 +142,11 @@ class CheckingAccountServiceAdminOpeningTests {
     @Test
     @DisplayName("El usuario de otro cliente no se asigna a un cliente nuevo y no se abre nada")
     void anotherCustomersUsernameIsNotAssignedToANewCustomer() {
-        service.openAccount(ADMIN, command().build());
+        opening.openAccount(ADMIN, command().build());
         OpenAccountCommand stealing = other().ownerUsername("ada").build();
 
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> service.openAccount(ADMIN, stealing))
+                .isThrownBy(() -> opening.openAccount(ADMIN, stealing))
                 .withMessage("El usuario ada ya es de otro cliente");
         assertThat(accounts.findAll()).hasSize(1);
         assertThat(customers.findByTaxId(new TaxId("00000000T"))).isEmpty();
@@ -154,12 +156,12 @@ class CheckingAccountServiceAdminOpeningTests {
     @Test
     @DisplayName("El alta pública no puede usar el usuario que el administrador dio a un cliente")
     void publicSignUpCannotUseAnotherCustomersUsername() {
-        service.openAccount(ADMIN, command().build());
+        opening.openAccount(ADMIN, command().build());
         SignUpCommand signUp = SignUpCommand.builder().fullName("Margaret Hamilton").taxId("00000000T")
                 .email("margaret@example.com").username("ada").initialDeposit(new BigDecimal("100")).build();
 
         assertThat(service.isUsernameTaken("ada")).isTrue();
-        assertThatIllegalArgumentException().isThrownBy(() -> service.signUp(signUp));
+        assertThatIllegalArgumentException().isThrownBy(() -> opening.signUp(signUp));
         assertThat(customers.findByTaxId(new TaxId("00000000T"))).isEmpty();
     }
 
@@ -170,7 +172,7 @@ class CheckingAccountServiceAdminOpeningTests {
                 new EmailAddress("ada@example.com")));
 
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> service.openAccount(ADMIN, OpenAccountCommand.builder()
+                .isThrownBy(() -> opening.openAccount(ADMIN, OpenAccountCommand.builder()
                         .holderTaxId("12345678Z").initialDeposit(new BigDecimal("75")).build()))
                 .withMessageContaining("no tiene usuario");
         assertThat(accounts.findAll()).isEmpty();
@@ -182,7 +184,7 @@ class CheckingAccountServiceAdminOpeningTests {
         OpenAccountCommand tooLow = command().initialDeposit(new BigDecimal("10")).build();
 
         assertThatExceptionOfType(InsufficientInitialDepositException.class)
-                .isThrownBy(() -> service.openAccount(ADMIN, tooLow));
+                .isThrownBy(() -> opening.openAccount(ADMIN, tooLow));
         assertThat(customers.findByTaxId(new TaxId("12345678Z"))).isEmpty();
         assertThat(customerOwners.customerOf("ada")).isEmpty();
     }
@@ -193,16 +195,16 @@ class CheckingAccountServiceAdminOpeningTests {
         OpenAccountCommand inDollars = command().currency("USD").build();
 
         assertThatExceptionOfType(CurrencyMismatchException.class)
-                .isThrownBy(() -> service.openAccount(ADMIN, inDollars));
+                .isThrownBy(() -> opening.openAccount(ADMIN, inDollars));
         assertThat(customers.findByTaxId(new TaxId("12345678Z"))).isEmpty();
     }
 
     @Test
     @DisplayName("Un cliente abierto por el administrador puede abrir otra cuenta él mismo")
     void aCustomerOpenedByTheAdministratorCanOpenAnotherAccount() {
-        service.openAccount(ADMIN, command().build());
+        opening.openAccount(ADMIN, command().build());
 
-        AccountSummary another = service.openAnotherAccount(ADA,
+        AccountSummary another = opening.openAnotherAccount(ADA,
                 OpenAnotherAccountCommand.builder().initialDeposit(new BigDecimal("60")).build());
 
         assertThat(another.holderName()).isEqualTo("Ada Lovelace");

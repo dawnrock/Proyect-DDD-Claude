@@ -59,7 +59,7 @@ import com.dawnrock.ddd.application.TransferSummary;
 import com.dawnrock.ddd.application.WithdrawCommand;
 import com.dawnrock.ddd.domain.model.CurrencyMismatchException;
 import com.dawnrock.ddd.application.TransactionSummary;
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
 import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
 import com.dawnrock.ddd.application.OpenAccountCommand;
@@ -83,7 +83,7 @@ class AccountWebControllerTests {
     }
 
     @MockitoBean
-    private CheckingAccountCommands commands;
+    private AccountOpeningCommands commands;
 
     @MockitoBean
     private MoneyMovementCommands movements;

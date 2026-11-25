@@ -146,7 +146,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
 - **Acceptance criteria:**
   - [x] Movement, transfer, concurrency, REST and web tests pass against the new port; `./mvnw verify` green. (PMD found coupling 21 in MoneyMovementService: the target account lookup moved to AccountAccess.loadTarget; 1,042 test cases green)
 
-### [ ] T8 — `AccountOpeningCommands` and `AccountOpeningService` (~15 min)
+### [x] T8 — `AccountOpeningCommands` and `AccountOpeningService` (~15 min)
 
 - **Layer:** application · adapter.in · config
 - **Files:** `AccountOpeningCommands.java`, `AccountOpeningService.java` (new), `CheckingAccountCommands.java` (deleted), `CheckingAccountService.java`, `CustomerRegistration`, `rest.AccountController`, `web.AccountWebController`, `cli.DomainModelRunner`, `DomainConfiguration.java`, their tests; `AccountOpeningService*Tests.java` (renamed from `CheckingAccountServiceAdminOpeningTests`, `…SignUpTests`, `…AnotherAccountTests`, `…RegenerateAccountNumberTests`)
@@ -156,7 +156,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
   2. New service with the admin opening (`newCustomer`, `ownerOfExisting`), sign-up, another account, IBAN regeneration and `requireUnused` (R16).
   3. Adapters and mocks use the new port; rename and move the tests.
 - **Acceptance criteria:**
-  - [ ] `CheckingAccountCommands` no longer exists; opening, sign-up and registration tests pass; `./mvnw verify` green.
+  - [x] `CheckingAccountCommands` no longer exists; opening, sign-up and registration tests pass; `./mvnw verify` green. (PMD found coupling 22 in AccountOpeningService, as the plan's risks foresaw: the opening steps moved to AccountOpener (prepare, save, reassignNumber) and the customers to CustomerDirectory; the admin opening split into openForExisting and openForNew. The query and event-publication tests left CheckingAccountServiceTests for DomainEventPublicationTests, so CPD finds no duplicated setup)
 
 ### [ ] T9 — `CheckingAccountQueryService`; delete `CheckingAccountService` (~10 min)
 

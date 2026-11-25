@@ -50,6 +50,7 @@ class MoneyMovementServiceTests {
     private CheckingAccountRepository repository;
     private DomainEventPublisher publisher;
     private CheckingAccountService service;
+    private AccountOpeningCommands opening;
     private MoneyMovementCommands movements;
 
     private MutableClock clock;
@@ -65,6 +66,7 @@ class MoneyMovementServiceTests {
                 .clock(clock)
                 .build();
         service = fixture.service();
+        opening = fixture.accountOpeningService();
         movements = fixture.moneyMovementService();
     }
 
@@ -75,7 +77,7 @@ class MoneyMovementServiceTests {
         @Test
         @DisplayName("Un ingreso aprobado actualiza el saldo y aparece entre los movimientos")
         void anApprovedDepositUpdatesTheBalanceAndAppearsAmongTheTransactions() {
-            UUID id = service.openAccount(ADMIN, retailOpening().build()).id();
+            UUID id = opening.openAccount(ADMIN, retailOpening().build()).id();
 
             TransactionSummary transaction = movements.deposit(ADMIN, 
                     DepositCommand.builder().accountId(id).amount(new BigDecimal("25.50")).build());
@@ -104,7 +106,7 @@ class MoneyMovementServiceTests {
         @Test
         @DisplayName("Un ingreso en otra divisa lanza CurrencyMismatchException y no cambia el saldo")
         void aDepositInAnotherCurrencyThrowsCurrencyMismatchExceptionAndKeepsTheBalance() {
-            UUID id = service.openAccount(ADMIN, retailOpening().build()).id();
+            UUID id = opening.openAccount(ADMIN, retailOpening().build()).id();
             DepositCommand dollars =
                     DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).currency("USD").build();
 
@@ -130,7 +132,7 @@ class MoneyMovementServiceTests {
         })
         void withdrawalsAtTheOverdraftLimitDependOnTheSegment(
                 String segment, String amount, String status, String finalBalance) {
-            UUID id = service.openAccount(ADMIN,
+            UUID id = opening.openAccount(ADMIN,
                     ("HIGH_NET_WORTH".equals(segment) ? highNetWorthOpening() : retailOpening()).build()).id();
 
             TransactionSummary transaction = movements.withdraw(ADMIN, 
@@ -145,7 +147,7 @@ class MoneyMovementServiceTests {
         @Test
         @DisplayName("Una retirada rechazada no cambia el saldo pero queda registrada")
         void aRejectedWithdrawalKeepsTheBalanceButIsRecorded() {
-            UUID id = service.openAccount(ADMIN, retailOpening().build()).id();
+            UUID id = opening.openAccount(ADMIN, retailOpening().build()).id();
 
             TransactionSummary transaction = movements.withdraw(ADMIN, 
                     WithdrawCommand.builder().accountId(id).amount(new BigDecimal("500")).build());
@@ -174,7 +176,7 @@ class MoneyMovementServiceTests {
         @Test
         @DisplayName("Una retirada en otra divisa lanza CurrencyMismatchException y no cambia el saldo")
         void aWithdrawalInAnotherCurrencyThrowsCurrencyMismatchExceptionAndKeepsTheBalance() {
-            UUID id = service.openAccount(ADMIN, retailOpening().build()).id();
+            UUID id = opening.openAccount(ADMIN, retailOpening().build()).id();
             WithdrawCommand dollars =
                     WithdrawCommand.builder().accountId(id).amount(BigDecimal.TEN).currency("USD").build();
 
@@ -197,8 +199,8 @@ class MoneyMovementServiceTests {
 
         @BeforeEach
         void openAccounts() {
-            AccountSummary source = service.openAccount(ADMIN, retailOpening().initialDeposit(new BigDecimal("500")).build());
-            AccountSummary target = service.openAccount(ADMIN, retailOpening().initialDeposit(new BigDecimal("100")).build());
+            AccountSummary source = opening.openAccount(ADMIN, retailOpening().initialDeposit(new BigDecimal("500")).build());
+            AccountSummary target = opening.openAccount(ADMIN, retailOpening().initialDeposit(new BigDecimal("100")).build());
             sourceId = source.id();
             targetId = target.id();
             sourceNumber = source.accountNumber();
@@ -362,7 +364,7 @@ class MoneyMovementServiceTests {
 
         /** Abre con el patrimonio mínimo (alto patrimonio por saldo) y retira hasta dejar la cuenta en descubierto. */
         private UUID cuentaEnDescubierto(OpenAccountCommand.Builder command) {
-            UUID id = service.openAccount(ADMIN, command.initialDeposit(new BigDecimal("100000")).build()).id();
+            UUID id = opening.openAccount(ADMIN, command.initialDeposit(new BigDecimal("100000")).build()).id();
             movements.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("100500")).build());
             return id;
         }
@@ -406,7 +408,7 @@ class MoneyMovementServiceTests {
         @DisplayName("Tras un mes bajo el mínimo y sin ingresos altos, la transferencia se evalúa ya como minorista")
         void afterAMonthBelowTheMinimumWithoutHighIncomeTheTransferIsEvaluatedAsRetail() {
             UUID id = cuentaEnDescubierto(retailOpening());
-            String target = service.openAccount(ADMIN, highNetWorthOpening().build()).accountNumber();
+            String target = opening.openAccount(ADMIN, highNetWorthOpening().build()).accountNumber();
             clock.advance(Duration.ofDays(32));
 
             TransferSummary transferencia = movements.transfer(ADMIN, TransferCommand.builder()
@@ -424,7 +426,7 @@ class MoneyMovementServiceTests {
         @Test
         @DisplayName("Una retirada no válida sobre una cuenta con la revisión vencida deja al titular en minorista y publica el cambio")
         void anInvalidWithdrawalDoesNotLoseTheDueReview() {
-            UUID id = service.openAccount(ADMIN, retailOpening().initialDeposit(new BigDecimal("100000")).build()).id();
+            UUID id = opening.openAccount(ADMIN, retailOpening().initialDeposit(new BigDecimal("100000")).build()).id();
             movements.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("500")).build());
             clock.advance(Duration.ofDays(32));
             clearInvocations(publisher);
@@ -440,7 +442,7 @@ class MoneyMovementServiceTests {
         @Test
         @DisplayName("Una transferencia no válida sobre una cuenta con la revisión vencida deja al titular en minorista y publica el cambio")
         void anInvalidTransferDoesNotLoseTheDueReview() {
-            AccountSummary source = service.openAccount(ADMIN, retailOpening().initialDeposit(new BigDecimal("100000")).build());
+            AccountSummary source = opening.openAccount(ADMIN, retailOpening().initialDeposit(new BigDecimal("100000")).build());
             movements.withdraw(ADMIN,
                     WithdrawCommand.builder().accountId(source.id()).amount(new BigDecimal("500")).build());
             clock.advance(Duration.ofDays(32));
