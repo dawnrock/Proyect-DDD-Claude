@@ -197,7 +197,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Lint without errors; `check-contract-version.mjs` passes against `Hexagonal` (2.2.3 → 2.2.4).
 
-### [ ] T14 — ADR 0022 and project status (~10 min)
+### [x] T14 — ADR 0022 and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0022-brand-identity.md`, `docs/adr/0016-web-frontend-libraries.md`, `docs/adr/README.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -207,7 +207,7 @@ Decisions taken in this plan:
   2. ADR 0016: Tektur in the libraries table and the vendored-files paragraph.
   3. Status files: issue done, decision row, pending items (no browser test of the intro; `/favicon.ico` still unanswered by a file), history row.
 - **Acceptance criteria:**
-  - [ ] `node scripts/check-project-status.mjs` passes on the PR's diff.
+  - [x] `node scripts/check-project-status.mjs` passes on the PR's diff.
 
 ## Global acceptance criteria
 
