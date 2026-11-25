@@ -74,7 +74,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] The font is served publicly with its MIME type; `./mvnw verify` green.
 
-### [ ] T3 — Shared brand geometry (~10 min)
+### [x] T3 — Shared brand geometry (~10 min)
 
 - **Layer:** adapter.in.web (static) · tests
 - **Files:** `src/main/resources/static/js/brand-geometry.js`, `scripts/brand-geometry.test.mjs`
@@ -83,7 +83,7 @@ Decisions taken in this plan:
   1. Test first (`node:test`): synthetic glyphs as `ink` functions (a rectangle «o», an «n» as an arch with two stems, an «A» as two slanted legs and a bar) check `strokeThickness`, `topLine` (centre of the top band, capped at the stroke), `rightStem` (down to the baseline), `leftLeg` (two fitted edges, crossbar rows ignored), `partial(path, f)` and `arrow(leg, length)` (shaft with the leg's width, head 2.6 × the width).
   2. Move those functions out of the prototype into the module, with no DOM access.
 - **Acceptance criteria:**
-  - [ ] `node --test "scripts/*.test.mjs"` passes, the new file included.
+  - [x] `node --test "scripts/*.test.mjs"` passes, the new file included.
 
 ### [ ] T4 — SVG generator and the three logos (~10 min)
 
