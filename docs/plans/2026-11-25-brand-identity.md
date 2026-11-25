@@ -62,7 +62,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Opening `docs/brand/prototypes/intro.html` in a browser plays the approved intro.
 
-### [ ] T2 — Vendor Tektur (~10 min)
+### [x] T2 — Vendor Tektur (~10 min)
 
 - **Layer:** build
 - **Files:** `src/main/resources/static/vendor/tektur/` (`tektur-latin-wght-normal.woff2`, `OFL.txt`, `README.md`), `src/main/resources/static/css/app.css`, test in `WebSecurityTests` or a new `StaticAssetsTests`
@@ -72,7 +72,7 @@ Decisions taken in this plan:
   2. `@font-face { font-family: "Tektur"; src: url(/vendor/tektur/...) format("woff2"); font-weight: 400 900; font-display: block; }` in `app.css` (downloaded only when used).
   3. Test: `GET /vendor/tektur/tektur-latin-wght-normal.woff2` without a session answers 200 with `font/woff2`.
 - **Acceptance criteria:**
-  - [ ] The font is served publicly with its MIME type; `./mvnw verify` green.
+  - [x] The font is served publicly with its MIME type; `./mvnw verify` green.
 
 ### [ ] T3 — Shared brand geometry (~10 min)
 

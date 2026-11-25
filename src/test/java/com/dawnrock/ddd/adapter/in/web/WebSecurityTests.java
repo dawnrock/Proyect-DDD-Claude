@@ -139,6 +139,14 @@ class WebSecurityTests {
     }
 
     @Test
+    @DisplayName("La tipografía Tektur de la marca se sirve sin sesión y como fuente woff2 (#178)")
+    void theBrandTypefaceIsServedWithoutSessionAsWoff2() throws Exception {
+        mvc.perform(get("/vendor/tektur/tektur-latin-wght-normal.woff2"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("font/woff2"));
+    }
+
+    @Test
     @DisplayName("Las librerías del frontend se guardan en caché un año y las páginas no se guardan (#124)")
     void frontendLibrariesAreCachedAndPagesAreNot() throws Exception {
         mvc.perform(get("/webjars/bootstrap/css/bootstrap.min.css"))
