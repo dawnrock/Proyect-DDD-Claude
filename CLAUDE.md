@@ -27,7 +27,7 @@ node scripts/graphify.mjs affected "<Clase>"         # quién depende de una cla
 ```
 
 - En Windows usa `mvnw.cmd`. Necesita Java 21 (`JAVA_HOME`).
-- H2 en memoria (`jdbc:h2:mem:ddd`), consola en `/h2-console`. La persistencia puede ser simulada (repositorios en memoria): es un proyecto de práctica.
+- Persistencia real con JPA y migraciones Flyway (ADR 0019): en local y en los tests, H2 en memoria en modo PostgreSQL (`jdbc:h2:mem:ddd`, consola en `/h2-console`); en producción (perfil `prod`, Render), PostgreSQL en Neon con `SPRING_DATASOURCE_URL`/`_USERNAME`/`_PASSWORD`. Los usuarios de Spring Security también están en la base de datos.
 - Análisis estático (ADR 0020): las reglas están en `checkstyle.xml`, `pmd-ruleset.xml` y `spotbugs-exclude.xml`, y los smells que ya existían, en `pmd-baseline.properties`. Ante un falso positivo, exclusión acotada con un comentario que diga por qué; nunca se ignora un aviso ni se salta el análisis en el CI.
 
 ## Arquitectura por fase
