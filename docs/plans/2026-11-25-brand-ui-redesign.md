@@ -180,7 +180,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
   - [x] All operation tests (deposit, withdrawal, transfer, IBAN) pass, htmx fragment included.
   - [x] Works without JavaScript (the details open by themselves).
 
-### [ ] T12 — Account detail: transactions with brand glyphs (~10 min)
+### [x] T12 — Account detail: transactions with brand glyphs (~10 min)
 
 - **Layer:** adapter.in (templates)
 - **Files:** `templates/accounts/detail.html`, `AccountDetailControllerTests.java`
@@ -189,7 +189,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
   1. Each row (class `movement`) has a slanted chip with `rise` for an approved deposit (with or without counterpart), `drop` for an approved withdrawal, `drop` in `flat` grey for a rejected one; amounts in Tektur, deposits in `rise`; «Rechazado» in `drop`, the amount struck through (as today).
   2. Tests: a deposit row has the rise glyph, a withdrawal the drop, a rejected one the grey drop.
 - **Acceptance criteria:**
-  - [ ] The new tests and the existing transaction tests pass.
+  - [x] The new tests and the existing transaction tests pass.
 
 ### [ ] T13 — Post-operation animation selectors (~5 min)
 

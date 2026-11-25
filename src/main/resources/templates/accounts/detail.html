@@ -102,16 +102,18 @@
             <a class="btn-slant btn-slant-surface" id="another-account" th:if="${customer}" th:href="@{/accounts/another}" hx-target="body" hx-swap="innerHTML transition:true"><svg th:replace="~{fragments/icons :: icon('plus')}"></svg>Abrir otra cuenta</a>
         </div>
 
-        <h2 class="h6 fw-semibold mb-3">Movimientos</h2>
-        <ul class="list-group" th:if="${!transactions.isEmpty()}">
+        <h2 class="h5 mb-2">Movimientos</h2>
+        <ul class="movements" th:if="${!transactions.isEmpty()}">
             <!--/* Un ingreso suma (+) y una retirada resta (−); un movimiento rechazado no cambió el saldo y va sin signo.
-                 Supone que solo hay DEPOSIT y WITHDRAWAL: un tipo nuevo exigiría revisar el signo. */-->
-            <li class="list-group-item d-flex align-items-center gap-3 py-3" th:each="t : ${transactions}" th:with="cp=${t.counterpartAccountNumber().orElse(null)}" th:classappend="${t.rejected()} ? 'row-rejected'">
+                 Supone que solo hay DEPOSIT y WITHDRAWAL: un tipo nuevo exigiría revisar el signo y el glifo. El glifo de
+                 la marca (#185) dice si el dinero entra (la subida de la A) o sale (la caída de la n); rechazado, en gris. */-->
+            <li class="movement" th:each="t : ${transactions}" th:with="cp=${t.counterpartAccountNumber().orElse(null)}" th:classappend="${t.rejected()} ? 'row-rejected'">
+                <span class="movement-chip"><th:block th:if="${t.type() == 'DEPOSIT'}"><svg th:replace="~{fragments/brand :: rise}"></svg></th:block><th:block th:if="${t.type() == 'WITHDRAWAL'}"><svg th:replace="~{fragments/brand :: drop}"></svg></th:block></span>
                 <span class="flex-grow-1 overflow-hidden">
                     <span class="d-block" th:text="${t.type() == 'DEPOSIT' ? (cp != null ? 'Transferencia de ' + @fmt.maskedIban(cp) : 'Ingreso') : (t.type() == 'WITHDRAWAL' ? (cp != null ? 'Transferencia a ' + @fmt.maskedIban(cp) : 'Retirada') : t.type())}">Ingreso</span>
                     <span class="d-block small text-body-secondary"><span th:text="${#temporals.format(t.occurredOn(), 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</span><span class="text-danger" th:if="${t.rejected()}"> · Rechazado</span><span th:if="${t.status() == 'PENDING'}"> · Pendiente</span></span>
                 </span>
-                <span class="row-amount text-nowrap" th:classappend="${t.type() == 'DEPOSIT' and t.approved()} ? 'text-success'"
+                <span class="row-amount amount" th:classappend="${t.type() == 'DEPOSIT' and t.approved()} ? 'text-success'"
                       th:text="${t.rejected() ? @fmt.money(t.amount(), t.currency()) : @fmt.signedMoney(t.amount(), t.currency(), t.type() == 'DEPOSIT')}">+0,00 €</span>
             </li>
         </ul>

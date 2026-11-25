@@ -139,6 +139,24 @@ class AccountDetailControllerTests extends AccountWebTestSupport {
         }
 
         @Test
+        @DisplayName("Cada movimiento lleva su glifo: la subida si entra dinero, la caída si sale y la caída en gris si se rechazó (#185)")
+        void eachTransactionCarriesItsBrandGlyph() throws Exception {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details(
+                    transaction("DEPOSIT", "100.00", "APPROVED"),
+                    transaction("WITHDRAWAL", "30.00", "APPROVED"),
+                    transaction("WITHDRAWAL", "500.00", "REJECTED")));
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<li class=\"movement\">\\s*<span class=\"movement-chip\"><svg class=\"glyph glyph-rise\".*")))
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<li class=\"movement\">\\s*<span class=\"movement-chip\"><svg class=\"glyph glyph-drop\".*")))
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<li class=\"movement row-rejected\">\\s*<span class=\"movement-chip\"><svg class=\"glyph glyph-drop\".*")));
+        }
+
+        @Test
         @DisplayName("Una retirada con contrapartida se muestra como transferencia a la cuenta de destino")
         void aWithdrawalWithCounterpartIsShownAsTransferTo() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details(
