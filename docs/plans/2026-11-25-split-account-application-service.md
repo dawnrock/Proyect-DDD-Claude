@@ -110,7 +110,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
 - **Acceptance criteria:**
   - [x] New tests pass; the outbox tests (`OutboxDeliveryTests`, `OutboxRestartTests`) and the event tests of the service pass unchanged. (3 new tests, red first because the class did not exist; 1,038 test cases green, outbox tests unchanged)
 
-### [ ] T5 — Extract `AccountAccess`, `UsernameAvailability` and `DueSegmentReview` (~10 min)
+### [x] T5 — Extract `AccountAccess`, `UsernameAvailability` and `DueSegmentReview` (~10 min)
 
 - **Layer:** application
 - **Files:** the three new classes, `CheckingAccountService.java`
@@ -120,7 +120,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
   2. `UsernameAvailability`: `isTaken(username)` (R30).
   3. `DueSegmentReview`: `reviewIfDue(account, changes)` returning whether the holder went back to retail.
 - **Acceptance criteria:**
-  - [ ] `CheckingAccountService` only orchestrates; `CheckingAccountServiceOwnershipTests` and the segment review tests pass unchanged.
+  - [x] `CheckingAccountService` only orchestrates; `CheckingAccountServiceOwnershipTests` and the segment review tests pass unchanged. (1,038 test cases green)
 
 ### [ ] T6 — `SegmentReviewCommands` and `AccountSegmentReviewService` (~10 min)
 

@@ -46,10 +46,11 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     private final AccountOwnershipRepository ownership;
     private final CheckingAccountFactory factory;
     private final MoneyTransferService transferService;
-    private final SegmentReviewService segmentReview;
-    private final Clock clock;
     private final UnitOfWork unitOfWork;
     private final AccountUnitOfWork accountUnit;
+    private final AccountAccess access;
+    private final UsernameAvailability usernames;
+    private final DueSegmentReview dueSegmentReview;
     private final CustomerRepository customers;
     private final CustomerOwnershipRepository customerOwnership;
 
@@ -63,10 +64,11 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         this.ownership = ownership;
         this.factory = factory;
         this.transferService = transferService;
-        this.segmentReview = segmentReview;
-        this.clock = clock;
         this.unitOfWork = unitOfWork;
         this.accountUnit = new AccountUnitOfWork(unitOfWork, repository, publisher);
+        this.access = new AccountAccess(repository, ownership);
+        this.usernames = new UsernameAvailability(customerOwnership, ownership);
+        this.dueSegmentReview = new DueSegmentReview(segmentReview, clock);
         this.customers = customers;
         this.customerOwnership = customerOwnership;
     }
@@ -88,7 +90,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         CheckingAccount opened = factory.open(customer, AccountViews.toAmount(command.initialDeposit(), command.currency()));
         requireUnused(opened.accountNumber());
         if (existing.isEmpty()) {
-            if (usernameTaken(owner)) {
+            if (usernames.isTaken(owner)) {
                 throw new IllegalArgumentException("El usuario %s ya es de otro cliente".formatted(owner));
             }
             customers.save(customer);
@@ -155,7 +157,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
             customers.findByTaxId(taxId).ifPresent(existing -> {
                 throw new DuplicateCustomerException(taxId);
             });
-            if (usernameTaken(command.username())) {
+            if (usernames.isTaken(command.username())) {
                 throw new IllegalArgumentException("El usuario %s ya es de otro cliente".formatted(command.username()));
             }
             customers.save(customer);
@@ -195,7 +197,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
             throw new ForbiddenOperationException("generar un nuevo número de cuenta");
         }
         return accountUnit.execute(changes -> {
-            CheckingAccount account = load(id);
+            CheckingAccount account = access.load(id);
             AccountNumber generated = factory.nextAccountNumber();
             requireUnused(generated);
             account.reassignAccountNumber(generated);
@@ -205,18 +207,13 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
 
     @Override
     public boolean isUsernameTaken(String username) {
-        return unitOfWork.execute(() -> usernameTaken(username));
-    }
-
-    /** Un usuario está tomado si es de un cliente o ya es propietario de alguna cuenta (R30). */
-    private boolean usernameTaken(String username) {
-        return customerOwnership.customerOf(username).isPresent() || !ownership.accountsOf(username).isEmpty();
+        return unitOfWork.execute(() -> usernames.isTaken(username));
     }
 
     @Override
     public List<AccountSummary> listAccounts(Caller caller) {
         return unitOfWork.execute(() -> repository.findAll().stream()
-                .filter(account -> canAccess(caller, account.id()))
+                .filter(account -> access.canAccess(caller, account.id()))
                 .map(AccountViews::toSummary)
                 .toList());
     }
@@ -224,7 +221,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     @Override
     public AccountDetails findAccount(Caller caller, UUID id) {
         return unitOfWork.execute(() -> {
-            CheckingAccount account = loadFor(caller, id);
+            CheckingAccount account = access.loadFor(caller, id);
             return AccountViews.toDetails(account, holderEmail(account));
         });
     }
@@ -232,7 +229,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     @Override
     public TransactionSummary deposit(Caller caller, DepositCommand command) {
         return accountUnit.execute(changes -> {
-            CheckingAccount account = loadFor(caller, command.accountId());
+            CheckingAccount account = access.loadFor(caller, command.accountId());
             Transaction transaction = account.deposit(AccountViews.toAmount(command.amount(), command.currency()));
             changes.save(account);
             return AccountViews.toTransaction(transaction);
@@ -243,7 +240,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     public TransactionSummary withdraw(Caller caller, WithdrawCommand command) {
         reviewSegmentBeforeDebit(caller, command.accountId());
         return accountUnit.execute(changes -> {
-            CheckingAccount account = loadFor(caller, command.accountId());
+            CheckingAccount account = access.loadFor(caller, command.accountId());
             Transaction transaction = account.tryWithdraw(AccountViews.toAmount(command.amount(), command.currency()));
             changes.save(account);
             return AccountViews.toTransaction(transaction);
@@ -257,7 +254,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     }
 
     private TransferSummary transfer(Caller caller, TransferCommand command, AccountChanges changes) {
-        CheckingAccount source = loadFor(caller, command.sourceAccountId());
+        CheckingAccount source = access.loadFor(caller, command.sourceAccountId());
         AccountNumber targetNumber = new AccountNumber(command.targetAccountNumber());
         CheckingAccount target = repository.findByAccountNumber(targetNumber)
                 .orElseThrow(() -> new TargetAccountNotFoundException(targetNumber.value()));
@@ -273,7 +270,7 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
         return accountUnit.execute(changes -> {
             int demoted = 0;
             for (CheckingAccount account : repository.findAll()) {
-                if (reviewSegment(account, changes)) {
+                if (dueSegmentReview.reviewIfDue(account, changes)) {
                     demoted++;
                 }
             }
@@ -287,38 +284,11 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
      * publicado.
      */
     private void reviewSegmentBeforeDebit(Caller caller, UUID accountId) {
-        accountUnit.execute(changes -> reviewSegment(loadFor(caller, accountId), changes));
-    }
-
-    /** Revisa el segmento si le toca y guarda la cuenta. Devuelve si el titular ha vuelto a minorista. */
-    private boolean reviewSegment(CheckingAccount account, AccountChanges changes) {
-        if (!account.segmentReviewDue(clock.instant())) {
-            return false;
-        }
-        boolean wasHighNetWorth = account.primaryHolder().isHighNetWorth();
-        segmentReview.review(account, clock.instant());
-        changes.save(account);
-        return wasHighNetWorth && !account.primaryHolder().isHighNetWorth();
-    }
-
-    /** Carga la cuenta; una ajena (o sin propietario, para un usuario) se trata como inexistente. */
-    private CheckingAccount loadFor(Caller caller, UUID id) {
-        CheckingAccount account = load(id);
-        if (!canAccess(caller, id)) {
-            throw new AccountNotFoundException(id);
-        }
-        return account;
+        accountUnit.execute(changes -> dueSegmentReview.reviewIfDue(access.loadFor(caller, accountId), changes));
     }
 
     private String holderEmail(CheckingAccount account) {
         return customers.findByTaxId(account.primaryHolder().taxId()).map(customer -> customer.email().value()).orElse("");
     }
 
-    private boolean canAccess(Caller caller, UUID accountId) {
-        return caller.admin() || ownership.ownerOf(accountId).filter(caller.username()::equals).isPresent();
-    }
-
-    private CheckingAccount load(UUID id) {
-        return repository.findById(id).orElseThrow(() -> new AccountNotFoundException(id));
-    }
 }
