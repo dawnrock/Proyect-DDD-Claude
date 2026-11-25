@@ -56,7 +56,9 @@ final class CommandValidation {
         }
     }
 
-    /** Exige que {@code code} sea un código ISO 4217 válido; es el único sitio con el mensaje de divisa no válida. */
+    /**
+     * Exige que {@code code} sea un código ISO 4217 válido. Es el único sitio con el mensaje de divisa no válida.
+     */
     static void requireIsoCurrency(String code) {
         if (!isIsoCurrency(code)) {
             throw new IllegalArgumentException("La divisa %s no es un código ISO 4217 válido".formatted(code));

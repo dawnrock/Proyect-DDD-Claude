@@ -75,7 +75,8 @@ public interface OpenAccountCommandDef {
     @Value.Check
     default void validate() {
         CommandValidation.requireMatching(holderTaxId(), TAX_ID_PATTERN, TAX_ID_MESSAGE);
-        CommandValidation.requireMatchingUnlessBlank(holderEmail(), SignUpCommandDef.EMAIL_PATTERN, SignUpCommandDef.EMAIL_MESSAGE);
+        CommandValidation.requireMatchingUnlessBlank(holderEmail(), SignUpCommandDef.EMAIL_PATTERN,
+                SignUpCommandDef.EMAIL_MESSAGE);
         CommandValidation.requireMatchingIfPresent(ownerUsername(), USERNAME_PATTERN, OWNER_USERNAME_MESSAGE);
         CommandValidation.requireIsoCurrency(currency());
         CommandValidation.requireValidInitialDeposit(initialDeposit(), currency());

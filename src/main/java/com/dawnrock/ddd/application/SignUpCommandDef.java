@@ -41,9 +41,11 @@ public interface SignUpCommandDef {
     @Value.Check
     default void validate() {
         CommandValidation.requireNotBlank(fullName(), "El nombre y apellidos son obligatorios");
-        CommandValidation.requireMatching(taxId(), OpenAccountCommandDef.TAX_ID_PATTERN, OpenAccountCommandDef.TAX_ID_MESSAGE);
+        CommandValidation.requireMatching(taxId(), OpenAccountCommandDef.TAX_ID_PATTERN,
+                OpenAccountCommandDef.TAX_ID_MESSAGE);
         CommandValidation.requireMatching(email(), EMAIL_PATTERN, EMAIL_MESSAGE);
-        CommandValidation.requireMatching(username(), OpenAccountCommandDef.USERNAME_PATTERN, OpenAccountCommandDef.USERNAME_MESSAGE);
+        CommandValidation.requireMatching(username(), OpenAccountCommandDef.USERNAME_PATTERN,
+                OpenAccountCommandDef.USERNAME_MESSAGE);
         CommandValidation.requireIsoCurrency(currency());
         CommandValidation.requireValidInitialDeposit(initialDeposit(), currency());
     }

@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-25
-- **Status:** in progress
-- **Total estimate:** ~40 min (6 tasks)
+- **Status:** done
+- **Total estimate:** ~42 min (7 tasks)
 
 ## Goal
 
@@ -99,27 +99,37 @@ The PMD baseline (#168, ADR 0020) flags `CyclomaticComplexity` 11 in `OpenAccoun
 - **Acceptance criteria:**
   - [x] `pmd-baseline.properties` has no line for the two commands and `./mvnw verify` is green (sabotage: with the old `validate()` PMD fails with complexity 11 in both).
 
+### [x] T7 — Review fixes (~2 min)
+
+- **Layer:** application
+- **Files:** `OpenAccountCommandDef.java`, `SignUpCommandDef.java`, `CommandValidation.java`
+- **Depends on:** T6
+- **What to do:**
+  1. `revisor-ddd` found nothing blocking; its only suggestion, three calls longer than 120 columns, is applied (one Javadoc line too).
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] Neither `validate()` is above PMD's `CyclomaticComplexity` threshold; both lines are out of the baseline.
-- [ ] The invalid-currency message is defined once.
-- [ ] Same rules, messages and order: the characterization tests of T1-T2 and the existing web, REST and CLI tests pass unchanged.
+- [x] Neither `validate()` is above PMD's `CyclomaticComplexity` threshold; both lines are out of the baseline.
+- [x] The invalid-currency message is defined once.
+- [x] Same rules, messages and order: the characterization tests of T1-T2 and the existing web, REST and CLI tests pass unchanged.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: … (n/a: no API change).
-- [ ] Any new business term is in `docs/dominio/glosario.md` (n/a: no new term).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: … (n/a: no API change).
+- [x] Any new business term is in `docs/dominio/glosario.md` (n/a: no new term).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
