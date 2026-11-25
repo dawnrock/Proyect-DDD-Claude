@@ -94,7 +94,7 @@ Both new classes are package-private: only the aggregate uses them, so the hexag
 - **Acceptance criteria:**
   - [x] `AccountSegmentTests` green; `check-domain.mjs` without errors. Deviation: the defensive «Solo se revisa el segmento de un titular de alto patrimonio» is not reachable from `AccountSegment` either (its `restore` and `afterWithdrawal` never leave a pending review for a retail holder), so it stays as a commented defence without a test.
 
-### [ ] T5 — CheckingAccount on AccountSegment (~10 min)
+### [x] T5 — CheckingAccount on AccountSegment (~10 min)
 
 - **Layer:** domain
 - **Files:** `CheckingAccount.java`
@@ -102,7 +102,7 @@ Both new classes are package-private: only the aggregate uses them, so the hexag
 - **What to do:**
   1. The aggregate keeps an `AccountSegment` built in its constructors (`restore` in `reconstitute`); deposits, withdrawals, the opening, `segmentReviewDue`, `resolveSegmentReview` and `nextSegmentReview` delegate to it, and the aggregate records `CustomerSegmentChanged` when it answers `true`. Event order unchanged (opening first, then the deposit, then the segment change).
 - **Acceptance criteria:**
-  - [ ] All tests green without changes (domain, `SegmentReviewServiceTests`, persistence and end-to-end).
+  - [x] All tests green without changes (domain, `SegmentReviewServiceTests`, persistence and end-to-end). PMD without baseline: no warning in the whole project.
 
 ### [ ] T6 — Out of the PMD baseline, glossary and project status (~10 min)
 

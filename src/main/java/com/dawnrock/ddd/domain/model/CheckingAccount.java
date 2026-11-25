@@ -1,8 +1,6 @@
 package com.dawnrock.ddd.domain.model;
 
 import java.time.Instant;
-import java.time.Period;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -12,19 +10,13 @@ import java.util.UUID;
 public class CheckingAccount {
 
     private static final MonetaryAmount MINIMUM_INITIAL_DEPOSIT = MonetaryAmount.euros("50.00");
-    private static final MonetaryAmount OVERDRAFT_LIMIT = MonetaryAmount.euros("-1000.00");
-    private static final MonetaryAmount MINIMUM_NET_WORTH = MonetaryAmount.euros("100000.00");
-    /** Plazo desde que una cuenta de alto patrimonio cae bajo el patrimonio mínimo hasta que se revisa su segmento. */
-    private static final Period SEGMENT_GRACE_PERIOD = Period.ofMonths(1);
-    /** Cada cuánto se vuelven a verificar los ingresos de un titular que conserva el segmento sin el saldo mínimo. */
-    private static final Period INCOME_REVIEW_PERIOD = Period.ofMonths(6);
     private final UUID id;
     private AccountNumber accountNumber;
     private final AccountHolder primaryHolder;
     private final TransactionHistory transactions;
     private final List<DomainEvent> domainEvents = new ArrayList<>();
+    private final AccountSegment segment;
     private MonetaryAmount currentBalance;
-    private Instant nextSegmentReview;
 
     private CheckingAccount(AccountNumber accountNumber, 
                             AccountHolder primaryHolder, 
@@ -34,15 +26,16 @@ public class CheckingAccount {
         this.primaryHolder = primaryHolder;
         this.currentBalance = MonetaryAmount.zero(initialDeposit.currency());
         this.transactions = new TransactionHistory();
+        this.segment = AccountSegment.of(primaryHolder);
     }
 
     private CheckingAccount(UUID id, AccountNumber accountNumber, AccountHolder primaryHolder,
-                            MonetaryAmount currentBalance, Instant nextSegmentReview, TransactionHistory transactions) {
+                            MonetaryAmount currentBalance, AccountSegment segment, TransactionHistory transactions) {
         this.id = id;
         this.accountNumber = accountNumber;
         this.primaryHolder = primaryHolder;
         this.currentBalance = currentBalance;
-        this.nextSegmentReview = nextSegmentReview;
+        this.segment = segment;
         this.transactions = transactions;
     }
 
@@ -64,11 +57,9 @@ public class CheckingAccount {
         Objects.requireNonNull(accountNumber, "El número de cuenta es obligatorio");
         Objects.requireNonNull(primaryHolder, "El titular de la cuenta es obligatorio");
         Objects.requireNonNull(currentBalance, "El saldo de la cuenta es obligatorio");
-        if (nextSegmentReview != null && !primaryHolder.isHighNetWorth()) {
-            throw new IllegalStateException("Solo una cuenta de alto patrimonio tiene revisión de segmento pendiente");
-        }
+        AccountSegment segment = AccountSegment.restore(primaryHolder, nextSegmentReview);
         TransactionHistory history = TransactionHistory.restore(id, transactions, currentBalance);
-        return new CheckingAccount(id, accountNumber, primaryHolder, currentBalance, nextSegmentReview, history);
+        return new CheckingAccount(id, accountNumber, primaryHolder, currentBalance, segment, history);
     }
 
     /**
@@ -110,12 +101,8 @@ public class CheckingAccount {
         transaction.approve();
         currentBalance = newBalance;
         record(new MoneyDeposited(id, transaction.id(), amount, transaction.occurredOn()));
-        if (reachesMinimumNetWorth()) {
-            if (!primaryHolder.isHighNetWorth()) {
-                primaryHolder.promoteToHighNetWorth();
-                recordSegmentChange(transaction.occurredOn());
-            }
-            nextSegmentReview = null;
+        if (segment.afterDeposit(currentBalance)) {
+            recordSegmentChange(transaction.occurredOn());
         }
         return transaction;
     }
@@ -146,7 +133,7 @@ public class CheckingAccount {
     private Transaction tryWithdraw(Transaction movement) {
         MonetaryAmount amount = movement.amount();
         MonetaryAmount newBalance = currentBalance.subtract(amount);
-        boolean allowed = isAllowed(newBalance);
+        boolean allowed = segment.allows(newBalance);
 
         Transaction transaction = register(movement);
 
@@ -154,9 +141,7 @@ public class CheckingAccount {
             transaction.approve();
             currentBalance = newBalance;
             record(new MoneyWithdrawn(id, transaction.id(), amount, transaction.occurredOn()));
-            if (primaryHolder.isHighNetWorth() && !reachesMinimumNetWorth() && nextSegmentReview == null) {
-                nextSegmentReview = after(transaction.occurredOn(), SEGMENT_GRACE_PERIOD);
-            }
+            segment.afterWithdrawal(currentBalance, transaction.occurredOn());
         } else {
             transaction.reject();
             record(new WithdrawalRejected(id, transaction.id(), amount, transaction.occurredOn()));
@@ -166,8 +151,7 @@ public class CheckingAccount {
 
     /** Si a {@code now} ya le toca revisión al segmento del titular. */
     public boolean segmentReviewDue(Instant now) {
-        Objects.requireNonNull(now, "El momento de la revisión es obligatorio");
-        return nextSegmentReview != null && !now.isBefore(nextSegmentReview);
+        return segment.reviewDue(now);
     }
 
     /**
@@ -177,17 +161,7 @@ public class CheckingAccount {
      * @throws IllegalStateException si la revisión aún no está vencida
      */
     public void resolveSegmentReview(Instant now, boolean incomeStillHigh) {
-        if (!segmentReviewDue(now)) {
-            throw new IllegalStateException("La revisión del segmento aún no está vencida");
-        }
-        if (!primaryHolder.isHighNetWorth()) {
-            throw new IllegalStateException("Solo se revisa el segmento de un titular de alto patrimonio");
-        }
-        if (incomeStillHigh) {
-            nextSegmentReview = after(now, INCOME_REVIEW_PERIOD);
-        } else {
-            primaryHolder.demoteToRetail();
-            nextSegmentReview = null;
+        if (segment.resolveReview(now, incomeStillHigh)) {
             recordSegmentChange(now);
         }
     }
@@ -240,14 +214,7 @@ public class CheckingAccount {
      * patrimonio cuyo saldo está por debajo del patrimonio mínimo.
      */
     public Optional<Instant> nextSegmentReview() {
-        return Optional.ofNullable(nextSegmentReview);
-    }
-
-    private boolean isAllowed(MonetaryAmount newBalance) {
-        if (!newBalance.isNegative()) {
-            return true;
-        }
-        return primaryHolder.isHighNetWorth() && !newBalance.isLessThan(OVERDRAFT_LIMIT);
+        return segment.nextReview();
     }
 
     private Transaction register(Transaction transaction) {
@@ -258,20 +225,9 @@ public class CheckingAccount {
     private void recordOpening(MonetaryAmount initialDeposit) {
         int firstEvent = domainEvents.size();
         Transaction deposit = deposit(initialDeposit);
-        if (primaryHolder.isHighNetWorth() && !reachesMinimumNetWorth()) {
-            nextSegmentReview = after(deposit.occurredOn(), INCOME_REVIEW_PERIOD);
-        }
+        segment.afterOpening(currentBalance, deposit.occurredOn());
         domainEvents.add(firstEvent, new CheckingAccountOpened(
                 id, accountNumber, primaryHolder.fullName(), initialDeposit, deposit.occurredOn()));
-    }
-
-    /** Plazos en meses naturales, en UTC. */
-    private static Instant after(Instant instant, Period period) {
-        return instant.atZone(ZoneOffset.UTC).plus(period).toInstant();
-    }
-
-    private boolean reachesMinimumNetWorth() {
-        return !currentBalance.isLessThan(MINIMUM_NET_WORTH);
     }
 
     private void recordSegmentChange(Instant occurredOn) {

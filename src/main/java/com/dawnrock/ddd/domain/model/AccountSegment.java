@@ -12,7 +12,7 @@ import java.util.Optional;
  *
  * <ul>
  *   <li>El descubierto que permite: solo al alto patrimonio y hasta {@link #OVERDRAFT_LIMIT} (R6-R8).</li>
- * *   <li>El paso a alto patrimonio cuando el saldo llega al patrimonio mínimo ({@link #MINIMUM_NET_WORTH}).</li>
+ *   <li>El paso a alto patrimonio cuando el saldo llega al patrimonio mínimo ({@link #MINIMUM_NET_WORTH}).</li>
  *   <li>La revisión del segmento: se programa un {@link #SEGMENT_GRACE_PERIOD} después de la retirada que deja una
  *       cuenta de alto patrimonio bajo el mínimo, se cancela si lo recupera y, al resolverla, el titular conserva el
  *       segmento con una nueva revisión a los {@link #INCOME_REVIEW_PERIOD} o vuelve a minorista (R22-R27).</li>
