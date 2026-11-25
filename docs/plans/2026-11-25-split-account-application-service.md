@@ -180,7 +180,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
 - **Acceptance criteria:**
   - [x] Rule broken on purpose and restored; `./mvnw verify` green. (a field of type MoneyMovementService in TransferController made onlyConfigKnowsTheServicesBehindTheInputPorts fail; reverted, green)
 
-### [ ] T11 — PMD baseline (~5 min)
+### [x] T11 — PMD baseline (~5 min)
 
 - **Layer:** build
 - **Files:** `pmd-baseline.properties`
@@ -189,7 +189,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
   1. Remove the lines of `CheckingAccountService` and `CheckingAccountServiceTests`.
   2. `./mvnw verify`: no PMD warning on the new services and tests. If a test class is still too coupled, split it further rather than add it to the baseline.
 - **Acceptance criteria:**
-  - [ ] Baseline without those two lines; `./mvnw verify` green; `./mvnw pmd:pmd -Dpmd.baseline=` shows no `GodClass` or `CouplingBetweenObjects` in the new classes.
+  - [x] Baseline without those two lines; `./mvnw verify` green; `./mvnw pmd:pmd -Dpmd.baseline=` shows no `GodClass` or `CouplingBetweenObjects` in the new classes. (./mvnw pmd:pmd -Dpmd.baseline= only lists the four classes still in the baseline)
 
 ### [ ] T12 — Architecture and contract documents (~10 min)
 
