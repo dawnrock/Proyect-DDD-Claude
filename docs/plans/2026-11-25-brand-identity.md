@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-25
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~125 min (15 tasks)
 
 ## Goal
@@ -223,25 +223,25 @@ Decisions taken in this plan:
 
 **Specific:**
 
-- [ ] The first visit to `/login` in a browser session plays the 3-second intro and then shows the doors; later visits in the same session do not.
-- [ ] With reduced motion, without JavaScript or if Tektur does not load there is no intro and the page works as today.
-- [ ] Every page shows the header logo (`alt="monA Bank"`), the SVG favicon and a title ending in «· monA Bank».
-- [ ] No «Mon-A Bank», «Cuentas corrientes» or «Fase 2 · arquitectura hexagonal» left in what the user sees (templates, messages, contract texts).
-- [ ] The generated SVGs match the approved logo (shown to the user before the PR).
+- [x] The first visit to `/login` in a browser session plays the 3-second intro and then shows the doors; later visits in the same session do not.
+- [x] With reduced motion, without JavaScript or if Tektur does not load there is no intro and the page works as today.
+- [x] Every page shows the header logo (`alt="monA Bank"`), the SVG favicon and a title ending in «· monA Bank».
+- [x] No «Mon-A Bank», «Cuentas corrientes» or «Fase 2 · arquitectura hexagonal» left in what the user sees (templates, messages, contract texts).
+- [x] The generated SVGs match the approved logo (shown to the user before the PR).
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): Tektur vendored and opentype.js at dev time, both in ADR 0022.
-- [ ] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes (texts only: patch bump).
-- [ ] Any new business term is in `docs/dominio/glosario.md`.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}` (also used for the browser check of T12).
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): Tektur vendored and opentype.js at dev time, both in ADR 0022.
+- [x] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes (texts only: patch bump; 697 generated cases passed).
+- [x] Any new business term is in `docs/dominio/glosario.md`.
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
