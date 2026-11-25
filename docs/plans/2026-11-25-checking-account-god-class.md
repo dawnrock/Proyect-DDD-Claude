@@ -83,7 +83,7 @@ Both new classes are package-private: only the aggregate uses them, so the hexag
 - **Acceptance criteria:**
   - [x] All domain, persistence and end-to-end tests green without changes.
 
-### [ ] T4 — AccountSegment (~15 min)
+### [x] T4 — AccountSegment (~15 min)
 
 - **Layer:** domain
 - **Files:** `AccountSegment.java`, `AccountSegmentTests.java`
@@ -92,7 +92,7 @@ Both new classes are package-private: only the aggregate uses them, so the hexag
   1. Tests first (POJO), one per rule: overdraft allowed only to high net worth and down to -€1,000.00; a deposit that reaches the minimum net worth promotes a retail holder (answers `true` once) and cancels a pending review; a withdrawal that leaves a high net worth account below the minimum schedules the review one month later, and a second one does not move it; an opening below the minimum by a high net worth holder schedules the first review six months later; the review is due from its date on; resolving it keeps the segment and reschedules six months later, or demotes to retail (answers `true`); resolving before it is due, or without a moment, fails with today's messages; `restore` rejects a pending review for a retail holder.
   2. Write it, moving the four constants and `after` (calendar months in UTC) out of the aggregate.
 - **Acceptance criteria:**
-  - [ ] `AccountSegmentTests` green; `check-domain.mjs` without errors.
+  - [x] `AccountSegmentTests` green; `check-domain.mjs` without errors. Deviation: the defensive «Solo se revisa el segmento de un titular de alto patrimonio» is not reachable from `AccountSegment` either (its `restore` and `afterWithdrawal` never leave a pending review for a retail holder), so it stays as a commented defence without a test.
 
 ### [ ] T5 — CheckingAccount on AccountSegment (~10 min)
 
