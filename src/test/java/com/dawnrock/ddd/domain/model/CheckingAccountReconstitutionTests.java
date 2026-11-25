@@ -95,7 +95,7 @@ class CheckingAccountReconstitutionTests {
         assertThatThrownBy(() -> CheckingAccount.reconstitute(ID, IBAN, holder(CustomerSegment.RETAIL),
                 MonetaryAmount.euros("1300.00"), null, history(ID)))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("1250.00 EUR");
+                .hasMessage("El saldo guardado 1300.00 EUR no cuadra con los movimientos aprobados (1250.00 EUR)");
     }
 
     @Test
@@ -155,5 +155,21 @@ class CheckingAccountReconstitutionTests {
                 MonetaryAmount.euros("200.00"), null, List.of(deposito, deposito)))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Una cuenta guardada no repite movimientos");
+    }
+
+    @Test
+    @DisplayName("Con varios datos incoherentes se informa la primera comprobación: revisión de segmento, movimientos y saldo")
+    void withSeveralInconsistenciesTheFirstCheckIsReported() {
+        AccountHolder minorista = holder(CustomerSegment.RETAIL);
+        Instant revision = Instant.parse("2027-05-03T10:15:30Z");
+        MonetaryAmount saldoQueNoCuadra = MonetaryAmount.euros("9.99");
+        List<Transaction> deOtraCuenta = history(UUID.randomUUID());
+
+        assertThatThrownBy(() -> CheckingAccount.reconstitute(ID, IBAN, minorista, saldoQueNoCuadra, revision, deOtraCuenta))
+                .hasMessage("Solo una cuenta de alto patrimonio tiene revisión de segmento pendiente");
+        assertThatThrownBy(() -> CheckingAccount.reconstitute(ID, IBAN, minorista, saldoQueNoCuadra, null, deOtraCuenta))
+                .hasMessage("Un movimiento de la cuenta reconstituida pertenece a otra cuenta");
+        assertThatThrownBy(() -> CheckingAccount.reconstitute(ID, IBAN, minorista, saldoQueNoCuadra, null, history(ID)))
+                .hasMessageStartingWith("El saldo guardado 9.99 EUR no cuadra");
     }
 }
