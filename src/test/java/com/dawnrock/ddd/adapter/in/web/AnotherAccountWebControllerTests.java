@@ -41,7 +41,6 @@ import com.dawnrock.ddd.domain.model.MonetaryAmount;
 @WithMockUser(username = "ada", roles = "USER")
 class AnotherAccountWebControllerTests extends AccountWebTestSupport {
 
-    private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
     private static final UUID FIRST = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
     private static final UUID SECOND = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
 

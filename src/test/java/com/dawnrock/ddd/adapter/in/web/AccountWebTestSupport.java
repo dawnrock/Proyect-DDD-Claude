@@ -35,6 +35,16 @@ import com.dawnrock.ddd.application.TransferSummary;
 @Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class, TestUsers.class, AccountDetailView.class})
 abstract class AccountWebTestSupport {
 
+    protected static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+
+    protected static final Caller ADA = Caller.builder().username("ada").admin(false).build();
+
+    protected static final UUID ACCOUNT_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
+
+    protected static final UUID OTHER_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
+
+    protected static final String TARGET_IBAN = "ES9876543210987654321098";
+
     @Autowired
     protected MockMvc mvc;
 
@@ -52,10 +62,6 @@ abstract class AccountWebTestSupport {
         return MockMvcRequestBuilders.post(url).with(csrf());
     }
 
-    protected static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
-
-    protected static final Caller ADA = Caller.builder().username("ada").admin(false).build();
-
     protected static AccountSummary ownAccount(UUID id, String number, String holder) {
         return AccountSummary.builder()
                 .id(id)
@@ -65,8 +71,6 @@ abstract class AccountWebTestSupport {
                 .currency("EUR")
                 .build();
     }
-
-    protected static final UUID ACCOUNT_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
 
     protected static TransactionSummary transaction(String type, String amount, String status) {
         return TransactionSummary.builder()
@@ -103,10 +107,6 @@ abstract class AccountWebTestSupport {
                 .build();
     }
 
-    protected static final UUID OTHER_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
-
-    protected static final String TARGET_IBAN = "ES9876543210987654321098";
-
     protected static TransferSummary transfer(String amount, String status) {
         return TransferSummary.builder()
                 .sourceAccountId(ACCOUNT_ID)
@@ -119,17 +119,20 @@ abstract class AccountWebTestSupport {
                 .status(status)
                 .build();
     }
+
     /** Petición como la envía htmx: con la cabecera HX-Request. */
 
     protected static MockHttpServletRequestBuilder htmx(MockHttpServletRequestBuilder request) {
         return request.header("HX-Request", "true");
     }
+
     /** Atributo que apunta a un recurso propio con el hash de su contenido en el nombre (/js/app-<md5>.js). */
 
     protected static Matcher<String> hashed(String attribute, String path, String extension) {
         return matchesPattern("(?s).*" + attribute + "=\"" + Pattern.quote(path) + "-[0-9a-f]{32}"
                 + Pattern.quote(extension) + "\".*");
     }
+
     /** Atributo que apunta a un fichero de un WebJar, con la versión que añada Spring a la ruta. */
 
     protected static Matcher<String> webjar(String attribute, String webjar, String file) {

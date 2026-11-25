@@ -6,7 +6,7 @@
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-25
 - **Status:** in progress
-- **Total estimate:** ~110 min (14 tasks)
+- **Total estimate:** ~115 min (15 tasks)
 
 ## Goal
 
@@ -197,6 +197,16 @@
   1. Component and test tables of phase 2 name the new controllers and `AccountDetailView`; the #125 decision names `AccountDetailView.notice`.
 - **Acceptance criteria:**
   - [x] `grep -rn AccountWebController docs/arquitectura docs/ia/decisiones.md` finds only history. (only the history of #177 and the comparison note name it)
+
+### [x] T15 — Review fixes (~5 min)
+
+- **Layer:** tests
+- **Files:** `AccountWebTestSupport.java`, `AccountNumberWebControllerTests.java`, `AnotherAccountWebControllerTests.java`
+- **Depends on:** T13
+- **What to do:**
+  1. Fix what `revisor-ddd` found in the tests (no change of behaviour): the shared constants go first in `AccountWebTestSupport`, with a blank line before each Javadoc, and the two test classes stop redeclaring `ADMIN`, `ADA` and the account id they inherit.
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green with the same test cases; the other review notes go to `pendientes.md` in T14.
 
 ### [ ] T14 — Project status (~5 min)
 
