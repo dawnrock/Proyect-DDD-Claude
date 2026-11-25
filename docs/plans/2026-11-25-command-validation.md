@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-25
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~40 min (6 tasks)
 
 ## Goal
@@ -35,7 +35,7 @@ The PMD baseline (#168, ADR 0020) flags `CyclomaticComplexity` 11 in `OpenAccoun
 
 ## Tasks
 
-### [ ] T1 — Characterization: rules of the sign-up command (~10 min)
+### [x] T1 — Characterization: rules of the sign-up command (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/dawnrock/ddd/application/SignUpCommandTests.java`
@@ -44,7 +44,7 @@ The PMD baseline (#168, ADR 0020) flags `CyclomaticComplexity` 11 in `OpenAccoun
   1. One test per rule with its exact message: blank full name, malformed document, malformed e-mail, malformed username, non-ISO currency, initial deposit that rounds to zero or is above the maximum; and a valid command builds with `EUR` by default.
   2. They pass at once (characterization): break each rule temporarily in `SignUpCommandDef` to see the red, then revert.
 - **Acceptance criteria:**
-  - [ ] Every rule of `SignUpCommandDef.validate()` has a test with its message; sabotage seen red and reverted.
+  - [x] Every rule of `SignUpCommandDef.validate()` has a test with its message; sabotage seen red and reverted (each rule broken alone fails all its tests).
 
 ### [ ] T2 — Characterization: order of the rules (~5 min)
 
