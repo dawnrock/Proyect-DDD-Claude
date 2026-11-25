@@ -1,6 +1,5 @@
 package com.dawnrock.ddd.application;
 
-import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,9 +16,6 @@ import com.dawnrock.ddd.domain.model.DuplicateAccountNumberException;
 import com.dawnrock.ddd.domain.model.DuplicateCustomerException;
 import com.dawnrock.ddd.domain.model.EmailAddress;
 import com.dawnrock.ddd.domain.model.TaxId;
-import com.dawnrock.ddd.domain.model.Transaction;
-import com.dawnrock.ddd.domain.service.MoneyTransferService;
-import com.dawnrock.ddd.domain.service.SegmentReviewService;
 
 /**
  * Casos de uso de las cuentas corrientes: abrir, consultar, listar, ingresar, retirar y transferir. Carga y guarda el
@@ -45,30 +41,25 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
     private final CheckingAccountRepository repository;
     private final AccountOwnershipRepository ownership;
     private final CheckingAccountFactory factory;
-    private final MoneyTransferService transferService;
     private final UnitOfWork unitOfWork;
     private final AccountUnitOfWork accountUnit;
     private final AccountAccess access;
     private final UsernameAvailability usernames;
-    private final DueSegmentReview dueSegmentReview;
     private final CustomerRepository customers;
     private final CustomerOwnershipRepository customerOwnership;
 
     /** Recibe sus colaboradores ya construidos: los entrega {@code config.DomainConfiguration} (#20). */
     public CheckingAccountService(CheckingAccountRepository repository, AccountOwnershipRepository ownership,
                                   DomainEventPublisher publisher, CheckingAccountFactory factory,
-                                  MoneyTransferService transferService, SegmentReviewService segmentReview,
-                                  Clock clock, UnitOfWork unitOfWork, CustomerRepository customers,
+                                  UnitOfWork unitOfWork, CustomerRepository customers,
                                   CustomerOwnershipRepository customerOwnership) {
         this.repository = repository;
         this.ownership = ownership;
         this.factory = factory;
-        this.transferService = transferService;
         this.unitOfWork = unitOfWork;
         this.accountUnit = new AccountUnitOfWork(unitOfWork, repository, publisher);
         this.access = new AccountAccess(repository, ownership);
         this.usernames = new UsernameAvailability(customerOwnership, ownership);
-        this.dueSegmentReview = new DueSegmentReview(segmentReview, clock);
         this.customers = customers;
         this.customerOwnership = customerOwnership;
     }
@@ -224,54 +215,6 @@ public class CheckingAccountService implements CheckingAccountCommands, Checking
             CheckingAccount account = access.loadFor(caller, id);
             return AccountViews.toDetails(account, holderEmail(account));
         });
-    }
-
-    @Override
-    public TransactionSummary deposit(Caller caller, DepositCommand command) {
-        return accountUnit.execute(changes -> {
-            CheckingAccount account = access.loadFor(caller, command.accountId());
-            Transaction transaction = account.deposit(AccountViews.toAmount(command.amount(), command.currency()));
-            changes.save(account);
-            return AccountViews.toTransaction(transaction);
-        });
-    }
-
-    @Override
-    public TransactionSummary withdraw(Caller caller, WithdrawCommand command) {
-        reviewSegmentBeforeDebit(caller, command.accountId());
-        return accountUnit.execute(changes -> {
-            CheckingAccount account = access.loadFor(caller, command.accountId());
-            Transaction transaction = account.tryWithdraw(AccountViews.toAmount(command.amount(), command.currency()));
-            changes.save(account);
-            return AccountViews.toTransaction(transaction);
-        });
-    }
-
-    @Override
-    public TransferSummary transfer(Caller caller, TransferCommand command) {
-        reviewSegmentBeforeDebit(caller, command.sourceAccountId());
-        return accountUnit.execute(changes -> transfer(caller, command, changes));
-    }
-
-    private TransferSummary transfer(Caller caller, TransferCommand command, AccountChanges changes) {
-        CheckingAccount source = access.loadFor(caller, command.sourceAccountId());
-        AccountNumber targetNumber = new AccountNumber(command.targetAccountNumber());
-        CheckingAccount target = repository.findByAccountNumber(targetNumber)
-                .orElseThrow(() -> new TargetAccountNotFoundException(targetNumber.value()));
-        Transaction withdrawal =
-                transferService.transfer(source, target, AccountViews.toAmount(command.amount(), command.currency()));
-        changes.save(source);
-        changes.save(target);
-        return AccountViews.toTransfer(source, target, withdrawal);
-    }
-
-    /**
-     * Revisa el segmento de la cuenta antes de un cargo, en su propia unidad de trabajo: así el descubierto se decide
-     * con el segmento que corresponde hoy y, si el cargo falla después, la revisión ya está guardada y su evento
-     * publicado.
-     */
-    private void reviewSegmentBeforeDebit(Caller caller, UUID accountId) {
-        accountUnit.execute(changes -> dueSegmentReview.reviewIfDue(access.loadFor(caller, accountId), changes));
     }
 
     private String holderEmail(CheckingAccount account) {

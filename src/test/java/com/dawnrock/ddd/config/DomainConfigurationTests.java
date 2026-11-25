@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
 import com.dawnrock.ddd.application.CheckingAccountCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.SegmentReviewCommands;
 import com.dawnrock.ddd.application.listener.AuditLogListener;
 import com.dawnrock.ddd.application.listener.CustomerNotificationListener;
@@ -61,11 +62,21 @@ class DomainConfigurationTests {
 
         Object service = configuration.checkingAccountService(PersistenceTestAdapters.accounts(),
                 PersistenceTestAdapters.ownership(), mock(DomainEventPublisher.class), factory,
-                configuration.moneyTransferService(), configuration.segmentReviewService(taxId -> Optional.empty()),
-                configuration.clock(), PersistenceTestAdapters.unitOfWork(), PersistenceTestAdapters.customers(),
+                PersistenceTestAdapters.unitOfWork(), PersistenceTestAdapters.customers(),
                 PersistenceTestAdapters.customerOwnership());
 
         assertThat(service).isInstanceOf(CheckingAccountCommands.class).isInstanceOf(CheckingAccountQueries.class);
+    }
+
+    @Test
+    @DisplayName("Construye los movimientos de dinero, que ofrecen su puerto de entrada")
+    void buildsTheMoneyMovementsWithTheirInputPort() {
+        Object service = configuration.moneyMovementService(PersistenceTestAdapters.accounts(),
+                PersistenceTestAdapters.ownership(), mock(DomainEventPublisher.class),
+                configuration.moneyTransferService(), configuration.segmentReviewService(taxId -> Optional.empty()),
+                configuration.clock(), PersistenceTestAdapters.unitOfWork());
+
+        assertThat(service).isInstanceOf(MoneyMovementCommands.class);
     }
 
     @Test

@@ -19,6 +19,7 @@ import com.dawnrock.ddd.application.AccountDetails;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.CheckingAccountCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.DepositCommand;
 import com.dawnrock.ddd.application.OpenAccountCommand;
 import com.dawnrock.ddd.application.TransactionSummary;
@@ -30,7 +31,7 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * API REST de cuentas: {@code /api/accounts}. Mapea la petición a un command, delega en los puertos de entrada
- * {@link CheckingAccountCommands} y {@link CheckingAccountQueries} y convierte las vistas de aplicación en DTOs de
+ * {@link CheckingAccountCommands}, {@link MoneyMovementCommands} y {@link CheckingAccountQueries} y convierte las vistas de aplicación en DTOs de
  * respuesta. Los errores los traduce {@link RestExceptionHandler}. Contrato: {@code docs/contracts/open-query-list-accounts.md}.
  */
 @RestController
@@ -39,6 +40,8 @@ import lombok.RequiredArgsConstructor;
 public class AccountController {
 
     private final CheckingAccountCommands commands;
+
+    private final MoneyMovementCommands movements;
 
     private final CheckingAccountQueries queries;
 
@@ -82,7 +85,7 @@ public class AccountController {
         if (request.currency() != null) {
             command.currency(request.currency());
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(commands.deposit(CurrentCaller.from(authentication), command.build())));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(movements.deposit(CurrentCaller.from(authentication), command.build())));
     }
 
     @PostMapping("/{id}/withdrawals")
@@ -92,7 +95,7 @@ public class AccountController {
         if (request.currency() != null) {
             command.currency(request.currency());
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(commands.withdraw(CurrentCaller.from(authentication), command.build())));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(movements.withdraw(CurrentCaller.from(authentication), command.build())));
     }
 
     static AccountSummaryResponse toResponse(AccountSummary summary) {

@@ -38,6 +38,7 @@ import com.dawnrock.ddd.application.AccountDetails;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
 import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
 import com.dawnrock.ddd.application.NotACustomerException;
 import com.dawnrock.ddd.application.OpenAnotherAccountCommand;
@@ -62,6 +63,9 @@ class AnotherAccountWebTests {
 
     @MockitoBean
     private CheckingAccountCommands commands;
+
+    @MockitoBean
+    private MoneyMovementCommands movements;
 
     @MockitoBean
     private CheckingAccountQueries queries;
@@ -195,7 +199,7 @@ class AnotherAccountWebTests {
             mvc.perform(post("/accounts/another").param("initialDeposit", "100.00"))
                     .andExpect(status().isForbidden());
 
-            verifyNoInteractions(commands, queries);
+            verifyNoInteractions(commands, movements, queries);
         }
 
         @Test
@@ -209,7 +213,7 @@ class AnotherAccountWebTests {
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("El depósito inicial debe ser positivo")));
 
-            verifyNoInteractions(commands, queries);
+            verifyNoInteractions(commands, movements, queries);
         }
 
         @Test

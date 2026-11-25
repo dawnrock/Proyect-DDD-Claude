@@ -42,6 +42,7 @@ import com.dawnrock.ddd.application.AccountDetails;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
 import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
 import com.dawnrock.ddd.application.SignUpCommand;
 import com.dawnrock.ddd.domain.model.CurrencyMismatchException;
@@ -69,6 +70,9 @@ class SignUpControllerTests {
 
     @MockitoBean
     private CheckingAccountCommands commands;
+
+    @MockitoBean
+    private MoneyMovementCommands movements;
 
     @MockitoBean
     private CheckingAccountQueries queries;

@@ -134,7 +134,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
 - **Acceptance criteria:**
   - [x] Scheduler and segment review tests pass against the new port; `./mvnw verify` green. (test helpers shared in ServiceTestSupport so CPD finds no duplication; DomainConfigurationTests checks the new bean; 1,039 test cases green)
 
-### [ ] T7 — `MoneyMovementCommands` and `MoneyMovementService` (~15 min)
+### [x] T7 — `MoneyMovementCommands` and `MoneyMovementService` (~15 min)
 
 - **Layer:** application · adapter.in · config
 - **Files:** `MoneyMovementCommands.java`, `MoneyMovementService.java` (new), `CheckingAccountCommands.java`, `CheckingAccountService.java`, `rest.AccountController`, `rest.TransferController`, `web.AccountWebController`, `cli.DomainModelRunner`, `DomainConfiguration.java`, their tests; `MoneyMovementServiceTests.java` and `MoneyMovementServiceConcurrencyTests.java` (moved)
@@ -144,7 +144,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
   2. New service: segment review before a debit in its own unit (unchanged), then the movement in another.
   3. Adapters and their `@MockitoBean`s use the new port; move the deposit, withdrawal and transfer tests and the concurrency test.
 - **Acceptance criteria:**
-  - [ ] Movement, transfer, concurrency, REST and web tests pass against the new port; `./mvnw verify` green.
+  - [x] Movement, transfer, concurrency, REST and web tests pass against the new port; `./mvnw verify` green. (PMD found coupling 21 in MoneyMovementService: the target account lookup moved to AccountAccess.loadTarget; 1,042 test cases green)
 
 ### [ ] T8 — `AccountOpeningCommands` and `AccountOpeningService` (~15 min)
 

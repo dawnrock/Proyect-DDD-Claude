@@ -29,12 +29,15 @@ class CheckingAccountServiceOwnershipTests {
     private CheckingAccountRepository accounts;
     private AccountOwnershipRepository owners;
     private CheckingAccountService service;
+    private MoneyMovementCommands movements;
 
     @BeforeEach
     void setUp() {
         accounts = PersistenceTestAdapters.accounts();
         owners = PersistenceTestAdapters.ownership();
-        service = ApplicationServicesFixture.builder().accounts(accounts).ownership(owners).build().service();
+        ApplicationServicesFixture fixture = ApplicationServicesFixture.builder().accounts(accounts).ownership(owners).build();
+        service = fixture.service();
+        movements = fixture.moneyMovementService();
     }
 
     /** Un cliente por propietario: cada usuario es de un único cliente (R30). */
@@ -217,9 +220,9 @@ class CheckingAccountServiceOwnershipTests {
         void theSystemCallerOperatesOtherUsersAccounts() {
             Caller system = CallerDef.system();
 
-            service.deposit(system, deposit(adas));
-            service.withdraw(system, withdraw(graces));
-            service.transfer(system, transfer(adas, graces.accountNumber()));
+            movements.deposit(system, deposit(adas));
+            movements.withdraw(system, withdraw(graces));
+            movements.transfer(system, transfer(adas, graces.accountNumber()));
 
             assertThat(balanceOf(adas)).isEqualByComparingTo("500.00");
             assertThat(balanceOf(graces)).isEqualByComparingTo("500.00");
@@ -228,22 +231,22 @@ class CheckingAccountServiceOwnershipTests {
         @Test
         @DisplayName("Un usuario ingresa en su cuenta")
         void aUserDepositsIntoTheirAccount() {
-            assertThat(service.deposit(ADA, deposit(adas)).status()).isEqualTo("APPROVED");
+            assertThat(movements.deposit(ADA, deposit(adas)).status()).isEqualTo("APPROVED");
             assertThat(balanceOf(adas)).isEqualByComparingTo("600.00");
         }
 
         @Test
         @DisplayName("Un usuario retira de su cuenta")
         void aUserWithdrawsFromTheirAccount() {
-            assertThat(service.withdraw(ADA, withdraw(adas)).status()).isEqualTo("APPROVED");
+            assertThat(movements.withdraw(ADA, withdraw(adas)).status()).isEqualTo("APPROVED");
             assertThat(balanceOf(adas)).isEqualByComparingTo("400.00");
         }
 
         @Test
         @DisplayName("Un administrador opera en cualquier cuenta, también sin propietario")
         void anAdministratorOperatesOnAnyAccount() {
-            service.deposit(ADMIN, deposit(graces));
-            service.withdraw(ADMIN, withdraw(orphan));
+            movements.deposit(ADMIN, deposit(graces));
+            movements.withdraw(ADMIN, withdraw(orphan));
 
             assertThat(balanceOf(graces)).isEqualByComparingTo("600.00");
             assertThat(balanceOf(orphan)).isEqualByComparingTo("400.00");
@@ -253,7 +256,7 @@ class CheckingAccountServiceOwnershipTests {
         @DisplayName("Ingresar en una cuenta ajena lanza AccountNotFoundException y no cambia el saldo")
         void depositingIntoAnotherUsersAccountThrowsAccountNotFoundException() {
             assertThatExceptionOfType(AccountNotFoundException.class)
-                    .isThrownBy(() -> service.deposit(ADA, deposit(graces)));
+                    .isThrownBy(() -> movements.deposit(ADA, deposit(graces)));
             assertThat(balanceOf(graces)).isEqualByComparingTo("500.00");
         }
 
@@ -261,9 +264,9 @@ class CheckingAccountServiceOwnershipTests {
         @DisplayName("Retirar de una cuenta ajena o sin propietario lanza AccountNotFoundException")
         void withdrawingFromAnotherUsersAccountThrowsAccountNotFoundException() {
             assertThatExceptionOfType(AccountNotFoundException.class)
-                    .isThrownBy(() -> service.withdraw(ADA, withdraw(graces)));
+                    .isThrownBy(() -> movements.withdraw(ADA, withdraw(graces)));
             assertThatExceptionOfType(AccountNotFoundException.class)
-                    .isThrownBy(() -> service.withdraw(ADA, withdraw(orphan)));
+                    .isThrownBy(() -> movements.withdraw(ADA, withdraw(orphan)));
             assertThat(balanceOf(graces)).isEqualByComparingTo("500.00");
             assertThat(balanceOf(orphan)).isEqualByComparingTo("500.00");
         }
@@ -271,7 +274,7 @@ class CheckingAccountServiceOwnershipTests {
         @Test
         @DisplayName("Un usuario transfiere de su cuenta al IBAN de otro cliente, escrito con espacios y minúsculas")
         void aUserTransfersToAnotherCustomersIban() {
-            TransferSummary summary = service.transfer(ADA, transfer(adas, spaced(graces.accountNumber())));
+            TransferSummary summary = movements.transfer(ADA, transfer(adas, spaced(graces.accountNumber())));
 
             assertThat(summary.status()).isEqualTo("APPROVED");
             assertThat(summary.targetAccountNumber()).isEqualTo(graces.accountNumber());
@@ -282,14 +285,14 @@ class CheckingAccountServiceOwnershipTests {
         @Test
         @DisplayName("Un administrador transfiere desde cualquier cuenta")
         void anAdministratorTransfersFromAnyAccount() {
-            assertThat(service.transfer(ADMIN, transfer(graces, adas.accountNumber())).status()).isEqualTo("APPROVED");
+            assertThat(movements.transfer(ADMIN, transfer(graces, adas.accountNumber())).status()).isEqualTo("APPROVED");
         }
 
         @Test
         @DisplayName("Transferir desde una cuenta ajena lanza AccountNotFoundException y no mueve dinero")
         void transferringFromAnotherUsersAccountThrowsAccountNotFoundException() {
             assertThatExceptionOfType(AccountNotFoundException.class)
-                    .isThrownBy(() -> service.transfer(ADA, transfer(graces, adas.accountNumber())));
+                    .isThrownBy(() -> movements.transfer(ADA, transfer(graces, adas.accountNumber())));
             assertThat(balanceOf(adas)).isEqualByComparingTo("500.00");
             assertThat(balanceOf(graces)).isEqualByComparingTo("500.00");
         }
@@ -298,7 +301,7 @@ class CheckingAccountServiceOwnershipTests {
         @DisplayName("Transferir a un IBAN inexistente lanza TargetAccountNotFoundException y no mueve dinero")
         void transferringToAMissingIbanThrowsTargetAccountNotFoundException() {
             assertThatExceptionOfType(TargetAccountNotFoundException.class)
-                    .isThrownBy(() -> service.transfer(ADA, transfer(adas, "ES1000000000000000000001")))
+                    .isThrownBy(() -> movements.transfer(ADA, transfer(adas, "ES1000000000000000000001")))
                     .withMessageContaining("ES1000000000000000000001");
             assertThat(balanceOf(adas)).isEqualByComparingTo("500.00");
         }
@@ -307,7 +310,7 @@ class CheckingAccountServiceOwnershipTests {
         @DisplayName("Con origen ajeno y destino inexistente gana el origen: AccountNotFoundException")
         void withAForeignSourceAndAMissingTargetTheSourceErrorWins() {
             assertThatExceptionOfType(AccountNotFoundException.class)
-                    .isThrownBy(() -> service.transfer(ADA, transfer(graces, "ES1000000000000000000001")))
+                    .isThrownBy(() -> movements.transfer(ADA, transfer(graces, "ES1000000000000000000001")))
                     .isNotInstanceOf(TargetAccountNotFoundException.class);
         }
 
@@ -315,7 +318,7 @@ class CheckingAccountServiceOwnershipTests {
         @DisplayName("Transferir a la propia cuenta sigue siendo una regla del dominio")
         void transferringToTheSameAccountIsStillADomainRule() {
             assertThatExceptionOfType(com.dawnrock.ddd.domain.model.SameAccountTransferException.class)
-                    .isThrownBy(() -> service.transfer(ADA, transfer(adas, adas.accountNumber())));
+                    .isThrownBy(() -> movements.transfer(ADA, transfer(adas, adas.accountNumber())));
         }
     }
 }

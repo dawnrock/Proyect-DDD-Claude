@@ -10,6 +10,7 @@ import com.dawnrock.ddd.application.AccountOwnershipRepository;
 import com.dawnrock.ddd.application.AccountSegmentReviewService;
 import com.dawnrock.ddd.application.CheckingAccountService;
 import com.dawnrock.ddd.application.CustomerOwnershipRepository;
+import com.dawnrock.ddd.application.MoneyMovementService;
 import com.dawnrock.ddd.application.UnitOfWork;
 import com.dawnrock.ddd.domain.model.CheckingAccountFactory;
 import com.dawnrock.ddd.domain.model.CheckingAccountRepository;
@@ -54,8 +55,14 @@ public final class ApplicationServicesFixture {
 
     /** El servicio de aplicación con estos colaboradores. */
     public CheckingAccountService service() {
-        return new CheckingAccountService(accounts, ownership, publisher, factory, new MoneyTransferService(),
-                segmentReview, clock, unitOfWork, customers, customerOwnership);
+        return new CheckingAccountService(accounts, ownership, publisher, factory, unitOfWork, customers,
+                customerOwnership);
+    }
+
+    /** Ingresos, retiradas y transferencias sobre los mismos colaboradores. */
+    public MoneyMovementService moneyMovementService() {
+        return new MoneyMovementService(accounts, ownership, publisher, new MoneyTransferService(), segmentReview, clock,
+                unitOfWork);
     }
 
     /** La revisión periódica de segmentos sobre los mismos colaboradores. */

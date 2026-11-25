@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.TransferCommand;
 import com.dawnrock.ddd.application.TransferSummary;
 import com.dawnrock.ddd.adapter.in.CurrentCaller;
@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TransferController {
 
-    private final CheckingAccountCommands commands;
+    private final MoneyMovementCommands movements;
 
     @PostMapping
     public ResponseEntity<TransferResponse> transfer(
@@ -38,7 +38,7 @@ public class TransferController {
         if (request.currency() != null) {
             command.currency(request.currency());
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(commands.transfer(CurrentCaller.from(authentication), command.build())));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(movements.transfer(CurrentCaller.from(authentication), command.build())));
     }
 
     private static TransferResponse toResponse(TransferSummary transfer) {

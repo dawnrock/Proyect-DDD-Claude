@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import com.dawnrock.ddd.application.CheckingAccountCommands;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
 import com.dawnrock.ddd.adapter.in.SecuritySupport;
 import com.dawnrock.ddd.adapter.in.TestUsers;
@@ -49,6 +50,9 @@ class WebSecurityTests {
 
     @MockitoBean
     private CheckingAccountCommands commands;
+
+    @MockitoBean
+    private MoneyMovementCommands movements;
 
     @MockitoBean
     private CheckingAccountQueries queries;
@@ -87,7 +91,7 @@ class WebSecurityTests {
                 .andExpect(status().isUnauthorized())
                 .andExpect(header().string("HX-Redirect", "/login"));
 
-        verifyNoInteractions(commands, queries);
+        verifyNoInteractions(commands, movements, queries);
     }
 
     @Test
@@ -109,7 +113,7 @@ class WebSecurityTests {
                 .andExpect(status().isForbidden())
                 .andExpect(header().doesNotExist("HX-Redirect"));
 
-        verifyNoInteractions(commands, queries);
+        verifyNoInteractions(commands, movements, queries);
     }
 
     @Test

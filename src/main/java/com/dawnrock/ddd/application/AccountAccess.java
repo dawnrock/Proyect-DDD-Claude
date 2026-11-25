@@ -2,6 +2,7 @@ package com.dawnrock.ddd.application;
 
 import java.util.UUID;
 
+import com.dawnrock.ddd.domain.model.AccountNumber;
 import com.dawnrock.ddd.domain.model.CheckingAccount;
 import com.dawnrock.ddd.domain.model.CheckingAccountRepository;
 
@@ -33,6 +34,18 @@ final class AccountAccess {
             throw new AccountNotFoundException(id);
         }
         return account;
+    }
+
+    /**
+     * La cuenta de destino de una transferencia, por su número (que se normaliza como {@link AccountNumber}). Cualquier
+     * cuenta existente puede recibir una transferencia, sea de quien sea.
+     *
+     * @throws TargetAccountNotFoundException si no existe ninguna cuenta con ese número
+     */
+    CheckingAccount loadTarget(String accountNumber) {
+        AccountNumber targetNumber = new AccountNumber(accountNumber);
+        return repository.findByAccountNumber(targetNumber)
+                .orElseThrow(() -> new TargetAccountNotFoundException(targetNumber.value()));
     }
 
     boolean canAccess(Caller caller, UUID accountId) {

@@ -13,6 +13,7 @@ import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.CallerDef;
 import com.dawnrock.ddd.application.CheckingAccountCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.DepositCommand;
 import com.dawnrock.ddd.application.OpenAccountCommand;
 import com.dawnrock.ddd.application.TransactionSummary;
@@ -26,9 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Adaptador de entrada de línea de comandos (#19): al arrancar con el perfil {@code demo}, que
  * {@code ./mvnw spring-boot:run} activa por defecto, abre las cuentas de demostración para poder probar la aplicación
- * sin preparar datos. Como la API REST y la web, solo usa los puertos de entrada {@link CheckingAccountCommands} y
- * {@link CheckingAccountQueries}: los
- * datos cumplen las mismas reglas que los reales (el IBAN lo genera la numeración y el segmento lo decide la agencia
+ * sin preparar datos. Como la API REST y la web, solo usa los puertos de entrada {@link CheckingAccountCommands},
+ * {@link MoneyMovementCommands} y {@link CheckingAccountQueries}: los datos cumplen las mismas reglas que los reales (el IBAN lo genera la numeración y el segmento lo decide la agencia
  * tributaria a partir del NIF; Grace Hopper es de alto patrimonio por sus ingresos verificados). Si ya hay cuentas
  * (la base persiste entre arranques, #150), no carga nada. Los tests no lo cargan.
  */
@@ -44,6 +44,7 @@ public class DomainModelRunner implements ApplicationRunner {
             account("Alan Turing", "11111111H", "alan@example.com", "250.00", "alan"));
 
     private final CheckingAccountCommands commands;
+    private final MoneyMovementCommands movements;
     private final CheckingAccountQueries queries;
 
     /**
@@ -79,21 +80,21 @@ public class DomainModelRunner implements ApplicationRunner {
     }
 
     private void deposit(AccountSummary account, String amount) {
-        TransactionSummary deposit = commands.deposit(CallerDef.system(),
+        TransactionSummary deposit = movements.deposit(CallerDef.system(),
                 DepositCommand.builder().accountId(account.id()).amount(new BigDecimal(amount)).build());
         log.info("[demo] Ingresar · {} · {} {} · {}", account.accountNumber(), deposit.amount(), deposit.currency(),
                 deposit.approved() ? "aprobado" : "rechazado");
     }
 
     private void withdraw(AccountSummary account, String amount) {
-        TransactionSummary withdrawal = commands.withdraw(CallerDef.system(),
+        TransactionSummary withdrawal = movements.withdraw(CallerDef.system(),
                 WithdrawCommand.builder().accountId(account.id()).amount(new BigDecimal(amount)).build());
         log.info("[demo] Retirar · {} · {} {} · {}", account.accountNumber(), withdrawal.amount(),
                 withdrawal.currency(), withdrawal.approved() ? "aprobada" : "rechazada");
     }
 
     private void transfer(AccountSummary source, AccountSummary target, String amount) {
-        TransferSummary transfer = commands.transfer(CallerDef.system(), TransferCommand.builder()
+        TransferSummary transfer = movements.transfer(CallerDef.system(), TransferCommand.builder()
                 .sourceAccountId(source.id())
                 .targetAccountNumber(target.accountNumber())
                 .amount(new BigDecimal(amount))
