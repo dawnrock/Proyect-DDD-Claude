@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-25
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~110 min (14 tasks)
 
 ## Goal
@@ -66,7 +66,7 @@
 
 ## Tasks
 
-### [ ] T1 — Baseline (~5 min)
+### [x] T1 — Baseline (~5 min)
 
 - **Layer:** tests
 - **Files:** — (scratchpad only)
@@ -75,7 +75,7 @@
   1. `./mvnw clean verify` green; record the unique test cases (class + method) of the web tests.
   2. `./mvnw pmd:pmd -Dpmd.baseline=`: record WMC and coupling of `AccountWebController`.
 - **Acceptance criteria:**
-  - [ ] Test cases and PMD metrics recorded.
+  - [x] Test cases and PMD metrics recorded. (./mvnw clean verify green: 1,049 unique test cases; PMD on AccountWebController: WMC 58, ATFD 28, TCC 11.1 %, coupling 28)
 
 ### [ ] T2 — Base class for the account web tests (~10 min)
 
