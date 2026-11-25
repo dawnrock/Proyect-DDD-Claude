@@ -98,7 +98,7 @@ Decisions taken in this plan:
   - [x] The SVGs open in a browser and match `docs/brand/prototypes/logo.html` (screenshot side by side shown to the user).
   - [x] Re-running the script produces the same files (deterministic).
 
-### [ ] T5 — `/brand/**` public (~5 min)
+### [x] T5 — `/brand/**` public (~5 min)
 
 - **Layer:** adapter.in.web
 - **Files:** `WebSecurityConfig`, `WebSecurityTests`
@@ -107,7 +107,7 @@ Decisions taken in this plan:
   1. Test: `GET /brand/favicon.svg` and `/brand/monabank-horizontal.svg` without a session answer 200 `image/svg+xml`.
   2. Add `/brand/**` to the public matchers and to the class Javadoc.
 - **Acceptance criteria:**
-  - [ ] The test passes; other public/private rules unchanged.
+  - [x] The test passes; other public/private rules unchanged.
 
 ### [ ] T6 — Header logo, favicon and page title (~10 min)
 

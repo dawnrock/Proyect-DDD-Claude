@@ -146,6 +146,15 @@ class WebSecurityTests {
                 .andExpect(content().contentType("font/woff2"));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"/brand/favicon.svg", "/brand/monabank-horizontal.svg", "/brand/monabank-stacked.svg"})
+    @DisplayName("Los logos de monA Bank se sirven sin sesión como imágenes SVG (#178)")
+    void theBrandLogosAreServedWithoutSessionAsSvg(String path) throws Exception {
+        mvc.perform(get(path))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("image/svg+xml"));
+    }
+
     @Test
     @DisplayName("Las librerías del frontend se guardan en caché un año y las páginas no se guardan (#124)")
     void frontendLibrariesAreCachedAndPagesAreNot() throws Exception {
