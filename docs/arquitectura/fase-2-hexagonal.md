@@ -123,6 +123,7 @@ State at the end of the phase: adapters behind input and output ports, domain ev
 | `NotFoundException`, `AccountNotFoundException`, `TargetAccountNotFoundException`, `ForbiddenOperationException`, `OperationNotAllowedException`, `NotACustomerException` | `application` | Application errors |
 | `DomainModelRunner` | `adapter.in.cli` | Input adapter (CLI): with the `demo` profile, opens the demo accounts and runs a deposit, two withdrawals (approved and rejected) and a transfer through `AccountOpeningCommands` and `MoneyMovementCommands`, with a `[demo]` trace per use case |
 | `CheckingAccount` | `domain.model` | Aggregate root; records its domain events (`pullDomainEvents`); `open` is package-private, used only by the factory |
+| `TransactionHistory`, `AccountSegment` | `domain.model` | Package-private parts of the aggregate (#182): its transactions with the check of a stored account, and what the holder's segment means for the account (overdraft, promotion, segment review) |
 | `CheckingAccountFactory` | `domain.model` | Factory: number + segment from the verified income (R20), also for a registered customer (#103); built in `config` |
 | `Customer` | `domain.model` | Aggregate (#103): a monA Bank customer, identified by their document, with name and e-mail |
 | `SegmentReviewService` | `domain.service` | Domain service (#98): when the segment review of an account is due, verifies the income again through the `IncomeVerifier` port and tells the aggregate the result; built in `config` |

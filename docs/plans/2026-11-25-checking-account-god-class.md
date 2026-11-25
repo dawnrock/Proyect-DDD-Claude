@@ -104,7 +104,7 @@ Both new classes are package-private: only the aggregate uses them, so the hexag
 - **Acceptance criteria:**
   - [x] All tests green without changes (domain, `SegmentReviewServiceTests`, persistence and end-to-end). PMD without baseline: no warning in the whole project.
 
-### [ ] T6 — Out of the PMD baseline, glossary and project status (~10 min)
+### [x] T6 — Out of the PMD baseline, glossary and project status (~10 min)
 
 - **Layer:** build · docs
 - **Files:** `pmd-baseline.properties`, `docs/dominio/glosario.md`, `docs/arquitectura/fase-2-hexagonal.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -114,7 +114,7 @@ Both new classes are package-private: only the aggregate uses them, so the hexag
   2. Glossary: «Transaction history» and «Account segment» rows; `OVERDRAFT_LIMIT`, `SEGMENT_GRACE_PERIOD` and the minimum net worth point at `AccountSegment`. Architecture: the two classes in the domain table.
   3. Status files: issue done, the PMD baseline pending item resolved (the baseline is empty), history row; next step OAuth / Auth0.
 - **Acceptance criteria:**
-  - [ ] `pmd-baseline.properties` has no entries and `./mvnw verify` is green; glossary and architecture up to date.
+  - [x] `pmd-baseline.properties` has no entries and `./mvnw verify` is green (sabotage: with today's `CheckingAccount` PMD fails with both rules); glossary, architecture, ADR 0020 and decisions up to date.
 
 ## Global acceptance criteria
 
