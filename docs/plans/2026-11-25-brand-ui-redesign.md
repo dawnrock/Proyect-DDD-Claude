@@ -191,7 +191,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
 - **Acceptance criteria:**
   - [x] The new tests and the existing transaction tests pass.
 
-### [ ] T13 — Post-operation animation selectors (~5 min)
+### [x] T13 — Post-operation animation selectors (~5 min)
 
 - **Layer:** adapter.in (static)
 - **Files:** `static/js/app.js`
@@ -200,7 +200,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
   1. `.display-5` → `.balance`, `.list-group-item` → `.movement`.
   2. Check by hand: after a deposit with htmx, the balance and the new row animate; with reduced motion, nothing moves.
 - **Acceptance criteria:**
-  - [ ] Checked in the browser (Playwright, `reducedMotion` on and off).
+  - [x] Checked in the browser (Playwright, `reducedMotion` on and off): after a deposit with htmx, Motion animates `.balance` and `.movement`; with reduced motion, nothing.
 
 ### [ ] T14 — Remaining screens (~10 min)
 

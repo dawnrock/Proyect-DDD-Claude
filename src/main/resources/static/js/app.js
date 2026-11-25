@@ -53,11 +53,11 @@
         if (!panel.querySelector('.alert-success, .alert-warning')) {
             return;
         }
-        const balance = panel.querySelector('.display-5');
+        const balance = panel.querySelector('.balance');
         if (balance) {
             Motion.animate(balance, { scale: [0.92, 1], opacity: [0.4, 1] }, { duration: 0.4, ease: 'easeOut' });
         }
-        const newest = panel.querySelector('.list-group-item');
+        const newest = panel.querySelector('.movement');
         if (newest) {
             Motion.animate(newest, { opacity: [0, 1], x: [-12, 0] }, { duration: 0.35, delay: 0.1, ease: 'easeOut' });
         }
