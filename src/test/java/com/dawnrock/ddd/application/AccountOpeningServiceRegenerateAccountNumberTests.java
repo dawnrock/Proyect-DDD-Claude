@@ -25,7 +25,7 @@ class AccountOpeningServiceRegenerateAccountNumberTests {
     private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
 
     private CheckingAccountRepository accounts;
-    private CheckingAccountService service;
+    private CheckingAccountQueryService service;
     private AccountOpeningCommands opening;
     private AccountSummary account;
 
@@ -33,7 +33,7 @@ class AccountOpeningServiceRegenerateAccountNumberTests {
     void setUp() {
         accounts = PersistenceTestAdapters.accounts();
         ApplicationServicesFixture fixture = ApplicationServicesFixture.builder().accounts(accounts).build();
-        service = fixture.service();
+        service = fixture.queryService();
         opening = fixture.accountOpeningService();
         account = opening.signUp(SignUpCommand.builder().fullName("Ada Lovelace").taxId("12345678Z")
                 .email("ada@example.com").username("ada").initialDeposit(new BigDecimal("1000")).build());

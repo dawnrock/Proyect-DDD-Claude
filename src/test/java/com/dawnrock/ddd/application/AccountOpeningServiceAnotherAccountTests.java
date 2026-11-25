@@ -25,7 +25,7 @@ class AccountOpeningServiceAnotherAccountTests {
     private static final Caller GRACE = Caller.builder().username("grace").admin(false).build();
 
     private CheckingAccountRepository accounts;
-    private CheckingAccountService service;
+    private CheckingAccountQueryService service;
     private AccountOpeningCommands opening;
     private AccountSummary first;
 
@@ -33,7 +33,7 @@ class AccountOpeningServiceAnotherAccountTests {
     void setUp() {
         accounts = PersistenceTestAdapters.accounts();
         ApplicationServicesFixture fixture = ApplicationServicesFixture.builder().accounts(accounts).build();
-        service = fixture.service();
+        service = fixture.queryService();
         opening = fixture.accountOpeningService();
         first = opening.signUp(SignUpCommand.builder().fullName("Ada Lovelace").taxId("12345678Z")
                 .email("ada@example.com").username("ada").initialDeposit(new BigDecimal("1000")).build());

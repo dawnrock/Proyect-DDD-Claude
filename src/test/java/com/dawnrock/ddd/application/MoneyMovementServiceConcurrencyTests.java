@@ -52,7 +52,7 @@ class MoneyMovementServiceConcurrencyTests {
 
     private void runRound() throws Exception {
         ApplicationServicesFixture services = newServices();
-        CheckingAccountService service = services.service();
+        CheckingAccountQueryService service = services.queryService();
         AccountSummary ada = open(services.accountOpeningService(), "Ada Lovelace", "12345678Z", "ada");
         AccountSummary alan = open(services.accountOpeningService(), "Alan Turing", "11111111H", "alan");
 
@@ -89,7 +89,7 @@ class MoneyMovementServiceConcurrencyTests {
         }
     }
 
-    private static void assertBalancesAndTransactions(CheckingAccountService service, AccountSummary ada,
+    private static void assertBalancesAndTransactions(CheckingAccountQueryService service, AccountSummary ada,
                                                       AccountSummary alan) {
         int operations = THREADS * OPERATIONS_PER_THREAD;
         AccountDetails adaDetails = service.findAccount(ADMIN, ada.id());

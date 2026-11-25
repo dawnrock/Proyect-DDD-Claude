@@ -28,7 +28,7 @@ class AccountOpeningServiceSignUpTests {
     private AccountOwnershipRepository owners;
     private CustomerRepository customers;
     private CustomerOwnershipRepository customerOwners;
-    private CheckingAccountService service;
+    private CheckingAccountQueryService service;
     private AccountOpeningCommands opening;
 
     @BeforeEach
@@ -43,7 +43,7 @@ class AccountOpeningServiceSignUpTests {
                 .customers(customers)
                 .customerOwnership(customerOwners)
                 .build();
-        service = fixture.service();
+        service = fixture.queryService();
         opening = fixture.accountOpeningService();
     }
 

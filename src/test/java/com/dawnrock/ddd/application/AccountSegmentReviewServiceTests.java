@@ -28,7 +28,7 @@ class AccountSegmentReviewServiceTests {
 
     private final MutableClock clock = new MutableClock();
     private final DomainEventPublisher publisher = mock(DomainEventPublisher.class);
-    private CheckingAccountService service;
+    private CheckingAccountQueryService service;
     private AccountOpeningCommands opening;
     private SegmentReviewCommands segmentReview;
     private MoneyMovementCommands movements;
@@ -42,7 +42,7 @@ class AccountSegmentReviewServiceTests {
                 .publisher(publisher)
                 .clock(clock)
                 .build();
-        service = fixture.service();
+        service = fixture.queryService();
         opening = fixture.accountOpeningService();
         segmentReview = fixture.segmentReviewService();
         movements = fixture.moneyMovementService();

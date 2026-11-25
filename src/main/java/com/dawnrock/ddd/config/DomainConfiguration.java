@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import com.dawnrock.ddd.application.AccountOpeningService;
 import com.dawnrock.ddd.application.AccountOwnershipRepository;
 import com.dawnrock.ddd.application.AccountSegmentReviewService;
-import com.dawnrock.ddd.application.CheckingAccountService;
+import com.dawnrock.ddd.application.CheckingAccountQueryService;
 import com.dawnrock.ddd.application.CustomerOwnershipRepository;
 import com.dawnrock.ddd.application.MoneyMovementService;
 import com.dawnrock.ddd.application.UnitOfWork;
@@ -56,11 +56,11 @@ public class DomainConfiguration {
 
     /** Implementa {@code CheckingAccountQueries}; los adaptadores de entrada reciben cada servicio por su puerto. */
     @Bean
-    public CheckingAccountService checkingAccountService(CheckingAccountRepository repository,
+    public CheckingAccountQueryService checkingAccountQueryService(CheckingAccountRepository repository,
                                                          AccountOwnershipRepository ownership,
                                                          UnitOfWork unitOfWork, CustomerRepository customers,
                                                          CustomerOwnershipRepository customerOwnership) {
-        return new CheckingAccountService(repository, ownership, unitOfWork, customers, customerOwnership);
+        return new CheckingAccountQueryService(repository, ownership, unitOfWork, customers, customerOwnership);
     }
 
     /** Implementa {@code AccountOpeningCommands}: apertura, alta de clientes, otra cuenta y regeneración del IBAN. */

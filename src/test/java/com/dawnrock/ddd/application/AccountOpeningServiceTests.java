@@ -44,7 +44,7 @@ class AccountOpeningServiceTests {
                 .accounts(repository)
                 .publisher(publisher)
                 .build();
-        queries = fixture.service();
+        queries = fixture.queryService();
         opening = fixture.accountOpeningService();
     }
 

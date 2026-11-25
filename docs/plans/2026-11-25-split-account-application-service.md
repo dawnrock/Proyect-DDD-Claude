@@ -158,16 +158,16 @@ Package-private collaborators cannot be built in `config`, so each service keeps
 - **Acceptance criteria:**
   - [x] `CheckingAccountCommands` no longer exists; opening, sign-up and registration tests pass; `./mvnw verify` green. (PMD found coupling 22 in AccountOpeningService, as the plan's risks foresaw: the opening steps moved to AccountOpener (prepare, save, reassignNumber) and the customers to CustomerDirectory; the admin opening split into openForExisting and openForNew. The query and event-publication tests left CheckingAccountServiceTests for DomainEventPublicationTests, so CPD finds no duplicated setup)
 
-### [ ] T9 — `CheckingAccountQueryService`; delete `CheckingAccountService` (~10 min)
+### [x] T9 — `CheckingAccountQueryService`; delete `CheckingAccountService` (~10 min)
 
 - **Layer:** application · config
-- **Files:** `CheckingAccountQueryService.java` (new), `CheckingAccountService.java` (deleted), `DomainConfiguration.java`, the fixture, `DomainConfigurationTests.java`, query tests moved to `CheckingAccountQueryServiceTests.java`, ownership tests split between the services they exercise
+- **Files:** `CheckingAccountQueryService.java` (renamed from `CheckingAccountService.java`, which T8 left with the queries only), `DomainConfiguration.java`, the fixture, `DomainConfigurationTests.java`, `HexagonalArchitectureTests.java` (the old rule now names the query service until T10), query tests in `CheckingAccountQueryServiceTests.java`; the ownership tests check one rule (ADR 0008) across the three services and become `AccountOwnershipTests`, like `DomainEventPublicationTests`
 - **Depends on:** T8
 - **What to do:**
   1. The query service implements `CheckingAccountQueries` on `AccountAccess`, `UsernameAvailability` and `AccountViews`, each query inside the `UnitOfWork` (unchanged).
   2. Delete `CheckingAccountService`; `DomainConfigurationTests` checks one bean per port.
 - **Acceptance criteria:**
-  - [ ] No reference to `CheckingAccountService` left in `src/`; `./mvnw verify` green with the same number of test cases as T1 (plus the new ones of T4).
+  - [x] No reference to `CheckingAccountService` left in `src/`; `./mvnw verify` green with the same number of test cases as T1 (plus the new ones of T4). (compared with a clean run of origin/Hexagonal: 1,042 unique test cases before, 1,048 after; the only two gone are the old both-ports checks, replaced by one check per port)
 
 ### [ ] T10 — ArchUnit: no adapter depends on an application service (~5 min)
 

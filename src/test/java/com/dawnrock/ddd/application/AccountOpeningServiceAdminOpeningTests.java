@@ -34,7 +34,7 @@ class AccountOpeningServiceAdminOpeningTests {
     private CheckingAccountRepository accounts;
     private CustomerRepository customers;
     private CustomerOwnershipRepository customerOwners;
-    private CheckingAccountService service;
+    private CheckingAccountQueryService service;
     private AccountOpeningCommands opening;
 
     @BeforeEach
@@ -47,7 +47,7 @@ class AccountOpeningServiceAdminOpeningTests {
                 .customers(customers)
                 .customerOwnership(customerOwners)
                 .build();
-        service = fixture.service();
+        service = fixture.queryService();
         opening = fixture.accountOpeningService();
     }
 

@@ -17,15 +17,15 @@ import org.junit.jupiter.api.Test;
 import com.dawnrock.ddd.support.ApplicationServicesFixture;
 
 /** Consultas de cuentas con los adaptadores en memoria reales detrás de los puertos: no hace falta simularlos. */
-class CheckingAccountServiceTests {
+class CheckingAccountQueryServiceTests {
 
-    private CheckingAccountService service;
+    private CheckingAccountQueryService service;
     private AccountOpeningCommands opening;
 
     @BeforeEach
     void setUp() {
         ApplicationServicesFixture fixture = ApplicationServicesFixture.builder().build();
-        service = fixture.service();
+        service = fixture.queryService();
         opening = fixture.accountOpeningService();
     }
 

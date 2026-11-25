@@ -32,7 +32,7 @@ import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
 import com.dawnrock.ddd.application.AccountOpeningCommands;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.CheckingAccountService;
+import com.dawnrock.ddd.application.CheckingAccountQueryService;
 import com.dawnrock.ddd.application.OpenAccountCommand;
 import com.dawnrock.ddd.application.SignUpCommand;
 import com.dawnrock.ddd.domain.model.CheckingAccountRepository;
@@ -51,7 +51,7 @@ class CustomerRegistrationTests {
     private CheckingAccountRepository accounts;
     private InMemoryUserDetailsManager users;
     private CustomerRegistration registration;
-    private CheckingAccountService service;
+    private CheckingAccountQueryService service;
     private AccountOpeningCommands opening;
     private SignUpLimit limit;
 
@@ -69,7 +69,7 @@ class CustomerRegistrationTests {
     private CustomerRegistration registrationWith(InMemoryUserDetailsManager manager, SignUpLimitProperties limits) {
         limit = new SignUpLimit(limits, Clock.fixed(Instant.parse("2026-11-23T10:00:00Z"), ZoneOffset.UTC));
         ApplicationServicesFixture fixture = ApplicationServicesFixture.builder().accounts(accounts).build();
-        service = fixture.service();
+        service = fixture.queryService();
         opening = fixture.accountOpeningService();
         return new CustomerRegistration(opening, service, manager, encoder, limit);
     }

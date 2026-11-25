@@ -49,7 +49,7 @@ class MoneyMovementServiceTests {
 
     private CheckingAccountRepository repository;
     private DomainEventPublisher publisher;
-    private CheckingAccountService service;
+    private CheckingAccountQueryService service;
     private AccountOpeningCommands opening;
     private MoneyMovementCommands movements;
 
@@ -65,7 +65,7 @@ class MoneyMovementServiceTests {
                 .publisher(publisher)
                 .clock(clock)
                 .build();
-        service = fixture.service();
+        service = fixture.queryService();
         opening = fixture.accountOpeningService();
         movements = fixture.moneyMovementService();
     }

@@ -20,7 +20,7 @@ import com.dawnrock.ddd.support.ApplicationServicesFixture;
  * Reglas de propiedad de las cuentas (#50): un administrador accede a todo; un usuario solo a sus cuentas, y una ajena
  * se trata como inexistente. Repositorios en memoria reales.
  */
-class CheckingAccountServiceOwnershipTests {
+class AccountOwnershipTests {
 
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
     private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
@@ -28,7 +28,7 @@ class CheckingAccountServiceOwnershipTests {
 
     private CheckingAccountRepository accounts;
     private AccountOwnershipRepository owners;
-    private CheckingAccountService service;
+    private CheckingAccountQueryService service;
     private AccountOpeningCommands opening;
     private MoneyMovementCommands movements;
 
@@ -37,7 +37,7 @@ class CheckingAccountServiceOwnershipTests {
         accounts = PersistenceTestAdapters.accounts();
         owners = PersistenceTestAdapters.ownership();
         ApplicationServicesFixture fixture = ApplicationServicesFixture.builder().accounts(accounts).ownership(owners).build();
-        service = fixture.service();
+        service = fixture.queryService();
         opening = fixture.accountOpeningService();
         movements = fixture.moneyMovementService();
     }

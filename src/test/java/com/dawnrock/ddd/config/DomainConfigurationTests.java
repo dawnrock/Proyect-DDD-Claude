@@ -71,7 +71,7 @@ class DomainConfigurationTests {
     @Test
     @DisplayName("Construye las consultas de cuentas, que ofrecen su puerto de entrada")
     void buildsTheAccountQueriesWithTheirInputPort() {
-        Object service = configuration.checkingAccountService(PersistenceTestAdapters.accounts(),
+        Object service = configuration.checkingAccountQueryService(PersistenceTestAdapters.accounts(),
                 PersistenceTestAdapters.ownership(), PersistenceTestAdapters.unitOfWork(),
                 PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
 

@@ -28,7 +28,7 @@ import com.tngtech.archunit.lang.SimpleConditionEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 
-import com.dawnrock.ddd.application.CheckingAccountService;
+import com.dawnrock.ddd.application.CheckingAccountQueryService;
 import com.dawnrock.ddd.domain.model.DomainException;
 
 /**
@@ -117,7 +117,7 @@ class HexagonalArchitectureTests {
     static void inputAdaptersOnlyKnowTheInputPorts(JavaClasses classes) {
         noClasses()
                 .that().resideInAPackage("..adapter.in..")
-                .should().dependOnClassesThat().areAssignableTo(CheckingAccountService.class)
+                .should().dependOnClassesThat().areAssignableTo(CheckingAccountQueryService.class)
                 .check(classes);
     }
 

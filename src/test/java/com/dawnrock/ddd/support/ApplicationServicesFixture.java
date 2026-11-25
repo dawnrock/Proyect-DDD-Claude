@@ -9,7 +9,7 @@ import com.dawnrock.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.dawnrock.ddd.application.AccountOpeningService;
 import com.dawnrock.ddd.application.AccountOwnershipRepository;
 import com.dawnrock.ddd.application.AccountSegmentReviewService;
-import com.dawnrock.ddd.application.CheckingAccountService;
+import com.dawnrock.ddd.application.CheckingAccountQueryService;
 import com.dawnrock.ddd.application.CustomerOwnershipRepository;
 import com.dawnrock.ddd.application.MoneyMovementService;
 import com.dawnrock.ddd.application.UnitOfWork;
@@ -28,7 +28,7 @@ import lombok.Builder;
  * sustituye solo los que necesita ver o controlar:
  *
  * <pre>{@code
- * service = ApplicationServicesFixture.builder().accounts(accounts).clock(clock).build().service();
+ * queries = ApplicationServicesFixture.builder().accounts(accounts).clock(clock).build().queryService();
  * }</pre>
  */
 @Builder
@@ -54,9 +54,9 @@ public final class ApplicationServicesFixture {
     @Builder.Default
     private final CustomerOwnershipRepository customerOwnership = PersistenceTestAdapters.customerOwnership();
 
-    /** El servicio de aplicación con estos colaboradores. */
-    public CheckingAccountService service() {
-        return new CheckingAccountService(accounts, ownership, unitOfWork, customers, customerOwnership);
+    /** Las consultas de cuentas sobre estos colaboradores. */
+    public CheckingAccountQueryService queryService() {
+        return new CheckingAccountQueryService(accounts, ownership, unitOfWork, customers, customerOwnership);
     }
 
     /** Apertura, alta de clientes, otra cuenta y regeneración del IBAN sobre los mismos colaboradores. */

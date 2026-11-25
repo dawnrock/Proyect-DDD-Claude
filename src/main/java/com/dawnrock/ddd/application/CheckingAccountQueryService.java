@@ -19,7 +19,7 @@ import com.dawnrock.ddd.domain.model.CustomerRepository;
  * <p>Implementa {@link CheckingAccountQueries}, lo único que conocen los adaptadores de entrada. Sin anotaciones de
  * Spring: lo construye {@code config} (#174).
  */
-public class CheckingAccountService implements CheckingAccountQueries {
+public class CheckingAccountQueryService implements CheckingAccountQueries {
 
     private final CheckingAccountRepository repository;
     private final UnitOfWork unitOfWork;
@@ -28,7 +28,7 @@ public class CheckingAccountService implements CheckingAccountQueries {
     private final CustomerRepository customers;
 
     /** Recibe sus colaboradores ya construidos: los entrega {@code config.DomainConfiguration}. */
-    public CheckingAccountService(CheckingAccountRepository repository, AccountOwnershipRepository ownership,
+    public CheckingAccountQueryService(CheckingAccountRepository repository, AccountOwnershipRepository ownership,
                                   UnitOfWork unitOfWork, CustomerRepository customers,
                                   CustomerOwnershipRepository customerOwnership) {
         this.repository = repository;

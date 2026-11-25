@@ -5,7 +5,7 @@ import java.util.UUID;
 
 /**
  * Puerto de entrada de los casos de uso que consultan cuentas: listado y detalle. Los adaptadores de entrada dependen de
- * este puerto y no de la clase que lo implementa ({@code CheckingAccountService}). Un usuario solo ve sus cuentas; un
+ * este puerto y no de la clase que lo implementa ({@code CheckingAccountQueryService}). Un usuario solo ve sus cuentas; un
  * administrador, todas (ADR 0008).
  */
 public interface CheckingAccountQueries {

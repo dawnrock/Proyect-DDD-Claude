@@ -19,7 +19,7 @@ import com.dawnrock.ddd.application.AccountOwnershipRepository;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.CallerDef;
 import com.dawnrock.ddd.application.AccountOpeningCommands;
-import com.dawnrock.ddd.application.CheckingAccountService;
+import com.dawnrock.ddd.application.CheckingAccountQueryService;
 import com.dawnrock.ddd.application.MoneyMovementCommands;
 import com.dawnrock.ddd.application.TransactionSummary;
 import com.dawnrock.ddd.domain.model.CheckingAccountFactory;
@@ -30,7 +30,7 @@ class DomainModelRunnerTests {
 
     private final AccountOwnershipRepository ownership = PersistenceTestAdapters.ownership();
     private final ApplicationServicesFixture services = ApplicationServicesFixture.builder().ownership(ownership).build();
-    private final CheckingAccountService service = services.service();
+    private final CheckingAccountQueryService service = services.queryService();
     /** El runner solo recibe los puertos de entrada; el servicio concreto se usa aquí también para consultar. */
     private final AccountOpeningCommands commands = services.accountOpeningService();
     private final MoneyMovementCommands movements = services.moneyMovementService();
@@ -67,7 +67,7 @@ class DomainModelRunnerTests {
                 .ownership(ownership)
                 .factory(new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), taxId -> Optional.empty()))
                 .build();
-        CheckingAccountService withoutIncomes = withoutIncomesServices.service();
+        CheckingAccountQueryService withoutIncomes = withoutIncomesServices.queryService();
 
         new DomainModelRunner(withoutIncomesServices.accountOpeningService(),
                 withoutIncomesServices.moneyMovementService(), withoutIncomes).run(new DefaultApplicationArguments());
