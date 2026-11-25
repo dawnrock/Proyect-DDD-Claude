@@ -17,6 +17,9 @@ public interface SignUpCommandDef {
     /** Formato de un correo: algo, una arroba, un dominio con al menos un punto; sin espacios. */
     String EMAIL_PATTERN = "^ *[^@\\s]+@[^@\\s]+\\.[^@\\s]+ *$";
 
+    /** Mensaje de un correo mal formado; lo comparten los commands de alta y de apertura. */
+    String EMAIL_MESSAGE = "El correo electrónico no es válido";
+
     String fullName();
 
     /** DNI o NIE del cliente; lo normaliza {@code TaxId}. */
@@ -34,23 +37,16 @@ public interface SignUpCommandDef {
         return "EUR";
     }
 
+    /** Reglas de formato, en este orden: la primera que falla es la que se informa. */
     @Value.Check
     default void validate() {
-        if (fullName().isBlank()) {
-            throw new IllegalArgumentException("El nombre y apellidos son obligatorios");
-        }
-        if (!taxId().matches(OpenAccountCommandDef.TAX_ID_PATTERN)) {
-            throw new IllegalArgumentException(OpenAccountCommandDef.TAX_ID_MESSAGE);
-        }
-        if (!email().matches(EMAIL_PATTERN)) {
-            throw new IllegalArgumentException("El correo electrónico no es válido");
-        }
-        if (!username().matches(OpenAccountCommandDef.USERNAME_PATTERN)) {
-            throw new IllegalArgumentException(OpenAccountCommandDef.USERNAME_MESSAGE);
-        }
-        if (!CommandValidation.isIsoCurrency(currency())) {
-            throw new IllegalArgumentException("La divisa %s no es un código ISO 4217 válido".formatted(currency()));
-        }
+        CommandValidation.requireNotBlank(fullName(), "El nombre y apellidos son obligatorios");
+        CommandValidation.requireMatching(taxId(), OpenAccountCommandDef.TAX_ID_PATTERN,
+                OpenAccountCommandDef.TAX_ID_MESSAGE);
+        CommandValidation.requireMatching(email(), EMAIL_PATTERN, EMAIL_MESSAGE);
+        CommandValidation.requireMatching(username(), OpenAccountCommandDef.USERNAME_PATTERN,
+                OpenAccountCommandDef.USERNAME_MESSAGE);
+        CommandValidation.requireIsoCurrency(currency());
         CommandValidation.requireValidInitialDeposit(initialDeposit(), currency());
     }
 }

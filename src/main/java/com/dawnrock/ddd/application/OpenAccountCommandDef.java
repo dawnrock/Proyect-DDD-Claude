@@ -71,20 +71,14 @@ public interface OpenAccountCommandDef {
         return "";
     }
 
+    /** Reglas de formato, en este orden: la primera que falla es la que se informa. */
     @Value.Check
     default void validate() {
-        if (!holderTaxId().matches(TAX_ID_PATTERN)) {
-            throw new IllegalArgumentException(TAX_ID_MESSAGE);
-        }
-        if (!holderEmail().isBlank() && !holderEmail().matches(SignUpCommandDef.EMAIL_PATTERN)) {
-            throw new IllegalArgumentException("El correo electrónico no es válido");
-        }
-        if (!ownerUsername().isEmpty() && !ownerUsername().matches(USERNAME_PATTERN)) {
-            throw new IllegalArgumentException(OWNER_USERNAME_MESSAGE);
-        }
-        if (!CommandValidation.isIsoCurrency(currency())) {
-            throw new IllegalArgumentException("La divisa %s no es un código ISO 4217 válido".formatted(currency()));
-        }
+        CommandValidation.requireMatching(holderTaxId(), TAX_ID_PATTERN, TAX_ID_MESSAGE);
+        CommandValidation.requireMatchingUnlessBlank(holderEmail(), SignUpCommandDef.EMAIL_PATTERN,
+                SignUpCommandDef.EMAIL_MESSAGE);
+        CommandValidation.requireMatchingIfPresent(ownerUsername(), USERNAME_PATTERN, OWNER_USERNAME_MESSAGE);
+        CommandValidation.requireIsoCurrency(currency());
         CommandValidation.requireValidInitialDeposit(initialDeposit(), currency());
     }
 }
