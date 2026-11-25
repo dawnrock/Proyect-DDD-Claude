@@ -89,6 +89,22 @@ class AccountListControllerTests extends AccountWebTestSupport {
         }
 
         @Test
+        @DisplayName("Cada cuenta es una tarjeta inclinada con la A de marca de agua que lleva a su detalle, y abrir cuenta es un botón claro (#185)")
+        void eachAccountIsASlantedCardWithTheWatermark() throws Exception {
+            UUID id = UUID.randomUUID();
+            when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(
+                    summary(id, "ES1234567890123456789012", "Ana Pérez", "150.00")));
+
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<a class=\"card-slant\" href=\"/accounts/" + id + "\">\\s*"
+                                    + "<svg class=\"watermark\"[^>]*aria-hidden=\"true\".*")))
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<a class=\"btn-slant btn-slant-light\" href=\"/accounts/new\">.*Abrir cuenta.*")));
+        }
+
+        @Test
         @DisplayName("El listado muestra el segmento de cada cuenta junto al IBAN abreviado")
         void theListShowsEachAccountsSegment() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(

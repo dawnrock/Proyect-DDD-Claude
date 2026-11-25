@@ -146,7 +146,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
 - **Acceptance criteria:**
   - [x] Sign-up tests pass, field and validation tests included.
 
-### [ ] T9 — Account list (~10 min)
+### [x] T9 — Account list (~10 min)
 
 - **Layer:** adapter.in (templates)
 - **Files:** `templates/accounts/list.html`, `AccountListControllerTests.java`
@@ -155,7 +155,7 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
   1. Total balance in Tektur (class `amount`); each account a `.card-slant` link with the `watermark`, masked IBAN, segment and balance; «Abrir cuenta» / «Abrir otra cuenta» as `.btn-slant-light`. The admin list (with holder names and initials) keeps its information.
   2. Test: each account card links to its detail and carries the watermark.
 - **Acceptance criteria:**
-  - [ ] List tests pass for admin and customer.
+  - [x] List tests pass for admin and customer.
 
 ### [ ] T10 — Account detail: summary (~5 min)
 
