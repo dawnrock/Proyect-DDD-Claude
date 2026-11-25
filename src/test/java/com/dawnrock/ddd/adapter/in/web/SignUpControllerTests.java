@@ -375,7 +375,7 @@ class SignUpControllerTests {
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/accounts/" + id))
                     .andExpect(flash().attribute("message",
-                            "Te damos la bienvenida a Mon-A Bank. Tu IBAN es ES2199990001220000000001"));
+                            "Te damos la bienvenida a monA Bank. Tu IBAN es ES2199990001220000000001"));
 
             ArgumentCaptor<SignUpCommand> command = ArgumentCaptor.forClass(SignUpCommand.class);
             verify(registration).register(command.capture(), eq("clave-secreta-1"), any());
@@ -490,7 +490,7 @@ class SignUpControllerTests {
             mvc.perform(get("/accounts/" + id).session(session))
                     .andExpect(status().isOk())
                     .andExpect(view().name("accounts/detail"))
-                    .andExpect(content().string(containsString("Te damos la bienvenida a Mon-A Bank. Tu IBAN es ES2199990001220000000001")))
+                    .andExpect(content().string(containsString("Te damos la bienvenida a monA Bank. Tu IBAN es ES2199990001220000000001")))
                     .andExpect(content().string(containsString("margaret")));
 
             ArgumentCaptor<Caller> caller = ArgumentCaptor.forClass(Caller.class);

@@ -17,7 +17,7 @@ class MonABankIbansTests {
             "1, ES8099990001450000000001",
             "2, ES1099990001410000000002",
             "3, ES8899990001440000000003"})
-    @DisplayName("El número secuencial de una cuenta da el mismo IBAN de Mon-A Bank que la demo")
+    @DisplayName("El número secuencial de una cuenta da el mismo IBAN de monA Bank que la demo")
     void theSequentialNumberGivesTheMonABankIban(long number, String iban) {
         assertThat(MonABankIbans.forAccount(number)).isEqualTo(new AccountNumber(iban));
     }

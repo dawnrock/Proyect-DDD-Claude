@@ -152,7 +152,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] Domain tests green; `check-domain.mjs` without errors.
 
-### [ ] T10 — Name in application and web messages (~10 min)
+### [x] T10 — Name in application and web messages (~10 min)
 
 - **Layer:** application · adapter.in
 - **Files:** `NotACustomerException`, `SignUpController`, their tests, `CustomerControllerTests`, `DddLabApplicationTests`, and Javadocs naming the bank (`CustomerDirectory`, `AccountOpeningCommands`)
@@ -161,7 +161,7 @@ Decisions taken in this plan:
   1. Tests first (welcome flash «Te damos la bienvenida a monA Bank…», REST `detail` «Ya eres cliente de monA Bank…», end-to-end sign-up), then the messages.
   2. Remaining `@DisplayName`s and Javadocs with «Mon-A Bank» → «monA Bank» (text only, no code names).
 - **Acceptance criteria:**
-  - [ ] `grep -rn "Mon-A Bank" src` returns nothing; `./mvnw verify` green.
+  - [x] `grep -rn "Mon-A Bank" src` returns nothing; `./mvnw verify` green.
 
 ### [ ] T11 — Name in the remaining templates (~5 min)
 

@@ -8,7 +8,7 @@ import com.dawnrock.ddd.domain.model.DuplicateCustomerException;
 import com.dawnrock.ddd.domain.model.TaxId;
 
 /**
- * Los clientes de Mon-A Bank y su usuario (#103): buscarlos, darlos de alta con un usuario libre (R30) y saber de qué
+ * Los clientes de monA Bank y su usuario (#103): buscarlos, darlos de alta con un usuario libre (R30) y saber de qué
  * cliente es quien pide un caso de uso. Lo usan los casos de uso que abren cuentas (#174).
  */
 final class CustomerDirectory {

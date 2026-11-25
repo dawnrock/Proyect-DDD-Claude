@@ -560,7 +560,7 @@ class DddLabApplicationTests {
 	}
 
 	@Nested
-	@DisplayName("Alta de cliente de Mon-A Bank con el servicio real (#103)")
+	@DisplayName("Alta de cliente de monA Bank con el servicio real (#103)")
 	class CustomerSignUp {
 
 		/** NIE válido que no usa ningún otro test del contexto compartido. */
@@ -581,7 +581,7 @@ class DddLabApplicationTests {
 			assertThat(firstAccount).contains("/accounts/").doesNotContain("login");
 			HttpResponse<String> detail = send(visitor, path(firstAccount));
 			assertThat(detail.statusCode()).isEqualTo(200);
-			assertThat(detail.body()).contains("Te damos la bienvenida a Mon-A Bank")
+			assertThat(detail.body()).contains("Te damos la bienvenida a monA Bank")
 					.containsPattern("ES\\d{2}99990001\\d{12}");
 
 			HttpResponse<String> another = postForm(visitor, "/accounts/another", "initialDeposit=60.00&currency=EUR");

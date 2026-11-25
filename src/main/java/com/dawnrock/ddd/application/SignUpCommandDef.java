@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import org.immutables.value.Value;
 
 /**
- * Orden de darse de alta como cliente de Mon-A Bank: registra al cliente y le abre su primera cuenta, con un IBAN que
+ * Orden de darse de alta como cliente de monA Bank: registra al cliente y le abre su primera cuenta, con un IBAN que
  * asigna el banco. Valida sus campos al construirse ({@code IllegalArgumentException}), antes de llegar al dominio.
  * La contraseña no viaja aquí: la gestiona la presentación ({@code CustomerRegistration}). Contrato:
  * {@code docs/contracts/customer-sign-up.md}.

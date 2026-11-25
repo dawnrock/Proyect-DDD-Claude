@@ -44,7 +44,7 @@ class AccountOpeningServiceAnotherAccountTests {
     }
 
     @Test
-    @DisplayName("El cliente acaba con dos cuentas de IBAN distintos y de Mon-A Bank, y las dos se listan")
+    @DisplayName("El cliente acaba con dos cuentas de IBAN distintos y de monA Bank, y las dos se listan")
     void theCustomerEndsUpWithTwoAccountsWithDifferentIbans() {
         AccountSummary second = opening.openAnotherAccount(ADA, deposit("200.00"));
 
@@ -70,7 +70,7 @@ class AccountOpeningServiceAnotherAccountTests {
     void aNonCustomerCannotOpenAnotherAccount() {
         assertThatExceptionOfType(NotACustomerException.class)
                 .isThrownBy(() -> opening.openAnotherAccount(GRACE, deposit("200.00")))
-                .withMessageContaining("grace");
+                .withMessage("El usuario grace no es cliente de monA Bank: no puede abrir otra cuenta");
         assertThat(accounts.findAll()).hasSize(1);
     }
 
