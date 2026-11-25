@@ -163,7 +163,7 @@ Decisions taken in this plan:
 - **Acceptance criteria:**
   - [x] `grep -rn "Mon-A Bank" src` returns nothing; `./mvnw verify` green.
 
-### [ ] T11 — Name in the remaining templates (~5 min)
+### [x] T11 — Name in the remaining templates (~5 min)
 
 - **Layer:** adapter.in.web (templates)
 - **Files:** `signup/account.html`, `accounts/another.html`, `accounts/detail.html` and the web tests that read those texts
@@ -171,7 +171,7 @@ Decisions taken in this plan:
 - **What to do:**
   1. «Acepto las condiciones de monA Bank», «un IBAN de monA Bank», «generado por monA Bank»; adjust any assertion.
 - **Acceptance criteria:**
-  - [ ] No «Mon-A» in `src/main/resources/templates`.
+  - [x] No «Mon-A» in `src/main/resources/templates` (guarded by `BrandNameTemplatesTests`).
 
 ### [ ] T12 — Intro markup and script (~10 min)
 

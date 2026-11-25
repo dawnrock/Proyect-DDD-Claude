@@ -24,7 +24,7 @@
             <details id="regenerate-action" th:if="${admin}">
                 <summary class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><svg th:replace="~{fragments/icons :: icon('refresh-cw')}"></svg>Generar nuevo IBAN</summary>
                 <form class="card card-body mt-2" th:action="@{/accounts/{id}/account-number(id=${account.id()})}" th:hx-post="@{/accounts/{id}/account-number(id=${account.id()})}" method="post">
-                    <p>Se sustituirá el IBAN actual por otro generado por Mon-A Bank. El IBAN anterior dejará de funcionar.</p>
+                    <p>Se sustituirá el IBAN actual por otro generado por monA Bank. El IBAN anterior dejará de funcionar.</p>
                     <div><button class="btn btn-warning" type="submit">Confirmar</button></div>
                 </form>
             </details>
