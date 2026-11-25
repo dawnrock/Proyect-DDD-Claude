@@ -135,16 +135,16 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
 - **Acceptance criteria:**
   - [x] Login tests pass; the error and blocked notices still show.
 
-### [ ] T8 — Sign-up steps over the big A (~10 min)
+### [x] T8 — Sign-up steps over the big A (~10 min)
 
 - **Layer:** adapter.in (templates)
 - **Files:** `templates/signup/{data,account,access,progress}.html`, `SignUpControllerTests.java`
 - **Depends on:** T5
 - **What to do:**
-  1. The three steps: backdrop, the stacked logo replaced by the horizontal one like the doors, buttons `.btn-slant`, progress bar as a thin `rise` bar (keep `signup-progress-bar` and its view transition).
+  1. The three steps: backdrop, the stacked logo removed (deviation: the header already shows the logo, so a second one in the page would repeat it), buttons `.btn-slant`, progress bar as a thin `rise` bar (keep `signup-progress-bar` and its view transition).
   2. Test: each step has the backdrop.
 - **Acceptance criteria:**
-  - [ ] Sign-up tests pass, field and validation tests included.
+  - [x] Sign-up tests pass, field and validation tests included.
 
 ### [ ] T9 — Account list (~10 min)
 

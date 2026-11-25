@@ -246,9 +246,6 @@ a.card-slant:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--mo
     .btn-slant::before, a.card-slant { transition: background-color 0.15s ease-out; }
 }
 
-/* Logo apilado en las bienvenidas del login y del alta (#178): decorativo, el título ya nombra al banco. */
-.brand-welcome { display: block; width: min(18rem, 70%); height: auto; margin: 0.5rem auto 2rem; }
-
 /* Intro de la marca (#178): capa a pantalla completa sobre las puertas del login, del color de fondo de la web. */
 .splash { position: fixed; inset: 0; z-index: 1080; background-color: var(--bs-body-bg); }
 .splash canvas { display: block; width: 100%; height: 100%; }

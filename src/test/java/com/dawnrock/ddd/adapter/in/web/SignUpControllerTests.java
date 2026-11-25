@@ -2,7 +2,6 @@ package com.dawnrock.ddd.adapter.in.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -109,12 +108,15 @@ class SignUpControllerTests {
         }
 
         @Test
-        @DisplayName("El primer paso del alta muestra el logo apilado de monA Bank sobre su título (#178)")
-        void theFirstStepShowsTheStackedLogoAboveItsTitle() throws Exception {
+        @DisplayName("El primer paso va sobre la A de fondo con «Continuar» en turquesa; el logo es el de la cabecera (#185)")
+        void theFirstStepSitsOverTheBigAWithTheHeaderLogo() throws Exception {
             mvc.perform(get("/signup"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(matchesPattern(
-                            "(?s).*<img [^>]*src=\"/brand/monabank-stacked[^\"]*\\.svg\"[^>]*alt=\"\".*<h1[^>]*>Hazte cliente de monA Bank</h1>.*")));
+                    .andExpect(content().string(containsString("<div class=\"backdrop\" aria-hidden=\"true\">")))
+                    .andExpect(content().string(containsString("navbar-brand")))
+                    .andExpect(content().string(not(containsString("monabank-stacked"))))
+                    .andExpect(content().string(containsString(
+                            "<button class=\"btn-slant btn-slant-rise\" type=\"submit\">Continuar</button>")));
         }
 
         @Test
@@ -208,6 +210,16 @@ class SignUpControllerTests {
             mvc.perform(validStep2(post("/signup/access")))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/signup"));
+        }
+
+        @Test
+        @DisplayName("El paso 2 también va sobre la A de fondo, con «Continuar» en turquesa (#185)")
+        void step2SitsOverTheBigA() throws Exception {
+            mvc.perform(get("/signup/access").session(sessionAfterStep1()))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("<div class=\"backdrop\" aria-hidden=\"true\">")))
+                    .andExpect(content().string(containsString(
+                            "<button class=\"btn-slant btn-slant-rise\" type=\"submit\">Continuar</button>")));
         }
 
         @Test
@@ -324,6 +336,16 @@ class SignUpControllerTests {
             mvc.perform(validStep3(post("/signup/account")).session(sessionAfterStep1()))
                     .andExpect(redirectedUrl("/signup"));
             verifyNoInteractions(registration);
+        }
+
+        @Test
+        @DisplayName("El paso 3 también va sobre la A de fondo, con «Abrir mi cuenta» en turquesa (#185)")
+        void step3SitsOverTheBigA() throws Exception {
+            mvc.perform(get("/signup/account").session(sessionAfterStep2()))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("<div class=\"backdrop\" aria-hidden=\"true\">")))
+                    .andExpect(content().string(containsString(
+                            "<button class=\"btn-slant btn-slant-rise\" type=\"submit\">Abrir mi cuenta</button>")));
         }
 
         @Test
