@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-25
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~115 min (15 tasks)
 
 ## Goal
@@ -208,7 +208,7 @@
 - **Acceptance criteria:**
   - [x] `./mvnw verify` green with the same test cases; the other review notes go to `pendientes.md` in T14.
 
-### [ ] T14 — Project status (~5 min)
+### [x] T14 — Project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `pendientes.md`, `decisiones.md`, `historial.md`
@@ -216,29 +216,29 @@
 - **What to do:**
   1. #177 done and next step (OAuth / Auth0, or the next baseline refactoring); the PMD baseline item without `AccountWebController`; a row in `historial.md`.
 - **Acceptance criteria:**
-  - [ ] The CI status check passes.
+  - [x] The CI status check passes. (status, decisions, pending items and history updated; the CI check runs on the PR)
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] `AccountWebController` no longer exists; each account route is served by its own controller, which receives only the input ports it uses.
-- [ ] `pmd-baseline.properties` no longer lists `AccountWebController`, and the analysis reports nothing new.
-- [ ] No behaviour change: the existing web tests pass pointed at the new controllers, with no assertion changed; templates and `docs/api/openapi.yaml` unchanged.
+- [x] `AccountWebController` no longer exists; each account route is served by its own controller, which receives only the input ports it uses.
+- [x] `pmd-baseline.properties` no longer lists `AccountWebController`, and the analysis reports nothing new.
+- [x] No behaviour change: the existing web tests pass pointed at the new controllers, with no assertion changed; templates and `docs/api/openapi.yaml` unchanged. Compared with the T1 run: the same 1,049 test cases, only moved between classes; `revisor-ddd` compared the 11 routes with the old controller and found no change.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: n/a (the API does not change).
-- [ ] Any new business term is in `docs/dominio/glosario.md` (n/a: no new business terms).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}` (`/login` 200, `/` without session 302).
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: n/a (the API does not change).
+- [x] Any new business term is in `docs/dominio/glosario.md` (n/a: no new business terms).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
