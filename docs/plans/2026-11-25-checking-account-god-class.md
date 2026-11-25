@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-25
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~60 min (6 tasks)
 
 ## Goal
@@ -50,7 +50,7 @@ Both new classes are package-private: only the aggregate uses them, so the hexag
 
 ## Tasks
 
-### [ ] T1 — Characterization of the reconstitution (~5 min)
+### [x] T1 — Characterization of the reconstitution (~5 min)
 
 - **Layer:** tests
 - **Files:** `CheckingAccountReconstitutionTests.java`
@@ -60,7 +60,7 @@ Both new classes are package-private: only the aggregate uses them, so the hexag
   2. A retail account with a pending review **and** a transaction of another account reports the segment check first (today's order: required data, segment review, transactions, balance).
   3. Sabotage: change the order of two checks in `reconstitute`, see the red, revert.
 - **Acceptance criteria:**
-  - [ ] Every reconstitution message and the order of the checks are fixed by tests; sabotage seen red and reverted.
+  - [x] Every reconstitution message and the order of the checks are fixed by tests; sabotage seen red and reverted.
 
 ### [ ] T2 — TransactionHistory (~10 min)
 
