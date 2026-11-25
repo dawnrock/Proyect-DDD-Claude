@@ -33,7 +33,7 @@ import com.dawnrock.ddd.application.WithdrawCommand;
 import com.dawnrock.ddd.domain.model.CurrencyMismatchException;
 
 /** Retiradas desde el detalle de la cuenta (#177), con y sin htmx. */
-@WebMvcTest({WithdrawalWebController.class, AccountDetailController.class, AccountWebController.class})
+@WebMvcTest({WithdrawalWebController.class, TransferWebController.class, AccountDetailController.class, AccountWebController.class})
 @WithMockUser(username = "admin", roles = "ADMIN")
 class WithdrawalWebControllerTests extends AccountWebTestSupport {
 

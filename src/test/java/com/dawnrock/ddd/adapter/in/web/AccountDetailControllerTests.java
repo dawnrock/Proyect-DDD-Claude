@@ -30,7 +30,7 @@ import com.dawnrock.ddd.application.Caller;
 import com.dawnrock.ddd.application.ForbiddenOperationException;
 
 /** Detalle de una cuenta (#177): movimientos, formularios de las operaciones y acciones según el rol. */
-@WebMvcTest({AccountDetailController.class, AccountListController.class, AccountWebController.class, DepositWebController.class, WithdrawalWebController.class})
+@WebMvcTest({AccountDetailController.class, AccountListController.class, AccountWebController.class, DepositWebController.class, WithdrawalWebController.class, TransferWebController.class})
 @WithMockUser(username = "admin", roles = "ADMIN")
 class AccountDetailControllerTests extends AccountWebTestSupport {
 

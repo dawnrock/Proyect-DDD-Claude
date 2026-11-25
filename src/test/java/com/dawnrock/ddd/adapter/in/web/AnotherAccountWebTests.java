@@ -37,7 +37,7 @@ import com.dawnrock.ddd.domain.model.InsufficientInitialDepositException;
 import com.dawnrock.ddd.domain.model.MonetaryAmount;
 
 /** «Abrir otra cuenta» para clientes (#95): el botón, el formulario de solo depósito y el rechazo al administrador. */
-@WebMvcTest({AccountWebController.class, AccountDetailController.class, DepositWebController.class, WithdrawalWebController.class, AccountListController.class})
+@WebMvcTest({AccountWebController.class, AccountDetailController.class, DepositWebController.class, WithdrawalWebController.class, TransferWebController.class, AccountListController.class})
 @WithMockUser(username = "ada", roles = "USER")
 class AnotherAccountWebTests extends AccountWebTestSupport {
 
