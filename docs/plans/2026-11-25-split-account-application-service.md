@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-25
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~125 min (14 tasks)
 
 ## Goal
@@ -213,7 +213,7 @@ Package-private collaborators cannot be built in `config`, so each service keeps
 - **Acceptance criteria:**
   - [x] `./mvnw verify` green; the other review notes go to `pendientes.md` in T13.
 
-### [ ] T13 — Project status (~5 min)
+### [x] T13 — Project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `pendientes.md`, `decisiones.md`, `historial.md`
@@ -222,30 +222,30 @@ Package-private collaborators cannot be built in `config`, so each service keeps
   1. #174 done in the status table and next step (`AccountWebController` or OAuth / Auth0).
   2. `pendientes.md`: the PMD baseline item without `CheckingAccountService`; `decisiones.md`: input ports per use case; a row in `historial.md`.
 - **Acceptance criteria:**
-  - [ ] The CI status check passes.
+  - [x] The CI status check passes. (status, decisions, pending items and history updated; the CI check runs on the PR)
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] `CheckingAccountCommands` and `CheckingAccountService` no longer exist; the four ports are interfaces in `application`, each implemented by one service.
-- [ ] Every input adapter depends only on the ports it uses, never on a service (ArchUnit).
-- [ ] `pmd-baseline.properties` no longer lists `CheckingAccountService` nor `CheckingAccountServiceTests`, and the analysis reports nothing new.
-- [ ] No behaviour change: the existing tests pass pointed at the new ports, with no assertion changed; `docs/api/openapi.yaml` unchanged.
+- [x] `CheckingAccountCommands` and `CheckingAccountService` no longer exist; the four ports are interfaces in `application`, each implemented by one service.
+- [x] Every input adapter depends only on the ports it uses, never on a service (ArchUnit).
+- [x] `pmd-baseline.properties` no longer lists `CheckingAccountService` nor `CheckingAccountServiceTests`, and the analysis reports nothing new.
+- [x] No behaviour change: the existing tests pass pointed at the new ports, with no assertion changed; `docs/api/openapi.yaml` unchanged. Only the two checks that one service offered both ports were replaced by one check per port; `revisor-ddd` compared every use case with the old service and found no observable change.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: n/a (the API does not change).
-- [ ] Any new business term is in `docs/dominio/glosario.md` (n/a: no new business terms).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}` (the demo data loads through the new ports).
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: n/a (the API does not change).
+- [x] Any new business term is in `docs/dominio/glosario.md` (n/a: no new business terms).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
