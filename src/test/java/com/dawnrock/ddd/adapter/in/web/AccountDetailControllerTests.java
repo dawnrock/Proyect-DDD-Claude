@@ -354,6 +354,16 @@ class AccountDetailControllerTests extends AccountWebTestSupport {
         }
 
         @Test
+        @DisplayName("Generar nuevo IBAN, aunque va bajo la pista, sigue en el acordeón: abrirla cierra las demás (#185)")
+        void regeneratingTheIbanStaysInTheAccordion() throws Exception {
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<div x-data=\"actionPanels\" x-on:toggle.capture=\"closeOthers\\(\\$event\\)\">\\s*"
+                                    + "<div class=\"actions mb-3\">.*<details id=\"regenerate-action\">.*?</details>\\s*</div>\\s*</div>\\s*<h2.*")));
+        }
+
+        @Test
         @DisplayName("Ingresar lleva la subida de la A y retirar la caída de la n; transferir y generar IBAN, sus iconos (#185)")
         void depositAndWithdrawalCarryTheBrandGlyphs() throws Exception {
             mvc.perform(get("/accounts/" + ACCOUNT_ID))

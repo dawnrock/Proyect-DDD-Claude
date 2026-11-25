@@ -5,8 +5,8 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-25
-- **Status:** in progress
-- **Total estimate:** ~125 min (16 tasks)
+- **Status:** done
+- **Total estimate:** ~135 min (17 tasks)
 
 ## Goal
 
@@ -236,30 +236,43 @@ Markup the tests rely on and that must stay: the `<details id="deposit-action|wi
 - **Acceptance criteria:**
   - [x] The CI's project-status check passes.
 
+### [x] T17 — Review fixes (~10 min)
+
+- **Layer:** adapter.in (templates) · docs
+- **Files:** `templates/accounts/detail.html`, `AccountDetailControllerTests.java`, `docs/adr/0023-brand-ui.md`, `docs/brand/README.md`, `docs/ia/decisiones.md`, `docs/ia/pendientes.md`
+- **Depends on:** T16
+- **What to do:** fix what the `revisor-ddd` review found:
+  1. «Generar nuevo IBAN» had left the Alpine.js accordion when it moved under the track: one container now holds the track and the secondary actions, with a test.
+  2. ADR 0023 described the focus as `clip-path` + `drop-shadow`; the buttons use a skewed `::before` with its outline, and the cards an inset ring.
+  3. The docs said a rejected movement always shows a grey drop; it keeps its own glyph in grey.
+  4. Pending: check with a screen reader that the actions are still announced as expandable buttons with `display: contents`.
+- **Acceptance criteria:**
+  - [x] The new test fails with the previous template and passes; the docs match the CSS.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] The welcome doors look like the approved sketch: the darkened A bigger than the screen behind, logo, greeting and both doors centred, no icons on the doors.
-- [ ] The login form and the three sign-up steps carry the big A; inside the app only the small watermark.
-- [ ] Main buttons and the account actions are parallelograms with the A's slant and a visible keyboard focus.
-- [ ] Transactions show the brand glyphs (rise, drop, rejected).
-- [ ] Without JavaScript and with reduced motion everything works as today; the intro still plays once per session.
-- [ ] Good from 360 px to desktop, without horizontal scroll.
+- [x] The welcome doors look like the approved sketch: the darkened A bigger than the screen behind, logo, greeting and both doors centred, no icons on the doors.
+- [x] The login form and the three sign-up steps carry the big A; inside the app only the small watermark.
+- [x] Main buttons and the account actions are parallelograms with the A's slant and a visible keyboard focus.
+- [x] Transactions show the brand glyphs (rise, drop, rejected).
+- [x] Without JavaScript and with reduced motion everything works as today; the intro still plays once per session.
+- [x] Good from 360 px to desktop, without horizontal scroll.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit + static analysis).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit. No Java change outside tests is expected.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones: Sora is a vendored font justified in ADR 0023, not a Maven dependency.
-- [ ] If the API changes: n/a (no API change).
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a (no new business term).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit + static analysis).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit. No Java change outside tests is expected.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones: Sora is a vendored font justified in ADR 0023, not a Maven dependency.
+- [x] If the API changes: n/a (no API change).
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a (no new business term).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

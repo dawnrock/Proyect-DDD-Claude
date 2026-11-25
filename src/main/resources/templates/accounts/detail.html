@@ -21,8 +21,9 @@
         </section>
 
         <!--/* Cada acción es un <details>: se abre sin JavaScript y el servidor la deja abierta si su formulario vuelve con
-             errores. Alpine.js (actionPanels, en app.js) solo añade que abrir una cierre las demás. */-->
-        <div class="actions mb-3" x-data="actionPanels" x-on:toggle.capture="closeOthers($event)">
+             errores. Alpine.js (actionPanels, en app.js) solo añade que abrir una cierre las demás, también las secundarias. */-->
+        <div x-data="actionPanels" x-on:toggle.capture="closeOthers($event)">
+        <div class="actions mb-3">
             <details id="deposit-action" th:object="${depositForm}" th:open="${#fields.hasAnyErrors()}">
                 <summary class="btn-slant action-toggle"><svg th:replace="~{fragments/brand :: rise}"></svg>Ingresar</summary>
                 <form class="card card-body action-form" th:action="@{/accounts/{id}/deposits(id=${account.id()})}" th:hx-post="@{/accounts/{id}/deposits(id=${account.id()})}" th:object="${depositForm}" method="post" novalidate>
@@ -100,6 +101,7 @@
             </details>
             <!--/* Enlace dentro del panel: sin destino propio heredaría el del panel y se pintaría dentro de él (#126) */-->
             <a class="btn-slant btn-slant-surface" id="another-account" th:if="${customer}" th:href="@{/accounts/another}" hx-target="body" hx-swap="innerHTML transition:true"><svg th:replace="~{fragments/icons :: icon('plus')}"></svg>Abrir otra cuenta</a>
+        </div>
         </div>
 
         <h2 class="h5 mb-2">Movimientos</h2>
