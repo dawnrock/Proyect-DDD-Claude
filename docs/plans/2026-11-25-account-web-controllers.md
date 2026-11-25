@@ -127,7 +127,7 @@
 - **Acceptance criteria:**
   - [x] Moved tests and `WebSecurityTests` pass. (1,049 test cases, unchanged)
 
-### [ ] T7 — `WithdrawalWebController` (~10 min)
+### [x] T7 — `WithdrawalWebController` (~10 min)
 
 - **Layer:** adapter.in · tests
 - **Files:** `WithdrawalWebController.java` (new), `AccountWebController.java`, `WithdrawalWebControllerTests.java`
@@ -135,7 +135,7 @@
 - **What to do:**
   1. Move `POST /accounts/{id}/withdrawals`; move `Retiradas` and `RetiradasConHtmx`. If CPD finds the deposit and withdrawal steps duplicated, extract them to a small shared helper in this task.
 - **Acceptance criteria:**
-  - [ ] Moved tests pass; CPD reports nothing.
+  - [x] Moved tests pass; CPD reports nothing. (CPD found no duplication; both movement controllers build their command in a toCommand method; 1,049 test cases, unchanged)
 
 ### [ ] T8 — `TransferWebController` (~10 min)
 

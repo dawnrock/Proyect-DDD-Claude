@@ -62,38 +62,6 @@ public class AccountWebController {
         return detailView.notice(id, htmx, AccountDetailView.MESSAGE, "Nuevo IBAN asignado: " + account.accountNumber(), caller, model, redirect);
     }
 
-    @PostMapping("/accounts/{id}/withdrawals")
-    public String withdraw(@PathVariable UUID id, @Valid @ModelAttribute("withdrawalForm") MovementForm form,
-                           BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication,
-                           @RequestHeader(name = HtmxLoginRedirect.HX_REQUEST, defaultValue = "false") boolean htmx) {
-        Caller caller = CurrentCaller.from(authentication);
-        if (!result.hasErrors()) {
-            WithdrawCommand command = null;
-            try {
-                command = WithdrawCommand.builder()
-                        .accountId(id).amount(form.getAmount()).currency(form.getCurrency()).build();
-            } catch (IllegalArgumentException e) {
-                result.reject("invalid", e.getMessage());
-            }
-            if (command != null) {
-                try {
-                    TransactionSummary withdrawal = movements.withdraw(caller, command);
-                    String amount = fmt.money(withdrawal.amount(), withdrawal.currency());
-                    if (withdrawal.rejected()) {
-                        return detailView.notice(id, htmx, AccountDetailView.REJECTION,
-                                "Retirada de %s rechazada: el saldo resultante no está permitido para esta cuenta"
-                                        .formatted(amount), caller, model, redirect);
-                    }
-                    return detailView.notice(id, htmx, AccountDetailView.MESSAGE, "Retirada de %s aprobada".formatted(amount),
-                            caller, model, redirect);
-                } catch (DomainException e) {
-                    result.reject("domain", e.getMessage());
-                }
-            }
-        }
-        return detailView.render(id, caller, model, htmx);
-    }
-
     @PostMapping("/accounts/{id}/transfers")
     public String transfer(@PathVariable UUID id, @Valid @ModelAttribute("transferForm") TransferForm form,
                            BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication,

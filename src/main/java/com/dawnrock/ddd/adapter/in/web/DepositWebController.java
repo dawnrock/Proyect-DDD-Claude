@@ -41,25 +41,27 @@ public class DepositWebController {
                           BindingResult result, Model model, RedirectAttributes redirect, Authentication authentication,
                           @RequestHeader(name = HtmxLoginRedirect.HX_REQUEST, defaultValue = "false") boolean htmx) {
         Caller caller = CurrentCaller.from(authentication);
-        if (!result.hasErrors()) {
-            DepositCommand command = null;
+        DepositCommand command = result.hasErrors() ? null : toCommand(id, form, result);
+        if (command != null) {
             try {
-                command = DepositCommand.builder()
-                        .accountId(id).amount(form.getAmount()).currency(form.getCurrency()).build();
-            } catch (IllegalArgumentException e) {
-                result.reject("invalid", e.getMessage());
-            }
-            if (command != null) {
-                try {
-                    TransactionSummary deposit = movements.deposit(caller, command);
-                    return detailView.notice(id, htmx, AccountDetailView.MESSAGE,
-                            "Ingreso de %s aprobado".formatted(fmt.money(deposit.amount(), deposit.currency())),
-                            caller, model, redirect);
-                } catch (DomainException e) {
-                    result.reject("domain", e.getMessage());
-                }
+                TransactionSummary deposit = movements.deposit(caller, command);
+                return detailView.notice(id, htmx, AccountDetailView.MESSAGE,
+                        "Ingreso de %s aprobado".formatted(fmt.money(deposit.amount(), deposit.currency())),
+                        caller, model, redirect);
+            } catch (DomainException e) {
+                result.reject("domain", e.getMessage());
             }
         }
         return detailView.render(id, caller, model, htmx);
+    }
+
+    /** El command, o {@code null} con el error en el formulario si lo rechaza (red de seguridad de la validación). */
+    private static DepositCommand toCommand(UUID id, MovementForm form, BindingResult result) {
+        try {
+            return DepositCommand.builder().accountId(id).amount(form.getAmount()).currency(form.getCurrency()).build();
+        } catch (IllegalArgumentException e) {
+            result.reject("invalid", e.getMessage());
+            return null;
+        }
     }
 }
