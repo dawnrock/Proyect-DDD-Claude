@@ -2,28 +2,22 @@ package com.dawnrock.ddd.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
-import java.time.Clock;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
-import com.dawnrock.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.dawnrock.ddd.domain.model.AccountNumber;
-import com.dawnrock.ddd.domain.model.CheckingAccountFactory;
 import com.dawnrock.ddd.domain.model.CheckingAccountRepository;
 import com.dawnrock.ddd.domain.model.CurrencyMismatchException;
 import com.dawnrock.ddd.domain.model.CustomerRepository;
-import com.dawnrock.ddd.domain.model.DomainEventPublisher;
 import com.dawnrock.ddd.domain.model.DuplicateCustomerException;
 import com.dawnrock.ddd.domain.model.InsufficientInitialDepositException;
 import com.dawnrock.ddd.domain.model.TaxId;
-import com.dawnrock.ddd.domain.service.MoneyTransferService;
-import com.dawnrock.ddd.domain.service.SegmentReviewService;
+import com.dawnrock.ddd.support.ApplicationServicesFixture;
 
 /** Alta de un cliente nuevo con su primera cuenta (R28-R30). Adaptadores en memoria reales. */
 class CheckingAccountServiceSignUpTests {
@@ -42,11 +36,13 @@ class CheckingAccountServiceSignUpTests {
         owners = PersistenceTestAdapters.ownership();
         customers = PersistenceTestAdapters.customers();
         customerOwners = PersistenceTestAdapters.customerOwnership();
-        service = new CheckingAccountService(accounts, owners, mock(DomainEventPublisher.class),
-                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(),
-                        TaxAgencyTestAdapters.incomeVerifier()),
-                new MoneyTransferService(), new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()),
-                Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(), customers, customerOwners);
+        service = ApplicationServicesFixture.builder()
+                .accounts(accounts)
+                .ownership(owners)
+                .customers(customers)
+                .customerOwnership(customerOwners)
+                .build()
+                .service();
     }
 
     private static SignUpCommand.Builder signUp() {

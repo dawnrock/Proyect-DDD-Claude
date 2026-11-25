@@ -47,7 +47,7 @@
 
 Package-private collaborators cannot be built in `config`, so each service keeps a **public constructor that takes the output ports** (and the factory, domain services, `Clock`, `UnitOfWork`) and builds its collaborators inside; `DomainConfiguration` builds one bean per service and adapters receive them by their port. The lock and the transaction stay in the single `UnitOfWork` bean, so the concurrency guarantees (#78, #150) do not change.
 
-**Tests.** The service tests (`CheckingAccountService*Tests`, 1,936 lines) build the service with ten arguments in nine places. A test helper `ApplicationServicesFixture` (in `src/test/.../application`) builds the four services on the in-memory adapters (`PersistenceTestAdapters`) with optional overrides (publisher, factory, clock, income verifier), so the tests move to one class per service without repeating the wiring. The adapter tests that mock `CheckingAccountCommands` (`@MockitoBean`) mock the new port(s) instead. `CheckingAccountServiceConcurrencyTests` becomes `MoneyMovementServiceConcurrencyTests`.
+**Tests.** The service tests (`CheckingAccountService*Tests`, 1,936 lines) build the service with ten arguments in nine places. A test helper `ApplicationServicesFixture` (in `src/test/.../support`) builds the four services on the in-memory adapters (`PersistenceTestAdapters`) with optional overrides (publisher, factory, clock, income verifier), so the tests move to one class per service without repeating the wiring. The adapter tests that mock `CheckingAccountCommands` (`@MockitoBean`) mock the new port(s) instead. `CheckingAccountServiceConcurrencyTests` becomes `MoneyMovementServiceConcurrencyTests`.
 
 **ArchUnit.** `HexagonalArchitectureTests` forbids input adapters to depend on `CheckingAccountService`. It becomes: input adapters (and nobody outside `application` and `config`) do not depend on classes of `application` that implement an input port, checked by the rule that ports are interfaces plus a rule on classes whose name ends in `Service`.
 
@@ -78,16 +78,16 @@ Package-private collaborators cannot be built in `config`, so each service keeps
 - **Acceptance criteria:**
   - [x] Test count and PMD metrics recorded; affected files confirmed. (1,035 test cases green; PMD: CheckingAccountService WMC 53, ATFD 19, TCC 10.8 %, coupling 35; CheckingAccountServiceTests coupling over 20; Graphify not installed in this container, affected files confirmed with grep)
 
-### [ ] T2 — Test fixture for the application services (~10 min)
+### [x] T2 — Test fixture for the application services (~10 min)
 
 - **Layer:** tests
-- **Files:** `src/test/java/com/dawnrock/ddd/application/ApplicationServicesFixture.java`, the nine `new CheckingAccountService(...)` call sites
+- **Files:** `src/test/java/com/dawnrock/ddd/support/ApplicationServicesFixture.java` (in `support`, where `src/test/CLAUDE.md` puts test builders), the nine `new CheckingAccountService(...)` call sites
 - **Depends on:** T1
 - **What to do:**
   1. Create the fixture (Lombok `@Builder` is allowed in test builders) with the in-memory adapters by default and overrides for publisher, factory, clock and income verifier; for now it returns a `CheckingAccountService`.
   2. Replace the nine constructions in the tests with the fixture.
 - **Acceptance criteria:**
-  - [ ] No test builds `CheckingAccountService` directly; `./mvnw verify` green with the same number of tests.
+  - [x] No test builds `CheckingAccountService` directly; `./mvnw verify` green with the same number of tests. (14 constructions in 9 test classes replaced; 1,035 test cases green)
 
 ### [ ] T3 — Extract `AccountViews` (~5 min)
 

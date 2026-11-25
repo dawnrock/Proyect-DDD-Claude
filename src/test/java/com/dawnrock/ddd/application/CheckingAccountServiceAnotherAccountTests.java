@@ -2,26 +2,20 @@ package com.dawnrock.ddd.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
-import java.time.Clock;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
-import com.dawnrock.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.dawnrock.ddd.domain.model.AccountNumber;
-import com.dawnrock.ddd.domain.model.CheckingAccountFactory;
 import com.dawnrock.ddd.domain.model.CheckingAccountRepository;
 import com.dawnrock.ddd.domain.model.CurrencyMismatchException;
-import com.dawnrock.ddd.domain.model.DomainEventPublisher;
 import com.dawnrock.ddd.domain.model.InsufficientInitialDepositException;
 import com.dawnrock.ddd.domain.model.TaxId;
-import com.dawnrock.ddd.domain.service.MoneyTransferService;
-import com.dawnrock.ddd.domain.service.SegmentReviewService;
+import com.dawnrock.ddd.support.ApplicationServicesFixture;
 
 /** Abrir otra cuenta un cliente que ya tiene una: el titular sale de sus datos de cliente. */
 class CheckingAccountServiceAnotherAccountTests {
@@ -37,13 +31,7 @@ class CheckingAccountServiceAnotherAccountTests {
     @BeforeEach
     void setUp() {
         accounts = PersistenceTestAdapters.accounts();
-        service = new CheckingAccountService(accounts, PersistenceTestAdapters.ownership(),
-                mock(DomainEventPublisher.class),
-                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(),
-                        TaxAgencyTestAdapters.incomeVerifier()),
-                new MoneyTransferService(), new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()),
-                Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(), PersistenceTestAdapters.customers(),
-                PersistenceTestAdapters.customerOwnership());
+        service = ApplicationServicesFixture.builder().accounts(accounts).build().service();
         first = service.signUp(SignUpCommand.builder().fullName("Ada Lovelace").taxId("12345678Z")
                 .email("ada@example.com").username("ada").initialDeposit(new BigDecimal("1000")).build());
     }

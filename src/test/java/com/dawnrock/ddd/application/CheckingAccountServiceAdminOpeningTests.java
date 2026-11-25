@@ -3,10 +3,8 @@ package com.dawnrock.ddd.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
-import java.time.Clock;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,18 +13,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
-import com.dawnrock.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
-import com.dawnrock.ddd.domain.model.CheckingAccountFactory;
 import com.dawnrock.ddd.domain.model.CheckingAccountRepository;
 import com.dawnrock.ddd.domain.model.CurrencyMismatchException;
 import com.dawnrock.ddd.domain.model.Customer;
 import com.dawnrock.ddd.domain.model.CustomerRepository;
-import com.dawnrock.ddd.domain.model.DomainEventPublisher;
 import com.dawnrock.ddd.domain.model.EmailAddress;
 import com.dawnrock.ddd.domain.model.InsufficientInitialDepositException;
 import com.dawnrock.ddd.domain.model.TaxId;
-import com.dawnrock.ddd.domain.service.MoneyTransferService;
-import com.dawnrock.ddd.domain.service.SegmentReviewService;
+import com.dawnrock.ddd.support.ApplicationServicesFixture;
 
 /**
  * Alta de cuenta del administrador para un cliente nuevo o existente, identificado por su documento (contrato
@@ -47,12 +41,12 @@ class CheckingAccountServiceAdminOpeningTests {
         accounts = PersistenceTestAdapters.accounts();
         customers = PersistenceTestAdapters.customers();
         customerOwners = PersistenceTestAdapters.customerOwnership();
-        service = new CheckingAccountService(accounts, PersistenceTestAdapters.ownership(),
-                mock(DomainEventPublisher.class),
-                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(),
-                        TaxAgencyTestAdapters.incomeVerifier()),
-                new MoneyTransferService(), new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()),
-                Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(), customers, customerOwners);
+        service = ApplicationServicesFixture.builder()
+                .accounts(accounts)
+                .customers(customers)
+                .customerOwnership(customerOwners)
+                .build()
+                .service();
     }
 
     private static OpenAccountCommand.Builder command() {

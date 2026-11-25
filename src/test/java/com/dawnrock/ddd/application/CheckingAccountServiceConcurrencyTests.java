@@ -2,7 +2,6 @@ package com.dawnrock.ddd.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.Clock;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +15,8 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
-import com.dawnrock.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
-import com.dawnrock.ddd.domain.model.CheckingAccountFactory;
 import com.dawnrock.ddd.domain.model.DomainEventPublisher;
-import com.dawnrock.ddd.domain.service.MoneyTransferService;
-import com.dawnrock.ddd.domain.service.SegmentReviewService;
+import com.dawnrock.ddd.support.ApplicationServicesFixture;
 
 /**
  * Operaciones simultáneas sobre las mismas cuentas (#78): el servicio real con los adaptadores en memoria, sin Spring.
@@ -39,11 +34,7 @@ class CheckingAccountServiceConcurrencyTests {
 
     private static CheckingAccountService newService() {
         DomainEventPublisher ignoreEvents = events -> { };
-        return new CheckingAccountService(PersistenceTestAdapters.accounts(), PersistenceTestAdapters.ownership(),
-                ignoreEvents, new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(),
-                        TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(),
-                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
+        return ApplicationServicesFixture.builder().publisher(ignoreEvents).build().service();
     }
 
     private static AccountSummary open(CheckingAccountService service, String holder, String taxId, String owner) {

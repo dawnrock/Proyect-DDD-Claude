@@ -2,9 +2,7 @@ package com.dawnrock.ddd.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.mock;
 
-import java.time.Clock;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -14,13 +12,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
-import com.dawnrock.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
-import com.dawnrock.ddd.domain.model.DomainEventPublisher;
 import com.dawnrock.ddd.domain.model.CheckingAccountRepository;
 import com.dawnrock.ddd.support.TestAccounts;
-import com.dawnrock.ddd.domain.model.CheckingAccountFactory;
-import com.dawnrock.ddd.domain.service.MoneyTransferService;
-import com.dawnrock.ddd.domain.service.SegmentReviewService;
+import com.dawnrock.ddd.support.ApplicationServicesFixture;
 
 /**
  * Reglas de propiedad de las cuentas (#50): un administrador accede a todo; un usuario solo a sus cuentas, y una ajena
@@ -40,10 +34,7 @@ class CheckingAccountServiceOwnershipTests {
     void setUp() {
         accounts = PersistenceTestAdapters.accounts();
         owners = PersistenceTestAdapters.ownership();
-        service = new CheckingAccountService(accounts, owners, mock(DomainEventPublisher.class),
-                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(),
-                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
+        service = ApplicationServicesFixture.builder().accounts(accounts).ownership(owners).build().service();
     }
 
     /** Un cliente por propietario: cada usuario es de un único cliente (R30). */

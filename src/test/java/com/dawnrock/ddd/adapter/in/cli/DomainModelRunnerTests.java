@@ -2,9 +2,7 @@ package com.dawnrock.ddd.adapter.in.cli;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.mockito.Mockito.mock;
 
-import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,21 +21,15 @@ import com.dawnrock.ddd.application.CallerDef;
 import com.dawnrock.ddd.application.CheckingAccountCommands;
 import com.dawnrock.ddd.application.CheckingAccountService;
 import com.dawnrock.ddd.application.TransactionSummary;
-import com.dawnrock.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
-import com.dawnrock.ddd.domain.model.DomainEventPublisher;
 import com.dawnrock.ddd.domain.model.CheckingAccountFactory;
-import com.dawnrock.ddd.domain.service.MoneyTransferService;
-import com.dawnrock.ddd.domain.service.SegmentReviewService;
+import com.dawnrock.ddd.support.ApplicationServicesFixture;
 
 @ExtendWith(OutputCaptureExtension.class)
 class DomainModelRunnerTests {
 
     private final AccountOwnershipRepository ownership = PersistenceTestAdapters.ownership();
     private final CheckingAccountService service =
-            new CheckingAccountService(PersistenceTestAdapters.accounts(), ownership, mock(DomainEventPublisher.class),
-                    new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(),
-                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
+            ApplicationServicesFixture.builder().ownership(ownership).build().service();
     /** El runner solo recibe el puerto de commands; el servicio concreto se usa aquí solo para consultar. */
     private final CheckingAccountCommands commands = service;
 
@@ -69,10 +61,11 @@ class DomainModelRunnerTests {
     @Test
     @DisplayName("El segmento lo decide la agencia tributaria: sin ingresos verificados las tres cuentas son minoristas")
     void theTaxAgencyDecidesTheSegment() {
-        CheckingAccountService withoutIncomes = new CheckingAccountService(PersistenceTestAdapters.accounts(), ownership,
-                mock(DomainEventPublisher.class), new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), taxId -> Optional.empty()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(),
-                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
+        CheckingAccountService withoutIncomes = ApplicationServicesFixture.builder()
+                .ownership(ownership)
+                .factory(new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), taxId -> Optional.empty()))
+                .build()
+                .service();
 
         new DomainModelRunner(withoutIncomes, withoutIncomes).run(new DefaultApplicationArguments());
 

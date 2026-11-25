@@ -49,9 +49,8 @@ import com.dawnrock.ddd.domain.model.WithdrawalRejected;
 import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
 import com.dawnrock.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.dawnrock.ddd.domain.model.CheckingAccountFactory;
-import com.dawnrock.ddd.domain.service.MoneyTransferService;
-import com.dawnrock.ddd.domain.service.SegmentReviewService;
 import com.dawnrock.ddd.support.MutableClock;
+import com.dawnrock.ddd.support.ApplicationServicesFixture;
 
 /** Casos de uso con el adaptador en memoria real detrás de los puertos: no hace falta simularlo. */
 class CheckingAccountServiceTests {
@@ -71,10 +70,12 @@ class CheckingAccountServiceTests {
         clock = new MutableClock();
         repository = spy(PersistenceTestAdapters.accounts());
         publisher = mock(DomainEventPublisher.class);
-        service = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(), publisher,
-                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), clock, PersistenceTestAdapters.unitOfWork(),
-                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
+        service = ApplicationServicesFixture.builder()
+                .accounts(repository)
+                .publisher(publisher)
+                .clock(clock)
+                .build()
+                .service();
     }
 
     /** Eventos publicados en cada llamada a {@code publishAll}, en orden. */
@@ -149,10 +150,13 @@ class CheckingAccountServiceTests {
         @DisplayName("Un número generado que ya está en uso se rechaza y no se guarda")
         void aGeneratedNumberAlreadyInUseIsRejected() {
             String used = service.openAccount(ADMIN, command().build()).accountNumber();
-            CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
-                    publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), clock, PersistenceTestAdapters.unitOfWork(),
-                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
+            CheckingAccountService faulty = ApplicationServicesFixture.builder()
+                    .accounts(repository)
+                    .publisher(publisher)
+                    .factory(new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()))
+                    .clock(clock)
+                    .build()
+                    .service();
 
             assertThatExceptionOfType(DuplicateAccountNumberException.class)
                     .isThrownBy(() -> faulty.openAccount(ADMIN, byTaxId("87654321X").build()))
@@ -446,10 +450,13 @@ class CheckingAccountServiceTests {
         @DisplayName("Un caso de uso que falla antes de guardar no publica nada")
         void aUseCaseFailingBeforeSavingPublishesNothing() {
             String used = service.openAccount(ADMIN, command().build()).accountNumber();
-            CheckingAccountService faulty = new CheckingAccountService(repository, PersistenceTestAdapters.ownership(),
-                    publisher, new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), clock, PersistenceTestAdapters.unitOfWork(),
-                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
+            CheckingAccountService faulty = ApplicationServicesFixture.builder()
+                    .accounts(repository)
+                    .publisher(publisher)
+                    .factory(new CheckingAccountFactory(() -> new AccountNumber(used), TaxAgencyTestAdapters.incomeVerifier()))
+                    .clock(clock)
+                    .build()
+                    .service();
             clearInvocations(publisher);
 
             assertThatExceptionOfType(DuplicateAccountNumberException.class)
@@ -665,11 +672,12 @@ class CheckingAccountServiceTests {
                     publishedOutsideUnit.set(true);
                 }
             };
-            recorded = new CheckingAccountService(PersistenceTestAdapters.accounts(), PersistenceTestAdapters.ownership(),
-                    recordingPublisher, new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(),
-                            TaxAgencyTestAdapters.incomeVerifier()), new MoneyTransferService(),
-                new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()), clock, unit,
-                PersistenceTestAdapters.customers(), PersistenceTestAdapters.customerOwnership());
+            recorded = ApplicationServicesFixture.builder()
+                    .publisher(recordingPublisher)
+                    .clock(clock)
+                    .unitOfWork(unit)
+                    .build()
+                    .service();
         }
 
         @Test

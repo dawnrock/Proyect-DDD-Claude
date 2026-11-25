@@ -2,7 +2,6 @@ package com.dawnrock.ddd.adapter.in;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -30,19 +29,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
-import com.dawnrock.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
 import com.dawnrock.ddd.application.CheckingAccountService;
 import com.dawnrock.ddd.application.OpenAccountCommand;
 import com.dawnrock.ddd.application.SignUpCommand;
-import com.dawnrock.ddd.domain.model.CheckingAccountFactory;
 import com.dawnrock.ddd.domain.model.CheckingAccountRepository;
-import com.dawnrock.ddd.domain.model.DomainEventPublisher;
 import com.dawnrock.ddd.domain.model.DuplicateCustomerException;
 import com.dawnrock.ddd.domain.model.InsufficientInitialDepositException;
-import com.dawnrock.ddd.domain.service.MoneyTransferService;
-import com.dawnrock.ddd.domain.service.SegmentReviewService;
+import com.dawnrock.ddd.support.ApplicationServicesFixture;
 
 /** Alta con usuario: la aplicación no conoce Spring Security, así que las credenciales se crean aquí. */
 class CustomerRegistrationTests {
@@ -71,13 +66,7 @@ class CustomerRegistrationTests {
 
     private CustomerRegistration registrationWith(InMemoryUserDetailsManager manager, SignUpLimitProperties limits) {
         limit = new SignUpLimit(limits, Clock.fixed(Instant.parse("2026-11-23T10:00:00Z"), ZoneOffset.UTC));
-        service = new CheckingAccountService(accounts, PersistenceTestAdapters.ownership(),
-                mock(DomainEventPublisher.class),
-                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(),
-                        TaxAgencyTestAdapters.incomeVerifier()),
-                new MoneyTransferService(), new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()),
-                Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(), PersistenceTestAdapters.customers(),
-                PersistenceTestAdapters.customerOwnership());
+        service = ApplicationServicesFixture.builder().accounts(accounts).build().service();
         return new CustomerRegistration(service, service, manager, encoder, limit);
     }
 

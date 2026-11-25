@@ -2,10 +2,8 @@ package com.dawnrock.ddd.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
-import java.time.Clock;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,10 +15,8 @@ import com.dawnrock.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.dawnrock.ddd.domain.model.AccountNumber;
 import com.dawnrock.ddd.domain.model.CheckingAccountFactory;
 import com.dawnrock.ddd.domain.model.CheckingAccountRepository;
-import com.dawnrock.ddd.domain.model.DomainEventPublisher;
-import com.dawnrock.ddd.domain.service.MoneyTransferService;
-import com.dawnrock.ddd.domain.service.SegmentReviewService;
 import com.dawnrock.ddd.support.TestAccounts;
+import com.dawnrock.ddd.support.ApplicationServicesFixture;
 
 /** El administrador sustituye el IBAN de una cuenta por otro que genera el banco (R32). */
 class CheckingAccountServiceRegenerateAccountNumberTests {
@@ -35,13 +31,7 @@ class CheckingAccountServiceRegenerateAccountNumberTests {
     @BeforeEach
     void setUp() {
         accounts = PersistenceTestAdapters.accounts();
-        service = new CheckingAccountService(accounts, PersistenceTestAdapters.ownership(),
-                mock(DomainEventPublisher.class),
-                new CheckingAccountFactory(PersistenceTestAdapters.accountNumbers(),
-                        TaxAgencyTestAdapters.incomeVerifier()),
-                new MoneyTransferService(), new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()),
-                Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(), PersistenceTestAdapters.customers(),
-                PersistenceTestAdapters.customerOwnership());
+        service = ApplicationServicesFixture.builder().accounts(accounts).build().service();
         account = service.signUp(SignUpCommand.builder().fullName("Ada Lovelace").taxId("12345678Z")
                 .email("ada@example.com").username("ada").initialDeposit(new BigDecimal("1000")).build());
     }
@@ -100,13 +90,11 @@ class CheckingAccountServiceRegenerateAccountNumberTests {
     void whenTheGeneratedNumberIsAlreadyUsedTheAccountKeepsItsOwn() {
         UUID id = accounts.save(TestAccounts.anAccount().accountNumber("ES9121000418450200051332").open()).id();
         AccountNumber used = new AccountNumber("ES9121000418450200051332");
-        CheckingAccountService faulty = new CheckingAccountService(accounts, PersistenceTestAdapters.ownership(),
-                mock(DomainEventPublisher.class),
-                new CheckingAccountFactory(() -> new AccountNumber(account.accountNumber()),
-                        TaxAgencyTestAdapters.incomeVerifier()),
-                new MoneyTransferService(), new SegmentReviewService(TaxAgencyTestAdapters.incomeVerifier()),
-                Clock.systemUTC(), PersistenceTestAdapters.unitOfWork(), PersistenceTestAdapters.customers(),
-                PersistenceTestAdapters.customerOwnership());
+        CheckingAccountService faulty = ApplicationServicesFixture.builder()
+                .accounts(accounts)
+                .factory(new CheckingAccountFactory(() -> new AccountNumber(account.accountNumber()), TaxAgencyTestAdapters.incomeVerifier()))
+                .build()
+                .service();
 
         assertThatExceptionOfType(com.dawnrock.ddd.domain.model.DuplicateAccountNumberException.class)
                 .isThrownBy(() -> faulty.regenerateAccountNumber(ADMIN, id));
