@@ -37,7 +37,7 @@ import com.dawnrock.ddd.domain.model.AccountNumber;
 import com.dawnrock.ddd.domain.model.SameAccountTransferException;
 
 /** Transferencias desde el detalle de la cuenta (#177): envío, errores y respuestas a htmx. */
-@WebMvcTest({TransferWebController.class, AccountNumberWebController.class, AccountDetailController.class, AccountWebController.class})
+@WebMvcTest({TransferWebController.class, AccountNumberWebController.class, OpenAccountWebController.class, AccountDetailController.class, AccountWebController.class})
 @WithMockUser(username = "admin", roles = "ADMIN")
 class TransferWebControllerTests extends AccountWebTestSupport {
 

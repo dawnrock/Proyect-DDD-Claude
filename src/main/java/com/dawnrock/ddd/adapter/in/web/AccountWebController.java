@@ -39,8 +39,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AccountWebController {
 
-    private static final String FORM_VIEW = "accounts/new";
-
     private static final String ANOTHER_VIEW = "accounts/another";
 
     private final AccountOpeningCommands commands;
@@ -91,51 +89,6 @@ public class AccountWebController {
         }
         addFormOptions(model);
         return ANOTHER_VIEW;
-    }
-
-    @GetMapping("/accounts/new")
-    public String newAccountForm(Model model) {
-        model.addAttribute("form", new OpenAccountForm());
-        addFormOptions(model);
-        return FORM_VIEW;
-    }
-
-    @PostMapping("/accounts/new")
-    public String openAccount(@Valid @ModelAttribute("form") OpenAccountForm form, BindingResult result,
-                              Model model, RedirectAttributes redirect, Authentication authentication) {
-        OpenAccountCommand command = result.hasErrors() ? null : toCommand(form, result);
-        if (command != null) {
-            try {
-                AccountSummary account = commands.openAccount(CurrentCaller.from(authentication), command);
-                redirect.addFlashAttribute("message", "Cuenta %s abierta correctamente como %s"
-                        .formatted(account.accountNumber(), fmt.segment(account.segment())));
-                return "redirect:/";
-            } catch (DomainException | IllegalArgumentException e) {
-                result.reject("domain", e.getMessage());
-            }
-        }
-        addFormOptions(model);
-        return FORM_VIEW;
-    }
-
-    /**
-     * Construye el command, o deja el error en el formulario y devuelve {@code null} si lo rechaza (por ejemplo,
-     * una divisa con formato válido pero que no existe): es la red de seguridad de la validación del formulario.
-     */
-    private OpenAccountCommand toCommand(OpenAccountForm form, BindingResult result) {
-        try {
-            return OpenAccountCommand.builder()
-                    .holderTaxId(form.getHolderTaxId())
-                    .holderName(Objects.requireNonNullElse(form.getHolderName(), ""))
-                    .holderEmail(Objects.requireNonNullElse(form.getHolderEmail(), ""))
-                    .initialDeposit(form.getInitialDeposit())
-                    .currency(form.getCurrency())
-                    .ownerUsername(Objects.requireNonNullElse(form.getOwnerUsername(), ""))
-                    .build();
-        } catch (IllegalArgumentException e) {
-            result.reject("invalid", e.getMessage());
-            return null;
-        }
     }
 
     private void addFormOptions(Model model) {

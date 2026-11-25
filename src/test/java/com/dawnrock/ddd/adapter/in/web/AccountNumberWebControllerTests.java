@@ -30,7 +30,7 @@ import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
 
 /** El administrador sustituye el IBAN de una cuenta por otro generado (#95, R31); un cliente no puede. */
-@WebMvcTest({AccountWebController.class, AccountDetailController.class, DepositWebController.class, WithdrawalWebController.class, TransferWebController.class, AccountNumberWebController.class, AccountListController.class})
+@WebMvcTest({AccountWebController.class, AccountDetailController.class, DepositWebController.class, WithdrawalWebController.class, TransferWebController.class, AccountNumberWebController.class, OpenAccountWebController.class, AccountListController.class})
 class AccountNumberWebControllerTests extends AccountWebTestSupport {
 
     private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();

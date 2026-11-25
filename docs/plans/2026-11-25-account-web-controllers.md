@@ -157,7 +157,7 @@
 - **Acceptance criteria:**
   - [x] Renamed tests pass. (1,049 test cases, unchanged)
 
-### [ ] T10 — `OpenAccountWebController` (~10 min)
+### [x] T10 — `OpenAccountWebController` (~10 min)
 
 - **Layer:** adapter.in · tests
 - **Files:** `OpenAccountWebController.java` (new), `AccountWebController.java`, `OpenAccountWebControllerTests.java`
@@ -165,7 +165,7 @@
 - **What to do:**
   1. Move `GET`/`POST /accounts/new` and `toCommand`; move `Alta`, `ErroresDelAlta` and `UsuarioDelTitularEnMinusculas`.
 - **Acceptance criteria:**
-  - [ ] Moved tests pass.
+  - [x] Moved tests pass. (1,049 test cases, unchanged)
 
 ### [ ] T11 — `AnotherAccountWebController`; delete `AccountWebController` (~10 min)
 
