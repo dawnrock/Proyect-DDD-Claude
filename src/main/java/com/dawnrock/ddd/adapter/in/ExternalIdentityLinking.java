@@ -37,11 +37,13 @@ public class ExternalIdentityLinking {
      *                                                                             correctos (cuenta como intento fallido)
      * @throws TooManyLoginAttemptsException si el usuario o la IP están bloqueados
      * @throws IdentityAlreadyLinkedException si el usuario ya tiene otra identidad de Auth0
-     * @throws IllegalStateException si la identidad pendiente ha caducado
+     * @throws org.springframework.security.core.AuthenticationException si la cuenta local está deshabilitada, bloqueada
+     *                                                                    o caducada
+     * @throws PendingIdentityExpiredException si la identidad pendiente ha caducado (no cuenta como intento)
      */
     public String link(PendingIdentity pending, String username, String rawPassword, String clientIp) {
         if (pending.isExpired(clock.getIfAvailable(Clock::systemUTC))) {
-            throw new IllegalStateException("La identidad pendiente de " + pending.provider() + " ha caducado");
+            throw new PendingIdentityExpiredException(pending.provider());
         }
         UsernamePasswordAuthenticationToken attempt =
                 UsernamePasswordAuthenticationToken.unauthenticated(Usernames.normalize(username), rawPassword);

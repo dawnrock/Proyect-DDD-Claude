@@ -77,7 +77,8 @@ Web reads the optional beans with `ObjectProvider`, so every `@WebMvcTest` that 
 | `UnlinkedIdentityException` | Auth0 identity not linked | the failure handler stores `pending()` in the session (`PendingIdentity.SESSION_ATTRIBUTE`) and redirects to `/login/link` | n/a |
 | other `AuthenticationException` from the OAuth2 login (state, token, `invalid_user` for a missing or disabled local user…) | Auth0 callback fails | redirect to `/login?oauth-error`: form with «No se pudo iniciar sesión con Auth0. Inténtalo de nuevo.» | n/a |
 | no pending identity, or `isExpired` | `GET`/`POST /login/link` | redirect to `/login?link-expired`: form with «Vuelve a entrar con Auth0 para vincular tu usuario.» | n/a |
-| `BadCredentialsException` | wrong username or password on the link page | link page again (200) with «Usuario o contraseña incorrectos» | n/a |
+| `AuthenticationException` (`BadCredentialsException`, `DisabledException`, `LockedException`…) | wrong username or password, or a disabled, locked or expired local account | link page again (200) with «Usuario o contraseña incorrectos» (same notice for all, like the login) | n/a |
+| `PendingIdentityExpiredException` | the pending identity expired while the customer was typing | removes it and redirects to `/login?link-expired` | n/a |
 | `TooManyLoginAttemptsException` | user + IP or IP blocked (ADR 0017) | link page again (200) with the login's blocking message (minutes from `LoginAttemptsProperties`) | n/a |
 | `IdentityAlreadyLinkedException` | the user already has another Auth0 identity | link page again (200) with «Ese usuario ya está vinculado a otra cuenta de Auth0» | n/a |
 
@@ -121,6 +122,7 @@ The username of the link form is stripped and lower-cased like `SignUpForm` (#15
 
 <!-- Each renegotiation: date, who asked, what changed and why. -->
 
+- 2026-11-26, lead, after the `revisor-ddd` review: an expired pending identity throws its own `PendingIdentityExpiredException` (it was `IllegalStateException`, which also caught configuration errors), and the link page treats every `AuthenticationException` as a wrong password (a disabled account answered 500 and revealed its state).
 - 2026-11-26, lead, integration (T11): PKCE **is** the default for confidential clients in Spring Security 7.1.1: `DefaultOAuth2AuthorizationRequestResolver` applies it when the method is `NONE` **or** `ClientSettings.isRequireProofKey()`, which defaults to `true` (the review only saw the first branch; found when the end-to-end test stayed green with the customizer removed). The custom resolver is dropped and `Auth0ClientRegistration` declares `requireProofKey(true)`, so PKCE does not depend on that default; the S256 tests stay.
 - 2026-11-26, review round 1 (lead merged both reviews; no disagreement):
   - PKCE is explicit in `WebSecurityConfig` (both: not the default for `client_secret_basic` in 7.1.1).

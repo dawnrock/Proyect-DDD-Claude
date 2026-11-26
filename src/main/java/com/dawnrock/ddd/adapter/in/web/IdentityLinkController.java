@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,6 +22,7 @@ import com.dawnrock.ddd.adapter.in.ExternalIdentityLinking;
 import com.dawnrock.ddd.adapter.in.IdentityAlreadyLinkedException;
 import com.dawnrock.ddd.adapter.in.LoginAttemptsProperties;
 import com.dawnrock.ddd.adapter.in.PendingIdentity;
+import com.dawnrock.ddd.adapter.in.PendingIdentityExpiredException;
 import com.dawnrock.ddd.adapter.in.TooManyLoginAttemptsException;
 
 /**
@@ -89,13 +90,15 @@ public class IdentityLinkController {
             model.addAttribute("linkError",
                     "Demasiados intentos fallidos. Vuelve a intentarlo dentro de %d minutos.".formatted(lockoutMinutes));
             return VIEW;
-        } catch (BadCredentialsException e) {
+        } catch (AuthenticationException e) {
+            // Contraseña errónea o cuenta deshabilitada, bloqueada o caducada: el mismo aviso, como el login, para no
+            // revelar el estado de una cuenta a quien no sabe su contraseña
             model.addAttribute("linkError", "Usuario o contraseña incorrectos");
             return VIEW;
         } catch (IdentityAlreadyLinkedException e) {
             model.addAttribute("linkError", "Ese usuario ya está vinculado a otra cuenta de Auth0");
             return VIEW;
-        } catch (IllegalStateException e) {
+        } catch (PendingIdentityExpiredException e) {
             // La identidad pendiente caducó mientras el cliente escribía
             session.removeAttribute(PendingIdentity.SESSION_ATTRIBUTE);
             return LINK_EXPIRED;

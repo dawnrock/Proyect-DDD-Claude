@@ -39,9 +39,4 @@ public record Auth0Properties(String domain, String clientId, String clientSecre
             throw new IllegalStateException("Configuración de Auth0 incompleta: faltan " + String.join(", ", missing));
         }
     }
-
-    /** Si están los tres valores. */
-    public boolean isConfigured() {
-        return !domain.isEmpty();
-    }
 }

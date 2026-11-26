@@ -213,6 +213,18 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **Acceptance criteria:**
   - [ ] Docs in English; CI's status check passes.
 
+### [x] T13 — Review fixes (~10 min)
+
+- **Side:** both
+- **Layer:** adapter.in · adapter.in.web · docs
+- **Files:** `PendingIdentityExpiredException` (new), `ExternalIdentityLinking`, `IdentityLinkController`, `Auth0Properties`; their tests; ADR 0024 and the contract
+- **Depends on:** T11
+- **What to do:**
+  1. `revisor-ddd` findings: the link page treats every `AuthenticationException` as a wrong password (a disabled account answered 500 and revealed its state); an expired pending identity throws its own exception instead of `IllegalStateException`; `Auth0Properties.isConfigured()` was unused; the ADR says the link page is the only password check left once #199 turns the form login off, and how the 10 minutes are enforced.
+- **Acceptance criteria:**
+  - [x] A disabled local account on the link page gets «Usuario o contraseña incorrectos» (200), seen red first.
+  - [x] An expired pending identity throws `PendingIdentityExpiredException` and the page redirects to `/login?link-expired`, seen red first.
+
 ## Global acceptance criteria
 
 **Specific:**

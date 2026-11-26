@@ -111,12 +111,12 @@ class ExternalIdentityLinkingTests {
     }
 
     @Test
-    @DisplayName("Una identidad pendiente caducada lanza IllegalStateException sin comprobar la contraseña")
+    @DisplayName("Una identidad pendiente caducada se rechaza como caducada sin comprobar la contraseña")
     void anExpiredPendingIdentityThrowsWithoutCheckingThePassword() {
         PendingIdentity expired = new PendingIdentity(ExternalIdentities.AUTH0, SUB, null,
                 NOW.minus(PendingIdentity.VALIDITY));
 
-        assertThatExceptionOfType(IllegalStateException.class)
+        assertThatExceptionOfType(PendingIdentityExpiredException.class)
                 .isThrownBy(() -> linking.link(expired, "ada", "mala", IP));
         assertThat(attempts.lockedFor("ada", IP)).isEmpty();
         assertThat(identities.usernameOf(ExternalIdentities.AUTH0, SUB)).isEmpty();

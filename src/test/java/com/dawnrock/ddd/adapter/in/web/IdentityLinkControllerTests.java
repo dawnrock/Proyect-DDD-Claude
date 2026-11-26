@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -39,6 +40,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import com.dawnrock.ddd.adapter.in.ExternalIdentityLinking;
 import com.dawnrock.ddd.adapter.in.IdentityAlreadyLinkedException;
 import com.dawnrock.ddd.adapter.in.PendingIdentity;
+import com.dawnrock.ddd.adapter.in.PendingIdentityExpiredException;
 import com.dawnrock.ddd.adapter.in.SecuritySupport;
 import com.dawnrock.ddd.adapter.in.TestUsers;
 import com.dawnrock.ddd.adapter.in.TooManyLoginAttemptsException;
@@ -171,7 +173,7 @@ class IdentityLinkControllerTests {
     @DisplayName("Si la identidad pendiente caduca al vincular, lleva a /login?link-expired")
     void anIdentityThatExpiresWhileLinkingRedirectsToLinkExpired() throws Exception {
         when(linking.link(any(), anyString(), anyString(), anyString()))
-                .thenThrow(new IllegalStateException("caducada"));
+                .thenThrow(new PendingIdentityExpiredException("auth0"));
 
         mvc.perform(submit("ada", "secreto-123"))
                 .andExpect(redirectedUrl("/login?link-expired"));
@@ -204,6 +206,18 @@ class IdentityLinkControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(
                         "Demasiados intentos fallidos. Vuelve a intentarlo dentro de 30 minutos.")));
+    }
+
+    @Test
+    @DisplayName("Una cuenta local deshabilitada recibe el mismo aviso que una contraseña errónea, sin revelar su estado")
+    void aDisabledLocalAccountGetsTheSameNoticeAsAWrongPassword() throws Exception {
+        when(linking.link(any(), anyString(), anyString(), anyString()))
+                .thenThrow(new DisabledException("deshabilitada"));
+
+        mvc.perform(submit("ada", "x"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Usuario o contraseña incorrectos")))
+                .andExpect(content().string(not(containsString("deshabilitada"))));
     }
 
     @Test
