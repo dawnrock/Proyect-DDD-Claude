@@ -97,6 +97,13 @@ class Auth0ClientRegistrationTests {
         }
 
         @Test
+        @DisplayName("el registro exige PKCE aunque el cliente sea confidencial")
+        void theRegistrationRequiresPkceAlthoughTheClientIsConfidential() {
+            configured.run(context -> assertThat(context.getBean(ClientRegistrationRepository.class)
+                    .findByRegistrationId(ExternalIdentities.AUTH0).getClientSettings().isRequireProofKey()).isTrue());
+        }
+
+        @Test
         @DisplayName("también hay un LinkedOidcUserService que traduce el sub al usuario local")
         void thereIsAlsoALinkedOidcUserService() {
             configured.run(context -> assertThat(context).hasSingleBean(LinkedOidcUserService.class));

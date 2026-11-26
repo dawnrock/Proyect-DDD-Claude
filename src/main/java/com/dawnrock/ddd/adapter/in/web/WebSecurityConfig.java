@@ -11,8 +11,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizers;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -84,20 +82,16 @@ public class WebSecurityConfig {
     }
 
     /**
-     * El inicio de sesión con Auth0 (#196, ADR 0024), solo si hay un registro de cliente. Spring Security no aplica PKCE
-     * por defecto a un cliente confidencial ({@code client_secret_basic}): se activa en el resolvedor. El usuario lo da
+     * El inicio de sesión con Auth0 (#196, ADR 0024), solo si hay un registro de cliente. PKCE lo declara el propio
+     * registro ({@code requireProofKey}, en {@code Auth0ClientRegistration}), y Spring lo aplica. El usuario lo da
      * {@link LinkedOidcUserService} (el usuario local vinculado al {@code sub}); si no hay vínculo, el manejador de
      * fallos lleva a {@code /login/link}.
      */
     private static void oauth2Login(HttpSecurity http, ClientRegistrationRepository registrations,
                                     LinkedOidcUserService oidcUsers) throws Exception {
-        DefaultOAuth2AuthorizationRequestResolver resolver = new DefaultOAuth2AuthorizationRequestResolver(
-                registrations, "/oauth2/authorization");
-        resolver.setAuthorizationRequestCustomizer(OAuth2AuthorizationRequestCustomizers.withPkce());
         http.oauth2Login(login -> login
                 .loginPage("/login")
                 .defaultSuccessUrl("/", true)
-                .authorizationEndpoint(endpoint -> endpoint.authorizationRequestResolver(resolver))
                 .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUsers))
                 .failureHandler(new OAuth2LoginFailureHandler()));
     }

@@ -48,6 +48,9 @@ public class Auth0ClientRegistration {
                 .clientId(properties.clientId())
                 .clientSecret(properties.clientSecret())
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                // PKCE también para este cliente confidencial: es el valor por defecto de Spring Security 7.1, pero se
+                // declara para no depender de él
+                .clientSettings(ClientRegistration.ClientSettings.builder().requireProofKey(true).build())
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
                 .scope("openid", "profile", "email")
