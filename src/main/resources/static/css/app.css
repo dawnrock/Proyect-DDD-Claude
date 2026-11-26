@@ -240,15 +240,15 @@ body:has(> main.welcome) .backdrop svg { top: -36vh; height: 170vh; }
    mínima por tan 12,4° ≈ 0,22. Como el clip-path recortaría también un contorno, el foco es un ::after con la misma
    forma, en anillo (evenodd) y separado 3 px de la puerta. */
 .door {
-    --door-run: calc(5.25rem * 0.22);
+    --door-run: calc(var(--door-h) * 0.22);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
     gap: 0.2rem;
     width: 100%;
-    min-height: 5.25rem;
-    padding: 0.85rem 2.5rem 0.85rem 2.25rem;
+    min-height: var(--door-h);
+    padding: 0.6rem 1.5rem 0.6rem 1.9rem;
     text-align: left;
 }
 .door::before {
@@ -270,15 +270,18 @@ body:has(> main.welcome) .backdrop svg { top: -36vh; height: 170vh; }
 /* La de abajo, más ancha: sus lados siguen la inclinación de los de arriba, como una sola A partida en dos. Se ensancha
    lo que bajan esos lados en el hueco entre las dos y en su propia altura; el texto no se mueve. */
 .door + .door {
-    --door-reach: calc((0.9rem + 5.25rem) * 0.22);
+    --door-reach: calc((var(--door-gap) + var(--door-h)) * 0.22);
     width: calc(100% + 2 * var(--door-reach));
     margin-inline: calc(-1 * var(--door-reach));
-    padding-left: calc(2.25rem + var(--door-reach));
+    padding-left: calc(1.9rem + var(--door-reach));
 }
 .door:focus-visible::before { outline: none; }
 .door:focus-visible::after { display: block; }
-.door-title { font-size: 1.25rem; font-weight: 700; }
-.door-hint { font-family: var(--mona-text); font-weight: 400; font-size: 0.8125rem; opacity: 0.8; }
+.door-title { font-size: 1.1rem; font-weight: 700; }
+.door-hint { font-family: var(--mona-text); font-weight: 400; font-size: 0.78rem; opacity: 0.8; }
+/* En pantallas muy estrechas la ayuda baja un punto para caber en una línea: si se partiera, la puerta crecería y sus
+   lados dejarían de tener la inclinación de la A. */
+@media (max-width: 340px) { .door-hint { font-size: 0.7rem; } }
 
 /* Tarjetas con el borde derecho inclinado como la pata derecha de la A (#185). El foco se marca por dentro, porque el
    clip-path recortaría el contorno. */
@@ -357,7 +360,12 @@ main.welcome {
 .welcome-head { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 0.5rem 0.8rem; text-align: center; }
 .brand-hero { display: block; width: min(42vw, 10.25rem); height: auto; aspect-ratio: 701.5 / 236.96; }   /* la intro lo mide antes de que cargue */
 .welcome-title { margin: 0; font-size: min(7.4vw, 1.8rem); line-height: 1; }
-.doors { width: 100%; display: flex; flex-direction: column; gap: 0.9rem; padding-inline: 0.5rem; }
+@media (max-width: 340px) {   /* en pantallas muy estrechas, más pequeños para seguir en una línea */
+    .welcome-title { font-size: 6.6vw; }
+    .brand-hero { width: 38vw; }
+}
+/* Altura y separación de las puertas: de ellas sale la inclinación de sus lados (12,4°, la de la A). */
+.doors { --door-h: 4.25rem; --door-gap: 0.75rem; width: 100%; display: flex; flex-direction: column; gap: var(--door-gap); padding-inline: min(2rem, 4.5vw); }
 
 /* Listado de cuentas (#185): saldo total grande, tarjetas inclinadas y la acción principal a todo el ancho. */
 .total-balance { font-size: clamp(2.25rem, 10vw, 3rem); line-height: 1.05; letter-spacing: -0.015em; }
