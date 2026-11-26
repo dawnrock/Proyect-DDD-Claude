@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-26
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~100 min (10 tasks)
 
 ## Goal
@@ -56,7 +56,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 
 ## Tasks
 
-### [ ] T1 — `Auth0Properties`: audience and Swagger UI client (~5 min)
+### [x] T1 — `Auth0Properties`: audience and Swagger UI client (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/Auth0Properties.java`; test `Auth0PropertiesTests` (or the existing registration test)
@@ -64,7 +64,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 - **What to do:**
   1. Add `audience` and `apiDocsClientId` (blank by default). `audience` or `apiDocsClientId` without the three web values → `IllegalStateException` naming the missing variables, like the partial configuration of #196. Helper `trustsApiTokens()` = domain and audience set.
 - **Acceptance criteria:**
-  - [ ] Without them, everything as in #196; with the domain trio plus audience, `trustsApiTokens()`; audience alone fails at startup with the variable names.
+  - [x] Without them, everything as in #196; with the domain trio plus audience, `trustsApiTokens()`; audience alone fails at startup with the variable names.
 
 ### [ ] T2 — `Auth0AccessTokens`: validators and `sub` → local user (~10 min)
 
