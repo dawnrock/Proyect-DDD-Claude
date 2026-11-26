@@ -25,7 +25,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.dawnrock.ddd.adapter.in.ClientIpResolver;
 import com.dawnrock.ddd.adapter.in.CustomerRegistration;
 import com.dawnrock.ddd.adapter.in.Durations;
+import com.dawnrock.ddd.adapter.in.IdentityAlreadyLinkedException;
 import com.dawnrock.ddd.adapter.in.PendingIdentity;
+import com.dawnrock.ddd.adapter.in.PendingIdentityExpiredException;
 import com.dawnrock.ddd.adapter.in.SignUpLimit;
 import com.dawnrock.ddd.adapter.in.TooManySignUpsException;
 import com.dawnrock.ddd.adapter.in.UsernameTakenException;
@@ -201,14 +203,20 @@ public class SignUpController {
         } catch (IllegalArgumentException e) {
             return backToData(form, redirect, e.getMessage(), false);
         }
-        return register(form, command, result, redirect, request, response, status);
+        return register(form, command, result, redirect, request, response, session, status);
     }
 
-    /** Da de alta al cliente y lleva a donde toca según el resultado; los errores del dominio vuelven al paso que los arregla. */
+    /**
+     * Da de alta al cliente y lleva a donde toca según el resultado; los errores del dominio vuelven al paso que los
+     * arregla. En modo Auth0 (#198) el alta no tiene contraseña ni inicio de sesión programático.
+     */
     private String register(SignUpForm form, SignUpCommand command, BindingResult result,
                             RedirectAttributes redirect, HttpServletRequest request, HttpServletResponse response,
-                            SessionStatus status) {
+                            HttpSession session, SessionStatus status) {
         try {
+            if (form.isExternalIdentity()) {
+                return registerWithAuth0(command, request, session, status);
+            }
             AccountSummary account = registration.register(command, form.getPassword(),
                     clientIpResolver.resolve(request));
             String username = form.getUsername();
@@ -228,10 +236,37 @@ public class SignUpController {
             return "redirect:/signup/access";
         } catch (IllegalArgumentException e) {
             return backToData(form, redirect, e.getMessage(), false);
+        } catch (PendingIdentityExpiredException e) {
+            // La identidad pendiente caducó durante el alta: no se creó nada
+            pendingIdentities.remove(session);
+            return LINK_EXPIRED;
+        } catch (IdentityAlreadyLinkedException e) {
+            // Otra pestaña la vinculó entretanto: el vínculo existe, así que Auth0 ya inicia sesión con el usuario
+            status.setComplete();
+            return goToAuth0(session);
         } catch (DomainException e) {
             result.reject("domain", e.getMessage());
             return ACCOUNT_VIEW;
         }
+    }
+
+    /**
+     * Alta con la identidad de Auth0: sin contraseña local ni inicio de sesión programático (la sesión solo la crea el
+     * flujo OAuth2). Al terminar, vuelve a Auth0, que conserva su sesión: el viaje es silencioso y ahora encuentra el
+     * vínculo. No hay mensaje de bienvenida: no sobreviviría al viaje; la página de la cuenta, con su IBAN, lo confirma.
+     */
+    private String registerWithAuth0(SignUpCommand command, HttpServletRequest request, HttpSession session,
+                                     SessionStatus status) {
+        registration.registerWithExternalIdentity(command, pendingIdentities.current(session),
+                clientIpResolver.resolve(request));
+        status.setComplete();
+        return goToAuth0(session);
+    }
+
+    /** Quita la identidad pendiente y vuelve a Auth0 para entrar con la sesión del cliente ya vinculado. */
+    private String goToAuth0(HttpSession session) {
+        pendingIdentities.remove(session);
+        return "redirect:/oauth2/authorization/auth0";
     }
 
     /** Si el asistente está en modo Auth0 y ya no hay identidad pendiente vigente (la caducada se quita). */

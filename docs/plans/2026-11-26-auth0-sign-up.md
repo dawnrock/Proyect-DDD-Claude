@@ -107,7 +107,7 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
   - [x] `GET /signup?auth0` without a pending identity → `/login?link-expired`; with one → step 1 with the Auth0 e-mail.
   - [x] Step 2 in Auth0 mode has no password input and accepts a valid username alone; a bad username shows its error as today.
 
-### [ ] T5 — Wizard in Auth0 mode, step 3 (~10 min)
+### [x] T5 — Wizard in Auth0 mode, step 3 (~10 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -116,8 +116,8 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
 - **What to do:**
   1. In Auth0 mode `submitAccount` calls `registerWithExternalIdentity(command, pending, ip)`; on success it completes the session form, removes the pending identity and redirects to `/oauth2/authorization/auth0` (no programmatic sign-in). Errors as in the classic wizard, plus `PendingIdentityExpiredException` → `/login?link-expired` and `IdentityAlreadyLinkedException` → removes the pending identity and `redirect:/oauth2/authorization/auth0` (the link exists now; see the contract).
 - **Acceptance criteria:**
-  - [ ] Success → `redirect:/oauth2/authorization/auth0`, pending identity removed, nobody authenticated by the controller.
-  - [ ] Each error lands where the contract says; the classic wizard's tests pass unchanged.
+  - [x] Success → `redirect:/oauth2/authorization/auth0`, pending identity removed, nobody authenticated by the controller.
+  - [x] Each error lands where the contract says; the classic wizard's tests pass unchanged.
 
 ### [ ] T6 — End-to-end: sign up with Auth0 and sign in (~10 min)
 
