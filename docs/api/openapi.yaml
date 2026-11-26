@@ -36,6 +36,7 @@ info:
     | 415 | The request body is not JSON (operations with a body) | Tipo de contenido no admitido |
     | 422 | A domain business rule is violated | Regla de negocio incumplida |
     | 429 | Too many requests from one IP, with a `Retry-After` header in seconds: failed login attempts when asking for a token (ADR 0017) or customer sign-ups (ADR 0018) | Demasiados intentos / Demasiadas altas |
+    | 503 | An Auth0 access token was sent but Auth0's public keys cannot be read right now, so the token cannot be checked: try again later (the token is not rejected) | Servicio no disponible |
   contact:
     name: Proyect-DDD-Claude
     url: https://github.com/dawnrock/Proyect-DDD-Claude/issues

@@ -68,7 +68,8 @@ public class ApiDocsController {
         discovery.put("response_types_supported", List.of("code"));
         discovery.put("grant_types_supported", List.of("authorization_code"));
         discovery.put("code_challenge_methods_supported", List.of("S256"));
-        discovery.put("scopes_supported", List.of("openid", "profile", "email"));
+        // Los mismos ámbitos que pide la página y exige el contrato (auth0: [openid])
+        discovery.put("scopes_supported", List.of("openid"));
         return ResponseEntity.ok(discovery);
     }
 }

@@ -30,7 +30,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwsHeader;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -108,6 +113,19 @@ class ApiAuth0TokensTests {
         given(identities.usernameOf(ExternalIdentities.AUTH0, "auth0|nadie")).willReturn(Optional.empty());
     }
 
+    @Autowired
+    private JwtEncoder ownEncoder;
+
+    /** Un token HS256 firmado con el secreto propio de la API, con el emisor que se quiera. */
+    private String ownSecretToken(String issuer) {
+        Instant now = Instant.now();
+        JwtClaimsSet claims = JwtClaimsSet.builder().issuer(issuer).subject("auth0|ada").audience(
+                List.of(TestAuth0Tenant.AUDIENCE)).issuedAt(now).expiresAt(now.plusSeconds(600))
+                .claim("roles", List.of("ADMIN")).build();
+        return ownEncoder.encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims))
+                .getTokenValue();
+    }
+
     private static String bearer(String token) {
         return "Bearer " + token;
     }
@@ -154,7 +172,7 @@ class ApiAuth0TokensTests {
     }
 
     @Test
-    @DisplayName("Un token de Auth0 para otra API, de otro emisor, caducado o firmado con otra clave recibe 401")
+    @DisplayName("Otra API, otro emisor, caducado, otra clave o el algoritmo del otro emisor: 401")
     void otherAudienceIssuerExpiredOrForeignKeyGet401() throws Exception {
         Instant later = Instant.now().plusSeconds(600);
         List<String> rejected = List.of(
@@ -162,7 +180,11 @@ class ApiAuth0TokensTests {
                 TestAuth0Tenant.accessToken("auth0|ada", "https://otro.auth0.com/", TestAuth0Tenant.AUDIENCE, later),
                 TestAuth0Tenant.accessToken("auth0|ada", TestAuth0Tenant.ISSUER, TestAuth0Tenant.AUDIENCE,
                         Instant.now().minusSeconds(3600)),
-                TestAuth0Tenant.signedWithAnotherKey("auth0|ada"));
+                TestAuth0Tenant.signedWithAnotherKey("auth0|ada"),
+                // Confusión de algoritmos: HS256 con el secreto propio diciendo ser de Auth0, y RS256 del tenant
+                // diciendo ser un token propio; cada emisor solo acepta su algoritmo y su clave
+                ownSecretToken(TestAuth0Tenant.ISSUER),
+                TestAuth0Tenant.accessToken("ada", "ddd-lab", TestAuth0Tenant.AUDIENCE, later));
 
         for (String token : rejected) {
             mvc.perform(get("/api/accounts").header(HttpHeaders.AUTHORIZATION, bearer(token)))

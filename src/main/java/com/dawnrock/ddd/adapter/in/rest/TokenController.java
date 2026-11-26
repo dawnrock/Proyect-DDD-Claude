@@ -15,7 +15,8 @@ import com.dawnrock.ddd.adapter.in.ClientIpAuthenticationDetailsSource;
 
 /**
  * Emisión de tokens de la API: {@code POST /api/auth/token}, público (#122, ADR 0015). Las credenciales erróneas las
- * traduce {@link RestExceptionHandler} a 401, y el bloqueo por demasiados intentos (#130), a 429. El token se envía después en {@code Authorization: Bearer}.
+ * traduce {@link RestExceptionHandler} a 401, y el bloqueo por demasiados intentos (#130), a 429. El token se envía
+ * después en {@code Authorization: Bearer}.
  * Solo existe con la autenticación local ({@code app.auth.local}, por defecto sí; #197): sin ella, 404.
  */
 @RestController

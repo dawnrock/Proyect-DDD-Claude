@@ -73,14 +73,14 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 - **Depends on:** T1
 - **What to do:**
   1. A static `validator(issuer, audience)`: default timestamps + issuer + `aud` contains the audience.
-  2. A converter `Jwt → AbstractAuthenticationToken`: `ExternalIdentities.usernameOf("auth0", sub)` → `UserDetailsService` → `JwtAuthenticationToken(jwt, localAuthorities, localUsername)`. Unlinked `sub`, or a missing or disabled user → `InvalidBearerTokenException` with the unlinked detail (the user's state is never told apart).
+  2. A converter `Jwt → AbstractAuthenticationToken`: `ExternalIdentities.usernameOf("auth0", sub)` → `UserDetailsService` → `JwtAuthenticationToken(jwt, localAuthorities, localUsername)`. Unlinked `sub`, or a missing or disabled user → `UnlinkedAccessTokenException`, an `invalid_token` of our own (RFC 6750 descriptions must be ASCII, so the Spanish text goes in the `ProblemDetail`; the user's state is never told apart).
 - **Acceptance criteria:**
-  - [x] A linked `sub` gives the local name and `ROLE_*`; unlinked, missing and disabled all give `InvalidBearerTokenException`; the validator rejects wrong `iss`, wrong `aud` and expired tokens.
+  - [x] A linked `sub` gives the local name and `ROLE_*`; unlinked, missing and disabled all give `UnlinkedAccessTokenException`; the validator rejects wrong `iss`, wrong `aud` and expired tokens.
 
 ### [x] T3 — Auth0 decoder, only with domain and audience (~10 min)
 
 - **Layer:** adapter.in.rest
-- **Files:** `adapter/in/rest/Auth0AccessTokens.java` (`@Configuration` with its own condition), test `Auth0AccessTokensConfigurationTests` (`ApplicationContextRunner`)
+- **Files:** `adapter/in/rest/Auth0ApiTokensConfig.java` (`@Configuration` with its own condition; `Auth0Properties.baseUrl()`/`issuerUri()`), test `Auth0ApiTokensConfigTests` (`ApplicationContextRunner`)
 - **Depends on:** T2
 - **What to do:**
   1. Bean `auth0JwtDecoder`: `NimbusJwtDecoder.withJwkSetUri("https://<domain>/.well-known/jwks.json").jwsAlgorithm(RS256)` with T2's validator. Nimbus fetches the keys on the first decode, so startup stays offline.
@@ -105,7 +105,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 ### [x] T5 — Own token endpoint behind `app.auth.local` (~5 min)
 
 - **Layer:** adapter.in.rest
-- **Files:** `TokenController.java`, `AccessTokenIssuer.java`, `JwtSupport.java`; test `LocalTokensDisabledTests` (`@WebMvcTest` with `app.auth.local=false`)
+- **Files:** `TokenController.java`, `AccessTokenIssuer.java`, `ApiSecurityConfig.java`; test `LocalTokensDisabledTests` (`@WebMvcTest` with `app.auth.local=false`)
 - **Depends on:** T4
 - **What to do:**
   1. `@ConditionalOnBooleanProperty(name = "app.auth.local", matchIfMissing = true)` on the controller and the issuer; the own issuer only joins the resolver when it is on.
@@ -167,6 +167,18 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 - **Acceptance criteria:**
   - [ ] Docs in English; CI's status check passes.
 
+### [x] T11 — Review fixes (~10 min)
+
+- **Layer:** adapter.in.rest · adapter.in.web · docs
+- **Files:** `Auth0UnavailableException` (new), `ApiSecurityConfig`, `JwtSupport`, `TokenController`, `ApiDocsController`; tests `ApiAuth0UnavailableTests`, `ApiIssuersTests`, `ApiAuth0TokensTests`; `openapi.yaml` and CHANGELOG (still 2.3.0)
+- **Depends on:** T10
+- **What to do:**
+  1. `revisor-ddd` findings: Auth0's keys unreachable answered 500 (Spring rethrows `AuthenticationServiceException`) → the Auth0 decoder translates any non-`BadJwtException` into `Auth0UnavailableException` and the entry point answers 503 `ProblemDetail`; two managers for the same `iss` fail at startup (`trust`) instead of overwriting; HS256/RS256 confusion cases added to the rejected tokens; the discovery document advertises only `openid` like the page and the contract; the own decoder is `@Primary`; imports and long lines tidied; the plan's file names follow the code.
+- **Acceptance criteria:**
+  - [x] An Auth0 token with Auth0 unreachable gets 503 without `WWW-Authenticate` (seen red first: the exception escaped the chain).
+  - [x] An HS256 token signed with the own secret claiming Auth0's issuer, and an RS256 token of the tenant claiming the own issuer, both get 401 (characterization: each issuer already accepted only its algorithm and key).
+  - [x] A repeated issuer fails with `IllegalStateException` (seen red first: the method did not exist).
+
 ## Global acceptance criteria
 
 **Specific:**
@@ -196,5 +208,5 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 - **Two more things to create in Auth0** (the user's tenant): the API (its identifier is the audience) and a Single Page Application for Swagger UI. Without them the code is done but the Auth0 path of the API cannot be tried on Render; the CI never needs them.
 - **Swagger UI and `openIdConnect` (resolved in T8).** Swagger UI 5.34.1 resolves the relative `openIdConnectUrl` against the page and offers the PKCE flow; checked in Chromium. The fallback was not needed.
 - **Schemathesis and the alternative scheme.** It should keep authenticating through `bearerAuth`; if it warns about or tries `auth0`, the fix goes in `schemathesis.toml` as a reviewed change.
-- **JWKS on the first Auth0 token.** The first request with an Auth0 token pays one call to `jwks.json` (cached afterwards by Nimbus); if Auth0 is unreachable, that request gets 401, not 500. The own tokens never depend on it.
+- **JWKS on the first Auth0 token.** The first request with an Auth0 token pays one call to `jwks.json` (cached afterwards by Nimbus). If Auth0 is unreachable, Spring would rethrow the error (500); since the review (T11) that request gets 503 `ProblemDetail` without asking for another token. The own tokens never depend on it.
 - **`sub` of the API token = `sub` of the ID token.** Auth0 uses the same user id for every application of the tenant, so the link made on the web works for the API; the end-to-end test assumes it, the manual check on Render confirms it.

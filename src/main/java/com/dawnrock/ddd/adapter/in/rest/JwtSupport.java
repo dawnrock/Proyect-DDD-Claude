@@ -9,6 +9,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -45,7 +46,12 @@ public class JwtSupport {
         return new NimbusJwtEncoder(new ImmutableSecret<>(jwtSigningKey));
     }
 
+    /**
+     * El decodificador de los tokens propios. Es el principal: desde #197 también hay uno de Auth0
+     * ({@code auth0JwtDecoder}), que solo se inyecta por su nombre.
+     */
     @Bean
+    @Primary
     public JwtDecoder jwtDecoder(SecretKey jwtSigningKey, JwtProperties properties) {
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(jwtSigningKey)
                 .macAlgorithm(MacAlgorithm.HS256)
