@@ -9,8 +9,10 @@
 <main class="app-container mx-auto w-100 px-3 pb-5" th:classappend="${showForm} ? '' : 'welcome'">
     <h1 class="h3 fw-semibold mb-4" th:if="${showForm}">Acceso</h1>
     <div class="welcome-head" th:unless="${showForm}">
+        <!--/* «Bienvenido a» y, a su lado, el logo. El logo ya dice «monA Bank»: el título no lo repite a la vista, pero sí a los
+             lectores de pantalla (el logo es decorativo). */-->
+        <h1 class="welcome-title">Bienvenido a<span class="visually-hidden"> monA Bank</span></h1>
         <img class="brand-hero" th:src="@{/brand/monabank-horizontal.svg}" alt="">
-        <h1 class="welcome-title">Bienvenido a monA Bank</h1>
     </div>
     <div class="alert alert-success d-flex align-items-center gap-2" role="status" th:if="${param.logout}"><svg th:replace="~{fragments/icons :: icon('circle-check')}"></svg>Has cerrado la sesión</div>
 

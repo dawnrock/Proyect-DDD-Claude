@@ -63,14 +63,14 @@ class LoginControllerTests {
     }
 
     @Test
-    @DisplayName("La bienvenida del login va sin cabecera: la A de fondo y, en el centro, el logo, el título y las dos puertas (#185)")
+    @DisplayName("La bienvenida del login va sin cabecera: la A de fondo y, en el centro, «Bienvenido a» con el logo a su lado (el nombre del banco, solo para lectores de pantalla) y las dos puertas (#185)")
     void theLoginWelcomeCentresLogoTitleAndDoorsOverTheBigA() throws Exception {
         mvc.perform(get("/login"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("<div class=\"backdrop\" aria-hidden=\"true\">")))
                 .andExpect(content().string(matchesPattern(
-                        "(?s).*<img [^>]*src=\"/brand/monabank-horizontal[^\"]*\\.svg\"[^>]*alt=\"\".*"
-                                + "<h1[^>]*>Bienvenido a monA Bank</h1>.*"
+                        "(?s).*<h1[^>]*>Bienvenido a<span class=\"visually-hidden\"> monA Bank</span></h1>\\s*"
+                                + "<img [^>]*src=\"/brand/monabank-horizontal[^\"]*\\.svg\"[^>]*alt=\"\".*"
                                 + "<a class=\"btn-slant btn-slant-rise door\" href=\"/signup\">.*Quiero ser cliente.*"
                                 + "<a class=\"btn-slant btn-slant-light door\" href=\"/login\\?form\">.*Ya soy cliente.*")))
                 .andExpect(content().string(not(containsString("navbar-brand"))));
