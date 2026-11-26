@@ -1,17 +1,19 @@
-// Intro de monA Bank (#178, ADR 0022): 3 s antes de las puertas del login. Doce palabras positivas de la banca y la
-// bolsa pierden su terminación, sus iniciales vuelan a las letras del logo y se pinta la gráfica de la marca.
+// Intro de monA Bank (#178, ADR 0022): 5 s antes de las puertas del login. Doce palabras positivas de la banca y la
+// bolsa se quedan un segundo a la vista, pierden su terminación, sus iniciales vuelan a las letras del logo, se pinta la
+// gráfica de la marca y el logo se queda otro segundo antes de desvanecerse.
 // Prototipo aprobado: docs/brand/prototypes/intro.html.
 //
-// Mejora progresiva: la capa (#splash) llega oculta y solo se muestra si va a reproducirse. No se ve sin JavaScript,
-// con movimiento reducido, si la tipografía no carga ni la segunda vez en la misma sesión del navegador. Es un módulo:
-// se evalúa una vez por documento, así que las navegaciones de htmx (hx-boost) no la repiten. Esc o un clic la quitan.
+// Mejora progresiva: la capa (#splash) llega oculta y solo se muestra si va a reproducirse. Se ve en cada carga de las
+// puertas; no sin JavaScript, con movimiento reducido ni si la tipografía no carga. Es un módulo: se evalúa una vez por
+// documento, así que las navegaciones de htmx (hx-boost) no la repiten. Esc o un clic la quitan.
 import { arrow, leftLeg, legPolygon, partial, rightStem, strokeThickness, topLine } from 'brand-geometry';
 
 const splash = document.getElementById('splash');
 const canvas = splash?.querySelector('canvas');
-const SEEN = 'monabank:intro';
 const FONT = 'Tektur';
-const DURATION = 3000;
+const DURATION = 5000;
+const WORDS_HOLD = 1000;   // las palabras, quietas y enteras, antes de convertirse en la marca
+const FADE = 350;          // la capa se desvanece en los últimos 350 ms; antes, el logo queda quieto un segundo más
 const COLORS = { paper: '#eef0f2', mist: '#b9c0c7', flat: '#8b949c', drop: '#f0545c', rise: '#1fc8b0' };
 // Palabras de cada letra del logo, en orden: m o n A (monA) · B a n k (Bank)
 const WORDS = [['Maximize', 'Markets'], ['Optimism'], ['Net gain'], ['Affluence', 'Assets'],
@@ -23,8 +25,6 @@ const TIER = {
 const MON = 0.75;    // «mon» al 75 % de la A
 const ARROW = 0.18;  // largo del asta sobre el vértice, en tamaños de la A
 
-const seen = () => { try { return sessionStorage.getItem(SEEN) === '1'; } catch { return false; } };
-const remember = () => { try { sessionStorage.setItem(SEEN, '1'); } catch { /* sin almacenamiento: se verá otra vez */ } };
 const fontReady = async () => {
     try {
         await Promise.all([document.fonts.load(`900 40px "${FONT}"`), document.fonts.load(`400 40px "${FONT}"`)]);
@@ -236,16 +236,17 @@ const stage = () => {
         it.ox = it.x - b * Math.sin(it.angle);
         it.oy = it.y + b * Math.cos(it.angle);
         it.enter = rnd() * 330;
-        it.erase = 640 + rnd() * 140;
-        it.fly = 950 + it.li * 30 + rnd() * 60;
+        it.erase = WORDS_HOLD + 640 + rnd() * 140;
+        it.fly = WORDS_HOLD + 950 + it.li * 30 + rnd() * 60;
         it.alpha = [0.36, 0.62, 0.84, 0.95][it.tier];
     });
 
     // ---------- guion (ms) ----------
-    //    0– 600  entran las palabras          640–1000  se borran las terminaciones
-    //  950–1840  las iniciales vuelan al logo: se enderezan y cambian de tamaño, de peso y de mayúscula a minúscula
-    // 1860–2480  la gráfica: gris (m, o) → caída roja (n) → subida turquesa (A) → flecha
-    // 2480–2650  el logo, quieto                2650–3000  la capa se desvanece
+    //    0– 600  entran las palabras           600–1600  las palabras, quietas y enteras
+    // 1640–2000  se borran las terminaciones
+    // 1950–2840  las iniciales vuelan al logo: se enderezan y cambian de tamaño, de peso y de mayúscula a minúscula
+    // 2860–3480  la gráfica: gris (m, o) → caída roja (n) → subida turquesa (A) → flecha
+    // 3480–4650  el logo, quieto               4650–5000  la capa se desvanece
     const landed = Math.max(...items.map((it) => it.fly)) + 620;
     const words = (t) => {
         items.forEach((it) => {   // la palabra (y su inicial, mientras no despegue)
@@ -302,14 +303,13 @@ const stage = () => {
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.drawImage(layer, 0, 0);
         }
-        splash.style.opacity = String(1 - easeInOut(clamp((t - 2650) / 350)));
+        splash.style.opacity = String(1 - easeInOut(clamp((t - (DURATION - FADE)) / FADE)));
     };
 };
 
 const play = async () => {
-    if (!splash || !canvas || seen() || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!splash || !canvas || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     splash.hidden = false;   // cuanto antes, para que no se vean las puertas antes de la intro
-    remember();
     let frame = 0;
     const finish = () => { cancelAnimationFrame(frame); splash.remove(); };
     if (!(await fontReady())) { finish(); return; }

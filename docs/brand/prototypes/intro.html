@@ -44,11 +44,8 @@
   const splash = document.getElementById('splash');
   const q = new URLSearchParams(location.search);
   const frameMode = q.has('frame');
-  // Una vez por sesión del navegador; con movimiento reducido, nunca.
-  const SEEN = 'monabank:intro';
-  const seen = () => { try { return sessionStorage.getItem(SEEN) === '1'; } catch { return false; } };
-  if (!frameMode && (seen() || matchMedia('(prefers-reduced-motion: reduce)').matches)) { splash.remove(); return; }
-  try { sessionStorage.setItem(SEEN, '1'); } catch { /* sin almacenamiento: se verá en cada visita */ }
+  // En cada carga; con movimiento reducido, nunca.
+  if (!frameMode && matchMedia('(prefers-reduced-motion: reduce)').matches) { splash.remove(); return; }
 
   const FONT = 'Tektur';
   try {
@@ -56,7 +53,8 @@
   } catch { splash.remove(); return; }
   if (!document.fonts.check(`700 40px "${FONT}"`)) { splash.remove(); return; }
 
-  const DURATION = 3000;
+  const DURATION = 5000;
+  const WORDS_HOLD = 1000, FADE = 350;   // un segundo con las palabras quietas; el logo, quieto hasta el desvanecido
   const COLORS = { paper: '#eef0f2', mist: '#b9c0c7', flat: '#8b949c', drop: '#f0545c', rise: '#1fc8b0' };
   // Palabras de cada letra del logo, en orden: m o n A (monA) · B a n k (Bank)
   const WORDS = [['Maximize', 'Markets'], ['Optimism'], ['Net gain'], ['Affluence', 'Assets'],
@@ -267,17 +265,18 @@
     const c = Math.cos(it.angle), s = Math.sin(it.angle), b = it.size * .8;
     it.ox = it.x - b * s; it.oy = it.y + b * c;
     it.enter = rnd() * 330;
-    it.erase = 640 + rnd() * 140;
-    it.fly = 950 + it.li * 30 + rnd() * 60;
+    it.erase = WORDS_HOLD + 640 + rnd() * 140;
+    it.fly = WORDS_HOLD + 950 + it.li * 30 + rnd() * 60;
     it.alpha = [.36, .62, .84, .95][it.tier];
   });
 
   // =====================================================================================
   // Guion (ms)
-  //    0– 600  entran las palabras          640–1000  se borran las terminaciones
-  //  950–1840  las iniciales vuelan al logo: se enderezan, cambian de tamaño, peso y caja
-  // 1860–2480  la gráfica: gris (m, o) → caída roja (n) → subida turquesa (A) → flecha
-  // 2480–2650  el logo, quieto                2650–3000  la capa se desvanece
+  //    0– 600  entran las palabras           600–1600  las palabras, quietas y enteras
+  // 1640–2000  se borran las terminaciones
+  // 1950–2840  las iniciales vuelan al logo: se enderezan, cambian de tamaño, peso y caja
+  // 2860–3480  la gráfica: gris (m, o) → caída roja (n) → subida turquesa (A) → flecha
+  // 3480–4650  el logo, quieto               4650–5000  la capa se desvanece
   // =====================================================================================
   const clamp = (v) => Math.min(1, Math.max(0, v));
   const easeOut = (t) => 1 - Math.pow(1 - t, 3);
@@ -324,7 +323,7 @@
       drawLogo(seg(0, 200), seg(200, 150), seg(350, 150), seg(500, 120, easeOut));
       ctx.globalAlpha = 1; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(layer, 0, 0);
     }
-    splash.style.opacity = 1 - easeInOut(clamp((t - 2650) / 350));
+    splash.style.opacity = 1 - easeInOut(clamp((t - (DURATION - FADE)) / FADE));
   };
 
   window.__render = render;
