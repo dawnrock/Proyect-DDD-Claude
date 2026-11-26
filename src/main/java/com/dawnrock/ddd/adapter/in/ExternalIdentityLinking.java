@@ -1,5 +1,11 @@
 package com.dawnrock.ddd.adapter.in;
 
+import java.time.Clock;
+
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 
 /**
@@ -9,6 +15,18 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ExternalIdentityLinking {
+
+    private final ThrottledAuthenticationProvider authentication;
+    private final ExternalIdentities identities;
+    private final ObjectProvider<Clock> clock;
+
+    /** @param clock el reloj del núcleo; sin él, como en los tests web, el del sistema */
+    public ExternalIdentityLinking(ThrottledAuthenticationProvider authentication, ExternalIdentities identities,
+                                   ObjectProvider<Clock> clock) {
+        this.authentication = authentication;
+        this.identities = identities;
+        this.clock = clock;
+    }
 
     /**
      * Comprueba la contraseña del usuario local y vincula la identidad pendiente.
@@ -22,6 +40,17 @@ public class ExternalIdentityLinking {
      * @throws IllegalStateException si la identidad pendiente ha caducado
      */
     public String link(PendingIdentity pending, String username, String rawPassword, String clientIp) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        if (pending.isExpired(clock.getIfAvailable(Clock::systemUTC))) {
+            throw new IllegalStateException("La identidad pendiente de " + pending.provider() + " ha caducado");
+        }
+        UsernamePasswordAuthenticationToken attempt =
+                UsernamePasswordAuthenticationToken.unauthenticated(Usernames.normalize(username), rawPassword);
+        attempt.setDetails(new WebAuthenticationDetails(clientIp, null));
+        Authentication result = authentication.authenticate(attempt);
+        if (result == null) {
+            throw new IllegalStateException("El proveedor de autenticación no admite usuario y contraseña");
+        }
+        identities.link(pending.provider(), pending.subject(), result.getName());
+        return result.getName();
     }
 }

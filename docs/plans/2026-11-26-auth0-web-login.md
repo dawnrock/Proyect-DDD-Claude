@@ -130,7 +130,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **Acceptance criteria:**
   - [x] Linked identity → name = local username and `ROLE_USER`/`ROLE_ADMIN` from the store; unknown → `UnlinkedIdentityException` with subject and e-mail; disabled user → rejected.
 
-### [ ] T6 — `ExternalIdentityLinking`: link with the local password (~10 min)
+### [x] T6 — `ExternalIdentityLinking`: link with the local password (~10 min)
 
 - **Side:** back
 - **Layer:** adapter.in (support)
@@ -139,7 +139,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **What to do:**
   1. Authenticates `username`/`rawPassword` with the `ThrottledAuthenticationProvider` (IP in `WebAuthenticationDetails`, so the attempt limit applies and the username is normalised, #157), then `identities.link(pending.provider(), pending.subject(), username)`. An expired pending identity → `IllegalStateException`. Uses `TestUsers` and `InMemoryExternalIdentities` in the test.
 - **Acceptance criteria:**
-  - [ ] Right password → linked and the normalised username returned; wrong password → `BadCredentialsException` and it counts for the limit; after the limit → `TooManyLoginAttemptsException` even with the right password; username already linked to another identity → `IdentityAlreadyLinkedException`.
+  - [x] Right password → linked and the normalised username returned; wrong password → `BadCredentialsException` and it counts for the limit; after the limit → `TooManyLoginAttemptsException` even with the right password; username already linked to another identity → `IdentityAlreadyLinkedException`.
 
 ### [ ] T7 — Login page: "Entrar con Auth0" (~5 min)
 
