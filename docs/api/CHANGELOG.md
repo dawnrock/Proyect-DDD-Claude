@@ -2,6 +2,14 @@
 
 Changes to `docs/api/openapi.yaml`, newest first. Versioning policy: [ADR 0014](../adr/0014-contract-versioning.md) (major for an incompatible change as `oasdiff breaking` reports it, minor for a compatible addition, patch for documentation only). The CI checks the bump on every pull request.
 
+## 2.3.0 · 2026-11-26 (#197)
+
+Compatible addition ([ADR 0024](../adr/0024-oauth2-oidc-auth0.md)).
+
+- **New security scheme `auth0`** (`openIdConnect`, discovery at `/api-docs/openid-configuration`): every protected operation accepts either the API's own token (`bearerAuth`, unchanged) or an Auth0 access token for the API's audience. The token's `sub` must be linked to a monA Bank user on the web; roles come from monA Bank.
+- **401:** also for an Auth0 token for another audience or from another issuer, and for an Auth0 identity that is not linked (new example `unlinkedAuth0Identity`, with its own `detail`).
+- **`POST /api/auth/token`:** documented as available only while local authentication is on. No change in the default configuration.
+
 ## 2.2.4 · 2026-11-25 (#178)
 
 Documentation only.

@@ -133,7 +133,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 - **Acceptance criteria:**
   - [x] `/api-docs/oauth2-redirect.html` is served from our origin; the page has the `oauth2RedirectUrl`, `usePkceWithAuthorizationCodeGrant: true` and the `audience` parameter; without Auth0 nothing breaks (checked by hand once with `spring-boot:run`; the browser check of the Auth0 flow runs after T8, once the contract has the scheme).
 
-### [ ] T8 — Contract 2.3.0 (~10 min)
+### [x] T8 — Contract 2.3.0 (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`, `docs/api/CHANGELOG.md`, `schemathesis.toml` only if needed
@@ -142,7 +142,8 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
   1. Scheme `auth0` (`type: openIdConnect`, `openIdConnectUrl: /api-docs/openid-configuration`) with a description: Auth0 access token for the API audience, the identity must be linked once on the web, roles from monA Bank. Global `security` becomes the alternative `bearerAuth` **or** `auth0`; the public operations stay `security: []`. The 401 description mentions the unlinked case. `POST /api/auth/token` says it exists only while local authentication is on.
   2. `info.version` 2.3.0, CHANGELOG entry, `npx @redocly/cli lint`, `oasdiff breaking` with no breaking change, `node scripts/contract-test.mjs` green.
 - **Acceptance criteria:**
-  - [ ] Lint without errors, no breaking change, contract version check and Schemathesis green.
+  - [x] Lint without errors, no breaking change, contract version check and Schemathesis green.
+  - [x] Browser check (Chromium, fake tenant, Swagger UI files served from the same npm package as jsDelivr): Swagger UI reads the relative `openIdConnectUrl`, offers «authorization_code with PKCE» with the public client id, and its Auth0 redirect carries `code_challenge_method=S256`, the audience and our `oauth2-redirect.html`.
 
 ### [ ] T9 — End-to-end: an Auth0 token against the real context (~10 min)
 
@@ -193,7 +194,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 ## Risks and open questions
 
 - **Two more things to create in Auth0** (the user's tenant): the API (its identifier is the audience) and a Single Page Application for Swagger UI. Without them the code is done but the Auth0 path of the API cannot be tried on Render; the CI never needs them.
-- **Swagger UI and `openIdConnect`.** Swagger UI 5 reads the discovery document of an `openIdConnect` scheme and offers its flows; whether it resolves a relative `openIdConnectUrl` against the page must be checked in T7/T8. Fallback: keep `openIdConnect` in the contract and give Swagger UI the absolute URL by patching the loaded spec (`specActions.updateJsonSpec`) from `/api-docs/oauth-config`.
+- **Swagger UI and `openIdConnect` (resolved in T8).** Swagger UI 5.34.1 resolves the relative `openIdConnectUrl` against the page and offers the PKCE flow; checked in Chromium. The fallback was not needed.
 - **Schemathesis and the alternative scheme.** It should keep authenticating through `bearerAuth`; if it warns about or tries `auth0`, the fix goes in `schemathesis.toml` as a reviewed change.
 - **JWKS on the first Auth0 token.** The first request with an Auth0 token pays one call to `jwks.json` (cached afterwards by Nimbus); if Auth0 is unreachable, that request gets 401, not 500. The own tokens never depend on it.
 - **`sub` of the API token = `sub` of the ID token.** Auth0 uses the same user id for every application of the tenant, so the link made on the web works for the API; the end-to-end test assumes it, the manual check on Render confirms it.
