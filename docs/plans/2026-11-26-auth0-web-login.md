@@ -205,7 +205,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 
 - **Side:** both
 - **Layer:** docs
-- **Files:** `docs/deploy/render.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`, delete the oldest plan (`docs/plans/2026-11-25-account-web-controllers.md`)
+- **Files:** `docs/deploy/render.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
 - **Depends on:** T11
 - **What to do:**
   1. `render.md`: Auth0 tenant setup (Regular Web Application; Allowed Callback URLs `https://<service>.onrender.com/login/oauth2/code/auth0`; Allowed Logout URLs `https://<service>.onrender.com/login?logout`; RP-Initiated Logout End Session Endpoint Discovery on) and the three `APP_AUTH_AUTH0_*` variables (the secret only in Render, never in the repository).
