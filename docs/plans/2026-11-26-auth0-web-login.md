@@ -95,7 +95,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **Acceptance criteria:**
   - [x] `DddLabApplicationTests` starts (Flyway applies V3 and `ddl-auto=validate` passes).
 
-### [ ] T3 — `ExternalIdentities`: contract, JDBC and in-memory (~10 min)
+### [x] T3 — `ExternalIdentities`: contract, JDBC and in-memory (~10 min)
 
 - **Side:** back
 - **Layer:** adapter.in (support)
@@ -105,7 +105,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
   1. Contract: an unknown pair gives empty; after `link` the pair gives the username; linking the same pair twice is a no-op; a second identity of the same provider for the same username → `IdentityAlreadyLinkedException`; the same subject cannot point to two usernames.
   2. `JdbcExternalIdentities` with `JdbcClient`, translating the unique violation into `IdentityAlreadyLinkedException`; bean next to `userDetailsService` in `UserStore` (depends on database initialisation). The JDBC test runs on H2 with a user created first (FK).
 - **Acceptance criteria:**
-  - [ ] Both implementations pass `ExternalIdentitiesContract`.
+  - [x] Both implementations pass `ExternalIdentitiesContract`.
 
 ### [ ] T4 — Auth0 client registration from three properties (~10 min)
 

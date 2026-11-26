@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
@@ -40,5 +41,12 @@ public class UserStore {
             }
         }
         return manager;
+    }
+
+    /** Las identidades de Auth0 vinculadas a los usuarios (#196, ADR 0024), en la tabla {@code external_identity}. */
+    @Bean
+    @DependsOnDatabaseInitialization
+    public ExternalIdentities externalIdentities(DataSource dataSource) {
+        return new JdbcExternalIdentities(JdbcClient.create(dataSource));
     }
 }
