@@ -141,7 +141,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **Acceptance criteria:**
   - [x] Right password → linked and the normalised username returned; wrong password → `BadCredentialsException` and it counts for the limit; after the limit → `TooManyLoginAttemptsException` even with the right password; username already linked to another identity → `IdentityAlreadyLinkedException`.
 
-### [ ] T7 — Login page: "Entrar con Auth0" (~5 min)
+### [x] T7 — Login page: "Entrar con Auth0" (~5 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -150,9 +150,9 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **What to do:**
   1. `auth0Enabled` in the model from `ObjectProvider<ClientRegistrationRepository>`. On the form page, below "Entrar", a separator and an `<a class="btn-slant btn-slant-surface" hx-boost="false" href="/oauth2/authorization/auth0">Entrar con Auth0</a>`. `?oauth-error` shows the form with "No se pudo iniciar sesión con Auth0. Inténtalo de nuevo." and `?link-expired` with "Vuelve a entrar con Auth0 para vincular tu usuario".
 - **Acceptance criteria:**
-  - [ ] With Auth0 configured, the form shows the button with `hx-boost="false"`; without it, the page is unchanged; both messages show on their parameter.
+  - [x] With Auth0 configured, the form shows the button with `hx-boost="false"`; without it, the page is unchanged; both messages show on their parameter.
 
-### [ ] T8 — Link page `/login/link` (~10 min)
+### [x] T8 — Link page `/login/link` (~10 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -162,9 +162,9 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
   1. `GET`: no pending identity in the session or expired → `/login?link-expired`; otherwise the form with the Auth0 e-mail ("Has entrado en Auth0 como …. Para terminar, escribe una sola vez tu usuario y tu contraseña de monA Bank"), username (lower-cased like `SignUpForm`) and password with its show-password button, brand style of the login form.
   2. `POST` (CSRF): calls `ExternalIdentityLinking` (mocked from the contract) with the client IP (`ClientIpResolver`); success → removes the pending identity and redirects to `/oauth2/authorization/auth0`; `BadCredentialsException` → "Usuario o contraseña incorrectos"; `TooManyLoginAttemptsException` → the blocking message of the login; `IdentityAlreadyLinkedException` → "Ese usuario ya está vinculado a otra cuenta de Auth0". Accessible errors as in #145.
 - **Acceptance criteria:**
-  - [ ] Without a pending identity → redirect to `/login?link-expired`; with one, the success POST redirects to `/oauth2/authorization/auth0` and clears the session attribute; each error shows its message with status 200 and the form.
+  - [x] Without a pending identity → redirect to `/login?link-expired`; with one, the success POST redirects to `/oauth2/authorization/auth0` and clears the session attribute; each error shows its message with status 200 and the form.
 
-### [ ] T9 — Web chain: `oauth2Login()` when configured (~10 min)
+### [x] T9 — Web chain: `oauth2Login()` when configured (~10 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -173,10 +173,10 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **What to do:**
   1. If a `ClientRegistrationRepository` is available: `oauth2Login()` with `loginPage("/login")`, `userInfoEndpoint().oidcUserService(...)`, PKCE on the authorization request resolver (`OAuth2AuthorizationRequestCustomizers.withPkce()`, unless Spring Security already applies it by default to confidential clients), failure handler: `UnlinkedIdentityException` → store the `PendingIdentity` in the session and redirect to `/login/link`; anything else → `/login?oauth-error`. `/login/link` is public.
 - **Acceptance criteria:**
-  - [ ] `GET /oauth2/authorization/auth0` → 302 to `https://<fake-domain>/authorize` with `code_challenge_method=S256`, `state` and `nonce`; without a registration the route does not exist and the existing web tests still pass.
-  - [ ] The failure handler with an `UnlinkedIdentityException` leaves the `PendingIdentity` in the session and redirects to `/login/link`.
+  - [x] `GET /oauth2/authorization/auth0` → 302 to `https://<fake-domain>/authorize` with `code_challenge_method=S256`, `state` and `nonce`; without a registration the route does not exist and the existing web tests still pass.
+  - [x] The failure handler with an `UnlinkedIdentityException` leaves the `PendingIdentity` in the session and redirects to `/login/link`.
 
-### [ ] T10 — Logout in Auth0 and the `app.auth.local` switch (~10 min)
+### [x] T10 — Logout in Auth0 and the `app.auth.local` switch (~10 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -186,8 +186,8 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
   1. Logout success handler: `OAuth2AuthenticationToken` → `OidcClientInitiatedLogoutSuccessHandler` with `post_logout_redirect_uri={baseUrl}/login?logout`; otherwise `/login?logout`. Logout form with `hx-boost="false"`.
   2. `AuthProperties(boolean local)` (`app.auth.local`, default `true`): `formLogin()` only when `true`. No profile sets it to `false` in this issue (#199 does).
 - **Acceptance criteria:**
-  - [ ] Logout with `oidcLogin()` → 302 to `https://<fake-domain>/oidc/logout` with `id_token_hint` and `post_logout_redirect_uri`; logout of a form session → `/login?logout`.
-  - [ ] With `app.auth.local=false`, `POST /login` with valid credentials does not authenticate; with the default it does.
+  - [x] Logout with `oidcLogin()` → 302 to `https://<fake-domain>/oidc/logout` with `id_token_hint` and `post_logout_redirect_uri`; logout of a form session → `/login?logout`.
+  - [x] With `app.auth.local=false`, `POST /login` with valid credentials does not authenticate; with the default it does.
 
 ### [ ] T11 — End-to-end: link and sign in (~10 min)
 

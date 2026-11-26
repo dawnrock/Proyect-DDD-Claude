@@ -74,7 +74,7 @@
             field.focus();
             return;
         }
-        const alert = document.querySelector('form .alert[role="alert"]');
+        const alert = document.querySelector('form .alert[role="alert"], .card > .alert[role="alert"]');
         if (alert) {
             alert.tabIndex = -1;
             alert.focus();

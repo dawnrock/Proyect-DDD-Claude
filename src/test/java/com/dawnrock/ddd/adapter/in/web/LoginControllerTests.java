@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import com.dawnrock.ddd.adapter.in.SecuritySupport;
 import com.dawnrock.ddd.adapter.in.TestUsers;
@@ -190,5 +191,16 @@ class LoginControllerTests {
         String html = mvc.perform(get("/login").param("form", "")).andReturn().getResponse().getContentAsString();
 
         FieldTags.assertPasswordToggle(html, "password");
+    }
+
+    @Test
+    @WithMockUser("ada")
+    @DisplayName("El cierre de sesión de la cabecera no se navega con htmx: con Auth0 termina en otro dominio (#196)")
+    void theHeaderLogoutFormIsNotBoosted() throws Exception {
+        mvc.perform(get("/login").param("form", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().string(matchesPattern(
+                        "(?s).*<form[^>]*action=\"/logout\"[^>]*hx-boost=\"false\"[^>]*>.*|"
+                                + "(?s).*<form[^>]*hx-boost=\"false\"[^>]*action=\"/logout\"[^>]*>.*")));
     }
 }

@@ -36,31 +36,47 @@
 
     <div class="doors" th:unless="${showForm}">
         <a class="btn-slant btn-slant-rise door" th:href="@{/signup}"><span class="door-title">Quiero ser cliente</span><span class="door-hint">Abre tu cuenta en tres pasos.</span></a>
-        <a class="btn-slant btn-slant-light door" th:href="@{/login(form)}"><span class="door-title">Ya soy cliente</span><span class="door-hint">Entra con tu usuario y tu contraseña.</span></a>
+        <!--/* Sin autenticación local, la puerta va directa a Auth0, que termina en otro dominio: sin hx-boost. */-->
+        <a class="btn-slant btn-slant-light door" th:if="${auth0Enabled and !localEnabled}" hx-boost="false" th:href="@{/oauth2/authorization/auth0}"><span class="door-title">Ya soy cliente</span><span class="door-hint">Entra con tu cuenta de Auth0.</span></a>
+        <a class="btn-slant btn-slant-light door" th:unless="${auth0Enabled and !localEnabled}" th:href="@{/login(form)}"><span class="door-title">Ya soy cliente</span><span class="door-hint">Entra con tu usuario y tu contraseña.</span></a>
     </div>
 
-    <form class="card card-body" th:if="${showForm}" th:action="@{/login}" method="post">
+    <div class="card card-body" th:if="${showForm}">
         <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:if="${param.error}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg>Usuario o contraseña incorrectos</div>
         <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:if="${param.blocked}"><svg th:replace="~{fragments/icons :: icon('shield-x')}"></svg><span th:text="|Demasiados intentos fallidos. Vuelve a intentarlo dentro de ${lockoutMinutes} minutos.|">Demasiados intentos fallidos. Vuelve a intentarlo dentro de 30 minutos.</span></div>
 
-        <div class="mb-3">
-            <label class="form-label" for="username">Usuario</label>
-            <input class="form-control" type="text" id="username" autocapitalize="none" spellcheck="false" name="username" autocomplete="username" autofocus required>
-        </div>
+        <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:if="${param.containsKey('oauth-error')}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg>No se pudo iniciar sesión con Auth0. Inténtalo de nuevo.</div>
+        <div class="alert alert-warning d-flex align-items-center gap-2" role="alert" th:if="${param.containsKey('link-expired')}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg>Vuelve a entrar con Auth0 para vincular tu usuario.</div>
 
-        <div class="mb-3">
-            <label class="form-label" for="password">Contraseña</label>
-            <div class="input-group" x-data="passwordToggle">
-                <input class="form-control" type="password" id="password" name="password" autocomplete="current-password" required x-bind:type="shown ? 'text' : 'password'">
-                <button th:replace="~{fragments/password-toggle :: button('password')}"></button>
+        <form th:if="${localEnabled}" th:action="@{/login}" method="post">
+            <div class="mb-3">
+                <label class="form-label" for="username">Usuario</label>
+                <input class="form-control" type="text" id="username" autocapitalize="none" spellcheck="false" name="username" autocomplete="username" autofocus required>
             </div>
-        </div>
 
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn-slant btn-slant-rise" type="submit">Entrar</button>
-            <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1" th:href="@{/login}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg>Volver</a>
-        </div>
-    </form>
+            <div class="mb-3">
+                <label class="form-label" for="password">Contraseña</label>
+                <div class="input-group" x-data="passwordToggle">
+                    <input class="form-control" type="password" id="password" name="password" autocomplete="current-password" required x-bind:type="shown ? 'text' : 'password'">
+                    <button th:replace="~{fragments/password-toggle :: button('password')}"></button>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn-slant btn-slant-rise" type="submit">Entrar</button>
+                <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1" th:href="@{/login}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg>Volver</a>
+            </div>
+        </form>
+
+        <th:block th:if="${auth0Enabled}">
+            <!--/* Auth0 termina en otro dominio: el enlace no se navega con htmx. */-->
+            <div class="d-flex align-items-center gap-3 my-3 text-body-secondary small" aria-hidden="true" th:if="${localEnabled}"><hr class="flex-grow-1 m-0"><span>o</span><hr class="flex-grow-1 m-0"></div>
+            <div class="d-flex align-items-center gap-3">
+                <a class="btn-slant btn-slant-surface" hx-boost="false" th:href="@{/oauth2/authorization/auth0}">Entrar con Auth0</a>
+                <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1" th:href="@{/login}" th:unless="${localEnabled}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg>Volver</a>
+            </div>
+        </th:block>
+    </div>
 </main>
 <th:block th:unless="${showForm}">
 <!--/* El import map da al módulo de la intro la URL versionada de la geometría, como Thymeleaf hace con el resto de

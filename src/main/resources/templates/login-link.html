@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Vincular tu usuario')}"></head>
+<body class="d-flex flex-column min-vh-100" hx-boost="true" hx-swap="innerHTML transition:true">
+<div th:replace="~{fragments/brand :: backdrop}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="app-container mx-auto w-100 px-3 pb-5">
+    <h1 class="h3 fw-semibold mb-3">Vincula tu usuario</h1>
+    <p class="mb-4" th:text="${email != null} ? |Has entrado en Auth0 como ${email}. Para terminar, escribe una sola vez tu usuario y tu contraseña de monA Bank.| : 'Has entrado en Auth0. Para terminar, escribe una sola vez tu usuario y tu contraseña de monA Bank.'">Has entrado en Auth0. Para terminar, escribe una sola vez tu usuario y tu contraseña de monA Bank.</p>
+
+    <!--/* Sin hx-boost: al vincular, el envío termina en el dominio de Auth0, que htmx no puede navegar. */-->
+    <form class="card card-body" th:action="@{/login/link}" th:object="${identityLinkForm}" method="post" hx-boost="false" novalidate>
+        <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:if="${linkError}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${linkError}">Error</span></div>
+
+        <div class="mb-3">
+            <label class="form-label" for="username">Usuario</label>
+            <input class="form-control" type="text" id="username" required enterkeyhint="next" autocomplete="username" autocapitalize="none" spellcheck="false" autofocus th:field="*{username}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('username')} ? 'true'" th:aria-describedby="${#fields.hasErrors('username')} ? 'username-error'">
+            <p class="invalid-feedback" id="username-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></p>
+        </div>
+
+        <!--/* La contraseña nunca se pinta de vuelta: ni th:field ni value. */-->
+        <div class="mb-3">
+            <label class="form-label" for="password">Contraseña</label>
+            <div class="input-group has-validation" x-data="passwordToggle">
+                <input class="form-control" type="password" id="password" required enterkeyhint="done" name="password" autocomplete="current-password" th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'" th:aria-invalid="${#fields.hasErrors('password')} ? 'true'" th:aria-describedby="${#fields.hasErrors('password')} ? 'password-error'" x-bind:type="shown ? 'text' : 'password'">
+                <button th:replace="~{fragments/password-toggle :: button('password')}"></button>
+                <p class="invalid-feedback" id="password-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn-slant btn-slant-rise" type="submit">Vincular</button>
+            <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1" th:href="@{/login}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg>Volver</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>
