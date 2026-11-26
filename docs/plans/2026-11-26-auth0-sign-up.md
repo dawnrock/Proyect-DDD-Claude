@@ -83,7 +83,7 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
 - **Acceptance criteria:**
   - [x] With the `sub` already linked, no customer, account or user is created and the exception reaches the caller.
 
-### [ ] T3 — Link page: «Date de alta» (~5 min)
+### [x] T3 — Link page: «Date de alta» (~5 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -92,9 +92,9 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
 - **What to do:**
   1. The page reads as a choice: the current link form under «¿Ya eres cliente de monA Bank?» and, below, «¿Aún no eres cliente?» with a `btn-slant` link to `/signup?auth0` (normal navigation, no Auth0 redirect).
 - **Acceptance criteria:**
-  - [ ] With a pending identity the page shows both options and the sign-up link points to `/signup?auth0`.
+  - [x] With a pending identity the page shows both options and the sign-up link points to `/signup?auth0`.
 
-### [ ] T4 — Wizard in Auth0 mode, steps 1 and 2 (~10 min)
+### [x] T4 — Wizard in Auth0 mode, steps 1 and 2 (~10 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -104,10 +104,10 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
   1. `GET /signup?auth0` with a valid pending identity starts a fresh form in Auth0 mode with the e-mail prefilled; without one (or expired) → `/login?link-expired`. Every step in Auth0 mode checks the pending identity again.
   2. Step 2 in Auth0 mode asks only for the username («Entrarás con tu cuenta de Auth0: no necesitas contraseña de monA Bank»), validated with `ExternalAccess`; no password fields are rendered.
 - **Acceptance criteria:**
-  - [ ] `GET /signup?auth0` without a pending identity → `/login?link-expired`; with one → step 1 with the Auth0 e-mail.
-  - [ ] Step 2 in Auth0 mode has no password input and accepts a valid username alone; a bad username shows its error as today.
+  - [x] `GET /signup?auth0` without a pending identity → `/login?link-expired`; with one → step 1 with the Auth0 e-mail.
+  - [x] Step 2 in Auth0 mode has no password input and accepts a valid username alone; a bad username shows its error as today.
 
-### [ ] T5 — Wizard in Auth0 mode, step 3 (~10 min)
+### [x] T5 — Wizard in Auth0 mode, step 3 (~10 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -116,8 +116,8 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
 - **What to do:**
   1. In Auth0 mode `submitAccount` calls `registerWithExternalIdentity(command, pending, ip)`; on success it completes the session form, removes the pending identity and redirects to `/oauth2/authorization/auth0` (no programmatic sign-in). Errors as in the classic wizard, plus `PendingIdentityExpiredException` → `/login?link-expired` and `IdentityAlreadyLinkedException` → removes the pending identity and `redirect:/oauth2/authorization/auth0` (the link exists now; see the contract).
 - **Acceptance criteria:**
-  - [ ] Success → `redirect:/oauth2/authorization/auth0`, pending identity removed, nobody authenticated by the controller.
-  - [ ] Each error lands where the contract says; the classic wizard's tests pass unchanged.
+  - [x] Success → `redirect:/oauth2/authorization/auth0`, pending identity removed, nobody authenticated by the controller.
+  - [x] Each error lands where the contract says; the classic wizard's tests pass unchanged.
 
 ### [ ] T6 — End-to-end: sign up with Auth0 and sign in (~10 min)
 

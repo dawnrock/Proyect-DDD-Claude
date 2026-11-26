@@ -14,10 +14,14 @@
 
         <div class="mb-3">
             <label class="form-label" for="username">Usuario</label>
-            <input class="form-control" type="text" id="username" required enterkeyhint="next" autocomplete="username" autocapitalize="none" spellcheck="false" autofocus th:field="*{username}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('username')} ? 'true'" th:aria-describedby="${#fields.hasErrors('username')} ? 'username-help username-error' : 'username-help'">
+            <input class="form-control" type="text" id="username" required enterkeyhint="next" autocomplete="username" autocapitalize="none" spellcheck="false" autofocus th:field="*{username}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('username')} ? 'true'" th:aria-describedby="${#fields.hasErrors('username')} ? ('username-help ' + (${signUpForm.externalIdentity} ? 'auth0-access-note ' : '') + 'username-error') : ('username-help' + (${signUpForm.externalIdentity} ? ' auth0-access-note' : ''))">
             <p class="form-text mb-0" id="username-help">De 3 a 30 caracteres: minúsculas sin tildes ni ñ, dígitos, puntos, guiones bajos o guiones. Si escribes mayúsculas, se guarda en minúsculas.</p>
+            <p class="form-text mb-0" id="auth0-access-note" th:if="${signUpForm.externalIdentity}">Entrarás con tu cuenta de Auth0: no necesitas contraseña de monA Bank.</p>
             <p class="invalid-feedback" id="username-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></p>
         </div>
+
+        <!--/* En modo Auth0 no hay contraseña local: los dos campos ni se pintan. */-->
+        <th:block th:unless="${signUpForm.externalIdentity}">
 
         <!--/* La contraseña nunca se pinta de vuelta: ni th:field ni value. */-->
         <div class="mb-3">
@@ -37,6 +41,8 @@
                 <p class="invalid-feedback" id="passwordRepetition-error" th:if="${#fields.hasErrors('passwordRepetition')}" th:errors="*{passwordRepetition}"></p>
             </div>
         </div>
+
+        </th:block>
 
         <div class="d-flex align-items-center gap-3">
             <button class="btn-slant btn-slant-rise" type="submit">Continuar</button>
