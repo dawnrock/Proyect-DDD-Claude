@@ -123,7 +123,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 - **Acceptance criteria:**
   - [x] Without configuration: `enabled: false` and discovery 404; with it: the expected JSON, with no secret anywhere in either answer.
 
-### [ ] T7 — Swagger UI: «Authorize» with Auth0 and PKCE (~10 min)
+### [x] T7 — Swagger UI: «Authorize» with Auth0 and PKCE (~10 min)
 
 - **Layer:** adapter.in.web (static)
 - **Files:** `static/api-docs/index.html`, `static/api-docs/oauth2-redirect.html` (+ `oauth2-redirect.js` if 5.34.1 ships it apart), copied from `swagger-ui-dist@5.34.1` with a README line on where they come from; test in `ApiDocsControllerTests` (MockMvc over the static files)
@@ -131,7 +131,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 - **What to do:**
   1. The page fetches `/api-docs/oauth-config` before creating the UI, passes `oauth2RedirectUrl: <origin>/api-docs/oauth2-redirect.html`, and calls `initOAuth` with the client id, PKCE and `audience` only when enabled. Without Auth0 it behaves as today.
 - **Acceptance criteria:**
-  - [ ] `/api-docs/oauth2-redirect.html` is served from our origin; the page has the `oauth2RedirectUrl`, `usePkceWithAuthorizationCodeGrant: true` and the `audience` parameter; without Auth0 nothing breaks (checked by hand once with `spring-boot:run`).
+  - [x] `/api-docs/oauth2-redirect.html` is served from our origin; the page has the `oauth2RedirectUrl`, `usePkceWithAuthorizationCodeGrant: true` and the `audience` parameter; without Auth0 nothing breaks (checked by hand once with `spring-boot:run`; the browser check of the Auth0 flow runs after T8, once the contract has the scheme).
 
 ### [ ] T8 — Contract 2.3.0 (~10 min)
 

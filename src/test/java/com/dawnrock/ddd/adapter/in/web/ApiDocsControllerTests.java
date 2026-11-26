@@ -1,6 +1,8 @@
 package com.dawnrock.ddd.adapter.in.web;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,6 +33,31 @@ class ApiDocsControllerTests {
         mvc.perform(get("/api-docs"))
                 .andExpect(status().isFound())
                 .andExpect(redirectedUrl("/api-docs/index.html"));
+    }
+
+    @Test
+    @WithAnonymousUser
+    @DisplayName("La página de Swagger UI pide su configuración de Auth0 y solo inicia sesión con PKCE y la audiencia")
+    void theSwaggerUiPageAsksForItsAuth0ConfigAndSignsInWithPkce() throws Exception {
+        mvc.perform(get("/api-docs/index.html"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("fetch('/api-docs/oauth-config')")))
+                .andExpect(content().string(containsString(
+                        "oauth2RedirectUrl: window.location.origin + '/api-docs/oauth2-redirect.html'")))
+                .andExpect(content().string(containsString("usePkceWithAuthorizationCodeGrant: true")))
+                .andExpect(content().string(containsString("additionalQueryStringParams: {audience: config.audience}")));
+    }
+
+    @Test
+    @WithAnonymousUser
+    @DisplayName("La página de vuelta de OAuth de Swagger UI se sirve desde nuestro origen")
+    void theOAuthRedirectPageIsServedFromOurOrigin() throws Exception {
+        mvc.perform(get("/api-docs/oauth2-redirect.html"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<script src=\"oauth2-redirect.js\"></script>")));
+        mvc.perform(get("/api-docs/oauth2-redirect.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("swaggerUIRedirectOauth2")));
     }
 
     @Test
