@@ -54,7 +54,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 
 ## Tasks
 
-### [ ] T0 — Contract (~10 min)
+### [x] T0 — Contract (~10 min)
 
 - **Side:** both
 - **Layer:** adapter.in · docs
@@ -70,7 +70,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
   4. Security wiring: who owns which file (back: support classes, V3, ADR; web: `WebSecurityConfig`, controllers, templates).
   5. No REST change: the OpenAPI section says "n/a (#197)".
 - **Acceptance criteria:**
-  - [ ] Contract agreed by backend-dev and web-dev and frozen in a commit; `./mvnw verify` compiles against the types.
+  - [x] Contract agreed by backend-dev and web-dev and frozen in a commit; `./mvnw verify` compiles against the types.
 
 ### [ ] T1 — ADR 0024 and the OAuth2 client dependency (~10 min)
 

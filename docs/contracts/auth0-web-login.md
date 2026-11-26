@@ -1,7 +1,7 @@
 # Contract: Web login with Auth0 (OIDC) and identity linking
 
 - **Issue:** [#196](https://github.com/dawnrock/Proyect-DDD-Claude/issues/196) · **Plan:** `docs/plans/2026-11-26-auth0-web-login.md`
-- **Status:** frozen at `<pending>`
+- **Status:** frozen at `33b4bd1`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both accepted the signatures and proposed precisions, merged by the lead, since the teammates cannot message each other)
 
 Builds on the frozen contracts `login-roles.md` (roles, `Caller`, security wiring) and `customer-sign-up.md` (users in the database, `ClientIpResolver`). ADR 0024 (written in T1) records the decisions.
