@@ -84,7 +84,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **Acceptance criteria:**
   - [x] `./mvnw verify` green with the new dependency and no other change in behaviour.
 
-### [ ] T2 — Flyway V3: `external_identity` (~5 min)
+### [x] T2 — Flyway V3: `external_identity` (~5 min)
 
 - **Side:** back
 - **Layer:** persistence (schema)
@@ -93,7 +93,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **What to do:**
   1. `provider varchar(20)`, `subject varchar(255)`, `username varchar(50)`; PK `(provider, subject)`, unique `(provider, username)`, FK `username` → `users(username)`. Plain SQL valid for H2 (PostgreSQL mode) and PostgreSQL.
 - **Acceptance criteria:**
-  - [ ] `DddLabApplicationTests` starts (Flyway applies V3 and `ddl-auto=validate` passes).
+  - [x] `DddLabApplicationTests` starts (Flyway applies V3 and `ddl-auto=validate` passes).
 
 ### [ ] T3 — `ExternalIdentities`: contract, JDBC and in-memory (~10 min)
 
