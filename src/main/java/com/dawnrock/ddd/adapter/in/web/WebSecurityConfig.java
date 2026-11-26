@@ -2,11 +2,15 @@ package com.dawnrock.ddd.adapter.in.web;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizers;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -14,6 +18,7 @@ import org.springframework.security.web.authentication.ExceptionMappingAuthentic
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
 import com.dawnrock.ddd.adapter.in.ClientIpAuthenticationDetailsSource;
+import com.dawnrock.ddd.adapter.in.LinkedOidcUserService;
 import com.dawnrock.ddd.adapter.in.TooManyLoginAttemptsException;
 
 /**
@@ -30,8 +35,13 @@ public class WebSecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain webSecurity(HttpSecurity http, ClientIpAuthenticationDetailsSource clientIp)
-            throws Exception {
+    public SecurityFilterChain webSecurity(HttpSecurity http, ClientIpAuthenticationDetailsSource clientIp,
+                                           ObjectProvider<ClientRegistrationRepository> registrations,
+                                           ObjectProvider<LinkedOidcUserService> oidcUsers) throws Exception {
+        ClientRegistrationRepository auth0 = registrations.getIfAvailable();
+        if (auth0 != null) {
+            oauth2Login(http, auth0, oidcUsers.getObject());
+        }
         return http
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/login", "/login/link", "/signup/**", "/css/**", "/js/**", "/webjars/**", "/vendor/**", "/brand/**", "/actuator/health", "/error", "/error/**",
@@ -61,6 +71,25 @@ public class WebSecurityConfig {
                     errors.authenticationEntryPoint(htmx).accessDeniedHandler(htmx);
                 })
                 .build();
+    }
+
+    /**
+     * El inicio de sesión con Auth0 (#196, ADR 0024), solo si hay un registro de cliente. Spring Security no aplica PKCE
+     * por defecto a un cliente confidencial ({@code client_secret_basic}): se activa en el resolvedor. El usuario lo da
+     * {@link LinkedOidcUserService} (el usuario local vinculado al {@code sub}); si no hay vínculo, el manejador de
+     * fallos lleva a {@code /login/link}.
+     */
+    private static void oauth2Login(HttpSecurity http, ClientRegistrationRepository registrations,
+                                    LinkedOidcUserService oidcUsers) throws Exception {
+        DefaultOAuth2AuthorizationRequestResolver resolver = new DefaultOAuth2AuthorizationRequestResolver(
+                registrations, "/oauth2/authorization");
+        resolver.setAuthorizationRequestCustomizer(OAuth2AuthorizationRequestCustomizers.withPkce());
+        http.oauth2Login(login -> login
+                .loginPage("/login")
+                .defaultSuccessUrl("/", true)
+                .authorizationEndpoint(endpoint -> endpoint.authorizationRequestResolver(resolver))
+                .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUsers))
+                .failureHandler(new OAuth2LoginFailureHandler()));
     }
 
     /** Un bloqueo por demasiados intentos (#130) va a {@code /login?blocked}; el resto de fallos, a {@code /login?error}. */

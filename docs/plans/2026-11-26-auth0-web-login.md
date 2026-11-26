@@ -164,7 +164,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **Acceptance criteria:**
   - [x] Without a pending identity → redirect to `/login?link-expired`; with one, the success POST redirects to `/oauth2/authorization/auth0` and clears the session attribute; each error shows its message with status 200 and the form.
 
-### [ ] T9 — Web chain: `oauth2Login()` when configured (~10 min)
+### [x] T9 — Web chain: `oauth2Login()` when configured (~10 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -173,8 +173,8 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **What to do:**
   1. If a `ClientRegistrationRepository` is available: `oauth2Login()` with `loginPage("/login")`, `userInfoEndpoint().oidcUserService(...)`, PKCE on the authorization request resolver (`OAuth2AuthorizationRequestCustomizers.withPkce()`, unless Spring Security already applies it by default to confidential clients), failure handler: `UnlinkedIdentityException` → store the `PendingIdentity` in the session and redirect to `/login/link`; anything else → `/login?oauth-error`. `/login/link` is public.
 - **Acceptance criteria:**
-  - [ ] `GET /oauth2/authorization/auth0` → 302 to `https://<fake-domain>/authorize` with `code_challenge_method=S256`, `state` and `nonce`; without a registration the route does not exist and the existing web tests still pass.
-  - [ ] The failure handler with an `UnlinkedIdentityException` leaves the `PendingIdentity` in the session and redirects to `/login/link`.
+  - [x] `GET /oauth2/authorization/auth0` → 302 to `https://<fake-domain>/authorize` with `code_challenge_method=S256`, `state` and `nonce`; without a registration the route does not exist and the existing web tests still pass.
+  - [x] The failure handler with an `UnlinkedIdentityException` leaves the `PendingIdentity` in the session and redirects to `/login/link`.
 
 ### [ ] T10 — Logout in Auth0 and the `app.auth.local` switch (~10 min)
 
