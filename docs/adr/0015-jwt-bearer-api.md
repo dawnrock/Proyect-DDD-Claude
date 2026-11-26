@@ -1,6 +1,6 @@
 # 0015 · JWT Bearer tokens for the REST API
 
-- **Status:** accepted · 2026-11-18
+- **Status:** accepted · 2026-11-18 · amended by [ADR 0024](0024-oauth2-oidc-auth0.md) (OAuth2/OIDC for the web login with Auth0; the API tokens stay as here until #197)
 - **Issue:** #122 · **Amends:** [ADR 0008](0008-spring-security.md) (authentication of `/api/**`) · **Related:** [ADR 0014](0014-contract-versioning.md) (contract 2.0.0)
 
 ## Context

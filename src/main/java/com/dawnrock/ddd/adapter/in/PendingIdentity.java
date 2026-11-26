@@ -26,6 +26,6 @@ public record PendingIdentity(String provider, String subject, String email, Ins
 
     /** Si ya pasaron {@link #VALIDITY} desde {@code createdAt} según el reloj. */
     public boolean isExpired(Clock clock) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+        return !clock.instant().isBefore(createdAt.plus(VALIDITY));
     }
 }

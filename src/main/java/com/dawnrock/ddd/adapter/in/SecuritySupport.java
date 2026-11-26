@@ -32,8 +32,8 @@ import com.dawnrock.ddd.application.OpenAccountCommandDef;
  * cuenta.
  */
 @Configuration
-@EnableConfigurationProperties({SecurityUsersProperties.class, AuthProperties.class, LoginAttemptsProperties.class,
-        TrustedProxiesProperties.class, SignUpLimitProperties.class})
+@EnableConfigurationProperties({SecurityUsersProperties.class, AuthProperties.class, Auth0Properties.class,
+        LoginAttemptsProperties.class, TrustedProxiesProperties.class, SignUpLimitProperties.class})
 public class SecuritySupport {
 
     private static final Set<String> ROLES = Set.of("ADMIN", "USER");

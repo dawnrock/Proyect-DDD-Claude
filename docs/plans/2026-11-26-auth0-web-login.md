@@ -72,7 +72,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **Acceptance criteria:**
   - [x] Contract agreed by backend-dev and web-dev and frozen in a commit; `./mvnw verify` compiles against the types.
 
-### [ ] T1 — ADR 0024 and the OAuth2 client dependency (~10 min)
+### [x] T1 — ADR 0024 and the OAuth2 client dependency (~10 min)
 
 - **Side:** back
 - **Layer:** build · docs
@@ -82,9 +82,9 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
   1. ADR 0024: context (ADR 0008 and 0015 named OAuth2/OIDC as the end state; ADR 0019 made users durable), decision (Auth0 as identity provider for the web, roles from our database, `external_identity` link, link with the local password, RP-initiated logout, hand-built registration, `app.auth.local`; the four issues), alternatives (Keycloak self-hosted, roles in an Auth0 claim, linking by e-mail, a separate branch or module for the realistic mode), consequences (tenant setup, secrets on Render, Auth0 outage blocks only Auth0 logins).
   2. Add `spring-boot-starter-security-oauth2-client` with a comment pointing to ADR 0024. Mark ADR 0008 and 0015 as "amended by ADR 0024".
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green with the new dependency and no other change in behaviour.
+  - [x] `./mvnw verify` green with the new dependency and no other change in behaviour.
 
-### [ ] T2 — Flyway V3: `external_identity` (~5 min)
+### [x] T2 — Flyway V3: `external_identity` (~5 min)
 
 - **Side:** back
 - **Layer:** persistence (schema)
@@ -93,9 +93,9 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **What to do:**
   1. `provider varchar(20)`, `subject varchar(255)`, `username varchar(50)`; PK `(provider, subject)`, unique `(provider, username)`, FK `username` → `users(username)`. Plain SQL valid for H2 (PostgreSQL mode) and PostgreSQL.
 - **Acceptance criteria:**
-  - [ ] `DddLabApplicationTests` starts (Flyway applies V3 and `ddl-auto=validate` passes).
+  - [x] `DddLabApplicationTests` starts (Flyway applies V3 and `ddl-auto=validate` passes).
 
-### [ ] T3 — `ExternalIdentities`: contract, JDBC and in-memory (~10 min)
+### [x] T3 — `ExternalIdentities`: contract, JDBC and in-memory (~10 min)
 
 - **Side:** back
 - **Layer:** adapter.in (support)
@@ -105,9 +105,9 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
   1. Contract: an unknown pair gives empty; after `link` the pair gives the username; linking the same pair twice is a no-op; a second identity of the same provider for the same username → `IdentityAlreadyLinkedException`; the same subject cannot point to two usernames.
   2. `JdbcExternalIdentities` with `JdbcClient`, translating the unique violation into `IdentityAlreadyLinkedException`; bean next to `userDetailsService` in `UserStore` (depends on database initialisation). The JDBC test runs on H2 with a user created first (FK).
 - **Acceptance criteria:**
-  - [ ] Both implementations pass `ExternalIdentitiesContract`.
+  - [x] Both implementations pass `ExternalIdentitiesContract`.
 
-### [ ] T4 — Auth0 client registration from three properties (~10 min)
+### [x] T4 — Auth0 client registration from three properties (~10 min)
 
 - **Side:** back
 - **Layer:** adapter.in (support)
@@ -117,9 +117,9 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
   1. `Auth0Properties(domain, clientId, clientSecret)`, blank by default; `isConfigured()`; partial configuration → `IllegalStateException` naming the missing variables.
   2. A `ClientRegistrationRepository` bean only when configured (custom condition on non-blank values): registration id `auth0`, `client_secret_basic`, `authorization_code`, redirect `{baseUrl}/login/oauth2/code/{registrationId}`, scopes `openid profile email`, the Auth0 endpoints and issuer from the domain, `end_session_endpoint` in the provider metadata, user name attribute `sub`.
 - **Acceptance criteria:**
-  - [ ] Without properties there is no `ClientRegistrationRepository`; with the three, the registration has the expected endpoints, scopes and `end_session_endpoint`; with only some, startup fails with the message.
+  - [x] Without properties there is no `ClientRegistrationRepository`; with the three, the registration has the expected endpoints, scopes and `end_session_endpoint`; with only some, startup fails with the message.
 
-### [ ] T5 — `LinkedOidcUserService`: `sub` → local user (~10 min)
+### [x] T5 — `LinkedOidcUserService`: `sub` → local user (~10 min)
 
 - **Side:** back
 - **Layer:** adapter.in (support)
@@ -128,9 +128,9 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **What to do:**
   1. Wraps the default `OidcUserService` (delegate injected, mocked in the test as Spring's `OAuth2UserService` interface). Linked → an `OidcUser` that keeps the ID token and claims but answers `getName()` with the local username and has the local authorities (`UserDetailsService`). Unknown → `UnlinkedIdentityException` with the `PendingIdentity` (`sub`, `email`, now). Local user disabled or missing → `OAuth2AuthenticationException` (`invalid_user`).
 - **Acceptance criteria:**
-  - [ ] Linked identity → name = local username and `ROLE_USER`/`ROLE_ADMIN` from the store; unknown → `UnlinkedIdentityException` with subject and e-mail; disabled user → rejected.
+  - [x] Linked identity → name = local username and `ROLE_USER`/`ROLE_ADMIN` from the store; unknown → `UnlinkedIdentityException` with subject and e-mail; disabled user → rejected.
 
-### [ ] T6 — `ExternalIdentityLinking`: link with the local password (~10 min)
+### [x] T6 — `ExternalIdentityLinking`: link with the local password (~10 min)
 
 - **Side:** back
 - **Layer:** adapter.in (support)
@@ -139,7 +139,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **What to do:**
   1. Authenticates `username`/`rawPassword` with the `ThrottledAuthenticationProvider` (IP in `WebAuthenticationDetails`, so the attempt limit applies and the username is normalised, #157), then `identities.link(pending.provider(), pending.subject(), username)`. An expired pending identity → `IllegalStateException`. Uses `TestUsers` and `InMemoryExternalIdentities` in the test.
 - **Acceptance criteria:**
-  - [ ] Right password → linked and the normalised username returned; wrong password → `BadCredentialsException` and it counts for the limit; after the limit → `TooManyLoginAttemptsException` even with the right password; username already linked to another identity → `IdentityAlreadyLinkedException`.
+  - [x] Right password → linked and the normalised username returned; wrong password → `BadCredentialsException` and it counts for the limit; after the limit → `TooManyLoginAttemptsException` even with the right password; username already linked to another identity → `IdentityAlreadyLinkedException`.
 
 ### [ ] T7 — Login page: "Entrar con Auth0" (~5 min)
 
