@@ -117,6 +117,17 @@ class LoginControllerTests {
     }
 
     @Test
+    @DisplayName("En las puertas, la capa de la intro va lo primero del body y la destapa un script en línea antes de que se pinte la página, sin un fogonazo de la bienvenida")
+    void theIntroLayerCoversTheDoorsFromTheFirstPaint() throws Exception {
+        mvc.perform(get("/login"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(matchesPattern(
+                        "(?s).*<body[^>]*>\\s*<div class=\"splash\" id=\"splash\"[^>]*>\\s*<canvas[^>]*></canvas>\\s*</div>\\s*"
+                                + "<script>[^<]*document\\.readyState === 'loading'[^<]*splash\\.hidden = false[^<]*</script>.*"
+                                + "<div class=\"backdrop\".*")));
+    }
+
+    @Test
     @DisplayName("El script de la intro se sirve como JavaScript, que es lo que exige un módulo (#178)")
     void theIntroScriptIsServedAsJavaScript() throws Exception {
         mvc.perform(get("/js/intro.js"))

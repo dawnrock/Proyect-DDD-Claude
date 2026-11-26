@@ -2,6 +2,24 @@
 <html lang="es" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Acceso')}"></head>
 <body class="d-flex flex-column min-vh-100" hx-boost="true" hx-swap="innerHTML transition:true">
+<th:block th:unless="${showForm}">
+<!--/* Intro de la marca (#178, ADR 0022), lo primero del body: el script de debajo la destapa antes de que se pinte la
+     página, para que no asome la bienvenida, solo en una carga completa (tras una navegación con htmx no suena) y sin
+     movimiento reducido. Si intro.js no llega a arrancar, la quita. Sin JavaScript se queda oculta. */-->
+<div class="splash" id="splash" role="img" aria-label="monA Bank" hidden>
+    <canvas aria-hidden="true"></canvas>
+</div>
+<script>
+    if (document.readyState === 'loading' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const splash = document.getElementById('splash');
+        splash.hidden = false;
+        document.documentElement.dataset.intro = 'playing';
+        setTimeout(() => {
+            if (!window.monaIntro) { splash.remove(); delete document.documentElement.dataset.intro; }
+        }, 2500);
+    }
+</script>
+</th:block>
 <!--/* Las pantallas de entrada (#185, ADR 0023) van sobre la A oscurecida de fondo. Las puertas, sin cabecera: el logo
      está en el centro. */-->
 <div th:replace="~{fragments/brand :: backdrop}"></div>
@@ -45,11 +63,8 @@
     </form>
 </main>
 <th:block th:unless="${showForm}">
-<!--/* Intro de la marca (#178, ADR 0022): oculta hasta que intro.js decide reproducirla. El import map da al módulo
-     la URL versionada de la geometría, como Thymeleaf hace con el resto de recursos. */-->
-<div class="splash" id="splash" role="img" aria-label="monA Bank" hidden>
-    <canvas aria-hidden="true"></canvas>
-</div>
+<!--/* El import map da al módulo de la intro la URL versionada de la geometría, como Thymeleaf hace con el resto de
+     recursos. */-->
 <script type="importmap" th:inline="javascript">{"imports":{"brand-geometry":[[@{/js/brand-geometry.js}]]}}</script>
 <script type="module" th:src="@{/js/intro.js}"></script>
 </th:block>

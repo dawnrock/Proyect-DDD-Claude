@@ -347,8 +347,9 @@ const stage = () => {
 };
 
 const play = async () => {
+    window.monaIntro = true;   // el script en línea de login.html ya no quitará la capa
     if (!splash || !canvas || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    splash.hidden = false;   // cuanto antes, para que no se vean las puertas antes de la intro
+    splash.hidden = false;   // normalmente ya la destapó el script en línea de login.html, antes del primer pintado
     const page = document.documentElement;
     page.dataset.intro = 'playing';   // saludo, A de fondo y puertas, ocultos hasta que acabe
     let frame = 0;
