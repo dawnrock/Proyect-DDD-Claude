@@ -83,7 +83,7 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
 - **Acceptance criteria:**
   - [ ] With the `sub` already linked, no customer, account or user is created and the exception reaches the caller.
 
-### [ ] T3 — Link page: «Date de alta» (~5 min)
+### [x] T3 — Link page: «Date de alta» (~5 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -92,7 +92,7 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
 - **What to do:**
   1. The page reads as a choice: the current link form under «¿Ya eres cliente de monA Bank?» and, below, «¿Aún no eres cliente?» with a `btn-slant` link to `/signup?auth0` (normal navigation, no Auth0 redirect).
 - **Acceptance criteria:**
-  - [ ] With a pending identity the page shows both options and the sign-up link points to `/signup?auth0`.
+  - [x] With a pending identity the page shows both options and the sign-up link points to `/signup?auth0`.
 
 ### [ ] T4 — Wizard in Auth0 mode, steps 1 and 2 (~10 min)
 

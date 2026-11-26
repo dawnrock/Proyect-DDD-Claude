@@ -8,6 +8,8 @@
     <h1 class="h3 fw-semibold mb-3">Vincula tu usuario</h1>
     <p class="mb-4" th:text="${email != null} ? |Has entrado en Auth0 como ${email}. Para terminar, escribe una sola vez tu usuario y tu contraseña de monA Bank.| : 'Has entrado en Auth0. Para terminar, escribe una sola vez tu usuario y tu contraseña de monA Bank.'">Has entrado en Auth0. Para terminar, escribe una sola vez tu usuario y tu contraseña de monA Bank.</p>
 
+    <section class="mb-5" aria-labelledby="link-heading">
+    <h2 class="h5 fw-semibold mb-3" id="link-heading">¿Ya eres cliente de monA Bank?</h2>
     <!--/* Sin hx-boost: al vincular, el envío termina en el dominio de Auth0, que htmx no puede navegar. */-->
     <form class="card card-body" th:action="@{/login/link}" th:object="${identityLinkForm}" method="post" hx-boost="false" novalidate>
         <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:if="${linkError}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${linkError}">Error</span></div>
@@ -33,6 +35,14 @@
             <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1" th:href="@{/login}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg>Volver</a>
         </div>
     </form>
+    </section>
+
+    <section aria-labelledby="sign-up-heading">
+        <h2 class="h5 fw-semibold mb-3" id="sign-up-heading">¿Aún no eres cliente?</h2>
+        <p class="mb-3">Date de alta con tu cuenta de Auth0: no necesitas una contraseña de monA Bank.</p>
+        <!--/* Navegación normal del mismo origen (htmx la impulsa como el resto de pasos del alta). */-->
+        <a class="btn-slant btn-slant-rise" th:href="@{/signup(auth0)}" href="/signup?auth0">Date de alta</a>
+    </section>
 </main>
 </body>
 </html>

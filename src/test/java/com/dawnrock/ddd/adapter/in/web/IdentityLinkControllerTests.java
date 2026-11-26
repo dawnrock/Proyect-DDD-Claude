@@ -134,6 +134,23 @@ class IdentityLinkControllerTests {
     }
 
     @Test
+    @DisplayName("La página es una elección con dos secciones con h2: ya soy cliente (vincular) y aún no (darse de alta, #198)")
+    void thePageOffersTwoSectionsToLinkOrToSignUp() throws Exception {
+        String html = mvc.perform(get("/login/link").session(session))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(html)
+                .containsPattern("(?s)<h1[^>]*>Vincula tu usuario</h1>.*<h2[^>]*>¿Ya eres cliente de monA Bank\\?</h2>"
+                        + ".*<form[^>]*action=\"/login/link\".*<h2[^>]*>¿Aún no eres cliente\\?</h2>")
+                .containsPattern("<a [^>]*class=\"btn-slant btn-slant-rise\"[^>]*href=\"/signup\\?auth0\"[^>]*>Date de alta</a>|"
+                        + "<a [^>]*href=\"/signup\\?auth0\"[^>]*class=\"btn-slant btn-slant-rise\"[^>]*>Date de alta</a>");
+        assertThat(html.indexOf("<h2")).isLessThan(html.indexOf("action=\"/login/link\""));
+        // El enlace de alta es una navegación normal del mismo origen: solo el formulario de vincular sale de htmx
+        assertThat(html).doesNotContainPattern("<a [^>]*hx-boost=\"false\"[^>]*auth0");
+    }
+
+    @Test
     @DisplayName("Sin correo en la identidad pendiente, el saludo no lo menciona")
     void withoutEmailTheGreetingOmitsIt() throws Exception {
         when(pending.email()).thenReturn(null);
