@@ -77,7 +77,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 - **Acceptance criteria:**
   - [x] A linked `sub` gives the local name and `ROLE_*`; unlinked, missing and disabled all give `InvalidBearerTokenException`; the validator rejects wrong `iss`, wrong `aud` and expired tokens.
 
-### [ ] T3 — Auth0 decoder, only with domain and audience (~10 min)
+### [x] T3 — Auth0 decoder, only with domain and audience (~10 min)
 
 - **Layer:** adapter.in.rest
 - **Files:** `adapter/in/rest/Auth0AccessTokens.java` (`@Configuration` with its own condition), test `Auth0AccessTokensConfigurationTests` (`ApplicationContextRunner`)
@@ -86,8 +86,8 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
   1. Bean `auth0JwtDecoder`: `NimbusJwtDecoder.withJwkSetUri("https://<domain>/.well-known/jwks.json").jwsAlgorithm(RS256)` with T2's validator. Nimbus fetches the keys on the first decode, so startup stays offline.
   2. Test the validation with a decoder built from a local RSA key pair (same validator), signing tokens in the test with `NimbusJwtEncoder`.
 - **Acceptance criteria:**
-  - [ ] No bean without domain or without audience; with both, the bean exists and the context starts with no network.
-  - [ ] A token signed with the test key, right `iss`/`aud`, decodes; wrong `aud` or `iss`, or expired, is rejected.
+  - [x] No bean without domain or without audience; with both, the bean exists and the context starts with no network.
+  - [x] A token signed with the test key, right `iss`/`aud`, decodes; wrong `aud` or `iss`, or expired, is rejected.
 
 ### [ ] T4 — `ApiSecurityConfig`: one manager per issuer (~10 min)
 

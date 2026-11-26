@@ -41,8 +41,7 @@ public class Auth0ClientRegistration {
 
     /** El registro {@code auth0} para el tenant de las propiedades. */
     static ClientRegistration registration(Auth0Properties properties) {
-        String host = properties.domain().replaceFirst("^https?://", "").replaceFirst("/+$", "");
-        String base = "https://" + host;
+        String base = properties.baseUrl();
         return ClientRegistration.withRegistrationId(ExternalIdentities.AUTH0)
                 .clientName("Auth0")
                 .clientId(properties.clientId())

@@ -53,6 +53,16 @@ public record Auth0Properties(String domain, String clientId, String clientSecre
         return !domain.isEmpty() && !audience.isEmpty();
     }
 
+    /** La URL del tenant, sin barra final, aunque el dominio se escriba con {@code https://} o con barra. */
+    public String baseUrl() {
+        return "https://" + domain.replaceFirst("^https?://", "").replaceFirst("/+$", "");
+    }
+
+    /** El emisor ({@code iss}) de los tokens del tenant: su URL con barra final, como la escribe Auth0. */
+    public String issuerUri() {
+        return baseUrl() + "/";
+    }
+
     private static String stripped(String value) {
         return value == null ? "" : value.strip();
     }
