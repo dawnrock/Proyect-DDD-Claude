@@ -17,7 +17,7 @@ The bank's name is written **monA Bank**: «monA» sounds like *money*, and the 
 
 ## Intro
 
-A 3-second animation before the login doors: twelve positive banking and stock-market words (Maximize, Markets · Optimism · Net gain · Affluence, Assets · Bull, Bonus · Alpha · Next · Key, Keep) lose their endings, their initials fly to the letters of the logo, and the chart is painted from left to right. Once per browser session, skipped with reduced motion, without JavaScript or if the font does not load.
+A 5-second animation before the login doors: twelve positive banking and stock-market words (Maximize, Markets · Optimism · Net gain · Affluence, Assets · Bull, Bonus · Alpha · Next · Key, Keep) stay still for a second, lose their endings, their initials fly to the letters of the logo, the chart is painted from left to right and the logo stays still for another second before fading out. It plays on every full load of the doors; skipped with reduced motion, without JavaScript or if the font does not load.
 
 ## Web interface
 
