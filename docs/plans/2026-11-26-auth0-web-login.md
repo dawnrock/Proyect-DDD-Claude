@@ -152,7 +152,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **Acceptance criteria:**
   - [x] With Auth0 configured, the form shows the button with `hx-boost="false"`; without it, the page is unchanged; both messages show on their parameter.
 
-### [ ] T8 — Link page `/login/link` (~10 min)
+### [x] T8 — Link page `/login/link` (~10 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -162,7 +162,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
   1. `GET`: no pending identity in the session or expired → `/login?link-expired`; otherwise the form with the Auth0 e-mail ("Has entrado en Auth0 como …. Para terminar, escribe una sola vez tu usuario y tu contraseña de monA Bank"), username (lower-cased like `SignUpForm`) and password with its show-password button, brand style of the login form.
   2. `POST` (CSRF): calls `ExternalIdentityLinking` (mocked from the contract) with the client IP (`ClientIpResolver`); success → removes the pending identity and redirects to `/oauth2/authorization/auth0`; `BadCredentialsException` → "Usuario o contraseña incorrectos"; `TooManyLoginAttemptsException` → the blocking message of the login; `IdentityAlreadyLinkedException` → "Ese usuario ya está vinculado a otra cuenta de Auth0". Accessible errors as in #145.
 - **Acceptance criteria:**
-  - [ ] Without a pending identity → redirect to `/login?link-expired`; with one, the success POST redirects to `/oauth2/authorization/auth0` and clears the session attribute; each error shows its message with status 200 and the form.
+  - [x] Without a pending identity → redirect to `/login?link-expired`; with one, the success POST redirects to `/oauth2/authorization/auth0` and clears the session attribute; each error shows its message with status 200 and the form.
 
 ### [ ] T9 — Web chain: `oauth2Login()` when configured (~10 min)
 

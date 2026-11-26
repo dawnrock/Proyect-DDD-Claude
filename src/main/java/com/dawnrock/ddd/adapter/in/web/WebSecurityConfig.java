@@ -34,7 +34,7 @@ public class WebSecurityConfig {
             throws Exception {
         return http
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/login", "/signup/**", "/css/**", "/js/**", "/webjars/**", "/vendor/**", "/brand/**", "/actuator/health", "/error", "/error/**",
+                        .requestMatchers("/login", "/login/link", "/signup/**", "/css/**", "/js/**", "/webjars/**", "/vendor/**", "/brand/**", "/actuator/health", "/error", "/error/**",
                                 "/openapi.yaml", "/api-docs", "/api-docs/**").permitAll()
                         // /accounts/another: cualquier sesión; el administrador recibe 403 del propio controlador
                         .requestMatchers("/accounts/new").hasRole("ADMIN")
