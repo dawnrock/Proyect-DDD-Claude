@@ -66,7 +66,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 - **Acceptance criteria:**
   - [x] Without them, everything as in #196; with the domain trio plus audience, `trustsApiTokens()`; audience alone fails at startup with the variable names.
 
-### [ ] T2 — `Auth0AccessTokens`: validators and `sub` → local user (~10 min)
+### [x] T2 — `Auth0AccessTokens`: validators and `sub` → local user (~10 min)
 
 - **Layer:** adapter.in.rest
 - **Files:** `adapter/in/rest/Auth0AccessTokens.java`; test `Auth0AccessTokensTests`
@@ -75,7 +75,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
   1. A static `validator(issuer, audience)`: default timestamps + issuer + `aud` contains the audience.
   2. A converter `Jwt → AbstractAuthenticationToken`: `ExternalIdentities.usernameOf("auth0", sub)` → `UserDetailsService` → `JwtAuthenticationToken(jwt, localAuthorities, localUsername)`. Unlinked `sub`, or a missing or disabled user → `InvalidBearerTokenException` with the unlinked detail (the user's state is never told apart).
 - **Acceptance criteria:**
-  - [ ] A linked `sub` gives the local name and `ROLE_*`; unlinked, missing and disabled all give `InvalidBearerTokenException`; the validator rejects wrong `iss`, wrong `aud` and expired tokens.
+  - [x] A linked `sub` gives the local name and `ROLE_*`; unlinked, missing and disabled all give `InvalidBearerTokenException`; the validator rejects wrong `iss`, wrong `aud` and expired tokens.
 
 ### [ ] T3 — Auth0 decoder, only with domain and audience (~10 min)
 
