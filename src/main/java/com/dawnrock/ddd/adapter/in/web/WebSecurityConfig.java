@@ -2,23 +2,32 @@ package com.dawnrock.ddd.adapter.in.web;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.ExceptionMappingAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 
+import com.dawnrock.ddd.adapter.in.AuthProperties;
 import com.dawnrock.ddd.adapter.in.ClientIpAuthenticationDetailsSource;
+import com.dawnrock.ddd.adapter.in.LinkedOidcUserService;
 import com.dawnrock.ddd.adapter.in.TooManyLoginAttemptsException;
 
 /**
  * Seguridad de la web (ADR 0008): la cadena de reserva, para todo lo que no es {@code /api/**} (va después de la de
- * la API). Inicio de sesión con formulario propio y sesión, CSRF activo, {@code /accounts/new} solo para
+ * la API). Inicio de sesión con formulario propio (si {@code app.auth.local}, que por defecto sí), con Auth0 (si hay
+ * registro de cliente, ADR 0024) y sesión, CSRF activo, {@code /accounts/new} solo para
  * administradores y la página 403 propia. A htmx, una sesión caducada le responde 401 con {@code HX-Redirect}
  * al login ({@link HtmxLoginRedirect}, #125).
  *
@@ -30,11 +39,27 @@ public class WebSecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain webSecurity(HttpSecurity http, ClientIpAuthenticationDetailsSource clientIp)
+    public SecurityFilterChain webSecurity(HttpSecurity http, ClientIpAuthenticationDetailsSource clientIp,
+                                           ObjectProvider<ClientRegistrationRepository> registrations,
+                                           ObjectProvider<LinkedOidcUserService> oidcUsers, AuthProperties auth)
             throws Exception {
+        ClientRegistrationRepository auth0 = registrations.getIfAvailable();
+        if (auth0 != null) {
+            oauth2Login(http, auth0, oidcUsers.getObject());
+        }
+        if (auth.local()) {
+            // La contraseña local (#196): con app.auth.local=false solo se entra con Auth0
+            http.formLogin(login -> login
+                    .loginPage("/login")
+                    .defaultSuccessUrl("/", true)
+                    .failureHandler(loginFailure())
+                    // La IP del cliente detrás de Render y Cloudflare, para el límite de intentos (#133)
+                    .authenticationDetailsSource(clientIp)
+                    .permitAll());
+        }
         return http
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/login", "/signup/**", "/css/**", "/js/**", "/webjars/**", "/vendor/**", "/brand/**", "/actuator/health", "/error", "/error/**",
+                        .requestMatchers("/login", "/login/link", "/signup/**", "/css/**", "/js/**", "/webjars/**", "/vendor/**", "/brand/**", "/actuator/health", "/error", "/error/**",
                                 "/openapi.yaml", "/api-docs", "/api-docs/**").permitAll()
                         // /accounts/another: cualquier sesión; el administrador recibe 403 del propio controlador
                         .requestMatchers("/accounts/new").hasRole("ADMIN")
@@ -44,14 +69,7 @@ public class WebSecurityConfig {
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
-                .formLogin(login -> login
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/", true)
-                        .failureHandler(loginFailure())
-                        // La IP del cliente detrás de Render y Cloudflare, para el límite de intentos (#133)
-                        .authenticationDetailsSource(clientIp)
-                        .permitAll())
-                .logout(logout -> logout.logoutSuccessUrl("/login?logout"))
+                .logout(logout -> logout.logoutSuccessHandler(logoutSuccess(auth0)))
                 .exceptionHandling(errors -> {
                     // htmx (#125): una sesión caducada lleva al login con HX-Redirect en vez de pintarlo en el panel
                     AccessDeniedHandlerImpl errorPage = new AccessDeniedHandlerImpl();
@@ -61,6 +79,42 @@ public class WebSecurityConfig {
                     errors.authenticationEntryPoint(htmx).accessDeniedHandler(htmx);
                 })
                 .build();
+    }
+
+    /**
+     * El inicio de sesión con Auth0 (#196, ADR 0024), solo si hay un registro de cliente. PKCE lo declara el propio
+     * registro ({@code requireProofKey}, en {@code Auth0ClientRegistration}), y Spring lo aplica. El usuario lo da
+     * {@link LinkedOidcUserService} (el usuario local vinculado al {@code sub}); si no hay vínculo, el manejador de
+     * fallos lleva a {@code /login/link}.
+     */
+    private static void oauth2Login(HttpSecurity http, ClientRegistrationRepository registrations,
+                                    LinkedOidcUserService oidcUsers) throws Exception {
+        http.oauth2Login(login -> login
+                .loginPage("/login")
+                .defaultSuccessUrl("/", true)
+                .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUsers))
+                .failureHandler(new OAuth2LoginFailureHandler()));
+    }
+
+    /**
+     * Tras cerrar la sesión: la de Auth0 ({@link OAuth2AuthenticationToken}) también cierra la sesión en Auth0, que
+     * vuelve a {@code {baseUrl}/login?logout}; cualquier otra va directa a {@code /login?logout}.
+     */
+    private static LogoutSuccessHandler logoutSuccess(ClientRegistrationRepository registrations) {
+        SimpleUrlLogoutSuccessHandler local = new SimpleUrlLogoutSuccessHandler();
+        local.setDefaultTargetUrl("/login?logout");
+        if (registrations == null) {
+            return local;
+        }
+        OidcClientInitiatedLogoutSuccessHandler auth0 = new OidcClientInitiatedLogoutSuccessHandler(registrations);
+        auth0.setPostLogoutRedirectUri("{baseUrl}/login?logout");
+        return (request, response, authentication) -> {
+            if (authentication instanceof OAuth2AuthenticationToken) {
+                auth0.onLogoutSuccess(request, response, authentication);
+            } else {
+                local.onLogoutSuccess(request, response, authentication);
+            }
+        };
     }
 
     /** Un bloqueo por demasiados intentos (#130) va a {@code /login?blocked}; el resto de fallos, a {@code /login?error}. */

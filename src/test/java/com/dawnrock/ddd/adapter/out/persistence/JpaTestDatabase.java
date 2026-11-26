@@ -50,7 +50,7 @@ final class JpaTestDatabase {
     static void clear() {
         JdbcTemplate jdbc = bean(JdbcTemplate.class);
         for (String table : new String[] {"account_transaction", "checking_account", "customer", "customer_username",
-                "account_owner", "authorities", "users"}) {
+                "account_owner", "external_identity", "authorities", "users"}) {
             jdbc.update("delete from " + table);
         }
     }

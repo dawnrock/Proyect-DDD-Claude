@@ -29,7 +29,8 @@
         <a class="navbar-brand d-inline-flex align-items-center" th:href="@{/}">
             <img th:src="@{/brand/monabank-horizontal.svg}" class="brand-logo" alt="monA Bank">
         </a>
-        <form class="d-flex align-items-center gap-3 m-0 small text-body-secondary" th:if="${currentUser != null}" th:action="@{/logout}" method="post">
+        <!--/* Sin hx-boost: con Auth0, cerrar la sesión termina en el dominio de Auth0, que htmx no puede navegar. */-->
+        <form class="d-flex align-items-center gap-3 m-0 small text-body-secondary" th:if="${currentUser != null}" th:action="@{/logout}" method="post" hx-boost="false">
             <span class="d-inline-flex align-items-center gap-1"><svg th:replace="~{fragments/icons :: icon('user-round')}"></svg><span th:text="${currentUser}">usuario</span></span>
             <button class="btn btn-link btn-sm p-0 d-inline-flex align-items-center gap-1" type="submit"><svg th:replace="~{fragments/icons :: icon('log-out')}"></svg>Cerrar sesión</button>
         </form>
