@@ -33,6 +33,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
 import com.dawnrock.ddd.adapter.in.Auth0Properties;
+import com.dawnrock.ddd.adapter.in.AuthProperties;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -48,7 +49,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * {@code docs/contracts/login-roles.md}.
  *
  * <p>Dos emisores (#197, ADR 0024): cada token va al gestor de su {@code iss}. Los propios ({@code app.jwt.issuer},
- * HS256) y, si está configurado ({@link Auth0ApiTokensConfig}), los de acceso de Auth0 (RS256, con la audiencia de la
+ * HS256), solo con la autenticación local ({@code app.auth.local}), y, si está configurado ({@link Auth0ApiTokensConfig}), los de acceso de Auth0 (RS256, con la audiencia de la
  * API), cuyo {@code sub} se traduce al usuario local con {@link Auth0AccessTokens}. Un emisor desconocido es un token
  * no válido. Una identidad de Auth0 sin vincular recibe 401 con {@link Auth0AccessTokens#UNLINKED_DETAIL}.
  */
@@ -65,11 +66,15 @@ public class ApiSecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain apiSecurity(HttpSecurity http, @Qualifier("jwtDecoder") JwtDecoder ownDecoder,
-                                           JwtProperties jwtProperties, Auth0Properties auth0Properties,
+                                           JwtProperties jwtProperties, AuthProperties authProperties,
+                                           Auth0Properties auth0Properties,
                                            @Qualifier(Auth0ApiTokensConfig.DECODER) ObjectProvider<JwtDecoder> auth0Decoder,
                                            ObjectProvider<Auth0AccessTokens> auth0Tokens) throws Exception {
         Map<String, AuthenticationManager> managers = new HashMap<>();
-        managers.put(jwtProperties.issuer(), manager(ownDecoder, jwtAuthenticationConverter()));
+        if (authProperties.local()) {
+            // Sin autenticación local (#199 en prod) los tokens propios no se emiten ni se aceptan
+            managers.put(jwtProperties.issuer(), manager(ownDecoder, jwtAuthenticationConverter()));
+        }
         JwtDecoder auth0 = auth0Decoder.getIfAvailable();
         if (auth0 != null) {
             managers.put(auth0Properties.issuerUri(), manager(auth0, auth0Tokens.getObject()));

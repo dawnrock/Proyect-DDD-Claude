@@ -3,6 +3,7 @@ package com.dawnrock.ddd.adapter.in.rest;
 import java.time.Instant;
 import java.util.List;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,6 +30,7 @@ import com.dawnrock.ddd.adapter.in.TooManyLoginAttemptsException;
  * inicio de sesión de la web.
  */
 @Component
+@ConditionalOnBooleanProperty(name = "app.auth.local", matchIfMissing = true)
 public class AccessTokenIssuer {
 
     static final String ROLES_CLAIM = "roles";

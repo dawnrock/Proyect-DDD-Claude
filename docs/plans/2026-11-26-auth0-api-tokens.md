@@ -102,7 +102,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
   - [x] Unknown issuer, wrong audience, expired or unlinked → 401 `ProblemDetail` with `WWW-Authenticate: Bearer error="invalid_token"`; the unlinked one has its own detail.
   - [x] Own tokens keep working and every existing API security test passes unchanged.
 
-### [ ] T5 — Own token endpoint behind `app.auth.local` (~5 min)
+### [x] T5 — Own token endpoint behind `app.auth.local` (~5 min)
 
 - **Layer:** adapter.in.rest
 - **Files:** `TokenController.java`, `AccessTokenIssuer.java`, `JwtSupport.java`; test `LocalTokensDisabledTests` (`@WebMvcTest` with `app.auth.local=false`)
@@ -110,7 +110,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 - **What to do:**
   1. `@ConditionalOnBooleanProperty(name = "app.auth.local", matchIfMissing = true)` on the controller and the issuer; the own issuer only joins the resolver when it is on.
 - **Acceptance criteria:**
-  - [ ] With `app.auth.local=false`, `POST /api/auth/token` → 404 and an own token → 401; with the default, both work as today.
+  - [x] With `app.auth.local=false`, `POST /api/auth/token` → 404 and an own token → 401; with the default, both work as today.
 
 ### [ ] T6 — `/api-docs/oauth-config` and `/api-docs/openid-configuration` (~10 min)
 
