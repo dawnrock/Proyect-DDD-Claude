@@ -48,7 +48,7 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
 
 ## Tasks
 
-### [ ] T0 — Contract (~10 min)
+### [x] T0 — Contract (~10 min)
 
 - **Side:** both
 - **Layer:** adapter.in · docs
@@ -57,7 +57,7 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
 - **What to do:**
   1. The shared API: `AccountSummary registerWithExternalIdentity(SignUpCommand command, PendingIdentity pending, String clientIp)`, its exceptions (those of `register` except the password one, plus `PendingIdentityExpiredException` and `IdentityAlreadyLinkedException`) and what the web shows for each; the screens (`/login/link` choice, `GET /signup?auth0`, step 2 in Auth0 mode, success → `/oauth2/authorization/auth0`); no REST change.
 - **Acceptance criteria:**
-  - [ ] Contract agreed by backend-dev and web-dev and frozen in a commit; `./mvnw verify` compiles against it.
+  - [x] Contract agreed by backend-dev and web-dev and frozen in a commit; `./mvnw verify` compiles against it.
 
 ### [ ] T1 — Registration with an Auth0 identity (~10 min)
 
@@ -114,7 +114,7 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
 - **Files:** `SignUpController.java`; test `SignUpAuth0Tests`
 - **Depends on:** T4
 - **What to do:**
-  1. In Auth0 mode `submitAccount` calls `registerWithExternalIdentity(command, pending, ip)`; on success it completes the session form, removes the pending identity and redirects to `/oauth2/authorization/auth0` (no programmatic sign-in). Errors as in the classic wizard, plus `PendingIdentityExpiredException` → `/login?link-expired` and `IdentityAlreadyLinkedException` → `/login/link` with «Esta cuenta de Auth0 ya está vinculada: entra con Auth0».
+  1. In Auth0 mode `submitAccount` calls `registerWithExternalIdentity(command, pending, ip)`; on success it completes the session form, removes the pending identity and redirects to `/oauth2/authorization/auth0` (no programmatic sign-in). Errors as in the classic wizard, plus `PendingIdentityExpiredException` → `/login?link-expired` and `IdentityAlreadyLinkedException` → removes the pending identity and `redirect:/oauth2/authorization/auth0` (the link exists now; see the contract).
 - **Acceptance criteria:**
   - [ ] Success → `redirect:/oauth2/authorization/auth0`, pending identity removed, nobody authenticated by the controller.
   - [ ] Each error lands where the contract says; the classic wizard's tests pass unchanged.
