@@ -16,9 +16,10 @@
     window.addEventListener('pageswap', ignoreAbortedTransition);
     window.addEventListener('pagereveal', ignoreAbortedTransition);
 
-    // Entrada de la página con Motion: los bloques de <main> aparecen escalonados. No se anima con movimiento reducido.
+    // Entrada de la página con Motion: los bloques de <main> aparecen escalonados. No se anima con movimiento reducido ni
+    // mientras suena la intro de las puertas (html[data-intro]), que ya hace aparecer la bienvenida por partes.
     const animateEntrance = () => {
-        if (reducedMotion || !window.Motion) {
+        if (reducedMotion || !window.Motion || document.documentElement.dataset.intro) {
             return;
         }
         const blocks = document.querySelectorAll('main > *');

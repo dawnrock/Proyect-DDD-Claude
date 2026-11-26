@@ -11,10 +11,6 @@
 /* Iconos de Lucide (fragmento fragments/icons :: icon): del tamaño del texto que acompañan. */
 .icon { width: 1.15em; height: 1.15em; flex: none; vertical-align: -0.2em; }
 
-/* Puertas de entrada del login (#95) como tarjetas de Bootstrap. */
-.door { transition: background-color 0.15s ease-in-out; }
-.door:hover, .door:focus-visible { background-color: var(--bs-tertiary-bg); }
-
 /* Iniciales del titular en el listado de cuentas (solo el administrador). */
 .avatar {
     display: flex;
@@ -189,6 +185,8 @@ h1, .h1, .h2, .h3 { font-weight: 600; letter-spacing: -0.005em; }
    por arriba, como en el boceto aprobado. */
 .backdrop { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
 .backdrop svg { position: absolute; left: 50%; top: -20vh; height: 130vh; width: auto; transform: translateX(-50%); }
+/* En la bienvenida, la A aún más grande, con solo el arranque de la punta de la flecha asomando por arriba. */
+body:has(> main.welcome) .backdrop svg { top: -36vh; height: 170vh; }
 .backdrop-a { fill: #262b30; stroke: #30363c; stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
 .backdrop-rise { fill: var(--mona-rise); opacity: 0.08; }
 
@@ -236,20 +234,54 @@ h1, .h1, .h2, .h3 { font-weight: 600; letter-spacing: -0.005em; }
 .btn-slant-drop { --slant-bg: var(--mona-drop); --slant-bg-hover: #f4767c; --slant-fg: var(--mona-on-accent); }
 .btn-slant-surface { --slant-bg: var(--mona-surface); --slant-bg-hover: var(--mona-surface-hover); --slant-fg: var(--mona-ink); }
 
-/* Las puertas del login (#185): bloques en paralelogramo a todo el ancho, con título y una línea de ayuda. */
+/* Las puertas del login (#185): bloques a todo el ancho, con título y una línea de ayuda, en trapecio con los dos lados
+   de la A: el izquierdo sube como la pata izquierda y el derecho baja como la derecha, a unos 12,4° (solo aquí; el resto
+   de botones siguen en paralelogramo). El ::before se recorta con clip-path y el retranqueo de arriba es la altura
+   mínima por tan 12,4° ≈ 0,22. Como el clip-path recortaría también un contorno, el foco es un ::after con la misma
+   forma, en anillo (evenodd) y separado 3 px de la puerta. */
 .door {
+    --door-run: calc(var(--door-h) * 0.22);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
     gap: 0.2rem;
     width: 100%;
-    min-height: 5.25rem;
-    padding: 0.85rem 2.5rem 0.85rem 2.25rem;
+    min-height: var(--door-h);
+    padding: 0.6rem 1.5rem 0.6rem 1.9rem;
     text-align: left;
 }
-.door-title { font-size: 1.25rem; font-weight: 700; }
-.door-hint { font-family: var(--mona-text); font-weight: 400; font-size: 0.8125rem; opacity: 0.8; }
+.door::before {
+    transform: none;
+    clip-path: polygon(var(--door-run) 0, calc(100% - var(--door-run)) 0, 100% 100%, 0 100%);
+}
+.door::after {   /* anillo de foco: trapecio exterior a 5 px menos el interior a 3 px */
+    content: "";
+    position: absolute;
+    inset: -5px;
+    z-index: -1;
+    display: none;
+    background-color: var(--mona-ink);
+    clip-path: polygon(evenodd,
+        calc(var(--door-run) + 2.2px) 0, calc(100% - var(--door-run) - 2.2px) 0, 100% 100%, 0 100%,
+        calc(var(--door-run) + 3.8px) 2px, calc(100% - var(--door-run) - 3.8px) 2px, calc(100% - 2.5px) calc(100% - 2px),
+        2.5px calc(100% - 2px));
+}
+/* La de abajo, más ancha: sus lados siguen la inclinación de los de arriba, como una sola A partida en dos. Se ensancha
+   lo que bajan esos lados en el hueco entre las dos y en su propia altura; el texto no se mueve. */
+.door + .door {
+    --door-reach: calc((var(--door-gap) + var(--door-h)) * 0.22);
+    width: calc(100% + 2 * var(--door-reach));
+    margin-inline: calc(-1 * var(--door-reach));
+    padding-left: calc(1.9rem + var(--door-reach));
+}
+.door:focus-visible::before { outline: none; }
+.door:focus-visible::after { display: block; }
+.door-title { font-size: 1.1rem; font-weight: 700; }
+.door-hint { font-family: var(--mona-text); font-weight: 400; font-size: 0.78rem; opacity: 0.8; }
+/* En pantallas muy estrechas la ayuda baja un punto para caber en una línea: si se partiera, la puerta crecería y sus
+   lados dejarían de tener la inclinación de la A. */
+@media (max-width: 340px) { .door-hint { font-size: 0.7rem; } }
 
 /* Tarjetas con el borde derecho inclinado como la pata derecha de la A (#185). El foco se marca por dentro, porque el
    clip-path recortaría el contorno. */
@@ -303,6 +335,15 @@ a.card-slant:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--mo
 /* Intro de la marca (#178): capa a pantalla completa sobre las puertas del login, del color de fondo de la web. */
 .splash { position: fixed; inset: 0; z-index: 1080; background-color: var(--bs-body-bg); }
 .splash canvas { display: block; width: 100%; height: 100%; }
+/* Mientras suena la intro, la bienvenida solo enseña el logo, justo donde la intro deja el suyo; al acabar aparecen por
+   partes «Bienvenido a», la A de fondo y las puertas (intro.js pone y quita html[data-intro]). */
+html[data-intro="playing"] .welcome-title,
+html[data-intro="playing"] .backdrop,
+html[data-intro="playing"] .doors { opacity: 0; }
+html[data-intro="playing"] .doors { transform: translateY(0.75rem); }
+html[data-intro="reveal"] .welcome-title { transition: opacity 0.45s ease-out; }
+html[data-intro="reveal"] .backdrop { transition: opacity 0.7s ease-out 0.4s; }
+html[data-intro="reveal"] .doors { transition: opacity 0.45s ease-out 1s, transform 0.45s ease-out 1s; }
 
 /* Bienvenida del login (#185): sin cabecera, con el logo, el saludo y las dos puertas centrados sobre la A de fondo. */
 main.welcome {
@@ -315,10 +356,16 @@ main.welcome {
     gap: 2.5rem;
     padding-top: 2.5rem;
 }
-.welcome-head { display: flex; flex-direction: column; align-items: center; gap: 1.4rem; text-align: center; }
-.brand-hero { display: block; width: min(15rem, 62vw); height: auto; }
-.welcome-title { margin: 0; font-size: 1.75rem; line-height: 1.15; }
-.doors { width: 100%; display: flex; flex-direction: column; gap: 0.9rem; padding-inline: 0.5rem; }
+/* «Bienvenido a» y el logo en una línea, sobre la línea base de las letras (si no caben, el logo baja a la siguiente). */
+.welcome-head { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 0.5rem 0.8rem; text-align: center; }
+.brand-hero { display: block; width: min(42vw, 10.25rem); height: auto; aspect-ratio: 701.5 / 236.96; }   /* la intro lo mide antes de que cargue */
+.welcome-title { margin: 0; font-size: min(7.4vw, 1.8rem); line-height: 1; }
+@media (max-width: 340px) {   /* en pantallas muy estrechas, más pequeños para seguir en una línea */
+    .welcome-title { font-size: 6.6vw; }
+    .brand-hero { width: 38vw; }
+}
+/* Altura y separación de las puertas: de ellas sale la inclinación de sus lados (12,4°, la de la A). */
+.doors { --door-h: 4.25rem; --door-gap: 0.75rem; width: 100%; display: flex; flex-direction: column; gap: var(--door-gap); padding-inline: min(2rem, 4.5vw); }
 
 /* Listado de cuentas (#185): saldo total grande, tarjetas inclinadas y la acción principal a todo el ancho. */
 .total-balance { font-size: clamp(2.25rem, 10vw, 3rem); line-height: 1.05; letter-spacing: -0.015em; }

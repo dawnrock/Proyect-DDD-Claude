@@ -2,6 +2,24 @@
 <html lang="es" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Acceso')}"></head>
 <body class="d-flex flex-column min-vh-100" hx-boost="true" hx-swap="innerHTML transition:true">
+<th:block th:unless="${showForm}">
+<!--/* Intro de la marca (#178, ADR 0022), lo primero del body: el script de debajo la destapa antes de que se pinte la
+     página, para que no asome la bienvenida, solo en una carga completa (tras una navegación con htmx no suena) y sin
+     movimiento reducido. Si intro.js no llega a arrancar, la quita. Sin JavaScript se queda oculta. */-->
+<div class="splash" id="splash" role="img" aria-label="monA Bank" hidden>
+    <canvas aria-hidden="true"></canvas>
+</div>
+<script>
+    if (document.readyState === 'loading' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const splash = document.getElementById('splash');
+        splash.hidden = false;
+        document.documentElement.dataset.intro = 'playing';
+        setTimeout(() => {
+            if (!window.monaIntro) { splash.remove(); delete document.documentElement.dataset.intro; }
+        }, 2500);
+    }
+</script>
+</th:block>
 <!--/* Las pantallas de entrada (#185, ADR 0023) van sobre la A oscurecida de fondo. Las puertas, sin cabecera: el logo
      está en el centro. */-->
 <div th:replace="~{fragments/brand :: backdrop}"></div>
@@ -9,8 +27,10 @@
 <main class="app-container mx-auto w-100 px-3 pb-5" th:classappend="${showForm} ? '' : 'welcome'">
     <h1 class="h3 fw-semibold mb-4" th:if="${showForm}">Acceso</h1>
     <div class="welcome-head" th:unless="${showForm}">
+        <!--/* «Bienvenido a» y, a su lado, el logo. El logo ya dice «monA Bank»: el título no lo repite a la vista, pero sí a los
+             lectores de pantalla (el logo es decorativo). */-->
+        <h1 class="welcome-title">Bienvenido a<span class="visually-hidden"> monA Bank</span></h1>
         <img class="brand-hero" th:src="@{/brand/monabank-horizontal.svg}" alt="">
-        <h1 class="welcome-title">Bienvenido a monA Bank</h1>
     </div>
     <div class="alert alert-success d-flex align-items-center gap-2" role="status" th:if="${param.logout}"><svg th:replace="~{fragments/icons :: icon('circle-check')}"></svg>Has cerrado la sesión</div>
 
@@ -43,11 +63,8 @@
     </form>
 </main>
 <th:block th:unless="${showForm}">
-<!--/* Intro de la marca (#178, ADR 0022): oculta hasta que intro.js decide reproducirla. El import map da al módulo
-     la URL versionada de la geometría, como Thymeleaf hace con el resto de recursos. */-->
-<div class="splash" id="splash" role="img" aria-label="monA Bank" hidden>
-    <canvas aria-hidden="true"></canvas>
-</div>
+<!--/* El import map da al módulo de la intro la URL versionada de la geometría, como Thymeleaf hace con el resto de
+     recursos. */-->
 <script type="importmap" th:inline="javascript">{"imports":{"brand-geometry":[[@{/js/brand-geometry.js}]]}}</script>
 <script type="module" th:src="@{/js/intro.js}"></script>
 </th:block>
