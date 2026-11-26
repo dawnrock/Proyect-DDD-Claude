@@ -72,7 +72,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **Acceptance criteria:**
   - [x] Contract agreed by backend-dev and web-dev and frozen in a commit; `./mvnw verify` compiles against the types.
 
-### [ ] T1 — ADR 0024 and the OAuth2 client dependency (~10 min)
+### [x] T1 — ADR 0024 and the OAuth2 client dependency (~10 min)
 
 - **Side:** back
 - **Layer:** build · docs
@@ -82,7 +82,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
   1. ADR 0024: context (ADR 0008 and 0015 named OAuth2/OIDC as the end state; ADR 0019 made users durable), decision (Auth0 as identity provider for the web, roles from our database, `external_identity` link, link with the local password, RP-initiated logout, hand-built registration, `app.auth.local`; the four issues), alternatives (Keycloak self-hosted, roles in an Auth0 claim, linking by e-mail, a separate branch or module for the realistic mode), consequences (tenant setup, secrets on Render, Auth0 outage blocks only Auth0 logins).
   2. Add `spring-boot-starter-security-oauth2-client` with a comment pointing to ADR 0024. Mark ADR 0008 and 0015 as "amended by ADR 0024".
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green with the new dependency and no other change in behaviour.
+  - [x] `./mvnw verify` green with the new dependency and no other change in behaviour.
 
 ### [ ] T2 — Flyway V3: `external_identity` (~5 min)
 

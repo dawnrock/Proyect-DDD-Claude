@@ -9,13 +9,13 @@
 | [0005](0005-thymeleaf.md) | Web interface with Thymeleaf | Accepted |
 | [0006](0006-hexagonal-architecture.md) | Hexagonal architecture for phase 2 | Accepted |
 | [0007](0007-equipo-back-web-contrato-primero.md) | Back/web team with the contract first | Accepted |
-| [0008](0008-spring-security.md) | Authentication and roles with Spring Security | Accepted (the API part, amended by 0015; login attempts, by 0017) |
+| [0008](0008-spring-security.md) | Authentication and roles with Spring Security | Accepted (the API part, amended by 0015; login attempts, by 0017; the web login with Auth0, by 0024) |
 | [0009](0009-domain-without-lombok.md) | No Lombok in the domain | Accepted |
 | [0010](0010-graphify-token-savings.md) | Graphify for dependency questions only, and a short project status | Accepted |
 | [0012](0012-customer-self-sign-up.md) | Customer self sign-up at Mon-A Bank (extends 0008) | Accepted |
 | [0013](0013-contract-tests-schemathesis.md) | Contract tests with Schemathesis, at hexagon level | Accepted |
 | [0014](0014-contract-versioning.md) | Semantic versioning of the OpenAPI contract | Accepted |
-| [0015](0015-jwt-bearer-api.md) | JWT Bearer tokens for the REST API (amends 0008) | Accepted |
+| [0015](0015-jwt-bearer-api.md) | JWT Bearer tokens for the REST API (amends 0008) | Accepted (amended by 0024) |
 | [0016](0016-web-frontend-libraries.md) | Frontend libraries for the Thymeleaf web (complements 0005) | Accepted |
 | [0017](0017-login-attempt-limit.md) | Limit on login attempts (amends 0008 and 0015) | Accepted |
 | [0018](0018-sign-up-limit.md) | Limit on customer sign-ups per IP and in total (amends 0012) | Accepted |
@@ -24,6 +24,7 @@
 | [0021](0021-domain-event-outbox.md) | Domain event outbox with a scheduled relay | Accepted |
 | [0022](0022-brand-identity.md) | monA Bank brand identity: logo, intro and typeface | Accepted |
 | [0023](0023-brand-ui.md) | The brand's UI language: the A's slant, logo glyphs and Sora (complements 0016 and 0022) | Accepted |
+| [0024](0024-oauth2-oidc-auth0.md) | Web login with Auth0 (OAuth2/OIDC) and identity linking (amends 0008 and 0015) | Accepted |
 
 ADR 0011 (the `integration` layer) only exists on `Monolithic`: it applies to phase 1.
 
