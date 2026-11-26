@@ -178,6 +178,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
   - [x] An Auth0 token with Auth0 unreachable gets 503 without `WWW-Authenticate` (seen red first: the exception escaped the chain).
   - [x] An HS256 token signed with the own secret claiming Auth0's issuer, and an RS256 token of the tenant claiming the own issuer, both get 401 (characterization: each issuer already accepted only its algorithm and key).
   - [x] A repeated issuer fails with `IllegalStateException` (seen red first: the method did not exist).
+  - [x] After the Graphify review of the PR: only a network failure (`RemoteKeySourceException` as cause) gives 503; any other decoding failure, a cryptographic one included, stays 401 (seen red first: every `JwtException` gave 503).
 
 ## Global acceptance criteria
 

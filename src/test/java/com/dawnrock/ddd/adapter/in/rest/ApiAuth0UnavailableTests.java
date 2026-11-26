@@ -18,6 +18,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
+
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.RemoteKeySourceException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -43,14 +46,26 @@ import com.dawnrock.ddd.support.TestAuth0Tenant;
         ApiAuth0UnavailableTests.UnreachableTenant.class})
 class ApiAuth0UnavailableTests {
 
-    /** Un tenant cuyas claves no se pueden descargar: Nimbus lanza {@link JwtException} al decodificar. */
+    /** Un token del tenant con el que el decodificador falla por un motivo criptográfico, no de red. */
+    static final String CRYPTO_FAILURE = TestAuth0Tenant.accessToken("auth0|crypto");
+
+    /**
+     * Un tenant cuyas claves no se pueden descargar: Spring lanza {@link JwtException} con la
+     * {@link RemoteKeySourceException} de Nimbus como causa, igual que {@code NimbusJwtDecoder}. Con el token
+     * {@link #CRYPTO_FAILURE}, una {@link JwtException} por un {@link JOSEException}, que no es de red.
+     */
     @TestConfiguration
     static class UnreachableTenant {
 
         @Bean(Auth0ApiTokensConfig.DECODER)
         JwtDecoder auth0JwtDecoder() {
             return token -> {
-                throw new JwtException("Couldn't retrieve remote JWK set: connection refused");
+                if (token.equals(CRYPTO_FAILURE)) {
+                    throw new JwtException("An error occurred while attempting to decode the Jwt",
+                            new JOSEException("Invalid key"));
+                }
+                throw new JwtException("Couldn't retrieve remote JWK set",
+                        new RemoteKeySourceException("connection refused", null));
             };
         }
 
@@ -85,6 +100,14 @@ class ApiAuth0UnavailableTests {
                 .andExpect(jsonPath("$.status").value(503))
                 .andExpect(jsonPath("$.title").value(ApiSecurityConfig.UNAVAILABLE_TITLE))
                 .andExpect(jsonPath("$.detail").value(not(ApiSecurityConfig.MISSING_TOKEN_DETAIL)));
+        verifyNoInteractions(queries);
+    }
+
+    @Test
+    @DisplayName("Un fallo al decodificar que no es de red sigue siendo un token no válido: 401, no 503")
+    void aDecodingFailureThatIsNotANetworkOneIsStillAnInvalidToken() throws Exception {
+        mvc.perform(get("/api/accounts").header(HttpHeaders.AUTHORIZATION, "Bearer " + CRYPTO_FAILURE))
+                .andExpect(status().isUnauthorized());
         verifyNoInteractions(queries);
     }
 }

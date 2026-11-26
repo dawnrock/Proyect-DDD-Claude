@@ -37,6 +37,8 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import com.dawnrock.ddd.adapter.in.Auth0Properties;
 import com.dawnrock.ddd.adapter.in.AuthProperties;
 
+import com.nimbusds.jose.RemoteKeySourceException;
+
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
@@ -139,18 +141,20 @@ public class ApiSecurityConfig {
     }
 
     /**
-     * El decodificador de Auth0 con sus fallos de red traducidos: un token mal formado, mal firmado o no válido sigue
-     * siendo un {@link BadJwtException} (401); no poder leer las claves del tenant es {@link Auth0UnavailableException}
-     * (503).
+     * El decodificador de Auth0 con su fallo de red traducido: no poder descargar las claves del tenant (la
+     * {@link RemoteKeySourceException} de Nimbus) es {@link Auth0UnavailableException} (503). Cualquier otro fallo
+     * (token mal formado, mal firmado, caducado, de otra audiencia, o un error criptográfico) sigue siendo un token no
+     * válido (401).
      */
     private static JwtDecoder reachable(JwtDecoder auth0) {
         return token -> {
             try {
                 return auth0.decode(token);
-            } catch (BadJwtException e) {
-                throw e;
             } catch (JwtException e) {
-                throw new Auth0UnavailableException(e);
+                if (e.getCause() instanceof RemoteKeySourceException) {
+                    throw new Auth0UnavailableException(e);
+                }
+                throw e instanceof BadJwtException ? e : new BadJwtException(e.getMessage(), e);
             }
         };
     }
