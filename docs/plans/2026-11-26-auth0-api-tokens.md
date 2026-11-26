@@ -112,7 +112,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 - **Acceptance criteria:**
   - [x] With `app.auth.local=false`, `POST /api/auth/token` → 404 and an own token → 401; with the default, both work as today.
 
-### [ ] T6 — `/api-docs/oauth-config` and `/api-docs/openid-configuration` (~10 min)
+### [x] T6 — `/api-docs/oauth-config` and `/api-docs/openid-configuration` (~10 min)
 
 - **Layer:** adapter.in.web
 - **Files:** `adapter/in/web/ApiDocsController.java`; test `ApiDocsControllerTests`
@@ -121,7 +121,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
   1. `GET /api-docs/oauth-config` (JSON): `{"enabled": false}` unless domain, audience and `apiDocsClientId` are set; then `enabled`, `clientId`, `audience`. Public values only (never the web client's secret).
   2. `GET /api-docs/openid-configuration` (JSON): `issuer`, `authorization_endpoint`, `token_endpoint`, `jwks_uri`, `response_types_supported: [code]`, `code_challenge_methods_supported: [S256]`, built from the domain; 404 when Auth0 is not configured. Both are public (already under `/api-docs/**`).
 - **Acceptance criteria:**
-  - [ ] Without configuration: `enabled: false` and discovery 404; with it: the expected JSON, with no secret anywhere in either answer.
+  - [x] Without configuration: `enabled: false` and discovery 404; with it: the expected JSON, with no secret anywhere in either answer.
 
 ### [ ] T7 — Swagger UI: «Authorize» with Auth0 and PKCE (~10 min)
 
