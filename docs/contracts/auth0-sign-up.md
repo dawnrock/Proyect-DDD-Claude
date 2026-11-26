@@ -1,7 +1,7 @@
 # Contract: Customer sign-up with an Auth0 identity
 
 - **Issue:** [#198](https://github.com/dawnrock/Proyect-DDD-Claude/issues/198) · **Plan:** `docs/plans/2026-11-26-auth0-sign-up.md`
-- **Status:** frozen at `<pending>`
+- **Status:** frozen at `d69ca6f`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both accepted the signature and proposed precisions, merged by the lead, since the teammates cannot message each other)
 
 Builds on `customer-sign-up.md` (the three-step wizard, rules R28-R32, ADR 0012), `auth0-web-login.md` (`PendingIdentity`, `/login/link`, the silent return to Auth0) and the sign-up limit (ADR 0018). ADR 0024 records the decisions.
