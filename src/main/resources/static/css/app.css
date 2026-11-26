@@ -11,10 +11,6 @@
 /* Iconos de Lucide (fragmento fragments/icons :: icon): del tamaño del texto que acompañan. */
 .icon { width: 1.15em; height: 1.15em; flex: none; vertical-align: -0.2em; }
 
-/* Puertas de entrada del login (#95) como tarjetas de Bootstrap. */
-.door { transition: background-color 0.15s ease-in-out; }
-.door:hover, .door:focus-visible { background-color: var(--bs-tertiary-bg); }
-
 /* Iniciales del titular en el listado de cuentas (solo el administrador). */
 .avatar {
     display: flex;
@@ -28,7 +24,7 @@
     font-weight: 600;
 }
 
-/* Acciones del detalle de cuenta (#185): una pista de trapecios, Ingresar, Retirar y Transferir. Cada una
+/* Acciones del detalle de cuenta (#185): una pista de paralelogramos encajados, Ingresar, Retirar y Transferir. Cada una
    es un <details> (se abre sin JavaScript); la abierta se rellena con su color y su formulario va debajo, a todo el
    ancho. Sin soporte de ::details-content, la fila se parte y la acción abierta baja a su propia fila, como antes. */
 .actions summary, .secondary-actions summary { list-style: none; }
@@ -36,7 +32,7 @@
 .actions { display: flex; flex-wrap: wrap; gap: 0.5rem 0.45rem; padding-inline: 0.4rem; }
 .actions > details { flex: 1 1 0; min-width: 0; }
 .actions > details[open] { order: 10; flex-basis: 100%; }
-.action-toggle { --slant-h: 3.5rem; width: 100%; padding-inline: 1rem; }
+.action-toggle { width: 100%; min-height: 3.5rem; padding-inline: 1rem; }
 #deposit-action { --action-accent: var(--mona-rise); }
 #withdrawal-action { --action-accent: var(--mona-drop); }
 #transfer-action { --action-accent: var(--mona-ink); }
@@ -60,7 +56,7 @@
 /* Acciones secundarias bajo la pista: abrir otra cuenta y generar un IBAN nuevo. */
 .secondary-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; padding-inline: 0.4rem; }
 .secondary-actions > details[open] { flex-basis: 100%; }
-.secondary-actions .btn-slant { --slant-h: 2.75rem; font-size: 0.9rem; }
+.secondary-actions .btn-slant { min-height: 2.75rem; font-size: 0.9rem; }
 .secondary-actions details[open] > summary { --slant-bg: var(--mona-surface-hover); }
 
 /* Movimientos (#185): cada fila con su glifo en una pastilla inclinada. Rechazado: no cambió el saldo, así que su
@@ -189,16 +185,14 @@ h1, .h1, .h2, .h3 { font-weight: 600; letter-spacing: -0.005em; }
    por arriba, como en el boceto aprobado. */
 .backdrop { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
 .backdrop svg { position: absolute; left: 50%; top: -20vh; height: 130vh; width: auto; transform: translateX(-50%); }
+/* En la bienvenida, la A aún más grande: la flecha se sale por arriba y el centro de la A queda detrás del saludo y las puertas. */
+body:has(> main.welcome) .backdrop svg { top: -55vh; height: 190vh; }
 .backdrop-a { fill: #262b30; stroke: #30363c; stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
 .backdrop-rise { fill: var(--mona-rise); opacity: 0.08; }
 
-/* Botones en trapecio con los dos lados de la A (#185): el izquierdo sube como la pata izquierda y el derecho baja como
-   la derecha, los dos a unos 12,4°. La forma es un ::before recortado con clip-path; como un clip-path recortaría
-   también un contorno de foco, el foco es un ::after con la misma forma, en anillo (evenodd) y separado 3 px del botón.
-   El retranqueo arriba (--slant-run) sale de la altura mínima (--slant-h) por tan 12,4° ≈ 0,22. */
+/* Botones en paralelogramo con la inclinación de la A (#185). La forma es un ::before sesgado y no un clip-path,
+   para que el contorno de foco siga el paralelogramo en lugar de quedar recortado. */
 .btn-slant {
-    --slant-h: 3rem;
-    --slant-run: calc(var(--slant-h) * 0.22);
     --slant-bg: var(--mona-surface);
     --slant-bg-hover: var(--mona-surface-hover);
     --slant-fg: var(--mona-ink);
@@ -208,7 +202,7 @@ h1, .h1, .h2, .h3 { font-weight: 600; letter-spacing: -0.005em; }
     align-items: center;
     justify-content: center;
     gap: 0.6rem;
-    min-height: var(--slant-h);
+    min-height: 3rem;
     padding: 0.65rem 1.75rem;
     border: 0;
     background: none;
@@ -228,9 +222,40 @@ h1, .h1, .h2, .h3 { font-weight: 600; letter-spacing: -0.005em; }
     inset: 0;
     z-index: -1;
     background-color: var(--slant-bg);
-    clip-path: polygon(var(--slant-run) 0, calc(100% - var(--slant-run)) 0, 100% 100%, 0 100%);
+    transform: skewX(-12.4deg);
 }
-.btn-slant::after {   /* anillo de foco: trapecio exterior a 5 px menos el interior a 3 px */
+.btn-slant:hover, .btn-slant:focus-visible { color: var(--slant-fg); }
+.btn-slant:hover::before { background-color: var(--slant-bg-hover); }
+.btn-slant:focus-visible { outline: none; }
+.btn-slant:focus-visible::before { outline: 2px solid var(--mona-ink); outline-offset: 3px; }
+.btn-slant:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn-slant-rise { --slant-bg: var(--mona-rise); --slant-bg-hover: #45d9c4; --slant-fg: var(--mona-on-accent); }
+.btn-slant-light { --slant-bg: var(--mona-ink); --slant-bg-hover: #ffffff; --slant-fg: var(--mona-on-accent); }
+.btn-slant-drop { --slant-bg: var(--mona-drop); --slant-bg-hover: #f4767c; --slant-fg: var(--mona-on-accent); }
+.btn-slant-surface { --slant-bg: var(--mona-surface); --slant-bg-hover: var(--mona-surface-hover); --slant-fg: var(--mona-ink); }
+
+/* Las puertas del login (#185): bloques a todo el ancho, con título y una línea de ayuda, en trapecio con los dos lados
+   de la A: el izquierdo sube como la pata izquierda y el derecho baja como la derecha, a unos 12,4° (solo aquí; el resto
+   de botones siguen en paralelogramo). El ::before se recorta con clip-path y el retranqueo de arriba es la altura
+   mínima por tan 12,4° ≈ 0,22. Como el clip-path recortaría también un contorno, el foco es un ::after con la misma
+   forma, en anillo (evenodd) y separado 3 px de la puerta. */
+.door {
+    --door-run: calc(5.25rem * 0.22);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.2rem;
+    width: 100%;
+    min-height: 5.25rem;
+    padding: 0.85rem 2.5rem 0.85rem 2.25rem;
+    text-align: left;
+}
+.door::before {
+    transform: none;
+    clip-path: polygon(var(--door-run) 0, calc(100% - var(--door-run)) 0, 100% 100%, 0 100%);
+}
+.door::after {   /* anillo de foco: trapecio exterior a 5 px menos el interior a 3 px */
     content: "";
     position: absolute;
     inset: -5px;
@@ -238,32 +263,12 @@ h1, .h1, .h2, .h3 { font-weight: 600; letter-spacing: -0.005em; }
     display: none;
     background-color: var(--mona-ink);
     clip-path: polygon(evenodd,
-        calc(var(--slant-run) + 2.2px) 0, calc(100% - var(--slant-run) - 2.2px) 0, 100% 100%, 0 100%,
-        calc(var(--slant-run) + 3.8px) 2px, calc(100% - var(--slant-run) - 3.8px) 2px, calc(100% - 2.5px) calc(100% - 2px),
+        calc(var(--door-run) + 2.2px) 0, calc(100% - var(--door-run) - 2.2px) 0, 100% 100%, 0 100%,
+        calc(var(--door-run) + 3.8px) 2px, calc(100% - var(--door-run) - 3.8px) 2px, calc(100% - 2.5px) calc(100% - 2px),
         2.5px calc(100% - 2px));
 }
-.btn-slant:hover, .btn-slant:focus-visible { color: var(--slant-fg); }
-.btn-slant:hover::before { background-color: var(--slant-bg-hover); }
-.btn-slant:focus-visible { outline: none; }
-.btn-slant:focus-visible::after { display: block; }
-.btn-slant:disabled { opacity: 0.55; cursor: not-allowed; }
-.btn-slant-rise { --slant-bg: var(--mona-rise); --slant-bg-hover: #45d9c4; --slant-fg: var(--mona-on-accent); }
-.btn-slant-light { --slant-bg: var(--mona-ink); --slant-bg-hover: #ffffff; --slant-fg: var(--mona-on-accent); }
-.btn-slant-drop { --slant-bg: var(--mona-drop); --slant-bg-hover: #f4767c; --slant-fg: var(--mona-on-accent); }
-.btn-slant-surface { --slant-bg: var(--mona-surface); --slant-bg-hover: var(--mona-surface-hover); --slant-fg: var(--mona-ink); }
-
-/* Las puertas del login (#185): bloques en trapecio a todo el ancho, con título y una línea de ayuda. */
-.door {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 0.2rem;
-    width: 100%;
-    --slant-h: 5.25rem;
-    padding: 0.85rem 2.5rem 0.85rem 2.25rem;
-    text-align: left;
-}
+.door:focus-visible::before { outline: none; }
+.door:focus-visible::after { display: block; }
 .door-title { font-size: 1.25rem; font-weight: 700; }
 .door-hint { font-family: var(--mona-text); font-weight: 400; font-size: 0.8125rem; opacity: 0.8; }
 
@@ -342,7 +347,7 @@ main.welcome {
 .account-cards { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
 .account-balance { font-size: 1.1rem; }
 .page-cta { display: flex; flex-direction: column; gap: 0.75rem; padding-inline: 0.4rem; }
-.page-cta .btn-slant { --slant-h: 3.5rem; width: 100%; font-size: 1.05rem; }
+.page-cta .btn-slant { width: 100%; min-height: 3.5rem; font-size: 1.05rem; }
 
 /* Detalle de cuenta (#185): titular y segmento, IBAN y el saldo grande, con la A de marca de agua detrás. */
 .account-summary { position: relative; isolation: isolate; overflow: hidden; padding-top: 0.25rem; }

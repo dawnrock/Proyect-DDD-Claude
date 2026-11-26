@@ -34,9 +34,9 @@ Chosen by the user on 2026-11-25 from three sketched directions (issue #185, [AD
 | rise | `#1fc8b0` | Money in and the main action |
 
 - **Type:** Tektur for headings, buttons, balances, amounts and IBANs; Sora for the rest.
-- **Slant:** about 12.4°, the A's legs. Buttons (`.btn-slant` with `rise`, `light`, `drop`, `surface`) are trapezoids with both sides of the A, drawn by a `::before` cut with `clip-path`; the focus ring is an `::after` with the same shape. Account cards (`.card-slant`) have their right edge slanted like the A's right leg.
+- **Slant:** about 12.4°, the A's legs. Buttons (`.btn-slant` with `rise`, `light`, `drop`, `surface`) are parallelograms drawn by a skewed `::before`, so the focus outline follows the shape; the login doors alone are trapezoids with both sides of the A (`clip-path`, with an `::after` focus ring of the same shape). Account cards (`.card-slant`) have their right edge slanted like the A's right leg.
 - **Glyphs** (`fragments/brand`): `rise`, the A's leg with its arrow, for money in; `drop`, the n's bar and stem, for money out; a rejected movement keeps its glyph in grey; `watermark`, the A in outline behind account cards and the balance; `backdrop`, the darkened A bigger than the screen behind the entry screens (login doors, login form, sign-up steps).
-- **Screens:** the doors have no header, only «Bienvenido a» with the logo beside it (the bank's name stays for screen readers) and the two doors without icons, centred over the backdrop. The account actions are a track of trapezoids; the open one fills with its colour (rise, drop or ink) and its form goes below.
+- **Screens:** the doors have no header, only «Bienvenido a» with the logo beside it (the bank's name stays for screen readers) and the two doors without icons, centred over the backdrop, which is bigger there than on the login form and the sign-up steps. The account actions are a track of interlocked parallelograms; the open one fills with its colour (rise, drop or ink) and its form goes below.
 
 ## Prototypes
 
