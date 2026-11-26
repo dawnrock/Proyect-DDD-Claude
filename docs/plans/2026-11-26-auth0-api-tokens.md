@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-26
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~100 min (10 tasks)
 
 ## Goal
@@ -155,7 +155,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 - **Acceptance criteria:**
   - [x] Passes without network; validated by sabotage (dropping the audience check makes the wrong-audience case pass).
 
-### [ ] T10 — Docs and project status (~10 min)
+### [x] T10 — Docs and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0024-oauth2-oidc-auth0.md` (API section), `docs/adr/0015-jwt-bearer-api.md` (status line), `docs/deploy/render.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -165,7 +165,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
   2. `render.md`: in Auth0, create the **API** (identifier = audience, RS256) and a **Single Page Application** for Swagger UI (Allowed Callback URLs `https://proyect-ddd-claude.onrender.com/api-docs/oauth2-redirect.html`, Allowed Web Origins `https://proyect-ddd-claude.onrender.com`, access to the API); in Render, `APP_AUTH_AUTH0_AUDIENCE` and `APP_AUTH_AUTH0_API_DOCS_CLIENT_ID`; manual check through Swagger UI.
   3. Status files: #197 done, next step #198.
 - **Acceptance criteria:**
-  - [ ] Docs in English; CI's status check passes.
+  - [x] Docs in English; CI's status check passes.
 
 ### [x] T11 — Review fixes (~10 min)
 
@@ -183,25 +183,25 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 
 **Specific:**
 
-- [ ] Without `APP_AUTH_AUTH0_AUDIENCE` the API behaves as today (own tokens only) and nothing contacts Auth0 at startup.
-- [ ] An Auth0 access token for the API audience, of a linked identity, gets the local user's accounts and role; an unlinked one gets 401 with a detail that says how to link it.
-- [ ] Wrong audience, unknown issuer, bad signature or expired → 401 `ProblemDetail` with `WWW-Authenticate: Bearer error="invalid_token"`.
-- [ ] With `app.auth.local=false`, `POST /api/auth/token` is 404 and own tokens are rejected (no profile sets it yet).
-- [ ] Swagger UI offers «Authorize» with Auth0 and PKCE when configured, and works as today when not.
+- [x] Without `APP_AUTH_AUTH0_AUDIENCE` the API behaves as today (own tokens only) and nothing contacts Auth0 at startup.
+- [x] An Auth0 access token for the API audience, of a linked identity, gets the local user's accounts and role; an unlinked one gets 401 with a detail that says how to link it.
+- [x] Wrong audience, unknown issuer, bad signature or expired → 401 `ProblemDetail` with `WWW-Authenticate: Bearer error="invalid_token"`.
+- [x] With `app.auth.local=false`, `POST /api/auth/token` is 404 and own tokens are rejected (no profile sets it yet).
+- [x] Swagger UI offers «Authorize» with Auth0 and PKCE when configured, and works as today when not.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): none expected (resource server and OAuth2 client are already in).
-- [ ] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes.
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a (security terms, in ADR 0024).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): none expected (resource server and OAuth2 client are already in).
+- [x] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes.
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a (security terms, in ADR 0024).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
