@@ -13,6 +13,7 @@ Render runs Java only through Docker, so the repository has a [`Dockerfile`](../
 | H2 console | image (`SPRING_H2_CONSOLE_ENABLED=false`) | Off: on a public URL it could run code on the server |
 | Users and passwords | you, in Render (`APP_SECURITY_USERS_*`) | Your own password instead of `demo` |
 | API token secret | you, in Render (`APP_JWT_SECRET`, `Hexagonal` only) | A random value of at least 32 bytes (#122, ADR 0015) |
+| Sign in with Auth0 | you, in Auth0 and in Render (`APP_AUTH_AUTH0_*`, `Hexagonal` only) | Optional: the «Entrar con Auth0» button (#196, ADR 0024); without them the web is as before |
 
 **Live services** (given by the user, 2026-11-17): `Hexagonal` at <https://proyect-ddd-claude.onrender.com> (also in the `servers` of `docs/api/openapi.yaml`) and `Monolithic` at <https://mon-e-bank-monolithic.onrender.com>. On the free plan they sleep when idle, so the first request may take about a minute. The image also serves the API documentation: Swagger UI at `/api-docs` over the contract at `/openapi.yaml` (#111; the `Dockerfile` copies `docs/api/openapi.yaml` into the build).
 
@@ -112,6 +113,37 @@ Since #150 (ADR 0019) the `Hexagonal` service keeps users, customers, accounts a
 If they run out, the start stops with a stack trace instead of hanging: `PSQLException: Connection attempt timed out.` (login), a `SocketTimeoutException` (connect or read), followed by Spring's `Application run failed`, and Render keeps the previous version. A parameter in the URL wins over these values, so to change one for a test add it there (for example `…?sslmode=require&loginTimeout=60`).
 
 The configured users (`APP_SECURITY_USERS_*`, `APP_ADMIN_*`) are written to the database on every start: changing a hash in Render still changes that user's password. Users who signed up are kept.
+
+## 2 ter. Sign in with Auth0 (`Hexagonal`, optional)
+
+Since #196 (ADR 0024) the web can sign customers in with [Auth0](https://auth0.com) (OpenID Connect). Without this section nothing changes: the variables are absent, the application starts without contacting Auth0 and the login page has no Auth0 button. With only some of the three variables the service does **not** start and the log names the missing ones.
+
+1. **In the Auth0 dashboard** (your tenant), *Applications → Create Application → Regular Web Application*. In its *Settings*:
+   - **Allowed Callback URLs:** `https://proyect-ddd-claude.onrender.com/login/oauth2/code/auth0` (for local runs, add `, http://localhost:8080/login/oauth2/code/auth0`).
+   - **Allowed Logout URLs:** `https://proyect-ddd-claude.onrender.com/login?logout` (locally, add `, http://localhost:8080/login?logout`).
+   - **Allowed Web Origins:** empty (the sign-in runs on the server).
+   - *Save Changes*. Write down the **Domain** and the **Client ID**; keep the **Client Secret** in a password manager, never in the repository or a chat.
+2. **In the tenant's *Settings → Advanced*,** turn on **RP-Initiated Logout End Session Endpoint Discovery**, so that logging out of monA Bank also ends the Auth0 session (`/oidc/logout`).
+3. **In Render, Environment of the `Hexagonal` service**, add:
+
+   ```text
+   APP_AUTH_AUTH0_DOMAIN=<your-tenant>.<region>.auth0.com
+   APP_AUTH_AUTH0_CLIENT_ID=<client id>
+   APP_AUTH_AUTH0_CLIENT_SECRET=<client secret>
+   ```
+
+   The domain may be written with or without `https://`. **Add them only once the deployed code includes #196.**
+4. **Save, rebuild and deploy.**
+
+**Manual check** (CI only tests against an imaginary tenant):
+
+1. `https://proyect-ddd-claude.onrender.com/login?form` shows «Entrar con Auth0» below the form.
+2. The button goes to Auth0's login page; sign up or sign in there.
+3. Back in monA Bank, the first time, the link page asks once for a monA Bank username and password (for example a demo user). After «Vincular» the browser goes to Auth0 and back without asking again and lands on that user's accounts.
+4. Sign out and sign in with Auth0 again: no link page this time.
+5. «Cerrar sesión» goes through Auth0 and back to the login page with «Has cerrado la sesión». If Auth0 shows an error about the logout URL instead, its value in *Allowed Logout URLs* does not match `post_logout_redirect_uri` (the query string `?logout` included): copy the URL from the error into that field.
+
+A failed Auth0 sign-in (wrong callback URL, a disabled user…) lands on the login form with «No se pudo iniciar sesión con Auth0». A link is permanent (no screen to undo it yet): it lives in the `external_identity` table.
 
 ## 3. Check it
 
