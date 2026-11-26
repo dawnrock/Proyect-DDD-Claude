@@ -69,6 +69,26 @@ public class CustomerRegistration {
         return account;
     }
 
+    /**
+     * Alta de un cliente con una identidad de Auth0 ya verificada y sin contraseña local (#198, ADR 0024): los mismos
+     * pasos y reglas que {@link #register}, pero el usuario se crea con una contraseña inutilizable y queda vinculado a
+     * la identidad ({@link ExternalIdentities}). Contrato: {@code docs/contracts/auth0-sign-up.md}.
+     *
+     * @param pending  la identidad de Auth0 pendiente de la sesión
+     * @param clientIp IP del cliente, para el límite de altas
+     * @return el resumen de la cuenta abierta, con el IBAN asignado
+     * @throws PendingIdentityExpiredException si la identidad pendiente caducó (no se crea nada)
+     * @throws IdentityAlreadyLinkedException si la identidad ya está vinculada a otro usuario (no se crea nada)
+     * @throws TooManySignUpsException si la IP o el total de altas llegó al límite (no se abre nada)
+     * @throws UsernameTakenException si el usuario ya existe (no se abre nada)
+     * @throws DuplicateCustomerException si ya hay un cliente con ese documento
+     * @throws com.dawnrock.ddd.domain.model.InsufficientInitialDepositException si el depósito no llega al mínimo
+     */
+    public AccountSummary registerWithExternalIdentity(SignUpCommand command, PendingIdentity pending,
+                                                       String clientIp) {
+        throw new UnsupportedOperationException("pendiente: backend-dev");
+    }
+
     private AccountSummary openAccount(SignUpCommand command, String rawPassword) {
         if (users.userExists(command.username()) || queries.isUsernameTaken(command.username())) {
             throw new UsernameTakenException(command.username());
