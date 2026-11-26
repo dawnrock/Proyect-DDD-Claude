@@ -189,7 +189,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
   - [x] Logout with `oidcLogin()` → 302 to `https://<fake-domain>/oidc/logout` with `id_token_hint` and `post_logout_redirect_uri`; logout of a form session → `/login?logout`.
   - [x] With `app.auth.local=false`, `POST /login` with valid credentials does not authenticate; with the default it does.
 
-### [ ] T11 — End-to-end: link and sign in (~10 min)
+### [x] T11 — End-to-end: link and sign in (~10 min)
 
 - **Side:** both
 - **Layer:** tests
@@ -199,7 +199,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
   1. With the real beans and H2: `/login?form` shows the button; `GET /oauth2/authorization/auth0` redirects with PKCE; a session holding a `PendingIdentity` + `POST /login/link` with a demo user's credentials stores the link in `external_identity` and redirects to `/oauth2/authorization/auth0`; `LinkedOidcUserService` then resolves that `sub` to the demo user (called with a stub delegate) and `oidcLogin()` with that name and role sees "Mis cuentas" with only their accounts.
   2. Without the properties (`DddLabApplicationTests`) nothing changes.
 - **Acceptance criteria:**
-  - [ ] The test passes without network; `./mvnw verify` green.
+  - [x] The test passes without network; `./mvnw verify` green.
 
 ### [ ] T12 — Docs and project status (~10 min)
 
