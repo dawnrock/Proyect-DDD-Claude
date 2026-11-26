@@ -1,7 +1,7 @@
 # 0024 · Web login with Auth0 (OAuth2/OIDC) and identity linking
 
 - **Status:** accepted · 2026-11-26
-- **Issue:** #196 (first of four: #196 web login, #197 the API accepts Auth0 tokens, #198 sign-up through Auth0, #199 realistic mode in production) · **Amends:** [ADR 0008](0008-spring-security.md) (the web authenticates with Auth0 as well as with the form) and [ADR 0015](0015-jwt-bearer-api.md) (OAuth2/OIDC was named there as the end state) · **Related:** [ADR 0019](0019-real-persistence.md) (users in the database), [ADR 0017](0017-login-attempt-limit.md) (login attempts), [ADR 0007](0007-equipo-back-web-contrato-primero.md) (contract first)
+- **Issues:** #196 and #197 (the first two of four: #196 web login, #197 the API accepts Auth0 tokens, #198 sign-up through Auth0, #199 realistic mode in production) · **Amends:** [ADR 0008](0008-spring-security.md) (the web authenticates with Auth0 as well as with the form) and [ADR 0015](0015-jwt-bearer-api.md) (OAuth2/OIDC was named there as the end state) · **Related:** [ADR 0019](0019-real-persistence.md) (users in the database), [ADR 0017](0017-login-attempt-limit.md) (login attempts), [ADR 0007](0007-equipo-back-web-contrato-primero.md) (contract first)
 
 ## Context
 
@@ -21,6 +21,16 @@ ADR 0008 and ADR 0015 left OAuth2/OIDC as the end state of the authentication: t
 - **`app.auth.local`** (`AuthProperties`, default `true`) switches the form login off. No profile sets it to `false` here; #199 does. With it off, the link page is on purpose the **only** place where a local password is still checked: an existing customer must prove once that the Auth0 identity is theirs (same attempt limit as the login).
 - **Dependency:** `spring-boot-starter-security-oauth2-client` (the resource server of ADR 0015 was already there). Spring's own `OidcUserService`, state, nonce and ID token validation are reused; nothing is written by hand.
 
+### The API (#197)
+
+- **Two issuers on `/api/**`.** `ApiSecurityConfig` sends each Bearer token to the `AuthenticationManager` of its `iss` (`JwtIssuerAuthenticationManagerResolver`): the API's own tokens (`ddd-lab`, HS256, ADR 0015) while `app.auth.local` is on, and Auth0 access tokens (`https://<domain>/`, RS256) when `APP_AUTH_AUTH0_AUDIENCE` is set. Any other issuer is an invalid token (401). Each issuer has its own decoder, so an HS256 token can never be checked with the RS256 keys or the other way round.
+- **Audience.** Auth0 only issues a JWT access token for an API when the authorization request names its `audience` (the identifier of the API created in the tenant). The decoder requires it in `aud` (`JwtAudienceValidator`), so a token issued for another API of the same tenant is rejected. Without the audience the API does not trust Auth0 at all; the web login does not need it.
+- **Keys on demand.** The Auth0 decoder reads `https://<domain>/.well-known/jwks.json` on the first Auth0 token and caches it (Nimbus): startup never calls Auth0, and if Auth0 is unreachable that request gets 401, never 500. Own tokens never depend on it.
+- **Same identity, same roles.** The token's `sub` is the same user id as the web's ID token, so the `external_identity` link of the web works for the API; `Auth0AccessTokens` turns it into a `JwtAuthenticationToken` named after the local user with the local `ROLE_*`. An unlinked `sub`, or a missing or disabled local user, gets the same 401 (`UnlinkedAccessTokenException`, an RFC 6750 `invalid_token` whose description stays ASCII as the header requires) with a Spanish `detail` saying how to link it. Linking stays on the web.
+- **Own tokens follow `app.auth.local`.** `TokenController` and `AccessTokenIssuer` only exist, and the own issuer is only trusted, while it is on (default). #199 turns it off in production.
+- **Swagger UI is a public client.** It runs in the browser and cannot keep a secret, so it is a separate Auth0 *Single Page Application* (`APP_AUTH_AUTH0_API_DOCS_CLIENT_ID`, not secret) that signs in with Authorization Code and PKCE for the API audience. The page asks `/api-docs/oauth-config` for that client and the audience; Auth0 redirects back to `oauth2-redirect.html`, copied unchanged from `swagger-ui-dist@5.34.1` into our origin.
+- **Tenant-agnostic contract.** The `auth0` security scheme is `openIdConnect` with `openIdConnectUrl: /api-docs/openid-configuration`, a minimal discovery document this application builds from the domain (only `code` with S256). The contract file names no tenant and stays the same in every environment. Contract 2.3.0 (a compatible addition, ADR 0014).
+
 ## Alternatives
 
 - **Keycloak self-hosted:** full control and no external service, but one more thing to run and pay for beside two free Render services and Neon; Auth0's free plan is enough for a practice project.
@@ -29,11 +39,15 @@ ADR 0008 and ADR 0015 left OAuth2/OIDC as the end state of the authentication: t
 - **Programmatic login after linking** (building the `Authentication` in the controller): saves a round trip, but skips Spring's own flow and its session protections.
 - **A separate branch or module for the realistic mode:** two code bases to keep in step. The mode is a configuration switch (`app.auth.*`) in the same code, which #199 will turn on in production.
 - **`ClientRegistrations.fromIssuerLocation`:** reads the discovery document from Auth0, so startup and every test would need the network.
+- **The API trusting only Auth0 at once:** realistic, but the tests, Schemathesis and the demo get their tokens from `POST /api/auth/token`; both issuers live together until #199 turns local authentication off in production.
+- **Swagger UI with the web's confidential client:** its secret would have to reach the browser. A public SPA client with PKCE is the standard for browser apps.
+- **The tenant's URLs written in the contract (`oauth2` scheme):** simpler for Swagger UI, but the contract would change with the tenant and name the user's tenant in the repository.
 
 ## Consequences
 
 - The Auth0 tenant must be set up by hand (Regular Web Application, Allowed Callback and Logout URLs, RP-Initiated Logout End Session Endpoint Discovery) and its three values go to Render as `APP_AUTH_AUTH0_*`; the secret only there, never in the repository (`docs/deploy/render.md`).
 - An Auth0 outage blocks only the Auth0 logins; the form login keeps working while `app.auth.local` is `true`.
+- For the API (#197) the tenant also needs an **API** (its identifier is `APP_AUTH_AUTH0_AUDIENCE`) and a **Single Page Application** for Swagger UI (`APP_AUTH_AUTH0_API_DOCS_CLIENT_ID`; callback `…/api-docs/oauth2-redirect.html`, web origin the service URL). The CI never needs them: the tests sign tokens with a local RSA key.
 - Nothing is tested against a real tenant in the CI: tests use a fake domain and `oidcLogin()`. The first real check is on Render.
 - The pending identity lives only in the session and is honoured for 10 minutes: an expired one is dropped when it is read (it may stay in an idle session until that session ends, holding only `sub` and e-mail). There is no unlinking and no linking from a signed-in session; the foreign key means a linked user cannot be deleted before that exists.
 - The users of the demo (`admin`, customers) can link their own Auth0 identities; the repository holds no Auth0 data.

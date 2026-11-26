@@ -13,7 +13,7 @@ Render runs Java only through Docker, so the repository has a [`Dockerfile`](../
 | H2 console | image (`SPRING_H2_CONSOLE_ENABLED=false`) | Off: on a public URL it could run code on the server |
 | Users and passwords | you, in Render (`APP_SECURITY_USERS_*`) | Your own password instead of `demo` |
 | API token secret | you, in Render (`APP_JWT_SECRET`, `Hexagonal` only) | A random value of at least 32 bytes (#122, ADR 0015) |
-| Sign in with Auth0 | you, in Auth0 and in Render (`APP_AUTH_AUTH0_*`, `Hexagonal` only) | Optional: the «Entrar con Auth0» button (#196, ADR 0024); without them the web is as before |
+| Sign in with Auth0 | you, in Auth0 and in Render (`APP_AUTH_AUTH0_*`, `Hexagonal` only) | Optional: the «Entrar con Auth0» button (#196, ADR 0024) and, with the audience, Auth0 tokens on the API and in Swagger UI (#197); without them everything is as before |
 
 **Live services** (given by the user, 2026-11-17): `Hexagonal` at <https://proyect-ddd-claude.onrender.com> (also in the `servers` of `docs/api/openapi.yaml`) and `Monolithic` at <https://mon-e-bank-monolithic.onrender.com>. On the free plan they sleep when idle, so the first request may take about a minute. The image also serves the API documentation: Swagger UI at `/api-docs` over the contract at `/openapi.yaml` (#111; the `Dockerfile` copies `docs/api/openapi.yaml` into the build).
 
@@ -144,6 +144,26 @@ Since #196 (ADR 0024) the web can sign customers in with [Auth0](https://auth0.c
 5. «Cerrar sesión» goes through Auth0 and back to the login page with «Has cerrado la sesión». If Auth0 shows an error about the logout URL instead, its value in *Allowed Logout URLs* does not match `post_logout_redirect_uri` (the query string `?logout` included): copy the URL from the error into that field.
 
 A failed Auth0 sign-in (wrong callback URL, a disabled user…) lands on the login form with «No se pudo iniciar sesión con Auth0». A link is permanent (no screen to undo it yet): it lives in the `external_identity` table.
+
+### The API with Auth0 tokens (#197, optional)
+
+With the section above done, the API can also accept **access tokens issued by Auth0**, and Swagger UI (`/api-docs`) gets «Authorize» with Auth0. Without these two variables the API keeps accepting only its own tokens.
+
+1. **Create the API in Auth0:** *Applications → APIs → Create API*. Name `monA Bank API`; **Identifier** (it becomes the audience; any URL-like text, it is never called), for example `https://proyect-ddd-claude.onrender.com/api`; signing algorithm **RS256**.
+2. **Create the application of Swagger UI:** *Applications → Create Application → Single Page Application* (it runs in the browser and has no secret). In its *Settings*:
+   - **Allowed Callback URLs:** `https://proyect-ddd-claude.onrender.com/api-docs/oauth2-redirect.html` (locally, add `, http://localhost:8080/api-docs/oauth2-redirect.html`).
+   - **Allowed Web Origins:** `https://proyect-ddd-claude.onrender.com` (locally, add `, http://localhost:8080`): the browser asks Auth0's token endpoint directly.
+   - *Save Changes* and write down its **Client ID**. If the tenant asks which APIs the application may call (*APIs* tab or the API's *Application Access*), allow it for `monA Bank API`.
+3. **In Render, Environment of the `Hexagonal` service**, add:
+
+   ```text
+   APP_AUTH_AUTH0_AUDIENCE=<identifier of the API, exactly as in Auth0>
+   APP_AUTH_AUTH0_API_DOCS_CLIENT_ID=<client id of the Single Page Application>
+   ```
+
+   Neither is secret. Both need the three `APP_AUTH_AUTH0_*` of the web: without them the service does not start. **Add them only once the deployed code includes #197.**
+
+**Manual check:** sign in on the web with Auth0 once, so the identity is linked. Open `https://proyect-ddd-claude.onrender.com/api-docs`, **Authorize** → section `auth0` → **Authorize** (the client id is filled in), sign in with Auth0, close the dialog and try `GET /api/accounts`: it answers with that user's accounts. An identity that was never linked answers 401 with «La identidad de Auth0 no está vinculada a ningún usuario…». The `bearerAuth` section keeps working with the API's own token.
 
 ## 3. Check it
 
