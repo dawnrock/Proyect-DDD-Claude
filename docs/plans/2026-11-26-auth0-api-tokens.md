@@ -89,7 +89,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
   - [x] No bean without domain or without audience; with both, the bean exists and the context starts with no network.
   - [x] A token signed with the test key, right `iss`/`aud`, decodes; wrong `aud` or `iss`, or expired, is rejected.
 
-### [ ] T4 — `ApiSecurityConfig`: one manager per issuer (~10 min)
+### [x] T4 — `ApiSecurityConfig`: one manager per issuer (~10 min)
 
 - **Layer:** adapter.in.rest
 - **Files:** `adapter/in/rest/ApiSecurityConfig.java`; tests `ApiAuth0TokensTests` (`@WebMvcTest` with a test RSA decoder for a fake tenant) and the existing API security tests
@@ -98,9 +98,9 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
   1. `oauth2ResourceServer(rs -> rs.authenticationManagerResolver(resolver))` with a `JwtIssuerAuthenticationManagerResolver` built from a map: own issuer → manager with the current HS256 decoder and roles converter (when `app.auth.local`); Auth0 issuer → manager with `auth0JwtDecoder` and T2's converter (when the bean exists).
   2. The entry point keeps its 401 `ProblemDetail` and `WWW-Authenticate: Bearer error="invalid_token"`, and uses the unlinked detail when the exception carries it.
 - **Acceptance criteria:**
-  - [ ] A linked customer's Auth0 token lists only their accounts; an Auth0 token of an admin can `POST /api/accounts`; of a customer, 403.
-  - [ ] Unknown issuer, wrong audience, expired or unlinked → 401 `ProblemDetail` with `WWW-Authenticate: Bearer error="invalid_token"`; the unlinked one has its own detail.
-  - [ ] Own tokens keep working and every existing API security test passes unchanged.
+  - [x] A linked customer's Auth0 token lists only their accounts; an Auth0 token of an admin can `POST /api/accounts`; of a customer, 403.
+  - [x] Unknown issuer, wrong audience, expired or unlinked → 401 `ProblemDetail` with `WWW-Authenticate: Bearer error="invalid_token"`; the unlinked one has its own detail.
+  - [x] Own tokens keep working and every existing API security test passes unchanged.
 
 ### [ ] T5 — Own token endpoint behind `app.auth.local` (~5 min)
 

@@ -2,7 +2,11 @@ package com.dawnrock.ddd.adapter.in.rest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -11,14 +15,24 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
+import org.springframework.security.oauth2.server.resource.authentication.JwtIssuerAuthenticationManagerResolver;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+
+import com.dawnrock.ddd.adapter.in.Auth0Properties;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -32,6 +46,11 @@ import jakarta.servlet.http.HttpServletResponse;
  * {@code CurrentCaller} traduce al {@code Caller}. Sin token, o con uno no válido o caducado, responde 401; sin el rol,
  * 403; ambos como {@code ProblemDetail} (RFC 9457) igual que {@link RestExceptionHandler}. Contrato:
  * {@code docs/contracts/login-roles.md}.
+ *
+ * <p>Dos emisores (#197, ADR 0024): cada token va al gestor de su {@code iss}. Los propios ({@code app.jwt.issuer},
+ * HS256) y, si está configurado ({@link Auth0ApiTokensConfig}), los de acceso de Auth0 (RS256, con la audiencia de la
+ * API), cuyo {@code sub} se traduce al usuario local con {@link Auth0AccessTokens}. Un emisor desconocido es un token
+ * no válido. Una identidad de Auth0 sin vincular recibe 401 con {@link Auth0AccessTokens#UNLINKED_DETAIL}.
  */
 @Import(JwtSupport.class)
 @Configuration
@@ -45,12 +64,23 @@ public class ApiSecurityConfig {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
+    public SecurityFilterChain apiSecurity(HttpSecurity http, @Qualifier("jwtDecoder") JwtDecoder ownDecoder,
+                                           JwtProperties jwtProperties, Auth0Properties auth0Properties,
+                                           @Qualifier(Auth0ApiTokensConfig.DECODER) ObjectProvider<JwtDecoder> auth0Decoder,
+                                           ObjectProvider<Auth0AccessTokens> auth0Tokens) throws Exception {
+        Map<String, AuthenticationManager> managers = new HashMap<>();
+        managers.put(jwtProperties.issuer(), manager(ownDecoder, jwtAuthenticationConverter()));
+        JwtDecoder auth0 = auth0Decoder.getIfAvailable();
+        if (auth0 != null) {
+            managers.put(auth0Properties.issuerUri(), manager(auth0, auth0Tokens.getObject()));
+        }
         AuthenticationEntryPoint unauthenticated = (request, response, exception) -> {
             if (exception instanceof OAuth2AuthenticationException) {
                 response.setHeader(HttpHeaders.WWW_AUTHENTICATE,
                         "Bearer error=\"invalid_token\", error_description=\"The token is invalid or expired\"");
-                writeProblem(response, HttpStatus.UNAUTHORIZED, UNAUTHENTICATED_TITLE, INVALID_TOKEN_DETAIL);
+                writeProblem(response, HttpStatus.UNAUTHORIZED, UNAUTHENTICATED_TITLE,
+                        exception instanceof UnlinkedAccessTokenException
+                                ? Auth0AccessTokens.UNLINKED_DETAIL : INVALID_TOKEN_DETAIL);
             } else {
                 response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer");
                 writeProblem(response, HttpStatus.UNAUTHORIZED, UNAUTHENTICATED_TITLE, MISSING_TOKEN_DETAIL);
@@ -69,7 +99,7 @@ public class ApiSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/accounts/*/account-number").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(resourceServer -> resourceServer
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                        .authenticationManagerResolver(new JwtIssuerAuthenticationManagerResolver(managers::get))
                         .authenticationEntryPoint(unauthenticated)
                         .accessDeniedHandler(forbidden))
                 .exceptionHandling(handling -> handling
@@ -78,6 +108,14 @@ public class ApiSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
+    }
+
+    /** El gestor de un emisor: su decodificador (firma y validación) y cómo convertir el token en usuario. */
+    private static AuthenticationManager manager(JwtDecoder decoder,
+                                                 Converter<Jwt, ? extends AbstractAuthenticationToken> converter) {
+        JwtAuthenticationProvider provider = new JwtAuthenticationProvider(decoder);
+        provider.setJwtAuthenticationConverter(converter);
+        return new ProviderManager(provider);
     }
 
     /** Claim {@code roles} ({@code ADMIN}, {@code USER}) → autoridades {@code ROLE_*}; {@code sub} → nombre. */
