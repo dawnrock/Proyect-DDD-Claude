@@ -1,13 +1,15 @@
 package com.dawnrock.ddd.adapter.in;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -20,9 +22,19 @@ class Auth0ClientRegistrationTests {
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
             .withUserConfiguration(Properties.class, Auth0ClientRegistration.class);
 
-    @Configuration
+    /** Sin {@code @Configuration} a propósito: el escaneo de los tests de contexto completo no debe recogerla. */
     @EnableConfigurationProperties({Auth0Properties.class, AuthProperties.class})
     static class Properties {
+
+        @Bean
+        ExternalIdentities externalIdentities() {
+            return mock(ExternalIdentities.class);
+        }
+
+        @Bean
+        UserDetailsService userDetailsService() {
+            return mock(UserDetailsService.class);
+        }
     }
 
     @Nested
@@ -35,6 +47,7 @@ class Auth0ClientRegistrationTests {
             runner.run(context -> {
                 assertThat(context).hasNotFailed();
                 assertThat(context).doesNotHaveBean(ClientRegistrationRepository.class);
+                assertThat(context).doesNotHaveBean(LinkedOidcUserService.class);
             });
         }
 
@@ -81,6 +94,12 @@ class Auth0ClientRegistrationTests {
                 assertThat(provider.getConfigurationMetadata())
                         .containsEntry("end_session_endpoint", "https://" + DOMAIN + "/oidc/logout");
             });
+        }
+
+        @Test
+        @DisplayName("también hay un LinkedOidcUserService que traduce el sub al usuario local")
+        void thereIsAlsoALinkedOidcUserService() {
+            configured.run(context -> assertThat(context).hasSingleBean(LinkedOidcUserService.class));
         }
 
         @Test

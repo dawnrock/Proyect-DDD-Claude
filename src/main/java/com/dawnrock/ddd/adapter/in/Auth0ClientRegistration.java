@@ -1,13 +1,17 @@
 package com.dawnrock.ddd.adapter.in;
 
+import java.time.Clock;
 import java.util.Map;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
@@ -26,6 +30,13 @@ public class Auth0ClientRegistration {
     @Bean
     public ClientRegistrationRepository clientRegistrationRepository(Auth0Properties properties) {
         return new InMemoryClientRegistrationRepository(registration(properties));
+    }
+
+    /** Resuelve el {@code sub} de Auth0 al usuario local con los roles de la base de datos. */
+    @Bean
+    public LinkedOidcUserService linkedOidcUserService(ExternalIdentities identities, UserDetailsService users,
+                                                       ObjectProvider<Clock> clock) {
+        return new LinkedOidcUserService(new OidcUserService(), identities, users, clock);
     }
 
     /** El registro {@code auth0} para el tenant de las propiedades. */

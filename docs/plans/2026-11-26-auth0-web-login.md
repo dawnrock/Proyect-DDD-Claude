@@ -119,7 +119,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **Acceptance criteria:**
   - [x] Without properties there is no `ClientRegistrationRepository`; with the three, the registration has the expected endpoints, scopes and `end_session_endpoint`; with only some, startup fails with the message.
 
-### [ ] T5 — `LinkedOidcUserService`: `sub` → local user (~10 min)
+### [x] T5 — `LinkedOidcUserService`: `sub` → local user (~10 min)
 
 - **Side:** back
 - **Layer:** adapter.in (support)
@@ -128,7 +128,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **What to do:**
   1. Wraps the default `OidcUserService` (delegate injected, mocked in the test as Spring's `OAuth2UserService` interface). Linked → an `OidcUser` that keeps the ID token and claims but answers `getName()` with the local username and has the local authorities (`UserDetailsService`). Unknown → `UnlinkedIdentityException` with the `PendingIdentity` (`sub`, `email`, now). Local user disabled or missing → `OAuth2AuthenticationException` (`invalid_user`).
 - **Acceptance criteria:**
-  - [ ] Linked identity → name = local username and `ROLE_USER`/`ROLE_ADMIN` from the store; unknown → `UnlinkedIdentityException` with subject and e-mail; disabled user → rejected.
+  - [x] Linked identity → name = local username and `ROLE_USER`/`ROLE_ADMIN` from the store; unknown → `UnlinkedIdentityException` with subject and e-mail; disabled user → rejected.
 
 ### [ ] T6 — `ExternalIdentityLinking`: link with the local password (~10 min)
 
