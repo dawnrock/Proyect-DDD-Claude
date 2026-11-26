@@ -1,5 +1,9 @@
 package com.dawnrock.ddd.adapter.in;
 
+import java.security.SecureRandom;
+import java.time.Clock;
+import java.util.Base64;
+
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
@@ -30,11 +34,16 @@ public class CustomerRegistration {
     /** Contraseña mínima del alta. */
     public static final int MINIMUM_PASSWORD_LENGTH = 8;
 
+    private static final int UNUSABLE_PASSWORD_BYTES = 32;
+
     private final AccountOpeningCommands commands;
     private final CheckingAccountQueries queries;
     private final UserDetailsManager users;
     private final PasswordEncoder passwordEncoder;
     private final SignUpLimit signUpLimit;
+    private final ExternalIdentities identities;
+    private final Clock clock;
+    private final SecureRandom random = new SecureRandom();
 
     /**
      * Da de alta al cliente, le abre su primera cuenta y crea su usuario. Los pasos van bajo un mismo cierre, así que
@@ -49,22 +58,7 @@ public class CustomerRegistration {
      * @throws IllegalArgumentException si la contraseña tiene menos de {@value #MINIMUM_PASSWORD_LENGTH} caracteres
      */
     public synchronized AccountSummary register(SignUpCommand command, String rawPassword, String clientIp) {
-        signUpLimit.tryReserve(clientIp).ifPresent(retryAfter -> {
-            throw new TooManySignUpsException(retryAfter);
-        });
-        AccountSummary account;
-        try {
-            account = openAccount(command, rawPassword);
-        } catch (RuntimeException e) {
-            // No se creó ningún cliente: la reserva se devuelve. Si el cliente ya existe y falla después la creación
-            // del usuario, el alta sigue contando, porque ocupa memoria
-            signUpLimit.release(clientIp);
-            if (e instanceof UsernameTakenException || e instanceof DuplicateCustomerException) {
-                // Revela que el usuario o el documento existen: cuenta para el límite de sondeo (#139)
-                signUpLimit.recordFailure(clientIp);
-            }
-            throw e;
-        }
+        AccountSummary account = reserveAndOpen(command, clientIp, () -> checkPassword(rawPassword));
         createUser(command, rawPassword);
         return account;
     }
@@ -84,20 +78,61 @@ public class CustomerRegistration {
      * @throws DuplicateCustomerException si ya hay un cliente con ese documento
      * @throws com.dawnrock.ddd.domain.model.InsufficientInitialDepositException si el depósito no llega al mínimo
      */
-    public AccountSummary registerWithExternalIdentity(SignUpCommand command, PendingIdentity pending,
-                                                       String clientIp) {
-        throw new UnsupportedOperationException("pendiente: backend-dev");
+    public synchronized AccountSummary registerWithExternalIdentity(SignUpCommand command, PendingIdentity pending,
+                                                                    String clientIp) {
+        // Estas dos comprobaciones no reservan nada ni cuentan para los límites: no revelan ningún documento ni usuario
+        if (pending.isExpired(clock)) {
+            throw new PendingIdentityExpiredException(pending.provider());
+        }
+        identities.usernameOf(pending.provider(), pending.subject()).ifPresent(linked -> {
+            throw new IdentityAlreadyLinkedException(pending.provider(), linked);
+        });
+        AccountSummary account = reserveAndOpen(command, clientIp, () -> { });
+        createUser(command, unusablePassword());
+        // Si otra pestaña vinculó la identidad entre la comprobación y aquí, la excepción llega al llamador: el cliente
+        // y el usuario ya existen y no se deshace nada (#150), igual que si falla la creación del usuario
+        identities.link(pending.provider(), pending.subject(), command.username());
+        return account;
     }
 
-    private AccountSummary openAccount(SignUpCommand command, String rawPassword) {
-        if (users.userExists(command.username()) || queries.isUsernameTaken(command.username())) {
-            throw new UsernameTakenException(command.username());
+    /**
+     * Reserva un hueco del límite de altas, comprueba el usuario y la contraseña (si la hay) y pide el alta. Si falla,
+     * devuelve el hueco y, si revela que el usuario o el documento existen, cuenta para el sondeo.
+     */
+    private AccountSummary reserveAndOpen(SignUpCommand command, String clientIp, Runnable passwordCheck) {
+        signUpLimit.tryReserve(clientIp).ifPresent(retryAfter -> {
+            throw new TooManySignUpsException(retryAfter);
+        });
+        try {
+            if (users.userExists(command.username()) || queries.isUsernameTaken(command.username())) {
+                throw new UsernameTakenException(command.username());
+            }
+            passwordCheck.run();
+            return commands.signUp(command);
+        } catch (RuntimeException e) {
+            // No se creó ningún cliente: la reserva se devuelve. Si el cliente ya existe y falla después la creación
+            // del usuario, el alta sigue contando, porque ocupa memoria
+            signUpLimit.release(clientIp);
+            if (e instanceof UsernameTakenException || e instanceof DuplicateCustomerException) {
+                // Revela que el usuario o el documento existen: cuenta para el límite de sondeo (#139)
+                signUpLimit.recordFailure(clientIp);
+            }
+            throw e;
         }
+    }
+
+    private static void checkPassword(String rawPassword) {
         if (rawPassword == null || rawPassword.length() < MINIMUM_PASSWORD_LENGTH) {
             throw new IllegalArgumentException(
                     "La contraseña debe tener al menos %d caracteres".formatted(MINIMUM_PASSWORD_LENGTH));
         }
-        return commands.signUp(command);
+    }
+
+    /** 32 bytes aleatorios que nadie conserva: el usuario creado con ellos no puede entrar con contraseña. */
+    private String unusablePassword() {
+        byte[] secret = new byte[UNUSABLE_PASSWORD_BYTES];
+        random.nextBytes(secret);
+        return Base64.getEncoder().encodeToString(secret);
     }
 
     private void createUser(SignUpCommand command, String rawPassword) {
