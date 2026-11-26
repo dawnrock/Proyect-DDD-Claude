@@ -145,7 +145,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
   - [x] Lint without errors, no breaking change, contract version check and Schemathesis green.
   - [x] Browser check (Chromium, fake tenant, Swagger UI files served from the same npm package as jsDelivr): Swagger UI reads the relative `openIdConnectUrl`, offers «authorization_code with PKCE» with the public client id, and its Auth0 redirect carries `code_challenge_method=S256`, the audience and our `oauth2-redirect.html`.
 
-### [ ] T9 — End-to-end: an Auth0 token against the real context (~10 min)
+### [x] T9 — End-to-end: an Auth0 token against the real context (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/dawnrock/ddd/Auth0ApiTokensTests.java` (full context, fake tenant, `@TestBean` replacing `auth0JwtDecoder` with one from a local RSA key)
@@ -153,7 +153,7 @@ Any other `iss` is rejected by the resolver with 401 `invalid_token`, as is an e
 - **What to do:**
   1. Link `ada`'s `sub` in `external_identity`, sign an access token for the API audience with the test key, `GET /api/accounts` lists only her accounts and `GET` of another customer's account is 404; an admin's token opens an account; an unlinked `sub` is 401 with its detail; an own token still works.
 - **Acceptance criteria:**
-  - [ ] Passes without network; validated by sabotage (dropping the audience check makes the wrong-audience case pass).
+  - [x] Passes without network; validated by sabotage (dropping the audience check makes the wrong-audience case pass).
 
 ### [ ] T10 — Docs and project status (~10 min)
 
