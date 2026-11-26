@@ -145,6 +145,8 @@ Since #196 (ADR 0024) the web can sign customers in with [Auth0](https://auth0.c
 
 A failed Auth0 sign-in (wrong callback URL, a disabled user…) lands on the login form with «No se pudo iniciar sesión con Auth0». A link is permanent (no screen to undo it yet): it lives in the `external_identity` table.
 
+**Sign-up through Auth0 (#198), manual check:** with an Auth0 account that was never used in monA Bank, «Entrar con Auth0» → the link page → «Date de alta» → the three steps (no password on step 2) → the browser goes through Auth0 without asking again and lands on the new account. That user cannot sign in with a password: it only enters with Auth0.
+
 ### The API with Auth0 tokens (#197, optional)
 
 With the section above done, the API can also accept **access tokens issued by Auth0**, and Swagger UI (`/api-docs`) gets «Authorize» with Auth0. Without these two variables the API keeps accepting only its own tokens.

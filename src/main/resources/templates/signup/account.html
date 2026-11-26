@@ -17,7 +17,8 @@
         <div class="d-flex justify-content-between gap-3 py-2"><dt class="small fw-normal text-body-secondary">Usuario</dt><dd class="mb-0 text-end text-break" th:text="${signUpForm.username}">usuario</dd></div>
     </dl>
 
-    <form class="card card-body" th:action="@{/signup/account}" th:object="${signUpForm}" method="post" novalidate>
+    <!--/* En modo Auth0 el envío termina en el dominio de Auth0, que htmx no puede navegar: sin hx-boost. */-->
+    <form class="card card-body" th:action="@{/signup/account}" th:object="${signUpForm}" method="post" th:attr="hx-boost=${signUpForm.externalIdentity} ? 'false'" novalidate>
         <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:each="err : ${#fields.globalErrors()}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${err}">Error</span></div>
 
         <div class="mb-3">

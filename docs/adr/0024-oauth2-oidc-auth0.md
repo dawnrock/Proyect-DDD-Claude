@@ -1,7 +1,7 @@
 # 0024 · Web login with Auth0 (OAuth2/OIDC) and identity linking
 
 - **Status:** accepted · 2026-11-26
-- **Issues:** #196 and #197 (the first two of four: #196 web login, #197 the API accepts Auth0 tokens, #198 sign-up through Auth0, #199 realistic mode in production) · **Amends:** [ADR 0008](0008-spring-security.md) (the web authenticates with Auth0 as well as with the form) and [ADR 0015](0015-jwt-bearer-api.md) (OAuth2/OIDC was named there as the end state) · **Related:** [ADR 0019](0019-real-persistence.md) (users in the database), [ADR 0017](0017-login-attempt-limit.md) (login attempts), [ADR 0007](0007-equipo-back-web-contrato-primero.md) (contract first)
+- **Issues:** #196, #197 and #198 (the first three of four: #196 web login, #197 the API accepts Auth0 tokens, #198 sign-up through Auth0, #199 realistic mode in production) · **Amends:** [ADR 0008](0008-spring-security.md) (the web authenticates with Auth0 as well as with the form) and [ADR 0015](0015-jwt-bearer-api.md) (OAuth2/OIDC was named there as the end state) · **Related:** [ADR 0019](0019-real-persistence.md) (users in the database), [ADR 0017](0017-login-attempt-limit.md) (login attempts), [ADR 0007](0007-equipo-back-web-contrato-primero.md) (contract first)
 
 ## Context
 
@@ -30,6 +30,13 @@ ADR 0008 and ADR 0015 left OAuth2/OIDC as the end state of the authentication: t
 - **Own tokens follow `app.auth.local`.** `TokenController` and `AccessTokenIssuer` only exist, and the own issuer is only trusted, while it is on (default). #199 turns it off in production.
 - **Swagger UI is a public client.** It runs in the browser and cannot keep a secret, so it is a separate Auth0 *Single Page Application* (`APP_AUTH_AUTH0_API_DOCS_CLIENT_ID`, not secret) that signs in with Authorization Code and PKCE for the API audience. The page asks `/api-docs/oauth-config` for that client and the audience; Auth0 redirects back to `oauth2-redirect.html`, copied unchanged from `swagger-ui-dist@5.34.1` into our origin.
 - **Tenant-agnostic contract.** The `auth0` security scheme is `openIdConnect` with `openIdConnectUrl: /api-docs/openid-configuration`, a minimal discovery document this application builds from the domain (only `code` with S256). The contract file names no tenant and stays the same in every environment. Contract 2.3.0 (a compatible addition, ADR 0014).
+
+### Sign-up through Auth0 (#198)
+
+- **New customers need no local password.** An unknown Auth0 identity reaches `/login/link`, which offers both ways in: link an existing user with the local password (#196), or **sign up**. The sign-up is the same three-step wizard with the same rules (ADR 0012), in an *Auth0 mode* that asks for the username but no password and prefills the e-mail from Auth0 (editable and only informative).
+- **The user still exists locally,** because it is the key of account ownership and of the roles: role `USER` and an **unusable password** (BCrypt of 32 random bytes that are never kept), so neither the form login nor `POST /api/auth/token` accept any password for it. `CustomerRegistration.registerWithExternalIdentity` reuses the classic sign-up (limit, probing counter, username checks, the use case) and then links the identity; `application` does not change.
+- **The pending identity is honoured while the customer is active:** each completed step renews it (a sliding 10-minute window), every step checks it, and the browser cannot switch the wizard's mode. After the sign-up the web goes back to Auth0, as after linking: no programmatic sign-in, so no welcome message survives the round trip.
+- The classic sign-up with a password stays while `app.auth.local` is on; #199 turns it off in production.
 
 ## Alternatives
 

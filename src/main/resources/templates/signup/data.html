@@ -5,14 +5,14 @@
 <div th:replace="~{fragments/brand :: backdrop}"></div>
 <header th:replace="~{fragments/layout :: header}"></header>
 <main class="app-container mx-auto w-100 px-3 pb-5">
-    <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1 mb-3" th:href="@{/login}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg>Volver</a>
+    <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1 mb-3" th:href="${signUpForm.externalIdentity} ? @{/login/link} : @{/login}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg>Volver</a>
     <h1 class="h3 fw-semibold mb-3">Hazte cliente de monA Bank</h1>
     <nav th:replace="~{signup/progress :: progress(1)}"></nav>
 
     <form class="card card-body" th:action="@{/signup}" th:object="${signUpForm}" method="post" novalidate>
         <div class="alert alert-danger" role="alert" th:if="${signUpError}">
             <p class="d-flex align-items-center gap-2 mb-0"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg><span th:text="${signUpError}">Error</span></p>
-            <p class="mt-2 mb-0" th:if="${duplicateCustomer}"><a class="alert-link" th:href="@{/login(form)}">Entrar con mi usuario</a></p>
+            <p class="mt-2 mb-0" th:if="${duplicateCustomer}"><a class="alert-link" th:href="${signUpForm.externalIdentity} ? @{/login/link} : @{/login(form)}">Entrar con mi usuario</a></p>
         </div>
 
         <div class="mb-3">
@@ -29,13 +29,14 @@
 
         <div class="mb-3">
             <label class="form-label" for="email">Correo electrónico</label>
-            <input class="form-control" type="email" id="email" required enterkeyhint="next" autocomplete="email" th:field="*{email}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('email')} ? 'true'" th:aria-describedby="${#fields.hasErrors('email')} ? 'email-error'">
+            <input class="form-control" type="email" id="email" required enterkeyhint="next" autocomplete="email" th:field="*{email}" th:errorclass="is-invalid" th:aria-invalid="${#fields.hasErrors('email')} ? 'true'" th:aria-describedby="${signUpForm.externalIdentity} ? (${#fields.hasErrors('email')} ? 'email-help email-error' : 'email-help') : (${#fields.hasErrors('email')} ? 'email-error')">
+            <p class="form-text mb-0" id="email-help" th:if="${signUpForm.externalIdentity}">Es el correo de tu cuenta de Auth0. Puedes cambiarlo: solo sirve para contactar contigo y no es tu acceso.</p>
             <p class="invalid-feedback" id="email-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
         </div>
 
         <div class="d-flex align-items-center gap-3">
             <button class="btn-slant btn-slant-rise" type="submit">Continuar</button>
-            <a class="link-secondary text-decoration-none" th:href="@{/login}">Cancelar</a>
+            <a class="link-secondary text-decoration-none" th:href="${signUpForm.externalIdentity} ? @{/login/link} : @{/login}">Cancelar</a>
         </div>
     </form>
 </main>

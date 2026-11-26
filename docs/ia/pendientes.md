@@ -39,6 +39,10 @@
   - **No unlinking and no linking from a signed-in session;** the foreign key to `users` stops deleting a linked user (no user deletion exists yet).
   - **Pending identity:** honoured for 10 minutes but only dropped when read, so an idle session may keep `sub` and e-mail until it ends; the failure handler does not rotate the anonymous session id (the final sign-in does). Linking has no limit per session or per `sub`, only the login's per user + IP and per IP (#196 review).
   - **For #198-#199:** the link page and the Auth0 button use the fixed path `/oauth2/authorization/auth0`; with `app.auth.local=false` (#199) `POST /login/link` still checks local passwords on purpose (ADR 0024).
+- **Sign-up through Auth0 (#198, ADR 0024):**
+  - **Half-finished sign-up:** the user and the link are created after the use case's transaction (as in the classic sign-up, #150). If `link` fails (another tab linked the same `sub` meanwhile, or a database error), the customer and a user with an unusable password stay without a link: retrying gives `UsernameTaken`/`DuplicateCustomer`, and `/login/link` asks for a password nobody knows, so that customer cannot get in. A "finish a half sign-up" path (user without password and without identity) or a single operation for user + link would close it.
+  - **For #199:** with `app.auth.local=false`, `GET /signup` without `?auth0` (the classic wizard) and `POST /api/customers` still sign up with a password; `/login/link` keeps checking local passwords on purpose (ADR 0024).
+  - **Not tried against a real tenant yet;** manual check in `docs/deploy/render.md`.
 - **The API with Auth0 tokens (#197, ADR 0024):**
   - **Not tried against a real tenant:** the API and the Single Page Application must be created in Auth0 first (`docs/deploy/render.md`); the CI signs tokens with a local RSA key, and the Swagger UI flow was checked in Chromium against an imaginary tenant only.
   - **Relative `openIdConnectUrl`:** Swagger UI 5.34.1 resolves `/api-docs/openid-configuration` against the page (checked), but other OpenAPI tools may expect an absolute URL; Redocly and Schemathesis accept it.
