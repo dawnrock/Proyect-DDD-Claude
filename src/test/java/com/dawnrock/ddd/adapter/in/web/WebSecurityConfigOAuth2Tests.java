@@ -1,7 +1,11 @@
 package com.dawnrock.ddd.adapter.in.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -18,7 +22,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -40,6 +46,9 @@ class WebSecurityConfigOAuth2Tests {
 
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    private ClientRegistrationRepository registrations;
 
     @MockitoBean
     private LinkedOidcUserService linkedOidcUserService;
@@ -101,5 +110,30 @@ class WebSecurityConfigOAuth2Tests {
 
         assertThat(response.getRedirectedUrl()).isEqualTo("/login?oauth-error");
         assertThat(request.getSession(false)).isNull();
+    }
+
+    @Test
+    @DisplayName("Cerrar sesión con una sesión de Auth0 lleva al /oidc/logout del dominio con id_token_hint y el retorno a /login?logout")
+    void logoutOfAnAuth0SessionGoesToAuth0WithTheIdTokenHint() throws Exception {
+        OidcIdToken idToken = OidcIdToken.withTokenValue("token-de-prueba").subject("auth0|123")
+                .issuer("https://tenant.example.auth0.com/").build();
+
+        String location = mvc.perform(post("/logout").with(csrf())
+                        .with(oidcLogin().clientRegistration(registrations.findByRegistrationId("auth0")).idToken(
+                                token -> token.tokenValue(idToken.getTokenValue()))))
+                .andExpect(status().is3xxRedirection())
+                .andReturn().getResponse().getRedirectedUrl();
+
+        assertThat(location).startsWith("https://tenant.example.auth0.com/oidc/logout?")
+                .contains("id_token_hint=token-de-prueba")
+                .contains("post_logout_redirect_uri=http://localhost/login?logout");
+    }
+
+    @Test
+    @DisplayName("Cerrar sesión con una sesión de formulario lleva a /login?logout, sin pasar por Auth0")
+    void logoutOfAFormSessionGoesToTheLoginNotice() throws Exception {
+        mvc.perform(post("/logout").with(csrf()).with(user("ada")))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?logout"));
     }
 }

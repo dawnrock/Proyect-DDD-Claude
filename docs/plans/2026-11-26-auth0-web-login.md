@@ -176,7 +176,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
   - [x] `GET /oauth2/authorization/auth0` → 302 to `https://<fake-domain>/authorize` with `code_challenge_method=S256`, `state` and `nonce`; without a registration the route does not exist and the existing web tests still pass.
   - [x] The failure handler with an `UnlinkedIdentityException` leaves the `PendingIdentity` in the session and redirects to `/login/link`.
 
-### [ ] T10 — Logout in Auth0 and the `app.auth.local` switch (~10 min)
+### [x] T10 — Logout in Auth0 and the `app.auth.local` switch (~10 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -186,8 +186,8 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
   1. Logout success handler: `OAuth2AuthenticationToken` → `OidcClientInitiatedLogoutSuccessHandler` with `post_logout_redirect_uri={baseUrl}/login?logout`; otherwise `/login?logout`. Logout form with `hx-boost="false"`.
   2. `AuthProperties(boolean local)` (`app.auth.local`, default `true`): `formLogin()` only when `true`. No profile sets it to `false` in this issue (#199 does).
 - **Acceptance criteria:**
-  - [ ] Logout with `oidcLogin()` → 302 to `https://<fake-domain>/oidc/logout` with `id_token_hint` and `post_logout_redirect_uri`; logout of a form session → `/login?logout`.
-  - [ ] With `app.auth.local=false`, `POST /login` with valid credentials does not authenticate; with the default it does.
+  - [x] Logout with `oidcLogin()` → 302 to `https://<fake-domain>/oidc/logout` with `id_token_hint` and `post_logout_redirect_uri`; logout of a form session → `/login?logout`.
+  - [x] With `app.auth.local=false`, `POST /login` with valid credentials does not authenticate; with the default it does.
 
 ### [ ] T11 — End-to-end: link and sign in (~10 min)
 
