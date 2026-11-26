@@ -195,6 +195,23 @@ class CustomerRegistrationExternalIdentityTests {
     }
 
     @Test
+    @DisplayName("Una identidad ya vinculada se rechaza sin abrir nada ni tocar el límite de altas")
+    void anAlreadyLinkedIdentityIsRejectedWithoutOpeningAnything() {
+        registration = registrationWith(new SignUpLimitProperties(1, 1, Duration.ofHours(1), 1));
+        users.createUser(User.withUsername("ada")
+                .password("{noop}x").roles("USER").build());
+        identities.link(ExternalIdentities.AUTH0, "auth0|margaret", "ada");
+
+        assertThatExceptionOfType(IdentityAlreadyLinkedException.class).isThrownBy(
+                () -> registration.registerWithExternalIdentity(signUp().build(), freshPending(), IP));
+
+        assertThat(accounts.findAll()).isEmpty();
+        assertThat(users.userExists("margaret")).isFalse();
+        registration.registerWithExternalIdentity(signUp().build(), pending("auth0|otra", NOW_CLOCK.instant()), IP);
+        assertThat(accounts.findAll()).hasSize(1);
+    }
+
+    @Test
     @DisplayName("Si otra pestaña vincula la identidad justo antes del enlace, la excepción llega y no se deshace nada")
     void aLinkRaceReachesTheCallerAndUndoesNothing() {
         ExternalIdentities racing = new ExternalIdentities() {
