@@ -24,7 +24,7 @@
 | [0021](0021-domain-event-outbox.md) | Domain event outbox with a scheduled relay | Accepted |
 | [0022](0022-brand-identity.md) | monA Bank brand identity: logo, intro and typeface | Accepted |
 | [0023](0023-brand-ui.md) | The brand's UI language: the A's slant, logo glyphs and Sora (complements 0016 and 0022) | Accepted |
-| [0024](0024-oauth2-oidc-auth0.md) | Web login with Auth0 (OAuth2/OIDC) and identity linking (amends 0008 and 0015) | Accepted |
+| [0024](0024-oauth2-oidc-auth0.md) | Login with Auth0 (OAuth2/OIDC) and identity linking: the web (#196) and the API (#197) (amends 0008 and 0015) | Accepted |
 
 ADR 0011 (the `integration` layer) only exists on `Monolithic`: it applies to phase 1.
 

@@ -54,7 +54,7 @@ class LinkedOidcUserServiceTests {
         idToken = OidcIdToken.withTokenValue("id-token").subject(SUB).issuer("https://tenant.example.auth0.com/")
                 .claim("email", "ada@example.com").issuedAt(NOW).expiresAt(NOW.plus(Duration.ofHours(1))).build();
         request = new OidcUserRequest(
-                Auth0ClientRegistration.registration(new Auth0Properties("tenant.example.auth0.com", "id", "secret")),
+                Auth0ClientRegistration.registration(new Auth0Properties("tenant.example.auth0.com", "id", "secret", null, null)),
                 new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "access", NOW, NOW.plusSeconds(60)),
                 idToken);
         when(delegate.loadUser(request)).thenReturn(new DefaultOidcUser(

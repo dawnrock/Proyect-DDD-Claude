@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Proyect-DDD-Claude · Checking accounts API
-  version: 2.2.4
+  version: 2.3.0
   description: |
     Versioned with SemVer (ADR 0014); the changes are in `docs/api/CHANGELOG.md`.
 
@@ -18,18 +18,25 @@ info:
     call as `Authorization: Bearer <token>`. It lasts 15 minutes; when it expires, ask for a new one.
     HTTP Basic is not accepted.
 
+    Since 2.3.0 (ADR 0024) the API also accepts an **access token issued by Auth0** for this API's
+    audience (`auth0` scheme; «Authorize» in Swagger UI signs in with Auth0 and PKCE). The Auth0
+    identity must have been linked once to a monA Bank user on the web («Entrar con Auth0»); the token
+    then acts as that user, with the roles monA Bank gives them. `POST /api/auth/token` exists only
+    while the application keeps its own users and passwords (local authentication).
+
     The API answers in Spanish: the `title` and `detail` values below and in the examples are the
     real ones and are not translated.
 
     | Code | When | `title` |
     | ---- | ---- | ------- |
     | 400 | Invalid request (format, validation or an argument the domain rejects) | Petición no válida |
-    | 401 | No Bearer token, an invalid or expired one, or wrong credentials when asking for a token | No autenticado |
+    | 401 | No Bearer token, an invalid or expired one (wrong issuer or audience included), an Auth0 identity not linked to any user, or wrong credentials when asking for a token | No autenticado |
     | 403 | Authenticated, but without the required role (only an administrator opens accounts or replaces an IBAN) | Acceso denegado |
     | 404 | The requested resource does not exist, or it is another customer's account (its existence is not revealed) | Recurso inexistente |
     | 415 | The request body is not JSON (operations with a body) | Tipo de contenido no admitido |
     | 422 | A domain business rule is violated | Regla de negocio incumplida |
     | 429 | Too many requests from one IP, with a `Retry-After` header in seconds: failed login attempts when asking for a token (ADR 0017) or customer sign-ups (ADR 0018) | Demasiados intentos / Demasiadas altas |
+    | 503 | An Auth0 access token was sent but Auth0's public keys cannot be read right now, so the token cannot be checked: try again later (the token is not rejected) | Servicio no disponible |
   contact:
     name: Proyect-DDD-Claude
     url: https://github.com/dawnrock/Proyect-DDD-Claude/issues
@@ -43,10 +50,11 @@ servers:
     description: Local development
   - url: https://proyect-ddd-claude.onrender.com
     description: Render deployment of the `Hexagonal` branch (free plan, the first request may take about a minute while it wakes up)
-# Every operation needs a Bearer token (#122) except asking for one and signing up. An admin sees every account;
-# a user only their own.
+# Every operation needs a Bearer token (#122) except asking for one and signing up: one of the API's own tokens or
+# an Auth0 access token (#197). An admin sees every account; a user only their own.
 security:
   - bearerAuth: []
+  - auth0: [openid]
 tags:
   - name: accounts
     description: Checking accounts (#5).
@@ -68,7 +76,9 @@ paths:
         <token>`. Its claims are `iss`, `sub` (the username), `roles` (`ADMIN` or `USER`), `iat` and `exp`. The
         answer is 200, not 201: a token is not a resource with its own URL. Wrong credentials give 401 without saying
         whether the user or the password failed. After 3 failures for a user from one IP, or 10 from one IP with any
-        user, the requests from there get 429 for 30 minutes, even with the right password (ADR 0017).
+        user, the requests from there get 429 for 30 minutes, even with the right password (ADR 0017). Available only
+        while local authentication is on (development, tests and the demo); without it the path does not exist and
+        Auth0 access tokens are the way in (ADR 0024).
       security: []
       requestBody:
         required: true
@@ -793,6 +803,15 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: A token from `POST /api/auth/token` (demo profile users are in the README). It lasts 15 minutes.
+    auth0:
+      type: openIdConnect
+      openIdConnectUrl: /api-docs/openid-configuration
+      description: |
+        An access token issued by Auth0 for this API's audience (RS256), sent as `Authorization: Bearer <token>`
+        (ADR 0024). Authorization Code with PKCE; in Swagger UI, «Authorize» signs in with Auth0. The discovery
+        document is served by this application and built from the configured tenant (404 when Auth0 is not
+        configured). The token's `sub` must be linked to a monA Bank user (sign in once on the web with «Entrar con
+        Auth0»); otherwise the answer is 401. Roles come from monA Bank, not from the token.
   responses:
     TooManyRequests:
       description: |
@@ -836,7 +855,10 @@ components:
             status: 429
             detail: 'Demasiadas altas de clientes en este momento: inténtalo de nuevo más tarde'
     Unauthorized:
-      description: Not authenticated, with a `WWW-Authenticate` header that asks for a Bearer token.
+      description: |
+        Not authenticated, with a `WWW-Authenticate` header that asks for a Bearer token: no token, an invalid or
+        expired one (an Auth0 token for another audience or from another issuer included), or an Auth0 identity that
+        is not linked to any monA Bank user.
       headers:
         WWW-Authenticate:
           description: '`Bearer`, or `Bearer error="invalid_token", ...` when the token sent is invalid or expired.'
@@ -861,6 +883,13 @@ components:
                 title: No autenticado
                 status: 401
                 detail: El token no es válido o ha caducado
+            unlinkedAuth0Identity:
+              summary: Auth0 identity not linked to any user
+              value:
+                type: about:blank
+                title: No autenticado
+                status: 401
+                detail: 'La identidad de Auth0 no está vinculada a ningún usuario: entra una vez en la web con Auth0 para vincularla'
     Forbidden:
       description: Access denied.
       content:

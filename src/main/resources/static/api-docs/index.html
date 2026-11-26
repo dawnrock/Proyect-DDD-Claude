@@ -14,12 +14,29 @@
           integrity="sha384-XFYN47VzPiDY6qPtxYKg0nqUeW/upo20xf1j2SUE7gT/i35FJB4cuS/71Iegzk8Z" crossorigin="anonymous"></script>
   <script>
     // El contrato escrito a mano, el mismo fichero que docs/api/openapi.yaml (lo copia el build).
-    window.ui = SwaggerUIBundle({
-      url: '/openapi.yaml',
-      dom_id: '#swagger-ui',
-      deepLinking: true,
-      persistAuthorization: false
-    });
+    // «Authorize» con Auth0 (#197, ADR 0024): Swagger UI es un cliente público (SPA) que pide el token con PKCE para la
+    // audiencia de la API. Su configuración viene del servidor; sin Auth0, enabled es false y la página es la de siempre.
+    // La vuelta de Auth0 llega a oauth2-redirect.html, copiada sin cambios de swagger-ui-dist@5.34.1 (con su .js).
+    fetch('/api-docs/oauth-config')
+      .then(response => response.ok ? response.json() : {enabled: false})
+      .catch(() => ({enabled: false}))
+      .then(config => {
+        window.ui = SwaggerUIBundle({
+          url: '/openapi.yaml',
+          dom_id: '#swagger-ui',
+          deepLinking: true,
+          persistAuthorization: false,
+          oauth2RedirectUrl: window.location.origin + '/api-docs/oauth2-redirect.html'
+        });
+        if (config.enabled) {
+          window.ui.initOAuth({
+            clientId: config.clientId,
+            scopes: 'openid',
+            usePkceWithAuthorizationCodeGrant: true,
+            additionalQueryStringParams: {audience: config.audience}
+          });
+        }
+      });
   </script>
 </body>
 </html>
