@@ -107,7 +107,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **Acceptance criteria:**
   - [x] Both implementations pass `ExternalIdentitiesContract`.
 
-### [ ] T4 — Auth0 client registration from three properties (~10 min)
+### [x] T4 — Auth0 client registration from three properties (~10 min)
 
 - **Side:** back
 - **Layer:** adapter.in (support)
@@ -117,7 +117,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
   1. `Auth0Properties(domain, clientId, clientSecret)`, blank by default; `isConfigured()`; partial configuration → `IllegalStateException` naming the missing variables.
   2. A `ClientRegistrationRepository` bean only when configured (custom condition on non-blank values): registration id `auth0`, `client_secret_basic`, `authorization_code`, redirect `{baseUrl}/login/oauth2/code/{registrationId}`, scopes `openid profile email`, the Auth0 endpoints and issuer from the domain, `end_session_endpoint` in the provider metadata, user name attribute `sub`.
 - **Acceptance criteria:**
-  - [ ] Without properties there is no `ClientRegistrationRepository`; with the three, the registration has the expected endpoints, scopes and `end_session_endpoint`; with only some, startup fails with the message.
+  - [x] Without properties there is no `ClientRegistrationRepository`; with the three, the registration has the expected endpoints, scopes and `end_session_endpoint`; with only some, startup fails with the message.
 
 ### [ ] T5 — `LinkedOidcUserService`: `sub` → local user (~10 min)
 
