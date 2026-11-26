@@ -32,7 +32,7 @@ import com.dawnrock.ddd.application.OpenAccountCommandDef;
  * cuenta.
  */
 @Configuration
-@EnableConfigurationProperties({SecurityUsersProperties.class, LoginAttemptsProperties.class,
+@EnableConfigurationProperties({SecurityUsersProperties.class, AuthProperties.class, LoginAttemptsProperties.class,
         TrustedProxiesProperties.class, SignUpLimitProperties.class})
 public class SecuritySupport {
 

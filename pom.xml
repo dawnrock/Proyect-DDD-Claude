@@ -91,6 +91,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
         </dependency>
+        <!-- Inicio de sesión con Auth0, OAuth2/OIDC (#196): justificado en docs/adr/0024-oauth2-oidc-auth0.md -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security-oauth2-client</artifactId>
+        </dependency>
         <!-- Frontend web (ADR 0016): WebJars con rutas sin versión gracias a webjars-locator-lite -->
         <dependency>
             <groupId>org.webjars</groupId>
