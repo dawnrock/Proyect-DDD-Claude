@@ -34,8 +34,16 @@ public class SignUpForm {
     public interface PersonalData {
     }
 
-    /** Paso 2: usuario y contraseña. */
+    /** Paso 2 en modo clásico: el usuario (la contraseña va aparte, en {@link LocalPassword}). */
     public interface Access {
+    }
+
+    /** Paso 2 en modo Auth0 (#198): solo el usuario; el cliente entrará con su cuenta de Auth0, sin contraseña local. */
+    public interface ExternalAccess {
+    }
+
+    /** Contraseña local del paso 2: el controlador la valida a mano, solo en modo clásico. */
+    public interface LocalPassword {
     }
 
     /** Paso 3: depósito inicial y aceptación de las condiciones. */
@@ -56,14 +64,14 @@ public class SignUpForm {
     private String email;
 
     /** Usuario con el que entrará; mismo formato que el command. */
-    @NotBlank(groups = Access.class, message = "El usuario es obligatorio")
-    @Pattern(groups = Access.class, regexp = OpenAccountCommandDef.USERNAME_PATTERN,
+    @NotBlank(groups = {Access.class, ExternalAccess.class}, message = "El usuario es obligatorio")
+    @Pattern(groups = {Access.class, ExternalAccess.class}, regexp = OpenAccountCommandDef.USERNAME_PATTERN,
             message = OpenAccountCommandDef.USERNAME_MESSAGE)
     private String username;
 
     /** Solo vive en la sesión del servidor entre los pasos 2 y 3; ninguna plantilla la pinta. */
-    @NotBlank(groups = Access.class, message = "La contraseña es obligatoria")
-    @Size(groups = Access.class, min = CustomerRegistration.MINIMUM_PASSWORD_LENGTH,
+    @NotBlank(groups = LocalPassword.class, message = "La contraseña es obligatoria")
+    @Size(groups = LocalPassword.class, min = CustomerRegistration.MINIMUM_PASSWORD_LENGTH,
             message = "La contraseña debe tener al menos " + CustomerRegistration.MINIMUM_PASSWORD_LENGTH + " caracteres")
     private String password;
 
@@ -80,11 +88,24 @@ public class SignUpForm {
     @AssertTrue(groups = AccountData.class, message = "Debes aceptar las condiciones")
     private boolean conditionsAccepted;
 
+    /** Alta con una identidad de Auth0, sin contraseña local (#198). Sin setter: solo {@link #startExternalIdentity}. */
+    @Setter(lombok.AccessLevel.NONE)
+    private boolean externalIdentity;
+
     @Setter(lombok.AccessLevel.NONE)
     private boolean personalDataDone;
 
     @Setter(lombok.AccessLevel.NONE)
     private boolean accessDone;
+
+    /**
+     * Pone el formulario en modo Auth0 con el correo que da Auth0 (editable y solo informativo; vacío si no hay). El
+     * navegador no puede activar el modo: el campo no tiene setter.
+     */
+    public void startExternalIdentity(String email) {
+        externalIdentity = true;
+        this.email = email == null ? "" : email;
+    }
 
     public void completePersonalData() {
         personalDataDone = true;

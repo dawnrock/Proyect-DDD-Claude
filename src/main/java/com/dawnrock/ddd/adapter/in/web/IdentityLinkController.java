@@ -43,7 +43,7 @@ public class IdentityLinkController {
 
     private final ClientIpResolver clientIpResolver;
 
-    private final ObjectProvider<Clock> clock;
+    private final PendingIdentitySession pendingIdentities;
 
     /** Minutos del bloqueo por demasiados intentos, los mismos que dice el login: al menos 1. */
     private final long lockoutMinutes;
@@ -54,7 +54,7 @@ public class IdentityLinkController {
         long minutes = Durations.minutesRoundedUp(lockout);
         this.linking = linking;
         this.clientIpResolver = clientIpResolver;
-        this.clock = clock;
+        this.pendingIdentities = new PendingIdentitySession(clock);
         this.lockoutMinutes = minutes;
     }
 
@@ -65,7 +65,7 @@ public class IdentityLinkController {
 
     @GetMapping("/login/link")
     public String form(HttpSession session, Model model) {
-        PendingIdentity pending = pending(session);
+        PendingIdentity pending = pendingIdentities.current(session);
         if (pending == null) {
             return LINK_EXPIRED;
         }
@@ -76,7 +76,7 @@ public class IdentityLinkController {
     @PostMapping("/login/link")
     public String link(@Validated @ModelAttribute("identityLinkForm") IdentityLinkForm form, BindingResult result,
                        HttpSession session, HttpServletRequest request, Model model) {
-        PendingIdentity pending = pending(session);
+        PendingIdentity pending = pendingIdentities.current(session);
         if (pending == null) {
             return LINK_EXPIRED;
         }
@@ -100,24 +100,11 @@ public class IdentityLinkController {
             return VIEW;
         } catch (PendingIdentityExpiredException e) {
             // La identidad pendiente caducó mientras el cliente escribía
-            session.removeAttribute(PendingIdentity.SESSION_ATTRIBUTE);
+            pendingIdentities.remove(session);
             return LINK_EXPIRED;
         }
-        session.removeAttribute(PendingIdentity.SESSION_ATTRIBUTE);
+        pendingIdentities.remove(session);
         // Auth0 conserva su sesión: el viaje de ida y vuelta es silencioso y ahora encuentra la vinculación
         return "redirect:/oauth2/authorization/auth0";
-    }
-
-    /** La identidad pendiente de la sesión, o {@code null} si no hay o ha caducado (en ese caso la quita). */
-    private PendingIdentity pending(HttpSession session) {
-        Object attribute = session.getAttribute(PendingIdentity.SESSION_ATTRIBUTE);
-        if (!(attribute instanceof PendingIdentity pending)) {
-            return null;
-        }
-        if (pending.isExpired(clock.getIfAvailable(Clock::systemUTC))) {
-            session.removeAttribute(PendingIdentity.SESSION_ATTRIBUTE);
-            return null;
-        }
-        return pending;
     }
 }

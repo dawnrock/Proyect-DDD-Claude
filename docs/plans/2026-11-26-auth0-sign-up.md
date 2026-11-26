@@ -94,7 +94,7 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
 - **Acceptance criteria:**
   - [x] With a pending identity the page shows both options and the sign-up link points to `/signup?auth0`.
 
-### [ ] T4 — Wizard in Auth0 mode, steps 1 and 2 (~10 min)
+### [x] T4 — Wizard in Auth0 mode, steps 1 and 2 (~10 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -104,8 +104,8 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
   1. `GET /signup?auth0` with a valid pending identity starts a fresh form in Auth0 mode with the e-mail prefilled; without one (or expired) → `/login?link-expired`. Every step in Auth0 mode checks the pending identity again.
   2. Step 2 in Auth0 mode asks only for the username («Entrarás con tu cuenta de Auth0: no necesitas contraseña de monA Bank»), validated with `ExternalAccess`; no password fields are rendered.
 - **Acceptance criteria:**
-  - [ ] `GET /signup?auth0` without a pending identity → `/login?link-expired`; with one → step 1 with the Auth0 e-mail.
-  - [ ] Step 2 in Auth0 mode has no password input and accepts a valid username alone; a bad username shows its error as today.
+  - [x] `GET /signup?auth0` without a pending identity → `/login?link-expired`; with one → step 1 with the Auth0 e-mail.
+  - [x] Step 2 in Auth0 mode has no password input and accepts a valid username alone; a bad username shows its error as today.
 
 ### [ ] T5 — Wizard in Auth0 mode, step 3 (~10 min)
 
