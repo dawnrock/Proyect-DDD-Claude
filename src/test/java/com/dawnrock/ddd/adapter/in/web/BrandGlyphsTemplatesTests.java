@@ -18,6 +18,11 @@ import org.springframework.core.io.ClassPathResource;
  */
 class BrandGlyphsTemplatesTests {
 
+    /** Contorno de la A y pata verde, con las coordenadas de static/brand/favicon.svg. */
+    private static final String A_OUTLINE = "M358.8 0L323.2 0L354 -140L419.2 -140L450 0L414.4 0L408.6 -30L364.6 -30L358.8 0"
+            + "M380.4 -113.4L368.8 -54.2L404.4 -54.2L392.8 -113.4L380.4 -113.4";
+    private static final String GREEN_LEG = "319.57,2 350.98,-140 384.42,-140 358.7,2";
+
     private static final Pattern FRAGMENT = Pattern.compile(
             "<(svg|div) th:fragment=\"(\\w+)\"[^>]*>.*?</\\1>", Pattern.DOTALL);
 
@@ -30,6 +35,18 @@ class BrandGlyphsTemplatesTests {
         assertThat(fragment).contains("aria-hidden=\"true\"");
         assertThat(fragment).doesNotContainPattern("(fill|stroke)=\"#");
         assertThat(fragment).doesNotContain("style=");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"watermark", "backdrop"})
+    @DisplayName("En la A de fondo y en la marca de agua, la pata verde va recortada por el contorno de la A, como en el logo")
+    void theGreenLegIsClippedByTheOutlineOfTheA(String name) throws IOException {
+        String fragment = fragment(name);
+        Matcher clip = Pattern.compile("<clipPath id=\"([\\w-]+)\"><path d=\"" + Pattern.quote(A_OUTLINE) + "\">")
+                .matcher(fragment);
+
+        assertThat(clip.find()).as("clipPath con el contorno de la A").isTrue();
+        assertThat(fragment).contains("<polygon points=\"" + GREEN_LEG + "\" clip-path=\"url(#" + clip.group(1) + ")\">");
     }
 
     private static String fragment(String name) throws IOException {
