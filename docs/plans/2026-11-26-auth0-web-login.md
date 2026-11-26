@@ -141,7 +141,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **Acceptance criteria:**
   - [ ] Right password → linked and the normalised username returned; wrong password → `BadCredentialsException` and it counts for the limit; after the limit → `TooManyLoginAttemptsException` even with the right password; username already linked to another identity → `IdentityAlreadyLinkedException`.
 
-### [ ] T7 — Login page: "Entrar con Auth0" (~5 min)
+### [x] T7 — Login page: "Entrar con Auth0" (~5 min)
 
 - **Side:** web
 - **Layer:** adapter.in.web
@@ -150,7 +150,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **What to do:**
   1. `auth0Enabled` in the model from `ObjectProvider<ClientRegistrationRepository>`. On the form page, below "Entrar", a separator and an `<a class="btn-slant btn-slant-surface" hx-boost="false" href="/oauth2/authorization/auth0">Entrar con Auth0</a>`. `?oauth-error` shows the form with "No se pudo iniciar sesión con Auth0. Inténtalo de nuevo." and `?link-expired` with "Vuelve a entrar con Auth0 para vincular tu usuario".
 - **Acceptance criteria:**
-  - [ ] With Auth0 configured, the form shows the button with `hx-boost="false"`; without it, the page is unchanged; both messages show on their parameter.
+  - [x] With Auth0 configured, the form shows the button with `hx-boost="false"`; without it, the page is unchanged; both messages show on their parameter.
 
 ### [ ] T8 — Link page `/login/link` (~10 min)
 
