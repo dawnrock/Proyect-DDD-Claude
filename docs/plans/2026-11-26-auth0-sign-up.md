@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-26
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~85 min (9 tasks)
 
 ## Goal
@@ -130,7 +130,7 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
 - **Acceptance criteria:**
   - [x] Passes without network; validated by sabotage (skipping the link makes it fail).
 
-### [ ] T7 — Docs and project status (~10 min)
+### [x] T7 — Docs and project status (~10 min)
 
 - **Side:** both
 - **Layer:** docs
@@ -140,31 +140,44 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
   1. ADR 0024: sign-up through Auth0 without a local password, unusable password, link and silent return; the classic sign-up stays until #199.
   2. `render.md`: manual check (a new Auth0 account → «Date de alta» → lands on its account). Status files: #198 done, next #199.
 - **Acceptance criteria:**
-  - [ ] Docs in English; CI's status check passes.
+  - [x] Docs in English; CI's status check passes.
+
+### [x] T8 — Review fixes (~10 min)
+
+- **Side:** both
+- **Layer:** adapter.in · adapter.in.web · docs
+- **Files:** `SignUpForm`, `SignUpController`, `PendingIdentitySession`, `CustomerRegistration`; test `SignUpAuth0SessionTests`; contract, `pendientes.md`
+- **Depends on:** T6
+- **What to do:**
+  1. `revisor-ddd` findings: an abandoned Auth0-mode wizard could be continued by another Auth0 identity in the same browser → the form remembers its `sub`; the sliding window had no cap → 30 minutes from the start; tests for "smuggling" a password (classic wizard with a pending identity, password sent in Auth0 mode, classic password dropped by `?auth0`); `requireNonNull` on the pending identity; the half-finished sign-up noted in `pendientes.md`.
+- **Acceptance criteria:**
+  - [x] Another `sub` in the session cannot continue the wizard, and `GET /signup` then shows a clean classic step 1 (sabotage: without the `sub` check the test fails).
+  - [x] A wizard older than 30 minutes goes to `/login?link-expired` even with a fresh pending identity.
+  - [x] A password sent in Auth0 mode is not kept (sabotage: without clearing it the test fails); the classic wizard with a pending identity still calls `register`.
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] An unknown Auth0 identity can sign up from the link page and ends on «Mis cuentas» / its account, signed in with Auth0.
-- [ ] The user created this way cannot sign in with a password nor get an own token.
-- [ ] Duplicate document, different data for an existing document, taken username and the sign-up limit answer as in today's sign-up.
-- [ ] The classic sign-up with password and the REST sign-up are unchanged.
-- [ ] Contract back ↔ web in `docs/contracts/` (ADR 0007).
+- [x] An unknown Auth0 identity can sign up from the link page and ends on «Mis cuentas» / its account, signed in with Auth0.
+- [x] The user created this way cannot sign in with a password nor get an own token.
+- [x] Duplicate document, different data for an existing document, taken username and the sign-up limit answer as in today's sign-up.
+- [x] The classic sign-up with password and the REST sign-up are unchanged.
+- [x] Contract back ↔ web in `docs/contracts/` (ADR 0007).
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): none expected.
-- [ ] If the API changes: n/a (the REST sign-up does not change).
-- [ ] Any new business term is in `docs/dominio/glosario.md`.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): none expected.
+- [x] If the API changes: n/a (the REST sign-up does not change).
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a (identity and passwords are security terms, in ADR 0024).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
