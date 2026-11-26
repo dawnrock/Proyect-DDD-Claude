@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-26
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~110 min (13 tasks)
 
 ## Goal
@@ -201,7 +201,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 - **Acceptance criteria:**
   - [x] The test passes without network; `./mvnw verify` green.
 
-### [ ] T12 — Docs and project status (~10 min)
+### [x] T12 — Docs and project status (~10 min)
 
 - **Side:** both
 - **Layer:** docs
@@ -211,7 +211,7 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
   1. `render.md`: Auth0 tenant setup (Regular Web Application; Allowed Callback URLs `https://<service>.onrender.com/login/oauth2/code/auth0`; Allowed Logout URLs `https://<service>.onrender.com/login?logout`; RP-Initiated Logout End Session Endpoint Discovery on) and the three `APP_AUTH_AUTH0_*` variables (the secret only in Render, never in the repository).
   2. Status files: #196 done, next step #197; decision (identity in `adapter.in`, link with password, re-entry instead of programmatic login); pending items (no unlinking, no linking from a signed-in session, pending identity only in the session).
 - **Acceptance criteria:**
-  - [ ] Docs in English; CI's status check passes.
+  - [x] Docs in English; CI's status check passes.
 
 ### [x] T13 — Review fixes (~10 min)
 
@@ -229,31 +229,31 @@ First of four issues: #196 (this one) → #197 API accepts Auth0 tokens → #198
 
 **Specific:**
 
-- [ ] Without `APP_AUTH_AUTH0_*` the application starts and the web behaves as today (all existing tests green, no network at startup).
-- [ ] An Auth0 identity that is already linked signs in with the local username and local role and only sees their accounts.
-- [ ] An unknown identity goes to the link page; the right password links it and signs in after the silent re-entry; a wrong one does not and counts as a failed login attempt (ADR 0017).
-- [ ] An identity cannot be linked to two usernames, nor a username to two identities of the same provider.
-- [ ] Logging out of an Auth0 session ends it in Auth0 too and lands on `/login?logout`.
-- [ ] The authorization request uses PKCE (S256), and the Auth0 link and the logout form are not boosted by htmx.
+- [x] Without `APP_AUTH_AUTH0_*` the application starts and the web behaves as today (all existing tests green, no network at startup).
+- [x] An Auth0 identity that is already linked signs in with the local username and local role and only sees their accounts.
+- [x] An unknown identity goes to the link page; the right password links it and signs in after the silent re-entry; a wrong one does not and counts as a failed login attempt (ADR 0017).
+- [x] An identity cannot be linked to two usernames, nor a username to two identities of the same provider.
+- [x] Logging out of an Auth0 session ends it in Auth0 too and lands on `/login?logout`.
+- [x] The authorization request uses PKCE (S256), and the Auth0 link and the logout form are not boosted by htmx.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): `spring-boot-starter-security-oauth2-client`, ADR 0024.
-- [ ] If the API changes: n/a (the API does not change until #197).
-- [ ] Any new business term is in `docs/dominio/glosario.md`: n/a (external identity and linking are security terms, not domain language; they go to ADR 0024).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): `spring-boot-starter-security-oauth2-client`, ADR 0024.
+- [x] If the API changes: n/a (the API does not change until #197).
+- [x] Any new business term is in `docs/dominio/glosario.md`: n/a (external identity and linking are security terms, not domain language; they go to ADR 0024).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
 - **Not tested against a real tenant in CI.** Everything runs with a fake domain and `oidcLogin()`. The first real check is on Render once the user creates the Auth0 application and sets the three variables; a manual checklist goes in `render.md`.
-- **PKCE default.** If Spring Security 7 already sends PKCE for confidential clients, the customizer is dropped and the test still asserts S256.
+- **PKCE default (resolved in T11).** Spring Security 7.1.1 already sends PKCE for confidential clients (`ClientSettings.requireProofKey` defaults to `true`); the custom resolver was dropped, the registration declares it and the tests still assert S256.
 - **Pending identity in the session.** It lives at most 10 minutes and only holds what Auth0 already verified (`sub`, e-mail). The session id changes on the final login (Spring's session fixation protection).
 - **Auth0 e-mail is not used to link.** Linking by e-mail would be easier, but the local users have no e-mail and an unverified e-mail would let anyone take an account; the password proves ownership.
 - **The demo users on Render** (`admin`, customers) can link their own Auth0 identities; the repository holds no Auth0 data.
