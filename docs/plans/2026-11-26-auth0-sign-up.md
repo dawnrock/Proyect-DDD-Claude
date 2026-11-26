@@ -119,7 +119,7 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
   - [x] Success → `redirect:/oauth2/authorization/auth0`, pending identity removed, nobody authenticated by the controller.
   - [x] Each error lands where the contract says; the classic wizard's tests pass unchanged.
 
-### [ ] T6 — End-to-end: sign up with Auth0 and sign in (~10 min)
+### [x] T6 — End-to-end: sign up with Auth0 and sign in (~10 min)
 
 - **Side:** both
 - **Layer:** tests
@@ -128,7 +128,7 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
 - **What to do:**
   1. A session with a `PendingIdentity`, the three steps of `/signup?auth0` → the customer, account, user and `external_identity` row exist; `LinkedOidcUserService` resolves the `sub` to the new user; with that session (`oidcLogin()`) `/` leads to the new account. The new user cannot get a token from `POST /api/auth/token` with any password.
 - **Acceptance criteria:**
-  - [ ] Passes without network; validated by sabotage (skipping the link makes it fail).
+  - [x] Passes without network; validated by sabotage (skipping the link makes it fail).
 
 ### [ ] T7 — Docs and project status (~10 min)
 
