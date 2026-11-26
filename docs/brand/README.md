@@ -17,7 +17,7 @@ The bank's name is written **monA Bank**: «monA» sounds like *money*, and the 
 
 ## Intro
 
-A 5-second animation before the login doors: twelve positive banking and stock-market words (Maximize, Markets · Optimism · Net gain · Affluence, Assets · Bull, Bonus · Alpha · Next · Key, Keep) stay still for a second, lose their endings, their initials fly to the letters of the logo, the chart is painted from left to right and the logo stays still for another second before fading out. It plays on every full load of the doors; skipped with reduced motion, without JavaScript or if the font does not load.
+A 5-second animation before the login doors: twelve positive banking and stock-market words (Maximize, Markets · Optimism · Net gain · Affluence, Assets · Bull, Bonus · Alpha · Next · Key, Keep) stay still for a second, lose their endings, their initials fly to the letters of the logo, the chart is painted from left to right and the logo stays still for another second. Then it shrinks onto the welcome's logo, the layer goes without a jump and the page appears in turn: «Bienvenido a», the backdrop and the doors. It plays on every full load of the doors; skipped with reduced motion, without JavaScript or if the font does not load.
 
 ## Web interface
 
@@ -36,7 +36,7 @@ Chosen by the user on 2026-11-25 from three sketched directions (issue #185, [AD
 - **Type:** Tektur for headings, buttons, balances, amounts and IBANs; Sora for the rest.
 - **Slant:** about 12.4°, the A's legs. Buttons (`.btn-slant` with `rise`, `light`, `drop`, `surface`) are parallelograms drawn by a skewed `::before`, so the focus outline follows the shape; the login doors alone are trapezoids with both sides of the A (`clip-path`, with an `::after` focus ring of the same shape). Account cards (`.card-slant`) have their right edge slanted like the A's right leg.
 - **Glyphs** (`fragments/brand`): `rise`, the A's leg with its arrow, for money in; `drop`, the n's bar and stem, for money out; a rejected movement keeps its glyph in grey; `watermark`, the A in outline behind account cards and the balance; `backdrop`, the darkened A bigger than the screen behind the entry screens (login doors, login form, sign-up steps).
-- **Screens:** the doors have no header, only «Bienvenido a» with the logo beside it (the bank's name stays for screen readers) and the two doors without icons, centred over the backdrop, which is bigger there than on the login form and the sign-up steps. The account actions are a track of interlocked parallelograms; the open one fills with its colour (rise, drop or ink) and its form goes below.
+- **Screens:** the doors have no header, only «Bienvenido a» with the logo beside it (the bank's name stays for screen readers) and the two doors without icons, together a pyramid with the A's slant (the lower one is wider, so its sides continue those of the upper one), centred over the backdrop, which is bigger there than on the login form and the sign-up steps. The account actions are a track of interlocked parallelograms; the open one fills with its colour (rise, drop or ink) and its form goes below.
 
 ## Prototypes
 

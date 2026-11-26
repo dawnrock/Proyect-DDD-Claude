@@ -185,8 +185,8 @@ h1, .h1, .h2, .h3 { font-weight: 600; letter-spacing: -0.005em; }
    por arriba, como en el boceto aprobado. */
 .backdrop { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
 .backdrop svg { position: absolute; left: 50%; top: -20vh; height: 130vh; width: auto; transform: translateX(-50%); }
-/* En la bienvenida, la A aún más grande: la flecha se sale por arriba y el centro de la A queda detrás del saludo y las puertas. */
-body:has(> main.welcome) .backdrop svg { top: -55vh; height: 190vh; }
+/* En la bienvenida, la A aún más grande, con solo el arranque de la punta de la flecha asomando por arriba. */
+body:has(> main.welcome) .backdrop svg { top: -36vh; height: 170vh; }
 .backdrop-a { fill: #262b30; stroke: #30363c; stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
 .backdrop-rise { fill: var(--mona-rise); opacity: 0.08; }
 
@@ -267,6 +267,14 @@ body:has(> main.welcome) .backdrop svg { top: -55vh; height: 190vh; }
         calc(var(--door-run) + 3.8px) 2px, calc(100% - var(--door-run) - 3.8px) 2px, calc(100% - 2.5px) calc(100% - 2px),
         2.5px calc(100% - 2px));
 }
+/* La de abajo, más ancha: sus lados siguen la inclinación de los de arriba, como una sola A partida en dos. Se ensancha
+   lo que bajan esos lados en el hueco entre las dos y en su propia altura; el texto no se mueve. */
+.door + .door {
+    --door-reach: calc((0.9rem + 5.25rem) * 0.22);
+    width: calc(100% + 2 * var(--door-reach));
+    margin-inline: calc(-1 * var(--door-reach));
+    padding-left: calc(2.25rem + var(--door-reach));
+}
 .door:focus-visible::before { outline: none; }
 .door:focus-visible::after { display: block; }
 .door-title { font-size: 1.25rem; font-weight: 700; }
@@ -324,6 +332,15 @@ a.card-slant:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--mo
 /* Intro de la marca (#178): capa a pantalla completa sobre las puertas del login, del color de fondo de la web. */
 .splash { position: fixed; inset: 0; z-index: 1080; background-color: var(--bs-body-bg); }
 .splash canvas { display: block; width: 100%; height: 100%; }
+/* Mientras suena la intro, la bienvenida solo enseña el logo, justo donde la intro deja el suyo; al acabar aparecen por
+   partes «Bienvenido a», la A de fondo y las puertas (intro.js pone y quita html[data-intro]). */
+html[data-intro="playing"] .welcome-title,
+html[data-intro="playing"] .backdrop,
+html[data-intro="playing"] .doors { opacity: 0; }
+html[data-intro="playing"] .doors { transform: translateY(0.75rem); }
+html[data-intro="reveal"] .welcome-title { transition: opacity 0.45s ease-out; }
+html[data-intro="reveal"] .backdrop { transition: opacity 0.7s ease-out 0.4s; }
+html[data-intro="reveal"] .doors { transition: opacity 0.45s ease-out 1s, transform 0.45s ease-out 1s; }
 
 /* Bienvenida del login (#185): sin cabecera, con el logo, el saludo y las dos puertas centrados sobre la A de fondo. */
 main.welcome {
@@ -338,7 +355,7 @@ main.welcome {
 }
 /* «Bienvenido a» y el logo en una línea, sobre la línea base de las letras (si no caben, el logo baja a la siguiente). */
 .welcome-head { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 0.5rem 0.8rem; text-align: center; }
-.brand-hero { display: block; width: min(42vw, 10.25rem); height: auto; }
+.brand-hero { display: block; width: min(42vw, 10.25rem); height: auto; aspect-ratio: 701.5 / 236.96; }   /* la intro lo mide antes de que cargue */
 .welcome-title { margin: 0; font-size: min(7.4vw, 1.8rem); line-height: 1; }
 .doors { width: 100%; display: flex; flex-direction: column; gap: 0.9rem; padding-inline: 0.5rem; }
 

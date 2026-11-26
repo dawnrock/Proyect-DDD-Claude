@@ -1,6 +1,8 @@
-// Intro de monA Bank (#178, ADR 0022): 5 s antes de las puertas del login. Doce palabras positivas de la banca y la
-// bolsa se quedan un segundo a la vista, pierden su terminación, sus iniciales vuelan a las letras del logo, se pinta la
-// gráfica de la marca y el logo se queda otro segundo antes de desvanecerse.
+// Intro de monA Bank (#178, ADR 0022), antes de las puertas del login. Doce palabras positivas de la banca y la bolsa
+// se quedan un segundo a la vista, pierden su terminación, sus iniciales vuelan a las letras del logo, se pinta la
+// gráfica de la marca y el logo se queda otro segundo. Después se encoge y se coloca justo encima del logo de la
+// bienvenida («Bank» pasa de debajo a su lado, como en monabank-horizontal.svg); la capa se quita sin salto y la página
+// aparece por partes: «Bienvenido a», la A de fondo y las puertas (las clases de html[data-intro] en app.css).
 // Prototipo aprobado: docs/brand/prototypes/intro.html.
 //
 // Mejora progresiva: la capa (#splash) llega oculta y solo se muestra si va a reproducirse. Se ve en cada carga de las
@@ -11,9 +13,14 @@ import { arrow, leftLeg, legPolygon, partial, rightStem, strokeThickness, topLin
 const splash = document.getElementById('splash');
 const canvas = splash?.querySelector('canvas');
 const FONT = 'Tektur';
-const DURATION = 5000;
 const WORDS_HOLD = 1000;   // las palabras, quietas y enteras, antes de convertirse en la marca
-const FADE = 350;          // la capa se desvanece en los últimos 350 ms; antes, el logo queda quieto un segundo más
+const MOVE_AT = 4480;      // tras un segundo con el logo quieto, va a su sitio en la bienvenida…
+const MOVE = 720;          // …en este tiempo
+const DURATION = MOVE_AT + MOVE;
+const REVEAL = 1500;       // lo que tarda la página en aparecer por partes (las transiciones de app.css)
+// Logo horizontal (scripts/build-brand.mjs): la A mide 200 unidades, su origen (inicio de la m, línea base) es (0, 0),
+// el viewBox empieza en (3.2, -232.96) y mide 701.5 de ancho; «Bank» va al 45 % de la A y a un 14 % de «monA».
+const HERO = { size: 200, left: 3.2, top: -232.96, width: 701.5, bank: 0.45, gap: 0.14 };
 const COLORS = { paper: '#eef0f2', mist: '#b9c0c7', flat: '#8b949c', drop: '#f0545c', rise: '#1fc8b0' };
 // Palabras de cada letra del logo, en orden: m o n A (monA) · B a n k (Bank)
 const WORDS = [['Maximize', 'Markets'], ['Optimism'], ['Net gain'], ['Affluence', 'Assets'],
@@ -85,6 +92,19 @@ const stage = () => {
     let kindPen = pen - kindWidth;
     logo.slice(4).forEach((l) => { l.x = kindPen; l.y = base + KIND * 1.2; kindPen += ctx.measureText(l.ch).width; });
     const at = (i) => ([x, y]) => [logo[i].x - 2 + x, base - glyphs[i].base + y];
+    // dónde acaba «Bank» en el logo horizontal, en las mismas coordenadas que «monA»
+    ctx.font = font(400, S * HERO.bank);
+    logo.slice(4).forEach((l, k) => {
+        l.lineX = logo[0].x + nameWidth + S * HERO.gap + ctx.measureText('Bank'.slice(0, k)).width;
+    });
+    // y dónde está el logo de la bienvenida: se mide al empezar a moverse, con la página ya maquetada
+    const hero = document.querySelector('.brand-hero');
+    let target;
+    const place = () => {
+        const r = hero.getBoundingClientRect();
+        const k = r.width / HERO.width;
+        return { scale: HERO.size * k / S, x: r.left - HERO.left * k, y: r.top - HERO.top * k };
+    };
 
     // ---------- la gráfica, en coordenadas de pantalla ----------
     const flat = [0, 1].flatMap((i) => topLine(glyphs[i], T).map(at(i)));
@@ -99,10 +119,18 @@ const stage = () => {
     layer.width = canvas.width;
     layer.height = canvas.height;
     const lx = layer.getContext('2d');
-    const drawLogo = (pFlat, pDrop, pLeg, pArrow) => {
+    const drawLogo = (pFlat, pDrop, pLeg, pArrow, pMove) => {
         lx.setTransform(1, 0, 0, 1, 0, 0);
         lx.clearRect(0, 0, layer.width, layer.height);
-        lx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        if (pMove > 0 && hero) {   // escala y traslada todo el logo hasta el de la bienvenida
+            target ??= place();
+            const k = 1 + (target.scale - 1) * pMove;
+            const ox = logo[0].x + (target.x - logo[0].x) * pMove;
+            const oy = base + (target.y - base) * pMove;
+            lx.setTransform(dpr * k, 0, 0, dpr * k, dpr * (ox - k * logo[0].x), dpr * (oy - k * base));
+        } else {
+            lx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
         logo.slice(0, 4).forEach((l) => { lx.font = font(l.weight, l.size); lx.fillStyle = l.color; lx.fillText(l.ch, l.x, l.y); });
         lx.save();
         lx.globalCompositeOperation = 'source-atop';   // solo dentro de las letras
@@ -124,7 +152,17 @@ const stage = () => {
             lx.fill();
             if (pArrow > 0.55) { shape(lx, head.map(at(3))); lx.fill(); }
         }
-        logo.slice(4).forEach((l) => { lx.font = font(l.weight, l.size); lx.fillStyle = l.color; lx.fillText(l.ch, l.x, l.y); });
+        // «Bank» se desvanece bajo la A y reaparece a su lado: deslizándose, a medio camino cruzaba la pata de la A o se
+        // salía de la pantalla de un móvil
+        const m = hero ? pMove : 0;
+        const away = m >= 0.5;
+        lx.globalAlpha = away ? easeOut(clamp((m - 0.7) / 0.3)) : 1 - easeOut(clamp(m / 0.3));
+        logo.slice(4).forEach((l) => {
+            lx.font = font(l.weight, away ? S * HERO.bank : l.size);
+            lx.fillStyle = l.color;
+            lx.fillText(l.ch, away ? l.lineX : l.x, away ? base : l.y);
+        });
+        lx.globalAlpha = 1;
     };
 
     // ---------- palabras: pegadas entre sí, con tamaños muy dispares y giros fuertes ----------
@@ -246,7 +284,8 @@ const stage = () => {
     // 1640–2000  se borran las terminaciones
     // 1950–2840  las iniciales vuelan al logo: se enderezan y cambian de tamaño, de peso y de mayúscula a minúscula
     // 2860–3480  la gráfica: gris (m, o) → caída roja (n) → subida turquesa (A) → flecha
-    // 3480–4650  el logo, quieto               4650–5000  la capa se desvanece
+    // 3480–4480  el logo, quieto               4480–5200  el logo va a su sitio en la bienvenida
+    // después, sin la capa: «Bienvenido a», la A de fondo y las puertas (1,5 s, en app.css)
     const landed = Math.max(...items.map((it) => it.fly)) + 620;
     const words = (t) => {
         items.forEach((it) => {   // la palabra (y su inicial, mientras no despegue)
@@ -298,20 +337,30 @@ const stage = () => {
             words(t);
         } else {
             const step = (from, length, ease = easeInOut) => ease(clamp((t - landed - 20 - from) / length));
-            drawLogo(step(0, 200), step(200, 150), step(350, 150), step(500, 120, easeOut));
+            drawLogo(step(0, 200), step(200, 150), step(350, 150), step(500, 120, easeOut),
+                easeInOut(clamp((t - MOVE_AT) / MOVE)));
             ctx.globalAlpha = 1;
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.drawImage(layer, 0, 0);
         }
-        splash.style.opacity = String(1 - easeInOut(clamp((t - (DURATION - FADE)) / FADE)));
     };
 };
 
 const play = async () => {
     if (!splash || !canvas || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     splash.hidden = false;   // cuanto antes, para que no se vean las puertas antes de la intro
+    const page = document.documentElement;
+    page.dataset.intro = 'playing';   // saludo, A de fondo y puertas, ocultos hasta que acabe
     let frame = 0;
-    const finish = () => { cancelAnimationFrame(frame); splash.remove(); };
+    let done = false;
+    const finish = () => {
+        if (done) return;
+        done = true;
+        cancelAnimationFrame(frame);
+        splash.remove();
+        page.dataset.intro = 'reveal';
+        setTimeout(() => { delete page.dataset.intro; }, REVEAL);
+    };
     if (!(await fontReady())) { finish(); return; }
     const render = stage();
     let start = null;
