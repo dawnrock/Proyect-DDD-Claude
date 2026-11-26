@@ -15,21 +15,73 @@
 .door { transition: background-color 0.15s ease-in-out; }
 .door:hover, .door:focus-visible { background-color: var(--bs-tertiary-bg); }
 
-/* Iniciales del titular en el listado de cuentas. */
-.avatar { width: 2.5rem; height: 2.5rem; }
-
-/* Acciones del detalle de cuenta: cada <summary> es un botón y el panel abierto ocupa toda la fila, tras los botones. */
-.actions summary { list-style: none; }
-.actions summary::-webkit-details-marker { display: none; }
-.actions details[open] { order: 10; flex-basis: 100%; }
-.actions details[open] > summary {
-    color: var(--bs-btn-active-color);
-    background-color: var(--bs-btn-active-bg);
-    border-color: var(--bs-btn-active-border-color);
+/* Iniciales del titular en el listado de cuentas (solo el administrador). */
+.avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background-color: var(--mona-ground);
+    font-size: 0.875rem;
+    font-weight: 600;
 }
 
-/* Movimiento rechazado: no cambió el saldo, así que su importe va tachado. */
-.row-rejected .row-amount { color: var(--bs-secondary-color); text-decoration: line-through; }
+/* Acciones del detalle de cuenta (#185): una pista de paralelogramos encajados, Ingresar, Retirar y Transferir. Cada una
+   es un <details> (se abre sin JavaScript); la abierta se rellena con su color y su formulario va debajo, a todo el
+   ancho. Sin soporte de ::details-content, la fila se parte y la acción abierta baja a su propia fila, como antes. */
+.actions summary, .secondary-actions summary { list-style: none; }
+.actions summary::-webkit-details-marker, .secondary-actions summary::-webkit-details-marker { display: none; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.5rem 0.45rem; padding-inline: 0.4rem; }
+.actions > details { flex: 1 1 0; min-width: 0; }
+.actions > details[open] { order: 10; flex-basis: 100%; }
+.action-toggle { width: 100%; min-height: 3.5rem; padding-inline: 1rem; }
+#deposit-action { --action-accent: var(--mona-rise); }
+#withdrawal-action { --action-accent: var(--mona-drop); }
+#transfer-action { --action-accent: var(--mona-ink); }
+.actions details[open] > .action-toggle {
+    --slant-bg: var(--action-accent);
+    --slant-bg-hover: var(--action-accent);
+    --slant-fg: var(--mona-on-accent);
+}
+.actions details[open] > .action-toggle .glyph { color: inherit; }
+.action-form { margin-top: 0.6rem; }
+@supports selector(::details-content) {
+    .actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .actions > details { display: contents; }
+    .actions > details > summary { grid-row: 1; }
+    .actions > details::details-content { grid-column: 1 / -1; grid-row: 2; }
+    /* El contenido de una acción cerrada comparte esa segunda fila: fuera de la maqueta, para que no tape el formulario
+       abierto ni reciba sus clics. */
+    .actions > details:not([open])::details-content { display: none; pointer-events: none; }
+}
+
+/* Acciones secundarias bajo la pista: abrir otra cuenta y generar un IBAN nuevo. */
+.secondary-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; padding-inline: 0.4rem; }
+.secondary-actions > details[open] { flex-basis: 100%; }
+.secondary-actions .btn-slant { min-height: 2.75rem; font-size: 0.9rem; }
+.secondary-actions details[open] > summary { --slant-bg: var(--mona-surface-hover); }
+
+/* Movimientos (#185): cada fila con su glifo en una pastilla inclinada. Rechazado: no cambió el saldo, así que su
+   importe va tachado y su glifo en gris. */
+.movements { list-style: none; margin: 0; padding: 0; }
+.movement { display: flex; align-items: center; gap: 0.9rem; padding: 0.85rem 0; border-bottom: 1px solid var(--mona-line); }
+.movement:last-child { border-bottom: 0; }
+.movement-chip {
+    position: relative;
+    isolation: isolate;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.25rem;
+}
+.movement-chip::before { content: ""; position: absolute; inset: 0; z-index: -1; background-color: var(--mona-surface); transform: skewX(-12.4deg); }
+.movement .row-amount { font-size: 1rem; }
+.row-rejected .row-amount { color: var(--bs-secondary-color); text-decoration: line-through; font-weight: 400; }
+.row-rejected .glyph { color: var(--mona-flat); }
 
 /* Barra de progreso del alta de cliente (#95): fina, como una línea. */
 .signup-progress { height: 0.375rem; }
@@ -50,12 +102,236 @@
         U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+/* Tipografía de texto de la web (#185, ADR 0023): etiquetas, campos, descripciones y avisos. */
+@font-face {
+    font-family: "Sora";
+    font-style: normal;
+    font-weight: 100 800;
+    font-display: swap;
+    src: url("/vendor/sora/sora-latin-wght-normal.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+        U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Paleta de la marca sobre las variables del tema oscuro de Bootstrap (#185, ADR 0023). La subida (turquesa) y la
+   caída (coral) significan dinero que entra y dinero que sale; el gris plano, lo neutro. */
+:root[data-bs-theme=dark] {
+    --mona-ground: #212529;
+    --mona-surface: #2b3035;
+    --mona-surface-hover: #343a40;
+    --mona-line: #343a40;
+    --mona-line-strong: #5b636b;
+    --mona-ink: #eef0f2;
+    --mona-ink-2: #b9c0c7;
+    --mona-ink-3: #9aa2aa;
+    --mona-flat: #8b949c;
+    --mona-drop: #f0545c;
+    --mona-rise: #1fc8b0;
+    --mona-on-accent: #14181b;
+    /* Inclinación de las patas de la A (≈ 12,4°): desplazamiento horizontal por cada píxel de alto. */
+    --mona-slant: 0.22;
+    --mona-display: "Tektur", system-ui, sans-serif;
+    --mona-text: "Sora", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+    --bs-body-bg: var(--mona-ground);
+    --bs-body-color: var(--mona-ink);
+    --bs-body-font-family: var(--mona-text);
+    --bs-emphasis-color: var(--mona-ink);
+    --bs-secondary-color: var(--mona-ink-2);
+    --bs-tertiary-color: var(--mona-ink-3);
+    --bs-secondary-bg: var(--mona-surface);
+    --bs-tertiary-bg: var(--mona-surface);
+    --bs-border-color: var(--mona-line);
+    --bs-border-radius: 0;
+    --bs-border-radius-sm: 0;
+    --bs-border-radius-lg: 0;
+    --bs-link-color: var(--mona-ink);
+    --bs-link-color-rgb: 238, 240, 242;
+    --bs-link-hover-color: #ffffff;
+    --bs-link-hover-color-rgb: 255, 255, 255;
+    --bs-success: var(--mona-rise);
+    --bs-success-rgb: 31, 200, 176;
+    --bs-success-text-emphasis: var(--mona-rise);
+    --bs-danger: var(--mona-drop);
+    --bs-danger-rgb: 240, 84, 92;
+    --bs-danger-text-emphasis: #ff8a90;
+    --bs-form-invalid-color: #ff8a90;
+    --bs-form-invalid-border-color: var(--mona-drop);
+    --bs-focus-ring-color: rgba(31, 200, 176, 0.45);
+}
+
+/* Títulos, saldos, importes e IBAN en Tektur; el resto, en Sora. */
+h1, h2, h3, h4, .h1, .h2, .h3, .h4, .h5, .h6, .amount, .balance, .iban { font-family: var(--mona-display); }
+h1, .h1, .h2, .h3 { font-weight: 600; letter-spacing: -0.005em; }
+.amount, .balance { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.balance { font-size: clamp(2.5rem, 11vw, 3.5rem); line-height: 1; letter-spacing: -0.015em; }
+.iban { letter-spacing: 0.04em; }
+
 /* Logo de monA Bank en la cabecera (#178): el SVG horizontal, a la altura de la barra de navegación. */
 .brand-logo { height: 2rem; width: auto; display: block; }
 
-/* Logo apilado en las bienvenidas del login y del alta (#178): decorativo, el título ya nombra al banco. */
-.brand-welcome { display: block; width: min(18rem, 70%); height: auto; margin: 0.5rem auto 2rem; }
+/* Cabecera (#185): una línea fina la separa del contenido; usuario y salida, discretos. */
+.app-header { border-bottom: 1px solid var(--mona-line); }
+.app-header .btn-link { color: var(--mona-ink-2); text-decoration: none; min-height: 44px; }
+.app-header .btn-link:hover, .app-header .btn-link:focus-visible { color: var(--mona-ink); }
+
+/* Glifos de la marca (fragments/brand): la subida de la A y la caída de la n, del alto del texto o algo más. */
+.glyph { display: inline-block; flex: none; height: 1.5em; width: auto; vertical-align: -0.3em; }
+.glyph-rise { color: var(--mona-rise); }
+.glyph-drop { color: var(--mona-drop); height: 1.1em; vertical-align: -0.15em; }
+
+/* La A en contorno como marca de agua, detrás del contenido de su contenedor (que lleva position: relative). */
+.watermark { position: absolute; pointer-events: none; z-index: 0; height: 160%; width: auto; right: 1.5rem; top: -25%; }
+.watermark-a { fill: none; stroke: #30363c; stroke-width: 2.5px; vector-effect: non-scaling-stroke; }
+.watermark-rise { fill: var(--mona-rise); opacity: 0.16; }
+
+/* La A oscurecida y más grande que la pantalla detrás de las pantallas de entrada (#185): fija, centrada y cortada
+   por arriba, como en el boceto aprobado. */
+.backdrop { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.backdrop svg { position: absolute; left: 50%; top: -20vh; height: 130vh; width: auto; transform: translateX(-50%); }
+.backdrop-a { fill: #262b30; stroke: #30363c; stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
+.backdrop-rise { fill: var(--mona-rise); opacity: 0.08; }
+
+/* Botones en paralelogramo con la inclinación de la A (#185). La forma es un ::before sesgado y no un clip-path,
+   para que el contorno de foco siga el paralelogramo en lugar de quedar recortado. */
+.btn-slant {
+    --slant-bg: var(--mona-surface);
+    --slant-bg-hover: var(--mona-surface-hover);
+    --slant-fg: var(--mona-ink);
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: 3rem;
+    padding: 0.65rem 1.75rem;
+    border: 0;
+    background: none;
+    color: var(--slant-fg);
+    font-family: var(--mona-display);
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+}
+.btn-slant::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--slant-bg);
+    transform: skewX(-12.4deg);
+}
+.btn-slant:hover, .btn-slant:focus-visible { color: var(--slant-fg); }
+.btn-slant:hover::before { background-color: var(--slant-bg-hover); }
+.btn-slant:focus-visible { outline: none; }
+.btn-slant:focus-visible::before { outline: 2px solid var(--mona-ink); outline-offset: 3px; }
+.btn-slant:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn-slant-rise { --slant-bg: var(--mona-rise); --slant-bg-hover: #45d9c4; --slant-fg: var(--mona-on-accent); }
+.btn-slant-light { --slant-bg: var(--mona-ink); --slant-bg-hover: #ffffff; --slant-fg: var(--mona-on-accent); }
+.btn-slant-drop { --slant-bg: var(--mona-drop); --slant-bg-hover: #f4767c; --slant-fg: var(--mona-on-accent); }
+.btn-slant-surface { --slant-bg: var(--mona-surface); --slant-bg-hover: var(--mona-surface-hover); --slant-fg: var(--mona-ink); }
+
+/* Las puertas del login (#185): bloques en paralelogramo a todo el ancho, con título y una línea de ayuda. */
+.door {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.2rem;
+    width: 100%;
+    min-height: 5.25rem;
+    padding: 0.85rem 2.5rem 0.85rem 2.25rem;
+    text-align: left;
+}
+.door-title { font-size: 1.25rem; font-weight: 700; }
+.door-hint { font-family: var(--mona-text); font-weight: 400; font-size: 0.8125rem; opacity: 0.8; }
+
+/* Tarjetas con el borde derecho inclinado como la pata derecha de la A (#185). El foco se marca por dentro, porque el
+   clip-path recortaría el contorno. */
+.card-slant {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 5.75rem;
+    padding: 1rem 2.25rem 1rem 1rem;
+    background-color: var(--mona-surface);
+    color: var(--mona-ink);
+    text-decoration: none;
+    clip-path: polygon(0 0, calc(100% - 1.25rem) 0, 100% 100%, 0 100%);
+}
+.card-slant > :not(.watermark) { position: relative; }
+.card-slant .watermark { height: 140%; top: -15%; right: 2rem; }
+.card-slant .watermark-rise { opacity: 0.1; }
+.card-slant .iban { font-size: 0.95rem; letter-spacing: 0.02em; white-space: nowrap; }
+a.card-slant:hover { background-color: var(--mona-surface-hover); color: var(--mona-ink); }
+a.card-slant:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--mona-ink); background-color: var(--mona-surface-hover); }
+
+/* Superficies, campos y avisos con la paleta de la marca y sin esquinas redondeadas. */
+.card { --bs-card-bg: var(--mona-surface); --bs-card-border-width: 0; --bs-card-border-radius: 0; --bs-card-inner-border-radius: 0; }
+.form-control, .form-select {
+    min-height: 3rem;
+    background-color: var(--mona-ground);
+    border: 1.5px solid var(--mona-line-strong);
+    color: var(--mona-ink);
+}
+.form-control:focus, .form-select:focus {
+    background-color: var(--mona-ground);
+    border-color: var(--mona-rise);
+    box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
+    color: var(--mona-ink);
+}
+.form-control::placeholder { color: var(--mona-ink-3); }
+.input-group .btn-outline-secondary { border: 1.5px solid var(--mona-line-strong); color: var(--mona-ink-2); }
+.form-check-input:checked { background-color: var(--mona-rise); border-color: var(--mona-rise); }
+.form-text { color: var(--mona-ink-2); }
+.alert { border-width: 0; }
+.signup-progress { background-color: var(--mona-surface); }
+.signup-progress .progress-bar { background-color: var(--mona-rise); }
+
+@media (prefers-reduced-motion: no-preference) {
+    .btn-slant::before, a.card-slant { transition: background-color 0.15s ease-out; }
+}
 
 /* Intro de la marca (#178): capa a pantalla completa sobre las puertas del login, del color de fondo de la web. */
 .splash { position: fixed; inset: 0; z-index: 1080; background-color: var(--bs-body-bg); }
 .splash canvas { display: block; width: 100%; height: 100%; }
+
+/* Bienvenida del login (#185): sin cabecera, con el logo, el saludo y las dos puertas centrados sobre la A de fondo. */
+main.welcome {
+    flex: 1 0 auto;
+    max-width: 26rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2.5rem;
+    padding-top: 2.5rem;
+}
+.welcome-head { display: flex; flex-direction: column; align-items: center; gap: 1.4rem; text-align: center; }
+.brand-hero { display: block; width: min(15rem, 62vw); height: auto; }
+.welcome-title { margin: 0; font-size: 1.75rem; line-height: 1.15; }
+.doors { width: 100%; display: flex; flex-direction: column; gap: 0.9rem; padding-inline: 0.5rem; }
+
+/* Listado de cuentas (#185): saldo total grande, tarjetas inclinadas y la acción principal a todo el ancho. */
+.total-balance { font-size: clamp(2.25rem, 10vw, 3rem); line-height: 1.05; letter-spacing: -0.015em; }
+.account-cards { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
+.account-balance { font-size: 1.1rem; }
+.page-cta { display: flex; flex-direction: column; gap: 0.75rem; padding-inline: 0.4rem; }
+.page-cta .btn-slant { width: 100%; min-height: 3.5rem; font-size: 1.05rem; }
+
+/* Detalle de cuenta (#185): titular y segmento, IBAN y el saldo grande, con la A de marca de agua detrás. */
+.account-summary { position: relative; isolation: isolate; overflow: hidden; padding-top: 0.25rem; }
+.account-summary > :not(.watermark) { position: relative; }
+.account-summary .watermark { height: 12rem; top: -1rem; right: -0.5rem; z-index: -1; }
+.account-summary .watermark-rise { opacity: 0.1; }
+.account-holder { margin: 0 0 0.25rem; font-family: var(--mona-text); font-size: 0.95rem; font-weight: 500; color: var(--mona-ink-2); }
+.account-iban { margin: 0 0 1rem; font-size: 0.95rem; color: var(--mona-ink-2); }
+.account-summary .balance { margin: 0 0 0.5rem; }

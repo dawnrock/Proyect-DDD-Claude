@@ -139,6 +139,24 @@ class AccountDetailControllerTests extends AccountWebTestSupport {
         }
 
         @Test
+        @DisplayName("Cada movimiento lleva su glifo: la subida si entra dinero, la caída si sale y la caída en gris si se rechazó (#185)")
+        void eachTransactionCarriesItsBrandGlyph() throws Exception {
+            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details(
+                    transaction("DEPOSIT", "100.00", "APPROVED"),
+                    transaction("WITHDRAWAL", "30.00", "APPROVED"),
+                    transaction("WITHDRAWAL", "500.00", "REJECTED")));
+
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<li class=\"movement\">\\s*<span class=\"movement-chip\"><svg class=\"glyph glyph-rise\".*")))
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<li class=\"movement\">\\s*<span class=\"movement-chip\"><svg class=\"glyph glyph-drop\".*")))
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<li class=\"movement row-rejected\">\\s*<span class=\"movement-chip\"><svg class=\"glyph glyph-drop\".*")));
+        }
+
+        @Test
         @DisplayName("Una retirada con contrapartida se muestra como transferencia a la cuenta de destino")
         void aWithdrawalWithCounterpartIsShownAsTransferTo() throws Exception {
             when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details(
@@ -327,16 +345,33 @@ class AccountDetailControllerTests extends AccountWebTestSupport {
         }
 
         @Test
-        @DisplayName("Las acciones son un acordeón de Alpine.js con iconos de Lucide: abrir una cierra las demás (#124)")
-        void theActionsAreAnAlpineAccordionWithLucideIcons() throws Exception {
-            when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(details());
-
+        @DisplayName("Las acciones son un acordeón de Alpine.js: abrir una cierra las demás (#124)")
+        void theActionsAreAnAlpineAccordion() throws Exception {
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("x-data=\"actionPanels\"")))
-                    .andExpect(content().string(containsString("x-on:toggle.capture=\"closeOthers($event)\"")))
-                    .andExpect(content().string(containsString("#arrow-down-to-line\"></use></svg>Ingresar</summary>")))
-                    .andExpect(content().string(containsString("#arrow-up-from-line\"></use></svg>Retirar</summary>")))
+                    .andExpect(content().string(containsString("x-on:toggle.capture=\"closeOthers($event)\"")));
+        }
+
+        @Test
+        @DisplayName("Generar nuevo IBAN, aunque va bajo la pista, sigue en el acordeón: abrirla cierra las demás (#185)")
+        void regeneratingTheIbanStaysInTheAccordion() throws Exception {
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<div x-data=\"actionPanels\" x-on:toggle.capture=\"closeOthers\\(\\$event\\)\">\\s*"
+                                    + "<div class=\"actions mb-3\">.*<details id=\"regenerate-action\">.*?</details>\\s*</div>\\s*</div>\\s*<h2.*")));
+        }
+
+        @Test
+        @DisplayName("Ingresar lleva la subida de la A y retirar la caída de la n; transferir y generar IBAN, sus iconos (#185)")
+        void depositAndWithdrawalCarryTheBrandGlyphs() throws Exception {
+            mvc.perform(get("/accounts/" + ACCOUNT_ID))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<summary class=\"btn-slant action-toggle\"><svg class=\"glyph glyph-rise\"[^>]*>.*?</svg>Ingresar</summary>.*")))
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<summary class=\"btn-slant action-toggle\"><svg class=\"glyph glyph-drop\"[^>]*>.*?</svg>Retirar</summary>.*")))
                     .andExpect(content().string(containsString("#arrow-left-right\"></use></svg>Transferir</summary>")))
                     .andExpect(content().string(containsString("#refresh-cw\"></use></svg>Generar nuevo IBAN</summary>")));
         }

@@ -2,25 +2,21 @@
 <html lang="es" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Acceso')}"></head>
 <body class="d-flex flex-column min-vh-100" hx-boost="true" hx-swap="innerHTML transition:true">
-<header th:replace="~{fragments/layout :: header}"></header>
-<main class="app-container mx-auto w-100 px-3 pb-5">
-    <img class="brand-welcome" th:unless="${showForm}" th:src="@{/brand/monabank-stacked.svg}" alt="">
-    <h1 class="h3 fw-semibold mb-4" th:text="${showForm} ? 'Acceso' : 'Bienvenido a monA Bank'">Acceso</h1>
+<!--/* Las pantallas de entrada (#185, ADR 0023) van sobre la A oscurecida de fondo. Las puertas, sin cabecera: el logo
+     está en el centro. */-->
+<div th:replace="~{fragments/brand :: backdrop}"></div>
+<th:block th:if="${showForm}"><header th:replace="~{fragments/layout :: header}"></header></th:block>
+<main class="app-container mx-auto w-100 px-3 pb-5" th:classappend="${showForm} ? '' : 'welcome'">
+    <h1 class="h3 fw-semibold mb-4" th:if="${showForm}">Acceso</h1>
+    <div class="welcome-head" th:unless="${showForm}">
+        <img class="brand-hero" th:src="@{/brand/monabank-horizontal.svg}" alt="">
+        <h1 class="welcome-title">Bienvenido a monA Bank</h1>
+    </div>
     <div class="alert alert-success d-flex align-items-center gap-2" role="status" th:if="${param.logout}"><svg th:replace="~{fragments/icons :: icon('circle-check')}"></svg>Has cerrado la sesión</div>
 
-    <div class="row row-cols-1 row-cols-sm-2 g-3" th:unless="${showForm}">
-        <div class="col">
-            <a class="card card-body h-100 text-reset text-decoration-none door" th:href="@{/login(form)}">
-                <span class="d-inline-flex align-items-center gap-2 fw-semibold mb-1"><svg th:replace="~{fragments/icons :: icon('log-in')}"></svg>Ya soy cliente</span>
-                <span class="small text-body-secondary">Entra con tu usuario y tu contraseña.</span>
-            </a>
-        </div>
-        <div class="col">
-            <a class="card card-body h-100 text-reset text-decoration-none door" th:href="@{/signup}">
-                <span class="d-inline-flex align-items-center gap-2 fw-semibold mb-1"><svg th:replace="~{fragments/icons :: icon('user-round-plus')}"></svg>Quiero ser cliente</span>
-                <span class="small text-body-secondary">Abre tu cuenta en tres pasos.</span>
-            </a>
-        </div>
+    <div class="doors" th:unless="${showForm}">
+        <a class="btn-slant btn-slant-rise door" th:href="@{/signup}"><span class="door-title">Quiero ser cliente</span><span class="door-hint">Abre tu cuenta en tres pasos.</span></a>
+        <a class="btn-slant btn-slant-light door" th:href="@{/login(form)}"><span class="door-title">Ya soy cliente</span><span class="door-hint">Entra con tu usuario y tu contraseña.</span></a>
     </div>
 
     <form class="card card-body" th:if="${showForm}" th:action="@{/login}" method="post">
@@ -41,7 +37,7 @@
         </div>
 
         <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-primary d-inline-flex align-items-center gap-2" type="submit"><svg th:replace="~{fragments/icons :: icon('log-in')}"></svg>Entrar</button>
+            <button class="btn-slant btn-slant-rise" type="submit">Entrar</button>
             <a class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1" th:href="@{/login}"><svg th:replace="~{fragments/icons :: icon('arrow-left')}"></svg>Volver</a>
         </div>
     </form>

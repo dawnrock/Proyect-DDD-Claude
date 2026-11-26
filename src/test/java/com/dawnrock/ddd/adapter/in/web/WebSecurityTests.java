@@ -138,10 +138,11 @@ class WebSecurityTests {
         mvc.perform(get(path)).andExpect(status().isOk());
     }
 
-    @Test
-    @DisplayName("La tipografía Tektur de la marca se sirve sin sesión y como fuente woff2 (#178)")
-    void theBrandTypefaceIsServedWithoutSessionAsWoff2() throws Exception {
-        mvc.perform(get("/vendor/tektur/tektur-latin-wght-normal.woff2"))
+    @ParameterizedTest
+    @ValueSource(strings = {"/vendor/tektur/tektur-latin-wght-normal.woff2", "/vendor/sora/sora-latin-wght-normal.woff2"})
+    @DisplayName("Las tipografías de la marca, Tektur (#178) y Sora (#185), se sirven sin sesión y como fuente woff2")
+    void theBrandTypefacesAreServedWithoutSessionAsWoff2(String path) throws Exception {
+        mvc.perform(get(path))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("font/woff2"));
     }

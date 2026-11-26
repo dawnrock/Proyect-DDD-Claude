@@ -4,31 +4,35 @@
 <body class="d-flex flex-column min-vh-100" hx-boost="true" hx-swap="innerHTML transition:true">
 <header th:replace="~{fragments/layout :: header}"></header>
 <main class="app-container mx-auto w-100 px-3 pb-5">
-    <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
-        <h1 class="h3 fw-semibold mb-0" th:text="${admin} ? 'Cuentas' : 'Mis cuentas'">Cuentas</h1>
-        <a class="btn btn-primary d-inline-flex align-items-center gap-2" th:if="${admin}" th:href="@{/accounts/new}"><svg th:replace="~{fragments/icons :: icon('plus')}"></svg>Abrir cuenta</a>
-        <a class="btn btn-primary d-inline-flex align-items-center gap-2" th:if="${customer}" th:href="@{/accounts/another}"><svg th:replace="~{fragments/icons :: icon('plus')}"></svg>Abrir otra cuenta</a>
-    </div>
+    <h1 class="h3 mb-3" th:text="${admin} ? 'Cuentas' : 'Mis cuentas'">Cuentas</h1>
     <div th:if="${message}" class="alert alert-success d-flex align-items-center gap-2" role="status"><svg th:replace="~{fragments/icons :: icon('circle-check')}"></svg><span th:text="${message}">Cuenta abierta</span></div>
 
-    <div class="mb-4" th:unless="${accounts.isEmpty()}">
-        <p class="small text-body-secondary mb-0">Saldo total</p>
-        <p class="display-6 fw-semibold text-nowrap mb-0" th:each="total : ${totals}" th:text="${@fmt.money(total.value, total.key)}">0,00 €</p>
-    </div>
+    <section class="mb-4" th:unless="${accounts.isEmpty()}">
+        <p class="small text-body-secondary mb-1">Saldo total</p>
+        <p class="amount total-balance mb-0" th:each="total : ${totals}" th:text="${@fmt.money(total.value, total.key)}">0,00 €</p>
+    </section>
 
-    <div class="list-group" th:unless="${accounts.isEmpty()}">
-        <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3" th:each="account : ${accounts}" th:href="@{/accounts/{id}(id=${account.id()})}">
-            <span class="avatar rounded-circle bg-body-tertiary d-flex align-items-center justify-content-center flex-shrink-0 small fw-semibold" aria-hidden="true" th:text="${@fmt.initials(account.holderName())}">AP</span>
+    <!--/* Cada cuenta es una tarjeta inclinada como la pata derecha de la A, con la A de marca de agua (#185). Las
+         iniciales del titular solo le sirven al administrador, que ve las cuentas de todos. */-->
+    <div class="account-cards" th:unless="${accounts.isEmpty()}">
+        <a class="card-slant" th:each="account : ${accounts}" th:href="@{/accounts/{id}(id=${account.id()})}">
+            <svg th:replace="~{fragments/brand :: watermark}"></svg>
+            <span class="avatar flex-shrink-0" aria-hidden="true" th:if="${admin}" th:text="${@fmt.initials(account.holderName())}">AP</span>
             <span class="flex-grow-1 overflow-hidden">
-                <span class="d-block" th:text="${account.holderName()}">Titular</span>
-                <span class="d-block small text-body-secondary"><span th:text="${@fmt.maskedIban(account.accountNumber())}"
-                      th:title="${account.accountNumber()}">ES00 •••• 0000</span> · <span th:text="${@fmt.segment(account.segment())}">Minorista</span></span>
+                <span class="d-block iban" th:text="${@fmt.maskedIban(account.accountNumber())}"
+                      th:title="${account.accountNumber()}">ES00 •••• 0000</span>
+                <span class="d-block small text-body-secondary text-truncate"><span th:text="${account.holderName()}">Titular</span> · <span th:text="${@fmt.segment(account.segment())}">Minorista</span></span>
             </span>
-            <span class="text-nowrap" th:text="${@fmt.money(account.balance(), account.currency())}">0,00 €</span>
+            <span class="amount account-balance" th:text="${@fmt.money(account.balance(), account.currency())}">0,00 €</span>
         </a>
     </div>
     <p th:if="${accounts.isEmpty() and admin}" class="text-body-secondary">Todavía no hay cuentas. Abre la primera.</p>
     <p th:if="${accounts.isEmpty() and !admin}" class="text-body-secondary">Todavía no tienes cuentas.</p>
+
+    <div class="page-cta">
+        <a class="btn-slant btn-slant-light" th:if="${admin}" th:href="@{/accounts/new}"><svg th:replace="~{fragments/icons :: icon('plus')}"></svg>Abrir cuenta</a>
+        <a class="btn-slant btn-slant-light" th:if="${customer}" th:href="@{/accounts/another}"><svg th:replace="~{fragments/icons :: icon('plus')}"></svg>Abrir otra cuenta</a>
+    </div>
 </main>
 </body>
 </html>

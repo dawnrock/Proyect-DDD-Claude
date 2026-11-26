@@ -89,6 +89,22 @@ class AccountListControllerTests extends AccountWebTestSupport {
         }
 
         @Test
+        @DisplayName("Cada cuenta es una tarjeta inclinada con la A de marca de agua que lleva a su detalle, y abrir cuenta es un botón claro (#185)")
+        void eachAccountIsASlantedCardWithTheWatermark() throws Exception {
+            UUID id = UUID.randomUUID();
+            when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(
+                    summary(id, "ES1234567890123456789012", "Ana Pérez", "150.00")));
+
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<a class=\"card-slant\" href=\"/accounts/" + id + "\">\\s*"
+                                    + "<svg class=\"watermark\"[^>]*aria-hidden=\"true\".*")))
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<a class=\"btn-slant btn-slant-light\" href=\"/accounts/new\">.*Abrir cuenta.*")));
+        }
+
+        @Test
         @DisplayName("El listado muestra el segmento de cada cuenta junto al IBAN abreviado")
         void theListShowsEachAccountsSegment() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(
@@ -128,6 +144,21 @@ class AccountListControllerTests extends AccountWebTestSupport {
                             "(?s).*<link rel=\"icon\" type=\"image/svg\\+xml\" href=\"/brand/favicon[^\"]*\\.svg\">.*")))
                     .andExpect(content().string(matchesPattern("(?s).*<title>[^<]* · monA Bank</title>.*")))
                     .andExpect(content().string(not(containsString("Cuentas corrientes"))));
+        }
+
+        @Test
+        @DisplayName("Todas las páginas precargan las tipografías de la marca, Tektur y Sora, con su URL versionada (#185)")
+        void everyPagePreloadsTheBrandTypefaces() throws Exception {
+            when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
+
+            mvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<link rel=\"preload\" href=\"/vendor/tektur/tektur-latin-wght-normal-[0-9a-f]{32}\\.woff2\""
+                                    + " as=\"font\" type=\"font/woff2\" crossorigin>.*")))
+                    .andExpect(content().string(matchesPattern(
+                            "(?s).*<link rel=\"preload\" href=\"/vendor/sora/sora-latin-wght-normal-[0-9a-f]{32}\\.woff2\""
+                                    + " as=\"font\" type=\"font/woff2\" crossorigin>.*")));
         }
 
         @Test
