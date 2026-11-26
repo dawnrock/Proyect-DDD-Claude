@@ -59,7 +59,7 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
 - **Acceptance criteria:**
   - [x] Contract agreed by backend-dev and web-dev and frozen in a commit; `./mvnw verify` compiles against it.
 
-### [ ] T1 — Registration with an Auth0 identity (~10 min)
+### [x] T1 — Registration with an Auth0 identity (~10 min)
 
 - **Side:** back
 - **Layer:** adapter.in
@@ -68,11 +68,11 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
 - **What to do:**
   1. Expired pending identity → `PendingIdentityExpiredException` before reserving anything. Otherwise the same steps as `register` (limit, username checks, `signUp`), then the user with an unusable password and `identities.link(...)`.
 - **Acceptance criteria:**
-  - [ ] Creates the customer, the account, the user (role `USER`) and the link; the username is the customer's owner.
-  - [ ] The user cannot authenticate with any password (an empty one included) through the `ThrottledAuthenticationProvider`.
-  - [ ] Expired identity: nothing created and the sign-up slot untouched; duplicate document, taken username and the sign-up limit behave as in `register` (failures counted, slot given back).
+  - [x] Creates the customer, the account, the user (role `USER`) and the link; the username is the customer's owner.
+  - [x] The user cannot authenticate with any password (an empty one included) through the `ThrottledAuthenticationProvider`.
+  - [x] Expired identity: nothing created and the sign-up slot untouched; duplicate document, taken username and the sign-up limit behave as in `register` (failures counted, slot given back).
 
-### [ ] T2 — An identity already linked meanwhile (~5 min)
+### [x] T2 — An identity already linked meanwhile (~5 min)
 
 - **Side:** back
 - **Layer:** adapter.in
@@ -81,7 +81,7 @@ Third of four issues: #196 (done) → #197 (done) → **#198** → #199 realisti
 - **What to do:**
   1. Before creating anything, an identity that is already linked (the customer linked it in another tab) → `IdentityAlreadyLinkedException`, nothing created, slot given back.
 - **Acceptance criteria:**
-  - [ ] With the `sub` already linked, no customer, account or user is created and the exception reaches the caller.
+  - [x] With the `sub` already linked, no customer, account or user is created and the exception reaches the caller.
 
 ### [ ] T3 — Link page: «Date de alta» (~5 min)
 
