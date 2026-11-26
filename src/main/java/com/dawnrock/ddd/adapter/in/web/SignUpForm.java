@@ -1,6 +1,7 @@
 package com.dawnrock.ddd.adapter.in.web;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
@@ -92,6 +93,14 @@ public class SignUpForm {
     @Setter(lombok.AccessLevel.NONE)
     private boolean externalIdentity;
 
+    /** El {@code sub} de Auth0 con el que empezó el alta en modo Auth0: solo esa identidad puede continuarla. */
+    @Setter(lombok.AccessLevel.NONE)
+    private String externalSubject;
+
+    /** Cuándo empezó el alta en modo Auth0: no puede durar más que {@code SignUpController.AUTH0_WIZARD_LIMIT}. */
+    @Setter(lombok.AccessLevel.NONE)
+    private Instant externalStartedAt;
+
     @Setter(lombok.AccessLevel.NONE)
     private boolean personalDataDone;
 
@@ -99,11 +108,13 @@ public class SignUpForm {
     private boolean accessDone;
 
     /**
-     * Pone el formulario en modo Auth0 con el correo que da Auth0 (editable y solo informativo; vacío si no hay). El
-     * navegador no puede activar el modo: el campo no tiene setter.
+     * Pone el formulario en modo Auth0 para la identidad {@code subject}, con el correo que da Auth0 (editable y solo
+     * informativo; vacío si no hay). El navegador no puede activar el modo ni cambiar la identidad: no hay setters.
      */
-    public void startExternalIdentity(String email) {
+    public void startExternalIdentity(String subject, String email, Instant startedAt) {
         externalIdentity = true;
+        externalSubject = subject;
+        externalStartedAt = startedAt;
         this.email = email == null ? "" : email;
     }
 

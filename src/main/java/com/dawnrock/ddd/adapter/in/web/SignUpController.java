@@ -49,6 +49,9 @@ import com.dawnrock.ddd.domain.model.DuplicateCustomerException;
 @SessionAttributes(SignUpController.FORM)
 public class SignUpController {
 
+    /** Lo más que puede durar un alta en modo Auth0, aunque la identidad pendiente se renueve en cada paso. */
+    static final Duration AUTH0_WIZARD_LIMIT = Duration.ofMinutes(30);
+
     static final String FORM = "signUpForm";
 
     private static final String DATA_VIEW = "signup/data";
@@ -111,7 +114,7 @@ public class SignUpController {
             return LINK_EXPIRED;
         }
         SignUpForm form = new SignUpForm();
-        form.startExternalIdentity(pending.email());
+        form.startExternalIdentity(pending.subject(), pending.email(), pendingIdentities.instant());
         model.addAttribute(FORM, form);
         warnIfLimitReached(request, model);
         return DATA_VIEW;
@@ -158,7 +161,10 @@ public class SignUpController {
         } else {
             validator.validate(form, result, SignUpForm.Access.class, SignUpForm.LocalPassword.class);
         }
-        if (!form.isExternalIdentity() && !result.hasErrors() && !Objects.equals(form.getPassword(), form.getPasswordRepetition())) {
+        if (form.isExternalIdentity()) {
+            // En modo Auth0 no hay contraseña local: si el navegador manda una, no se guarda
+            form.clearPassword();
+        } else if (!result.hasErrors() && passwordsDiffer(form)) {
             result.rejectValue("passwordRepetition", "mismatch", "Las contraseñas no coinciden");
         }
         if (result.hasErrors()) {
@@ -269,9 +275,22 @@ public class SignUpController {
         return "redirect:/oauth2/authorization/auth0";
     }
 
-    /** Si el asistente está en modo Auth0 y ya no hay identidad pendiente vigente (la caducada se quita). */
+    private static boolean passwordsDiffer(SignUpForm form) {
+        return !Objects.equals(form.getPassword(), form.getPasswordRepetition());
+    }
+
+    /**
+     * Si el asistente está en modo Auth0 y ya no puede seguir: no hay identidad pendiente vigente (la caducada se
+     * quita), es de otra identidad que la que empezó el alta, o el alta pasó de {@link #AUTH0_WIZARD_LIMIT} aunque la
+     * identidad se haya ido renovando (#198, revisión).
+     */
     private boolean pendingMissing(SignUpForm form, HttpSession session) {
-        return form.isExternalIdentity() && pendingIdentities.current(session) == null;
+        if (!form.isExternalIdentity()) {
+            return false;
+        }
+        PendingIdentity pending = pendingIdentities.current(session);
+        return pending == null || !pending.subject().equals(form.getExternalSubject())
+                || pendingIdentities.instant().isAfter(form.getExternalStartedAt().plus(AUTH0_WIZARD_LIMIT));
     }
 
     /** Completar un paso del modo Auth0 renueva la identidad pendiente: la ventana de 10 minutos se desliza. */

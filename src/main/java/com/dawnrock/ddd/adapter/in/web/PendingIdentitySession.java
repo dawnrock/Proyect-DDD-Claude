@@ -1,6 +1,7 @@
 package com.dawnrock.ddd.adapter.in.web;
 
 import java.time.Clock;
+import java.time.Instant;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -44,6 +45,11 @@ final class PendingIdentitySession {
 
     void remove(HttpSession session) {
         session.removeAttribute(PendingIdentity.SESSION_ATTRIBUTE);
+    }
+
+    /** El instante actual según el reloj de la aplicación. */
+    Instant instant() {
+        return now().instant();
     }
 
     private Clock now() {

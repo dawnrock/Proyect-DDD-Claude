@@ -3,6 +3,7 @@ package com.dawnrock.ddd.adapter.in;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.util.Base64;
+import java.util.Objects;
 
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -80,6 +81,7 @@ public class CustomerRegistration {
      */
     public synchronized AccountSummary registerWithExternalIdentity(SignUpCommand command, PendingIdentity pending,
                                                                     String clientIp) {
+        Objects.requireNonNull(pending, "Falta la identidad de Auth0 pendiente");
         // Estas dos comprobaciones no reservan nada ni cuentan para los límites: no revelan ningún documento ni usuario
         if (pending.isExpired(clock)) {
             throw new PendingIdentityExpiredException(pending.provider());
