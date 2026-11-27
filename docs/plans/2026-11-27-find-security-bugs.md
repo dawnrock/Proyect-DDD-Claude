@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-27
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~25 min (3 tasks)
 
 ## Goal
@@ -41,7 +41,7 @@ A local trial run on 2026-11-27 (commit `3bc1cb9`) reported five warnings: one i
 
 ## Tasks
 
-### [ ] T1 — Problem responses of the API chain serialized, not formatted (~10 min)
+### [x] T1 — Problem responses of the API chain serialized, not formatted (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `ApiSecurityConfig.java`, `ApiSecurityTests.java`
@@ -50,8 +50,9 @@ A local trial run on 2026-11-27 (commit `3bc1cb9`) reported five warnings: one i
   1. Red: a test in `ApiSecurityTests` that parses the 401 (no token), 401 (invalid token), 403 (no role) bodies as JSON and checks `type`, `title`, `status` and `detail`, plus a unit test of the writer with a detail that contains `"` and `\` (still valid JSON, same text after parsing).
   2. Green: `writeProblem` builds a `ProblemDetail` (`ProblemDetail.forStatusAndDetail`, `setTitle`) and writes it with the JSON mapper to the response (`application/problem+json`, UTF-8). The mapper reaches the entry point and the access denied handler through the bean method's parameters.
 - **Acceptance criteria:**
-  - [ ] The new tests pass; existing `ApiSecurityTests`, `Auth0ApiTokensTests` and `ApiAuth0UnavailableTests` still pass with the same bodies.
-  - [ ] `node scripts/contract-test.mjs` (Schemathesis) still passes: the bodies keep the contract's `Problem` schema.
+  - [x] The new tests pass; existing `ApiSecurityTests`, `Auth0ApiTokensTests` and `ApiAuth0UnavailableTests` still pass with the same bodies.
+  - [x] `node scripts/contract-test.mjs` (Schemathesis) still passes: the bodies keep the contract's `Problem` schema.
+- **Deviation:** the writer serializes an ordered map with the same four fields (`type`, `title`, `status`, `detail`) through a private `JsonMapper` constant, instead of a `ProblemDetail` through the application's bean: the body stays byte-for-byte the same as before for every current message, needs no `ProblemDetail` mixin and no wiring. The new test is `ApiProblemResponsesTests` (red: the old writer produced invalid JSON for a detail with quotes).
 
 ### [ ] T2 — Find Security Bugs in SpotBugs, with narrow exclusions (~10 min)
 
