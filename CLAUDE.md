@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Proyecto de práctica: aplicar **DDD con Java 21 + Spring Boot 4.1** sobre el dominio de cuentas corrientes, y la **arquitectura de IA de Claude Code** (skills, agentes, hooks, issues de GitHub). Parte del estado del Lab 22 del curso de DDD (solo `domain.model`).
+Proyecto de práctica: aplicar **DDD con Java 21 + Spring Boot 4.2** sobre el dominio de cuentas corrientes, y la **arquitectura de IA de Claude Code** (skills, agentes, hooks, issues de GitHub). Parte del estado del Lab 22 del curso de DDD (solo `domain.model`).
 
 El proyecto mantiene dos "fotografías" en ramas separadas:
 
