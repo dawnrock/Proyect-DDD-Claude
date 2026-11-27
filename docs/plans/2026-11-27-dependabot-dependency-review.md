@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-27
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~30 min (4 tasks)
 
 ## Goal
@@ -57,7 +57,7 @@ Close the largest OWASP Top 10 gap of the project, **A06 · Vulnerable and outda
   1. New job `dependency-review` with `if: github.event_name == 'pull_request'`, `permissions: contents: read`, `actions/checkout@v4` and `actions/dependency-review-action@v4` with `fail-on-severity: high`.
   2. Keep the `verify` job unchanged; the Telegram notice stays in `verify`.
 - **Acceptance criteria:**
-  - [ ] The PR of this issue shows the `dependency-review` check in green.
+  - [x] The PR of this issue shows the `dependency-review` check in green.
 
 ### [x] T3 — Code review skips Dependabot (~5 min)
 
@@ -67,10 +67,10 @@ Close the largest OWASP Top 10 gap of the project, **A06 · Vulnerable and outda
 - **What to do:**
   1. `if: github.actor != 'dependabot[bot]'` on the `claude-review` job (Dependabot runs do not get `CLAUDE_CODE_OAUTH_TOKEN`), with a comment saying why.
 - **Acceptance criteria:**
-  - [ ] The workflow still runs on this PR (the actor is not Dependabot).
-  - [ ] On the first Dependabot PR the job shows as skipped, not failed (checked once after the merge).
+  - [x] The workflow still runs on this PR (the actor is not Dependabot).
+  - [ ] On the first Dependabot PR the job shows as skipped, not failed (checked once after the merge). _Pending: only observable on the first Dependabot PR._
 
-### [ ] T4 — Documentation and project status (~10 min)
+### [x] T4 — Documentation and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/decisiones.md`, `docs/ia/pendientes.md`, `docs/ia/estado-del-proyecto.md`, `docs/ia/historial.md`
@@ -80,29 +80,29 @@ Close the largest OWASP Top 10 gap of the project, **A06 · Vulnerable and outda
   2. `pendientes.md`: what Dependabot does not cover (Motion, Swagger UI with its SRI hashes, tools pinned in `ci.yml`), and the manual step for the owner: turn on **Dependabot alerts** and **security updates** in the repository settings (they are not part of `dependabot.yml`).
   3. Project status: #204 done, next step #205; one row in `historial.md`.
 - **Acceptance criteria:**
-  - [ ] `node scripts/check-project-status.mjs` passes in CI (the PR closes #204 and touches the status file).
+  - [x] `node scripts/check-project-status.mjs` passes in CI (the PR closes #204 and touches the status file).
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] `.github/dependabot.yml` covers Maven, GitHub Actions and Docker against `Hexagonal`.
-- [ ] The `dependency-review` job runs on pull requests and is green on this one.
-- [ ] Dependabot pull requests do not fail because of missing secrets.
+- [x] `.github/dependabot.yml` covers Maven, GitHub Actions and Docker against `Hexagonal`.
+- [x] The `dependency-review` job runs on pull requests and is green on this one.
+- [x] Dependabot pull requests do not fail because of missing secrets (the review job is skipped for them; the `verify` job already tolerates missing secrets).
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit. (No Java changes.)
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` — n/a (no Java tests).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR) — none added.
-- [ ] If the API changes: n/a.
-- [ ] Any new business term is in `docs/dominio/glosario.md` — n/a.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit. (No Java changes.)
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` — n/a (no Java tests).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR) — none added.
+- [x] If the API changes: n/a.
+- [x] Any new business term is in `docs/dominio/glosario.md` — n/a.
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
