@@ -89,7 +89,7 @@ Facts from the code:
   - [x] `./mvnw verify` green with no Alpine in the jar.
 - **Deviation:** in T3 `TemplatesCspTests` covers inline styles, `on*=` handlers and Alpine attributes in `templates/`; the rule on inline scripts lands with T6 (login) and the scan of `static/**/*.html` with T8 (Swagger UI), because those inline scripts only disappear in those tasks and every task must leave `./mvnw verify` green. The sign-up progress test now checks the `signup-progress-step-N` class instead of `style="width: 33%"`.
 
-### [ ] T4 — htmx hardened for the CSP (~5 min)
+### [x] T4 — htmx hardened for the CSP (~5 min)
 
 - **Layer:** adapter.in (web resources)
 - **Files:** `fragments/layout.html`, `AccountListControllerTests.java` (or the test that already checks `htmx-config`)
@@ -97,7 +97,7 @@ Facts from the code:
 - **What to do:**
   1. Add `"includeIndicatorStyles":false,"allowEval":false,"allowScriptTags":false` to the existing `htmx-config` meta, with a comment on why (CSP, #206).
 - **Acceptance criteria:**
-  - [ ] A test checks the three settings in the rendered layout.
+  - [x] A test checks the three settings in the rendered layout (`LoginControllerTests`).
 
 ### [ ] T5 — The three policies as values (~10 min)
 

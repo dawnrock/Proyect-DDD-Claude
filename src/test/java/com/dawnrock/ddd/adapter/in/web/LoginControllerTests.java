@@ -40,13 +40,14 @@ class LoginControllerTests {
     }
 
     @Test
-    @DisplayName("El login navega con htmx y la configuración de htmx no guarda copias de las páginas (#126)")
+    @DisplayName("El login navega con htmx, que no guarda copias de las páginas ni evalúa código ni inyecta estilos (#126, #206)")
     void theLoginNavigatesWithHtmxAndDoesNotCachePages() throws Exception {
         mvc.perform(get("/login").param("form", ""))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("hx-boost=\"true\" hx-swap=\"innerHTML transition:true\"")))
-                .andExpect(content().string(containsString(
-                        "<meta name=\"htmx-config\" content='{\"historyCacheSize\":0,\"refreshOnHistoryMiss\":true}'>")));
+                .andExpect(content().string(containsString("<meta name=\"htmx-config\" content='{\"historyCacheSize\":0,"
+                        + "\"refreshOnHistoryMiss\":true,\"includeIndicatorStyles\":false,\"allowEval\":false,"
+                        + "\"allowScriptTags\":false}'>")));
     }
 
     @Test
