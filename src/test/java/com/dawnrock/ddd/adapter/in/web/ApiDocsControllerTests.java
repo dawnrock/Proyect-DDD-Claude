@@ -1,6 +1,8 @@
 package com.dawnrock.ddd.adapter.in.web;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -41,10 +43,15 @@ class ApiDocsControllerTests {
 
     @Test
     @WithAnonymousUser
-    @DisplayName("La página de Swagger UI pide su configuración de Auth0 y solo inicia sesión con PKCE y la audiencia")
+    @DisplayName("La página de Swagger UI carga init.js, sin script en línea, que pide su configuración de Auth0 y solo inicia sesión con PKCE y la audiencia (#206)")
     void theSwaggerUiPageAsksForItsAuth0ConfigAndSignsInWithPkce() throws Exception {
         mvc.perform(get("/api-docs/index.html"))
                 .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<script src=\"init.js\"></script>")))
+                .andExpect(content().string(not(matchesPattern("(?s).*<script>.*"))));
+        mvc.perform(get("/api-docs/init.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/javascript"))
                 .andExpect(content().string(containsString("fetch('/api-docs/oauth-config')")))
                 .andExpect(content().string(containsString(
                         "oauth2RedirectUrl: window.location.origin + '/api-docs/oauth2-redirect.html'")))

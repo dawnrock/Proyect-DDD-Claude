@@ -133,7 +133,7 @@ Facts from the code:
 - **Acceptance criteria:**
   - [x] The new tests pass and the existing web security tests stay green (the `/api-docs` and Auth0 `form-action` cases live in `ApiDocsControllerTests` and `ApiDocsAuth0Tests`, whose contexts serve Swagger UI and configure a tenant; the H2 exclusion was proven by removing it: its test failed).
 
-### [ ] T8 — Swagger UI without inline script (~5 min)
+### [x] T8 — Swagger UI without inline script (~5 min)
 
 - **Layer:** adapter.in (web resources)
 - **Files:** `static/api-docs/index.html`, `static/api-docs/init.js` (new), `ApiDocsControllerTests.java`
@@ -142,7 +142,7 @@ Facts from the code:
   1. Move the inline `fetch('/api-docs/oauth-config')…` block unchanged into `init.js`, loaded with `<script src="init.js">` after the bundle.
   2. Test: `/api-docs/init.js` is served and public; `index.html` has no inline script.
 - **Acceptance criteria:**
-  - [ ] `ApiDocsControllerTests` and `ApiDocsAuth0Tests` pass.
+  - [x] `ApiDocsControllerTests` and `ApiDocsAuth0Tests` pass; `TemplatesCspTests` now also scans `static/**/*.html` (except the copied `oauth2-redirect.html`) for inline scripts, styles and handlers; the two Swagger UI tests of `DddLabApplicationTests` look for the bootstrap code in `init.js`.
 
 ### [ ] T9 — API chain headers (~5 min)
 
