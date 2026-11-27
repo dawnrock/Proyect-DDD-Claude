@@ -130,7 +130,6 @@ class WebSecurityTests {
             "/webjars/bootstrap/css/bootstrap.min.css",
             "/webjars/bootstrap/js/bootstrap.bundle.min.js",
             "/webjars/htmx.org/dist/htmx.min.js",
-            "/webjars/alpinejs/dist/cdn.min.js",
             "/webjars/lucide-static/sprite.svg",
             "/vendor/motion/motion.js"})
     @DisplayName("Las librerías del frontend se sirven sin sesión y sin versión en la ruta (#124)")

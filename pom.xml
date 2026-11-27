@@ -32,7 +32,6 @@
         <!-- Librerías del frontend web servidas como WebJars (ADR 0016, #124) -->
         <bootstrap.version>5.3.8</bootstrap.version>
         <htmx.version>2.0.11</htmx.version>
-        <alpinejs.version>3.17.5</alpinejs.version>
         <lucide-static.version>1.67.0</lucide-static.version>
         <webjars-locator-lite.version>1.1.5</webjars-locator-lite.version>
         <!-- spring-boot:run arranca con los datos de demostración (#11); -Dspring-boot.run.profiles=default lo evita -->
@@ -113,11 +112,6 @@
             <groupId>org.webjars.npm</groupId>
             <artifactId>htmx.org</artifactId>
             <version>${htmx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.npm</groupId>
-            <artifactId>alpinejs</artifactId>
-            <version>${alpinejs.version}</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.npm</groupId>

@@ -74,7 +74,7 @@ Facts from the code:
 - **Acceptance criteria:**
   - [x] `AccountDetailControllerTests` passes; the server still opens the panel whose form came back with errors.
 
-### [ ] T3 — Alpine out of the build and no inline styles (~10 min)
+### [x] T3 — Alpine out of the build and no inline styles (~10 min)
 
 - **Layer:** adapter.in (web resources) · build
 - **Files:** `pom.xml`, `fragments/layout.html`, `signup/progress.html`, CSS of the sign-up, `WebSecurityTests.java`, `AccountListControllerTests.java`, new `TemplatesCspTests.java`
@@ -85,8 +85,9 @@ Facts from the code:
   3. Red/green: `TemplatesCspTests` scans `src/main/resources/templates/**/*.html` and `static/**/*.html` (except `static/api-docs/oauth2-redirect.html`, copied unchanged from swagger-ui-dist) and fails on `style=`, `th:style`, `on*=` handlers, `x-` attributes and any `<script>` without `src` that is not the nonce-carrying import map.
   4. Update the two tests that list the Alpine WebJar.
 - **Acceptance criteria:**
-  - [ ] `TemplatesCspTests` passes, and fails if `style="…"` is added back to any template (checked by breaking it once).
-  - [ ] `./mvnw verify` green with no Alpine in the jar.
+  - [x] `TemplatesCspTests` passes, and fails if `style="…"` is added back to any template (checked by breaking it once).
+  - [x] `./mvnw verify` green with no Alpine in the jar.
+- **Deviation:** in T3 `TemplatesCspTests` covers inline styles, `on*=` handlers and Alpine attributes in `templates/`; the rule on inline scripts lands with T6 (login) and the scan of `static/**/*.html` with T8 (Swagger UI), because those inline scripts only disappear in those tasks and every task must leave `./mvnw verify` green. The sign-up progress test now checks the `signup-progress-step-N` class instead of `style="width: 33%"`.
 
 ### [ ] T4 — htmx hardened for the CSP (~5 min)
 
