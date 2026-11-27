@@ -9,9 +9,10 @@
     <title th:text="${title} + ' · monA Bank'">monA Bank</title>
     <link rel="icon" type="image/svg+xml" th:href="@{/brand/favicon.svg}">
     <!--/* htmx (#126): sin copias de las páginas en sessionStorage (llevarían saldos e IBAN); volver atrás recarga. Con la
-         CSP (#206, ADR 0025): no inyecta su <style> de indicadores (no se usan), no evalúa código (hx-on, js:) y no ejecuta
-         los <script> que lleguen en una respuesta. */-->
-    <meta name="htmx-config" content='{"historyCacheSize":0,"refreshOnHistoryMiss":true,"includeIndicatorStyles":false,"allowEval":false,"allowScriptTags":false}'>
+         CSP (#206, ADR 0025): no inyecta su <style> de indicadores (no se usan), no evalúa código (hx-on, js:), no ejecuta
+         los <script> que lleguen en una respuesta y, al asentar un intercambio, no copia el atributo style del elemento
+         viejo (el que deja Motion al animar), porque copiarlo es un estilo en línea que la CSP bloquea. */-->
+    <meta name="htmx-config" content='{"historyCacheSize":0,"refreshOnHistoryMiss":true,"includeIndicatorStyles":false,"allowEval":false,"allowScriptTags":false,"attributesToSettle":["class","width","height"]}'>
     <!--/* Tipografías de la marca (#185, ADR 0023): Tektur en títulos e importes, Sora en el resto. Se precargan para que
          el texto no cambie de letra al cargar; su URL versionada es la misma que reescribe app.css. */-->
     <link rel="preload" th:href="@{/vendor/tektur/tektur-latin-wght-normal.woff2}" as="font" type="font/woff2" crossorigin>

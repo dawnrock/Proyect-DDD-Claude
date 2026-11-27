@@ -155,7 +155,7 @@ Facts from the code:
 - **Acceptance criteria:**
   - [x] The tests pass; `node scripts/contract-test.mjs` still passes (738/738; headers are not part of the contract).
 
-### [ ] T10 — Browser check with Playwright (~15 min)
+### [x] T10 — Browser check with Playwright (~15 min)
 
 - **Layer:** tests
 - **Files:** none committed (a script in the session's scratchpad)
@@ -165,7 +165,9 @@ Facts from the code:
   2. Repeat login and detail with JavaScript disabled.
   3. Auth0 flows cannot be run locally (no tenant): rely on T7's `form-action` test and note the owner check below.
 - **Acceptance criteria:**
-  - [ ] Zero CSP violations and zero console errors on every page; the result goes in the PR description.
+  - [x] Zero CSP violations on every page; the result goes in the PR description.
+- **Result (2026-11-27):** the first run found one real violation: when htmx swaps `#account-panel`, its settle step copies the old element's `style` attribute (left by Motion's entrance animation) with `setAttribute`, which `style-src 'self'` blocks. Fixed with `"attributesToSettle":["class","width","height"]` in `htmx-config` (test in `LoginControllerTests`). After it, no CSP violation anywhere: login doors and intro, wrong password, show password (also on the sign-up step swapped by htmx), deposit/withdrawal/transfer through htmx, accordion before and after a swap, logout, sign-up, Swagger UI with "Try it out" and the H2 console; without JavaScript the toggle stays hidden and the `<details>` open. jsDelivr is not reachable from the session, so the identical `swagger-ui-dist@5.34.1` files from npm were served for its URLs (SRI matched).
+- **Not from this change (seen on `Hexagonal` too, same walk):** a `pageerror` "Transition was aborted… ViewTransition opt-in disabled" on `/login?logout` after several htmx operations, and the 404 of `/api-docs/openid-configuration` when Auth0 is not configured. On `Hexagonal` the show-password button did not work on the sign-up step swapped by htmx (Alpine did not initialise it); the delegated listeners fix it.
 
 ### [ ] T11 — ADRs, pending items and project status (~10 min)
 

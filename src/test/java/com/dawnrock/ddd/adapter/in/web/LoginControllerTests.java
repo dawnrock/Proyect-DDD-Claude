@@ -47,7 +47,7 @@ class LoginControllerTests {
                 .andExpect(content().string(containsString("hx-boost=\"true\" hx-swap=\"innerHTML transition:true\"")))
                 .andExpect(content().string(containsString("<meta name=\"htmx-config\" content='{\"historyCacheSize\":0,"
                         + "\"refreshOnHistoryMiss\":true,\"includeIndicatorStyles\":false,\"allowEval\":false,"
-                        + "\"allowScriptTags\":false}'>")));
+                        + "\"allowScriptTags\":false,\"attributesToSettle\":[\"class\",\"width\",\"height\"]}'>")));
     }
 
     @Test
