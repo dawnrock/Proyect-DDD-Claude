@@ -4,8 +4,6 @@ target/
 .github/
 .claude/
 .mvn/
-graphify-out/
-graphify-out.*/
 docs/
 !docs/api/openapi.yaml
 scripts/

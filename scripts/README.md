@@ -32,7 +32,7 @@ git diff --name-only origin/Monolithic...HEAD | PR_BODY="Closes #5" node scripts
 
 ## notify.mjs
 
-Envía un mensaje push a Telegram. Lo usan `plan-feature`, `implement-plan` y el hook `notify-telegram.mjs`. Configuración en [docs/ia/notificaciones.md](../docs/ia/notificaciones.md).
+Envía un mensaje push a Telegram. Lo usan el hook `notify-telegram.mjs` y el CI cuando falla; las skills ya no avisan. Configuración en [docs/ia/notificaciones.md](../docs/ia/notificaciones.md).
 
 ```bash
 node scripts/notify.mjs "Prueba desde Proyect-DDD-Claude"
@@ -51,18 +51,6 @@ node scripts/clean-merged-worktrees.mjs             # borra
 ```
 
 Se ejecuta solo tras cada `gh pr merge` con el hook `PostToolUse` de `.claude/settings.json` (`--hook`). Nunca toca el checkout principal, el worktree desde el que se ejecuta, los worktrees de sesiones (fuera de `agent-*`), los bloqueados ni los que tienen trabajo sin commitear. Nunca borra las ramas de fase, `master`, las ramas en uso ni las `claude/*`, que crea la app de Claude para sus sesiones. Solo reconoce fusiones con commit de merge, las que usa este repositorio. Si OneDrive bloquea una carpeta, la borra a mano y ejecuta `git worktree prune`.
-
-## graphify.mjs
-
-Lanzador portable de [Graphify](https://pypi.org/project/graphifyy/) (ADR 0010). El grafo del código Java vive en `graphify-out/` (no versionado, uno por worktree) y se usa solo para preguntas de dependencias.
-
-```bash
-node scripts/graphify.mjs update .                                  # regenera el grafo (local, sin tokens)
-node scripts/graphify.mjs affected "MoneyTransferService"           # quién depende de una clase
-node scripts/graphify.mjs path "TransferController" "CheckingAccount" # cómo se relacionan dos clases
-```
-
-Busca `graphify` en el PATH y, si no está, `py -m graphify` (Windows) o `python3 -m graphify`. Fuerza `GRAPHIFY_BACKEND=none`. Códigos de salida: 0 con respuesta, 3 si el nombre es ambiguo (lista los candidatos), 4 si no hay nodo y 1 si Graphify no está instalado (quien lo llama sigue con Grep). Instalación: `py -m pip install --user graphifyy` o `pip install graphifyy`.
 
 ## contract-test.mjs
 

@@ -1,6 +1,6 @@
 ---
 name: implement-plan
-description: Implementa el plan de una issue de GitHub (generado con plan-feature) en un git worktree aislado (o, en las sesiones en la nube, en la rama que impone el entorno), tarea a tarea, con TDD estricto (JUnit + ArchUnit, ./mvnw). Cada tarea terminada se commitea y se marca en el plan; al cumplir los criterios globales abre una PR contra la rama de la fase (Monolithic o Hexagonal, nunca master) y avisa por Telegram. Úsala cuando se pida implementar, ejecutar o llevar a cabo un plan o una issue.
+description: Implementa el plan de una issue de GitHub (generado con plan-feature) en un git worktree aislado (o, en las sesiones en la nube, en la rama que impone el entorno), tarea a tarea, con TDD estricto (JUnit + ArchUnit, ./mvnw). Cada tarea terminada se commitea y se marca en el plan; al cumplir los criterios globales abre una PR contra la rama de la fase (Monolithic o Hexagonal, nunca master). Úsala cuando se pida implementar, ejecutar o llevar a cabo un plan o una issue.
 argument-hint: <número de issue de GitHub>
 allowed-tools: Read, Grep, Glob, Edit, Write, AskUserQuestion, Bash(git:*), Bash(./mvnw:*), Bash(mvnw.cmd:*), Bash(node:*), Bash(npx @redocly/cli:*), Bash(curl:*), Bash(ls:*), Bash(cp:*), Bash(gh issue view:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh pr checks:*), Bash(gh pr merge:*)
 ---
@@ -35,7 +35,6 @@ Issue indicada por el usuario: $ARGUMENTS
 - `.claude/worktrees/` está en `.gitignore`; si no lo estuviera, avísalo en el informe.
 - Si el plan no está commiteado en la rama base, cópialo al worktree y haz un primer commit `docs: añade el plan <slug>`.
 - A partir de aquí **todo** se hace dentro del worktree. Comprueba que las rutas absolutas incluyen `.claude/worktrees/<slug>/` antes de editar.
-- Genera el grafo del código en el worktree: `node scripts/graphify.mjs update .` (local, sin tokens; ADR 0010). Si Graphify no está instalado, sigue sin él.
 - Cambia `**Status:**` del plan a `in progress`.
 
 ### 2 bis. Rama impuesta por el entorno (sesiones en la nube)
@@ -46,10 +45,10 @@ Si el entorno impone una rama de desarrollo, se trabaja **en esa rama, sin workt
   - Vacío, o solo commits ya contenidos en la rama base (PR anterior fusionada): reiníciala desde la base con `git checkout -B <rama-impuesta> origin/<rama-base>`.
   - Commits de esta misma issue (por ejemplo, su plan): síguela sin reiniciar y continúa desde la primera tarea sin marcar.
   - Commits de otro trabajo sin fusionar: **para** y pregunta con `AskUserQuestion`; no mezcles dos issues en la misma PR.
-- Trabaja en el checkout principal. El plan se commitea en la rama como en el paso 2, se genera el grafo (`node scripts/graphify.mjs update .`) y `**Status:**` pasa a `in progress`.
+- Trabaja en el checkout principal. El plan se commitea en la rama como en el paso 2 y `**Status:**` pasa a `in progress`.
 - Sube con `git push -u origin <rama-impuesta>`; nunca a otra rama.
 - La PR (paso 7) se abre **desde la rama impuesta contra la rama de la fase** (`Monolithic` o `Hexagonal`, nunca `master`). No es una desviación del plan: no hace falta justificarla en la PR.
-- Tras la fusión (paso 9) no hay worktree que borrar. GitHub puede borrar la rama remota al fusionar; la local se reinicia desde la base ya actualizada (`git fetch origin <rama-base> && git checkout -B <rama-impuesta> origin/<rama-base>`) y se sube si el entorno pide que no queden commits sin subir. Así la siguiente issue parte de la base fusionada.
+- Tras la fusión (paso 8) no hay worktree que borrar. GitHub puede borrar la rama remota al fusionar; la local se reinicia desde la base ya actualizada (`git fetch origin <rama-base> && git checkout -B <rama-impuesta> origin/<rama-base>`) y se sube si el entorno pide que no queden commits sin subir. Así la siguiente issue parte de la base fusionada.
 
 ### 3. Implementar cada tarea con TDD estricto
 
@@ -65,7 +64,6 @@ Casos especiales:
 - **Tests de caracterización** o sobre código existente: pasarán a la primera. Demuestra que pueden fallar rompiendo temporalmente el código, viendo el rojo y revirtiendo. Indícalo en el resumen.
 - **Reglas de ArchUnit nuevas:** valídalas introduciendo temporalmente la dependencia prohibida (rojo) y revirtiendo (verde).
 - **Tareas sin comportamiento testeable** (docs, configuración, `pom.xml`): verifica sus criterios y ejecuta `./mvnw verify`.
-- Si una tarea toca el dominio, ejecuta también `node .claude/skills/ddd-building-block/scripts/check-domain.mjs`.
 
 ### 4. Cerrar la tarea
 
@@ -79,7 +77,7 @@ Si un test no se puede poner en verde sin salirte del plan o un criterio no se p
 
 ### 6. Criterios globales
 
-1. Comprueba cada criterio global: `./mvnw verify`; arranque con `./mvnw spring-boot:run` en segundo plano + `curl -s localhost:8080/actuator/health` (detén el proceso al acabar); `check-domain.mjs`; `git diff origin/<rama-base>... -- pom.xml` para las dependencias; OpenAPI si aplica y, si el plan toca la API, `node scripts/contract-test.mjs` (pruebas de contrato con Schemathesis, ADR 0013; si no está instalado: `pip install schemathesis==4.33.4`).
+1. Comprueba cada criterio global: `./mvnw verify`; arranque con `./mvnw spring-boot:run` en segundo plano + `curl -s localhost:8080/actuator/health` (detén el proceso al acabar); `git diff origin/<rama-base>... -- pom.xml` para las dependencias; OpenAPI si aplica y, si el plan toca la API, `node scripts/contract-test.mjs` (pruebas de contrato con Schemathesis, ADR 0013; si no está instalado: `pip install schemathesis==4.33.4`).
 2. Márcalos. Si alguno falla, trátalo como en el paso 5.
 3. **Actualiza el estado del proyecto** (obligatorio: el CI falla si una PR con `Closes #n` no toca `docs/ia/estado-del-proyecto.md`):
    - `estado-del-proyecto.md`: escribe el estado como quedará tras fusionar la PR: la issue en "Done" con su número de PR y el "Next step" apuntando a la próxima issue; cambia la fecha de "Last updated". Mantenlo corto: se lee en cada sesión, así que no le añadas detalle.
@@ -111,19 +109,8 @@ Decisión del usuario (2026-11-17): **cuando el usuario pide una PR** (al lanzar
 3. Fusiona igual que el botón **Merge pull request** de GitHub con su opción por defecto, **Create a merge commit** (no «Squash and merge» ni «Rebase and merge»), fijando la cabeza esperada para no fusionar un commit que no has visto en verde: `gh pr merge <n> --merge --match-head-commit <sha>` (o `expectedHeadSha` con el SHA completo en la herramienta de GitHub).
 4. Si un check falla o hay un hallazgo bloqueante, **no fusiones**: arregla la causa en la misma rama, sube el arreglo y vuelve a esperar. Nunca desactives un test para ponerlo en verde.
 5. No fusiones si el usuario dice que la deje abierta, si la PR es un borrador o si en el informe quedó algo pendiente de su decisión.
-6. Después de fusionar: deja de seguir la PR, borra sus ramas y worktrees como en el paso 9 y avisa por Telegram:
-   ```bash
-   node scripts/notify.mjs "🔀 PR fusionada con los checks en verde: <título> · <URL de la PR> · #<número>"
-   ```
+6. Después de fusionar: deja de seguir la PR y borra sus ramas y worktrees como en el paso 8.
 
-### 8. Avisar por Telegram
+### 8. Informar
 
-```bash
-node scripts/notify.mjs "✅ PR lista para revisar: <título> · <URL de la PR> · #<número> · <n>/<n> tareas"
-```
-
-No avises si no hay PR. Si falla o no está configurado, menciónalo en el informe.
-
-### 9. Informar
-
-Issue, rama, worktree (o rama impuesta, paso 2 bis), URL de la PR, `git log --oneline origin/<rama-base>..HEAD`, tareas y criterios (con desviaciones y validaciones por sabotaje), si se avisó por Telegram y si la PR se fusionó (paso 7 bis) o qué la frena. Una vez fusionada (por ti con los checks en verde o por el usuario), borra el worktree y las ramas de la PR, local y remota, tras comprobar que están contenidas en la rama base (`git merge-base --is-ancestor`); nunca `master`, `Monolithic` ni `Hexagonal`. Con rama impuesta por el entorno, en vez de borrarla se reinicia desde la base (paso 2 bis).
+Issue, rama, worktree (o rama impuesta, paso 2 bis), URL de la PR, `git log --oneline origin/<rama-base>..HEAD`, tareas y criterios (con desviaciones y validaciones por sabotaje) y si la PR se fusionó (paso 7 bis) o qué la frena. Una vez fusionada (por ti con los checks en verde o por el usuario), borra el worktree y las ramas de la PR, local y remota, tras comprobar que están contenidas en la rama base (`git merge-base --is-ancestor`); nunca `master`, `Monolithic` ni `Hexagonal`. Con rama impuesta por el entorno, en vez de borrarla se reinicia desde la base (paso 2 bis).

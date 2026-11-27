@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Positive;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 
 /**
  * Formulario de transferencia. Aplica la misma validación que {@code TransferRequest} (REST), según
@@ -19,7 +18,6 @@ import lombok.experimental.Accessors;
  */
 @Getter
 @Setter
-@Accessors(fluent = false)
 public class TransferForm {
 
     @NotBlank(message = "Escribe el número de cuenta de destino")

@@ -17,7 +17,6 @@ import com.dawnrock.ddd.adapter.in.Usernames;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 
 /**
  * Formulario del alta de cliente en tres pasos. Vive en la sesión del servidor ({@code @SessionAttributes}) mientras
@@ -28,7 +27,6 @@ import lombok.experimental.Accessors;
  */
 @Getter
 @Setter
-@Accessors(fluent = false)
 public class SignUpForm {
 
     /** Paso 1: datos personales. */

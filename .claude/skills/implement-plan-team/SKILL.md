@@ -35,7 +35,7 @@ Crea el worktree de integración desde la rama base, como en `implement-plan` (p
    git worktree add -b <tipo>/<slug>-back .claude/worktrees/<slug>-back <commit-contrato>
    git worktree add -b <tipo>/<slug>-web  .claude/worktrees/<slug>-web  <commit-contrato>
    ```
-   Los creas tú, y no con `isolation: worktree` del agente, porque esos worktrees pueden partir de una rama distinta del commit del contrato (observado en #7). En cada uno, genera el grafo del código: `node scripts/graphify.mjs update .` (local, sin tokens; ADR 0010). Si Graphify no está instalado, sigue sin él.
+   Los creas tú, y no con `isolation: worktree` del agente, porque esos worktrees pueden partir de una rama distinta del commit del contrato (observado en #7).
 2. Asigna a `backend-dev` las tareas `Side: back` (en `<slug>-back`) y a `web-dev` las `Side: web` (en `<slug>-web`), en la lista de tareas compartida del equipo. Las `Side: both` las haces tú en la integración.
 3. Cada teammate sigue TDD, un commit por tarea y marca sus tareas en **su** copia del plan. La web trabaja contra el servicio del contrato simulado con `@MockitoBean`. Al lanzarlos, dales la ruta absoluta de su worktree: comprueban que cada archivo que editan está dentro, no hacen push y no tocan el contrato.
 
@@ -48,9 +48,9 @@ Si un teammate necesita cambiar el contrato, **para su tarea**, envía la propue
 1. Cuando los dos terminen, en el worktree de integración: `git merge --no-ff <tipo>/<slug>-back` y después `<tipo>/<slug>-web`. Resuelve conflictos (solo deberían aparecer en el plan: conserva las tareas marcadas de ambos lados).
 2. Haz las tareas `Side: both` (por ejemplo, un test de extremo a extremo con el servicio real en lugar del stub).
 3. Pide una revisión a `revisor-ddd` sobre `git diff origin/<rama-base>...HEAD` y corrige lo relevante.
-4. Criterios globales, actualización de `docs/ia/estado-del-proyecto.md` (obligatoria, ver paso 6.3 de `implement-plan`), `**Status:** done`, PR única contra la rama de la fase con `Closes #<número>`, aviso por Telegram y fusión automática con los checks en verde, como en `implement-plan` (pasos 6-8 y 7 bis). En el cuerpo de la PR resume: contrato acordado (y renegociaciones), tareas por lado y commits de cada uno.
+4. Criterios globales, actualización de `docs/ia/estado-del-proyecto.md` (obligatoria, ver paso 6.3 de `implement-plan`), `**Status:** done`, PR única contra la rama de la fase con `Closes #<número>` y fusión automática con los checks en verde, como en `implement-plan` (pasos 6-8 y 7 bis). En el cuerpo de la PR resume: contrato acordado (y renegociaciones), tareas por lado y commits de cada uno.
 5. Cierra el equipo. No borres todavía los worktrees ni las ramas `-back`/`-web`: se borran, como la de integración, cuando la PR esté fusionada (ver los pasos 7 bis y 9 de `implement-plan`).
 
 ## 5. Informar
 
-Igual que `implement-plan` (paso 9), añadiendo: cuántas rondas llevó acordar el contrato, renegociaciones durante la implementación y qué hizo cada teammate.
+Igual que `implement-plan` (paso 8), añadiendo: cuántas rondas llevó acordar el contrato, renegociaciones durante la implementación y qué hizo cada teammate.

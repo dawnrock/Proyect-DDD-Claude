@@ -13,7 +13,6 @@ import com.dawnrock.ddd.adapter.in.Usernames;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 
 /**
  * Formulario de alta de cuenta del administrador. Aplica la misma validación que {@code OpenAccountRequest} (REST).
@@ -22,7 +21,6 @@ import lombok.experimental.Accessors;
  */
 @Getter
 @Setter
-@Accessors(fluent = false)
 public class OpenAccountForm {
 
     @NotBlank(message = "El documento del titular es obligatorio")

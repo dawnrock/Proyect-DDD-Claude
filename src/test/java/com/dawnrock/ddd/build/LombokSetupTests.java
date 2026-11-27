@@ -18,17 +18,17 @@ class LombokSetupTests {
     }
 
     @Test
-    @DisplayName("Lombok genera accesores fluidos al estilo record")
-    void lombokGeneratesRecordStyleFluentAccessors() {
+    @DisplayName("Lombok genera getters JavaBean, los que enlaza Spring MVC en los formularios web")
+    void lombokGeneratesJavaBeanGetters() {
         Sample sample = new Sample("Ada Lovelace");
 
-        assertThat(sample.name()).isEqualTo("Ada Lovelace");
+        assertThat(sample.getName()).isEqualTo("Ada Lovelace");
     }
 
     @Test
-    @DisplayName("Lombok no genera accesores con el prefijo get")
-    void lombokDoesNotGenerateGetPrefixedAccessors() {
+    @DisplayName("Lombok no genera accesores fluidos al estilo record (ADR 0026)")
+    void lombokDoesNotGenerateFluentAccessors() {
         assertThatExceptionOfType(NoSuchMethodException.class)
-                .isThrownBy(() -> Sample.class.getDeclaredMethod("getName"));
+                .isThrownBy(() -> Sample.class.getDeclaredMethod("name"));
     }
 }

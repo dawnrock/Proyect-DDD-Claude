@@ -22,11 +22,10 @@ Antes de tocar código, comprueba en qué rama estás (`git branch --show-curren
 ./mvnw spring-boot:run             # arranca en :8080 con el perfil demo (tres cuentas y sus operaciones); GET /actuator/health → {"status":"UP"}
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=default   # arranca sin datos de demostración
 node scripts/contract-test.mjs                       # pruebas de contrato (Schemathesis) contra el jar; requiere ./mvnw verify y schemathesis instalado (ADR 0013)
-node scripts/graphify.mjs update .                   # regenera el grafo del código (local, sin tokens)
-node scripts/graphify.mjs affected "<Clase>"         # quién depende de una clase (ADR 0010)
 ```
 
 - En Windows usa `mvnw.cmd`. Necesita Java 21 (`JAVA_HOME`).
+- Búsquedas en el código: Grep/Glob y, para referencias, definiciones e implementaciones de símbolos Java, la herramienta `LSP` del plugin `jdtls-lsp` (activado en `.claude/settings.json`; necesita `jdtls` en el `PATH`). Sin `jdtls`, todo funciona con Grep (ADR 0027).
 - Persistencia real con JPA y migraciones Flyway (ADR 0019): en local y en los tests, H2 en memoria en modo PostgreSQL (`jdbc:h2:mem:ddd`, consola en `/h2-console`); en producción (perfil `prod`, Render), PostgreSQL en Neon con `SPRING_DATASOURCE_URL`/`_USERNAME`/`_PASSWORD`. Los usuarios de Spring Security también están en la base de datos.
 - Análisis estático (ADR 0020): las reglas están en `checkstyle.xml`, `pmd-ruleset.xml` y `spotbugs-exclude.xml`, y los smells que ya existían, en `pmd-baseline.properties`. Ante un falso positivo, exclusión acotada con un comentario que diga por qué; nunca se ignora un aviso ni se salta el análisis en el CI.
 
@@ -53,7 +52,7 @@ En ambas fases el dominio no depende de Spring ni de `jakarta` y su estado es pr
 | Lombok | `@RequiredArgsConstructor` (inyección por constructor) y `@Slf4j` fuera del dominio. `@Getter`/`@Setter` en formularios web. `@Builder` solo en builders de test | Cualquier anotación en `domain..` (ADR 0009): accesores y `equals`/`hashCode` por id se escriben a mano |
 | Immutables | Commands, queries y vistas de `application`; DTOs de los adaptadores | Cualquier clase de `domain..` (su código generado deja dependencias `org.immutables` en el bytecode) |
 
-ArchUnit no ve las anotaciones de Lombok (retención `SOURCE`): lo comprueba `node .claude/skills/ddd-building-block/scripts/check-domain.mjs`.
+Lombok genera accesores JavaBean (`getX()`/`setX()`). Las reglas del dominio (solo JDK, sin Lombok ni Immutables, estado privado, sin setters) las comprueba ArchUnit en `./mvnw verify`: Lombok deja `@lombok.Generated` en el bytecode y la regla D1 lo rechaza (ADR 0026).
 
 ## Flujo de trabajo con issues
 

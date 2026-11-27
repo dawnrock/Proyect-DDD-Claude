@@ -27,7 +27,7 @@ Phase 2 design: `docs/arquitectura/fase-2-hexagonal.md`; comparison with phase 1
 - **Merges:** a PR the user asked for (with `/implement-plan`, `/implement-plan-team`, `/advance-issues` or by asking for a PR) is merged by Claude as soon as all its checks are green, with no blocking review finding and no conflict, never against `master` (step 7 bis of `implement-plan`, 2026-11-17). Any other PR is not merged without the user's "yes". **Once merged, all its branches and worktrees are deleted** (local and remote, also the team's `-back`/`-web` ones), after checking they are contained in the base branch (2026-11-03).
 - **`CLAUDE.md` and the `.claude/` configuration** only change with their explicit approval, never at an agent's request.
 - **Diagrams are shown to the user before they are committed.** Diagram style: grayscale, no colours.
-- The user may follow the session from the phone (Remote Control). **Telegram notices are on** (the user turned them back on on 2026-10-30): the skills run `scripts/notify.mjs` when they say so.
+- The user may follow the session from the phone (Remote Control). **The skills no longer send Telegram notices** (2026-11-28); only the `Notification`/`Stop` hooks and failed CI do (`docs/ia/notificaciones.md`).
 - Language: conversation, commits, `@DisplayName` and domain error messages in Spanish; code and **documentation in English** (since the language-convention PR, 2026-10-23; the older documents were translated in #70). Only `docs/analysis/` and the five phase-1 plans of 2026-10-23 stay in Spanish; file names are not translated.
 - **Token savings (#57):** this file only holds what is needed to start. Everything else goes to its annexes and is only read when the task needs it.
 

@@ -11,11 +11,9 @@ flowchart LR
     W -->|/commit| C[1 commit per task]
     W -->|revisor-ddd| R[DDD review]
     C --> PR[PR against Monolithic / Hexagonal]
-    PR --> CI[CI: check-domain + mvnw verify]
+    PR --> CI[CI: mvnw verify]
     PR --> CR[Claude Code Review]
-    P -. notify.mjs .-> T[(Telegram)]
-    PR -. notify.mjs .-> T
-    CI -. on failure .-> T
+    CI -. on failure .-> T[(Telegram)]
 ```
 
 | Piece | File | Course chapter | Purpose |
@@ -27,11 +25,12 @@ flowchart LR
 | Skill | `.claude/skills/plan-feature/` | 9, 9.2.3 | Issue → plan with 5-10 min tasks and criteria, following `assets/template.md`. |
 | Skill | `.claude/skills/implement-plan/` | 9, 13.1 | Plan → worktree → TDD → commits → PR against the phase branch. In cloud sessions, where the environment imposes a development branch (`claude/*`), it works on that branch without a worktree and opens the PR from it (step 2 bis, #136). |
 | Skill | `.claude/skills/advance-issues/` | 9 | Autonomous loop over the open issues (2026-11-17): picks the most coherent order (blockers and dependencies first), then `plan-feature` → `implement-plan`/`implement-plan-team` → merge with green checks, without waiting for approval between steps; it only stops to ask the user for a concrete decision (`AskUserQuestion` with options). |
-| Skill with supporting material | `.claude/skills/ddd-building-block/` | 9.2 | `references/` (DDD rules, Lombok/Immutables), `templates/` (VO, entity, test) and `scripts/check-domain.mjs`. |
+| Skill with supporting material | `.claude/skills/ddd-building-block/` | 9.2 | `references/` (DDD rules, Lombok/Immutables), `templates/` (VO, entity, test). The domain rules are checked by ArchUnit in `./mvnw verify` (ADR 0026). |
 | Phase 2 skill | `.claude/skills/hexagonal-adapter/` | 9.2 | Templates for port, adapter and adapter test. |
 | Third-party skill | `.claude/skills/security-audit/` | 9 | Cloudflare's `security-audit` (copied from `cloudflare/security-audit-skill`, commit `c1c8a8c`, with its licence; #140, #141). Guidance mode for focused security questions; full audit mode (six phases with isolated agents, reports outside the repository) only on an explicit request. When to use it: see Security. |
 | Subagent | `.claude/agents/revisor-ddd.md` | 10.2 | DDD and architecture review, without edit rights, with Sonnet. |
-| Subagent | `.claude/agents/buscador-referencias.md` | 10.1, 10.3 | Wide searches with Haiku so the main context does not fill up. |
+| Subagent | `.claude/agents/buscador-referencias.md` | 10.1, 10.3 | Wide searches with Haiku so the main context does not fill up: Grep/Glob, plus the `LSP` tool for references, definitions and implementations of Java symbols (ADR 0027). |
+| Plugin | `jdtls-lsp` (`enabledPlugins` in `.claude/settings.json`) | 10.3 | Java language server (Eclipse JDT.LS) behind the `LSP` tool; needs `jdtls` on the `PATH`, otherwise searches fall back to Grep (ADR 0027). |
 | Teammates | `.claude/agents/backend-dev.md`, `.claude/agents/web-dev.md` | 10.2, 13.2 | One agent per side (back / web), with limited tools and packages; they review and negotiate the contract. `web-dev` checks the `modern-web-guidance` plugin skill before writing templates, CSS or JavaScript. `backend-dev` has the read-only tools of the Neon plugin (MCP) to check the production schema and logs (ADR 0019; user decision, 2026-11-23). |
 | Team skill | `.claude/skills/implement-plan-team/` | 13.1, 13.2 | Back + web issue: contract first (`docs/contracts/`), parallel implementation in worktrees, integration and one PR (ADR 0007). |
 | `PreToolUse` hook | `.claude/hooks/block-backlog-json.mjs` | 12 | Blocks reading the backlog seed: the issues are the source of truth. |
@@ -39,7 +38,6 @@ flowchart LR
 | `PostToolUse` hook (Bash) | `scripts/clean-merged-worktrees.mjs --hook` | 12 | After a `gh pr merge`, deletes the teammates' worktrees (`.claude/worktrees/agent-*`) that are merged and clean, and every merged local branch not in use (except the phase branches, `master` and `claude/*`). It complements, not contradicts, the agreement to delete every branch and worktree of a PR once merged (`implement-plan`, step 9): the skill also removes the remote branch after checking it is contained in the base branch, and resets a session's imposed `claude/*` branch to the updated base instead of deleting it (#136). |
 | Deterministic scripts | `scripts/seed-issues.mjs`, `scripts/notify.mjs` | 9.2.2, 14 | Create the backlog; send notifications. |
 | Memory between sessions | `docs/ia/estado-del-proyecto.md` + annexes `decisiones.md`, `pendientes.md`, `historial.md` + `scripts/check-project-status.mjs` | 6.2, 12, 14 | Entry point of every session (cited by `CLAUDE.md`), short on purpose; the annexes are only read when needed (ADR 0010). Updated by `implement-plan` / `implement-plan-team`, required by the plan template, checked by `revisor-ddd`, and CI fails if a PR that closes an issue does not touch it. |
-| Code graph | Graphify (`graphifyy`) + `scripts/graphify.mjs` + `.graphifyignore` | 10.3 | Local graph of the Java code (`graphify-out/`, no tokens, one per worktree). `buscador-referencias` and `plan-feature` only use it for dependency questions (`affected`, `path`), where it saves tokens (−27 % in phase 1, −32 % in phase 2, #71); questions about methods go straight to Grep (#79); no hook (ADR 0010). `scripts/measure-graphify.mjs` repeats the measurement. |
 | CI/CD | `.github/workflows/ci.yml` | 14 | The deterministic part (build, tests, ArchUnit, domain rules, project status, OpenAPI lint and, since #107, the contract tests with Schemathesis against the running jar, ADR 0013; since #112, on pull requests, the contract version check with oasdiff, ADR 0014; since #168, static analysis with Checkstyle, PMD/CPD and SpotBugs inside `mvnw verify`, ADR 0020) without AI. |
 | CI/CD with AI | `.github/workflows/claude.yml`, `claude-code-review.yml` | 14 | `@claude` on issues/PRs and an automatic review of every PR. |
 | Agent teams | `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | 13.2 | Enabled for research or review tasks in parallel. |

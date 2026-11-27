@@ -6,7 +6,6 @@ import com.dawnrock.ddd.adapter.in.Usernames;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 
 /**
  * Formulario de {@code /login/link} (#196): el usuario y la contraseña locales con los que se vincula la identidad de
@@ -14,7 +13,6 @@ import lombok.experimental.Accessors;
  */
 @Getter
 @Setter
-@Accessors(fluent = false)
 public class IdentityLinkForm {
 
     @NotBlank(message = "El usuario es obligatorio")

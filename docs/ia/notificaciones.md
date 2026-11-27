@@ -4,13 +4,13 @@ They replace the Slack notices of curso-claude. They reach the phone when:
 
 | Event | Who sends it |
 | ----- | ------------ |
-| Plan published on the issue | `plan-feature` skill (`scripts/notify.mjs`) |
-| PR ready for review | `implement-plan` skill (`scripts/notify.mjs`) |
 | Claude is waiting for a permission | `Notification` hook |
 | Claude finishes answering (optional) | `Stop` hook, if `TELEGRAM_NOTIFY_ON_STOP=1` |
 | CI fails | `.github/workflows/ci.yml` |
 
-Without configuration nothing happens: the script says it is not configured and the skills carry on.
+The skills (`plan-feature`, `implement-plan`, `implement-plan-team`, `advance-issues`) no longer send notices (2026-11-28): the Claude desktop app already notifies when a session waits or finishes, and Remote Control shows its progress. Only the hooks and CI above use Telegram.
+
+Without configuration nothing happens: the script says it is not configured.
 
 ## Configuration (once)
 

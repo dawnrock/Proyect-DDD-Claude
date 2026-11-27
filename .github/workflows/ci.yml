@@ -1,6 +1,6 @@
 name: CI
 
-# Lo determinista (compilar, tests JUnit, reglas de ArchUnit, reglas del dominio) lo hace el CI,
+# Lo determinista (compilar, tests JUnit, reglas de ArchUnit, que incluyen las del dominio) lo hace el CI,
 # no el agente. Se ejecuta en las ramas de fase y en sus PR; master está congelada.
 on:
   push:
@@ -56,9 +56,6 @@ jobs:
 
       - name: Tests de los scripts (node:test)
         run: node --test "scripts/*.test.mjs"
-
-      - name: Reglas del dominio (Lombok / Immutables / dependencias)
-        run: node .claude/skills/ddd-building-block/scripts/check-domain.mjs
 
       - name: Contrato OpenAPI (Redocly)
         run: npx --yes @redocly/cli@2.71.0 lint docs/api/openapi.yaml

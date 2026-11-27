@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Positive;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 
 /**
  * Formulario de ingreso o retirada. Aplica la misma validación que {@code MovementRequest} (REST), según
@@ -17,7 +16,6 @@ import lombok.experimental.Accessors;
  */
 @Getter
 @Setter
-@Accessors(fluent = false)
 public class MovementForm {
 
     @NotNull(message = "El importe es obligatorio")

@@ -2,6 +2,7 @@
 
 - **Status:** accepted · 2026-10-26
 - **Supersedes:** the domain part of [ADR 0003](0003-lombok-immutables.md) (`@Getter` and `@EqualsAndHashCode(onlyExplicitlyIncluded = true)` allowed in `domain..`). The rest of ADR 0003 still applies.
+- **Amended by:** [ADR 0026](0026-domain-rules-in-archunit.md): `check-domain.mjs` is removed and ArchUnit (D1) is the only automatic check.
 
 ## Context
 
