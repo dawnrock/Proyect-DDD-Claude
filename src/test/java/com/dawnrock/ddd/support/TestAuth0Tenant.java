@@ -39,6 +39,14 @@ public final class TestAuth0Tenant {
         "app.auth.auth0.client-secret=test-secret",
         "app.auth.auth0.audience=" + AUDIENCE};
 
+    /**
+     * Las cinco propiedades de Auth0 que exige el modo realista ({@code app.auth.local=false}, #199): las de arriba más
+     * el cliente público de Swagger UI.
+     */
+    public static final String[] REALISTIC_MODE_PROPERTIES = {
+        PROPERTIES[0], PROPERTIES[1], PROPERTIES[2], PROPERTIES[3],
+        "app.auth.auth0.api-docs-client-id=test-spa"};
+
     private static final int TTL_SECONDS = 600;
 
     private static final KeyPair KEYS = rsaKeys();

@@ -86,7 +86,7 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   - [x] Context with `app.auth.local=false` and no Auth0 → fails, the message names the five variables; with only the three web ones → names `_AUDIENCE` and `_API_DOCS_CLIENT_ID`.
   - [x] Context with `app.auth.local=false` and the five → starts; with `true` and none → starts.
 
-### [ ] T3 — `prod` turns local authentication off (~10 min)
+### [x] T3 — `prod` turns local authentication off (~10 min)
 
 - **Layer:** config (resources) · tests
 - **Files:** `src/main/resources/application-prod.properties`, `src/test/java/com/dawnrock/ddd/ProdProfileTests.java`
@@ -96,8 +96,8 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   2. `app.auth.local=false` in `application-prod.properties`, with a comment (#199, ADR 0024) and the emergency switch `APP_AUTH_LOCAL=true`.
   3. Give the existing `ProdProfileTests` the Auth0 properties so they keep testing what they tested.
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest=ProdProfileTests` green, the new two included.
-  - [ ] `demo`/`default` profiles unchanged (`app.auth.local` is `true`).
+  - [x] `./mvnw test -Dtest=ProdProfileTests` green, the new two included.
+  - [x] `demo`/`default` profiles unchanged (`app.auth.local` is `true`).
 
 ### [ ] T4 — The password sign-up refuses to run without local authentication (~5 min)
 

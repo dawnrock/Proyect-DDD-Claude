@@ -16,13 +16,22 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import com.dawnrock.ddd.adapter.in.AuthProperties;
+import com.dawnrock.ddd.support.TestAuth0Tenant;
+
 /**
  * Perfil {@code prod} (#150, ADR 0019): la base de datos sale solo de las variables de entorno {@code SPRING_DATASOURCE_*}
- * (Neon en Render). Sin ellas la aplicación no arranca, en lugar de caer en silencio en la H2 en memoria.
+ * (Neon en Render). Sin ellas la aplicación no arranca, en lugar de caer en silencio en la H2 en memoria. Desde #199
+ * {@code prod} es además el modo realista (solo Auth0): sus tests arrancan con las cinco propiedades del tenant de prueba,
+ * salvo el que comprueba que sin ellas no arranca.
  */
 class ProdProfileTests {
 
     private static SpringApplicationBuilder prod() {
+        return prodWithoutAuth0().properties(TestAuth0Tenant.REALISTIC_MODE_PROPERTIES);
+    }
+
+    private static SpringApplicationBuilder prodWithoutAuth0() {
         return new SpringApplicationBuilder(DddLabApplication.class)
                 .profiles("prod")
                 .web(WebApplicationType.SERVLET)
@@ -81,5 +90,27 @@ class ProdProfileTests {
                             .close())
                     .hasStackTraceContaining("Connection attempt timed out"));
         }
+    }
+
+    @Test
+    @DisplayName("Con el perfil prod la autenticación local está apagada: es el modo realista, solo con Auth0")
+    void withTheProdProfileLocalAuthenticationIsOff() {
+        try (ConfigurableApplicationContext context = prod().run("--SPRING_DATASOURCE_URL=" + h2Url(),
+                "--SPRING_DATASOURCE_USERNAME=sa", "--SPRING_DATASOURCE_PASSWORD=")) {
+            assertThat(context.getBean(AuthProperties.class).local()).isFalse();
+        }
+    }
+
+    @Test
+    @DisplayName("Con el perfil prod y sin las variables de Auth0 la aplicación no arranca y dice cuáles faltan")
+    void withTheProdProfileAndWithoutAuth0TheApplicationDoesNotStart() {
+        assertThatThrownBy(() -> prodWithoutAuth0().run("--SPRING_DATASOURCE_URL=" + h2Url(),
+                "--SPRING_DATASOURCE_USERNAME=sa", "--SPRING_DATASOURCE_PASSWORD=").close())
+                .hasStackTraceContaining("Sin autenticación local (app.auth.local=false) hace falta Auth0")
+                .hasStackTraceContaining("APP_AUTH_AUTH0_AUDIENCE");
+    }
+
+    private static String h2Url() {
+        return "jdbc:h2:mem:" + UUID.randomUUID() + ";MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1";
     }
 }
