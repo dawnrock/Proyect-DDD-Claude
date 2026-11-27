@@ -81,6 +81,10 @@
 
 /* Barra de progreso del alta de cliente (#95): fina, como una línea. */
 .signup-progress { height: 0.375rem; }
+/* El ancho de cada paso, como clase y no como style en línea, que la CSP bloquea (#206). */
+.signup-progress-step-1 { width: 33%; }
+.signup-progress-step-2 { width: 66%; }
+.signup-progress-step-3 { width: 100%; }
 
 /* Con htmx (#126), la transición de vista hace crecer la barra del alta de un paso al siguiente. */
 @media (prefers-reduced-motion: no-preference) {

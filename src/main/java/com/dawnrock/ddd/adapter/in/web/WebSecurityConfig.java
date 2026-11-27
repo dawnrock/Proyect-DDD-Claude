@@ -1,6 +1,7 @@
 package com.dawnrock.ddd.adapter.in.web;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +13,9 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.HeaderWriter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.ExceptionMappingAuthenticationFailureHandler;
@@ -19,8 +23,10 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 
+import com.dawnrock.ddd.adapter.in.Auth0Properties;
 import com.dawnrock.ddd.adapter.in.AuthProperties;
 import com.dawnrock.ddd.adapter.in.ClientIpAuthenticationDetailsSource;
+import com.dawnrock.ddd.adapter.in.ContentSecurityPolicies;
 import com.dawnrock.ddd.adapter.in.LinkedOidcUserService;
 import com.dawnrock.ddd.adapter.in.TooManyLoginAttemptsException;
 
@@ -37,11 +43,17 @@ import com.dawnrock.ddd.adapter.in.TooManyLoginAttemptsException;
 @Configuration
 public class WebSecurityConfig {
 
+    private static final String CONTENT_SECURITY_POLICY_HEADER = "Content-Security-Policy";
+    private static final String PERMISSIONS_POLICY_HEADER = "Permissions-Policy";
+    private static final String H2_CONSOLE = "/h2-console";
+    private static final String API_DOCS = "/api-docs";
+
     @Bean
     @Order(2)
     public SecurityFilterChain webSecurity(HttpSecurity http, ClientIpAuthenticationDetailsSource clientIp,
                                            ObjectProvider<ClientRegistrationRepository> registrations,
-                                           ObjectProvider<LinkedOidcUserService> oidcUsers, AuthProperties auth)
+                                           ObjectProvider<LinkedOidcUserService> oidcUsers, AuthProperties auth,
+                                           Auth0Properties auth0Properties)
             throws Exception {
         ClientRegistrationRepository auth0 = registrations.getIfAvailable();
         if (auth0 != null) {
@@ -68,7 +80,12 @@ public class WebSecurityConfig {
                         .requestMatchers("/h2-console/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
+                        .referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                        .addHeaderWriter(new StaticHeadersWriter(PERMISSIONS_POLICY_HEADER,
+                                ContentSecurityPolicies.PERMISSIONS_POLICY))
+                        .addHeaderWriter(contentSecurityPolicy(auth0Origin(auth0Properties))))
                 .logout(logout -> logout.logoutSuccessHandler(logoutSuccess(auth0)))
                 .exceptionHandling(errors -> {
                     // htmx (#125): una sesión caducada lleva al login con HX-Redirect en vez de pintarlo en el panel
@@ -79,6 +96,29 @@ public class WebSecurityConfig {
                     errors.authenticationEntryPoint(htmx).accessDeniedHandler(htmx);
                 })
                 .build();
+    }
+
+    /**
+     * La Content-Security-Policy de cada respuesta de la cadena web (#206, ADR 0025), según la ruta: Swagger UI
+     * ({@code /api-docs/**}) tiene la suya; la consola H2, ninguna (sus scripts van en línea y solo existe en local, para
+     * administradores); el resto, la de la web con el nonce de la petición. {@link CspNonce} guarda el nonce en la
+     * petición, así que es el mismo que pintó la plantilla: las cabeceras se escriben al enviar la respuesta.
+     */
+    static HeaderWriter contentSecurityPolicy(Optional<String> auth0Origin) {
+        return (request, response) -> {
+            String path = request.getRequestURI().substring(request.getContextPath().length());
+            if (path.startsWith(H2_CONSOLE)) {
+                return;
+            }
+            response.setHeader(CONTENT_SECURITY_POLICY_HEADER, path.startsWith(API_DOCS)
+                    ? ContentSecurityPolicies.apiDocs(auth0Origin)
+                    : ContentSecurityPolicies.web(CspNonce.of(request), auth0Origin));
+        };
+    }
+
+    /** El origen del tenant de Auth0, si está configurado: logout, alta y PKCE de Swagger UI acaban en él. */
+    static Optional<String> auth0Origin(Auth0Properties auth0) {
+        return auth0.domain().isEmpty() ? Optional.empty() : Optional.of(auth0.baseUrl());
     }
 
     /**

@@ -40,13 +40,14 @@ class LoginControllerTests {
     }
 
     @Test
-    @DisplayName("El login navega con htmx y la configuración de htmx no guarda copias de las páginas (#126)")
+    @DisplayName("El login navega con htmx, que no guarda copias de las páginas ni evalúa código ni inyecta estilos (#126, #206)")
     void theLoginNavigatesWithHtmxAndDoesNotCachePages() throws Exception {
         mvc.perform(get("/login").param("form", ""))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("hx-boost=\"true\" hx-swap=\"innerHTML transition:true\"")))
-                .andExpect(content().string(containsString(
-                        "<meta name=\"htmx-config\" content='{\"historyCacheSize\":0,\"refreshOnHistoryMiss\":true}'>")));
+                .andExpect(content().string(containsString("<meta name=\"htmx-config\" content='{\"historyCacheSize\":0,"
+                        + "\"refreshOnHistoryMiss\":true,\"includeIndicatorStyles\":false,\"allowEval\":false,"
+                        + "\"allowScriptTags\":false,\"attributesToSettle\":[\"class\",\"width\",\"height\"]}'>")));
     }
 
     @Test
@@ -108,7 +109,7 @@ class LoginControllerTests {
                         "(?s).*<div class=\"splash\" id=\"splash\" role=\"img\" aria-label=\"monA Bank\" hidden>\\s*"
                                 + "<canvas aria-hidden=\"true\"></canvas>\\s*</div>.*")))
                 .andExpect(content().string(matchesPattern(
-                        "(?s).*<script type=\"importmap\">\\{\"imports\":\\{\"brand-geometry\":\"\\\\?/js\\\\?/brand-geometry-[0-9a-f]{32}\\.js\"\\}\\}</script>.*")))
+                        "(?s).*<script type=\"importmap\" nonce=\"[A-Za-z0-9_-]{22}\">\\{\"imports\":\\{\"brand-geometry\":\"\\\\?/js\\\\?/brand-geometry-[0-9a-f]{32}\\.js\"\\}\\}</script>.*")))
                 .andExpect(content().string(matchesPattern(
                         "(?s).*<script type=\"module\" src=\"/js/intro-[0-9a-f]{32}\\.js\"></script>.*")));
         mvc.perform(get("/login").param("form", ""))
@@ -118,14 +119,34 @@ class LoginControllerTests {
     }
 
     @Test
-    @DisplayName("En las puertas, la capa de la intro va lo primero del body y la destapa un script en línea antes de que se pinte la página, sin un fogonazo de la bienvenida")
+    @DisplayName("En las puertas, la capa de la intro va lo primero del body y la destapa splash.js, sin defer, antes de que se pinte la página (sin script en línea: CSP, #206)")
     void theIntroLayerCoversTheDoorsFromTheFirstPaint() throws Exception {
         mvc.perform(get("/login"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(matchesPattern(
                         "(?s).*<body[^>]*>\\s*<div class=\"splash\" id=\"splash\"[^>]*>\\s*<canvas[^>]*></canvas>\\s*</div>\\s*"
-                                + "<script>[^<]*document\\.readyState === 'loading'[^<]*splash\\.hidden = false[^<]*</script>.*"
+                                + "<script src=\"/js/splash-[0-9a-f]{32}\\.js\"></script>.*"
                                 + "<div class=\"backdrop\".*")));
+        mvc.perform(get("/js/splash.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("document.readyState === 'loading'")))
+                .andExpect(content().string(containsString("splash.hidden = false")));
+    }
+
+    @Test
+    @DisplayName("Cada petición del login lleva un nonce distinto para su import map (#206)")
+    void eachLoginRequestHasItsOwnNonce() throws Exception {
+        String first = mvc.perform(get("/login")).andReturn().getResponse().getContentAsString();
+        String second = mvc.perform(get("/login")).andReturn().getResponse().getContentAsString();
+
+        assertThat(nonceOf(first)).isNotEqualTo(nonceOf(second));
+    }
+
+    private static String nonceOf(String html) {
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("<script type=\"importmap\" nonce=\"([^\"]+)\"")
+                .matcher(html);
+        assertThat(matcher.find()).isTrue();
+        return matcher.group(1);
     }
 
     @Test

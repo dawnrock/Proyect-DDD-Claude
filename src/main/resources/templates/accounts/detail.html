@@ -21,8 +21,8 @@
         </section>
 
         <!--/* Cada acción es un <details>: se abre sin JavaScript y el servidor la deja abierta si su formulario vuelve con
-             errores. Alpine.js (actionPanels, en app.js) solo añade que abrir una cierre las demás, también las secundarias. */-->
-        <div x-data="actionPanels" x-on:toggle.capture="closeOthers($event)">
+             errores. app.js solo añade que abrir una cierre las demás, también las secundarias (#206, sin Alpine.js). */-->
+        <div data-action-panels>
         <div class="actions mb-3">
             <details id="deposit-action" th:object="${depositForm}" th:open="${#fields.hasAnyErrors()}">
                 <summary class="btn-slant action-toggle"><svg th:replace="~{fragments/brand :: rise}"></svg>Ingresar</summary>

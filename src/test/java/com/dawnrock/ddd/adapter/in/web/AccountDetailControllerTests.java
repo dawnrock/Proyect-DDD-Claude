@@ -345,12 +345,13 @@ class AccountDetailControllerTests extends AccountWebTestSupport {
         }
 
         @Test
-        @DisplayName("Las acciones son un acordeón de Alpine.js: abrir una cierra las demás (#124)")
-        void theActionsAreAnAlpineAccordion() throws Exception {
+        @DisplayName("Las acciones son un acordeón de app.js, sin Alpine.js: abrir una cierra las demás (#124, #206)")
+        void theActionsAreAnAccordionWithoutAlpine() throws Exception {
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("x-data=\"actionPanels\"")))
-                    .andExpect(content().string(containsString("x-on:toggle.capture=\"closeOthers($event)\"")));
+                    .andExpect(content().string(containsString("<div data-action-panels>")))
+                    .andExpect(content().string(not(containsString("x-data"))))
+                    .andExpect(content().string(not(containsString("x-on:"))));
         }
 
         @Test
@@ -359,7 +360,7 @@ class AccountDetailControllerTests extends AccountWebTestSupport {
             mvc.perform(get("/accounts/" + ACCOUNT_ID))
                     .andExpect(status().isOk())
                     .andExpect(content().string(matchesPattern(
-                            "(?s).*<div x-data=\"actionPanels\" x-on:toggle.capture=\"closeOthers\\(\\$event\\)\">\\s*"
+                            "(?s).*<div data-action-panels>\\s*"
                                     + "<div class=\"actions mb-3\">.*<details id=\"regenerate-action\">.*?</details>\\s*</div>\\s*</div>\\s*<h2.*")));
         }
 

@@ -4,8 +4,11 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.dawnrock.ddd.adapter.in.ContentSecurityPolicies;
 import com.dawnrock.ddd.adapter.in.SecuritySupport;
 import com.dawnrock.ddd.adapter.in.TestUsers;
 
@@ -62,5 +66,16 @@ class ApiDocsAuth0Tests {
                 .andExpect(jsonPath("$.response_types_supported[0]").value("code"))
                 .andExpect(jsonPath("$.code_challenge_methods_supported[0]").value("S256"))
                 .andExpect(content().string(not(containsString("secreto-web"))));
+    }
+
+    @Test
+    @WithAnonymousUser
+    @DisplayName("Con Auth0, Swagger UI puede pedir el token al tenant y la web deja que los formularios acaben en él (#206)")
+    void withAuth0ThePoliciesAllowTheTenant() throws Exception {
+        mvc.perform(get("/api-docs/index.html"))
+                .andExpect(header().string("Content-Security-Policy",
+                        ContentSecurityPolicies.apiDocs(Optional.of(TENANT))));
+        mvc.perform(get("/login"))
+                .andExpect(header().string("Content-Security-Policy", containsString("form-action 'self' " + TENANT)));
     }
 }

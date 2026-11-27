@@ -102,9 +102,11 @@ class SignUpControllerTests {
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString("role=\"progressbar\"")))
                     .andExpect(content().string(containsString("aria-valuemin=\"0\" aria-valuemax=\"3\" aria-valuenow=\"1\"")))
-                    .andExpect(content().string(containsString("style=\"width: 33%\"")))
+                    // #206: el ancho del paso es una clase de app.css, no un style en línea (CSP)
+                    .andExpect(content().string(not(containsString("style=\"width"))))
                     // #126: con nombre de transición de vista, la barra crece de un paso al siguiente
-                    .andExpect(content().string(containsString("<div class=\"progress-bar signup-progress-bar\"")));
+                    .andExpect(content().string(containsString(
+                            "<div class=\"progress-bar signup-progress-bar signup-progress-step-1\"")));
         }
 
         @Test

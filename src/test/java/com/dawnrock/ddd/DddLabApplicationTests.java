@@ -791,17 +791,22 @@ class DddLabApplicationTests {
 
 			assertThat(response.statusCode()).isEqualTo(200);
 			assertThat(response.uri().getPath()).isEqualTo("/api-docs/index.html");
-			assertThat(response.body()).contains("SwaggerUIBundle");
+			assertThat(response.body()).contains("swagger-ui-bundle.js", "<script src=\"init.js\"></script>");
 		}
 
 		@Test
-		@DisplayName("La página de Swagger UI se sirve sin credenciales y carga el contrato escrito a mano")
+		@DisplayName("La página de Swagger UI y su init.js se sirven sin credenciales y cargan el contrato escrito a mano")
 		void theSwaggerUiPageIsServedWithoutCredentials() throws Exception {
 			HttpResponse<String> response = http.send(HttpRequest.newBuilder(URI.create(url("/api-docs/index.html"))).GET().build(),
 					HttpResponse.BodyHandlers.ofString());
 
 			assertThat(response.statusCode()).isEqualTo(200);
-			assertThat(response.body()).contains("SwaggerUIBundle", "url: '/openapi.yaml'", "integrity=\"sha384-");
+			assertThat(response.body()).contains("swagger-ui-bundle.js", "integrity=\"sha384-");
+			// El arranque va en init.js, no en línea (CSP, #206)
+			HttpResponse<String> init = http.send(HttpRequest.newBuilder(URI.create(url("/api-docs/init.js"))).GET().build(),
+					HttpResponse.BodyHandlers.ofString());
+			assertThat(init.statusCode()).isEqualTo(200);
+			assertThat(init.body()).contains("SwaggerUIBundle", "url: '/openapi.yaml'");
 		}
 	}
 

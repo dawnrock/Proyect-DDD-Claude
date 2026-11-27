@@ -38,7 +38,7 @@ class AccountListControllerTests extends AccountWebTestSupport {
     class Listado {
 
         @Test
-        @DisplayName("La página usa el tema oscuro de Bootstrap y carga htmx, Alpine.js, Motion y app.js desde la propia aplicación (#124)")
+        @DisplayName("La página usa el tema oscuro de Bootstrap y carga htmx, Motion y app.js desde la propia aplicación, sin Alpine.js (#124, #206)")
         void thePageUsesBootstrapDarkThemeAndLoadsTheFrontendLibraries() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of());
 
@@ -50,7 +50,7 @@ class AccountListControllerTests extends AccountWebTestSupport {
                     .andExpect(content().string(webjar("href", "bootstrap", "css/bootstrap.min.css")))
                     .andExpect(content().string(webjar("src", "bootstrap", "js/bootstrap.bundle.min.js")))
                     .andExpect(content().string(webjar("src", "htmx.org", "dist/htmx.min.js")))
-                    .andExpect(content().string(webjar("src", "alpinejs", "dist/cdn.min.js")))
+                    .andExpect(content().string(not(containsString("alpinejs"))))
                     .andExpect(content().string(hashed("src", "/vendor/motion/motion", ".js")))
                     .andExpect(content().string(hashed("src", "/js/app", ".js")))
                     .andExpect(content().string(hashed("href", "/css/app", ".css")))

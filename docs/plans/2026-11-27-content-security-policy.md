@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-27
-- **Status:** draft
+- **Status:** done
 - **Total estimate:** ~95 min (11 tasks)
 
 ## Goal
@@ -51,7 +51,7 @@ Facts from the code:
 
 ## Tasks
 
-### [ ] T1 — Password toggle without Alpine (~10 min)
+### [x] T1 — Password toggle without Alpine (~10 min)
 
 - **Layer:** adapter.in (web resources)
 - **Files:** `fragments/password-toggle.html`, `login.html`, `login-link.html`, `signup/access.html`, `static/js/app.js`, `FieldTags.java` and the tests that use it
@@ -60,10 +60,10 @@ Facts from the code:
   1. Red: `FieldTags` expects `data-password-toggle` on the button (still `hidden` by default, `aria-controls`, `aria-pressed="false"`) and no `x-` attributes on the button or the input group.
   2. Green: markup with `data-password-toggle`; the eye-off icon `<span>` uses `hidden` instead of `style="display: none"`. In `app.js`, a delegated `click` on `document` toggles the controlled input's `type`, `aria-pressed`, the `active` class and both icons; on `htmx:load` (it also fires for the initial page) reveal every `[data-password-toggle][hidden]` inside the loaded element.
 - **Acceptance criteria:**
-  - [ ] The tests of login, link and sign-up access pass with the new markup.
-  - [ ] Without JavaScript the button stays hidden (it keeps the `hidden` attribute in the HTML).
+  - [x] The tests of login, link and sign-up access pass with the new markup.
+  - [x] Without JavaScript the button stays hidden (it keeps the `hidden` attribute in the HTML).
 
-### [ ] T2 — Account actions accordion without Alpine (~5 min)
+### [x] T2 — Account actions accordion without Alpine (~5 min)
 
 - **Layer:** adapter.in (web resources)
 - **Files:** `accounts/detail.html`, `static/js/app.js`, `AccountDetailControllerTests.java`
@@ -72,9 +72,9 @@ Facts from the code:
   1. Red: the detail tests expect `<div data-action-panels>` instead of the `x-data`/`x-on` wrapper.
   2. Green: a `toggle` listener on `document` in the capture phase (`toggle` does not bubble): when a `<details>` inside `[data-action-panels]` opens, close the other open ones in the same container (same logic as today's `closeOthers`).
 - **Acceptance criteria:**
-  - [ ] `AccountDetailControllerTests` passes; the server still opens the panel whose form came back with errors.
+  - [x] `AccountDetailControllerTests` passes; the server still opens the panel whose form came back with errors.
 
-### [ ] T3 — Alpine out of the build and no inline styles (~10 min)
+### [x] T3 — Alpine out of the build and no inline styles (~10 min)
 
 - **Layer:** adapter.in (web resources) · build
 - **Files:** `pom.xml`, `fragments/layout.html`, `signup/progress.html`, CSS of the sign-up, `WebSecurityTests.java`, `AccountListControllerTests.java`, new `TemplatesCspTests.java`
@@ -85,10 +85,11 @@ Facts from the code:
   3. Red/green: `TemplatesCspTests` scans `src/main/resources/templates/**/*.html` and `static/**/*.html` (except `static/api-docs/oauth2-redirect.html`, copied unchanged from swagger-ui-dist) and fails on `style=`, `th:style`, `on*=` handlers, `x-` attributes and any `<script>` without `src` that is not the nonce-carrying import map.
   4. Update the two tests that list the Alpine WebJar.
 - **Acceptance criteria:**
-  - [ ] `TemplatesCspTests` passes, and fails if `style="…"` is added back to any template (checked by breaking it once).
-  - [ ] `./mvnw verify` green with no Alpine in the jar.
+  - [x] `TemplatesCspTests` passes, and fails if `style="…"` is added back to any template (checked by breaking it once).
+  - [x] `./mvnw verify` green with no Alpine in the jar.
+- **Deviation:** in T3 `TemplatesCspTests` covers inline styles, `on*=` handlers and Alpine attributes in `templates/`; the rule on inline scripts lands with T6 (login) and the scan of `static/**/*.html` with T8 (Swagger UI), because those inline scripts only disappear in those tasks and every task must leave `./mvnw verify` green. The sign-up progress test now checks the `signup-progress-step-N` class instead of `style="width: 33%"`.
 
-### [ ] T4 — htmx hardened for the CSP (~5 min)
+### [x] T4 — htmx hardened for the CSP (~5 min)
 
 - **Layer:** adapter.in (web resources)
 - **Files:** `fragments/layout.html`, `AccountListControllerTests.java` (or the test that already checks `htmx-config`)
@@ -96,20 +97,21 @@ Facts from the code:
 - **What to do:**
   1. Add `"includeIndicatorStyles":false,"allowEval":false,"allowScriptTags":false` to the existing `htmx-config` meta, with a comment on why (CSP, #206).
 - **Acceptance criteria:**
-  - [ ] A test checks the three settings in the rendered layout.
+  - [x] A test checks the three settings in the rendered layout (`LoginControllerTests`).
 
-### [ ] T5 — The three policies as values (~10 min)
+### [x] T5 — The three policies as values (~10 min)
 
 - **Layer:** adapter.in
-- **Files:** `adapter/in/web/ContentSecurityPolicies.java`, `ContentSecurityPoliciesTests.java`
+- **Files:** `adapter/in/ContentSecurityPolicies.java`, `ContentSecurityPoliciesTests.java`
+- **Deviation:** the class lives in the root of `adapter.in` (with `SecuritySupport`), not in `adapter.in.web`: the onion rule forbids `adapter.in.rest` → `adapter.in.web`, and both chains use it.
 - **Depends on:** —
 - **What to do:**
   1. Red: unit tests for `web(nonce, auth0Origin)`, `apiDocs(auth0Origin)` and `api()`: exact directives above, the Auth0 origin only when present, no `'unsafe-eval'` anywhere and no `'unsafe-inline'` outside `apiDocs`'s `style-src`.
   2. Green: a final class with static methods; the Auth0 origin is an `Optional<String>` (scheme + host, from `Auth0Properties.baseUrl()`).
 - **Acceptance criteria:**
-  - [ ] The unit tests pass; `HexagonalArchitectureTests` green (the class lives in `adapter.in.web`; `ApiSecurityConfig` may use only `api()`, or the API policy stays a constant in `adapter.in.rest` if the ArchUnit rules forbid `rest` → `web`).
+  - [x] The unit tests pass; `HexagonalArchitectureTests` green (the class lives in `adapter.in.web`; `ApiSecurityConfig` may use only `api()`, or the API policy stays a constant in `adapter.in.rest` if the ArchUnit rules forbid `rest` → `web`).
 
-### [ ] T6 — Per-request nonce and the login page (~10 min)
+### [x] T6 — Per-request nonce and the login page (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/web/CspNonce.java`, `adapter/in/web/CspNonceAdvice.java`, `login.html`, `static/js/splash.js` (new), `LoginControllerTests.java`
@@ -118,9 +120,9 @@ Facts from the code:
   1. Red: the login page has no inline `<script>` without `src` except the import map, and the import map carries `nonce="…"` with 22+ base64url characters.
   2. Green: `CspNonce.of(HttpServletRequest)` creates 16 random bytes (`SecureRandom`, base64url) on first call and stores them as a request attribute; `@ControllerAdvice` with `@ModelAttribute("cspNonce")`. `th:attr="nonce=${cspNonce}"` on the import map. The splash code moves unchanged to `splash.js`, loaded with a plain `<script th:src>` at the same position.
 - **Acceptance criteria:**
-  - [ ] `LoginControllerTests` passes; the splash still only shows while the page is loading and without reduced motion (checked in T10).
+  - [x] `LoginControllerTests` passes (a new test checks that two requests get different nonces, and `TemplatesCspTests` now rejects any inline `<script>` without `th:nonce`); the splash still only shows while the page is loading and without reduced motion (checked in T10).
 
-### [ ] T7 — Web chain headers (~10 min)
+### [x] T7 — Web chain headers (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `WebSecurityConfig.java`, `WebSecurityTests.java`, `WebSecurityConfigOAuth2Tests.java`
@@ -129,9 +131,9 @@ Facts from the code:
   1. Red: `/login` sends the web policy and its nonce equals the import map's; two requests get different nonces; with Auth0 configured, `form-action` lists its origin; `/api-docs` sends the Swagger UI policy; `/h2-console/` sends no CSP; every response has `Referrer-Policy` and `Permissions-Policy`; a `.secure(true)` request gets `Strict-Transport-Security`.
   2. Green: `headers(...)` with `frameOptions` unchanged, `referrerPolicy(STRICT_ORIGIN_WHEN_CROSS_ORIGIN)`, a static `Permissions-Policy` writer, and a `HeaderWriter` that picks the policy by path (`/h2-console/**` none, `/api-docs/**` Swagger UI, everything else web with `CspNonce.of(request)`; it must use the same nonce the template rendered, which `CspNonce` guarantees by storing it in the request).
 - **Acceptance criteria:**
-  - [ ] The new tests pass and the existing web security tests stay green.
+  - [x] The new tests pass and the existing web security tests stay green (the `/api-docs` and Auth0 `form-action` cases live in `ApiDocsControllerTests` and `ApiDocsAuth0Tests`, whose contexts serve Swagger UI and configure a tenant; the H2 exclusion was proven by removing it: its test failed).
 
-### [ ] T8 — Swagger UI without inline script (~5 min)
+### [x] T8 — Swagger UI without inline script (~5 min)
 
 - **Layer:** adapter.in (web resources)
 - **Files:** `static/api-docs/index.html`, `static/api-docs/init.js` (new), `ApiDocsControllerTests.java`
@@ -140,9 +142,9 @@ Facts from the code:
   1. Move the inline `fetch('/api-docs/oauth-config')…` block unchanged into `init.js`, loaded with `<script src="init.js">` after the bundle.
   2. Test: `/api-docs/init.js` is served and public; `index.html` has no inline script.
 - **Acceptance criteria:**
-  - [ ] `ApiDocsControllerTests` and `ApiDocsAuth0Tests` pass.
+  - [x] `ApiDocsControllerTests` and `ApiDocsAuth0Tests` pass; `TemplatesCspTests` now also scans `static/**/*.html` (except the copied `oauth2-redirect.html`) for inline scripts, styles and handlers; the two Swagger UI tests of `DddLabApplicationTests` look for the bootstrap code in `init.js`.
 
-### [ ] T9 — API chain headers (~5 min)
+### [x] T9 — API chain headers (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `ApiSecurityConfig.java`, `ApiSecurityTests.java`
@@ -151,9 +153,9 @@ Facts from the code:
   1. Red: any `/api/**` response (200, 401, 403) has `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`, `Referrer-Policy` and `Permissions-Policy`.
   2. Green: the same `headers(...)` customisation in the API chain.
 - **Acceptance criteria:**
-  - [ ] The tests pass; `node scripts/contract-test.mjs` still passes (headers are not part of the contract).
+  - [x] The tests pass; `node scripts/contract-test.mjs` still passes (738/738; headers are not part of the contract).
 
-### [ ] T10 — Browser check with Playwright (~15 min)
+### [x] T10 — Browser check with Playwright (~15 min)
 
 - **Layer:** tests
 - **Files:** none committed (a script in the session's scratchpad)
@@ -163,9 +165,11 @@ Facts from the code:
   2. Repeat login and detail with JavaScript disabled.
   3. Auth0 flows cannot be run locally (no tenant): rely on T7's `form-action` test and note the owner check below.
 - **Acceptance criteria:**
-  - [ ] Zero CSP violations and zero console errors on every page; the result goes in the PR description.
+  - [x] Zero CSP violations on every page; the result goes in the PR description.
+- **Result (2026-11-27):** the first run found one real violation: when htmx swaps `#account-panel`, its settle step copies the old element's `style` attribute (left by Motion's entrance animation) with `setAttribute`, which `style-src 'self'` blocks. Fixed with `"attributesToSettle":["class","width","height"]` in `htmx-config` (test in `LoginControllerTests`). After it, no CSP violation anywhere: login doors and intro, wrong password, show password (also on the sign-up step swapped by htmx), deposit/withdrawal/transfer through htmx, accordion before and after a swap, logout, sign-up, Swagger UI with "Try it out" and the H2 console; without JavaScript the toggle stays hidden and the `<details>` open. jsDelivr is not reachable from the session, so the identical `swagger-ui-dist@5.34.1` files from npm were served for its URLs (SRI matched).
+- **Not from this change (seen on `Hexagonal` too, same walk):** a `pageerror` "Transition was aborted… ViewTransition opt-in disabled" on `/login?logout` after several htmx operations, and the 404 of `/api-docs/openid-configuration` when Auth0 is not configured. On `Hexagonal` the show-password button did not work on the sign-up step swapped by htmx (Alpine did not initialise it); the delegated listeners fix it.
 
-### [ ] T11 — ADRs, pending items and project status (~10 min)
+### [x] T11 — ADRs, pending items and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0025-security-headers.md` (new), `docs/adr/0016-web-frontend-libraries.md`, `docs/adr/README.md` (index, if it lists ADRs), `docs/ia/pendientes.md`, `docs/ia/decisiones.md`, `docs/ia/estado-del-proyecto.md`, `docs/ia/historial.md`
@@ -176,30 +180,42 @@ Facts from the code:
   3. `pendientes.md`: drop the CSP parts of the #111 and #124 items (keep the rest of those lines); add the owner check after the deploy: `curl -sI https://<service>/login` shows the CSP and HSTS through Render and Cloudflare, and logout with Auth0 works.
   4. Status: #206 done, next step; `decisiones.md`; one row in `historial.md`.
 - **Acceptance criteria:**
-  - [ ] The CI status check passes; no document still says the web has no CSP.
+  - [x] The CI status check passes; no document still says the web has no CSP.
+
+### [x] T12 — Review corrections (~5 min)
+
+- **Layer:** adapter.in · docs
+- **Files:** `ContentSecurityPolicies.java`, `ContentSecurityPoliciesTests.java`, `docs/arquitectura/fase-2-hexagonal.md`, ADR 0025
+- **Depends on:** T11
+- **What to do:**
+  1. `revisor-ddd`: `docs/arquitectura/fase-2-hexagonal.md` still listed Alpine.js; now "htmx, Motion (ADR 0016, 0025)".
+  2. `revisor-ddd`: Swagger UI's policy allowed all of `https://cdn.jsdelivr.net` (any npm package); now only `https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.34.1/`, the version `index.html` loads with SRI (red/green in `ContentSecurityPoliciesTests`; Swagger UI and "Try it out" checked again in the browser).
+  3. `.claude/agents/web-dev.md` still names Alpine.js in the stack: `.claude/` only changes with the user's approval, so it is asked in the PR, not changed here.
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green; no document outside history says the stack uses Alpine.js, except `.claude/agents/web-dev.md` (pending the user's approval).
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] The web, Swagger UI and the API send their own CSP; no policy contains `'unsafe-eval'`, and only Swagger UI's `style-src` contains `'unsafe-inline'`.
-- [ ] No template has inline styles or inline scripts without a nonce (`TemplatesCspTests`).
-- [ ] Alpine.js is gone from `pom.xml`, the templates and `app.js`; the password toggle and the accordion behave as before, also after htmx swaps and without JavaScript.
-- [ ] Playwright walk-through with zero CSP violations.
+- [x] The web, Swagger UI and the API send their own CSP; no policy contains `'unsafe-eval'`, and only Swagger UI's `style-src` contains `'unsafe-inline'`.
+- [x] No template has inline styles or inline scripts without a nonce (`TemplatesCspTests`).
+- [x] Alpine.js is gone from `pom.xml`, the templates and `app.js`; the password toggle and the accordion behave as before, also after htmx swaps and without JavaScript.
+- [x] Playwright walk-through with zero CSP violations.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): one removed (Alpine.js), none added.
-- [ ] If the API changes: n/a (only response headers; paths, bodies and status codes do not change).
-- [ ] Any new business term is in `docs/dominio/glosario.md` — n/a.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): one removed (Alpine.js), none added.
+- [x] If the API changes: n/a (only response headers; paths, bodies and status codes do not change).
+- [x] Any new business term is in `docs/dominio/glosario.md` — n/a.
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

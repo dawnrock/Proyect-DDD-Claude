@@ -25,6 +25,7 @@
 | [0022](0022-brand-identity.md) | monA Bank brand identity: logo, intro and typeface | Accepted |
 | [0023](0023-brand-ui.md) | The brand's UI language: the A's slant, logo glyphs and Sora (complements 0016 and 0022) | Accepted |
 | [0024](0024-oauth2-oidc-auth0.md) | Login with Auth0 (OAuth2/OIDC) and identity linking: the web (#196), the API (#197) and the sign-up (#198) (amends 0008 and 0015) | Accepted |
+| [0025](0025-security-headers.md) | Content-Security-Policy and security headers, without Alpine.js (amends 0016) | Accepted |
 
 ADR 0011 (the `integration` layer) only exists on `Monolithic`: it applies to phase 1.
 

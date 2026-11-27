@@ -1,11 +1,16 @@
 package com.dawnrock.ddd.adapter.in.web;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +20,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.dawnrock.ddd.adapter.in.ContentSecurityPolicies;
 import com.dawnrock.ddd.adapter.in.SecuritySupport;
 import com.dawnrock.ddd.adapter.in.TestUsers;
 
@@ -37,10 +43,15 @@ class ApiDocsControllerTests {
 
     @Test
     @WithAnonymousUser
-    @DisplayName("La página de Swagger UI pide su configuración de Auth0 y solo inicia sesión con PKCE y la audiencia")
+    @DisplayName("La página de Swagger UI carga init.js, sin script en línea, que pide su configuración de Auth0 y solo inicia sesión con PKCE y la audiencia (#206)")
     void theSwaggerUiPageAsksForItsAuth0ConfigAndSignsInWithPkce() throws Exception {
         mvc.perform(get("/api-docs/index.html"))
                 .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<script src=\"init.js\"></script>")))
+                .andExpect(content().string(not(matchesPattern("(?s).*<script>.*"))));
+        mvc.perform(get("/api-docs/init.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/javascript"))
                 .andExpect(content().string(containsString("fetch('/api-docs/oauth-config')")))
                 .andExpect(content().string(containsString(
                         "oauth2RedirectUrl: window.location.origin + '/api-docs/oauth2-redirect.html'")))
@@ -70,5 +81,14 @@ class ApiDocsControllerTests {
                 .andExpect(jsonPath("$.clientId").doesNotExist());
         mvc.perform(get("/api-docs/openid-configuration"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithAnonymousUser
+    @DisplayName("Swagger UI tiene su propia CSP, que permite jsDelivr; sin Auth0, no se conecta con nadie más (#206)")
+    void swaggerUiHasItsOwnPolicy() throws Exception {
+        mvc.perform(get("/api-docs/index.html"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Security-Policy", ContentSecurityPolicies.apiDocs(Optional.empty())));
     }
 }
