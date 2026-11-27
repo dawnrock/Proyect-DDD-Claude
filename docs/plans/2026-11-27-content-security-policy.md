@@ -144,7 +144,7 @@ Facts from the code:
 - **Acceptance criteria:**
   - [x] `ApiDocsControllerTests` and `ApiDocsAuth0Tests` pass; `TemplatesCspTests` now also scans `static/**/*.html` (except the copied `oauth2-redirect.html`) for inline scripts, styles and handlers; the two Swagger UI tests of `DddLabApplicationTests` look for the bootstrap code in `init.js`.
 
-### [ ] T9 — API chain headers (~5 min)
+### [x] T9 — API chain headers (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `ApiSecurityConfig.java`, `ApiSecurityTests.java`
@@ -153,7 +153,7 @@ Facts from the code:
   1. Red: any `/api/**` response (200, 401, 403) has `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`, `Referrer-Policy` and `Permissions-Policy`.
   2. Green: the same `headers(...)` customisation in the API chain.
 - **Acceptance criteria:**
-  - [ ] The tests pass; `node scripts/contract-test.mjs` still passes (headers are not part of the contract).
+  - [x] The tests pass; `node scripts/contract-test.mjs` still passes (738/738; headers are not part of the contract).
 
 ### [ ] T10 — Browser check with Playwright (~15 min)
 

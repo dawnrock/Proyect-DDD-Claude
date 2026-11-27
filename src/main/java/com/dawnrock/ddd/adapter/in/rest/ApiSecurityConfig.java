@@ -34,9 +34,12 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtIss
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 
 import com.dawnrock.ddd.adapter.in.Auth0Properties;
 import com.dawnrock.ddd.adapter.in.AuthProperties;
+import com.dawnrock.ddd.adapter.in.ContentSecurityPolicies;
 
 import com.nimbusds.jose.RemoteKeySourceException;
 
@@ -135,6 +138,12 @@ public class ApiSecurityConfig {
                         .authenticationEntryPoint(unauthenticated)
                         .accessDeniedHandler(forbidden))
                 .csrf(csrf -> csrf.disable())
+                // Cabeceras de seguridad (#206, ADR 0025): la API solo devuelve JSON, así que su CSP no permite nada
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(ContentSecurityPolicies.api()))
+                        .referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                        .addHeaderWriter(new StaticHeadersWriter("Permissions-Policy",
+                                ContentSecurityPolicies.PERMISSIONS_POLICY)))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }

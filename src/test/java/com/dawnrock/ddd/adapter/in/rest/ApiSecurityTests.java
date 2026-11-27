@@ -41,7 +41,9 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
+import com.dawnrock.ddd.adapter.in.ContentSecurityPolicies;
 import com.dawnrock.ddd.adapter.in.SecuritySupport;
 import com.dawnrock.ddd.adapter.in.TestUsers;
 import com.dawnrock.ddd.application.AccountSummary;
@@ -258,6 +260,27 @@ class ApiSecurityTests {
             mvc.perform(get("/api/accounts").header(HttpHeaders.AUTHORIZATION, "Bearer " + forged))
                     .andExpect(status().isUnauthorized());
             verifyNoInteractions(queries);
+        }
+    }
+
+    @Nested
+    @DisplayName("Cabeceras de seguridad (#206, ADR 0025)")
+    class SecurityHeaders {
+
+        @Test
+        @DisplayName("Toda respuesta de la API, con o sin token y con o sin permiso, prohíbe cargar nada y que la enmarquen")
+        void everyApiResponseForbidsLoadingAnythingAndFraming() throws Exception {
+            given(queries.listAccounts(any(Caller.class))).willReturn(List.of());
+
+            for (ResultActions response : List.of(
+                    mvc.perform(get("/api/accounts").header(HttpHeaders.AUTHORIZATION, bearer("ada"))),
+                    mvc.perform(get("/api/accounts")),
+                    mvc.perform(post("/api/accounts").header(HttpHeaders.AUTHORIZATION, bearer("ada"))
+                            .contentType(MediaType.APPLICATION_JSON).content(OPEN_BODY)))) {
+                response.andExpect(header().string("Content-Security-Policy", ContentSecurityPolicies.api()))
+                        .andExpect(header().string("Referrer-Policy", "strict-origin-when-cross-origin"))
+                        .andExpect(header().string("Permissions-Policy", ContentSecurityPolicies.PERMISSIONS_POLICY));
+            }
         }
     }
 }
