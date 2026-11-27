@@ -35,18 +35,6 @@ updates:
         patterns:
           - "*"
 
-  # Imágenes base del Dockerfile. Sin versiones mayores: cambiar de JDK (eclipse-temurin 21 → 25) es una decisión del
-  # proyecto, no una actualización rutinaria.
-  - package-ecosystem: docker
-    directory: "/"
-    target-branch: Hexagonal
-    schedule:
-      interval: weekly
-      day: monday
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: build
-    ignore:
-      - dependency-name: "*"
-        update-types:
-          - version-update:semver-major
+  # Sin Docker: el Dockerfile usa etiquetas flotantes (maven:3.9-eclipse-temurin-21, eclipse-temurin:21-jre), así que
+  # cada build ya descarga el último parche de Java 21 y de Maven 3.9. Lo único que Dependabot podía proponer era cambiar
+  # de JDK (su primera PR fue Java 21 → 26), y eso es una decisión del proyecto, no una actualización rutinaria.
