@@ -18,6 +18,10 @@ jobs:
     #   github.event.pull_request.user.login == 'new-developer' ||
     #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
 
+    # Las PR de Dependabot (#204) no reciben los secretos del repositorio (CLAUDE_CODE_OAUTH_TOKEN): la revisión fallaría
+    # siempre. Se salta; si el usuario la quiere, la pide a Claude.
+    if: github.actor != 'dependabot[bot]'
+
     runs-on: ubuntu-latest
     permissions:
       contents: read

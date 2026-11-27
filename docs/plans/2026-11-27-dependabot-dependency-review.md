@@ -59,7 +59,7 @@ Close the largest OWASP Top 10 gap of the project, **A06 · Vulnerable and outda
 - **Acceptance criteria:**
   - [ ] The PR of this issue shows the `dependency-review` check in green.
 
-### [ ] T3 — Code review skips Dependabot (~5 min)
+### [x] T3 — Code review skips Dependabot (~5 min)
 
 - **Layer:** build
 - **Files:** `.github/workflows/claude-code-review.yml`
