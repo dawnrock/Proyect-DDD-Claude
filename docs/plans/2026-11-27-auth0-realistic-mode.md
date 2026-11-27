@@ -184,6 +184,18 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
 - **Acceptance criteria:**
   - [x] Documents in English; the CI check of `estado-del-proyecto.md` passes.
 
+### [x] T12 — Review fixes (~5 min)
+
+- **Layer:** docs · adapter.in (Javadoc)
+- **Files:** `AuthProperties.java`, `docs/adr/0024-oauth2-oidc-auth0.md`, `docs/deploy/render.md`, `docs/ia/pendientes.md`
+- **Depends on:** T1-T10 and the `revisor-ddd` review (no blocking findings)
+- **What to do:**
+  1. Present tense where the docs still said «#199 will turn it off» (`AuthProperties` Javadoc, ADR 0024).
+  2. `render.md`: in realistic mode the passwords of `APP_SECURITY_USERS_*` are the only protection of the link; never `prod` with the `demo` password.
+  3. `pendientes.md`: the two readers of `app.auth.local` (`@Value` in `SignUpController`, `AuthProperties` elsewhere).
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green; documents in English.
+
 ### [ ] T11 — Auth0 and Render: set-up before the merge and check after it (~10 min + the user's time in Auth0)
 
 - **Layer:** deploy (no code)
