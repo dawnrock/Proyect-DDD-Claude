@@ -48,7 +48,7 @@ Close the largest OWASP Top 10 gap of the project, **A06 · Vulnerable and outda
   - [x] The file parses as YAML (`python3 -c "import yaml,sys; yaml.safe_load(open('.github/dependabot.yml'))"`) and uses only keys from the Dependabot v2 schema.
   - [ ] After the merge, the repository's Insights → Dependency graph → Dependabot tab shows the three ecosystems with no configuration error (owner-observable; noted in the PR). _Pending: only observable after the merge._
 
-### [ ] T2 — Dependency review job (~5 min)
+### [x] T2 — Dependency review job (~5 min)
 
 - **Layer:** build
 - **Files:** `.github/workflows/ci.yml`
