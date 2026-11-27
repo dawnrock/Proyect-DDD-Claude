@@ -6,7 +6,7 @@
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-27
 - **Status:** draft
-- **Total estimate:** ~90 min (10 tasks) + the Auth0/Render set-up before the merge
+- **Total estimate:** ~100 min (11 tasks) + the Auth0/Render set-up before the merge
 
 ## Goal
 
@@ -15,6 +15,8 @@ One code base, two modes chosen by configuration with `app.auth.local` (ADR 0024
 Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
 
 **Already in place** (#196-#198 prepared the switch): `AuthProperties.local` (default `true`); the form login only with it (`WebSecurityConfig`); `TokenController` and `AccessTokenIssuer` only with it, and the own issuer only trusted with it (`ApiSecurityConfig`, tested in `LocalTokensDisabledTests`); the login page with only «Entrar con Auth0» and the «Ya soy cliente» door going to Auth0 (`LoginController`, `login.html`, `LoginAuth0OnlyTests`). **Missing:** the switch in `prod`, the startup check, the sign-ups with a password (REST and web classic wizard), the «Quiero ser cliente» door, the 401 hint that still points to `POST /api/auth/token`, an end-to-end test of the mode, and the docs.
+
+**Fix found while setting up Render (2026-11-27, added as T1 at the user's request):** the first Auth0 sign-in on Render landed on `/login` with **both** notices, «No se pudo iniciar sesión con Auth0» and «Vuelve a entrar con Auth0 para vincular tu usuario». `login.html` (#196) tests the parameters with `${param.containsKey('oauth-error')}` / `${param.containsKey('link-expired')}`, which is always true: either parameter shows both notices (checked with a throwaway test; `${param['oauth-error'] != null}` shows only the right one). The tests only asserted that the expected notice appears, never that the other does not. Besides, the real cause of that first failure is unknown: `OAuth2LoginFailureHandler` redirects without logging anything (likely the instance switch of the redeploy losing the in-memory session that holds the authorization request; a second try worked and linked the user).
 
 ### Decisions agreed with the user (issue + 2026-11-27)
 
@@ -40,6 +42,7 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
 
 | Layer / package | File | Change |
 | --------------- | ---- | ------ |
+| `adapter.in.web` | `templates/login.html`, `OAuth2LoginFailureHandler.java` | Fix (T1): each notice only with its own parameter; the failed Auth0 return logs its OAuth error code |
 | `adapter.in` | `Auth0Properties.java` | `missingForRealisticMode()`: the names of the five variables without a value |
 | `adapter.in` | `SecuritySupport.java` (or a small `RealisticModeCheck`) | With `app.auth.local=false`, fails at startup if any of the five is missing |
 | `adapter.in` | `CustomerRegistration.java` | The password sign-up (`register(command, password, ip)`) refuses to run without local authentication (defence in depth) |
@@ -57,7 +60,21 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
 
 ## Tasks
 
-### [ ] T1 — The realistic mode requires the full Auth0 configuration (~10 min)
+### [ ] T1 — Fix: the login notices of Auth0 appear only with their parameter, and the failed return is logged (~10 min)
+
+- **Layer:** adapter.in.web
+- **Files:** `src/main/resources/templates/login.html`, `src/main/java/com/dawnrock/ddd/adapter/in/web/OAuth2LoginFailureHandler.java`; `LoginAuth0Tests.java`, `OAuth2LoginFailureHandlerTests.java` (new or existing)
+- **Depends on:** —
+- **What to do:**
+  1. Tests first (they fail today): `GET /login?oauth-error` shows the red notice and **not** «Vuelve a entrar con Auth0…»; `GET /login?link-expired` shows the amber notice and **not** «No se pudo iniciar sesión con Auth0…»; `GET /login?form` shows neither.
+  2. In `login.html`, `th:if="${param['oauth-error'] != null}"` and `th:if="${param['link-expired'] != null}"`; check no other template uses `param.containsKey`.
+  3. Test first: when the Auth0 return fails for a reason other than an unlinked identity, the handler logs one `WARN` with the OAuth error code (`OAuth2AuthenticationException#getError().getErrorCode()`, e.g. `authorization_request_not_found`, `invalid_state_parameter`), or the exception class if there is none, and still redirects to `/login?oauth-error`. Never tokens, `sub`, e-mail or the description of the error (it may carry personal data). An unlinked identity is not a failure worth a warning: no log.
+  4. `@Slf4j` on the handler (Lombok is allowed outside the domain).
+- **Acceptance criteria:**
+  - [ ] The new login tests pass and the old ones stay green.
+  - [ ] The handler test captures the `WARN` with the error code (e.g. with `OutputCaptureExtension`) and the redirect is unchanged.
+
+### [ ] T2 — The realistic mode requires the full Auth0 configuration (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `src/main/java/com/dawnrock/ddd/adapter/in/Auth0Properties.java`, `SecuritySupport.java` (or new `RealisticModeCheck.java` in the same package); tests `Auth0PropertiesTests`, `Auth0ClientRegistrationTests` (`ApplicationContextRunner`)
@@ -69,35 +86,35 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   - [ ] Context with `app.auth.local=false` and no Auth0 → fails, the message names the five variables; with only the three web ones → names `_AUDIENCE` and `_API_DOCS_CLIENT_ID`.
   - [ ] Context with `app.auth.local=false` and the five → starts; with `true` and none → starts.
 
-### [ ] T2 — `prod` turns local authentication off (~10 min)
+### [ ] T3 — `prod` turns local authentication off (~10 min)
 
 - **Layer:** config (resources) · tests
 - **Files:** `src/main/resources/application-prod.properties`, `src/test/java/com/dawnrock/ddd/ProdProfileTests.java`
-- **Depends on:** T1
+- **Depends on:** T2
 - **What to do:**
-  1. Test first in `ProdProfileTests`: with `prod`, the database variables and the five Auth0 ones, `AuthProperties.local()` is `false`; with `prod` and the database but no Auth0, startup fails with T1's message.
+  1. Test first in `ProdProfileTests`: with `prod`, the database variables and the five Auth0 ones, `AuthProperties.local()` is `false`; with `prod` and the database but no Auth0, startup fails with T2's message.
   2. `app.auth.local=false` in `application-prod.properties`, with a comment (#199, ADR 0024) and the emergency switch `APP_AUTH_LOCAL=true`.
   3. Give the existing `ProdProfileTests` the Auth0 properties so they keep testing what they tested.
 - **Acceptance criteria:**
   - [ ] `./mvnw test -Dtest=ProdProfileTests` green, the new two included.
   - [ ] `demo`/`default` profiles unchanged (`app.auth.local` is `true`).
 
-### [ ] T3 — The password sign-up refuses to run without local authentication (~5 min)
+### [ ] T4 — The password sign-up refuses to run without local authentication (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `src/main/java/com/dawnrock/ddd/adapter/in/CustomerRegistration.java`; its test
 - **Depends on:** —
 - **What to do:**
   1. Test first: with `AuthProperties(false)`, `register(command, password, ip)` throws `IllegalStateException` and creates nothing (no account, no user, no sign-up counted); `registerWithExternalIdentity(…)` keeps working.
-  2. Inject `AuthProperties` and add the guard. It is defence in depth: T4 and T5 make it unreachable from the outside.
+  2. Inject `AuthProperties` and add the guard. It is defence in depth: T5 and T6 make it unreachable from the outside.
 - **Acceptance criteria:**
   - [ ] The new test passes and the existing sign-up tests stay green.
 
-### [ ] T4 — REST: no sign-up with a password and a 401 that points to Auth0 (~10 min)
+### [ ] T5 — REST: no sign-up with a password and a 401 that points to Auth0 (~10 min)
 
 - **Layer:** adapter.in.rest
 - **Files:** `CustomerController.java`, `ApiSecurityConfig.java`; `LocalTokensDisabledTests.java`, `ApiSecurityTests.java`
-- **Depends on:** T3
+- **Depends on:** T4
 - **What to do:**
   1. Tests first in `LocalTokensDisabledTests` (add `CustomerController` to the slice): `POST /api/customers` → 404 with `app.auth.local=false`; `GET /api/accounts` without `Authorization` → 401 whose `detail` asks for an Auth0 access token and does not name `/api/auth/token`.
   2. `@ConditionalOnBooleanProperty(name = "app.auth.local", matchIfMissing = true)` on `CustomerController` (as on `TokenController`).
@@ -106,44 +123,44 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   - [ ] `POST /api/customers` → 404 in realistic mode; 201 in local mode (existing tests unchanged).
   - [ ] Missing-token 401 detail per mode, tested in both.
 
-### [ ] T5 — Web: the classic sign-up wizard goes to Auth0 in realistic mode (~10 min)
+### [ ] T6 — Web: the classic sign-up wizard goes to Auth0 in realistic mode (~10 min)
 
 - **Layer:** adapter.in.web
 - **Files:** `SignUpController.java`; `SignUpAuth0Tests.java` (or a new `SignUpRealisticModeTests`)
-- **Depends on:** T3
+- **Depends on:** T4
 - **What to do:**
   1. Tests first with `app.auth.local=false` and the test tenant: `GET /signup` (no `?auth0`, no pending identity) → redirect to `/oauth2/authorization/auth0`; `POST /signup`, `/signup/access`, `/signup/account` with a classic form → the same redirect, nothing created; `GET /signup?auth0` with a pending identity still runs the Auth0 wizard of #198 end to end.
   2. Inject `AuthProperties`; when local authentication is off and the form is not in Auth0 mode, every step returns `redirect:/oauth2/authorization/auth0` (an abandoned Auth0 wizard already resets to step 1, which now means going to Auth0).
 - **Acceptance criteria:**
   - [ ] The new tests pass; `SignUpControllerTests` (local mode) unchanged and green.
 
-### [ ] T6 — Web: «Quiero ser cliente» goes to Auth0 in realistic mode (~5 min)
+### [ ] T7 — Web: «Quiero ser cliente» goes to Auth0 in realistic mode (~5 min)
 
 - **Layer:** adapter.in.web
 - **Files:** `src/main/resources/templates/login.html`; `LoginAuth0OnlyTests.java`
-- **Depends on:** —
+- **Depends on:** T1 (same template)
 - **What to do:**
   1. Test first in `LoginAuth0OnlyTests`: the «Quiero ser cliente» door links to `/oauth2/authorization/auth0` with `hx-boost="false"` and its hint mentions Auth0; in `LoginControllerTests` (local) it still links to `/signup`.
   2. In `login.html`, the door follows `auth0Enabled and !localEnabled`, like «Ya soy cliente» (hint: «Crea tu acceso con Auth0 y abre tu cuenta en tres pasos.»).
 - **Acceptance criteria:**
   - [ ] Both login tests green; the page has no form posting to `/login` in realistic mode (already covered, keep it).
 
-### [ ] T7 — End-to-end test of the realistic mode, without network (~10 min)
+### [ ] T8 — End-to-end test of the realistic mode, without network (~10 min)
 
 - **Layer:** tests
 - **Files:** new `src/test/java/com/dawnrock/ddd/RealisticModeTests.java` (`@SpringBootTest` + `MockMvc`, like `Auth0ApiTokensTests`)
-- **Depends on:** T1-T6
+- **Depends on:** T1-T7
 - **What to do:**
   1. Properties: `app.auth.local=false`, `TestAuth0Tenant.PROPERTIES`, web client id/secret and SPA client id; link a demo user's `sub` in `setUp`.
   2. Check: `POST /api/auth/token` → 404; `POST /api/customers` → 404; `GET /login?form` has no password form; `POST /login` with valid demo credentials and CSRF does **not** authenticate; an Auth0 access token of a linked user → 200 on `GET /api/accounts`; an own HS256 token well signed → 401; `GET /signup` → redirect to Auth0.
 - **Acceptance criteria:**
   - [ ] `./mvnw test -Dtest=RealisticModeTests` green; the existing end-to-end tests and Schemathesis still run in local mode, unchanged.
 
-### [ ] T8 — OpenAPI: what exists only with local authentication (~10 min)
+### [ ] T9 — OpenAPI: what exists only with local authentication (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`, `docs/api/CHANGELOG.md`
-- **Depends on:** T4
+- **Depends on:** T5
 - **What to do:**
   1. `/api/auth/token` already says «available only while local authentication is on»; say the same for `POST /api/customers` (in production customers sign up on the web with Auth0, #198), and fix its «ask for a token with `POST /api/auth/token`» sentence for both modes. Add the realistic-mode example of the missing-token 401 next to the local one; `bearerAuth` described as local authentication only.
   2. Documentation only (no path, schema or status removed from the contract): `info.version` 2.3.0 → **2.3.1** (patch, ADR 0014; confirm with `oasdiff breaking`), entry in `CHANGELOG.md`.
@@ -151,26 +168,27 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors; `node scripts/check-contract-version.mjs` passes.
   - [ ] `node scripts/contract-test.mjs` passes (local mode).
 
-### [ ] T9 — ADR 0024, the Render guide and the project status (~10 min)
+### [ ] T10 — ADR 0024, the Render guide and the project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0024-oauth2-oidc-auth0.md`, `docs/deploy/render.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
-- **Depends on:** T1-T8
+- **Depends on:** T1-T9
 - **What to do:**
   1. ADR 0024: #199 done; the mode table above; the startup check; the password sign-ups off; `APP_AUTH_LOCAL=true` as an emergency switch (back to local mode without a deploy of code).
   2. `render.md`: section 2 ter is no longer «optional» for `Hexagonal`: a new subsection «Realistic mode (#199)» with the five required variables, the order (Auth0 API + SPA → variables in Render → deploy the code with #199), what changes for users (demo users and the administrator link once on `/login/link`, then only Auth0), the manual check and the rollback.
-  3. Status files: the next step, the decision (five variables required in `prod`), the resolved `pendientes.md` notes «For #199» of #196 and #198, and a row in `historial.md`.
+  3. Status files: the next step, the decision (five variables required in `prod`), the resolved `pendientes.md` notes «For #199» of #196 and #198, a new note on the Auth0 Management API (see Risks), and a row in `historial.md`.
+  4. `render.md`, «The API with Auth0 tokens»: in the SPA's *API Access* tab, **User-delegated Access → Grant Access** for the API (the button's name in today's dashboard); without it the SPA cannot ask for tokens of an API with per-app authorization.
 - **Acceptance criteria:**
   - [ ] Documents in English; the CI check of `estado-del-proyecto.md` passes.
 
-### [ ] T10 — Auth0 and Render: set-up before the merge and check after it (~10 min + the user's time in Auth0)
+### [ ] T11 — Auth0 and Render: set-up before the merge and check after it (~10 min + the user's time in Auth0)
 
 - **Layer:** deploy (no code)
 - **Files:** — (Render environment through `api.render.com`)
-- **Depends on:** T9 (PR open and green); the user's identifiers
+- **Depends on:** T10 (PR open and green); the user's identifiers
 - **What to do:**
-  1. **Before merging:** the user creates in Auth0 the API (`monA Bank API`, RS256) and the Single Page Application of Swagger UI, following `render.md` («The API with Auth0 tokens»), and gives the **API Identifier** and the **SPA Client ID**. Claude shows the exact change and, with the user's «yes», adds `APP_AUTH_AUTH0_AUDIENCE` and `APP_AUTH_AUTH0_API_DOCS_CLIENT_ID` to the `Hexagonal` service and deploys: the current code (#197) must start, and Swagger UI shows «Authorize» with Auth0 (checks #197 on Render).
-  2. Check that the five variables are set on the service (names only, never values).
+  1. ~~**Before merging:** the user creates in Auth0 the API and the Single Page Application of Swagger UI and gives the **API Identifier** and the **SPA Client ID**; Claude adds `APP_AUTH_AUTH0_AUDIENCE` and `APP_AUTH_AUTH0_API_DOCS_CLIENT_ID` to the `Hexagonal` service and deploys.~~ **Done on 2026-11-27** with the user's «yes»: API `monAbank` (identifier `https://mona-bank/`), SPA `monA Bank Swagger UI` with *Grant Access* on the API; deploy `dep-dc4l5avf3r2c73bq1700` (code `7feaa44`, #197) live, started without Auth0 configuration errors. The user linked their Auth0 identity on the web (second try, see T1). Pending: the user's check of Swagger UI «Authorize» with Auth0.
+  2. Check again, right before merging, that the five variables are set on the service (names only, never values).
   3. **Merge** (step 7 bis) and follow Render's deploy until it is live: `GET /actuator/health` → `UP`; `POST /api/auth/token` → 404; `/login?form` shows only «Entrar con Auth0»; `POST /api/customers` → 404. The manual Auth0 checks (link a demo user, sign up, Swagger UI) are the user's (they need an Auth0 login).
 - **Acceptance criteria:**
   - [ ] The deploy with #199 is live on Render and the checks above answer as expected; if it fails, `APP_AUTH_LOCAL=true` brings back local mode and the cause goes to `pendientes.md`.
@@ -201,8 +219,10 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
 
 ## Risks and open questions
 
-- **The merge depends on the user's Auth0 set-up.** Without the two identifiers in Render, the deploy of #199 fails at startup (Render keeps the previous version, so nothing breaks, but #199 is not live). That is why T10 sets them **before** merging.
+- **The merge depends on the user's Auth0 set-up.** Without the two identifiers in Render, the deploy of #199 fails at startup (Render keeps the previous version, so nothing breaks, but #199 is not live). That is why T11 sets them **before** merging.
 - **Demo users on Render:** `SPRING_PROFILES_ACTIVE=demo,prod`, and the four `APP_SECURITY_USERS_*` are set as Render variables. In realistic mode they are reachable only by linking an Auth0 identity once with their password; whoever knows a demo password can still link it (the same exposure as today's form login, but only once per user: a linked user cannot be linked again).
 - **Mode-dependent 401 text** changes an error `detail` in production; clients should not parse it (RFC 9457), and the contract shows both examples.
 - **`POST /login` in realistic mode** has no handler: the end-to-end test asserts only that it does not authenticate (the exact status, 403 without CSRF or 405 with it, is Spring's).
 - **Not tried against a real tenant in CI:** as in #196-#198, the manual Auth0 checks after the deploy are the user's.
+- **Auth0 Management API with user-delegated access for every application:** the tenant's policy for that system API is «allow all», so the SPA shows «All permissions granted» and it cannot be revoked per application, only by switching the API's policy to per-app authorization (a tenant-wide change). The scopes are only `*:current_user*` (each user's own Auth0 profile) and Swagger UI never asks for that audience, so it stays as is; noted in `pendientes.md` for a future hardening of the tenant.
+- **Sessions in memory on Render:** an Auth0 sign-in that starts on one instance and comes back to another during a redeploy loses the authorization request (probable cause of the first failure, T1). T1's log will confirm it next time; nothing else changes here.
