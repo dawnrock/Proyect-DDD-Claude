@@ -35,8 +35,10 @@
     <div class="alert alert-success d-flex align-items-center gap-2" role="status" th:if="${param.logout}"><svg th:replace="~{fragments/icons :: icon('circle-check')}"></svg>Has cerrado la sesión</div>
 
     <div class="doors" th:unless="${showForm}">
-        <a class="btn-slant btn-slant-rise door" th:href="@{/signup}"><span class="door-title">Quiero ser cliente</span><span class="door-hint">Abre tu cuenta en tres pasos.</span></a>
-        <!--/* Sin autenticación local, la puerta va directa a Auth0, que termina en otro dominio: sin hx-boost. */-->
+        <!--/* Sin autenticación local (#199) las dos puertas van a Auth0, que termina en otro dominio: sin hx-boost. Quien aún no
+             es cliente vuelve a /login/link y allí elige «Date de alta» (#198). */-->
+        <a class="btn-slant btn-slant-rise door" th:if="${auth0Enabled and !localEnabled}" hx-boost="false" th:href="@{/oauth2/authorization/auth0}"><span class="door-title">Quiero ser cliente</span><span class="door-hint">Crea tu acceso con Auth0 y abre tu cuenta en tres pasos.</span></a>
+        <a class="btn-slant btn-slant-rise door" th:unless="${auth0Enabled and !localEnabled}" th:href="@{/signup}"><span class="door-title">Quiero ser cliente</span><span class="door-hint">Abre tu cuenta en tres pasos.</span></a>
         <a class="btn-slant btn-slant-light door" th:if="${auth0Enabled and !localEnabled}" hx-boost="false" th:href="@{/oauth2/authorization/auth0}"><span class="door-title">Ya soy cliente</span><span class="door-hint">Entra con tu cuenta de Auth0.</span></a>
         <a class="btn-slant btn-slant-light door" th:unless="${auth0Enabled and !localEnabled}" th:href="@{/login(form)}"><span class="door-title">Ya soy cliente</span><span class="door-hint">Entra con tu usuario y tu contraseña.</span></a>
     </div>

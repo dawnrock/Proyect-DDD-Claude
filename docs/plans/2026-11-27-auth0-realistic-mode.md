@@ -136,7 +136,7 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   - [x] The new tests pass; `SignUpControllerTests` (local mode) unchanged and green.
   - Done: tests in a new `SignUpRealisticModeTests`; the controller reads `@Value("${app.auth.local:true}")` instead of `AuthProperties`, because one more type broke PMD's `CouplingBetweenObjects` on `SignUpController`.
 
-### [ ] T7 — Web: «Quiero ser cliente» goes to Auth0 in realistic mode (~5 min)
+### [x] T7 — Web: «Quiero ser cliente» goes to Auth0 in realistic mode (~5 min)
 
 - **Layer:** adapter.in.web
 - **Files:** `src/main/resources/templates/login.html`; `LoginAuth0OnlyTests.java`
@@ -145,7 +145,7 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   1. Test first in `LoginAuth0OnlyTests`: the «Quiero ser cliente» door links to `/oauth2/authorization/auth0` with `hx-boost="false"` and its hint mentions Auth0; in `LoginControllerTests` (local) it still links to `/signup`.
   2. In `login.html`, the door follows `auth0Enabled and !localEnabled`, like «Ya soy cliente» (hint: «Crea tu acceso con Auth0 y abre tu cuenta en tres pasos.»).
 - **Acceptance criteria:**
-  - [ ] Both login tests green; the page has no form posting to `/login` in realistic mode (already covered, keep it).
+  - [x] Both login tests green; the page has no form posting to `/login` in realistic mode (already covered, keep it).
 
 ### [ ] T8 — End-to-end test of the realistic mode, without network (~10 min)
 
