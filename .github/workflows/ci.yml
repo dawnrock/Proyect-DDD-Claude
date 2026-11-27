@@ -17,10 +17,10 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Dependencias con vulnerabilidades conocidas
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: high
 
@@ -29,21 +29,21 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0  # para comparar la PR con su rama base
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
           cache: maven
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
@@ -64,7 +64,7 @@ jobs:
         run: npx --yes @redocly/cli@2.71.0 lint docs/api/openapi.yaml
 
       # Versionado del contrato (#112, ADR 0014): si cambia, sube info.version; si es incompatible, la mayor.
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         if: github.event_name == 'pull_request'
         with:
           go-version: '1.27'
