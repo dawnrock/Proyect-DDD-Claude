@@ -171,7 +171,7 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors; `node scripts/check-contract-version.mjs` passes.
   - [x] `node scripts/contract-test.mjs` passes (local mode).
 
-### [ ] T10 — ADR 0024, the Render guide and the project status (~10 min)
+### [x] T10 — ADR 0024, the Render guide and the project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0024-oauth2-oidc-auth0.md`, `docs/deploy/render.md`, `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `pendientes.md`, `historial.md`
@@ -182,7 +182,7 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   3. Status files: the next step, the decision (five variables required in `prod`), the resolved `pendientes.md` notes «For #199» of #196 and #198, a new note on the Auth0 Management API (see Risks), and a row in `historial.md`.
   4. `render.md`, «The API with Auth0 tokens»: in the SPA's *API Access* tab, **User-delegated Access → Grant Access** for the API (the button's name in today's dashboard); without it the SPA cannot ask for tokens of an API with per-app authorization.
 - **Acceptance criteria:**
-  - [ ] Documents in English; the CI check of `estado-del-proyecto.md` passes.
+  - [x] Documents in English; the CI check of `estado-del-proyecto.md` passes.
 
 ### [ ] T11 — Auth0 and Render: set-up before the merge and check after it (~10 min + the user's time in Auth0)
 
