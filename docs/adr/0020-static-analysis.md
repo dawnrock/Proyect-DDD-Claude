@@ -46,3 +46,18 @@ The course's guidelines for adopting these tools: start with few rules, agree th
 - The PMD baseline works by class and rule, not by method: a new `CyclomaticComplexity` in another method of `CheckingAccount`, or more coupling in a listed class, would not fail the build. It is a limit of the plugin; the refactoring issues in `pendientes.md` remove those entries. Since #182 the baseline has no entries (#174, #177, #181 and #182 removed them), so the limit no longer applies.
 - The SpotBugs exclusion matches the generated classes by their `@org.immutables.value.Generated` annotation, so a new Immutables value type needs no change. Checkstyle, PMD and CPD are limited to `src/main/java` and `src/test/java` (they would otherwise read `target/generated-sources` at `verify`).
 - Proven on 2026-11-24 by breaking each tool on purpose, one at a time: a magic number in `src/main` (Checkstyle), a method with 11 parameters (PMD `ExcessiveParameterList`) and an ignored `BigDecimal.add()` (SpotBugs `RV_RETURN_VALUE_IGNORED`) each fail the build.
+
+## Amendment · Find Security Bugs (#205, 2026-11-27)
+
+- **Decision:** SpotBugs also runs **Find Security Bugs** (`com.h3xstream.findsecbugs:findsecbugs-plugin` 1.14.0, version in `findsecbugs.version`), declared in the plugin's `<plugins>`. It adds about 140 OWASP-oriented detectors (injection, XSS, weak cryptography, unvalidated redirects, CSRF) to the analysis the build already runs, with the same policy: any warning fails `./mvnw verify`, and a false positive gets a narrow exclusion with its reason. It is a build-time dependency only: nothing reaches the jar. Chosen with the user while reviewing the project against the OWASP Top 10.
+- **First run** (commit `3bc1cb9`), five warnings:
+
+  | Pattern | Where | Outcome |
+  | ------- | ----- | ------- |
+  | `XSS_SERVLET` | `ApiSecurityConfig.writeProblem` | Fixed: the problem JSON was built with `String.formatted` without escaping; it is now serialized with Jackson (`ApiProblemResponsesTests`) |
+  | `SPRING_CSRF_PROTECTION_DISABLED` | `ApiSecurityConfig` | Excluded: the API is stateless with Bearer tokens (ADR 0015), there is no cookie for a cross-site request to ride on |
+  | `SPRING_CSRF_UNRESTRICTED_REQUEST_MAPPING` | `AccessDeniedController.forbidden` | Excluded: Spring Security forwards the 403 page with the original method; it changes no state |
+  | `UNVALIDATED_REDIRECT` ×2 | `OAuth2LoginFailureHandler.onAuthenticationFailure` | Excluded: both targets are the context path plus a fixed path |
+
+- **Alternatives:** OWASP Dependency-Check covers libraries, not our code (dependencies are covered by Dependabot and the `dependency-review` job, #204); Semgrep or CodeQL would add a second engine and its own rules for little gain on this code base.
+- Proven by removing the `UNVALIDATED_REDIRECT` exclusion: `./mvnw verify` failed with both warnings, and passed again with it.

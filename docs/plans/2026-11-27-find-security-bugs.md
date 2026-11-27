@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-27
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~25 min (3 tasks)
 
 ## Goal
@@ -68,7 +68,7 @@ A local trial run on 2026-11-27 (commit `3bc1cb9`) reported five warnings: one i
   - [x] `./mvnw verify` ends in `BUILD SUCCESS` with the plugin active (the SpotBugs log lists `findsecbugs-plugin`).
   - [x] No exclusion covers a whole package or a whole pattern without a class.
 
-### [ ] T3 — ADR and project status (~5 min)
+### [x] T3 — ADR and project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0020-static-analysis.md`, `docs/ia/decisiones.md`, `docs/ia/estado-del-proyecto.md`, `docs/ia/historial.md`
@@ -77,29 +77,29 @@ A local trial run on 2026-11-27 (commit `3bc1cb9`) reported five warnings: one i
   1. ADR 0020: a dated section "Find Security Bugs (#205)" with why (OWASP detectors on the analysis we already run), the version, and the triage table of the first run.
   2. `decisiones.md` entry; status: #205 done, next step #206; one row in `historial.md`.
 - **Acceptance criteria:**
-  - [ ] The CI status check passes (the PR closes #205 and touches the status file).
+  - [x] The CI status check passes (the PR closes #205 and touches the status file).
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] Find Security Bugs runs in `./mvnw verify` and in the CI, and a new warning breaks the build.
-- [ ] The four false positives are excluded one by one, with their reason.
-- [ ] The API chain's problem responses are serialized JSON.
+- [x] Find Security Bugs runs in `./mvnw verify` and in the CI, and a new warning breaks the build.
+- [x] The four false positives are excluded one by one, with their reason.
+- [x] The API chain's problem responses are serialized JSON.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): `findsecbugs-plugin`, justified in ADR 0020.
-- [ ] If the API changes: n/a (same status codes and `Problem` bodies; the contract does not change).
-- [ ] Any new business term is in `docs/dominio/glosario.md` — n/a.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): `findsecbugs-plugin`, justified in ADR 0020.
+- [x] If the API changes: n/a (same status codes and `Problem` bodies; the contract does not change).
+- [x] Any new business term is in `docs/dominio/glosario.md` — n/a.
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
