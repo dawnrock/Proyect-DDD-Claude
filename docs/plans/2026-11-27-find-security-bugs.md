@@ -54,7 +54,7 @@ A local trial run on 2026-11-27 (commit `3bc1cb9`) reported five warnings: one i
   - [x] `node scripts/contract-test.mjs` (Schemathesis) still passes: the bodies keep the contract's `Problem` schema.
 - **Deviation:** the writer serializes an ordered map with the same four fields (`type`, `title`, `status`, `detail`) through a private `JsonMapper` constant, instead of a `ProblemDetail` through the application's bean: the body stays byte-for-byte the same as before for every current message, needs no `ProblemDetail` mixin and no wiring. The new test is `ApiProblemResponsesTests` (red: the old writer produced invalid JSON for a detail with quotes).
 
-### [ ] T2 — Find Security Bugs in SpotBugs, with narrow exclusions (~10 min)
+### [x] T2 — Find Security Bugs in SpotBugs, with narrow exclusions (~10 min)
 
 - **Layer:** build
 - **Files:** `pom.xml`, `spotbugs-exclude.xml`
@@ -65,8 +65,8 @@ A local trial run on 2026-11-27 (commit `3bc1cb9`) reported five warnings: one i
   3. One `<Match>` per false positive with `<Class name="…"/>` and `<Bug pattern="…"/>` (and `<Method>` for `AccessDeniedController.forbidden`), each with a comment explaining why, in the file's style.
   4. Validate the exclusions: remove one temporarily and check that `./mvnw verify` fails with that warning.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` ends in `BUILD SUCCESS` with the plugin active (the SpotBugs log lists `findsecbugs-plugin`).
-  - [ ] No exclusion covers a whole package or a whole pattern without a class.
+  - [x] `./mvnw verify` ends in `BUILD SUCCESS` with the plugin active (the SpotBugs log lists `findsecbugs-plugin`).
+  - [x] No exclusion covers a whole package or a whole pattern without a class.
 
 ### [ ] T3 — ADR and project status (~5 min)
 

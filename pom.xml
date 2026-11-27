@@ -44,6 +44,8 @@
         <!-- Línea base de PMD; ./mvnw pmd:pmd -Dpmd.baseline= enseña también los smells que ya existían -->
         <pmd.baseline>${project.basedir}/pmd-baseline.properties</pmd.baseline>
         <spotbugs-maven-plugin.version>4.10.5.0</spotbugs-maven-plugin.version>
+        <!-- Detectores de seguridad de OWASP para SpotBugs (#205, ADR 0020) -->
+        <findsecbugs.version>1.14.0</findsecbugs.version>
     </properties>
     <dependencies>
         <dependency>
@@ -323,6 +325,14 @@
                 <version>${spotbugs-maven-plugin.version}</version>
                 <configuration>
                     <excludeFilterFile>${project.basedir}/spotbugs-exclude.xml</excludeFilterFile>
+                    <!-- Find Security Bugs (#205, ADR 0020): inyecciones, XSS, criptografía débil, redirecciones y CSRF -->
+                    <plugins>
+                        <plugin>
+                            <groupId>com.h3xstream.findsecbugs</groupId>
+                            <artifactId>findsecbugs-plugin</artifactId>
+                            <version>${findsecbugs.version}</version>
+                        </plugin>
+                    </plugins>
                 </configuration>
                 <executions>
                     <execution>
