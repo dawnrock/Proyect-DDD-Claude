@@ -1,6 +1,7 @@
 package com.dawnrock.ddd.adapter.in.web;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -49,5 +50,16 @@ class LoginAuth0OnlyTests {
                 .andExpect(content().string(containsString(
                         "hx-boost=\"false\" href=\"/oauth2/authorization/auth0\"")))
                 .andExpect(content().string(not(containsString("href=\"/login?form\""))));
+    }
+
+    @Test
+    @DisplayName("Sin autenticación local, la puerta «Quiero ser cliente» va a Auth0 sin hx-boost y no al alta con contraseña")
+    void withoutLocalAuthenticationTheSignUpDoorGoesToAuth0() throws Exception {
+        mvc.perform(get("/login"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(matchesPattern("(?s).*<a class=\"btn-slant btn-slant-rise door\" "
+                        + "hx-boost=\"false\" href=\"/oauth2/authorization/auth0\"><span class=\"door-title\">"
+                        + "Quiero ser cliente</span><span class=\"door-hint\">[^<]*Auth0[^<]*</span></a>.*")))
+                .andExpect(content().string(not(containsString("href=\"/signup\""))));
     }
 }

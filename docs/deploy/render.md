@@ -13,7 +13,7 @@ Render runs Java only through Docker, so the repository has a [`Dockerfile`](../
 | H2 console | image (`SPRING_H2_CONSOLE_ENABLED=false`) | Off: on a public URL it could run code on the server |
 | Users and passwords | you, in Render (`APP_SECURITY_USERS_*`) | Your own password instead of `demo` |
 | API token secret | you, in Render (`APP_JWT_SECRET`, `Hexagonal` only) | A random value of at least 32 bytes (#122, ADR 0015) |
-| Sign in with Auth0 | you, in Auth0 and in Render (`APP_AUTH_AUTH0_*`, `Hexagonal` only) | Optional: the «Entrar con Auth0» button (#196, ADR 0024) and, with the audience, Auth0 tokens on the API and in Swagger UI (#197); without them everything is as before |
+| Sign in with Auth0 | you, in Auth0 and in Render (`APP_AUTH_AUTH0_*`, `Hexagonal` only) | **Required with `prod`** since #199 (realistic mode: only Auth0, all five variables); optional without `prod`: the «Entrar con Auth0» button (#196, ADR 0024) and, with the audience, Auth0 tokens on the API and in Swagger UI (#197) |
 
 **Live services** (given by the user, 2026-11-17): `Hexagonal` at <https://proyect-ddd-claude.onrender.com> (also in the `servers` of `docs/api/openapi.yaml`) and `Monolithic` at <https://mon-e-bank-monolithic.onrender.com>. On the free plan they sleep when idle, so the first request may take about a minute. The image also serves the API documentation: Swagger UI at `/api-docs` over the contract at `/openapi.yaml` (#111; the `Dockerfile` copies `docs/api/openapi.yaml` into the build).
 
@@ -114,9 +114,9 @@ If they run out, the start stops with a stack trace instead of hanging: `PSQLExc
 
 The configured users (`APP_SECURITY_USERS_*`, `APP_ADMIN_*`) are written to the database on every start: changing a hash in Render still changes that user's password. Users who signed up are kept.
 
-## 2 ter. Sign in with Auth0 (`Hexagonal`, optional)
+## 2 ter. Sign in with Auth0 (`Hexagonal`; required with `prod` since #199)
 
-Since #196 (ADR 0024) the web can sign customers in with [Auth0](https://auth0.com) (OpenID Connect). Without this section nothing changes: the variables are absent, the application starts without contacting Auth0 and the login page has no Auth0 button. With only some of the three variables the service does **not** start and the log names the missing ones.
+Since #196 (ADR 0024) the web can sign customers in with [Auth0](https://auth0.com) (OpenID Connect). With the `prod` profile (realistic mode, #199) Auth0 is the **only** way in and all five variables of this section are required: see «Realistic mode» at its end. Without `prod` and without this section nothing changes: the variables are absent, the application starts without contacting Auth0 and the login page has no Auth0 button. With only some of the three variables the service does **not** start and the log names the missing ones.
 
 1. **In the Auth0 dashboard** (your tenant), *Applications → Create Application → Regular Web Application*. In its *Settings*:
    - **Allowed Callback URLs:** `https://proyect-ddd-claude.onrender.com/login/oauth2/code/auth0` (for local runs, add `, http://localhost:8080/login/oauth2/code/auth0`).
@@ -155,7 +155,8 @@ With the section above done, the API can also accept **access tokens issued by A
 2. **Create the application of Swagger UI:** *Applications → Create Application → Single Page Application* (it runs in the browser and has no secret). In its *Settings*:
    - **Allowed Callback URLs:** `https://proyect-ddd-claude.onrender.com/api-docs/oauth2-redirect.html` (locally, add `, http://localhost:8080/api-docs/oauth2-redirect.html`).
    - **Allowed Web Origins:** `https://proyect-ddd-claude.onrender.com` (locally, add `, http://localhost:8080`): the browser asks Auth0's token endpoint directly.
-   - *Save Changes* and write down its **Client ID**. If the tenant asks which APIs the application may call (*APIs* tab or the API's *Application Access*), allow it for `monA Bank API`.
+   - *Save Changes* and write down its **Client ID**.
+   - In its **API Access** tab, on the row of `monA Bank API`: **Edit → User-Delegated Access → Grant Access**, without ticking any permission (the API defines none), and close. A *Grant ID* appears. Without it, an API with per-app authorization does not give this application tokens. (The *Auth0 Management API* row may show «All permissions granted» that cannot be removed per application: that is the tenant's policy for its system API, limited to `*:current_user*` scopes; Swagger UI never asks for it.)
 3. **In Render, Environment of the `Hexagonal` service**, add:
 
    ```text
@@ -165,7 +166,30 @@ With the section above done, the API can also accept **access tokens issued by A
 
    Neither is secret. Both need the three `APP_AUTH_AUTH0_*` of the web: without them the service does not start. **Add them only once the deployed code includes #197.**
 
-**Manual check:** sign in on the web with Auth0 once, so the identity is linked. Open `https://proyect-ddd-claude.onrender.com/api-docs`, **Authorize** → section `auth0` → **Authorize** (the client id is filled in), sign in with Auth0, close the dialog and try `GET /api/accounts`: it answers with that user's accounts. An identity that was never linked answers 401 with «La identidad de Auth0 no está vinculada a ningún usuario…». The `bearerAuth` section keeps working with the API's own token.
+**Manual check:** sign in on the web with Auth0 once, so the identity is linked. Open `https://proyect-ddd-claude.onrender.com/api-docs`, **Authorize** → section `auth0` → **Authorize** (the client id is filled in), sign in with Auth0, close the dialog and try `GET /api/accounts`: it answers with that user's accounts. An identity that was never linked answers 401 with «La identidad de Auth0 no está vinculada a ningún usuario…». The `bearerAuth` section works with the API's own token only in the local mode (without `prod`).
+
+### Realistic mode (#199)
+
+The `prod` profile sets `app.auth.local=false`: the service only lets people in through Auth0 (ADR 0024).
+
+| | Local mode (no `prod`) | Realistic mode (`prod`) |
+| --- | --- | --- |
+| Web login | Form, plus «Entrar con Auth0» if configured | Only Auth0: both doors of `/login` go there |
+| Sign-up | Classic wizard with a password, and through Auth0 if configured | Only through Auth0 (`/login/link` → «Date de alta»); `/signup` goes to Auth0 |
+| API | Own tokens (`POST /api/auth/token`) and Auth0 tokens if configured | Only Auth0 access tokens; `POST /api/auth/token` and `POST /api/customers` answer 404 |
+
+**Order to turn it on** (done on 2026-11-27 for the live service):
+
+1. The web login (the first part of this section) and the API with Auth0 tokens (the previous subsection) are set up and checked: the service has the five variables `APP_AUTH_AUTH0_DOMAIN`, `_CLIENT_ID`, `_CLIENT_SECRET`, `_AUDIENCE` and `_API_DOCS_CLIENT_ID`.
+2. Deploy the code that includes #199. With `SPRING_PROFILES_ACTIVE=demo,prod` it starts in realistic mode; if one of the five variables is missing, it does not start and the log says «Sin autenticación local (app.auth.local=false) hace falta Auth0: faltan …» (Render keeps the previous version running).
+
+**What changes for users:** existing users (the demo customers, the administrator of `APP_SECURITY_USERS_*`) sign in with Auth0 and, the first time, link their monA Bank user on `/login/link` with its password; from then on, only Auth0. **In this mode those passwords are the only thing that protects the link:** anyone with an Auth0 account who knows one can link that user to themselves (the administrator included). Never deploy `prod` with the README's `demo` password: set your own hashes (section 1). New customers sign up through Auth0. The local password is never used again to sign in or to get tokens.
+
+**Manual check:** `/login` shows only Auth0 doors and `/login?form` only «Entrar con Auth0»; `POST /api/auth/token` answers 404; a linked user enters with Auth0 on the web and in Swagger UI (`auth0` section).
+
+**Rollback:** add `APP_AUTH_LOCAL=true` to the service's environment and redeploy: the local mode comes back (form login, own tokens, sign-up with a password) without changing code. Remove it to go back to the realistic mode.
+
+**Diagnosing a failed Auth0 sign-in:** the log has a line `Falló el retorno de Auth0: <code>` with the OAuth2 error code (for example `authorization_request_not_found` when the browser comes back to an instance that does not have the session where the sign-in started, which can happen during a redeploy; trying again works).
 
 ## 3. Check it
 

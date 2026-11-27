@@ -44,6 +44,7 @@ public class CustomerRegistration {
     private final SignUpLimit signUpLimit;
     private final ExternalIdentities identities;
     private final Clock clock;
+    private final AuthProperties auth;
     private final SecureRandom random = new SecureRandom();
 
     /**
@@ -57,8 +58,14 @@ public class CustomerRegistration {
      * @throws DuplicateCustomerException si ya hay un cliente con ese documento
      * @throws com.dawnrock.ddd.domain.model.InsufficientInitialDepositException si el depósito no llega al mínimo
      * @throws IllegalArgumentException si la contraseña tiene menos de {@value #MINIMUM_PASSWORD_LENGTH} caracteres
+     * @throws IllegalStateException sin autenticación local ({@code app.auth.local=false}, #199): en el modo realista
+     *                               solo hay alta por Auth0. Los adaptadores ya no lo ofrecen; esto es una segunda barrera
      */
     public synchronized AccountSummary register(SignUpCommand command, String rawPassword, String clientIp) {
+        if (!auth.local()) {
+            throw new IllegalStateException(
+                    "El alta con contraseña no está disponible sin autenticación local: el alta es con Auth0");
+        }
         AccountSummary account = reserveAndOpen(command, clientIp, () -> checkPassword(rawPassword));
         createUser(command, rawPassword);
         return account;

@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -44,6 +45,9 @@ import com.dawnrock.ddd.domain.model.DuplicateCustomerException;
  * <p>Con una identidad de Auth0 pendiente en la sesión, {@code GET /signup?auth0} arranca el mismo asistente en modo
  * Auth0 (#198, ADR 0024): el paso 2 pide solo el usuario y cada paso comprueba la identidad pendiente, que se renueva
  * al completarlo. Contrato: {@code docs/contracts/auth0-sign-up.md}.
+ *
+ * <p>Sin autenticación local ({@code app.auth.local=false}, #199) no hay alta con contraseña: cualquier paso del
+ * asistente clásico lleva a Auth0, que devuelve a quien aún no es cliente a {@code /login/link} y su «Date de alta».
  */
 @Controller
 @SessionAttributes(SignUpController.FORM)
@@ -66,6 +70,8 @@ public class SignUpController {
 
     private static final String LINK_EXPIRED = "redirect:/login?link-expired";
 
+    private static final String AUTH0_LOGIN = "redirect:/oauth2/authorization/auth0";
+
     private final CustomerRegistration registration;
 
     private final ClientIpResolver clientIpResolver;
@@ -78,8 +84,16 @@ public class SignUpController {
 
     private final ProgrammaticSignIn signIn = new ProgrammaticSignIn();
 
+    /**
+     * Si hay alta con contraseña: solo con la autenticación local ({@code app.auth.local}, #199). Se lee el valor y no
+     * {@code AuthProperties}, igual que las condiciones de {@code TokenController} y {@code CustomerController}.
+     */
+    private final boolean localSignUp;
+
     public SignUpController(CustomerRegistration registration, ClientIpResolver clientIpResolver,
-                            SignUpLimit signUpLimit, SmartValidator validator, ObjectProvider<Clock> clock) {
+                            SignUpLimit signUpLimit, SmartValidator validator, ObjectProvider<Clock> clock,
+                            @Value("${app.auth.local:true}") boolean localSignUp) {
+        this.localSignUp = localSignUp;
         this.registration = registration;
         this.clientIpResolver = clientIpResolver;
         this.signUpLimit = signUpLimit;
@@ -95,9 +109,14 @@ public class SignUpController {
     @GetMapping("/signup")
     public String data(@ModelAttribute(FORM) SignUpForm form, HttpServletRequest request, HttpSession session,
                        Model model) {
+        SignUpForm current = form;
         if (pendingMissing(form, session)) {
             // Un asistente Auth0 abandonado, sin identidad vigente, no deja atrapado al cliente: paso 1 limpio
-            model.addAttribute(FORM, new SignUpForm());
+            current = new SignUpForm();
+            model.addAttribute(FORM, current);
+        }
+        if (classicSignUpOff(current)) {
+            return AUTH0_LOGIN;
         }
         warnIfLimitReached(request, model);
         return DATA_VIEW;
@@ -123,6 +142,9 @@ public class SignUpController {
     @PostMapping("/signup")
     public String submitData(@Validated(SignUpForm.PersonalData.class) @ModelAttribute(FORM) SignUpForm form,
                              BindingResult result, HttpServletRequest request, HttpSession session, Model model) {
+        if (classicSignUpOff(form)) {
+            return AUTH0_LOGIN;
+        }
         if (pendingMissing(form, session)) {
             return LINK_EXPIRED;
         }
@@ -141,6 +163,9 @@ public class SignUpController {
 
     @GetMapping("/signup/access")
     public String access(@ModelAttribute(FORM) SignUpForm form, HttpSession session) {
+        if (classicSignUpOff(form)) {
+            return AUTH0_LOGIN;
+        }
         if (pendingMissing(form, session)) {
             return LINK_EXPIRED;
         }
@@ -149,6 +174,9 @@ public class SignUpController {
 
     @PostMapping("/signup/access")
     public String submitAccess(@ModelAttribute(FORM) SignUpForm form, BindingResult result, HttpSession session) {
+        if (classicSignUpOff(form)) {
+            return AUTH0_LOGIN;
+        }
         if (pendingMissing(form, session)) {
             return LINK_EXPIRED;
         }
@@ -178,6 +206,9 @@ public class SignUpController {
 
     @GetMapping("/signup/account")
     public String account(@ModelAttribute(FORM) SignUpForm form, HttpSession session, Model model) {
+        if (classicSignUpOff(form)) {
+            return AUTH0_LOGIN;
+        }
         if (pendingMissing(form, session)) {
             return LINK_EXPIRED;
         }
@@ -193,6 +224,9 @@ public class SignUpController {
                                 BindingResult result, Model model, RedirectAttributes redirect,
                                 HttpServletRequest request, HttpServletResponse response, HttpSession session,
                                 SessionStatus status) {
+        if (classicSignUpOff(form)) {
+            return AUTH0_LOGIN;
+        }
         if (pendingMissing(form, session)) {
             return LINK_EXPIRED;
         }
@@ -272,7 +306,12 @@ public class SignUpController {
     /** Quita la identidad pendiente y vuelve a Auth0 para entrar con la sesión del cliente ya vinculado. */
     private String goToAuth0(HttpSession session) {
         pendingIdentities.remove(session);
-        return "redirect:/oauth2/authorization/auth0";
+        return AUTH0_LOGIN;
+    }
+
+    /** Si el asistente es el clásico, con contraseña, y no se ofrece: sin autenticación local (#199). */
+    private boolean classicSignUpOff(SignUpForm form) {
+        return !localSignUp && !form.isExternalIdentity();
     }
 
     private static boolean passwordsDiffer(SignUpForm form) {

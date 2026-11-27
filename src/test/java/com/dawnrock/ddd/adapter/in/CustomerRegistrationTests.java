@@ -72,7 +72,7 @@ class CustomerRegistrationTests {
         service = fixture.queryService();
         opening = fixture.accountOpeningService();
         return new CustomerRegistration(opening, service, manager, encoder, limit,
-                new InMemoryExternalIdentities(manager::userExists), Clock.systemUTC());
+                new InMemoryExternalIdentities(manager::userExists), Clock.systemUTC(), new AuthProperties(true));
     }
 
     private static SignUpCommand.Builder signUp() {
