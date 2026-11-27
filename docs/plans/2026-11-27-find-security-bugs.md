@@ -52,7 +52,7 @@ A local trial run on 2026-11-27 (commit `3bc1cb9`) reported five warnings: one i
 - **Acceptance criteria:**
   - [x] The new tests pass; existing `ApiSecurityTests`, `Auth0ApiTokensTests` and `ApiAuth0UnavailableTests` still pass with the same bodies.
   - [x] `node scripts/contract-test.mjs` (Schemathesis) still passes: the bodies keep the contract's `Problem` schema.
-- **Deviation:** the writer serializes an ordered map with the same four fields (`type`, `title`, `status`, `detail`) through a private `JsonMapper` constant, instead of a `ProblemDetail` through the application's bean: the body stays byte-for-byte the same as before for every current message, needs no `ProblemDetail` mixin and no wiring. The new test is `ApiProblemResponsesTests` (red: the old writer produced invalid JSON for a detail with quotes).
+- **Deviation:** the writer serializes an ordered map with the same four fields (`type`, `title`, `status`, `detail`) through a private `JsonMapper` constant, instead of a `ProblemDetail` through the application's bean: the body stays byte-for-byte the same as before for every current message, needs no `ProblemDetail` mixin and no wiring. The new test is `ApiProblemResponsesTests` (red: the old writer produced invalid JSON for a detail with quotes). The 401 (no token), 401 (invalid token) and 403 (no role) bodies were already parsed by the existing `jsonPath` assertions of `ApiSecurityTests`, which pass unchanged, so no duplicate test was added; the writer is package-private only for its unit test.
 
 ### [x] T2 — Find Security Bugs in SpotBugs, with narrow exclusions (~10 min)
 
@@ -62,7 +62,7 @@ A local trial run on 2026-11-27 (commit `3bc1cb9`) reported five warnings: one i
 - **What to do:**
   1. `<findsecbugs.version>1.14.0</findsecbugs.version>` next to the other analysis versions, and the plugin in the SpotBugs `<configuration><plugins>`, with a comment pointing to ADR 0020 and #205.
   2. Run `./mvnw verify`: only the four false positives above must remain (if new ones appear, triage them: fix a real one, or stop and add it to the plan with its reason).
-  3. One `<Match>` per false positive with `<Class name="…"/>` and `<Bug pattern="…"/>` (and `<Method>` for `AccessDeniedController.forbidden`), each with a comment explaining why, in the file's style.
+  3. One `<Match>` per false positive (three blocks: the two `UNVALIDATED_REDIRECT` warnings share `onAuthenticationFailure`; the exclusion is by method, not by line) with `<Class name="…"/>` and `<Bug pattern="…"/>` (and `<Method>` for `AccessDeniedController.forbidden`), each with a comment explaining why, in the file's style.
   4. Validate the exclusions: remove one temporarily and check that `./mvnw verify` fails with that warning.
 - **Acceptance criteria:**
   - [x] `./mvnw verify` ends in `BUILD SUCCESS` with the plugin active (the SpotBugs log lists `findsecbugs-plugin`).
@@ -105,3 +105,13 @@ A local trial run on 2026-11-27 (commit `3bc1cb9`) reported five warnings: one i
 
 - After T1, Find Security Bugs may flag the new writer differently (for example through `getOutputStream`); triage it in T2 like any other warning.
 - If #206 lands first, its new classes (nonce, header writers) may raise their own warnings; whichever PR goes second triages them.
+
+### [x] T4 — Review corrections (~5 min)
+
+- **Layer:** docs
+- **Files:** `docs/ia/historial.md`, this plan
+- **Depends on:** T3
+- **What to do:**
+  1. `revisor-ddd`: the history row said "four exclusions" while `spotbugs-exclude.xml` has three `<Match>` blocks for four warnings; the plan's T1 did not say which tests parse the 401/403 bodies. Both texts corrected.
+- **Acceptance criteria:**
+  - [x] History, plan and `spotbugs-exclude.xml` agree.
