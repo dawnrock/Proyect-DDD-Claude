@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-27
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~95 min (11 tasks)
 
 ## Goal
@@ -51,7 +51,7 @@ Facts from the code:
 
 ## Tasks
 
-### [ ] T1 — Password toggle without Alpine (~10 min)
+### [x] T1 — Password toggle without Alpine (~10 min)
 
 - **Layer:** adapter.in (web resources)
 - **Files:** `fragments/password-toggle.html`, `login.html`, `login-link.html`, `signup/access.html`, `static/js/app.js`, `FieldTags.java` and the tests that use it
@@ -60,8 +60,8 @@ Facts from the code:
   1. Red: `FieldTags` expects `data-password-toggle` on the button (still `hidden` by default, `aria-controls`, `aria-pressed="false"`) and no `x-` attributes on the button or the input group.
   2. Green: markup with `data-password-toggle`; the eye-off icon `<span>` uses `hidden` instead of `style="display: none"`. In `app.js`, a delegated `click` on `document` toggles the controlled input's `type`, `aria-pressed`, the `active` class and both icons; on `htmx:load` (it also fires for the initial page) reveal every `[data-password-toggle][hidden]` inside the loaded element.
 - **Acceptance criteria:**
-  - [ ] The tests of login, link and sign-up access pass with the new markup.
-  - [ ] Without JavaScript the button stays hidden (it keeps the `hidden` attribute in the HTML).
+  - [x] The tests of login, link and sign-up access pass with the new markup.
+  - [x] Without JavaScript the button stays hidden (it keeps the `hidden` attribute in the HTML).
 
 ### [ ] T2 — Account actions accordion without Alpine (~5 min)
 

@@ -40,7 +40,8 @@ final class FieldTags {
 
     /**
      * El campo de contraseña tiene su botón «Mostrar contraseña» (#146): un {@code <button type="button">} que controla
-     * el campo, empieza sin pulsar y está oculto hasta que Alpine.js lo muestra, así que sin JavaScript no aparece.
+     * el campo, empieza sin pulsar y está oculto hasta que {@code app.js} lo muestra (#206, sin Alpine.js), así que sin
+     * JavaScript no aparece. Ni el botón ni el campo llevan atributos de Alpine ni estilos en línea (CSP).
      */
     static void assertPasswordToggle(String html, String id) {
         Matcher matcher = Pattern.compile("<button\\b[^>]*\\baria-controls=\"" + Pattern.quote(id) + "\"[^>]*>(.*?)</button>",
@@ -48,15 +49,18 @@ final class FieldTags {
         assertThat(matcher.find()).as("botón de mostrar la contraseña %s", id).isTrue();
         assertThat(matcher.group()).as("botón de %s", id)
                 .contains("type=\"button\"")
+                .contains("data-password-toggle")
                 .contains(" hidden")
-                .contains("x-bind:hidden=\"false\"")
                 .contains("aria-pressed=\"false\"")
-                .contains("x-bind:class=\"{ active: shown }\"")
                 .contains("#eye\"")
                 .contains("#eye-off\"")
-                .contains("Mostrar contraseña");
+                .contains("Mostrar contraseña")
+                .doesNotContain("x-")
+                .doesNotContain("style=");
         assertThat(tag(html, id)).as("campo %s", id)
                 .contains("type=\"password\"")
-                .doesNotContain("value=");
+                .doesNotContain("value=")
+                .doesNotContain("x-bind");
+        assertThat(html).as("sin componentes de Alpine").doesNotContain("x-data=\"passwordToggle\"");
     }
 }

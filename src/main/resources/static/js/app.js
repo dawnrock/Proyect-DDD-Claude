@@ -100,11 +100,33 @@
         }
     });
 
+    // Botón «Mostrar contraseña» (#146, fragments/password-toggle), sin Alpine.js (#206, CSP). Va oculto en el HTML:
+    // se muestra al cargar la página y en cada contenido que inserta htmx (htmx:load llega para los dos), así que sin
+    // JavaScript no aparece. Los clics se escuchan en el documento para que valga también en lo que htmx sustituye.
+    const revealPasswordToggles = (root) => {
+        root.querySelectorAll?.('[data-password-toggle][hidden]').forEach((button) => {
+            button.hidden = false;
+        });
+    };
+    document.addEventListener('DOMContentLoaded', () => revealPasswordToggles(document));
+    document.addEventListener('htmx:load', (event) => revealPasswordToggles(event.target));
+    document.addEventListener('click', (event) => {
+        const button = event.target.closest?.('[data-password-toggle]');
+        const field = button && document.getElementById(button.getAttribute('aria-controls'));
+        if (!field) {
+            return;
+        }
+        const shown = button.getAttribute('aria-pressed') !== 'true';
+        field.type = shown ? 'text' : 'password';
+        button.setAttribute('aria-pressed', String(shown));
+        button.classList.toggle('active', shown);
+        button.querySelectorAll('[data-shown]').forEach((icon) => {
+            icon.hidden = icon.dataset.shown !== String(shown);
+        });
+    });
+
     // Acciones del detalle de cuenta: los <details> se abren solos sin JavaScript; con Alpine, abrir uno cierra los demás.
     document.addEventListener('alpine:init', () => {
-        // Botón «Mostrar contraseña» (#146, fragments/password-toggle): alterna el type del campo entre password y text.
-        Alpine.data('passwordToggle', () => ({ shown: false }));
-
         Alpine.data('actionPanels', () => ({
             closeOthers(event) {
                 const opened = event.target;
