@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Proyect-DDD-Claude · Checking accounts API
-  version: 2.3.0
+  version: 2.3.1
   description: |
     Versioned with SemVer (ADR 0014); the changes are in `docs/api/CHANGELOG.md`.
 
@@ -23,6 +23,11 @@ info:
     identity must have been linked once to a monA Bank user on the web («Entrar con Auth0»); the token
     then acts as that user, with the roles monA Bank gives them. `POST /api/auth/token` exists only
     while the application keeps its own users and passwords (local authentication).
+
+    Two modes (#199, ADR 0024): with **local authentication** (development, tests, the demo) both schemes
+    work, and `POST /api/auth/token` and `POST /api/customers` exist. In the **realistic mode** (production)
+    only Auth0 access tokens are accepted, those two paths do not exist (404), and customers sign up on the
+    web through Auth0.
 
     The API answers in Spanish: the `title` and `detail` values below and in the examples are the
     real ones and are not translated.
@@ -78,7 +83,7 @@ paths:
         whether the user or the password failed. After 3 failures for a user from one IP, or 10 from one IP with any
         user, the requests from there get 429 for 30 minutes, even with the right password (ADR 0017). Available only
         while local authentication is on (development, tests and the demo); without it the path does not exist and
-        Auth0 access tokens are the way in (ADR 0024).
+        Auth0 access tokens are the way in (realistic mode, production; #199, ADR 0024).
       security: []
       requestBody:
         required: true
@@ -325,7 +330,9 @@ paths:
       description: |
         Registers the customer, opens their first account with an IBAN assigned by the bank and creates their user
         (role USER), all at once and without administrator approval. No credentials are needed. The new user can then
-        ask for a token with `POST /api/auth/token` and use the API. A document is unique per customer (R29): signing up again with it fails with 422,
+        ask for a token with `POST /api/auth/token` and use the API. Available only while local authentication is on
+        (development, tests and the demo); in the realistic mode (production) the path does not exist and customers
+        sign up on the web through Auth0 (#198, #199). A document is unique per customer (R29): signing up again with it fails with 422,
         whatever the e-mail. Successful sign-ups are limited to 3 per hour from one IP and 50 per hour in total; over
         either limit the answer is 429 until the oldest sign-up of the hour expires (ADR 0018). Failed sign-ups do not
         count towards those limits, but 10 failures in the last hour from one IP because the username was taken or the
@@ -802,7 +809,10 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: A token from `POST /api/auth/token` (demo profile users are in the README). It lasts 15 minutes.
+      description: |
+        A token from `POST /api/auth/token` (demo profile users are in the README). It lasts 15 minutes. Only with
+        local authentication (development, tests and the demo); the realistic mode (production) does not accept it
+        (#199).
     auth0:
       type: openIdConnect
       openIdConnectUrl: /api-docs/openid-configuration
@@ -870,12 +880,19 @@ components:
             $ref: '#/components/schemas/ProblemDetail'
           examples:
             missingToken:
-              summary: No token
+              summary: No token (local authentication)
               value:
                 type: about:blank
                 title: No autenticado
                 status: 401
                 detail: 'Hace falta autenticarse para usar la API: pide un token en POST /api/auth/token y envíalo como Bearer'
+            missingTokenRealisticMode:
+              summary: No token (realistic mode, only Auth0)
+              value:
+                type: about:blank
+                title: No autenticado
+                status: 401
+                detail: 'Hace falta autenticarse para usar la API: inicia sesión con Auth0 y envía su token de acceso como Bearer'
             invalidToken:
               summary: Invalid or expired token
               value:

@@ -159,7 +159,7 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   - [x] `./mvnw test -Dtest=RealisticModeTests` green; the existing end-to-end tests and Schemathesis still run in local mode, unchanged.
   - Done: green at first (it integrates T1-T7); seen red (4/4) by switching the test to `app.auth.local=true`.
 
-### [ ] T9 — OpenAPI: what exists only with local authentication (~10 min)
+### [x] T9 — OpenAPI: what exists only with local authentication (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/api/openapi.yaml`, `docs/api/CHANGELOG.md`
@@ -168,8 +168,8 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   1. `/api/auth/token` already says «available only while local authentication is on»; say the same for `POST /api/customers` (in production customers sign up on the web with Auth0, #198), and fix its «ask for a token with `POST /api/auth/token`» sentence for both modes. Add the realistic-mode example of the missing-token 401 next to the local one; `bearerAuth` described as local authentication only.
   2. Documentation only (no path, schema or status removed from the contract): `info.version` 2.3.0 → **2.3.1** (patch, ADR 0014; confirm with `oasdiff breaking`), entry in `CHANGELOG.md`.
 - **Acceptance criteria:**
-  - [ ] `npx @redocly/cli lint docs/api/openapi.yaml` without errors; `node scripts/check-contract-version.mjs` passes.
-  - [ ] `node scripts/contract-test.mjs` passes (local mode).
+  - [x] `npx @redocly/cli lint docs/api/openapi.yaml` without errors; `node scripts/check-contract-version.mjs` passes.
+  - [x] `node scripts/contract-test.mjs` passes (local mode).
 
 ### [ ] T10 — ADR 0024, the Render guide and the project status (~10 min)
 

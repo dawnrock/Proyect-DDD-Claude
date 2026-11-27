@@ -2,6 +2,14 @@
 
 Changes to `docs/api/openapi.yaml`, newest first. Versioning policy: [ADR 0014](../adr/0014-contract-versioning.md) (major for an incompatible change as `oasdiff breaking` reports it, minor for a compatible addition, patch for documentation only). The CI checks the bump on every pull request.
 
+## 2.3.1 · 2026-11-27 (#199)
+
+Documentation only ([ADR 0024](../adr/0024-oauth2-oidc-auth0.md)).
+
+- **Two modes:** with local authentication (development, tests, the demo) nothing changes. In the realistic mode (production) only Auth0 access tokens are accepted, and `POST /api/auth/token` and `POST /api/customers` do not exist (404): customers sign up on the web through Auth0 (#198).
+- **`signUp` and `bearerAuth`:** documented as available only with local authentication.
+- **401:** new example `missingTokenRealisticMode`; without a token, the realistic mode's `detail` asks for an Auth0 access token instead of `POST /api/auth/token`. Same status, title and headers.
+
 ## 2.3.0 · 2026-11-26 (#197)
 
 Compatible addition ([ADR 0024](../adr/0024-oauth2-oidc-auth0.md)).
