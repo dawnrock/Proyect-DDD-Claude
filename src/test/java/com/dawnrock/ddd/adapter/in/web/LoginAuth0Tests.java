@@ -24,6 +24,10 @@ import com.dawnrock.ddd.adapter.in.TestUsers;
 @Import({WebSecurityConfig.class, SecuritySupport.class, TestUsers.class, Auth0TestRegistration.class})
 class LoginAuth0Tests {
 
+    private static final String OAUTH_ERROR_NOTICE = "No se pudo iniciar sesión con Auth0";
+
+    private static final String LINK_EXPIRED_NOTICE = "Vuelve a entrar con Auth0 para vincular tu usuario";
+
     @Autowired
     private MockMvc mvc;
 
@@ -59,7 +63,8 @@ class LoginAuth0Tests {
                 .andExpect(content().string(matchesPattern(
                         "(?s).*<div class=\"alert alert-danger[^\"]*\" role=\"alert\"><svg[^>]*>.*</svg>"
                                 + "No se pudo iniciar sesión con Auth0\\. Inténtalo de nuevo\\.</div>.*")))
-                .andExpect(content().string(not(containsString("Usuario o contraseña incorrectos"))));
+                .andExpect(content().string(not(containsString("Usuario o contraseña incorrectos"))))
+                .andExpect(content().string(not(containsString(LINK_EXPIRED_NOTICE))));
     }
 
     @Test
@@ -69,6 +74,16 @@ class LoginAuth0Tests {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("name=\"username\"")))
                 .andExpect(content().string(matchesPattern(
-                        "(?s).*role=\"alert\"><svg[^>]*>.*</svg>Vuelve a entrar con Auth0 para vincular tu usuario\\.</div>.*")));
+                        "(?s).*role=\"alert\"><svg[^>]*>.*</svg>Vuelve a entrar con Auth0 para vincular tu usuario\\.</div>.*")))
+                .andExpect(content().string(not(containsString(OAUTH_ERROR_NOTICE))));
+    }
+
+    @Test
+    @DisplayName("Con ?form y sin aviso, /login no muestra ninguno de los dos avisos de Auth0")
+    void withOnlyFormLoginShowsNeitherAuth0Notice() throws Exception {
+        mvc.perform(get("/login").param("form", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString(OAUTH_ERROR_NOTICE))))
+                .andExpect(content().string(not(containsString(LINK_EXPIRED_NOTICE))));
     }
 }

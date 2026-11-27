@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-27
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~100 min (11 tasks) + the Auth0/Render set-up before the merge
 
 ## Goal
@@ -60,7 +60,7 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
 
 ## Tasks
 
-### [ ] T1 — Fix: the login notices of Auth0 appear only with their parameter, and the failed return is logged (~10 min)
+### [x] T1 — Fix: the login notices of Auth0 appear only with their parameter, and the failed return is logged (~10 min)
 
 - **Layer:** adapter.in.web
 - **Files:** `src/main/resources/templates/login.html`, `src/main/java/com/dawnrock/ddd/adapter/in/web/OAuth2LoginFailureHandler.java`; `LoginAuth0Tests.java`, `OAuth2LoginFailureHandlerTests.java` (new or existing)
@@ -71,8 +71,8 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   3. Test first: when the Auth0 return fails for a reason other than an unlinked identity, the handler logs one `WARN` with the OAuth error code (`OAuth2AuthenticationException#getError().getErrorCode()`, e.g. `authorization_request_not_found`, `invalid_state_parameter`), or the exception class if there is none, and still redirects to `/login?oauth-error`. Never tokens, `sub`, e-mail or the description of the error (it may carry personal data). An unlinked identity is not a failure worth a warning: no log.
   4. `@Slf4j` on the handler (Lombok is allowed outside the domain).
 - **Acceptance criteria:**
-  - [ ] The new login tests pass and the old ones stay green.
-  - [ ] The handler test captures the `WARN` with the error code (e.g. with `OutputCaptureExtension`) and the redirect is unchanged.
+  - [x] The new login tests pass and the old ones stay green.
+  - [x] The handler test captures the `WARN` with the error code (e.g. with `OutputCaptureExtension`) and the redirect is unchanged.
 
 ### [ ] T2 — The realistic mode requires the full Auth0 configuration (~10 min)
 

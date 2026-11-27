@@ -45,8 +45,8 @@
         <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:if="${param.error}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg>Usuario o contraseña incorrectos</div>
         <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:if="${param.blocked}"><svg th:replace="~{fragments/icons :: icon('shield-x')}"></svg><span th:text="|Demasiados intentos fallidos. Vuelve a intentarlo dentro de ${lockoutMinutes} minutos.|">Demasiados intentos fallidos. Vuelve a intentarlo dentro de 30 minutos.</span></div>
 
-        <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:if="${param.containsKey('oauth-error')}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg>No se pudo iniciar sesión con Auth0. Inténtalo de nuevo.</div>
-        <div class="alert alert-warning d-flex align-items-center gap-2" role="alert" th:if="${param.containsKey('link-expired')}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg>Vuelve a entrar con Auth0 para vincular tu usuario.</div>
+        <div class="alert alert-danger d-flex align-items-center gap-2" role="alert" th:if="${param['oauth-error'] != null}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg>No se pudo iniciar sesión con Auth0. Inténtalo de nuevo.</div>
+        <div class="alert alert-warning d-flex align-items-center gap-2" role="alert" th:if="${param['link-expired'] != null}"><svg th:replace="~{fragments/icons :: icon('circle-alert')}"></svg>Vuelve a entrar con Auth0 para vincular tu usuario.</div>
 
         <form th:if="${localEnabled}" th:action="@{/login}" method="post">
             <div class="mb-3">
