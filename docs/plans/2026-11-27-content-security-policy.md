@@ -99,16 +99,17 @@ Facts from the code:
 - **Acceptance criteria:**
   - [x] A test checks the three settings in the rendered layout (`LoginControllerTests`).
 
-### [ ] T5 — The three policies as values (~10 min)
+### [x] T5 — The three policies as values (~10 min)
 
 - **Layer:** adapter.in
-- **Files:** `adapter/in/web/ContentSecurityPolicies.java`, `ContentSecurityPoliciesTests.java`
+- **Files:** `adapter/in/ContentSecurityPolicies.java`, `ContentSecurityPoliciesTests.java`
+- **Deviation:** the class lives in the root of `adapter.in` (with `SecuritySupport`), not in `adapter.in.web`: the onion rule forbids `adapter.in.rest` → `adapter.in.web`, and both chains use it.
 - **Depends on:** —
 - **What to do:**
   1. Red: unit tests for `web(nonce, auth0Origin)`, `apiDocs(auth0Origin)` and `api()`: exact directives above, the Auth0 origin only when present, no `'unsafe-eval'` anywhere and no `'unsafe-inline'` outside `apiDocs`'s `style-src`.
   2. Green: a final class with static methods; the Auth0 origin is an `Optional<String>` (scheme + host, from `Auth0Properties.baseUrl()`).
 - **Acceptance criteria:**
-  - [ ] The unit tests pass; `HexagonalArchitectureTests` green (the class lives in `adapter.in.web`; `ApiSecurityConfig` may use only `api()`, or the API policy stays a constant in `adapter.in.rest` if the ArchUnit rules forbid `rest` → `web`).
+  - [x] The unit tests pass; `HexagonalArchitectureTests` green (the class lives in `adapter.in.web`; `ApiSecurityConfig` may use only `api()`, or the API policy stays a constant in `adapter.in.rest` if the ArchUnit rules forbid `rest` → `web`).
 
 ### [ ] T6 — Per-request nonce and the login page (~10 min)
 
