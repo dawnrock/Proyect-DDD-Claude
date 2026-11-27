@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-27
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~95 min (11 tasks)
 
 ## Goal
@@ -169,7 +169,7 @@ Facts from the code:
 - **Result (2026-11-27):** the first run found one real violation: when htmx swaps `#account-panel`, its settle step copies the old element's `style` attribute (left by Motion's entrance animation) with `setAttribute`, which `style-src 'self'` blocks. Fixed with `"attributesToSettle":["class","width","height"]` in `htmx-config` (test in `LoginControllerTests`). After it, no CSP violation anywhere: login doors and intro, wrong password, show password (also on the sign-up step swapped by htmx), deposit/withdrawal/transfer through htmx, accordion before and after a swap, logout, sign-up, Swagger UI with "Try it out" and the H2 console; without JavaScript the toggle stays hidden and the `<details>` open. jsDelivr is not reachable from the session, so the identical `swagger-ui-dist@5.34.1` files from npm were served for its URLs (SRI matched).
 - **Not from this change (seen on `Hexagonal` too, same walk):** a `pageerror` "Transition was aborted… ViewTransition opt-in disabled" on `/login?logout` after several htmx operations, and the 404 of `/api-docs/openid-configuration` when Auth0 is not configured. On `Hexagonal` the show-password button did not work on the sign-up step swapped by htmx (Alpine did not initialise it); the delegated listeners fix it.
 
-### [ ] T11 — ADRs, pending items and project status (~10 min)
+### [x] T11 — ADRs, pending items and project status (~10 min)
 
 - **Layer:** docs
 - **Files:** `docs/adr/0025-security-headers.md` (new), `docs/adr/0016-web-frontend-libraries.md`, `docs/adr/README.md` (index, if it lists ADRs), `docs/ia/pendientes.md`, `docs/ia/decisiones.md`, `docs/ia/estado-del-proyecto.md`, `docs/ia/historial.md`
@@ -180,30 +180,30 @@ Facts from the code:
   3. `pendientes.md`: drop the CSP parts of the #111 and #124 items (keep the rest of those lines); add the owner check after the deploy: `curl -sI https://<service>/login` shows the CSP and HSTS through Render and Cloudflare, and logout with Auth0 works.
   4. Status: #206 done, next step; `decisiones.md`; one row in `historial.md`.
 - **Acceptance criteria:**
-  - [ ] The CI status check passes; no document still says the web has no CSP.
+  - [x] The CI status check passes; no document still says the web has no CSP.
 
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] The web, Swagger UI and the API send their own CSP; no policy contains `'unsafe-eval'`, and only Swagger UI's `style-src` contains `'unsafe-inline'`.
-- [ ] No template has inline styles or inline scripts without a nonce (`TemplatesCspTests`).
-- [ ] Alpine.js is gone from `pom.xml`, the templates and `app.js`; the password toggle and the accordion behave as before, also after htmx swaps and without JavaScript.
-- [ ] Playwright walk-through with zero CSP violations.
+- [x] The web, Swagger UI and the API send their own CSP; no policy contains `'unsafe-eval'`, and only Swagger UI's `style-src` contains `'unsafe-inline'`.
+- [x] No template has inline styles or inline scripts without a nonce (`TemplatesCspTests`).
+- [x] Alpine.js is gone from `pom.xml`, the templates and `app.js`; the password toggle and the accordion behave as before, also after htmx swaps and without JavaScript.
+- [x] Playwright walk-through with zero CSP violations.
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR): one removed (Alpine.js), none added.
-- [ ] If the API changes: n/a (only response headers; paths, bodies and status codes do not change).
-- [ ] Any new business term is in `docs/dominio/glosario.md` — n/a.
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR): one removed (Alpine.js), none added.
+- [x] If the API changes: n/a (only response headers; paths, bodies and status codes do not change).
+- [x] Any new business term is in `docs/dominio/glosario.md` — n/a.
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 

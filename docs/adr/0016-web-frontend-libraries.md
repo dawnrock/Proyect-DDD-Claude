@@ -45,3 +45,7 @@ The web (`adapter.in.web`) is HTML rendered on the server with Thymeleaf and a s
 - Motion is upgraded by hand: a new tarball, its integrity checked, and its `README.md` updated.
 - The look changes from the custom dark theme of #48 to plain Bootstrap with its dark mode. `app.css` only keeps what Bootstrap does not cover.
 - There is still no Content-Security-Policy (pending since #111). With every script served from the application's own origin, a `script-src 'self'` policy becomes possible, except that the Alpine.js standard build evaluates expressions with `new Function` and would need `'unsafe-eval'`, or its CSP build.
+
+## Amendment · Alpine.js removed (#206, 2026-11-27)
+
+Alpine.js left the project with the Content-Security-Policy of [ADR 0025](0025-security-headers.md): its standard build needs `'unsafe-eval'`, and it only drove the show-password button and the account actions accordion. Both are now plain JavaScript in `app.js` with listeners on `document` (`data-password-toggle`, `data-action-panels`), which also work on content htmx inserts. The Content-Security-Policy that this ADR left pending exists since #206.
