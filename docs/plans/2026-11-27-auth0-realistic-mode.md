@@ -147,7 +147,7 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
 - **Acceptance criteria:**
   - [x] Both login tests green; the page has no form posting to `/login` in realistic mode (already covered, keep it).
 
-### [ ] T8 — End-to-end test of the realistic mode, without network (~10 min)
+### [x] T8 — End-to-end test of the realistic mode, without network (~10 min)
 
 - **Layer:** tests
 - **Files:** new `src/test/java/com/dawnrock/ddd/RealisticModeTests.java` (`@SpringBootTest` + `MockMvc`, like `Auth0ApiTokensTests`)
@@ -156,7 +156,8 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   1. Properties: `app.auth.local=false`, `TestAuth0Tenant.PROPERTIES`, web client id/secret and SPA client id; link a demo user's `sub` in `setUp`.
   2. Check: `POST /api/auth/token` → 404; `POST /api/customers` → 404; `GET /login?form` has no password form; `POST /login` with valid demo credentials and CSRF does **not** authenticate; an Auth0 access token of a linked user → 200 on `GET /api/accounts`; an own HS256 token well signed → 401; `GET /signup` → redirect to Auth0.
 - **Acceptance criteria:**
-  - [ ] `./mvnw test -Dtest=RealisticModeTests` green; the existing end-to-end tests and Schemathesis still run in local mode, unchanged.
+  - [x] `./mvnw test -Dtest=RealisticModeTests` green; the existing end-to-end tests and Schemathesis still run in local mode, unchanged.
+  - Done: green at first (it integrates T1-T7); seen red (4/4) by switching the test to `app.auth.local=true`.
 
 ### [ ] T9 — OpenAPI: what exists only with local authentication (~10 min)
 
