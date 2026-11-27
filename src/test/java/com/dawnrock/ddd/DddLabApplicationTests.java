@@ -539,11 +539,12 @@ class DddLabApplicationTests {
 							.formatted(URLEncoder.encode(" Ada ", StandardCharsets.UTF_8), PASSWORD, csrf.group(1))))
 					.build(), HttpResponse.BodyHandlers.ofString());
 
-			String location = login.headers().firstValue("Location").orElseThrow();
-			assertThat(location).doesNotContain("login");
+			// Desde Spring Boot 4.2 la redirección es relativa («/»); el navegador la resuelve contra la página del login
+			URI location = URI.create(url("/login")).resolve(login.headers().firstValue("Location").orElseThrow());
+			assertThat(location.getPath()).doesNotContain("login");
 			HttpClient browser = HttpClient.newBuilder().cookieHandler(cookies)
 					.followRedirects(HttpClient.Redirect.NORMAL).build();
-			HttpResponse<String> home = browser.send(HttpRequest.newBuilder(URI.create(location))
+			HttpResponse<String> home = browser.send(HttpRequest.newBuilder(location)
 					.header("Accept", "text/html").GET().build(), HttpResponse.BodyHandlers.ofString());
 			assertThat(home.body()).contains("<span>ada</span>");
 		}
