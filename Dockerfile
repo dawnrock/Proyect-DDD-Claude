@@ -3,7 +3,7 @@
 # and the demo users' passwords come from environment variables.
 
 # --- Build stage: compile the JAR (CI already runs the tests with `mvn verify`)
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM maven:3.9-eclipse-temurin-26 AS build
 WORKDIR /workspace
 COPY pom.xml lombok.config ./
 RUN mvn -q -B dependency:go-offline
