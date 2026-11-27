@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-27
-- **Status:** in progress
+- **Status:** done (except T11 step 3, the check of the deploy after the merge)
 - **Total estimate:** ~100 min (11 tasks) + the Auth0/Render set-up before the merge
 
 ## Goal
@@ -212,25 +212,25 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
 
 **Specific:**
 
-- [ ] `application-prod.properties` with `app.auth.local=false`; starting `prod` without the five Auth0 variables fails with a clear message naming the missing ones.
-- [ ] Realistic-mode test (test issuer with a fixed key, no network): `/api/auth/token` → 404, `POST /api/customers` → 404, no form login, a linked Auth0 token is accepted and an own token is rejected, the classic sign-up goes to Auth0.
-- [ ] The end-to-end tests and Schemathesis still run in local mode, unchanged.
-- [ ] `openapi.yaml`: `/api/auth/token` and `POST /api/customers` documented as available only with local authentication (development and tests); ADR 0024 updated; `docs/deploy/render.md` with the steps to turn the realistic mode on.
-- [ ] Render's `Hexagonal` service runs the realistic mode with the five Auth0 variables.
+- [x] `application-prod.properties` with `app.auth.local=false`; starting `prod` without the five Auth0 variables fails with a clear message naming the missing ones.
+- [x] Realistic-mode test (test issuer with a fixed key, no network): `/api/auth/token` → 404, `POST /api/customers` → 404, no form login, a linked Auth0 token is accepted and an own token is rejected, the classic sign-up goes to Auth0.
+- [x] The end-to-end tests and Schemathesis still run in local mode, unchanged.
+- [x] `openapi.yaml`: `/api/auth/token` and `POST /api/customers` documented as available only with local authentication (development and tests); ADR 0024 updated; `docs/deploy/render.md` with the steps to turn the realistic mode on.
+- [ ] Render's `Hexagonal` service runs the realistic mode with the five Auth0 variables (the five are set; the deploy with #199 comes with the merge, T11).
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
-- [ ] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
-- [ ] No dependencies added beyond the planned ones (or justified in an ADR).
-- [ ] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes.
-- [ ] Any new business term is in `docs/dominio/glosario.md` (n/a: no new business term).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
+- [ ] All tasks and their criteria are checked (all but T11, which ends after the merge).
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The phase architecture is respected (hexagonal: dependencies point to the hexagon), verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1) and does not use Lombok (ADR 0009) (`node .claude/skills/ddd-building-block/scripts/check-domain.mjs` without errors).
+- [x] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
+- [x] No dependencies added beyond the planned ones (or justified in an ADR).
+- [x] If the API changes: `docs/api/openapi.yaml` reflects it with `info.version` bumped per ADR 0014 and an entry in `docs/api/CHANGELOG.md`, `npx @redocly/cli lint docs/api/openapi.yaml` has no errors and `node scripts/contract-test.mjs` passes.
+- [x] Any new business term is in `docs/dominio/glosario.md` (n/a: no new business term).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated: issue status and next step in `docs/ia/estado-del-proyecto.md` (kept short), new decisions in `decisiones.md`, pending items in `pendientes.md` and a row in `historial.md`.
 
 ## Risks and open questions
 
