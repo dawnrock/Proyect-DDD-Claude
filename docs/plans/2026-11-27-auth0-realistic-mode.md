@@ -124,7 +124,7 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   - [x] `POST /api/customers` → 404 in realistic mode; 201 in local mode (existing tests unchanged).
   - [x] Missing-token 401 detail per mode, tested in both.
 
-### [ ] T6 — Web: the classic sign-up wizard goes to Auth0 in realistic mode (~10 min)
+### [x] T6 — Web: the classic sign-up wizard goes to Auth0 in realistic mode (~10 min)
 
 - **Layer:** adapter.in.web
 - **Files:** `SignUpController.java`; `SignUpAuth0Tests.java` (or a new `SignUpRealisticModeTests`)
@@ -133,7 +133,8 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   1. Tests first with `app.auth.local=false` and the test tenant: `GET /signup` (no `?auth0`, no pending identity) → redirect to `/oauth2/authorization/auth0`; `POST /signup`, `/signup/access`, `/signup/account` with a classic form → the same redirect, nothing created; `GET /signup?auth0` with a pending identity still runs the Auth0 wizard of #198 end to end.
   2. Inject `AuthProperties`; when local authentication is off and the form is not in Auth0 mode, every step returns `redirect:/oauth2/authorization/auth0` (an abandoned Auth0 wizard already resets to step 1, which now means going to Auth0).
 - **Acceptance criteria:**
-  - [ ] The new tests pass; `SignUpControllerTests` (local mode) unchanged and green.
+  - [x] The new tests pass; `SignUpControllerTests` (local mode) unchanged and green.
+  - Done: tests in a new `SignUpRealisticModeTests`; the controller reads `@Value("${app.auth.local:true}")` instead of `AuthProperties`, because one more type broke PMD's `CouplingBetweenObjects` on `SignUpController`.
 
 ### [ ] T7 — Web: «Quiero ser cliente» goes to Auth0 in realistic mode (~5 min)
 
