@@ -3,6 +3,7 @@ package com.dawnrock.ddd.adapter.in.rest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -38,6 +39,8 @@ import com.dawnrock.ddd.adapter.in.Auth0Properties;
 import com.dawnrock.ddd.adapter.in.AuthProperties;
 
 import com.nimbusds.jose.RemoteKeySourceException;
+
+import tools.jackson.databind.json.JsonMapper;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -76,6 +79,8 @@ public class ApiSecurityConfig {
     static final String UNAVAILABLE_TITLE = "Servicio no disponible";
     static final String UNAVAILABLE_DETAIL =
             "No se puede comprobar el token de Auth0 en este momento: inténtalo de nuevo en unos minutos";
+    /** Serializa los errores de la cadena: solo textos y un número, no necesita la configuración de la aplicación. */
+    private static final JsonMapper PROBLEM_JSON = JsonMapper.builder().build();
 
     @Bean
     @Order(1)
@@ -183,12 +188,21 @@ public class ApiSecurityConfig {
         return converter;
     }
 
-    private static void writeProblem(HttpServletResponse response, HttpStatus status, String title, String detail)
+    /**
+     * Escribe el {@code ProblemDetail} (RFC 9457) de un error de la propia cadena, que ocurre fuera de Spring MVC y no
+     * pasa por sus conversores. Se serializa con Jackson, no se monta con texto (#205): cualquier título o detalle da un
+     * JSON válido. Mismos campos y orden que antes: {@code type}, {@code title}, {@code status} y {@code detail}.
+     */
+    static void writeProblem(HttpServletResponse response, HttpStatus status, String title, String detail)
             throws IOException {
+        Map<String, Object> problem = new LinkedHashMap<>();
+        problem.put("type", "about:blank");
+        problem.put("title", title);
+        problem.put("status", status.value());
+        problem.put("detail", detail);
         response.setStatus(status.value());
         response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.getWriter().write("{\"type\":\"about:blank\",\"title\":\"%s\",\"status\":%d,\"detail\":\"%s\"}"
-                .formatted(title, status.value(), detail));
+        response.getOutputStream().write(PROBLEM_JSON.writeValueAsBytes(problem));
     }
 }

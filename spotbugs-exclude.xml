@@ -18,4 +18,29 @@
         <Class name="~com\.dawnrock\.ddd\.adapter\.out\..*Entity"/>
         <Bug pattern="URF_UNREAD_FIELD"/>
     </Match>
+
+    <!-- Find Security Bugs (#205, ADR 0020). Falsos positivos revisados uno a uno. -->
+
+    <!-- La cadena de la API no tiene sesión y solo acepta tokens Bearer (ADR 0015): no hay cookie que una petición de
+         otro sitio pueda aprovechar, así que la protección CSRF no aporta nada. La cadena web la mantiene activa. -->
+    <Match>
+        <Class name="com.dawnrock.ddd.adapter.in.rest.ApiSecurityConfig"/>
+        <Bug pattern="SPRING_CSRF_PROTECTION_DISABLED"/>
+    </Match>
+
+    <!-- La página 403: Spring Security reenvía aquí la petición denegada conservando su método, por eso acepta cualquiera.
+         Solo pinta la página de error; no cambia ningún estado. -->
+    <Match>
+        <Class name="com.dawnrock.ddd.adapter.in.web.AccessDeniedController"/>
+        <Method name="forbidden"/>
+        <Bug pattern="SPRING_CSRF_UNRESTRICTED_REQUEST_MAPPING"/>
+    </Match>
+
+    <!-- Tras volver de Auth0 redirige a /login/link o /login?oauth-error: el context path de la propia aplicación y una
+         ruta fija. Ningún dato de la petición elige el destino. -->
+    <Match>
+        <Class name="com.dawnrock.ddd.adapter.in.web.OAuth2LoginFailureHandler"/>
+        <Method name="onAuthenticationFailure"/>
+        <Bug pattern="UNVALIDATED_REDIRECT"/>
+    </Match>
 </FindBugsFilter>
