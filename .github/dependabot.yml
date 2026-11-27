@@ -1,0 +1,52 @@
+# Actualizaciones de dependencias (#204, OWASP A06 · componentes vulnerables y desactualizados).
+# Dependabot abre cada lunes PR contra Hexagonal (Monolithic y master están congeladas). Sus PR solo se fusionan con el
+# «sí» del usuario (docs/ia/decisiones.md). Lo que no ve (Motion copiado a mano, Swagger UI desde jsDelivr y las
+# herramientas con versión fija en ci.yml) está en docs/ia/pendientes.md.
+version: 2
+updates:
+  # pom.xml: parent de Spring Boot, dependencias, plugins y WebJars. Menores y parches en una sola PR; las mayores, aparte.
+  - package-ecosystem: maven
+    directory: "/"
+    target-branch: Hexagonal
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: build
+    groups:
+      maven-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  # Las acciones de .github/workflows, todas en una PR.
+  - package-ecosystem: github-actions
+    directory: "/"
+    target-branch: Hexagonal
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: ci
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  # Imágenes base del Dockerfile. Sin versiones mayores: cambiar de JDK (eclipse-temurin 21 → 25) es una decisión del
+  # proyecto, no una actualización rutinaria.
+  - package-ecosystem: docker
+    directory: "/"
+    target-branch: Hexagonal
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: build
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major

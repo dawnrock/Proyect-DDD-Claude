@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-27
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~30 min (4 tasks)
 
 ## Goal
@@ -33,7 +33,7 @@ Close the largest OWASP Top 10 gap of the project, **A06 · Vulnerable and outda
 
 ## Tasks
 
-### [ ] T1 — Dependabot configuration (~10 min)
+### [x] T1 — Dependabot configuration (~10 min)
 
 - **Layer:** build
 - **Files:** `.github/dependabot.yml`
@@ -45,8 +45,8 @@ Close the largest OWASP Top 10 gap of the project, **A06 · Vulnerable and outda
      - `docker`: `commit-message.prefix: "build"`; `ignore` major updates (JDK changes such as `eclipse-temurin:21` → `25` are a project decision, not a routine bump).
   2. Comment at the top (in Spanish, like the other workflow files) on why and which ADR/issue.
 - **Acceptance criteria:**
-  - [ ] The file parses as YAML (`python3 -c "import yaml,sys; yaml.safe_load(open('.github/dependabot.yml'))"`) and uses only keys from the Dependabot v2 schema.
-  - [ ] After the merge, the repository's Insights → Dependency graph → Dependabot tab shows the three ecosystems with no configuration error (owner-observable; noted in the PR).
+  - [x] The file parses as YAML (`python3 -c "import yaml,sys; yaml.safe_load(open('.github/dependabot.yml'))"`) and uses only keys from the Dependabot v2 schema.
+  - [ ] After the merge, the repository's Insights → Dependency graph → Dependabot tab shows the three ecosystems with no configuration error (owner-observable; noted in the PR). _Pending: only observable after the merge._
 
 ### [ ] T2 — Dependency review job (~5 min)
 
