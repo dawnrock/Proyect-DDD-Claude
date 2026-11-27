@@ -2,7 +2,7 @@
 
 Personal practice project that combines two courses:
 
-- **Domain-Driven Design with Java 21 and Spring Boot 4.1**, on a checking-accounts domain (`CheckingAccount` aggregate, entities, value objects, ArchUnit).
+- **Domain-Driven Design with Java 21 and Spring Boot 4.2**, on a checking-accounts domain (`CheckingAccount` aggregate, entities, value objects, ArchUnit).
 - **Claude Code for software development**: the work is organised in GitHub issues and planned and implemented with skills, subagents, hooks and GitHub Actions ([AI architecture](docs/ia/arquitectura-ia.md)).
 
 It starts from a copy of [DDD-Lab-Java](https://github.com/dawnrock/DDD-Lab-Java) and evolves it into two snapshots kept apart:
@@ -13,7 +13,7 @@ It starts from a copy of [DDD-Lab-Java](https://github.com/dawnrock/DDD-Lab-Java
 | `Monolithic` | Layered monolith: Thymeleaf web + REST → application → domain / in-memory persistence. **Closed and frozen at tag `v1-monolito`** | [Phase 1 · Layered monolith](https://github.com/dawnrock/Proyect-DDD-Claude/milestones) |
 | `Hexagonal` | Ports and adapters, domain events, factory with ports, simulated adapters. **Phase closed at tag `v2-hexagonal`; still the default and active branch** | [Phase 2 · Hexagonal architecture](https://github.com/dawnrock/Proyect-DDD-Claude/milestones) |
 
-Technologies: Java 21, Spring Boot 4.1, Spring Security, JUnit 5, ArchUnit, Lombok, Immutables, Thymeleaf, H2.
+Technologies: Java 21, Spring Boot 4.2, Spring Security, JUnit 5, ArchUnit, Lombok, Immutables, Thymeleaf, H2.
 
 ## Run
 
