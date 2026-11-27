@@ -1,6 +1,6 @@
 # Plan: `record` as the only data carrier outside the domain (remove Immutables)
 
-- **Issue:** pending (to be created from this plan)
+- **Issue:** [#219](https://github.com/dawnrock/Proyect-DDD-Claude/issues/219)
 - **Type:** refactor
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
