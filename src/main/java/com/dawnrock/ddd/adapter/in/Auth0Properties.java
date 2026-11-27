@@ -48,6 +48,20 @@ public record Auth0Properties(String domain, String clientId, String clientSecre
         }
     }
 
+    /**
+     * Las variables que le faltan al modo realista ({@code app.auth.local=false}, #199), que exige las cinco: sin
+     * autenticación local, Auth0 es la única forma de entrar en la web y en la API. Vacía si no falta ninguna.
+     */
+    public List<String> missingForRealisticMode() {
+        List<String> missing = new ArrayList<>();
+        addIfEmpty(missing, domain, "APP_AUTH_AUTH0_DOMAIN");
+        addIfEmpty(missing, clientId, "APP_AUTH_AUTH0_CLIENT_ID");
+        addIfEmpty(missing, clientSecret, "APP_AUTH_AUTH0_CLIENT_SECRET");
+        addIfEmpty(missing, audience, "APP_AUTH_AUTH0_AUDIENCE");
+        addIfEmpty(missing, apiDocsClientId, "APP_AUTH_AUTH0_API_DOCS_CLIENT_ID");
+        return missing;
+    }
+
     /** Si la API acepta los tokens de acceso de Auth0: hay tenant y audiencia (#197). */
     public boolean trustsApiTokens() {
         return !domain.isEmpty() && !audience.isEmpty();
@@ -61,6 +75,12 @@ public record Auth0Properties(String domain, String clientId, String clientSecre
     /** El emisor ({@code iss}) de los tokens del tenant: su URL con barra final, como la escribe Auth0. */
     public String issuerUri() {
         return baseUrl() + "/";
+    }
+
+    private static void addIfEmpty(List<String> missing, String value, String variable) {
+        if (value.isEmpty()) {
+            missing.add(variable);
+        }
     }
 
     private static String stripped(String value) {

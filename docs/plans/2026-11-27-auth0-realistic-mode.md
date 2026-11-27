@@ -74,7 +74,7 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   - [x] The new login tests pass and the old ones stay green.
   - [x] The handler test captures the `WARN` with the error code (e.g. with `OutputCaptureExtension`) and the redirect is unchanged.
 
-### [ ] T2 — The realistic mode requires the full Auth0 configuration (~10 min)
+### [x] T2 — The realistic mode requires the full Auth0 configuration (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `src/main/java/com/dawnrock/ddd/adapter/in/Auth0Properties.java`, `SecuritySupport.java` (or new `RealisticModeCheck.java` in the same package); tests `Auth0PropertiesTests`, `Auth0ClientRegistrationTests` (`ApplicationContextRunner`)
@@ -83,8 +83,8 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   1. Test first: `Auth0Properties.missingForRealisticMode()` lists, in a fixed order, the `APP_AUTH_AUTH0_*` names without a value (empty with all five).
   2. A bean (registered with the security support) that, with `app.auth.local=false` and something missing, throws `IllegalStateException("Sin autenticación local (app.auth.local=false) hace falta Auth0: faltan APP_AUTH_AUTH0_AUDIENCE, …")`. With `app.auth.local=true` it does nothing (the all-or-nothing rules of #196/#197 still apply).
 - **Acceptance criteria:**
-  - [ ] Context with `app.auth.local=false` and no Auth0 → fails, the message names the five variables; with only the three web ones → names `_AUDIENCE` and `_API_DOCS_CLIENT_ID`.
-  - [ ] Context with `app.auth.local=false` and the five → starts; with `true` and none → starts.
+  - [x] Context with `app.auth.local=false` and no Auth0 → fails, the message names the five variables; with only the three web ones → names `_AUDIENCE` and `_API_DOCS_CLIENT_ID`.
+  - [x] Context with `app.auth.local=false` and the five → starts; with `true` and none → starts.
 
 ### [ ] T3 — `prod` turns local authentication off (~10 min)
 

@@ -50,4 +50,25 @@ class Auth0PropertiesTests {
                 .isThrownBy(() -> new Auth0Properties(null, null, null, null, "spa"))
                 .withMessageContaining("APP_AUTH_AUTH0_DOMAIN");
     }
+
+    @Test
+    @DisplayName("Para el modo realista no falta nada si están los cinco valores")
+    void nothingIsMissingForTheRealisticModeWithTheFiveValues() {
+        assertThat(new Auth0Properties(DOMAIN, "id", "secreto", AUDIENCE, "spa").missingForRealisticMode()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Para el modo realista, con solo los valores de la web faltan la audiencia y el cliente de Swagger UI")
+    void withOnlyTheWebValuesTheRealisticModeMissesTheApiValues() {
+        assertThat(new Auth0Properties(DOMAIN, "id", "secreto", null, " ").missingForRealisticMode())
+                .containsExactly("APP_AUTH_AUTH0_AUDIENCE", "APP_AUTH_AUTH0_API_DOCS_CLIENT_ID");
+    }
+
+    @Test
+    @DisplayName("Para el modo realista, sin Auth0 faltan las cinco variables, en orden")
+    void withoutAuth0TheRealisticModeMissesTheFiveVariables() {
+        assertThat(new Auth0Properties(null, null, null, null, null).missingForRealisticMode())
+                .containsExactly("APP_AUTH_AUTH0_DOMAIN", "APP_AUTH_AUTH0_CLIENT_ID", "APP_AUTH_AUTH0_CLIENT_SECRET",
+                        "APP_AUTH_AUTH0_AUDIENCE", "APP_AUTH_AUTH0_API_DOCS_CLIENT_ID");
+    }
 }
