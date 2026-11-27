@@ -99,7 +99,7 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   - [x] `./mvnw test -Dtest=ProdProfileTests` green, the new two included.
   - [x] `demo`/`default` profiles unchanged (`app.auth.local` is `true`).
 
-### [ ] T4 — The password sign-up refuses to run without local authentication (~5 min)
+### [x] T4 — The password sign-up refuses to run without local authentication (~5 min)
 
 - **Layer:** adapter.in
 - **Files:** `src/main/java/com/dawnrock/ddd/adapter/in/CustomerRegistration.java`; its test
@@ -108,7 +108,8 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   1. Test first: with `AuthProperties(false)`, `register(command, password, ip)` throws `IllegalStateException` and creates nothing (no account, no user, no sign-up counted); `registerWithExternalIdentity(…)` keeps working.
   2. Inject `AuthProperties` and add the guard. It is defence in depth: T5 and T6 make it unreachable from the outside.
 - **Acceptance criteria:**
-  - [ ] The new test passes and the existing sign-up tests stay green.
+  - [x] The new test passes and the existing sign-up tests stay green.
+  - Done: the test lives in its own `CustomerRegistrationRealisticModeTests` (one more type in `CustomerRegistrationTests` broke PMD's `CouplingBetweenObjects`); seen red by disabling the guard.
 
 ### [ ] T5 — REST: no sign-up with a password and a 401 that points to Auth0 (~10 min)
 

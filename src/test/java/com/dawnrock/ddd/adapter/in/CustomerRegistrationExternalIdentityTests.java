@@ -64,7 +64,7 @@ class CustomerRegistrationExternalIdentityTests {
         limit = new SignUpLimit(limits, NOW_CLOCK);
         ApplicationServicesFixture fixture = ApplicationServicesFixture.builder().accounts(accounts).build();
         return new CustomerRegistration(fixture.accountOpeningService(), fixture.queryService(), users, encoder, limit,
-                externalIdentities, NOW_CLOCK);
+                externalIdentities, NOW_CLOCK, new AuthProperties(true));
     }
 
     private static SignUpCommand.Builder signUp() {
