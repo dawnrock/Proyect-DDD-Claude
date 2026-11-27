@@ -1,6 +1,6 @@
 # Contract: Web login with Auth0 (OIDC) and identity linking
 
-- **Issue:** [#196](https://github.com/dawnrock/Proyect-DDD-Claude/issues/196) · **Plan:** `docs/plans/2026-11-26-auth0-web-login.md`
+- **Issue:** [#196](https://github.com/dawnrock/Proyect-DDD-Claude/issues/196) · **Plan:** in the issue (removed from `docs/plans/`)
 - **Status:** frozen at `33b4bd1`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both accepted the signatures and proposed precisions, merged by the lead, since the teammates cannot message each other)
 

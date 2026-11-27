@@ -9,6 +9,21 @@ on:
     branches: [Monolithic, Hexagonal]
 
 jobs:
+  # Revisión de dependencias (#204, OWASP A06): falla si la PR añade o sube una dependencia (Maven, acciones) con una
+  # vulnerabilidad conocida de severidad alta o crítica. Usa el grafo de dependencias de GitHub (repositorio público).
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dependencias con vulnerabilidades conocidas
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
   verify:
     runs-on: ubuntu-latest
     permissions:
