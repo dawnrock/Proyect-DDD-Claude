@@ -111,7 +111,7 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   - [x] The new test passes and the existing sign-up tests stay green.
   - Done: the test lives in its own `CustomerRegistrationRealisticModeTests` (one more type in `CustomerRegistrationTests` broke PMD's `CouplingBetweenObjects`); seen red by disabling the guard.
 
-### [ ] T5 — REST: no sign-up with a password and a 401 that points to Auth0 (~10 min)
+### [x] T5 — REST: no sign-up with a password and a 401 that points to Auth0 (~10 min)
 
 - **Layer:** adapter.in.rest
 - **Files:** `CustomerController.java`, `ApiSecurityConfig.java`; `LocalTokensDisabledTests.java`, `ApiSecurityTests.java`
@@ -121,8 +121,8 @@ Last of four issues: #196 (done) → #197 (done) → #198 (done) → **#199**.
   2. `@ConditionalOnBooleanProperty(name = "app.auth.local", matchIfMissing = true)` on `CustomerController` (as on `TokenController`).
   3. In `ApiSecurityConfig`, choose the detail of the missing-token 401 by mode: local keeps today's text; realistic → «Hace falta autenticarse para usar la API: inicia sesión con Auth0 y envía su token de acceso como Bearer».
 - **Acceptance criteria:**
-  - [ ] `POST /api/customers` → 404 in realistic mode; 201 in local mode (existing tests unchanged).
-  - [ ] Missing-token 401 detail per mode, tested in both.
+  - [x] `POST /api/customers` → 404 in realistic mode; 201 in local mode (existing tests unchanged).
+  - [x] Missing-token 401 detail per mode, tested in both.
 
 ### [ ] T6 — Web: the classic sign-up wizard goes to Auth0 in realistic mode (~10 min)
 

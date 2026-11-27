@@ -184,7 +184,9 @@ class ApiSecurityTests {
             mvc.perform(get("/api/accounts"))
                     .andExpect(status().isUnauthorized())
                     .andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE, "Bearer"))
-                    .andExpect(jsonPath("$.title").value("No autenticado"));
+                    .andExpect(jsonPath("$.title").value("No autenticado"))
+                    // Con autenticación local, el token se pide a la propia API (#199)
+                    .andExpect(jsonPath("$.detail").value(ApiSecurityConfig.MISSING_TOKEN_DETAIL));
             verifyNoInteractions(queries);
         }
 

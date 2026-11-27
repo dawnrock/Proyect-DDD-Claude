@@ -3,6 +3,9 @@ package com.dawnrock.ddd.adapter.in.rest;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
@@ -23,6 +26,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.dawnrock.ddd.adapter.in.CustomerRegistration;
 import com.dawnrock.ddd.adapter.in.SecuritySupport;
 import com.dawnrock.ddd.adapter.in.TestUsers;
 import com.dawnrock.ddd.application.AccountOpeningCommands;
@@ -32,9 +36,9 @@ import com.dawnrock.ddd.application.MoneyMovementCommands;
 /**
  * Sin autenticación local ({@code app.auth.local=false}, #197; la issue #199 lo hará en {@code prod}) la API no emite
  * ni acepta sus propios tokens: {@code POST /api/auth/token} no existe y un token propio, aunque esté bien firmado,
- * recibe 401.
+ * recibe 401. Tampoco hay alta con contraseña ({@code POST /api/customers}, #199), y el 401 sin token remite a Auth0.
  */
-@WebMvcTest(controllers = {AccountController.class, TokenController.class}, properties = {
+@WebMvcTest(controllers = {AccountController.class, TokenController.class, CustomerController.class}, properties = {
         "app.auth.local=false",
         "app.security.users[0].username=ada",
         "app.security.users[0].password-hash=" + TokenControllerTests.DEMO_HASH,
@@ -58,6 +62,9 @@ class LocalTokensDisabledTests {
     @MockitoBean
     private CheckingAccountQueries queries;
 
+    @MockitoBean
+    private CustomerRegistration registration;
+
     @Test
     @DisplayName("Pedir un token propio responde 404: el endpoint no existe")
     void askingForAnOwnTokenResponds404() throws Exception {
@@ -78,5 +85,26 @@ class LocalTokensDisabledTests {
         mvc.perform(get("/api/accounts").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isUnauthorized());
         verifyNoInteractions(queries);
+    }
+
+    @Test
+    @DisplayName("El alta con contraseña responde 404: en el modo realista solo hay alta por Auth0")
+    void signingUpWithAPasswordResponds404() throws Exception {
+        mvc.perform(post("/api/customers").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"fullName\": \"Margaret Hamilton\", \"taxId\": \"00000000T\", "
+                                + "\"email\": \"margaret@example.com\", \"username\": \"margaret\", "
+                                + "\"password\": \"demo-1234\", \"initialDeposit\": 100}"))
+                .andExpect(status().isNotFound());
+        verifyNoInteractions(registration);
+    }
+
+    @Test
+    @DisplayName("Sin token responde 401 y remite a Auth0, no a POST /api/auth/token")
+    void withoutTokenResponds401PointingToAuth0() throws Exception {
+        mvc.perform(get("/api/accounts"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.detail").value(ApiSecurityConfig.MISSING_AUTH0_TOKEN_DETAIL))
+                .andExpect(jsonPath("$.detail").value(containsString("Auth0")))
+                .andExpect(jsonPath("$.detail").value(not(containsString("/api/auth/token"))));
     }
 }

@@ -44,7 +44,8 @@ import jakarta.servlet.http.HttpServletResponse;
 /**
  * Seguridad de la API REST ({@code /api/**}, ADR 0008 y 0015): tokens JWT con {@code Authorization: Bearer}, sin
  * sesión y sin CSRF. Va antes que la de la web. HTTP Basic ya no se acepta (#122).
- * Son públicos {@code POST /api/auth/token} (pedir el token) y {@code POST /api/customers} (el alta de un cliente);
+ * Son públicos {@code POST /api/auth/token} (pedir el token) y {@code POST /api/customers} (el alta de un cliente),
+ * que solo existen con la autenticación local (#199);
  * {@code POST /api/accounts} (abrir una cuenta) y {@code POST /api/accounts/{id}/account-number} (sustituir su IBAN)
  * solo los permite a los administradores; la propiedad de cada cuenta la comprueba la capa de aplicación. El claim
  * {@code roles} del token se convierte en las autoridades {@code ROLE_*} y {@code sub} en el nombre, que
@@ -57,7 +58,8 @@ import jakarta.servlet.http.HttpServletResponse;
  * ({@link Auth0ApiTokensConfig}), los de acceso de Auth0 (RS256, con la audiencia de la API), cuyo {@code sub} se
  * traduce al usuario local con {@link Auth0AccessTokens}. Un emisor desconocido es un token no válido. Una identidad
  * de Auth0 sin vincular recibe 401 con {@link Auth0AccessTokens#UNLINKED_DETAIL}; si no se pueden leer las claves de
- * Auth0, 503 ({@link Auth0UnavailableException}).
+ * Auth0, 503 ({@link Auth0UnavailableException}). Sin token, el 401 dice dónde pedirlo: a la propia API con la
+ * autenticación local y a Auth0 sin ella (#199).
  */
 @Import(JwtSupport.class)
 @Configuration
@@ -67,6 +69,9 @@ public class ApiSecurityConfig {
     static final String FORBIDDEN_TITLE = "Acceso denegado";
     static final String MISSING_TOKEN_DETAIL =
             "Hace falta autenticarse para usar la API: pide un token en POST /api/auth/token y envíalo como Bearer";
+    /** El mismo aviso sin autenticación local (#199): el único token posible es el de acceso de Auth0. */
+    static final String MISSING_AUTH0_TOKEN_DETAIL =
+            "Hace falta autenticarse para usar la API: inicia sesión con Auth0 y envía su token de acceso como Bearer";
     static final String INVALID_TOKEN_DETAIL = "El token no es válido o ha caducado";
     static final String UNAVAILABLE_TITLE = "Servicio no disponible";
     static final String UNAVAILABLE_DETAIL =
@@ -90,6 +95,7 @@ public class ApiSecurityConfig {
             trust(managers, auth0Properties.issuerUri(),
                     manager(reachable(auth0), auth0Tokens.getObject()));
         }
+        String missingTokenDetail = authProperties.local() ? MISSING_TOKEN_DETAIL : MISSING_AUTH0_TOKEN_DETAIL;
         AuthenticationEntryPoint unauthenticated = (request, response, exception) -> {
             if (exception instanceof Auth0UnavailableException) {
                 writeProblem(response, HttpStatus.SERVICE_UNAVAILABLE, UNAVAILABLE_TITLE, UNAVAILABLE_DETAIL);
@@ -101,7 +107,7 @@ public class ApiSecurityConfig {
                                 ? Auth0AccessTokens.UNLINKED_DETAIL : INVALID_TOKEN_DETAIL);
             } else {
                 response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer");
-                writeProblem(response, HttpStatus.UNAUTHORIZED, UNAUTHENTICATED_TITLE, MISSING_TOKEN_DETAIL);
+                writeProblem(response, HttpStatus.UNAUTHORIZED, UNAUTHENTICATED_TITLE, missingTokenDetail);
             }
         };
         AccessDeniedHandler forbidden = (request, response, exception) -> writeProblem(response,
