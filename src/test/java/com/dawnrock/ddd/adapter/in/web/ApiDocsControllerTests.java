@@ -3,9 +3,12 @@ package com.dawnrock.ddd.adapter.in.web;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.dawnrock.ddd.adapter.in.ContentSecurityPolicies;
 import com.dawnrock.ddd.adapter.in.SecuritySupport;
 import com.dawnrock.ddd.adapter.in.TestUsers;
 
@@ -70,5 +74,14 @@ class ApiDocsControllerTests {
                 .andExpect(jsonPath("$.clientId").doesNotExist());
         mvc.perform(get("/api-docs/openid-configuration"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithAnonymousUser
+    @DisplayName("Swagger UI tiene su propia CSP, que permite jsDelivr; sin Auth0, no se conecta con nadie más (#206)")
+    void swaggerUiHasItsOwnPolicy() throws Exception {
+        mvc.perform(get("/api-docs/index.html"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Security-Policy", ContentSecurityPolicies.apiDocs(Optional.empty())));
     }
 }

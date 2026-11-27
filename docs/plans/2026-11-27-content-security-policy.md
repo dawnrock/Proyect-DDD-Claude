@@ -122,7 +122,7 @@ Facts from the code:
 - **Acceptance criteria:**
   - [x] `LoginControllerTests` passes (a new test checks that two requests get different nonces, and `TemplatesCspTests` now rejects any inline `<script>` without `th:nonce`); the splash still only shows while the page is loading and without reduced motion (checked in T10).
 
-### [ ] T7 — Web chain headers (~10 min)
+### [x] T7 — Web chain headers (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `WebSecurityConfig.java`, `WebSecurityTests.java`, `WebSecurityConfigOAuth2Tests.java`
@@ -131,7 +131,7 @@ Facts from the code:
   1. Red: `/login` sends the web policy and its nonce equals the import map's; two requests get different nonces; with Auth0 configured, `form-action` lists its origin; `/api-docs` sends the Swagger UI policy; `/h2-console/` sends no CSP; every response has `Referrer-Policy` and `Permissions-Policy`; a `.secure(true)` request gets `Strict-Transport-Security`.
   2. Green: `headers(...)` with `frameOptions` unchanged, `referrerPolicy(STRICT_ORIGIN_WHEN_CROSS_ORIGIN)`, a static `Permissions-Policy` writer, and a `HeaderWriter` that picks the policy by path (`/h2-console/**` none, `/api-docs/**` Swagger UI, everything else web with `CspNonce.of(request)`; it must use the same nonce the template rendered, which `CspNonce` guarantees by storing it in the request).
 - **Acceptance criteria:**
-  - [ ] The new tests pass and the existing web security tests stay green.
+  - [x] The new tests pass and the existing web security tests stay green (the `/api-docs` and Auth0 `form-action` cases live in `ApiDocsControllerTests` and `ApiDocsAuth0Tests`, whose contexts serve Swagger UI and configure a tenant; the H2 exclusion was proven by removing it: its test failed).
 
 ### [ ] T8 — Swagger UI without inline script (~5 min)
 

@@ -19,6 +19,9 @@ import java.util.Optional;
  */
 public final class ContentSecurityPolicies {
 
+    /** {@code Permissions-Policy} de las dos cadenas: la aplicación no usa cámara, micrófono, ubicación ni pagos. */
+    public static final String PERMISSIONS_POLICY = "camera=(), microphone=(), geolocation=(), payment=()";
+
     private static final String JSDELIVR = "https://cdn.jsdelivr.net";
 
     private ContentSecurityPolicies() {

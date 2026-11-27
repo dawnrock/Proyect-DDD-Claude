@@ -1,5 +1,6 @@
 package com.dawnrock.ddd.adapter.in.web;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -13,9 +14,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -26,13 +31,15 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import com.dawnrock.ddd.application.AccountOpeningCommands;
-import com.dawnrock.ddd.application.MoneyMovementCommands;
-import com.dawnrock.ddd.application.CheckingAccountQueries;
+import com.dawnrock.ddd.adapter.in.ContentSecurityPolicies;
 import com.dawnrock.ddd.adapter.in.SecuritySupport;
 import com.dawnrock.ddd.adapter.in.TestUsers;
+import com.dawnrock.ddd.application.AccountOpeningCommands;
+import com.dawnrock.ddd.application.CheckingAccountQueries;
+import com.dawnrock.ddd.application.MoneyMovementCommands;
 
 /** Reglas de la cadena de seguridad web (ADR 0008, #50): acceso, CSRF y rol de administrador. */
 @WebMvcTest({LoginController.class, AccessDeniedController.class, AccountListController.class,
@@ -291,5 +298,55 @@ class WebSecurityTests {
     void aPostWithoutCsrfTokenIsRejectedWith403() throws Exception {
         mvc.perform(post("/accounts/new"))
                 .andExpect(status().isForbidden());
+    }
+
+    @Nested
+    @DisplayName("Cabeceras de seguridad (#206, ADR 0025)")
+    class SecurityHeaders {
+
+        @Test
+        @DisplayName("El login envía la CSP de la web, y su nonce es el del import map de la página")
+        void theLoginSendsTheWebPolicyWithThePageNonce() throws Exception {
+            MvcResult result = mvc.perform(get("/login")).andExpect(status().isOk()).andReturn();
+            Matcher nonce = Pattern.compile("<script type=\"importmap\" nonce=\"([^\"]+)\"")
+                    .matcher(result.getResponse().getContentAsString());
+            assertThat(nonce.find()).isTrue();
+
+            assertThat(result.getResponse().getHeader("Content-Security-Policy"))
+                    .isEqualTo(ContentSecurityPolicies.web(nonce.group(1), Optional.empty()));
+        }
+
+        @Test
+        @DisplayName("Cada petición recibe un nonce distinto en su CSP")
+        void eachRequestGetsADifferentNonce() throws Exception {
+            String first = mvc.perform(get("/login")).andReturn().getResponse().getHeader("Content-Security-Policy");
+            String second = mvc.perform(get("/login")).andReturn().getResponse().getHeader("Content-Security-Policy");
+
+            assertThat(first).contains("'nonce-").isNotEqualTo(second);
+        }
+
+        @Test
+        @DisplayName("La consola H2 no lleva CSP: usa sus propios scripts en línea y solo existe en local")
+        void theH2ConsoleHasNoPolicy() throws Exception {
+            mvc.perform(get("/h2-console/"))
+                    .andExpect(header().doesNotExist("Content-Security-Policy"));
+        }
+
+        @Test
+        @DisplayName("Toda respuesta lleva Referrer-Policy y una Permissions-Policy que apaga cámara, micrófono, ubicación y pagos")
+        void everyResponseHasReferrerAndPermissionsPolicies() throws Exception {
+            mvc.perform(get("/login"))
+                    .andExpect(header().string("Referrer-Policy", "strict-origin-when-cross-origin"))
+                    .andExpect(header().string("Permissions-Policy", ContentSecurityPolicies.PERMISSIONS_POLICY));
+            mvc.perform(get("/"))
+                    .andExpect(header().string("Referrer-Policy", "strict-origin-when-cross-origin"));
+        }
+
+        @Test
+        @DisplayName("Una petición por HTTPS recibe Strict-Transport-Security")
+        void anHttpsRequestGetsHsts() throws Exception {
+            mvc.perform(get("/login").secure(true))
+                    .andExpect(header().exists("Strict-Transport-Security"));
+        }
     }
 }
