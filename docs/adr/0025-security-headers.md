@@ -22,7 +22,7 @@ Decided with the user on 2026-11-27: **Alpine.js is removed** and the policy is 
   | Where | Policy |
   | ----- | ------ |
   | Web (every page of the web chain) | `default-src 'self'; script-src 'self' 'nonce-…'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'self'; form-action 'self' <auth0>` |
-  | Swagger UI (`/api-docs/**`) | `default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; img-src 'self' data:; connect-src 'self' <auth0>; object-src 'none'; base-uri 'none'; frame-ancestors 'none'` |
+  | Swagger UI (`/api-docs/**`) | `default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.34.1/; style-src 'self' https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.34.1/ 'unsafe-inline'; img-src 'self' data:; connect-src 'self' <auth0>; object-src 'none'; base-uri 'none'; frame-ancestors 'none'` |
   | API (`/api/**`) | `default-src 'none'; frame-ancestors 'none'` (OWASP REST Security Cheat Sheet) |
 
   `<auth0>` is the tenant's origin (`Auth0Properties.baseUrl()`), only when Auth0 is configured. `data:` in images because Bootstrap's CSS draws form icons as `data:` SVGs. `form-action` lists Auth0 because Chromium also applies it to the redirect that follows a form post. `frame-ancestors 'self'` matches the `X-Frame-Options: SAMEORIGIN` the H2 console needs.
@@ -47,7 +47,7 @@ Decided with the user on 2026-11-27: **Alpine.js is removed** and the policy is 
 - No policy contains `'unsafe-eval'`; only Swagger UI's `style-src` contains `'unsafe-inline'` (Swagger UI sets inline styles).
 - New templates must keep the rules: no `style`, no inline handlers, inline scripts only with `th:nonce="${cspNonce}"`. `TemplatesCspTests` says so at build time.
 - A new external origin (a CDN, an analytics script, another identity provider) has to be added to `ContentSecurityPolicies` and its tests on purpose.
-- Upgrading Swagger UI may need new sources in its policy; upgrading htmx (#214) must keep the four `htmx-config` settings.
+- jsDelivr is allowed only for the pinned `swagger-ui-dist@5.34.1/` path, the same version `index.html` loads with SRI: upgrading Swagger UI changes both (and its SRI hashes), and may need new sources in its policy; upgrading htmx (#214) must keep the four `htmx-config` settings.
 - One less frontend dependency (ADR 0016). As a side effect, the show-password button now also works on the sign-up step swapped by htmx, where Alpine.js did not initialise it.
 - To check after a deploy, by the owner: `curl -sI https://<service>/login` shows the CSP and `Strict-Transport-Security` through Render and Cloudflare, and logout and the sign-up with Auth0 still work (`form-action`).
 - Proven by breaking it: a `style` attribute added to `signup/progress.html` fails `TemplatesCspTests`; removing the H2 exclusion fails `WebSecurityTests.theH2ConsoleHasNoPolicy`.

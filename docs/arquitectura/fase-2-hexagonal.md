@@ -17,7 +17,7 @@ com.dawnrock.ddd
 │   │   ├── cli           DomainModelRunner
 │   │   ├── rest          REST API
 │   │   ├── scheduler     SegmentReviewScheduler (daily segment review)
-│   │   └── web           Thymeleaf + Bootstrap, htmx, Alpine.js (ADR 0016)
+│   │   └── web           Thymeleaf + Bootstrap, htmx, Motion (ADR 0016, 0025)
 │   └── out
 │       ├── event         OutboxDomainEventPublisher, OutboxRelay (outbox, ADR 0021)
 │       ├── persistence   JpaCheckingAccountRepository, JpaCustomerRepository, JpaAccountOwnershipRepository,

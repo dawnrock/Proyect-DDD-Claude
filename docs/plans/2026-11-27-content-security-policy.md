@@ -182,6 +182,18 @@ Facts from the code:
 - **Acceptance criteria:**
   - [x] The CI status check passes; no document still says the web has no CSP.
 
+### [x] T12 — Review corrections (~5 min)
+
+- **Layer:** adapter.in · docs
+- **Files:** `ContentSecurityPolicies.java`, `ContentSecurityPoliciesTests.java`, `docs/arquitectura/fase-2-hexagonal.md`, ADR 0025
+- **Depends on:** T11
+- **What to do:**
+  1. `revisor-ddd`: `docs/arquitectura/fase-2-hexagonal.md` still listed Alpine.js; now "htmx, Motion (ADR 0016, 0025)".
+  2. `revisor-ddd`: Swagger UI's policy allowed all of `https://cdn.jsdelivr.net` (any npm package); now only `https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.34.1/`, the version `index.html` loads with SRI (red/green in `ContentSecurityPoliciesTests`; Swagger UI and "Try it out" checked again in the browser).
+  3. `.claude/agents/web-dev.md` still names Alpine.js in the stack: `.claude/` only changes with the user's approval, so it is asked in the PR, not changed here.
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green; no document outside history says the stack uses Alpine.js, except `.claude/agents/web-dev.md` (pending the user's approval).
+
 ## Global acceptance criteria
 
 **Specific:**

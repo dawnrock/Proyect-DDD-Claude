@@ -11,8 +11,8 @@ import java.util.Optional;
  *       (el import map del login). {@code data:} en imágenes porque el CSS de Bootstrap dibuja iconos como SVG
  *       {@code data:}. {@code form-action} incluye Auth0 porque Chromium también la aplica a la redirección que sigue
  *       a un formulario (cerrar sesión y el alta con Auth0 terminan en el tenant).</li>
- *   <li>{@link #apiDocs}: Swagger UI se carga de jsDelivr, pinta estilos en línea y, con Auth0, pide el token al
- *       tenant (PKCE).</li>
+ *   <li>{@link #apiDocs}: Swagger UI se carga de jsDelivr (solo su versión fija), pinta estilos en línea y, con
+ *       Auth0, pide el token al tenant (PKCE).</li>
  *   <li>{@link #api}: la API solo devuelve JSON: no carga nada ni se puede enmarcar (OWASP REST Security Cheat
  *       Sheet).</li>
  * </ul>
@@ -22,7 +22,11 @@ public final class ContentSecurityPolicies {
     /** {@code Permissions-Policy} de las dos cadenas: la aplicación no usa cámara, micrófono, ubicación ni pagos. */
     public static final String PERMISSIONS_POLICY = "camera=(), microphone=(), geolocation=(), payment=()";
 
-    private static final String JSDELIVR = "https://cdn.jsdelivr.net";
+    /**
+     * De jsDelivr solo la versión fija de Swagger UI (#111), la misma que index.html carga con SRI: un script de otro
+     * paquete de npm no pasaría la CSP. Al actualizar Swagger UI se cambian las dos.
+     */
+    private static final String SWAGGER_UI_DIST = "https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.34.1/";
 
     private ContentSecurityPolicies() {
     }
@@ -39,7 +43,7 @@ public final class ContentSecurityPolicies {
 
     /** @param auth0Origin el origen de Auth0 ({@code https://<dominio>}), si está configurado */
     public static String apiDocs(Optional<String> auth0Origin) {
-        return "default-src 'self'; script-src 'self' " + JSDELIVR + "; style-src 'self' " + JSDELIVR
+        return "default-src 'self'; script-src 'self' " + SWAGGER_UI_DIST + "; style-src 'self' " + SWAGGER_UI_DIST
                 + " 'unsafe-inline'; img-src 'self' data:; connect-src 'self'"
                 + auth0Origin.map(origin -> " " + origin).orElse("")
                 + "; object-src 'none'; base-uri 'none'; frame-ancestors 'none'";

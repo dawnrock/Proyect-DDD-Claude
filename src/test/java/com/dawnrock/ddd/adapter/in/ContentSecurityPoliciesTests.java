@@ -42,11 +42,12 @@ class ContentSecurityPoliciesTests {
     class ApiDocs {
 
         @Test
-        @DisplayName("permite jsDelivr y sus estilos en línea, y con Auth0 pedir el token a su dominio")
+        @DisplayName("solo permite de jsDelivr la versión fija de swagger-ui-dist, sus estilos en línea y, con Auth0, pedir el token a su dominio")
         void allowsJsDelivrItsInlineStylesAndAuth0() {
             assertThat(ContentSecurityPolicies.apiDocs(AUTH0)).isEqualTo(
-                    "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; "
-                            + "style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; img-src 'self' data:; "
+                    "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.34.1/; "
+                            + "style-src 'self' https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.34.1/ 'unsafe-inline'; "
+                            + "img-src 'self' data:; "
                             + "connect-src 'self' https://tenant.eu.auth0.com; object-src 'none'; base-uri 'none'; "
                             + "frame-ancestors 'none'");
         }
