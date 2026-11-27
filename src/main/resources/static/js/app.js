@@ -125,20 +125,18 @@
         });
     });
 
-    // Acciones del detalle de cuenta: los <details> se abren solos sin JavaScript; con Alpine, abrir uno cierra los demás.
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('actionPanels', () => ({
-            closeOthers(event) {
-                const opened = event.target;
-                if (!(opened instanceof HTMLDetailsElement) || !opened.open) {
-                    return;
-                }
-                this.$el.querySelectorAll('details[open]').forEach((panel) => {
-                    if (panel !== opened) {
-                        panel.open = false;
-                    }
-                });
-            },
-        }));
-    });
+    // Acciones del detalle de cuenta (#124): los <details> se abren solos sin JavaScript; con él, abrir uno cierra los demás
+    // del mismo contenedor, también las secundarias (#206, sin Alpine.js). toggle no se propaga: se escucha en captura.
+    document.addEventListener('toggle', (event) => {
+        const opened = event.target;
+        const panels = opened instanceof HTMLDetailsElement && opened.open && opened.closest('[data-action-panels]');
+        if (!panels) {
+            return;
+        }
+        panels.querySelectorAll('details[open]').forEach((panel) => {
+            if (panel !== opened) {
+                panel.open = false;
+            }
+        });
+    }, true);
 })();

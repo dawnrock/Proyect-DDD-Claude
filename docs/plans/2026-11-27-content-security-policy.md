@@ -63,7 +63,7 @@ Facts from the code:
   - [x] The tests of login, link and sign-up access pass with the new markup.
   - [x] Without JavaScript the button stays hidden (it keeps the `hidden` attribute in the HTML).
 
-### [ ] T2 — Account actions accordion without Alpine (~5 min)
+### [x] T2 — Account actions accordion without Alpine (~5 min)
 
 - **Layer:** adapter.in (web resources)
 - **Files:** `accounts/detail.html`, `static/js/app.js`, `AccountDetailControllerTests.java`
@@ -72,7 +72,7 @@ Facts from the code:
   1. Red: the detail tests expect `<div data-action-panels>` instead of the `x-data`/`x-on` wrapper.
   2. Green: a `toggle` listener on `document` in the capture phase (`toggle` does not bubble): when a `<details>` inside `[data-action-panels]` opens, close the other open ones in the same container (same logic as today's `closeOthers`).
 - **Acceptance criteria:**
-  - [ ] `AccountDetailControllerTests` passes; the server still opens the panel whose form came back with errors.
+  - [x] `AccountDetailControllerTests` passes; the server still opens the panel whose form came back with errors.
 
 ### [ ] T3 — Alpine out of the build and no inline styles (~10 min)
 
