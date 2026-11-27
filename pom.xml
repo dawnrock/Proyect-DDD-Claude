@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.1</version>
+        <version>4.2.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.dawnrock</groupId>
@@ -39,7 +39,7 @@
         <spring-boot.run.profiles>demo</spring-boot.run.profiles>
         <!-- Análisis estático en ./mvnw verify (ADR 0020), con las versiones del curso de Clean Code -->
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
-        <checkstyle.version>14.3.0</checkstyle.version>
+        <checkstyle.version>14.4.0</checkstyle.version>
         <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
         <!-- Línea base de PMD; ./mvnw pmd:pmd -Dpmd.baseline= enseña también los smells que ya existían -->
         <pmd.baseline>${project.basedir}/pmd-baseline.properties</pmd.baseline>
@@ -184,7 +184,7 @@
         <dependency>
             <groupId>com.tngtech.archunit</groupId>
             <artifactId>archunit-junit5</artifactId>
-            <version>1.5.0</version>
+            <version>1.5.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
