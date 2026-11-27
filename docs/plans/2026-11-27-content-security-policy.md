@@ -111,7 +111,7 @@ Facts from the code:
 - **Acceptance criteria:**
   - [x] The unit tests pass; `HexagonalArchitectureTests` green (the class lives in `adapter.in.web`; `ApiSecurityConfig` may use only `api()`, or the API policy stays a constant in `adapter.in.rest` if the ArchUnit rules forbid `rest` → `web`).
 
-### [ ] T6 — Per-request nonce and the login page (~10 min)
+### [x] T6 — Per-request nonce and the login page (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** `adapter/in/web/CspNonce.java`, `adapter/in/web/CspNonceAdvice.java`, `login.html`, `static/js/splash.js` (new), `LoginControllerTests.java`
@@ -120,7 +120,7 @@ Facts from the code:
   1. Red: the login page has no inline `<script>` without `src` except the import map, and the import map carries `nonce="…"` with 22+ base64url characters.
   2. Green: `CspNonce.of(HttpServletRequest)` creates 16 random bytes (`SecureRandom`, base64url) on first call and stores them as a request attribute; `@ControllerAdvice` with `@ModelAttribute("cspNonce")`. `th:attr="nonce=${cspNonce}"` on the import map. The splash code moves unchanged to `splash.js`, loaded with a plain `<script th:src>` at the same position.
 - **Acceptance criteria:**
-  - [ ] `LoginControllerTests` passes; the splash still only shows while the page is loading and without reduced motion (checked in T10).
+  - [x] `LoginControllerTests` passes (a new test checks that two requests get different nonces, and `TemplatesCspTests` now rejects any inline `<script>` without `th:nonce`); the splash still only shows while the page is loading and without reduced motion (checked in T10).
 
 ### [ ] T7 — Web chain headers (~10 min)
 
