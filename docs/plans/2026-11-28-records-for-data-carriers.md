@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-28
-- **Status:** draft
+- **Status:** in progress
 - **Total estimate:** ~95 min (11 tasks)
 
 ## Goal
@@ -70,7 +70,7 @@ Rules for the factories:
 
 Order: from the outside in (responses first, which nothing else depends on), then views, then commands, then the build. Every task leaves `./mvnw verify` green: a `record` keeps the generated type's name, so only the call sites that use `builder()` change.
 
-### [ ] T1 — Safety net for the JSON of the API (~10 min)
+### [x] T1 — Safety net for the JSON of the API (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/dawnrock/ddd/adapter/in/rest/RecordJsonTests.java` (new)
@@ -78,7 +78,7 @@ Order: from the outside in (responses first, which nothing else depends on), the
 - **What to do:**
   1. Serialize one instance of each REST response with the application's `JsonMapper` and assert the exact JSON (field names and order, `null` fields).
 - **Acceptance criteria:**
-  - [ ] The test passes against the current Immutables types, so it can detect any change in T2.
+  - [x] The test passes against the current Immutables types, so it can detect any change in T2. The JSON is in **alphabetical order** (Jackson 3's default), not in declaration order: the test pins it.
 
 ### [ ] T2 — REST responses as `record`s (~10 min)
 
