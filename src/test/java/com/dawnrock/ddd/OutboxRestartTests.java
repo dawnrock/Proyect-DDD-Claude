@@ -61,7 +61,7 @@ class OutboxRestartTests {
                     .initialDeposit(new BigDecimal("100"))
                     .ownerUsername("grace")
                     .build()).id();
-            first.getBean(MoneyMovementCommands.class).deposit(ADMIN, DepositCommand.builder().accountId(accountId).amount(new BigDecimal("25")).build());
+            first.getBean(MoneyMovementCommands.class).deposit(ADMIN, DepositCommand.of(accountId, new BigDecimal("25")));
 
             assertThat(pendingEvents(first)).as("el primer arranque no ha entregado nada").isEqualTo(3);
         }

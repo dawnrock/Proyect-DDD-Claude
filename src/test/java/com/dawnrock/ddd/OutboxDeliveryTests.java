@@ -60,7 +60,7 @@ class OutboxDeliveryTests {
                 .build()).id();
 
         assertThatNoException().isThrownBy(() -> movements.deposit(ADMIN,
-                DepositCommand.builder().accountId(accountId).amount(new BigDecimal("25")).build()));
+                DepositCommand.of(accountId, new BigDecimal("25"))));
 
         relay.relayPending();
 

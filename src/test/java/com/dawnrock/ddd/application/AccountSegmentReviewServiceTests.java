@@ -52,7 +52,7 @@ class AccountSegmentReviewServiceTests {
     /** Tres cuentas: una de alto patrimonio que baja del mínimo, otra que sigue por encima y una minorista. */
     private void openThreeAccounts() {
         belowMinimum = opening.openAccount(ADMIN, retailOpening().initialDeposit(new BigDecimal("100000")).build()).id();
-        movements.withdraw(ADMIN, WithdrawCommand.builder().accountId(belowMinimum).amount(new BigDecimal("500")).build());
+        movements.withdraw(ADMIN, WithdrawCommand.of(belowMinimum, new BigDecimal("500")));
         aboveMinimum = opening.openAccount(ADMIN, retailOpening().initialDeposit(new BigDecimal("100000")).build()).id();
         retail = opening.openAccount(ADMIN, retailOpening().build()).id();
         clearInvocations(publisher);

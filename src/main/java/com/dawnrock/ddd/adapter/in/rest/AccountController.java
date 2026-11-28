@@ -81,21 +81,19 @@ public class AccountController {
     @PostMapping("/{id}/deposits")
     public ResponseEntity<TransactionResponse> deposit(
             Authentication authentication, @PathVariable UUID id, @Valid @RequestBody MovementRequest request) {
-        DepositCommand.Builder command = DepositCommand.builder().accountId(id).amount(request.amount());
-        if (request.currency() != null) {
-            command.currency(request.currency());
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(movements.deposit(CurrentCaller.from(authentication), command.build())));
+        // Sin divisa en la petición, el command usa EUR
+        DepositCommand command = new DepositCommand(id, request.amount(), request.currency());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(toResponse(movements.deposit(CurrentCaller.from(authentication), command)));
     }
 
     @PostMapping("/{id}/withdrawals")
     public ResponseEntity<TransactionResponse> withdraw(
             Authentication authentication, @PathVariable UUID id, @Valid @RequestBody MovementRequest request) {
-        WithdrawCommand.Builder command = WithdrawCommand.builder().accountId(id).amount(request.amount());
-        if (request.currency() != null) {
-            command.currency(request.currency());
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(movements.withdraw(CurrentCaller.from(authentication), command.build())));
+        // Sin divisa en la petición, el command usa EUR
+        WithdrawCommand command = new WithdrawCommand(id, request.amount(), request.currency());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(toResponse(movements.withdraw(CurrentCaller.from(authentication), command)));
     }
 
     static AccountSummaryResponse toResponse(AccountSummary summary) {

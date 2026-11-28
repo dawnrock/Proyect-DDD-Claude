@@ -13,6 +13,9 @@ final class CommandValidation {
      */
     static final BigDecimal MAX_AMOUNT = new BigDecimal("999999999.99");
 
+    /** Divisa de un command que no la indica (#219: el valor por defecto que antes daba Immutables). */
+    static final String DEFAULT_CURRENCY = "EUR";
+
     private CommandValidation() {
     }
 

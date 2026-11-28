@@ -115,7 +115,7 @@ Order: from the outside in (responses first, which nothing else depends on), the
   - [x] Defaults behave as before (`ApplicationRecordsTests`, proven by removing the tax id default: red); `./mvnw verify` green.
   - [x] No `admin(true)`/`admin(false)` left at call sites (`CurrentCaller` keeps `new Caller(name, admin)`: the flag comes from the authorities).
 
-### [ ] T5 — Money commands: `DepositCommand`, `WithdrawCommand`, `TransferCommand` (~10 min)
+### [x] T5 — Money commands: `DepositCommand`, `WithdrawCommand`, `TransferCommand` (~10 min)
 
 - **Layer:** application
 - **Files:** the three `*Def.java`, call sites
@@ -124,7 +124,8 @@ Order: from the outside in (responses first, which nothing else depends on), the
   1. Compact constructor: defaults, then `validate()` with the same named checks and messages (#181).
   2. Factories `DepositCommand.of`, `WithdrawCommand.of`, `TransferCommand.of` (EUR); the canonical constructor where a currency or an invalid value is passed.
 - **Acceptance criteria:**
-  - [ ] The existing validation tests pass without changing their expected messages.
+  - [x] The existing validation tests pass without changing their expected messages.
+- **Deviation:** the test of a transfer without target account expected Immutables' `IllegalStateException` ("some of required attributes are not set"); the `record` throws `NullPointerException` with the attribute name, so the test now expects that exception and that message. The REST and web adapters lost their `if (currency != null)` branches: a `null` currency becomes `EUR` in the compact constructor (`CommandValidation.DEFAULT_CURRENCY`).
 
 ### [ ] T6 — Account opening and sign-up commands (~15 min)
 

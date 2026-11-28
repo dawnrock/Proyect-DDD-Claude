@@ -82,24 +82,21 @@ public class DomainModelRunner implements ApplicationRunner {
 
     private void deposit(AccountSummary account, String amount) {
         TransactionSummary deposit = movements.deposit(Caller.system(),
-                DepositCommand.builder().accountId(account.id()).amount(new BigDecimal(amount)).build());
+                DepositCommand.of(account.id(), new BigDecimal(amount)));
         log.info("[demo] Ingresar · {} · {} {} · {}", account.accountNumber(), deposit.amount(), deposit.currency(),
                 deposit.approved() ? "aprobado" : "rechazado");
     }
 
     private void withdraw(AccountSummary account, String amount) {
         TransactionSummary withdrawal = movements.withdraw(Caller.system(),
-                WithdrawCommand.builder().accountId(account.id()).amount(new BigDecimal(amount)).build());
+                WithdrawCommand.of(account.id(), new BigDecimal(amount)));
         log.info("[demo] Retirar · {} · {} {} · {}", account.accountNumber(), withdrawal.amount(),
                 withdrawal.currency(), withdrawal.approved() ? "aprobada" : "rechazada");
     }
 
     private void transfer(AccountSummary source, AccountSummary target, String amount) {
-        TransferSummary transfer = movements.transfer(Caller.system(), TransferCommand.builder()
-                .sourceAccountId(source.id())
-                .targetAccountNumber(target.accountNumber())
-                .amount(new BigDecimal(amount))
-                .build());
+        TransferSummary transfer = movements.transfer(Caller.system(), TransferCommand.of(source.id(),
+                target.accountNumber(), new BigDecimal(amount)));
         log.info("[demo] Transferir · {} → {} · {} {} · {}", transfer.sourceAccountNumber(),
                 transfer.targetAccountNumber(), transfer.amount(), transfer.currency(),
                 transfer.approved() ? "aprobada" : "rechazada");

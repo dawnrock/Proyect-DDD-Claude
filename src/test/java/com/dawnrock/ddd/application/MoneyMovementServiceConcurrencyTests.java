@@ -73,11 +73,9 @@ class MoneyMovementServiceConcurrencyTests {
             Callable<Void> worker = () -> {
                 start.await();
                 for (int i = 0; i < OPERATIONS_PER_THREAD; i++) {
-                    movements.transfer(ADMIN, TransferCommand.builder().sourceAccountId(ada.id())
-                            .targetAccountNumber(alan.accountNumber()).amount(ONE).build());
-                    movements.transfer(ADMIN, TransferCommand.builder().sourceAccountId(alan.id())
-                            .targetAccountNumber(ada.accountNumber()).amount(ONE).build());
-                    movements.deposit(ADMIN, DepositCommand.builder().accountId(ada.id()).amount(ONE).build());
+                    movements.transfer(ADMIN, TransferCommand.of(ada.id(), alan.accountNumber(), ONE));
+                    movements.transfer(ADMIN, TransferCommand.of(alan.id(), ada.accountNumber(), ONE));
+                    movements.deposit(ADMIN, DepositCommand.of(ada.id(), ONE));
                 }
                 return null;
             };

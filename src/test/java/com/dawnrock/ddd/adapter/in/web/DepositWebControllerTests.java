@@ -75,11 +75,7 @@ class DepositWebControllerTests extends AccountWebTestSupport {
                     .andExpect(redirectedUrl("/accounts/" + ACCOUNT_ID))
                     .andExpect(flash().attribute("message", "Ingreso de 50,00 € aprobado"));
 
-            verify(movements).deposit(ADMIN, DepositCommand.builder()
-                    .accountId(ACCOUNT_ID)
-                    .amount(new BigDecimal("50.00"))
-                    .currency("EUR")
-                    .build());
+            verify(movements).deposit(ADMIN, new DepositCommand(ACCOUNT_ID, new BigDecimal("50.00"), "EUR"));
         }
 
         @ParameterizedTest

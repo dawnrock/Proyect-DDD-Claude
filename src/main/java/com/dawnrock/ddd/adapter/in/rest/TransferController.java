@@ -31,14 +31,11 @@ public class TransferController {
     @PostMapping
     public ResponseEntity<TransferResponse> transfer(
             Authentication authentication, @Valid @RequestBody TransferRequest request) {
-        TransferCommand.Builder command = TransferCommand.builder()
-                .sourceAccountId(request.sourceAccountId())
-                .targetAccountNumber(request.targetAccountNumber())
-                .amount(request.amount());
-        if (request.currency() != null) {
-            command.currency(request.currency());
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(movements.transfer(CurrentCaller.from(authentication), command.build())));
+        // Sin divisa en la petición, el command usa EUR
+        TransferCommand command = new TransferCommand(request.sourceAccountId(), request.targetAccountNumber(),
+                request.amount(), request.currency());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(toResponse(movements.transfer(CurrentCaller.from(authentication), command)));
     }
 
     private static TransferResponse toResponse(TransferSummary transfer) {

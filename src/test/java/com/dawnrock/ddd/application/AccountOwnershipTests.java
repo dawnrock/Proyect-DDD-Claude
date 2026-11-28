@@ -193,19 +193,15 @@ class AccountOwnershipTests {
         }
 
         private DepositCommand deposit(AccountSummary account) {
-            return DepositCommand.builder().accountId(account.id()).amount(new BigDecimal("100")).build();
+            return DepositCommand.of(account.id(), new BigDecimal("100"));
         }
 
         private WithdrawCommand withdraw(AccountSummary account) {
-            return WithdrawCommand.builder().accountId(account.id()).amount(new BigDecimal("100")).build();
+            return WithdrawCommand.of(account.id(), new BigDecimal("100"));
         }
 
         private TransferCommand transfer(AccountSummary source, String targetNumber) {
-            return TransferCommand.builder()
-                    .sourceAccountId(source.id())
-                    .targetAccountNumber(targetNumber)
-                    .amount(new BigDecimal("100"))
-                    .build();
+            return TransferCommand.of(source.id(), targetNumber, new BigDecimal("100"));
         }
 
         /** El IBAN en minúsculas y en grupos de cuatro, como lo escribiría una persona. */

@@ -65,12 +65,8 @@ class TransferWebControllerTests extends AccountWebTestSupport {
                             "Transferencia de 25,00 € a ES98\u00A0••••\u00A01098 aprobada"))
                     .andExpect(flash().attributeCount(1));
 
-            verify(movements).transfer(ADMIN, TransferCommand.builder()
-                    .sourceAccountId(ACCOUNT_ID)
-                    .targetAccountNumber("es98 7654 3210 9876 5432 1098")
-                    .amount(new BigDecimal("25.00"))
-                    .currency("EUR")
-                    .build());
+            verify(movements).transfer(ADMIN, new TransferCommand(ACCOUNT_ID, "es98 7654 3210 9876 5432 1098",
+                    new BigDecimal("25.00"), "EUR"));
         }
 
         @Test
@@ -111,11 +107,7 @@ class TransferWebControllerTests extends AccountWebTestSupport {
                             .param("currency", ""))
                     .andExpect(status().is3xxRedirection());
 
-            verify(movements).transfer(ADMIN, TransferCommand.builder()
-                    .sourceAccountId(ACCOUNT_ID)
-                    .targetAccountNumber(TARGET_IBAN)
-                    .amount(new BigDecimal("25.00"))
-                    .build());
+            verify(movements).transfer(ADMIN, TransferCommand.of(ACCOUNT_ID, TARGET_IBAN, new BigDecimal("25.00")));
         }
     }
 

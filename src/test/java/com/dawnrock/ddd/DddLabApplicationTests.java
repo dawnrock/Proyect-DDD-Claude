@@ -100,7 +100,7 @@ class DddLabApplicationTests {
 				.ownerUsername("ada")
 				.build()).id();
 
-		movements.deposit(admin, DepositCommand.builder().accountId(accountId).amount(new BigDecimal("25")).build());
+		movements.deposit(admin, DepositCommand.of(accountId, new BigDecimal("25")));
 		// Desde #165 los eventos se guardan en el outbox y los entrega el relé, no la propia transacción
 		context.getBean(OutboxRelay.class).relayPending();
 

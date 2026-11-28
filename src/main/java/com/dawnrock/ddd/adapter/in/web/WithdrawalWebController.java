@@ -63,7 +63,7 @@ public class WithdrawalWebController {
     /** El command, o {@code null} con el error en el formulario si lo rechaza (red de seguridad de la validación). */
     private static WithdrawCommand toCommand(UUID id, MovementForm form, BindingResult result) {
         try {
-            return WithdrawCommand.builder().accountId(id).amount(form.getAmount()).currency(form.getCurrency()).build();
+            return new WithdrawCommand(id, form.getAmount(), form.getCurrency());
         } catch (IllegalArgumentException e) {
             result.reject("invalid", e.getMessage());
             return null;

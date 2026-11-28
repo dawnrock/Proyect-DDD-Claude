@@ -67,11 +67,7 @@ class WithdrawalWebControllerTests extends AccountWebTestSupport {
                     .andExpect(flash().attribute("message", "Retirada de 30,00 € aprobada"))
                     .andExpect(flash().attributeCount(1));
 
-            verify(movements).withdraw(ADMIN, WithdrawCommand.builder()
-                    .accountId(ACCOUNT_ID)
-                    .amount(new BigDecimal("30.00"))
-                    .currency("EUR")
-                    .build());
+            verify(movements).withdraw(ADMIN, new WithdrawCommand(ACCOUNT_ID, new BigDecimal("30.00"), "EUR"));
         }
 
         @Test
