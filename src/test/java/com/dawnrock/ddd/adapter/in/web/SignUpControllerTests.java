@@ -152,7 +152,7 @@ class SignUpControllerTests {
                     .andExpect(status().isOk())
                     .andExpect(view().name("signup/data"))
                     .andExpect(content().string(containsString(
-                            com.dawnrock.ddd.application.OpenAccountCommandDef.TAX_ID_MESSAGE)))
+                            com.dawnrock.ddd.application.OpenAccountCommand.TAX_ID_MESSAGE)))
                     .andExpect(content().string(containsString("El correo electrónico no es válido")));
         }
 
@@ -319,9 +319,8 @@ class SignUpControllerTests {
     }
 
     private static AccountSummary openedAccount(UUID id) {
-        return AccountSummary.builder().id(id).accountNumber("ES2199990001220000000001")
-                .holderName("Margaret Hamilton").segment("RETAIL").balance(new BigDecimal("100.00"))
-                .currency("EUR").build();
+        return new AccountSummary(id, "ES2199990001220000000001", "Margaret Hamilton", "RETAIL",
+                new BigDecimal("100.00"), "EUR");
     }
 
     @Nested
@@ -486,9 +485,8 @@ class SignUpControllerTests {
     class SesionTrasElAlta {
 
         private AccountDetails details(UUID id) {
-            return AccountDetails.builder().id(id).accountNumber("ES2199990001220000000001")
-                    .holderName("Margaret Hamilton").segment("RETAIL").balance(new BigDecimal("100.00"))
-                    .currency("EUR").build();
+            return AccountDetails.of(id, "ES2199990001220000000001", "Margaret Hamilton", "RETAIL",
+                    new BigDecimal("100.00"), "EUR");
         }
 
         @Test

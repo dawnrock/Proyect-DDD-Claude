@@ -4,6 +4,7 @@
 - **Status:** frozen at `9bd7290`
 - **Since #174 (application services split by use case):** on `Hexagonal`, opening belongs to `AccountOpeningCommands` (`AccountOpeningService`) and listing and detail to `CheckingAccountQueries` (`CheckingAccountQueryService`). `Monolithic` keeps the concrete `CheckingAccountService` described here.
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed with clarifications, merged by the lead)
+- **Since #219 (records instead of Immutables, ADR 0028):** the `*Def` types named here are now `record`s without the `Def` suffix (`OpenAccountCommandDef` → `OpenAccountCommand`…), built with static factories or the canonical constructor; a `null` optional value (currency, holder name, e-mail, owner) takes its default in the compact constructor. The rest of this frozen contract keeps the wording of its time.
 
 > **Superseded for opening accounts** by [`account-factory.md`](account-factory.md) (#18): the IBAN is generated and the segment is computed, so `accountNumber` and `segment` are no longer inputs of `OpenAccountCommand`, `OpenAccountRequest` or `OpenAccountForm`. Querying and listing below still apply.
 

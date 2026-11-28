@@ -23,6 +23,6 @@ public final class CurrentCaller {
         }
         boolean admin = authentication.getAuthorities().stream()
                 .anyMatch(authority -> ADMIN_AUTHORITY.equals(authority.getAuthority()));
-        return Caller.builder().username(authentication.getName()).admin(admin).build();
+        return new Caller(authentication.getName(), admin);
     }
 }

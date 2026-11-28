@@ -42,6 +42,14 @@ class HexagonalArchitectureTests {
 
     /** Raíz de {@code adapter.in}: soporte de seguridad compartido por los adaptadores de entrada (ADR 0008). */
     private static final String ADAPTER_IN_SUPPORT = "com.dawnrock.ddd.adapter.in";
+    /** Commands, queries, vistas y {@code Caller} de {@code application}; peticiones y respuestas de la API REST (#219). */
+    private static final DescribedPredicate<JavaClass> DATA_CARRIERS = describe(
+            "commands, queries, views and Caller of application, and requests and responses of the REST API",
+            type -> ("com.dawnrock.ddd.application".equals(type.getPackageName())
+                    && (endsWithAny(type.getSimpleName(), "Command", "Query", "Summary", "Details")
+                    || "Caller".equals(type.getSimpleName())))
+                    || ("com.dawnrock.ddd.adapter.in.rest".equals(type.getPackageName())
+                    && endsWithAny(type.getSimpleName(), "Request", "Response")));
 
     /**
      * Los anillos del hexágono: el modelo no depende de nadie, los servicios de dominio solo del modelo, la aplicación
@@ -175,7 +183,19 @@ class HexagonalArchitectureTests {
     }
 
     /**
-     * D1: el dominio solo conoce el JDK (ni Spring, ni {@code jakarta}, ni {@code org.immutables}). También rechaza
+     * Los objetos de datos fuera del dominio son {@code record} (#219, ADR 0028): los commands, queries, vistas y
+     * {@code Caller} de {@code application} y las peticiones y respuestas de la API REST. Un único mecanismo, sin Immutables.
+     */
+    @ArchTest
+    static void dataCarriersAreRecords(JavaClasses classes) {
+        classes()
+                .that(DATA_CARRIERS)
+                .should().beRecords()
+                .check(classes);
+    }
+
+    /**
+     * D1: el dominio solo conoce el JDK (ni Spring ni {@code jakarta}). También rechaza
      * Lombok: cada miembro que genera lleva {@code @lombok.Generated} en el bytecode (ADR 0009 y 0026).
      */
     @ArchTest
@@ -334,5 +354,9 @@ class HexagonalArchitectureTests {
                                 "%s implementa %s, que no es un puerto del hexágono".formatted(adapter.getName(), other.getName()))));
             }
         };
+    }
+
+    private static boolean endsWithAny(String name, String... suffixes) {
+        return List.of(suffixes).stream().anyMatch(name::endsWith);
     }
 }

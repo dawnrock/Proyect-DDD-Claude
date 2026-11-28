@@ -148,9 +148,8 @@ class ApiAuth0TokensTests {
     @Test
     @DisplayName("Los roles salen de la base de datos: el administrador abre cuentas y un cliente recibe 403")
     void rolesComeFromTheDatabase() throws Exception {
-        given(commands.openAccount(any(Caller.class), any())).willReturn(AccountSummary.builder()
-                .id(UUID.randomUUID()).accountNumber("ES9121000418450200051332").holderName("Ada Lovelace")
-                .segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build());
+        given(commands.openAccount(any(Caller.class), any())).willReturn(new AccountSummary(UUID.randomUUID(),
+                "ES9121000418450200051332", "Ada Lovelace", "RETAIL", new BigDecimal("100.00"), "EUR"));
 
         mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content(OPEN_BODY)
                         .header(HttpHeaders.AUTHORIZATION, bearer(TestAuth0Tenant.accessToken("auth0|admin"))))

@@ -4,6 +4,7 @@
 - **Status:** frozen at `bc31fa7`
 - **Since #174 (application services split by use case):** `openAccount` belongs to the input port `AccountOpeningCommands`, implemented by `AccountOpeningService`; `CheckingAccountCommands` and `CheckingAccountService` no longer exist. Signatures, commands and views are unchanged.
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed with clarifications, merged by the lead)
+- **Since #219 (records instead of Immutables, ADR 0028):** the `*Def` types named here are now `record`s without the `Def` suffix (`OpenAccountCommandDef` → `OpenAccountCommand`…), built with static factories or the canonical constructor; a `null` optional value (currency, holder name, e-mail, owner) takes its default in the compact constructor. The rest of this frozen contract keeps the wording of its time.
 
 Replaces the open-account part of `open-query-list-accounts.md` (#5) and keeps the ownership rules of `login-roles.md` (#50). Querying and listing do not change.
 

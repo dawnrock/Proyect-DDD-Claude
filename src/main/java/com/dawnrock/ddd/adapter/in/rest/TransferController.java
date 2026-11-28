@@ -31,25 +31,16 @@ public class TransferController {
     @PostMapping
     public ResponseEntity<TransferResponse> transfer(
             Authentication authentication, @Valid @RequestBody TransferRequest request) {
-        TransferCommand.Builder command = TransferCommand.builder()
-                .sourceAccountId(request.sourceAccountId())
-                .targetAccountNumber(request.targetAccountNumber())
-                .amount(request.amount());
-        if (request.currency() != null) {
-            command.currency(request.currency());
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(movements.transfer(CurrentCaller.from(authentication), command.build())));
+        // Sin divisa en la petición, el command usa EUR
+        TransferCommand command = new TransferCommand(request.sourceAccountId(), request.targetAccountNumber(),
+                request.amount(), request.currency());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(toResponse(movements.transfer(CurrentCaller.from(authentication), command)));
     }
 
     private static TransferResponse toResponse(TransferSummary transfer) {
-        return TransferResponse.builder()
-                .sourceAccountId(transfer.sourceAccountId())
-                .sourceAccountNumber(transfer.sourceAccountNumber())
-                .targetAccountNumber(transfer.targetAccountNumber())
-                .amount(transfer.amount())
-                .currency(transfer.currency())
-                .occurredOn(transfer.occurredOn())
-                .status(transfer.status())
-                .build();
+        return new TransferResponse(transfer.sourceAccountId(), transfer.sourceAccountNumber(),
+                transfer.targetAccountNumber(), transfer.amount(), transfer.currency(), transfer.occurredOn(),
+                transfer.status());
     }
 }

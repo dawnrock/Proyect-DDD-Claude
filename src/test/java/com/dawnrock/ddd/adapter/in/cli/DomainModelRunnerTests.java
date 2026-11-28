@@ -17,7 +17,7 @@ import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
 import com.dawnrock.ddd.application.AccountDetails;
 import com.dawnrock.ddd.application.AccountOwnershipRepository;
 import com.dawnrock.ddd.application.AccountSummary;
-import com.dawnrock.ddd.application.CallerDef;
+import com.dawnrock.ddd.application.Caller;
 import com.dawnrock.ddd.application.AccountOpeningCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueryService;
 import com.dawnrock.ddd.application.MoneyMovementCommands;
@@ -40,10 +40,10 @@ class DomainModelRunnerTests {
     void onStartupItOpensThreeDemoAccountsWithTheUseCase() {
         new DomainModelRunner(commands, movements, service).run(new DefaultApplicationArguments());
 
-        List<AccountSummary> accounts = service.listAccounts(CallerDef.system());
+        List<AccountSummary> accounts = service.listAccounts(Caller.system());
         assertThat(accounts).hasSize(3);
         assertThat(accounts)
-                .map(account -> service.findAccount(CallerDef.system(), account.id()).segment())
+                .map(account -> service.findAccount(Caller.system(), account.id()).segment())
                 .containsExactlyInAnyOrder("RETAIL", "RETAIL", "HIGH_NET_WORTH");
     }
 
@@ -52,7 +52,7 @@ class DomainModelRunnerTests {
     void eachDemoAccountBelongsToItsUser() {
         new DomainModelRunner(commands, movements, service).run(new DefaultApplicationArguments());
 
-        assertThat(service.listAccounts(CallerDef.system()))
+        assertThat(service.listAccounts(Caller.system()))
                 .extracting(AccountSummary::holderName, account -> ownership.ownerOf(account.id()).orElse(null))
                 .containsExactlyInAnyOrder(
                         tuple("Ada Lovelace", "ada"),
@@ -72,7 +72,7 @@ class DomainModelRunnerTests {
         new DomainModelRunner(withoutIncomesServices.accountOpeningService(),
                 withoutIncomesServices.moneyMovementService(), withoutIncomes).run(new DefaultApplicationArguments());
 
-        assertThat(withoutIncomes.listAccounts(CallerDef.system()))
+        assertThat(withoutIncomes.listAccounts(Caller.system()))
                 .extracting(AccountSummary::segment).containsOnly("RETAIL");
     }
 
@@ -81,7 +81,7 @@ class DomainModelRunnerTests {
     void theDemoAccountsCarryAGeneratedIban() {
         new DomainModelRunner(commands, movements, service).run(new DefaultApplicationArguments());
 
-        assertThat(service.listAccounts(CallerDef.system())).extracting(AccountSummary::accountNumber)
+        assertThat(service.listAccounts(Caller.system())).extracting(AccountSummary::accountNumber)
                 .doesNotHaveDuplicates().allMatch(number -> number.startsWith("ES") && number.startsWith("99990001", 4));
     }
 
@@ -106,9 +106,9 @@ class DomainModelRunnerTests {
 
     /** Detalle de la cuenta de demostración de un titular, con sus movimientos. */
     private AccountDetails detailsOf(String holderName) {
-        return service.listAccounts(CallerDef.system()).stream()
+        return service.listAccounts(Caller.system()).stream()
                 .filter(account -> account.holderName().equals(holderName))
-                .map(account -> service.findAccount(CallerDef.system(), account.id()))
+                .map(account -> service.findAccount(Caller.system(), account.id()))
                 .findFirst()
                 .orElseThrow();
     }
@@ -168,7 +168,7 @@ class DomainModelRunnerTests {
 
         new DomainModelRunner(commands, movements, service).run(new DefaultApplicationArguments());
 
-        assertThat(service.listAccounts(CallerDef.system())).hasSize(3);
+        assertThat(service.listAccounts(Caller.system())).hasSize(3);
         assertThat(detailsOf("Ada Lovelace").balance()).isEqualByComparingTo("1500.00");
         assertThat(detailsOf("Grace Hopper").balance()).isEqualByComparingTo("4700.00");
         assertThat(detailsOf("Alan Turing").balance()).isEqualByComparingTo("200.00");

@@ -7,8 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 
-import com.dawnrock.ddd.application.OpenAccountCommandDef;
-import com.dawnrock.ddd.application.SignUpCommandDef;
+import com.dawnrock.ddd.application.OpenAccountCommand;
+import com.dawnrock.ddd.application.SignUpCommand;
 import com.dawnrock.ddd.adapter.in.Usernames;
 
 import lombok.Getter;
@@ -24,19 +24,19 @@ import lombok.Setter;
 public class OpenAccountForm {
 
     @NotBlank(message = "El documento del titular es obligatorio")
-    @Pattern(regexp = OpenAccountCommandDef.TAX_ID_PATTERN, message = OpenAccountCommandDef.TAX_ID_MESSAGE)
+    @Pattern(regexp = OpenAccountCommand.TAX_ID_PATTERN, message = OpenAccountCommand.TAX_ID_MESSAGE)
     private String holderTaxId;
 
     /** Obligatorio solo para un cliente nuevo; para uno existente, en blanco o igual al suyo. */
     private String holderName;
 
     /** Obligatorio solo para un cliente nuevo. */
-    @Pattern(regexp = "^$|" + SignUpCommandDef.EMAIL_PATTERN, message = "El correo electrónico no es válido")
+    @Pattern(regexp = "^$|" + SignUpCommand.EMAIL_PATTERN, message = "El correo electrónico no es válido")
     private String holderEmail;
 
     /** Usuario (cliente) que verá y operará la cuenta; obligatorio solo para un cliente nuevo. */
-    @Pattern(regexp = "^$|" + OpenAccountCommandDef.USERNAME_PATTERN,
-            message = OpenAccountCommandDef.OWNER_USERNAME_MESSAGE)
+    @Pattern(regexp = "^$|" + OpenAccountCommand.USERNAME_PATTERN,
+            message = OpenAccountCommand.OWNER_USERNAME_MESSAGE)
     private String ownerUsername;
 
     @NotNull(message = "El depósito inicial es obligatorio")

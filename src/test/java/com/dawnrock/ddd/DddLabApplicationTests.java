@@ -91,16 +91,11 @@ class DddLabApplicationTests {
 	@ExtendWith(OutputCaptureExtension.class)
 	@DisplayName("Un ingreso llega al consumidor de auditoría a través del publicador de eventos")
 	void aDepositReachesTheAuditConsumer(CapturedOutput output) {
-		Caller admin = Caller.builder().username("admin").admin(true).build();
-		UUID accountId = commands.openAccount(admin, OpenAccountCommand.builder()
-				.holderName("Ada Lovelace")
-				.holderTaxId("12345678Z")
-				.holderEmail("ada@example.com")
-				.initialDeposit(new BigDecimal("100"))
-				.ownerUsername("ada")
-				.build()).id();
+		Caller admin = Caller.administrator("admin");
+		UUID accountId = commands.openAccount(admin, OpenAccountCommand.of("Ada Lovelace", "12345678Z", "ada@example.com",
+        new BigDecimal("100"), "ada")).id();
 
-		movements.deposit(admin, DepositCommand.builder().accountId(accountId).amount(new BigDecimal("25")).build());
+		movements.deposit(admin, DepositCommand.of(accountId, new BigDecimal("25")));
 		// Desde #165 los eventos se guardan en el outbox y los entrega el relé, no la propia transacción
 		context.getBean(OutboxRelay.class).relayPending();
 

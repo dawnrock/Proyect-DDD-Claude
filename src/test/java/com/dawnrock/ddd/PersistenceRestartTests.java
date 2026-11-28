@@ -16,7 +16,7 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import com.dawnrock.ddd.adapter.in.CustomerRegistration;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.CallerDef;
+import com.dawnrock.ddd.application.Caller;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
 import com.dawnrock.ddd.application.SignUpCommand;
 
@@ -39,7 +39,7 @@ class PersistenceRestartTests {
     }
 
     private static List<AccountSummary> accounts(ConfigurableApplicationContext context) {
-        return context.getBean(CheckingAccountQueries.class).listAccounts(CallerDef.system());
+        return context.getBean(CheckingAccountQueries.class).listAccounts(Caller.system());
     }
 
     @Test
@@ -48,20 +48,15 @@ class PersistenceRestartTests {
         AccountSummary signedUp;
         try (ConfigurableApplicationContext first = start()) {
             assertThat(accounts(first)).hasSize(3);
-            signedUp = first.getBean(CustomerRegistration.class).register(SignUpCommand.builder()
-                    .fullName("Margaret Hamilton")
-                    .taxId("00000000T")
-                    .email("margaret@example.com")
-                    .username("margaret")
-                    .initialDeposit(new BigDecimal("100.00"))
-                    .build(), "apolo-once", "203.0.113.7");
+            signedUp = first.getBean(CustomerRegistration.class).register(SignUpCommand.of("Margaret Hamilton",
+                    "00000000T", "margaret@example.com", "margaret", new BigDecimal("100.00")), "apolo-once", "203.0.113.7");
         }
 
         try (ConfigurableApplicationContext second = start()) {
             assertThat(accounts(second)).hasSize(4)
                     .extracting(AccountSummary::accountNumber).contains(signedUp.accountNumber());
             assertThat(second.getBean(CheckingAccountQueries.class)
-                    .listAccounts(Caller.builder().username("margaret").admin(false).build()))
+                    .listAccounts(Caller.customer("margaret")))
                     .extracting(AccountSummary::id).containsExactly(signedUp.id());
             assertThat(second.getBean(PasswordEncoder.class).matches("apolo-once",
                     second.getBean(UserDetailsManager.class).loadUserByUsername("margaret").getPassword())).isTrue();

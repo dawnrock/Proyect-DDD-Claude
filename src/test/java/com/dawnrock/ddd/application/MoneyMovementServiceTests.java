@@ -43,6 +43,7 @@ import com.dawnrock.ddd.domain.model.WithdrawalRejected;
 import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
 import com.dawnrock.ddd.support.MutableClock;
 import com.dawnrock.ddd.support.ApplicationServicesFixture;
+import com.dawnrock.ddd.support.CommandBuilders;
 
 /** Ingresos, retiradas y transferencias con los adaptadores en memoria detrás de los puertos (#174). */
 class MoneyMovementServiceTests {
@@ -80,7 +81,7 @@ class MoneyMovementServiceTests {
             UUID id = opening.openAccount(ADMIN, retailOpening().build()).id();
 
             TransactionSummary transaction = movements.deposit(ADMIN, 
-                    DepositCommand.builder().accountId(id).amount(new BigDecimal("25.50")).build());
+                    DepositCommand.of(id, new BigDecimal("25.50")));
 
             assertThat(transaction.type()).isEqualTo("DEPOSIT");
             assertThat(transaction.status()).isEqualTo("APPROVED");
@@ -96,7 +97,7 @@ class MoneyMovementServiceTests {
         @DisplayName("Una cuenta desconocida lanza AccountNotFoundException")
         void anUnknownAccountThrowsAccountNotFoundException() {
             UUID unknown = UUID.randomUUID();
-            DepositCommand command = DepositCommand.builder().accountId(unknown).amount(BigDecimal.TEN).build();
+            DepositCommand command = DepositCommand.of(unknown, BigDecimal.TEN);
 
             assertThatExceptionOfType(AccountNotFoundException.class)
                     .isThrownBy(() -> movements.deposit(ADMIN, command))
@@ -108,7 +109,7 @@ class MoneyMovementServiceTests {
         void aDepositInAnotherCurrencyThrowsCurrencyMismatchExceptionAndKeepsTheBalance() {
             UUID id = opening.openAccount(ADMIN, retailOpening().build()).id();
             DepositCommand dollars =
-                    DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).currency("USD").build();
+                    new DepositCommand(id, BigDecimal.TEN, "USD");
 
             assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> movements.deposit(ADMIN, dollars));
 
@@ -136,7 +137,7 @@ class MoneyMovementServiceTests {
                     ("HIGH_NET_WORTH".equals(segment) ? highNetWorthOpening() : retailOpening()).build()).id();
 
             TransactionSummary transaction = movements.withdraw(ADMIN, 
-                    WithdrawCommand.builder().accountId(id).amount(new BigDecimal(amount)).build());
+                    WithdrawCommand.of(id, new BigDecimal(amount)));
 
             assertThat(transaction.type()).isEqualTo("WITHDRAWAL");
             assertThat(transaction.status()).isEqualTo(status);
@@ -150,7 +151,7 @@ class MoneyMovementServiceTests {
             UUID id = opening.openAccount(ADMIN, retailOpening().build()).id();
 
             TransactionSummary transaction = movements.withdraw(ADMIN, 
-                    WithdrawCommand.builder().accountId(id).amount(new BigDecimal("500")).build());
+                    WithdrawCommand.of(id, new BigDecimal("500")));
 
             AccountDetails details = service.findAccount(ADMIN, id);
             assertThat(transaction.status()).isEqualTo("REJECTED");
@@ -166,7 +167,7 @@ class MoneyMovementServiceTests {
         @DisplayName("Una cuenta desconocida lanza AccountNotFoundException")
         void anUnknownAccountThrowsAccountNotFoundException() {
             UUID unknown = UUID.randomUUID();
-            WithdrawCommand command = WithdrawCommand.builder().accountId(unknown).amount(BigDecimal.TEN).build();
+            WithdrawCommand command = WithdrawCommand.of(unknown, BigDecimal.TEN);
 
             assertThatExceptionOfType(AccountNotFoundException.class)
                     .isThrownBy(() -> movements.withdraw(ADMIN, command))
@@ -178,7 +179,7 @@ class MoneyMovementServiceTests {
         void aWithdrawalInAnotherCurrencyThrowsCurrencyMismatchExceptionAndKeepsTheBalance() {
             UUID id = opening.openAccount(ADMIN, retailOpening().build()).id();
             WithdrawCommand dollars =
-                    WithdrawCommand.builder().accountId(id).amount(BigDecimal.TEN).currency("USD").build();
+                    new WithdrawCommand(id, BigDecimal.TEN, "USD");
 
             assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> movements.withdraw(ADMIN, dollars));
 
@@ -209,11 +210,7 @@ class MoneyMovementServiceTests {
         }
 
         private TransferCommand transfer(UUID source, String targetAccountNumber, String amount) {
-            return TransferCommand.builder()
-                    .sourceAccountId(source)
-                    .targetAccountNumber(targetAccountNumber)
-                    .amount(new BigDecimal(amount))
-                    .build();
+            return TransferCommand.of(source, targetAccountNumber, new BigDecimal(amount));
         }
 
         @Test
@@ -293,7 +290,7 @@ class MoneyMovementServiceTests {
         @DisplayName("Un ingreso o una retirada normales no llevan contrapartida")
         void regularDepositsAndWithdrawalsHaveNoCounterpart() {
             TransactionSummary deposit = movements.deposit(ADMIN,
-                    DepositCommand.builder().accountId(sourceId).amount(new BigDecimal("10")).build());
+                    DepositCommand.of(sourceId, new BigDecimal("10")));
 
             assertThat(deposit.counterpartAccountNumber()).isEmpty();
         }
@@ -345,12 +342,7 @@ class MoneyMovementServiceTests {
         @Test
         @DisplayName("Una transferencia en otra divisa lanza CurrencyMismatchException y no cambia los saldos")
         void aTransferInAnotherCurrencyThrowsCurrencyMismatchException() {
-            TransferCommand dollars = TransferCommand.builder()
-                    .sourceAccountId(sourceId)
-                    .targetAccountNumber(targetNumber)
-                    .amount(BigDecimal.TEN)
-                    .currency("USD")
-                    .build();
+            TransferCommand dollars = new TransferCommand(sourceId, targetNumber, BigDecimal.TEN, "USD");
 
             assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> movements.transfer(ADMIN, dollars));
             assertThat(service.findAccount(ADMIN, sourceId).balance()).isEqualByComparingTo("500.00");
@@ -363,15 +355,15 @@ class MoneyMovementServiceTests {
     class SegmentReviewBeforeDebit {
 
         /** Abre con el patrimonio mínimo (alto patrimonio por saldo) y retira hasta dejar la cuenta en descubierto. */
-        private UUID cuentaEnDescubierto(OpenAccountCommand.Builder command) {
+        private UUID cuentaEnDescubierto(CommandBuilders.OpenAccountBuilder command) {
             UUID id = opening.openAccount(ADMIN, command.initialDeposit(new BigDecimal("100000")).build()).id();
-            movements.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("100500")).build());
+            movements.withdraw(ADMIN, WithdrawCommand.of(id, new BigDecimal("100500")));
             return id;
         }
 
         private TransactionSummary retirar(UUID id, String amount) {
             return movements.withdraw(ADMIN,
-                    WithdrawCommand.builder().accountId(id).amount(new BigDecimal(amount)).build());
+                    WithdrawCommand.of(id, new BigDecimal(amount)));
         }
 
         @Test
@@ -411,8 +403,8 @@ class MoneyMovementServiceTests {
             String target = opening.openAccount(ADMIN, highNetWorthOpening().build()).accountNumber();
             clock.advance(Duration.ofDays(32));
 
-            TransferSummary transferencia = movements.transfer(ADMIN, TransferCommand.builder()
-                    .sourceAccountId(id).targetAccountNumber(target).amount(new BigDecimal("10")).build());
+            TransferSummary transferencia = movements.transfer(ADMIN, TransferCommand.of(id, target,
+                    new BigDecimal("10")));
 
             assertThat(transferencia.status()).isEqualTo("REJECTED");
             assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("RETAIL");
@@ -427,12 +419,12 @@ class MoneyMovementServiceTests {
         @DisplayName("Una retirada no válida sobre una cuenta con la revisión vencida deja al titular en minorista y publica el cambio")
         void anInvalidWithdrawalDoesNotLoseTheDueReview() {
             UUID id = opening.openAccount(ADMIN, retailOpening().initialDeposit(new BigDecimal("100000")).build()).id();
-            movements.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("500")).build());
+            movements.withdraw(ADMIN, WithdrawCommand.of(id, new BigDecimal("500")));
             clock.advance(Duration.ofDays(32));
             clearInvocations(publisher);
 
             assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> movements.withdraw(ADMIN,
-                    WithdrawCommand.builder().accountId(id).amount(BigDecimal.TEN).currency("USD").build()));
+                    new WithdrawCommand(id, BigDecimal.TEN, "USD")));
 
             assertThat(service.findAccount(ADMIN, id).segment()).isEqualTo("RETAIL");
             assertThat(publishedBatches(publisher).stream().flatMap(List::stream))
@@ -444,13 +436,12 @@ class MoneyMovementServiceTests {
         void anInvalidTransferDoesNotLoseTheDueReview() {
             AccountSummary source = opening.openAccount(ADMIN, retailOpening().initialDeposit(new BigDecimal("100000")).build());
             movements.withdraw(ADMIN,
-                    WithdrawCommand.builder().accountId(source.id()).amount(new BigDecimal("500")).build());
+                    WithdrawCommand.of(source.id(), new BigDecimal("500")));
             clock.advance(Duration.ofDays(32));
             clearInvocations(publisher);
 
             assertThatExceptionOfType(SameAccountTransferException.class).isThrownBy(() -> movements.transfer(ADMIN,
-                    TransferCommand.builder().sourceAccountId(source.id())
-                            .targetAccountNumber(source.accountNumber()).amount(BigDecimal.TEN).build()));
+                    TransferCommand.of(source.id(), source.accountNumber(), BigDecimal.TEN)));
 
             assertThat(service.findAccount(ADMIN, source.id()).segment()).isEqualTo("RETAIL");
             assertThat(publishedBatches(publisher).stream().flatMap(List::stream))

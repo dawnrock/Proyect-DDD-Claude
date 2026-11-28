@@ -56,7 +56,7 @@ En orden, de una en una, respetando `**Depends on:**`. No empieces una tarea sin
 
 1. **Rojo.** Escribe primero el test JUnit que expresa el criterio de la tarea. Ejecuta `./mvnw test -Dtest=<Clase>` y confirma que **falla por el motivo esperado** (aserción o clase inexistente), no por un error del propio test.
 2. **Verde.** Escribe el código mínimo para que pase. Ejecuta `./mvnw verify`: deben pasar el test nuevo y **todos** los anteriores, incluidas las reglas de ArchUnit.
-3. **Refactor.** Aplica las convenciones de `CLAUDE.md` (lenguaje ubicuo, accesores estilo record, uso permitido de Lombok/Immutables) sin cambiar el comportamiento, y repite `./mvnw verify`.
+3. **Refactor.** Aplica las convenciones de `CLAUDE.md` (lenguaje ubicuo, accesores estilo record, uso permitido de Lombok y `record`) sin cambiar el comportamiento, y repite `./mvnw verify`.
 4. **Criterios.** Comprueba uno a uno los de la tarea y márcalos `- [x]` solo si se cumplen de verdad.
 
 Casos especiales:

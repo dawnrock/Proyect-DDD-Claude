@@ -11,12 +11,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import com.dawnrock.ddd.support.CommandBuilders;
 
 /** Reglas de formato del command del alta de cliente (#103), antes de llegar al dominio. */
 class SignUpCommandTests {
 
-    private static SignUpCommand.Builder validCommand() {
-        return SignUpCommand.builder()
+    private static CommandBuilders.SignUpBuilder validCommand() {
+        return CommandBuilders.signUp()
                 .fullName("Ada Lovelace")
                 .taxId("12345678Z")
                 .email("ada@example.com")
@@ -66,7 +67,7 @@ class SignUpCommandTests {
     void theUsernameIsRequiredAndMustHaveTheUsernameFormat(String username) {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().username(username).build())
-                .withMessage(OpenAccountCommandDef.USERNAME_MESSAGE);
+                .withMessage(OpenAccountCommand.USERNAME_MESSAGE);
     }
 
     @ParameterizedTest
@@ -98,13 +99,13 @@ class SignUpCommandTests {
     @Test
     @DisplayName("Con varios datos mal, se informa la primera regla en orden: nombre, documento, correo, usuario, divisa y depósito")
     void withSeveralWrongFieldsTheFirstRuleInOrderIsReported() {
-        SignUpCommand.Builder command = SignUpCommand.builder()
+        CommandBuilders.SignUpBuilder command = CommandBuilders.signUp()
                 .fullName("").taxId("x").email("x").username("X").currency("eur").initialDeposit(BigDecimal.ZERO);
-        List<UnaryOperator<SignUpCommand.Builder>> fixes = List.of(
+        List<UnaryOperator<CommandBuilders.SignUpBuilder>> fixes = List.of(
                 b -> b.fullName("Ada Lovelace"), b -> b.taxId("12345678Z"), b -> b.email("ada@example.com"),
                 b -> b.username("ada"), b -> b.currency("EUR"));
         List<String> messages = List.of("El nombre y apellidos son obligatorios", "El documento debe ser un DNI o un NIE",
-                "El correo electrónico no es válido", OpenAccountCommandDef.USERNAME_MESSAGE,
+                "El correo electrónico no es válido", OpenAccountCommand.USERNAME_MESSAGE,
                 "La divisa eur no es un código ISO 4217 válido", "El depósito inicial debe ser positivo");
 
         for (int i = 0; i < messages.size(); i++) {

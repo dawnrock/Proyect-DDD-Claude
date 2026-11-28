@@ -61,8 +61,7 @@ class CustomerControllerTests {
     private CustomerRegistration registration;
 
     private static AccountSummary summary() {
-        return AccountSummary.builder().id(ID).accountNumber(IBAN).holderName("Margaret Hamilton").segment("RETAIL")
-                .balance(new BigDecimal("100.00")).currency("EUR").build();
+        return new AccountSummary(ID, IBAN, "Margaret Hamilton", "RETAIL", new BigDecimal("100.00"), "EUR");
     }
 
     private String send(String body) throws Exception {

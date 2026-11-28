@@ -25,7 +25,7 @@ Issue indicada por el usuario: $ARGUMENTS
 
 ### 3. Analizar el código
 
-- Relee `CLAUDE.md`: arquitectura de la fase, convenciones, tabla de Lombok/Immutables.
+- Relee `CLAUDE.md`: arquitectura de la fase, convenciones, tabla de Lombok y `record`.
 - Busca en `docs/ia/pendientes.md` avisos para esta issue o su área, y en `docs/ia/decisiones.md` las decisiones que la afecten.
 - Para dudas sobre bloques tácticos (value object, entidad, agregado, evento, factoría, servicio), lee `.claude/skills/ddd-building-block/references/reglas-ddd.md`.
 - En la fase 2, para puertos y adaptadores lee `.claude/skills/hexagonal-adapter/SKILL.md`.

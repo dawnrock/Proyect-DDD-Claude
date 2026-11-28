@@ -79,13 +79,7 @@ class AccountListControllerTests extends AccountWebTestSupport {
         }
 
         private static AccountSummary summary(UUID id, String accountNumber, String holder, String balance) {
-            return AccountSummary.builder()
-                    .id(id)
-                    .accountNumber(accountNumber)
-                    .holderName(holder).segment("RETAIL")
-                    .balance(new BigDecimal(balance))
-                    .currency("EUR")
-                    .build();
+            return new AccountSummary(id, accountNumber, holder, "RETAIL", new BigDecimal(balance), "EUR");
         }
 
         @Test
@@ -108,9 +102,8 @@ class AccountListControllerTests extends AccountWebTestSupport {
         @DisplayName("El listado muestra el segmento de cada cuenta junto al IBAN abreviado")
         void theListShowsEachAccountsSegment() throws Exception {
             when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(
-                    AccountSummary.builder().id(UUID.randomUUID()).accountNumber("ES1234567890123456789012")
-                            .holderName("Ana Pérez").segment("HIGH_NET_WORTH")
-                            .balance(new BigDecimal("150.00")).currency("EUR").build(),
+                    new AccountSummary(UUID.randomUUID(), "ES1234567890123456789012", "Ana Pérez", "HIGH_NET_WORTH",
+                            new BigDecimal("150.00"), "EUR"),
                     summary(UUID.randomUUID(), "ES7921000813610123456789", "Grace Hopper", "5000.00")));
 
             mvc.perform(get("/"))
@@ -231,7 +224,7 @@ class AccountListControllerTests extends AccountWebTestSupport {
                     .andExpect(content().string(containsString("#plus\"></use></svg>Abrir cuenta")))
                     .andExpect(content().string(not(containsString("Mis cuentas"))));
 
-            verify(queries).listAccounts(Caller.builder().username("admin").admin(true).build());
+            verify(queries).listAccounts(Caller.administrator("admin"));
         }
 
         @Test
@@ -250,7 +243,7 @@ class AccountListControllerTests extends AccountWebTestSupport {
                     .andExpect(content().string(not(containsString("Abrir cuenta"))))
                     .andExpect(content().string(not(containsString("/accounts/new"))));
 
-            verify(queries).listAccounts(Caller.builder().username("ada").admin(false).build());
+            verify(queries).listAccounts(Caller.customer("ada"));
         }
 
         @Test

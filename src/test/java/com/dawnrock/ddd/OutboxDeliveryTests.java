@@ -34,7 +34,7 @@ import com.dawnrock.ddd.domain.model.MoneyDeposited;
 @Import(OutboxDeliveryTests.FailingDepositConsumer.class)
 class OutboxDeliveryTests {
 
-    private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+    private static final Caller ADMIN = Caller.administrator("admin");
 
     @Autowired
     private AccountOpeningCommands commands;
@@ -51,16 +51,11 @@ class OutboxDeliveryTests {
     @Test
     @DisplayName("Un consumidor que falla no hace fallar el ingreso: su evento queda pendiente con un intento y los demás se entregan")
     void aFailingConsumerDoesNotBreakTheDepositAndItsEventStaysPending() {
-        UUID accountId = commands.openAccount(ADMIN, OpenAccountCommand.builder()
-                .holderName("Ada Lovelace")
-                .holderTaxId("12345678Z")
-                .holderEmail("ada@example.com")
-                .initialDeposit(new BigDecimal("100"))
-                .ownerUsername("ada")
-                .build()).id();
+        UUID accountId = commands.openAccount(ADMIN, OpenAccountCommand.of("Ada Lovelace", "12345678Z",
+                "ada@example.com", new BigDecimal("100"), "ada")).id();
 
         assertThatNoException().isThrownBy(() -> movements.deposit(ADMIN,
-                DepositCommand.builder().accountId(accountId).amount(new BigDecimal("25")).build()));
+                DepositCommand.of(accountId, new BigDecimal("25"))));
 
         relay.relayPending();
 

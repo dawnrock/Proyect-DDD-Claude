@@ -15,6 +15,7 @@ import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
 import com.dawnrock.ddd.domain.model.CheckingAccountRepository;
 import com.dawnrock.ddd.support.TestAccounts;
 import com.dawnrock.ddd.support.ApplicationServicesFixture;
+import com.dawnrock.ddd.support.CommandBuilders;
 
 /**
  * Reglas de propiedad de las cuentas (#50): un administrador accede a todo; un usuario solo a sus cuentas, y una ajena
@@ -22,9 +23,9 @@ import com.dawnrock.ddd.support.ApplicationServicesFixture;
  */
 class AccountOwnershipTests {
 
-    private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
-    private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
-    private static final Caller GRACE = Caller.builder().username("grace").admin(false).build();
+    private static final Caller ADMIN = Caller.administrator("admin");
+    private static final Caller ADA = Caller.customer("ada");
+    private static final Caller GRACE = Caller.customer("grace");
 
     private CheckingAccountRepository accounts;
     private AccountOwnershipRepository owners;
@@ -43,8 +44,8 @@ class AccountOwnershipTests {
     }
 
     /** Un cliente por propietario: cada usuario es de un único cliente (R30). */
-    private static OpenAccountCommand.Builder command(String owner) {
-        return OpenAccountCommand.builder()
+    private static CommandBuilders.OpenAccountBuilder command(String owner) {
+        return CommandBuilders.openAccount()
                 .holderName("Titular")
                 .holderTaxId("grace".equals(owner) ? "87654321X" : "12345678Z")
                 .holderEmail("titular@example.com")
@@ -138,7 +139,7 @@ class AccountOwnershipTests {
         @Test
         @DisplayName("Un usuario sin cuentas obtiene una lista vacía")
         void aUserWithoutAccountsGetsAnEmptyList() {
-            assertThat(service.listAccounts(Caller.builder().username("alan").admin(false).build())).isEmpty();
+            assertThat(service.listAccounts(Caller.customer("alan"))).isEmpty();
         }
 
         @Test
@@ -193,19 +194,15 @@ class AccountOwnershipTests {
         }
 
         private DepositCommand deposit(AccountSummary account) {
-            return DepositCommand.builder().accountId(account.id()).amount(new BigDecimal("100")).build();
+            return DepositCommand.of(account.id(), new BigDecimal("100"));
         }
 
         private WithdrawCommand withdraw(AccountSummary account) {
-            return WithdrawCommand.builder().accountId(account.id()).amount(new BigDecimal("100")).build();
+            return WithdrawCommand.of(account.id(), new BigDecimal("100"));
         }
 
         private TransferCommand transfer(AccountSummary source, String targetNumber) {
-            return TransferCommand.builder()
-                    .sourceAccountId(source.id())
-                    .targetAccountNumber(targetNumber)
-                    .amount(new BigDecimal("100"))
-                    .build();
+            return TransferCommand.of(source.id(), targetNumber, new BigDecimal("100"));
         }
 
         /** El IBAN en minúsculas y en grupos de cuatro, como lo escribiría una persona. */
@@ -220,7 +217,7 @@ class AccountOwnershipTests {
         @Test
         @DisplayName("El llamador de sistema (la demo) ingresa, retira y transfiere en cuentas de otros usuarios")
         void theSystemCallerOperatesOtherUsersAccounts() {
-            Caller system = CallerDef.system();
+            Caller system = Caller.system();
 
             movements.deposit(system, deposit(adas));
             movements.withdraw(system, withdraw(graces));

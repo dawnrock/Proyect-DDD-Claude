@@ -10,12 +10,13 @@ import org.mockito.ArgumentCaptor;
 
 import com.dawnrock.ddd.domain.model.DomainEvent;
 import com.dawnrock.ddd.domain.model.DomainEventPublisher;
+import com.dawnrock.ddd.support.CommandBuilders;
 
 /** Datos y comprobaciones comunes de los tests de los servicios de aplicación (#174). */
 final class ServiceTestSupport {
 
     /** Los casos de uso se piden como administrador; la propiedad se prueba en sus tests propios. */
-    static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+    static final Caller ADMIN = Caller.administrator("admin");
 
     private ServiceTestSupport() {
     }
@@ -29,8 +30,8 @@ final class ServiceTestSupport {
     }
 
     /** Titular minorista por NIF (40.000 € verificados); el IBAN lo genera la factoría. */
-    static OpenAccountCommand.Builder retailOpening() {
-        return OpenAccountCommand.builder()
+    static CommandBuilders.OpenAccountBuilder retailOpening() {
+        return CommandBuilders.openAccount()
                 .holderName("Ada Lovelace")
                 .holderTaxId("12345678Z")
                 .holderEmail("ada@example.com")
@@ -39,7 +40,7 @@ final class ServiceTestSupport {
     }
 
     /** Titular de alto patrimonio por NIF (250.000 € verificados). */
-    static OpenAccountCommand.Builder highNetWorthOpening() {
+    static CommandBuilders.OpenAccountBuilder highNetWorthOpening() {
         return retailOpening().holderName("Grace Hopper").holderTaxId("87654321X").holderEmail("grace@example.com")
                 .ownerUsername("grace");
     }

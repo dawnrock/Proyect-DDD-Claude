@@ -21,8 +21,8 @@ import com.dawnrock.ddd.support.ApplicationServicesFixture;
 /** El administrador sustituye el IBAN de una cuenta por otro que genera el banco (R32). */
 class AccountOpeningServiceRegenerateAccountNumberTests {
 
-    private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
-    private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
+    private static final Caller ADMIN = Caller.administrator("admin");
+    private static final Caller ADA = Caller.customer("ada");
 
     private CheckingAccountRepository accounts;
     private CheckingAccountQueryService service;
@@ -35,8 +35,8 @@ class AccountOpeningServiceRegenerateAccountNumberTests {
         ApplicationServicesFixture fixture = ApplicationServicesFixture.builder().accounts(accounts).build();
         service = fixture.queryService();
         opening = fixture.accountOpeningService();
-        account = opening.signUp(SignUpCommand.builder().fullName("Ada Lovelace").taxId("12345678Z")
-                .email("ada@example.com").username("ada").initialDeposit(new BigDecimal("1000")).build());
+        account = opening.signUp(SignUpCommand.of("Ada Lovelace", "12345678Z", "ada@example.com", "ada",
+                new BigDecimal("1000")));
     }
 
     @Test

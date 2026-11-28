@@ -1,6 +1,5 @@
 package com.dawnrock.ddd.adapter.in.web;
 
-import java.util.Objects;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -65,14 +64,9 @@ public class OpenAccountWebController {
      */
     private static OpenAccountCommand toCommand(OpenAccountForm form, BindingResult result) {
         try {
-            return OpenAccountCommand.builder()
-                    .holderTaxId(form.getHolderTaxId())
-                    .holderName(Objects.requireNonNullElse(form.getHolderName(), ""))
-                    .holderEmail(Objects.requireNonNullElse(form.getHolderEmail(), ""))
-                    .initialDeposit(form.getInitialDeposit())
-                    .currency(form.getCurrency())
-                    .ownerUsername(Objects.requireNonNullElse(form.getOwnerUsername(), ""))
-                    .build();
+            // Los campos del titular que falten quedan vacíos y la divisa que falte es EUR: lo hace el command
+            return new OpenAccountCommand(form.getHolderName(), form.getHolderTaxId(), form.getHolderEmail(),
+                    form.getInitialDeposit(), form.getOwnerUsername(), form.getCurrency());
         } catch (IllegalArgumentException e) {
             result.reject("invalid", e.getMessage());
             return null;

@@ -25,7 +25,7 @@ import com.dawnrock.ddd.support.ApplicationServicesFixture;
  */
 class MoneyMovementServiceConcurrencyTests {
 
-    private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+    private static final Caller ADMIN = Caller.administrator("admin");
     private static final int THREADS = 8;
     private static final int OPERATIONS_PER_THREAD = 300;
     private static final int ROUNDS = 5;
@@ -38,8 +38,7 @@ class MoneyMovementServiceConcurrencyTests {
     }
 
     private static AccountSummary open(AccountOpeningCommands opening, String holder, String taxId, String owner) {
-        return opening.openAccount(ADMIN, OpenAccountCommand.builder().holderName(holder).holderTaxId(taxId)
-                .holderEmail(owner + "@example.com").initialDeposit(INITIAL).ownerUsername(owner).build());
+        return opening.openAccount(ADMIN, OpenAccountCommand.of(holder, taxId, owner + "@example.com", INITIAL, owner));
     }
 
     @Test
@@ -73,11 +72,9 @@ class MoneyMovementServiceConcurrencyTests {
             Callable<Void> worker = () -> {
                 start.await();
                 for (int i = 0; i < OPERATIONS_PER_THREAD; i++) {
-                    movements.transfer(ADMIN, TransferCommand.builder().sourceAccountId(ada.id())
-                            .targetAccountNumber(alan.accountNumber()).amount(ONE).build());
-                    movements.transfer(ADMIN, TransferCommand.builder().sourceAccountId(alan.id())
-                            .targetAccountNumber(ada.accountNumber()).amount(ONE).build());
-                    movements.deposit(ADMIN, DepositCommand.builder().accountId(ada.id()).amount(ONE).build());
+                    movements.transfer(ADMIN, TransferCommand.of(ada.id(), alan.accountNumber(), ONE));
+                    movements.transfer(ADMIN, TransferCommand.of(alan.id(), ada.accountNumber(), ONE));
+                    movements.deposit(ADMIN, DepositCommand.of(ada.id(), ONE));
                 }
                 return null;
             };

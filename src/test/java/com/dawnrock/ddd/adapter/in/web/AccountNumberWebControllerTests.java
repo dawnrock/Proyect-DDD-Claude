@@ -32,8 +32,8 @@ import com.dawnrock.ddd.application.AccountSummary;
 class AccountNumberWebControllerTests extends AccountWebTestSupport {
 
     private static AccountDetails retailDetails() {
-        return AccountDetails.builder().id(ACCOUNT_ID).accountNumber("ES2199990001220000000001").holderName("Ada Lovelace")
-                .segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build();
+        return AccountDetails.of(ACCOUNT_ID, "ES2199990001220000000001", "Ada Lovelace", "RETAIL",
+                new BigDecimal("100.00"), "EUR");
     }
 
     @Test
@@ -87,9 +87,8 @@ class AccountNumberWebControllerTests extends AccountWebTestSupport {
     @WithMockUser(username = "admin", roles = "ADMIN")
     @DisplayName("El administrador cambia el IBAN, vuelve al detalle y ve el aviso con el IBAN nuevo")
     void theAdministratorChangesTheIbanAndReturnsToTheDetailsWithTheNotice() throws Exception {
-        when(commands.regenerateAccountNumber(ADMIN, ACCOUNT_ID)).thenReturn(AccountSummary.builder().id(ACCOUNT_ID)
-                .accountNumber("ES6499990001810000000002").holderName("Ada Lovelace")
-                .segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build());
+        when(commands.regenerateAccountNumber(ADMIN, ACCOUNT_ID)).thenReturn(new AccountSummary(ACCOUNT_ID,
+                "ES6499990001810000000002", "Ada Lovelace", "RETAIL", new BigDecimal("100.00"), "EUR"));
 
         mvc.perform(MockMvcRequestBuilders.post("/accounts/" + ACCOUNT_ID + "/account-number").with(csrf()))
                 .andExpect(status().is3xxRedirection())
@@ -104,11 +103,10 @@ class AccountNumberWebControllerTests extends AccountWebTestSupport {
     @DisplayName("Con htmx, el administrador recibe el panel con el aviso y el IBAN nuevo, sin redirigir (#125)")
     void withHtmxTheAdministratorGetsThePanelWithTheNewIban() throws Exception {
         String newIban = "ES6499990001810000000002";
-        when(commands.regenerateAccountNumber(ADMIN, ACCOUNT_ID)).thenReturn(AccountSummary.builder().id(ACCOUNT_ID)
-                .accountNumber(newIban).holderName("Ada Lovelace")
-                .segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build());
-        when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(AccountDetails.builder().id(ACCOUNT_ID).accountNumber(newIban)
-                .holderName("Ada Lovelace").segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build());
+        when(commands.regenerateAccountNumber(ADMIN, ACCOUNT_ID)).thenReturn(new AccountSummary(ACCOUNT_ID, newIban,
+                "Ada Lovelace", "RETAIL", new BigDecimal("100.00"), "EUR"));
+        when(queries.findAccount(ADMIN, ACCOUNT_ID)).thenReturn(AccountDetails.of(ACCOUNT_ID, newIban, "Ada Lovelace",
+                "RETAIL", new BigDecimal("100.00"), "EUR"));
 
         mvc.perform(MockMvcRequestBuilders.post("/accounts/" + ACCOUNT_ID + "/account-number").with(csrf()).header("HX-Request", "true"))
                 .andExpect(status().isOk())

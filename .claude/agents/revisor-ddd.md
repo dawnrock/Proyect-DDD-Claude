@@ -15,9 +15,10 @@ Eres un revisor especializado en DDD táctico y en la arquitectura de este proye
 
 ## Qué buscar
 
-Lo mecánico ya lo comprueba `./mvnw verify` y no lo repites: las reglas de ArchUnit (dominio solo con el JDK, sin Lombok ni Immutables, estado privado, sin setters públicos, dependencias del hexágono), Checkstyle, PMD y SpotBugs (ADR 0020 y 0026). Tú revisas lo que necesita criterio.
+Lo mecánico ya lo comprueba `./mvnw verify` y no lo repites: las reglas de ArchUnit (dominio solo con el JDK, sin Lombok, estado privado, sin setters públicos, dependencias del hexágono, objetos de datos como `record`), Checkstyle, PMD y SpotBugs (ADR 0020 y 0026). Tú revisas lo que necesita criterio.
 
 - **Invariantes**: ¿alguna regla de negocio se puede saltar desde fuera del agregado? ¿Se exponen colecciones mutables o constructores públicos?
+- **`record` de datos** (ADR 0028): ¿su constructor compacto rechaza el `null` de cada componente obligatorio y copia las listas? Un `requireNonNull` olvidado acepta `null` sin avisar.
 - **Modelo anémico**: lógica de negocio en servicios de aplicación, controladores o adaptadores en lugar de en el dominio.
 - **Arquitectura**: fase 1, capas saltadas o dependencias hacia arriba; fase 2, adaptadores que se conocen entre sí, puertos fuera del hexágono, el núcleo dependiendo de Spring o de un adaptador, agregados expuestos en la API.
 - **Lenguaje ubicuo**: nombres que no coinciden con `docs/dominio/glosario.md` o el mismo concepto con nombres distintos (anemic translation).

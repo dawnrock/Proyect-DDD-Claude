@@ -113,8 +113,8 @@ class ApiSecurityTests {
     }
 
     private static AccountSummary summary() {
-        return AccountSummary.builder().id(ID).accountNumber("ES9121000418450200051332").holderName("Ada Lovelace")
-                .segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build();
+        return new AccountSummary(ID, "ES9121000418450200051332", "Ada Lovelace", "RETAIL", new BigDecimal("100.00"),
+                "EUR");
     }
 
     @Nested
@@ -144,7 +144,7 @@ class ApiSecurityTests {
                             .contentType(MediaType.APPLICATION_JSON).content(OPEN_BODY))
                     .andExpect(status().isCreated());
 
-            verify(commands).openAccount(eq(Caller.builder().username("admin").admin(true).build()), any());
+            verify(commands).openAccount(eq(Caller.administrator("admin")), any());
         }
 
         @Test
@@ -161,7 +161,7 @@ class ApiSecurityTests {
             mvc.perform(post("/api/accounts").header(HttpHeaders.AUTHORIZATION, noRoles)
                             .contentType(MediaType.APPLICATION_JSON).content(OPEN_BODY))
                     .andExpect(status().isForbidden());
-            verify(queries).listAccounts(Caller.builder().username("ada").admin(false).build());
+            verify(queries).listAccounts(Caller.customer("ada"));
             verifyNoInteractions(commands, movements);
         }
 

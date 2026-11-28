@@ -71,13 +71,8 @@ public class TransferWebController {
     /** El command, o {@code null} con el error en el formulario si lo rechaza (red de seguridad de la validación). */
     private static TransferCommand toCommand(UUID id, TransferForm form, BindingResult result) {
         try {
-            TransferCommand.Builder builder = TransferCommand.builder()
-                    .sourceAccountId(id).targetAccountNumber(form.getTargetAccountNumber())
-                    .amount(form.getAmount());
-            if (form.getCurrency() != null) {
-                builder.currency(form.getCurrency());
-            }
-            return builder.build();
+            // Sin divisa en el formulario, el command usa EUR
+            return new TransferCommand(id, form.getTargetAccountNumber(), form.getAmount(), form.getCurrency());
         } catch (IllegalArgumentException e) {
             result.reject("invalid", e.getMessage());
             return null;

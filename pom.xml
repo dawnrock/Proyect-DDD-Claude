@@ -28,7 +28,6 @@
     </scm>
     <properties>
         <java.version>21</java.version>
-        <immutables.version>2.12.3</immutables.version>
         <!-- Librerías del frontend web servidas como WebJars (ADR 0016, #124) -->
         <bootstrap.version>5.3.8</bootstrap.version>
         <htmx.version>2.0.11</htmx.version>
@@ -122,12 +121,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.immutables</groupId>
-            <artifactId>value-annotations</artifactId>
-            <version>${immutables.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -225,11 +218,6 @@
                             <artifactId>lombok</artifactId>
                             <version>${lombok.version}</version>
                         </path>
-                        <path>
-                            <groupId>org.immutables</groupId>
-                            <artifactId>value</artifactId>
-                            <version>${immutables.version}</version>
-                        </path>
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
@@ -260,10 +248,6 @@
                 <configuration>
                     <configLocation>checkstyle.xml</configLocation>
                     <propertyExpansion>checkstyle.suppressions.file=${project.basedir}/checkstyle-suppressions.xml</propertyExpansion>
-                    <!-- Solo el código escrito a mano: el que genera Immutables en target/generated-sources no se puede corregir -->
-                    <sourceDirectories>
-                        <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
-                    </sourceDirectories>
                     <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <testSourceDirectories>
                         <testSourceDirectory>${project.build.testSourceDirectory}</testSourceDirectory>
@@ -291,11 +275,6 @@
                         <ruleset>pmd-ruleset.xml</ruleset>
                     </rulesets>
                     <includeTests>true</includeTests>
-                    <!-- Solo el código escrito a mano: el que genera Immutables no se puede corregir -->
-                    <excludeRoots>
-                        <excludeRoot>${project.build.directory}/generated-sources</excludeRoot>
-                        <excludeRoot>${project.build.directory}/generated-test-sources</excludeRoot>
-                    </excludeRoots>
                     <!-- Los smells que ya existían no hacen fallar el build ni salen en el informe; los nuevos, sí -->
                     <excludeFromFailureFile>${pmd.baseline}</excludeFromFailureFile>
                     <printFailingErrors>true</printFailingErrors>

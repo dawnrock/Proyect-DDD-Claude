@@ -32,8 +32,8 @@ class CustomerRegistrationRealisticModeTests {
                 fixture.queryService(), users, new SecuritySupport().passwordEncoder(),
                 new SignUpLimit(new SignUpLimitProperties(1_000, 1_000, Duration.ofHours(1), 1_000), Clock.systemUTC()),
                 new InMemoryExternalIdentities(users::userExists), Clock.systemUTC(), new AuthProperties(false));
-        SignUpCommand command = SignUpCommand.builder().fullName("Margaret Hamilton").taxId("00000000T")
-                .email("margaret@example.com").username("margaret").initialDeposit(new BigDecimal("100.00")).build();
+        SignUpCommand command = SignUpCommand.of("Margaret Hamilton", "00000000T", "margaret@example.com", "margaret",
+                new BigDecimal("100.00"));
 
         assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(() -> registration.register(command, "demo-1234", "203.0.113.5"))

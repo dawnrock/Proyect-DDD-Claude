@@ -20,9 +20,9 @@ import com.dawnrock.ddd.support.ApplicationServicesFixture;
 /** Abrir otra cuenta un cliente que ya tiene una: el titular sale de sus datos de cliente. */
 class AccountOpeningServiceAnotherAccountTests {
 
-    private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
-    private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
-    private static final Caller GRACE = Caller.builder().username("grace").admin(false).build();
+    private static final Caller ADMIN = Caller.administrator("admin");
+    private static final Caller ADA = Caller.customer("ada");
+    private static final Caller GRACE = Caller.customer("grace");
 
     private CheckingAccountRepository accounts;
     private CheckingAccountQueryService service;
@@ -35,12 +35,12 @@ class AccountOpeningServiceAnotherAccountTests {
         ApplicationServicesFixture fixture = ApplicationServicesFixture.builder().accounts(accounts).build();
         service = fixture.queryService();
         opening = fixture.accountOpeningService();
-        first = opening.signUp(SignUpCommand.builder().fullName("Ada Lovelace").taxId("12345678Z")
-                .email("ada@example.com").username("ada").initialDeposit(new BigDecimal("1000")).build());
+        first = opening.signUp(SignUpCommand.of("Ada Lovelace", "12345678Z", "ada@example.com", "ada",
+                new BigDecimal("1000")));
     }
 
     private static OpenAnotherAccountCommand deposit(String amount) {
-        return OpenAnotherAccountCommand.builder().initialDeposit(new BigDecimal(amount)).build();
+        return OpenAnotherAccountCommand.of(new BigDecimal(amount));
     }
 
     @Test
@@ -77,7 +77,7 @@ class AccountOpeningServiceAnotherAccountTests {
     @Test
     @DisplayName("Un administrador no puede abrir otra cuenta aunque su usuario coincida con el de un cliente")
     void anAdministratorCannotOpenAnotherAccount() {
-        Caller adminNamedAda = Caller.builder().username("ada").admin(true).build();
+        Caller adminNamedAda = Caller.administrator("ada");
 
         assertThatExceptionOfType(NotACustomerException.class)
                 .isThrownBy(() -> opening.openAnotherAccount(ADMIN, deposit("200.00")));
@@ -98,7 +98,7 @@ class AccountOpeningServiceAnotherAccountTests {
     @DisplayName("Un depósito en otra divisa se rechaza y no se abre la cuenta")
     void aDepositInAnotherCurrencyIsRejected() {
         assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> opening.openAnotherAccount(ADA,
-                OpenAnotherAccountCommand.builder().initialDeposit(new BigDecimal("200")).currency("USD").build()));
+                new OpenAnotherAccountCommand(new BigDecimal("200"), "USD")));
         assertThat(service.listAccounts(ADA)).hasSize(1);
     }
 }

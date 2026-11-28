@@ -73,10 +73,6 @@ public class AccessTokenIssuer {
                 .build();
         String token = encoder.encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims))
                 .getTokenValue();
-        return TokenResponse.builder()
-                .accessToken(token)
-                .tokenType(TOKEN_TYPE)
-                .expiresIn(properties.ttl().toSeconds())
-                .build();
+        return new TokenResponse(token, TOKEN_TYPE, properties.ttl().toSeconds());
     }
 }

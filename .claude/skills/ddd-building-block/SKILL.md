@@ -11,7 +11,7 @@ Crea o modifica el bloque de dominio pedido: $ARGUMENTS
 
 1. **Clasifica el bloque.** Antes de escribir nada, lee `references/reglas-ddd.md` y decide si es un objeto de valor, una entidad, un agregado, un evento, una factoría o un servicio de dominio. Si la petición no encaja claramente (por ejemplo, algo con identidad que se pide como VO), explícalo y propón la clasificación correcta.
 2. **Lenguaje ubicuo.** Busca el término en `docs/dominio/glosario.md`. Usa ese nombre en inglés en el código y añade el término al glosario si es nuevo.
-3. **Lombok e Immutables.** En el dominio no se usa ninguno de los dos (ADR 0009 y ADR 0003): accesores, `equals` y `hashCode` se escriben a mano. Detalles en `references/lombok-immutables.md`.
+3. **Lombok y record.** En el dominio no se usa Lombok (ADR 0009): accesores, `equals` y `hashCode` se escriben a mano, y los objetos de valor y los eventos son `record` (ADR 0028). Detalles en `references/lombok-records.md`.
 4. **Genera el código** partiendo de la plantilla que corresponda en `templates/`:
    - Objeto de valor → `templates/ValueObject.java.template` (un `record` con validación en el constructor compacto).
    - Entidad o raíz de agregado → `templates/Entity.java.template` (constructor privado + factoría estática, igualdad por id).
@@ -22,4 +22,4 @@ Crea o modifica el bloque de dominio pedido: $ARGUMENTS
    ```bash
    ./mvnw verify
    ```
-   ArchUnit (`HexagonalArchitectureTests`, `DomainIsolationTests`) comprueba que el dominio solo depende del JDK (ni Spring, ni `jakarta`, ni `org.immutables`, ni Lombok, por `@lombok.Generated`), que su estado es privado y que no tiene setters públicos (ADR 0026). **No des la tarea por terminada si falla.**
+   ArchUnit (`HexagonalArchitectureTests`, `DomainIsolationTests`) comprueba que el dominio solo depende del JDK (ni Spring, ni `jakarta`, ni Lombok, por `@lombok.Generated`), que su estado es privado y que no tiene setters públicos (ADR 0026). **No des la tarea por terminada si falla.**

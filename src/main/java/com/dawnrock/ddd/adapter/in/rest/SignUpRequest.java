@@ -9,13 +9,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-import com.dawnrock.ddd.application.OpenAccountCommandDef;
-import com.dawnrock.ddd.application.SignUpCommandDef;
+import com.dawnrock.ddd.application.OpenAccountCommand;
+import com.dawnrock.ddd.application.SignUpCommand;
 import com.dawnrock.ddd.adapter.in.CustomerRegistration;
 
 /**
- * Cuerpo de {@code POST /api/customers}. Es un {@code record} (no un DTO de Immutables) porque Hibernate Validator solo
- * ve las restricciones de campos y getters JavaBean. Aplica la validación compartida con el formulario web del alta
+ * Cuerpo de {@code POST /api/customers}, con las restricciones de Bean Validation en sus componentes. Aplica la
+ * validación compartida con el formulario web del alta
  * ("Shared input-adapter validation" del contrato). La letra de control del documento no se comprueba aquí: la comprueba
  * el dominio y responde 400. {@code currency} es opcional ({@code EUR}).
  */
@@ -24,16 +24,16 @@ public record SignUpRequest(
         String fullName,
 
         @NotBlank(message = "El documento es obligatorio")
-        @Pattern(regexp = OpenAccountCommandDef.TAX_ID_PATTERN, message = OpenAccountCommandDef.TAX_ID_MESSAGE)
+        @Pattern(regexp = OpenAccountCommand.TAX_ID_PATTERN, message = OpenAccountCommand.TAX_ID_MESSAGE)
         String taxId,
 
         @NotBlank(message = "El correo electrónico es obligatorio")
-        @Pattern(regexp = SignUpCommandDef.EMAIL_PATTERN, message = "El correo electrónico no es válido")
+        @Pattern(regexp = SignUpCommand.EMAIL_PATTERN, message = "El correo electrónico no es válido")
         String email,
 
         @NotBlank(message = "El usuario es obligatorio")
-        @Pattern(regexp = OpenAccountCommandDef.USERNAME_PATTERN,
-                message = OpenAccountCommandDef.USERNAME_MESSAGE)
+        @Pattern(regexp = OpenAccountCommand.USERNAME_PATTERN,
+                message = OpenAccountCommand.USERNAME_MESSAGE)
         String username,
 
         @NotBlank(message = "La contraseña es obligatoria")

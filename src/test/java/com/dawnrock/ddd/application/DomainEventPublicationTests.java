@@ -84,7 +84,7 @@ class DomainEventPublicationTests {
             UUID id = opening.openAccount(ADMIN, retailOpening().build()).id();
             clearInvocations(repository, publisher);
 
-            movements.deposit(ADMIN, DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).build());
+            movements.deposit(ADMIN, DepositCommand.of(id, BigDecimal.TEN));
 
             InOrder order = inOrder(repository, publisher);
             order.verify(repository).save(any(CheckingAccount.class));
@@ -99,7 +99,7 @@ class DomainEventPublicationTests {
             UUID id = opening.openAccount(ADMIN, retailOpening().build()).id();
             clearInvocations(publisher);
 
-            movements.withdraw(ADMIN, WithdrawCommand.builder().accountId(id).amount(new BigDecimal("5000")).build());
+            movements.withdraw(ADMIN, WithdrawCommand.of(id, new BigDecimal("5000")));
 
             assertThat(publishedBatches(publisher)).singleElement().satisfies(events -> assertThat(events)
                     .map(DomainEvent::getClass).containsExactly(WithdrawalRejected.class));
@@ -113,7 +113,7 @@ class DomainEventPublicationTests {
             doThrow(new IllegalStateException("fallo al guardar")).when(repository).save(any(CheckingAccount.class));
 
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() ->
-                    movements.deposit(ADMIN, DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).build()));
+                    movements.deposit(ADMIN, DepositCommand.of(id, BigDecimal.TEN)));
             verify(publisher, never()).publishAll(any());
         }
 
@@ -185,7 +185,7 @@ class DomainEventPublicationTests {
         @DisplayName("Los eventos se publican dentro de la unidad de trabajo, para que un outbox comparta su transacción (#165)")
         void eventsArePublishedInsideTheUnitOfWork() {
             UUID id = recorded.openAccount(ADMIN, retailOpening().build()).id();
-            recordedMovements.deposit(ADMIN, DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).build());
+            recordedMovements.deposit(ADMIN, DepositCommand.of(id, BigDecimal.TEN));
 
             assertThat(publications).isPositive();
             assertThat(publishedOutsideUnit).as("algún evento se publicó fuera de la unidad").isFalse();
@@ -199,7 +199,7 @@ class DomainEventPublicationTests {
             unit.failOnFinish = true;
 
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() ->
-                    recordedMovements.deposit(ADMIN, DepositCommand.builder().accountId(id).amount(BigDecimal.TEN).build()));
+                    recordedMovements.deposit(ADMIN, DepositCommand.of(id, BigDecimal.TEN)));
             assertThat(publications).isPositive();
             assertThat(publishedOutsideUnit).as("algún evento se publicó fuera de la unidad").isFalse();
         }

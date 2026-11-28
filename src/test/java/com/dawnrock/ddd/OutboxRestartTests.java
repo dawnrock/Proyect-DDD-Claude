@@ -30,7 +30,7 @@ import com.dawnrock.ddd.application.OpenAccountCommand;
 @ExtendWith(OutputCaptureExtension.class)
 class OutboxRestartTests {
 
-    private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+    private static final Caller ADMIN = Caller.administrator("admin");
 
     private final String database = "jdbc:h2:mem:outbox-restart-" + UUID.randomUUID()
             + ";MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1";
@@ -54,14 +54,9 @@ class OutboxRestartTests {
         UUID accountId;
         try (ConfigurableApplicationContext first = start()) {
             AccountOpeningCommands commands = first.getBean(AccountOpeningCommands.class);
-            accountId = commands.openAccount(ADMIN, OpenAccountCommand.builder()
-                    .holderName("Grace Hopper")
-                    .holderTaxId("87654321X")
-                    .holderEmail("grace@example.com")
-                    .initialDeposit(new BigDecimal("100"))
-                    .ownerUsername("grace")
-                    .build()).id();
-            first.getBean(MoneyMovementCommands.class).deposit(ADMIN, DepositCommand.builder().accountId(accountId).amount(new BigDecimal("25")).build());
+            accountId = commands.openAccount(ADMIN, OpenAccountCommand.of("Grace Hopper", "87654321X",
+                    "grace@example.com", new BigDecimal("100"), "grace")).id();
+            first.getBean(MoneyMovementCommands.class).deposit(ADMIN, DepositCommand.of(accountId, new BigDecimal("25")));
 
             assertThat(pendingEvents(first)).as("el primer arranque no ha entregado nada").isEqualTo(3);
         }

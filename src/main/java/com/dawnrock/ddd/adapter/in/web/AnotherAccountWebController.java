@@ -70,8 +70,7 @@ public class AnotherAccountWebController {
     /** El command, o {@code null} con el error en el formulario si lo rechaza (red de seguridad de la validación). */
     private static OpenAnotherAccountCommand toCommand(AnotherAccountForm form, BindingResult result) {
         try {
-            return OpenAnotherAccountCommand.builder()
-                    .initialDeposit(form.getInitialDeposit()).currency(form.getCurrency()).build();
+            return new OpenAnotherAccountCommand(form.getInitialDeposit(), form.getCurrency());
         } catch (IllegalArgumentException e) {
             result.reject("invalid", e.getMessage());
             return null;

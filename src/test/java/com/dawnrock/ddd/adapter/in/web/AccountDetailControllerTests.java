@@ -271,13 +271,8 @@ class AccountDetailControllerTests extends AccountWebTestSupport {
         @Test
         @DisplayName("Cada fila del listado enlaza con el detalle de su cuenta")
         void eachListRowLinksToItsAccountDetails() throws Exception {
-            when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(AccountSummary.builder()
-                    .id(ACCOUNT_ID)
-                    .accountNumber("ES1234567890123456789012")
-                    .holderName("Ana Pérez").segment("RETAIL")
-                    .balance(new BigDecimal("150.00"))
-                    .currency("EUR")
-                    .build()));
+            when(queries.listAccounts(any(Caller.class))).thenReturn(List.of(new AccountSummary(ACCOUNT_ID,
+                    "ES1234567890123456789012", "Ana Pérez", "RETAIL", new BigDecimal("150.00"), "EUR")));
 
             mvc.perform(get("/"))
                     .andExpect(content().string(containsString("href=\"/accounts/" + ACCOUNT_ID + "\"")));

@@ -24,7 +24,7 @@ Crea el worktree de integración desde la rama base, como en `implement-plan` (p
 ## 2. Contrato (T0)
 
 1. Redacta `docs/contracts/<slug>.md` a partir de [assets/contract-template.md](assets/contract-template.md): servicio de aplicación (firmas), commands y vistas (campos y tipos), errores (excepción → qué ve la web → código HTTP) y el fragmento de `docs/api/openapi.yaml`.
-2. Crea en el worktree de integración los **tipos del contrato** para que los dos lados compilen contra ellos: la clase del servicio de aplicación con las firmas y cuerpo `throw new UnsupportedOperationException("pendiente: backend-dev")`, los `*Def` de Immutables de commands y vistas, y el fragmento de OpenAPI. Sin lógica.
+2. Crea en el worktree de integración los **tipos del contrato** para que los dos lados compilen contra ellos: la clase del servicio de aplicación con las firmas y cuerpo `throw new UnsupportedOperationException("pendiente: backend-dev")`, los `record` de commands y vistas (ADR 0028), y el fragmento de OpenAPI. Sin lógica.
 3. Lanza el equipo con los dos teammates y pídeles que **revisen el contrato** (cada uno desde su lado, según su definición), los dos a la vez y sin editar nada. Los teammates lanzados como subagentes no pueden escribirse entre sí: tú reúnes las dos revisiones, aplicas al contrato lo que acuerden y arbitras lo que no; si hace falta, les devuelves la propuesta del otro para una segunda ronda. Si no convergen en dos rondas, decide tú y explica por qué en el contrato. En su línea "Agreed by" anota las rondas y que el lead unió las revisiones (#65, #76).
 4. Con el acuerdo, `./mvnw verify` (debe compilar) y commit `docs(contract): acuerda el contrato <slug>`. El contrato queda **congelado**: anota en el documento el hash del commit.
 

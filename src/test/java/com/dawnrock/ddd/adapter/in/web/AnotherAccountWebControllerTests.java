@@ -45,13 +45,12 @@ class AnotherAccountWebControllerTests extends AccountWebTestSupport {
     private static final UUID SECOND = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
 
     private static AccountSummary account(UUID id, String iban) {
-        return AccountSummary.builder().id(id).accountNumber(iban).holderName("Ada Lovelace")
-                .segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build();
+        return new AccountSummary(id, iban, "Ada Lovelace", "RETAIL", new BigDecimal("100.00"), "EUR");
     }
 
     private static AccountDetails details(UUID id) {
-        return AccountDetails.builder().id(id).accountNumber("ES2199990001220000000001").holderName("Ada Lovelace")
-                .segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build();
+        return AccountDetails.of(id, "ES2199990001220000000001", "Ada Lovelace", "RETAIL", new BigDecimal("100.00"),
+                "EUR");
     }
 
     @Nested
@@ -109,7 +108,7 @@ class AnotherAccountWebControllerTests extends AccountWebTestSupport {
         @WithMockUser(username = "admin", roles = "ADMIN")
         @DisplayName("El administrador no lo ve ni en el listado ni en el detalle")
         void theAdministratorDoesNotSeeIt() throws Exception {
-            Caller admin = Caller.builder().username("admin").admin(true).build();
+            Caller admin = Caller.administrator("admin");
             when(queries.listAccounts(admin)).thenReturn(List.of(account(FIRST, "ES2199990001220000000001")));
             when(queries.findAccount(admin, FIRST)).thenReturn(details(FIRST));
 

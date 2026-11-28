@@ -114,7 +114,7 @@ class SecuritySupportTests {
         Caller ada = CurrentCaller.from(UsernamePasswordAuthenticationToken.authenticated(
                 "ada", null, AuthorityUtils.createAuthorityList("ROLE_USER")));
 
-        assertThat(admin).isEqualTo(Caller.builder().username("admin").admin(true).build());
-        assertThat(ada).isEqualTo(Caller.builder().username("ada").admin(false).build());
+        assertThat(admin).isEqualTo(Caller.administrator("admin"));
+        assertThat(ada).isEqualTo(Caller.customer("ada"));
     }
 }

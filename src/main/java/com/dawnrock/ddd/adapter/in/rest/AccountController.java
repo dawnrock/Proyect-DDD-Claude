@@ -2,7 +2,6 @@ package com.dawnrock.ddd.adapter.in.rest;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -48,17 +47,11 @@ public class AccountController {
     @PostMapping
     public ResponseEntity<AccountSummaryResponse> openAccount(
             Authentication authentication, @Valid @RequestBody OpenAccountRequest request) {
-        OpenAccountCommand.Builder command = OpenAccountCommand.builder()
-                .holderTaxId(request.holderTaxId())
-                .holderName(Objects.requireNonNullElse(request.holderName(), ""))
-                .holderEmail(Objects.requireNonNullElse(request.holderEmail(), ""))
-                .initialDeposit(request.initialDeposit())
-                .ownerUsername(Objects.requireNonNullElse(request.ownerUsername(), ""));
-        if (request.currency() != null) {
-            command.currency(request.currency());
-        }
+        // Los campos del titular que falten quedan vacíos y la divisa que falte es EUR: lo hace el command
+        OpenAccountCommand command = new OpenAccountCommand(request.holderName(), request.holderTaxId(),
+                request.holderEmail(), request.initialDeposit(), request.ownerUsername(), request.currency());
 
-        AccountSummaryResponse body = toResponse(commands.openAccount(CurrentCaller.from(authentication), command.build()));
+        AccountSummaryResponse body = toResponse(commands.openAccount(CurrentCaller.from(authentication), command));
         return ResponseEntity.created(URI.create("/api/accounts/" + body.id())).body(body);
     }
 
@@ -81,57 +74,35 @@ public class AccountController {
     @PostMapping("/{id}/deposits")
     public ResponseEntity<TransactionResponse> deposit(
             Authentication authentication, @PathVariable UUID id, @Valid @RequestBody MovementRequest request) {
-        DepositCommand.Builder command = DepositCommand.builder().accountId(id).amount(request.amount());
-        if (request.currency() != null) {
-            command.currency(request.currency());
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(movements.deposit(CurrentCaller.from(authentication), command.build())));
+        // Sin divisa en la petición, el command usa EUR
+        DepositCommand command = new DepositCommand(id, request.amount(), request.currency());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(toResponse(movements.deposit(CurrentCaller.from(authentication), command)));
     }
 
     @PostMapping("/{id}/withdrawals")
     public ResponseEntity<TransactionResponse> withdraw(
             Authentication authentication, @PathVariable UUID id, @Valid @RequestBody MovementRequest request) {
-        WithdrawCommand.Builder command = WithdrawCommand.builder().accountId(id).amount(request.amount());
-        if (request.currency() != null) {
-            command.currency(request.currency());
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(movements.withdraw(CurrentCaller.from(authentication), command.build())));
+        // Sin divisa en la petición, el command usa EUR
+        WithdrawCommand command = new WithdrawCommand(id, request.amount(), request.currency());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(toResponse(movements.withdraw(CurrentCaller.from(authentication), command)));
     }
 
     static AccountSummaryResponse toResponse(AccountSummary summary) {
-        return AccountSummaryResponse.builder()
-                .id(summary.id())
-                .accountNumber(summary.accountNumber())
-                .holderName(summary.holderName())
-                .segment(summary.segment())
-                .balance(summary.balance())
-                .currency(summary.currency())
-                .build();
+        return new AccountSummaryResponse(summary.id(), summary.accountNumber(), summary.holderName(),
+                summary.segment(), summary.balance(), summary.currency());
     }
 
     private static AccountDetailsResponse toResponse(AccountDetails details) {
-        return AccountDetailsResponse.builder()
-                .id(details.id())
-                .accountNumber(details.accountNumber())
-                .holderName(details.holderName())
-                .holderTaxId(details.holderTaxId())
-                .holderEmail(details.holderEmail())
-                .segment(details.segment())
-                .balance(details.balance())
-                .currency(details.currency())
-                .transactions(details.transactions().stream().map(AccountController::toResponse).toList())
-                .build();
+        return new AccountDetailsResponse(details.id(), details.accountNumber(), details.holderName(),
+                details.holderTaxId(), details.holderEmail(), details.segment(), details.balance(), details.currency(),
+                details.transactions().stream().map(AccountController::toResponse).toList());
     }
 
     private static TransactionResponse toResponse(TransactionSummary transaction) {
-        return TransactionResponse.builder()
-                .id(transaction.id())
-                .type(transaction.type())
-                .amount(transaction.amount())
-                .currency(transaction.currency())
-                .occurredOn(transaction.occurredOn())
-                .status(transaction.status())
-                .counterpartAccountNumber(transaction.counterpartAccountNumber().orElse(null))
-                .build();
+        return new TransactionResponse(transaction.id(), transaction.type(), transaction.amount(),
+                transaction.currency(), transaction.occurredOn(), transaction.status(),
+                transaction.counterpartAccountNumber().orElse(null));
     }
 }

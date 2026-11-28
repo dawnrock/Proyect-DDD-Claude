@@ -4,6 +4,7 @@
 - **Status:** frozen at `cc7bc4d` · the API part is superseded by [ADR 0015](../adr/0015-jwt-bearer-api.md) (#122): `/api/**` uses JWT Bearer tokens from `POST /api/auth/token` instead of HTTP Basic; roles and ownership work as described here
 - **Since #174 (application services split by use case):** on `Hexagonal`, the use cases with a `Caller` are spread over `AccountOpeningCommands`, `MoneyMovementCommands` and `CheckingAccountQueries`, one service each; ownership works as described here. `Monolithic` keeps the concrete `CheckingAccountService`.
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both asked for minor changes, merged by the lead; the teammates cannot message each other)
+- **Since #219 (records instead of Immutables, ADR 0028):** the `*Def` types named here are now `record`s without the `Def` suffix (`OpenAccountCommandDef` → `OpenAccountCommand`…), built with static factories or the canonical constructor; a `null` optional value (currency, holder name, e-mail, owner) takes its default in the compact constructor. The rest of this frozen contract keeps the wording of its time.
 
 Builds on the frozen contracts of #5, #6 and #7 (`open-query-list-accounts.md`, `deposits-withdrawals.md`, `money-transfers.md`).
 

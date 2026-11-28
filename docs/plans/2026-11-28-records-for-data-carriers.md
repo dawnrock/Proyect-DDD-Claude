@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-28
-- **Status:** draft
+- **Status:** done
 - **Total estimate:** ~95 min (11 tasks)
 
 ## Goal
@@ -70,7 +70,7 @@ Rules for the factories:
 
 Order: from the outside in (responses first, which nothing else depends on), then views, then commands, then the build. Every task leaves `./mvnw verify` green: a `record` keeps the generated type's name, so only the call sites that use `builder()` change.
 
-### [ ] T1 — Safety net for the JSON of the API (~10 min)
+### [x] T1 — Safety net for the JSON of the API (~10 min)
 
 - **Layer:** tests
 - **Files:** `src/test/java/com/dawnrock/ddd/adapter/in/rest/RecordJsonTests.java` (new)
@@ -78,9 +78,9 @@ Order: from the outside in (responses first, which nothing else depends on), the
 - **What to do:**
   1. Serialize one instance of each REST response with the application's `JsonMapper` and assert the exact JSON (field names and order, `null` fields).
 - **Acceptance criteria:**
-  - [ ] The test passes against the current Immutables types, so it can detect any change in T2.
+  - [x] The test passes against the current Immutables types, so it can detect any change in T2. The JSON is in **alphabetical order** (Jackson 3's default), not in declaration order: the test pins it.
 
-### [ ] T2 — REST responses as `record`s (~10 min)
+### [x] T2 — REST responses as `record`s (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** the five `*ResponseDef.java` in `adapter.in.rest` and their mapping in the controllers
@@ -89,9 +89,10 @@ Order: from the outside in (responses first, which nothing else depends on), the
   1. Turn each one into a `record` named without `Def`, with `List.copyOf` for lists and `requireNonNull` where the attribute was mandatory.
   2. Replace `X.builder()…build()` with the constructor in the controllers.
 - **Acceptance criteria:**
-  - [ ] T1 passes unchanged; `node scripts/contract-test.mjs` passes.
+  - [x] T1 passes unchanged (only its construction syntax changed); `node scripts/contract-test.mjs` passes (738/738).
+- **Found by T1:** a `record` is serialized in the order of its components (Jackson puts creator properties first, even with `@JsonPropertyOrder(alphabetic = true)`), while the Immutables types came out alphabetically. Each response `record` carries an explicit `@JsonPropertyOrder({...})` with its fields in alphabetical order, so the JSON stays byte-for-byte the same.
 
-### [ ] T3 — Views as `record`s: `AccountSummary`, `TransactionSummary`, `TransferSummary` (~10 min)
+### [x] T3 — Views as `record`s: `AccountSummary`, `TransactionSummary`, `TransferSummary` (~10 min)
 
 - **Layer:** application
 - **Files:** the three `*Def.java`, their call sites in `application` and tests
@@ -100,9 +101,9 @@ Order: from the outside in (responses first, which nothing else depends on), the
   1. `record` with null checks; `TransactionSummary.of(…)` without counterpart (see "Replacing the builders").
   2. Update the call sites: `AccountSummary` and `TransferSummary` with the canonical constructor.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green; no test changes beyond the construction syntax.
+  - [x] `./mvnw verify` green; no test changes beyond the construction syntax (a `String` counterpart is now wrapped in `Optional.of`).
 
-### [ ] T4 — `AccountDetails` and `Caller` as `record`s (~10 min)
+### [x] T4 — `AccountDetails` and `Caller` as `record`s (~10 min)
 
 - **Layer:** application
 - **Files:** `AccountDetailsDef.java` (two defaults, list copy), `CallerDef.java`, call sites
@@ -111,10 +112,10 @@ Order: from the outside in (responses first, which nothing else depends on), the
   1. `AccountDetails.of(…)` with empty tax id, e-mail and transactions.
   2. `Caller.customer(username)`, `Caller.administrator(username)` and `Caller.system()`; replace the 40 `builder().username(…).admin(…)` calls.
 - **Acceptance criteria:**
-  - [ ] Defaults behave as before (a test with the optional fields missing); `./mvnw verify` green.
-  - [ ] No `admin(true)`/`admin(false)` left at call sites.
+  - [x] Defaults behave as before (`ApplicationRecordsTests`, proven by removing the tax id default: red); `./mvnw verify` green.
+  - [x] No `admin(true)`/`admin(false)` left at call sites (`CurrentCaller` keeps `new Caller(name, admin)`: the flag comes from the authorities).
 
-### [ ] T5 — Money commands: `DepositCommand`, `WithdrawCommand`, `TransferCommand` (~10 min)
+### [x] T5 — Money commands: `DepositCommand`, `WithdrawCommand`, `TransferCommand` (~10 min)
 
 - **Layer:** application
 - **Files:** the three `*Def.java`, call sites
@@ -123,9 +124,10 @@ Order: from the outside in (responses first, which nothing else depends on), the
   1. Compact constructor: defaults, then `validate()` with the same named checks and messages (#181).
   2. Factories `DepositCommand.of`, `WithdrawCommand.of`, `TransferCommand.of` (EUR); the canonical constructor where a currency or an invalid value is passed.
 - **Acceptance criteria:**
-  - [ ] The existing validation tests pass without changing their expected messages.
+  - [x] The existing validation tests pass without changing their expected messages.
+- **Deviation:** the test of a transfer without target account expected Immutables' `IllegalStateException` ("some of required attributes are not set"); the `record` throws `NullPointerException` with the attribute name, so the test now expects that exception and that message. The REST and web adapters lost their `if (currency != null)` branches: a `null` currency becomes `EUR` in the compact constructor (`CommandValidation.DEFAULT_CURRENCY`).
 
-### [ ] T6 — Account opening and sign-up commands (~15 min)
+### [x] T6 — Account opening and sign-up commands (~15 min)
 
 - **Layer:** application
 - **Files:** `OpenAccountCommandDef.java`, `OpenAnotherAccountCommandDef.java`, `SignUpCommandDef.java`, call sites (adapters and tests)
@@ -133,17 +135,18 @@ Order: from the outside in (responses first, which nothing else depends on), the
 - **What to do:**
   1. Same as T5; the pattern and message constants become `static final` fields. Factories `OpenAccountCommand.forHolder` and `.of`, `OpenAnotherAccountCommand.of`, `SignUpCommand.of`; remove the adapters' `requireNonNullElse(…, "")`, now done by the compact constructor.
 - **Acceptance criteria:**
-  - [ ] The validation tests and the web/REST sign-up and opening tests pass unchanged.
+  - [x] The validation tests and the web/REST sign-up and opening tests pass unchanged (expected messages and values untouched).
+- **Deviation:** 29 test call sites used a builder as a *template* (a valid command whose test changes one field, or the "first failing rule" tests that fix fields one by one). Instead of repeating every argument of the canonical constructor, they use test builders in `src/test/.../support/CommandBuilders` (Lombok `@Builder` on static methods that call the `record` constructor; `CLAUDE.md` allows `@Builder` only in test builders, which is where it is). Complete chains became factories or the canonical constructor as planned. The adapters lost their `requireNonNullElse(…, "")` and `if (currency != null)`: the compact constructors do it.
 
-### [ ] T7 — Remove `ApplicationValue` and the Immutables setup tests (~5 min)
+### [x] T7 — Remove `ApplicationValue` and the Immutables setup tests (~5 min)
 
 - **Layer:** application · tests
 - **Files:** `ApplicationValue.java`, `ImmutablesSetupTests.java`, `JacksonImmutablesTests.java`
 - **Depends on:** T2-T6
 - **Acceptance criteria:**
-  - [ ] `grep -r "org.immutables" src` returns nothing.
+  - [x] `grep -r "org.immutables" src` returns nothing (the JSON round trip of the responses is covered by `RecordJsonTests`; the request records were already records).
 
-### [ ] T8 — Remove Immutables from the build (~5 min)
+### [x] T8 — Remove Immutables from the build (~5 min)
 
 - **Layer:** build
 - **Files:** `pom.xml`, `checkstyle-suppressions.xml`, `spotbugs-exclude.xml`
@@ -152,9 +155,9 @@ Order: from the outside in (responses first, which nothing else depends on), the
   1. Remove the `value-annotations` dependency, `immutables.version` and the `org.immutables:value` processor (Lombok stays the only one in `annotationProcessorPaths`).
   2. Remove the exclusions that only existed for generated code in `target/generated-sources`.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green with the static analysis unchanged (no new PMD/SpotBugs/Checkstyle warnings).
+  - [x] `./mvnw clean verify` green with the static analysis unchanged (no new PMD/SpotBugs/Checkstyle warnings). Removed: the dependency, `immutables.version`, the processor, the SpotBugs exclusion for `@org.immutables.value.Generated`, and the Checkstyle `sourceDirectories` / PMD `excludeRoots` that only kept generated code out (`checkstyle-suppressions.xml` had nothing for it).
 
-### [ ] T9 — ArchUnit: data carriers are `record`s (~5 min)
+### [x] T9 — ArchUnit: data carriers are `record`s (~5 min)
 
 - **Layer:** tests
 - **Files:** `HexagonalArchitectureTests.java`
@@ -163,42 +166,54 @@ Order: from the outside in (responses first, which nothing else depends on), the
   1. Rule: classes in `application` named `*Command`, `*Query`, `*Summary`, `*Details` and in `adapter.in.rest` named `*Request`/`*Response` are `record`s. Validate it by sabotage (a class instead of a record → red).
   2. Remove `org.immutables` from the rules that mention it.
 - **Acceptance criteria:**
-  - [ ] The rule fails with a non-record carrier and passes after reverting.
+  - [x] The rule fails with a non-record carrier (a temporary `application.SabotageQuery` class) and passes after reverting. It is one explicit predicate (`DATA_CARRIERS`): ArchUnit folds chained `.and()/.or()` from left to right, which would not express the intended condition. The only `org.immutables` mention in the rules was the D1 comment, cleaned in T7.
 
-### [ ] T10 — Documentation (~10 min)
+### [x] T10 — Documentation (~10 min)
 
 - **Layer:** docs
 - **Files:** new ADR 0028 (supersedes the Immutables part of ADR 0003), `docs/adr/README.md`, `CLAUDE.md` (Lombok/Immutables table and allowed dependencies; needs the user's approval), `.claude/skills/ddd-building-block/references/lombok-immutables.md`, `hexagonal-adapter`, `implement-plan(-team)`, `plan-feature`, `.claude/agents/revisor-ddd.md`, `docs/arquitectura/fase-2-hexagonal.md`, `README.md`
 - **Depends on:** T9
 - **Acceptance criteria:**
-  - [ ] No current document recommends Immutables (history, plans and frozen contracts keep their wording).
+  - [x] No current document recommends Immutables (history, plans and frozen contracts keep their wording). `CLAUDE.md` and `.claude/` changed with the user's approval (2026-11-28); the skill reference is now `references/lombok-records.md`, the contract template names `record`s, and `revisor-ddd` checks the compact constructors.
 
-### [ ] T11 — Project status (~5 min)
+### [x] T11 — Project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `historial.md`
 - **Depends on:** T10
 
+### [x] T12 — Review corrections (~10 min)
+
+- **Layer:** tests · docs
+- **Files:** `HexagonalArchitectureTests.java`, `docs/ia/pendientes.md`, seven frozen contracts in `docs/contracts/`
+- **Depends on:** T11
+- **What to do:**
+  1. `revisor-ddd`: `dataCarriersAreRecords` did not cover `Caller` (no matching suffix); it is now named explicitly, and the predicate is grouped with parentheses.
+  2. `pendientes.md` still named `SignUpCommandDef.EMAIL_MESSAGE`.
+  3. The frozen contracts that name `*Def` types or Immutables behaviour get a "Since #219" line, as was done for #174; their body keeps the wording of its time. `fase-1-capas.md` describes the frozen phase 1 and is left as it is.
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green.
+
 ## Global acceptance criteria
 
 **Specific:**
 
-- [ ] No `org.immutables` in `pom.xml` or `src/`; no `*Def` types left.
-- [ ] The JSON of every REST response is byte-for-byte the same (T1) and `node scripts/contract-test.mjs` passes; `docs/api/openapi.yaml` does not change.
-- [ ] Validation messages and defaults behave as before (existing tests unchanged except for construction syntax).
+- [x] No `org.immutables` in `pom.xml` or `src/`; no `*Def` types left.
+- [x] The JSON of every REST response is byte-for-byte the same (T1) and `node scripts/contract-test.mjs` passes; `docs/api/openapi.yaml` does not change.
+- [x] Validation messages and defaults behave as before (existing tests unchanged except for construction syntax).
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The hexagonal architecture is respected, verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1, which also rejects Lombok and Immutables; ADR 0009 and 0026), verified by ArchUnit.
-- [ ] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
-- [ ] No dependencies added (one is removed).
-- [ ] API: n/a (the contract does not change).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The hexagonal architecture is respected, verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1, which also rejects Lombok and Immutables; ADR 0009 and 0026), verified by ArchUnit.
+- [x] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
+- [x] No dependencies added (one is removed).
+- [x] API: n/a (the contract does not change).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated.
 
 ## Risks and open questions
 

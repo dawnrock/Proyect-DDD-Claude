@@ -88,9 +88,8 @@ class SignUpRealisticModeTests {
         session.setAttribute(PendingIdentity.SESSION_ATTRIBUTE,
                 new PendingIdentity("auth0", "auth0|abc123", "ada@example.com", Instant.now()));
         when(registration.registerWithExternalIdentity(any(SignUpCommand.class), any(PendingIdentity.class),
-                anyString())).thenReturn(AccountSummary.builder().id(UUID.randomUUID())
-                .accountNumber("ES2199990001220000000001").holderName("Ada Lovelace").segment("RETAIL")
-                .balance(new BigDecimal("100.00")).currency("EUR").build());
+                anyString())).thenReturn(new AccountSummary(UUID.randomUUID(), "ES2199990001220000000001",
+                        "Ada Lovelace", "RETAIL", new BigDecimal("100.00"), "EUR"));
 
         mvc.perform(get("/signup").param("auth0", "").session(session)).andExpect(status().isOk());
         mvc.perform(post("/signup").with(csrf()).session(session).param("fullName", "Ada Lovelace")
