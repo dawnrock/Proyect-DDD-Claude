@@ -5,7 +5,7 @@
 - **Phase:** 2 · Hexagonal architecture
 - **Base branch:** `Hexagonal`
 - **Date:** 2026-11-28
-- **Status:** in progress
+- **Status:** done
 - **Total estimate:** ~95 min (11 tasks)
 
 ## Goal
@@ -176,7 +176,7 @@ Order: from the outside in (responses first, which nothing else depends on), the
 - **Acceptance criteria:**
   - [x] No current document recommends Immutables (history, plans and frozen contracts keep their wording). `CLAUDE.md` and `.claude/` changed with the user's approval (2026-11-28); the skill reference is now `references/lombok-records.md`, the contract template names `record`s, and `revisor-ddd` checks the compact constructors.
 
-### [ ] T11 — Project status (~5 min)
+### [x] T11 — Project status (~5 min)
 
 - **Layer:** docs
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `historial.md`
@@ -186,22 +186,22 @@ Order: from the outside in (responses first, which nothing else depends on), the
 
 **Specific:**
 
-- [ ] No `org.immutables` in `pom.xml` or `src/`; no `*Def` types left.
-- [ ] The JSON of every REST response is byte-for-byte the same (T1) and `node scripts/contract-test.mjs` passes; `docs/api/openapi.yaml` does not change.
-- [ ] Validation messages and defaults behave as before (existing tests unchanged except for construction syntax).
+- [x] No `org.immutables` in `pom.xml` or `src/`; no `*Def` types left.
+- [x] The JSON of every REST response is byte-for-byte the same (T1) and `node scripts/contract-test.mjs` passes; `docs/api/openapi.yaml` does not change.
+- [x] Validation messages and defaults behave as before (existing tests unchanged except for construction syntax).
 
 **Fixed:**
 
-- [ ] All tasks and their criteria are checked.
-- [ ] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
-- [ ] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
-- [ ] The hexagonal architecture is respected, verified by ArchUnit.
-- [ ] The domain only depends on the JDK (rule D1, which also rejects Lombok and Immutables; ADR 0009 and 0026), verified by ArchUnit.
-- [ ] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
-- [ ] No dependencies added (one is removed).
-- [ ] API: n/a (the contract does not change).
-- [ ] Documentation written or changed by this plan is in English.
-- [ ] Project status updated.
+- [x] All tasks and their criteria are checked.
+- [x] `./mvnw verify` ends in `BUILD SUCCESS` (JUnit + ArchUnit).
+- [x] `./mvnw spring-boot:run` starts and `GET /actuator/health` returns `{"status":"UP"}`.
+- [x] The hexagonal architecture is respected, verified by ArchUnit.
+- [x] The domain only depends on the JDK (rule D1, which also rejects Lombok and Immutables; ADR 0009 and 0026), verified by ArchUnit.
+- [x] New tests follow `src/test/CLAUDE.md` (method name in English camelCase + `@DisplayName` in Spanish).
+- [x] No dependencies added (one is removed).
+- [x] API: n/a (the contract does not change).
+- [x] Documentation written or changed by this plan is in English.
+- [x] Project status updated.
 
 ## Risks and open questions
 

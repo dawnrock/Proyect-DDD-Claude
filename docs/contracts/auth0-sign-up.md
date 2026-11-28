@@ -1,6 +1,6 @@
 # Contract: Customer sign-up with an Auth0 identity
 
-- **Issue:** [#198](https://github.com/dawnrock/Proyect-DDD-Claude/issues/198) · **Plan:** `docs/plans/2026-11-26-auth0-sign-up.md`
+- **Issue:** [#198](https://github.com/dawnrock/Proyect-DDD-Claude/issues/198) · **Plan:** in the issue (removed from `docs/plans/`)
 - **Status:** frozen at `d69ca6f`
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both accepted the signature and proposed precisions, merged by the lead, since the teammates cannot message each other)
 
