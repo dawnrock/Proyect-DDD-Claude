@@ -17,15 +17,15 @@ public class <Name>Service {
 
 ## Commands (input)
 
-| Command (`*Def`) | Field | Type | Required | Rules |
+| Command (`record`) | Field | Type | Required | Rules |
 | ---------------- | ----- | ---- | -------- | ----- |
-| `<Command>Def` | `holderName` | `String` | yes | not blank |
+| `<Command>` | `holderName` | `String` | yes | not blank |
 
 ## Views (output)
 
-| View (`*Def`) | Field | Type | Notes |
+| View (`record`) | Field | Type | Notes |
 | ------------- | ----- | ---- | ----- |
-| `<View>Def` | `accountNumber` | `String` | normalized IBAN |
+| `<View>` | `accountNumber` | `String` | normalized IBAN |
 
 Views never expose domain aggregates or entities.
 

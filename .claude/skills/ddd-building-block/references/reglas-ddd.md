@@ -43,7 +43,7 @@ Resumen operativo del curso de DDD (capítulos 4-10 y labs 22-27) aplicado a est
 ## Servicio de aplicación
 
 - Orquesta un caso de uso: carga agregados del repositorio, invoca el dominio, guarda y publica. **No contiene reglas de negocio.**
-- Recibe commands/queries (Immutables) y devuelve vistas, no agregados, a la presentación.
+- Recibe commands/queries (`record`) y devuelve vistas (`record`), no agregados, a la presentación.
 
 ## Antipatrones a evitar
 

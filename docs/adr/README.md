@@ -4,7 +4,7 @@
 | --- | -------- | ------ |
 | [0001](0001-arquitectura-ia-claude-code.md) | AI architecture with Claude Code and Telegram notifications | Accepted |
 | [0002](0002-ramas-por-fase.md) | One branch per snapshot: `master`, `Monolithic`, `Hexagonal` | Accepted |
-| [0003](0003-lombok-immutables.md) | Where Lombok and Immutables are used | Accepted (the domain part, superseded by 0009) |
+| [0003](0003-lombok-immutables.md) | Where Lombok and Immutables are used | Accepted (the domain part, superseded by 0009; the Immutables part, by 0028) |
 | [0004](0004-arquitectura-en-capas.md) | Layered architecture for phase 1 | Accepted |
 | [0005](0005-thymeleaf.md) | Web interface with Thymeleaf | Accepted |
 | [0006](0006-hexagonal-architecture.md) | Hexagonal architecture for phase 2 | Accepted |
@@ -28,6 +28,7 @@
 | [0025](0025-security-headers.md) | Content-Security-Policy and security headers, without Alpine.js (amends 0016) | Accepted |
 | [0026](0026-domain-rules-in-archunit.md) | Domain rules only in ArchUnit, and default Lombok accessors (amends 0003 and 0009) | Accepted |
 | [0027](0027-remove-graphify.md) | Remove Graphify: Grep + LSP for code searches (supersedes the Graphify part of 0010) | Accepted |
+| [0028](0028-records-for-data-carriers.md) | `record` as the only data carrier; Immutables removed (supersedes the Immutables part of 0003) | Accepted |
 
 ADR 0011 (the `integration` layer) only exists on `Monolithic`: it applies to phase 1.
 

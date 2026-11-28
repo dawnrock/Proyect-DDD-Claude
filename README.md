@@ -13,7 +13,7 @@ It starts from a copy of [DDD-Lab-Java](https://github.com/dawnrock/DDD-Lab-Java
 | `Monolithic` | Layered monolith: Thymeleaf web + REST → application → domain / in-memory persistence. **Closed and frozen at tag `v1-monolito`** | [Phase 1 · Layered monolith](https://github.com/dawnrock/Proyect-DDD-Claude/milestones) |
 | `Hexagonal` | Ports and adapters, domain events, factory with ports, simulated adapters. **Phase closed at tag `v2-hexagonal`; still the default and active branch** | [Phase 2 · Hexagonal architecture](https://github.com/dawnrock/Proyect-DDD-Claude/milestones) |
 
-Technologies: Java 21, Spring Boot 4.2, Spring Security, JUnit 5, ArchUnit, Lombok, Immutables, Thymeleaf, H2.
+Technologies: Java 21, Spring Boot 4.2, Spring Security, JUnit 5, ArchUnit, Lombok, Thymeleaf, H2.
 
 ## Run
 

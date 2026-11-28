@@ -1,6 +1,6 @@
 # 0003 · Where Lombok and Immutables are used
 
-- **Status:** accepted · 2026-10-23 · the domain part (`@Getter` and `@EqualsAndHashCode` allowed in `domain..`) is superseded by [ADR 0009](0009-domain-without-lombok.md): the domain does not use Lombok; the fluent accessors and `check-domain.mjs` are removed by [ADR 0026](0026-domain-rules-in-archunit.md)
+- **Status:** accepted · 2026-10-23 · the domain part (`@Getter` and `@EqualsAndHashCode` allowed in `domain..`) is superseded by [ADR 0009](0009-domain-without-lombok.md): the domain does not use Lombok; the fluent accessors and `check-domain.mjs` are removed by [ADR 0026](0026-domain-rules-in-archunit.md); the Immutables part is superseded by [ADR 0028](0028-records-for-data-carriers.md): data carriers are `record`s and Immutables is no longer used
 
 ## Context
 

@@ -19,7 +19,7 @@ Crea el puerto/adaptador pedido: $ARGUMENTS
 | Quién inicia | El exterior (usuario, REST, CLI, test) | La aplicación necesita algo de fuera |
 | Puerto | Interfaz en `application`, una por grupo de casos de uso (`AccountOpeningCommands`, `MoneyMovementCommands`, `SegmentReviewCommands`, `CheckingAccountQueries`) | Interfaz en `domain.model` (`CheckingAccountRepository`, `DomainEventPublisher`, `IncomeVerifier`) |
 | Adaptador | `adapter.in.<tecnología>`: **usa** el puerto y traduce la petición | `adapter.out.<tecnología>`: **implementa** el puerto |
-| Datos | Recibe/devuelve DTOs propios (Immutables o `record`); nunca expone agregados | Traduce entre el modelo y la tecnología |
+| Datos | Recibe/devuelve DTOs propios (`record`, ADR 0028); nunca expone agregados | Traduce entre el modelo y la tecnología |
 
 - Las dependencias apuntan siempre hacia el hexágono; los adaptadores no se conocen entre sí.
 - Los adaptadores de salida son **package-private** salvo lo que necesite `config`.

@@ -45,14 +45,14 @@ En ambas fases el dominio no depende de Spring ni de `jakarta` y su estado es pr
 - Los agregados se crean con métodos factoría estáticos (`CheckingAccount.open(...)`) y constructor privado; solo cambian de estado mediante métodos de negocio.
 - Lenguaje ubicuo: usa los términos de `docs/dominio/glosario.md`. Si aparece un término nuevo, añádelo allí.
 
-### Lombok e Immutables: dónde sí y dónde no
+### Lombok y record: dónde sí y dónde no
 
 | Librería | Sí | No |
 | -------- | -- | -- |
 | Lombok | `@RequiredArgsConstructor` (inyección por constructor) y `@Slf4j` fuera del dominio. `@Getter`/`@Setter` en formularios web. `@Builder` solo en builders de test | Cualquier anotación en `domain..` (ADR 0009): accesores y `equals`/`hashCode` por id se escriben a mano |
-| Immutables | Commands, queries y vistas de `application`; DTOs de los adaptadores | Cualquier clase de `domain..` (su código generado deja dependencias `org.immutables` en el bytecode) |
+| `record` | Todos los objetos de datos: objetos de valor y eventos del dominio, commands, queries y vistas de `application`, peticiones y respuestas de los adaptadores. Validación y valores por defecto en el constructor compacto; se construyen con factorías estáticas con nombre (`Caller.customer(…)`, `DepositCommand.of(…)`) o el constructor canónico (ADR 0028) | Builders en código de producción. Immutables ya no se usa (ADR 0028) |
 
-Lombok genera accesores JavaBean (`getX()`/`setX()`). Las reglas del dominio (solo JDK, sin Lombok ni Immutables, estado privado, sin setters) las comprueba ArchUnit en `./mvnw verify`: Lombok deja `@lombok.Generated` en el bytecode y la regla D1 lo rechaza (ADR 0026).
+Lombok genera accesores JavaBean (`getX()`/`setX()`). Las reglas del dominio (solo JDK, sin Lombok, estado privado, sin setters) las comprueba ArchUnit en `./mvnw verify`: Lombok deja `@lombok.Generated` en el bytecode y la regla D1 lo rechaza (ADR 0026).
 
 ## Flujo de trabajo con issues
 
@@ -70,7 +70,7 @@ Lombok genera accesores JavaBean (`getX()`/`setX()`). Las reglas del dominio (so
 
 - `docs/ia/arquitectura-ia.md`: qué pieza de Claude Code hace qué en este repo.
 - `docs/arquitectura/fase-1-capas.md`, `docs/arquitectura/fase-2-hexagonal.md`: diseño objetivo de cada fase.
-- `docs/adr/`: decisiones (ramas por fase, Lombok/Immutables, Thymeleaf, Telegram…).
+- `docs/adr/`: decisiones (ramas por fase, Lombok y record, Thymeleaf, Telegram…).
 - `docs/dominio/glosario.md`: lenguaje ubicuo y reglas de negocio.
 - `docs/api/openapi.yaml`: contrato REST (cuando exista). Cualquier cambio en la API lo actualiza.
 - `docs/contracts/`: contratos back ↔ web acordados por funcionalidad.
@@ -79,5 +79,5 @@ Lombok genera accesores JavaBean (`getX()`/`setX()`). Las reglas del dominio (so
 
 - No hagas push a `master` ni la uses como base de ninguna PR.
 - No uses `git push --force`, `--no-verify` ni `git add -A`.
-- No añadas dependencias fuera de las previstas (Lombok, Immutables, Thymeleaf, Mockito, ArchUnit) sin justificarlo en un ADR.
+- No añadas dependencias fuera de las previstas (Lombok, Thymeleaf, Mockito, ArchUnit) sin justificarlo en un ADR.
 - Los secretos (token de Telegram, `.env`) viven en `.claude/settings.local.json` o variables de entorno, nunca en el repositorio.

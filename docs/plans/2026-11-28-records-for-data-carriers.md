@@ -168,13 +168,13 @@ Order: from the outside in (responses first, which nothing else depends on), the
 - **Acceptance criteria:**
   - [x] The rule fails with a non-record carrier (a temporary `application.SabotageQuery` class) and passes after reverting. It is one explicit predicate (`DATA_CARRIERS`): ArchUnit folds chained `.and()/.or()` from left to right, which would not express the intended condition. The only `org.immutables` mention in the rules was the D1 comment, cleaned in T7.
 
-### [ ] T10 — Documentation (~10 min)
+### [x] T10 — Documentation (~10 min)
 
 - **Layer:** docs
 - **Files:** new ADR 0028 (supersedes the Immutables part of ADR 0003), `docs/adr/README.md`, `CLAUDE.md` (Lombok/Immutables table and allowed dependencies; needs the user's approval), `.claude/skills/ddd-building-block/references/lombok-immutables.md`, `hexagonal-adapter`, `implement-plan(-team)`, `plan-feature`, `.claude/agents/revisor-ddd.md`, `docs/arquitectura/fase-2-hexagonal.md`, `README.md`
 - **Depends on:** T9
 - **Acceptance criteria:**
-  - [ ] No current document recommends Immutables (history, plans and frozen contracts keep their wording).
+  - [x] No current document recommends Immutables (history, plans and frozen contracts keep their wording). `CLAUDE.md` and `.claude/` changed with the user's approval (2026-11-28); the skill reference is now `references/lombok-records.md`, the contract template names `record`s, and `revisor-ddd` checks the compact constructors.
 
 ### [ ] T11 — Project status (~5 min)
 
