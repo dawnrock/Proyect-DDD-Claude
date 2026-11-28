@@ -10,9 +10,7 @@
       "Bash(git branch *)",
       "Bash(gh issue view *)",
       "Bash(gh issue list *)",
-      "Bash(node .claude/skills/ddd-building-block/scripts/check-domain.mjs *)",
       "Bash(node scripts/notify.mjs *)",
-      "Bash(node scripts/graphify.mjs *)",
       "Bash(npx -y modern-web-guidance@latest *)"
     ],
     "deny": [
@@ -71,6 +69,9 @@
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "jdtls-lsp@claude-plugins-official": true
   },
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"

@@ -1,6 +1,6 @@
 # 0010 · Graphify for dependency questions only, and a short project status
 
-- **Status:** accepted · 2026-10-30 · confirmed on phase 2 on 2026-11-05 (#71) · methods go to Grep since 2026-11-11 (#79)
+- **Status:** decisions 1-4 (Graphify) superseded by [ADR 0027](0027-remove-graphify.md) on 2026-11-28; decision 5 (short project status) still applies · accepted · 2026-10-30 · confirmed on phase 2 on 2026-11-05 (#71) · methods go to Grep since 2026-11-11 (#79)
 - **Issue:** #57 (re-measured in #71)
 
 ## Context

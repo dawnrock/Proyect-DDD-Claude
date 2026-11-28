@@ -174,7 +174,10 @@ class HexagonalArchitectureTests {
                 .check(classes);
     }
 
-    /** D1: el dominio solo conoce el JDK (ni Spring, ni {@code jakarta}, ni {@code org.immutables}). */
+    /**
+     * D1: el dominio solo conoce el JDK (ni Spring, ni {@code jakarta}, ni {@code org.immutables}). También rechaza
+     * Lombok: cada miembro que genera lleva {@code @lombok.Generated} en el bytecode (ADR 0009 y 0026).
+     */
     @ArchTest
     static void theDomainOnlyDependsOnTheJdk(JavaClasses classes) {
         classes()

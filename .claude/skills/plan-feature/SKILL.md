@@ -1,8 +1,8 @@
 ---
 name: plan-feature
-description: Planifica un desarrollo, un fix o un refactor descrito en una issue de GitHub antes de escribir código. Lee la issue por su número, analiza el código Java/Spring de la fase activa (capas o hexagonal), genera un plan con objetivo, tareas pequeñas (5-10 min) y criterios de aceptación siguiendo assets/template.md, lo guarda en docs/plans/, lo publica como comentario en la issue y avisa por Telegram. Úsala cuando se pida planificar, diseñar o desglosar una issue.
+description: Planifica un desarrollo, un fix o un refactor descrito en una issue de GitHub antes de escribir código. Lee la issue por su número, analiza el código Java/Spring de la fase activa (capas o hexagonal), genera un plan con objetivo, tareas pequeñas (5-10 min) y criterios de aceptación siguiendo assets/template.md, lo guarda en docs/plans/, y lo publica como comentario en la issue. Úsala cuando se pida planificar, diseñar o desglosar una issue.
 argument-hint: <número de issue de GitHub>
-allowed-tools: Read, Grep, Glob, Write, AskUserQuestion, Bash(git status:*), Bash(git log:*), Bash(git diff:*), Bash(git branch:*), Bash(ls:*), Bash(gh issue view:*), Bash(gh issue comment:*), Bash(node scripts/notify.mjs:*), Bash(node scripts/graphify.mjs:*)
+allowed-tools: Read, Grep, Glob, Write, AskUserQuestion, Bash(git status:*), Bash(git log:*), Bash(git diff:*), Bash(git branch:*), Bash(ls:*), Bash(gh issue view:*), Bash(gh issue comment:*), LSP
 ---
 
 Planifica el trabajo descrito en la issue. **No implementes nada**: el resultado de esta skill es solo el plan.
@@ -29,8 +29,8 @@ Issue indicada por el usuario: $ARGUMENTS
 - Busca en `docs/ia/pendientes.md` avisos para esta issue o su área, y en `docs/ia/decisiones.md` las decisiones que la afecten.
 - Para dudas sobre bloques tácticos (value object, entidad, agregado, evento, factoría, servicio), lee `.claude/skills/ddd-building-block/references/reglas-ddd.md`.
 - En la fase 2, para puertos y adaptadores lee `.claude/skills/hexagonal-adapter/SKILL.md`.
-- Para saber qué depende de una clase que cambia (alcance del cambio), si existe `graphify-out/graph.json` usa el grafo antes que Grep: `node scripts/graphify.mjs affected "<Clase>"` y `path "<A>" "<B>"` (ADR 0010). Para el resto de búsquedas, como siempre.
 - Localiza y lee los archivos afectados. Delega búsquedas amplias en el agente `buscador-referencias`.
+- Para el alcance del cambio (quién usa una clase o un método que cambia), usa la herramienta `LSP` (`findReferences`) si está disponible y Grep si no (ADR 0027).
 - Determina si el trabajo **toca la API REST** (rutas, cuerpos, códigos de estado, traducción de errores). Si es así, incluye la actualización de `docs/api/openapi.yaml`.
 
 ### 4. Desglosar en tareas
@@ -70,14 +70,6 @@ gh issue comment <número> --body-file docs/plans/AAAA-MM-DD-<slug>.md
 
 Guarda la URL del comentario. Si falla, no bloquees: el plan queda en local; menciónalo.
 
-### 8. Avisar por Telegram
+### 8. Presentarlo
 
-```bash
-node scripts/notify.mjs "📝 Plan listo para revisar: <título> (#<número>, <tipo>) · <n> tareas (~<min> min) · <URL del comentario>"
-```
-
-Si responde que no está configurado o falla, continúa y menciónalo en el resumen.
-
-### 9. Presentarlo
-
-Resume objetivo, tareas con estimación, ruta del archivo, URL del comentario, si se avisó por Telegram y las preguntas abiertas. Pregunta si quiere ajustar algo o implementarlo con `/implement-plan <número>` (o `/implement-plan-team <número>` si el plan tiene T0 · Contract). No empieces a implementar sin su confirmación, **salvo** que te haya lanzado `advance-issues`: entonces resume el plan en dos líneas y sigue con la implementación sin esperar (las decisiones que necesite se preguntan antes, en el paso 2, con `AskUserQuestion`).
+Resume objetivo, tareas con estimación, ruta del archivo, URL del comentario y las preguntas abiertas. Pregunta si quiere ajustar algo o implementarlo con `/implement-plan <número>` (o `/implement-plan-team <número>` si el plan tiene T0 · Contract). No empieces a implementar sin su confirmación, **salvo** que te haya lanzado `advance-issues`: entonces resume el plan en dos líneas y sigue con la implementación sin esperar (las decisiones que necesite se preguntan antes, en el paso 2, con `AskUserQuestion`).

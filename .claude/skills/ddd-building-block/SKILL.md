@@ -2,7 +2,7 @@
 name: ddd-building-block
 description: Crea o modifica un bloque táctico de DDD en el dominio Java (objeto de valor, entidad, agregado, evento de dominio, factoría o servicio de dominio) siguiendo las reglas del curso y del proyecto, con su test JUnit. Úsala cuando se pida crear, añadir, modelar o cambiar un value object, una entidad, un agregado, un evento de dominio o una regla de negocio en domain.model o domain.service.
 argument-hint: <tipo de bloque> <nombre> [descripción de la regla de negocio]
-allowed-tools: Read, Grep, Glob, Edit, Write, Bash(./mvnw:*), Bash(node .claude/skills/ddd-building-block/scripts/check-domain.mjs:*)
+allowed-tools: Read, Grep, Glob, Edit, Write, Bash(./mvnw:*)
 ---
 
 Crea o modifica el bloque de dominio pedido: $ARGUMENTS
@@ -20,7 +20,6 @@ Crea o modifica el bloque de dominio pedido: $ARGUMENTS
 5. **TDD.** Escribe primero el test (rojo), luego el código (verde), siguiendo `src/test/CLAUDE.md`. Una regla de negocio = un test.
 6. **Verificación.** Ejecuta:
    ```bash
-   node .claude/skills/ddd-building-block/scripts/check-domain.mjs
    ./mvnw verify
    ```
-   El script comprueba que el dominio no importa Spring/`jakarta`/`org.immutables`, no usa Lombok y no tiene setters públicos. **No des la tarea por terminada si alguno de los dos falla.**
+   ArchUnit (`HexagonalArchitectureTests`, `DomainIsolationTests`) comprueba que el dominio solo depende del JDK (ni Spring, ni `jakarta`, ni `org.immutables`, ni Lombok, por `@lombok.Generated`), que su estado es privado y que no tiene setters públicos (ADR 0026). **No des la tarea por terminada si falla.**

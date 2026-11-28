@@ -1,6 +1,6 @@
 # 0003 · Where Lombok and Immutables are used
 
-- **Status:** accepted · 2026-10-23 · the domain part (`@Getter` and `@EqualsAndHashCode` allowed in `domain..`) is superseded by [ADR 0009](0009-domain-without-lombok.md): the domain does not use Lombok
+- **Status:** accepted · 2026-10-23 · the domain part (`@Getter` and `@EqualsAndHashCode` allowed in `domain..`) is superseded by [ADR 0009](0009-domain-without-lombok.md): the domain does not use Lombok; the fluent accessors and `check-domain.mjs` are removed by [ADR 0026](0026-domain-rules-in-archunit.md)
 
 ## Context
 
@@ -22,7 +22,7 @@ Implemented in issue [#2](https://github.com/dawnrock/Proyect-DDD-Claude/issues/
 | Lombok | 1.18.46, version managed by Spring Boot 4.1.1; `optional` dependency, excluded from the executable JAR | [`pom.xml`](../../pom.xml) |
 | Immutables | 2.12.3: `org.immutables:value-annotations` (`provided`) for the annotations and `org.immutables:value` only as a processor | [`pom.xml`](../../pom.xml) |
 | Processors | `maven-compiler-plugin` → `annotationProcessorPaths` with Lombok and Immutables. Once they are declared, Maven stops looking for processors on the classpath, so both must be listed. They apply to `compile` and `testCompile` | [`pom.xml`](../../pom.xml) |
-| Fluent accessors | `lombok.accessors.fluent = true` (`name()` instead of `getName()`), `config.stopBubbling = true` and `lombok.addLombokGeneratedAnnotation = true` | [`lombok.config`](../../lombok.config) |
+| Lombok settings | `config.stopBubbling = true` and `lombok.addLombokGeneratedAnnotation = true`. The original `lombok.accessors.fluent = true` was removed by ADR 0026: Lombok generates `getX()`/`setX()` | [`lombok.config`](../../lombok.config) |
 | Immutables style | `@ApplicationValue` meta-annotation: the abstract type carries the `Def` suffix and the generated one takes the name without it (`OpenAccountCommandDef` → `OpenAccountCommand`), public, without `with*` methods | [`ApplicationValue.java`](../../src/main/java/com/dawnrock/ddd/application/ApplicationValue.java) |
 
 The `LombokSetupTests` and `ImmutablesSetupTests` tests (in `src/test/.../build`) prove that both processors generate code.

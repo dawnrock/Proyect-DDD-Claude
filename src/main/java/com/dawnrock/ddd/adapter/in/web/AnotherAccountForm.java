@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Positive;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 
 /**
  * Formulario de «Abrir otra cuenta» de un cliente: solo el depósito (y la divisa). El titular sale del cliente que lo
@@ -17,7 +16,6 @@ import lombok.experimental.Accessors;
  */
 @Getter
 @Setter
-@Accessors(fluent = false)
 public class AnotherAccountForm {
 
     @NotNull(message = "El depósito inicial es obligatorio")
