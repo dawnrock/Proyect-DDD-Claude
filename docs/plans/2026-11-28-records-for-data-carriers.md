@@ -92,7 +92,7 @@ Order: from the outside in (responses first, which nothing else depends on), the
   - [x] T1 passes unchanged (only its construction syntax changed); `node scripts/contract-test.mjs` passes (738/738).
 - **Found by T1:** a `record` is serialized in the order of its components (Jackson puts creator properties first, even with `@JsonPropertyOrder(alphabetic = true)`), while the Immutables types came out alphabetically. Each response `record` carries an explicit `@JsonPropertyOrder({...})` with its fields in alphabetical order, so the JSON stays byte-for-byte the same.
 
-### [ ] T3 — Views as `record`s: `AccountSummary`, `TransactionSummary`, `TransferSummary` (~10 min)
+### [x] T3 — Views as `record`s: `AccountSummary`, `TransactionSummary`, `TransferSummary` (~10 min)
 
 - **Layer:** application
 - **Files:** the three `*Def.java`, their call sites in `application` and tests
@@ -101,7 +101,7 @@ Order: from the outside in (responses first, which nothing else depends on), the
   1. `record` with null checks; `TransactionSummary.of(…)` without counterpart (see "Replacing the builders").
   2. Update the call sites: `AccountSummary` and `TransferSummary` with the canonical constructor.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green; no test changes beyond the construction syntax.
+  - [x] `./mvnw verify` green; no test changes beyond the construction syntax (a `String` counterpart is now wrapped in `Optional.of`).
 
 ### [ ] T4 — `AccountDetails` and `Caller` as `record`s (~10 min)
 

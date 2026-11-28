@@ -23,14 +23,9 @@ final class AccountViews {
     }
 
     static AccountSummary toSummary(CheckingAccount account) {
-        return AccountSummary.builder()
-                .id(account.id())
-                .accountNumber(account.accountNumber().value())
-                .holderName(account.primaryHolder().fullName())
-                .segment(account.primaryHolder().segment().name())
-                .balance(account.currentBalance().amount())
-                .currency(account.currentBalance().currency().getCurrencyCode())
-                .build();
+        return new AccountSummary(account.id(), account.accountNumber().value(), account.primaryHolder().fullName(),
+                account.primaryHolder().segment().name(), account.currentBalance().amount(),
+                account.currentBalance().currency().getCurrencyCode());
     }
 
     /** El detalle de la cuenta; el correo del titular sale de sus datos de cliente (vacío si no los tiene). */
@@ -49,28 +44,15 @@ final class AccountViews {
     }
 
     static TransactionSummary toTransaction(Transaction transaction) {
-        return TransactionSummary.builder()
-                .id(transaction.id())
-                .type(transaction.type().name())
-                .amount(transaction.amount().amount())
-                .currency(transaction.amount().currency().getCurrencyCode())
-                .occurredOn(transaction.occurredOn())
-                .status(transaction.status().name())
-                .counterpartAccountNumber(transaction.counterpart().map(AccountNumber::value))
-                .build();
+        return new TransactionSummary(transaction.id(), transaction.type().name(), transaction.amount().amount(),
+                transaction.amount().currency().getCurrencyCode(), transaction.occurredOn(),
+                transaction.status().name(), transaction.counterpart().map(AccountNumber::value));
     }
 
     /** La transferencia vista desde el origen: el movimiento de retirada da importe, fecha y estado. */
     static TransferSummary toTransfer(CheckingAccount source, CheckingAccount target, Transaction withdrawal) {
-        return TransferSummary.builder()
-                .sourceAccountId(source.id())
-                .sourceAccountNumber(source.accountNumber().value())
-                .targetAccountId(target.id())
-                .targetAccountNumber(target.accountNumber().value())
-                .amount(withdrawal.amount().amount())
-                .currency(withdrawal.amount().currency().getCurrencyCode())
-                .occurredOn(withdrawal.occurredOn())
-                .status(withdrawal.status().name())
-                .build();
+        return new TransferSummary(source.id(), source.accountNumber().value(), target.id(),
+                target.accountNumber().value(), withdrawal.amount().amount(),
+                withdrawal.amount().currency().getCurrencyCode(), withdrawal.occurredOn(), withdrawal.status().name());
     }
 }

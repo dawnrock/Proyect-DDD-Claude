@@ -395,9 +395,8 @@ class SignUpAuth0Tests {
     @DisplayName("Envío del paso 3 en modo Auth0")
     class Alta {
 
-        private final AccountSummary opened = AccountSummary.builder().id(UUID.randomUUID())
-                .accountNumber("ES2199990001220000000001").holderName("Ada Lovelace").segment("RETAIL")
-                .balance(new BigDecimal("100.00")).currency("EUR").build();
+        private final AccountSummary opened = new AccountSummary(UUID.randomUUID(), "ES2199990001220000000001",
+                "Ada Lovelace", "RETAIL", new BigDecimal("100.00"), "EUR");
 
         @BeforeEach
         void readyForStep3() throws Exception {

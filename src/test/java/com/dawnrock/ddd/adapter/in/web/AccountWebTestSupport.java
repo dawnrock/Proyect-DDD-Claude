@@ -5,6 +5,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -63,36 +64,17 @@ abstract class AccountWebTestSupport {
     }
 
     protected static AccountSummary ownAccount(UUID id, String number, String holder) {
-        return AccountSummary.builder()
-                .id(id)
-                .accountNumber(number)
-                .holderName(holder).segment("RETAIL")
-                .balance(new BigDecimal("150.00"))
-                .currency("EUR")
-                .build();
+        return new AccountSummary(id, number, holder, "RETAIL", new BigDecimal("150.00"), "EUR");
     }
 
     protected static TransactionSummary transaction(String type, String amount, String status) {
-        return TransactionSummary.builder()
-                .id(UUID.randomUUID())
-                .type(type)
-                .amount(new BigDecimal(amount))
-                .currency("EUR")
-                .occurredOn(Instant.parse("2026-10-23T10:15:00Z"))
-                .status(status)
-                .build();
+        return TransactionSummary.of(UUID.randomUUID(), type, new BigDecimal(amount), "EUR",
+                Instant.parse("2026-10-23T10:15:00Z"), status);
     }
 
     protected static TransactionSummary transfer(String type, String amount, String status, String counterpart) {
-        return TransactionSummary.builder()
-                .id(UUID.randomUUID())
-                .type(type)
-                .amount(new BigDecimal(amount))
-                .currency("EUR")
-                .occurredOn(Instant.parse("2026-10-23T10:15:00Z"))
-                .status(status)
-                .counterpartAccountNumber(counterpart)
-                .build();
+        return new TransactionSummary(UUID.randomUUID(), type, new BigDecimal(amount), "EUR",
+                Instant.parse("2026-10-23T10:15:00Z"), status, Optional.of(counterpart));
     }
 
     protected static AccountDetails details(TransactionSummary... transactions) {
@@ -108,16 +90,8 @@ abstract class AccountWebTestSupport {
     }
 
     protected static TransferSummary transfer(String amount, String status) {
-        return TransferSummary.builder()
-                .sourceAccountId(ACCOUNT_ID)
-                .sourceAccountNumber("ES1234567890123456789012")
-                .targetAccountId(OTHER_ID)
-                .targetAccountNumber(TARGET_IBAN)
-                .amount(new BigDecimal(amount))
-                .currency("EUR")
-                .occurredOn(Instant.parse("2026-10-25T10:15:00Z"))
-                .status(status)
-                .build();
+        return new TransferSummary(ACCOUNT_ID, "ES1234567890123456789012", OTHER_ID, TARGET_IBAN,
+                new BigDecimal(amount), "EUR", Instant.parse("2026-10-25T10:15:00Z"), status);
     }
 
     /** Petición como la envía htmx: con la cabecera HX-Request. */

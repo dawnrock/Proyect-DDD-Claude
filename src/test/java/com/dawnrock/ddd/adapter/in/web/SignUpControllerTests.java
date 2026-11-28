@@ -319,9 +319,8 @@ class SignUpControllerTests {
     }
 
     private static AccountSummary openedAccount(UUID id) {
-        return AccountSummary.builder().id(id).accountNumber("ES2199990001220000000001")
-                .holderName("Margaret Hamilton").segment("RETAIL").balance(new BigDecimal("100.00"))
-                .currency("EUR").build();
+        return new AccountSummary(id, "ES2199990001220000000001", "Margaret Hamilton", "RETAIL",
+                new BigDecimal("100.00"), "EUR");
     }
 
     @Nested

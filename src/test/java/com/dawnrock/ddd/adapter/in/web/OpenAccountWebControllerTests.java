@@ -44,13 +44,8 @@ class OpenAccountWebControllerTests extends AccountWebTestSupport {
     class Alta {
 
         private AccountSummary abierta(String segment) {
-            return AccountSummary.builder()
-                    .id(UUID.randomUUID())
-                    .accountNumber("ES1234567890123456789012")
-                    .holderName("Ana Pérez").segment(segment)
-                    .balance(new BigDecimal("100.00"))
-                    .currency("EUR")
-                    .build();
+            return new AccountSummary(UUID.randomUUID(), "ES1234567890123456789012", "Ana Pérez", segment,
+                    new BigDecimal("100.00"), "EUR");
         }
 
         private MockHttpServletRequestBuilder altaValida() {
@@ -292,8 +287,8 @@ class OpenAccountWebControllerTests extends AccountWebTestSupport {
     class UsuarioDelTitularEnMinusculas {
 
         private AccountSummary cuentaAbierta() {
-            return AccountSummary.builder().id(UUID.randomUUID()).accountNumber("ES1234567890123456789012")
-                    .holderName("Ana Pérez").segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build();
+            return new AccountSummary(UUID.randomUUID(), "ES1234567890123456789012", "Ana Pérez", "RETAIL",
+                    new BigDecimal("100.00"), "EUR");
         }
 
         @Test

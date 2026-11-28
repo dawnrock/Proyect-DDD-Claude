@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Currency;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -81,8 +82,7 @@ class AccountControllerTests {
     private CheckingAccountQueries queries;
 
     private static AccountSummary summary() {
-        return AccountSummary.builder().id(ID).accountNumber(IBAN).holderName("Ada Lovelace").segment("RETAIL")
-                .balance(new BigDecimal("100.00")).currency("EUR").build();
+        return new AccountSummary(ID, IBAN, "Ada Lovelace", "RETAIL", new BigDecimal("100.00"), "EUR");
     }
 
     /** Un importe no válido responde 400 con el error del campo y no llega a los puertos (ingresos y retiradas). */
@@ -120,8 +120,7 @@ class AccountControllerTests {
         @DisplayName("La respuesta lleva el segmento que ha calculado la factoría")
         void theResponseCarriesTheCalculatedSegment() throws Exception {
             given(commands.openAccount(any(Caller.class), any())).willReturn(
-                    AccountSummary.builder().id(ID).accountNumber(IBAN).holderName("Grace Hopper")
-                            .segment("HIGH_NET_WORTH").balance(new BigDecimal("5000.00")).currency("EUR").build());
+                    new AccountSummary(ID, IBAN, "Grace Hopper", "HIGH_NET_WORTH", new BigDecimal("5000.00"), "EUR"));
 
             mvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("""
                     {"holderName": "Grace Hopper", "holderTaxId": "87654321X",
@@ -432,9 +431,8 @@ class AccountControllerTests {
                     .id(ID).accountNumber(IBAN).holderName("Ada Lovelace").holderTaxId("12345678Z")
                     .holderEmail("ada@example.com").segment("RETAIL")
                     .balance(new BigDecimal("100.00")).currency("EUR")
-                    .addTransactions(TransactionSummary.builder().id(transactionId).type("DEPOSIT")
-                            .amount(new BigDecimal("100.00")).currency("EUR")
-                            .occurredOn(Instant.parse("2026-10-23T10:15:30Z")).status("APPROVED").build())
+                    .addTransactions(TransactionSummary.of(transactionId, "DEPOSIT", new BigDecimal("100.00"), "EUR",
+                            Instant.parse("2026-10-23T10:15:30Z"), "APPROVED"))
                     .build());
 
             mvc.perform(get("/api/accounts/{id}", ID))
@@ -458,13 +456,11 @@ class AccountControllerTests {
             given(queries.findAccount(any(Caller.class), eq(ID))).willReturn(AccountDetails.builder()
                     .id(ID).accountNumber(IBAN).holderName("Ada Lovelace").segment("RETAIL")
                     .balance(new BigDecimal("0.00")).currency("EUR")
-                    .addTransactions(TransactionSummary.builder().id(UUID.randomUUID()).type("DEPOSIT")
-                            .amount(new BigDecimal("100.00")).currency("EUR")
-                            .occurredOn(Instant.parse("2026-10-23T10:15:30Z")).status("APPROVED").build())
-                    .addTransactions(TransactionSummary.builder().id(UUID.randomUUID()).type("WITHDRAWAL")
-                            .amount(new BigDecimal("100.00")).currency("EUR")
-                            .occurredOn(Instant.parse("2026-10-23T10:16:30Z")).status("APPROVED")
-                            .counterpartAccountNumber("ES7921000813610123456789").build())
+                    .addTransactions(TransactionSummary.of(UUID.randomUUID(), "DEPOSIT", new BigDecimal("100.00"),
+                            "EUR", Instant.parse("2026-10-23T10:15:30Z"), "APPROVED"))
+                    .addTransactions(new TransactionSummary(UUID.randomUUID(), "WITHDRAWAL", new BigDecimal("100.00"),
+                            "EUR", Instant.parse("2026-10-23T10:16:30Z"), "APPROVED",
+                            Optional.of("ES7921000813610123456789")))
                     .build());
 
             mvc.perform(get("/api/accounts/{id}", ID))
@@ -503,9 +499,8 @@ class AccountControllerTests {
         private static final String BODY = "{\"amount\": 25.50, \"currency\": \"EUR\"}";
 
         private TransactionSummary approvedDeposit() {
-            return TransactionSummary.builder().id(UUID.fromString("66666666-7777-8888-9999-000000000000"))
-                    .type("DEPOSIT").amount(new BigDecimal("25.50")).currency("EUR")
-                    .occurredOn(Instant.parse("2026-10-23T10:15:30Z")).status("APPROVED").build();
+            return TransactionSummary.of(UUID.fromString("66666666-7777-8888-9999-000000000000"), "DEPOSIT",
+                    new BigDecimal("25.50"), "EUR", Instant.parse("2026-10-23T10:15:30Z"), "APPROVED");
         }
 
         @Test
@@ -608,9 +603,8 @@ class AccountControllerTests {
         private static final String BODY = "{\"amount\": 25.50, \"currency\": \"EUR\"}";
 
         private TransactionSummary withdrawal(String status) {
-            return TransactionSummary.builder().id(UUID.fromString("66666666-7777-8888-9999-000000000000"))
-                    .type("WITHDRAWAL").amount(new BigDecimal("25.50")).currency("EUR")
-                    .occurredOn(Instant.parse("2026-10-23T10:15:30Z")).status(status).build();
+            return TransactionSummary.of(UUID.fromString("66666666-7777-8888-9999-000000000000"), "WITHDRAWAL",
+                    new BigDecimal("25.50"), "EUR", Instant.parse("2026-10-23T10:15:30Z"), status);
         }
 
         @Test
@@ -712,8 +706,7 @@ class AccountControllerTests {
         @DisplayName("Un administrador recibe 200 con el resumen y el IBAN nuevo")
         void anAdministratorGets200WithTheSummaryAndTheNewIban() throws Exception {
             given(commands.regenerateAccountNumber(ADMIN, ID)).willReturn(
-                    AccountSummary.builder().id(ID).accountNumber(NEW_IBAN).holderName("Ada Lovelace")
-                            .segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build());
+                    new AccountSummary(ID, NEW_IBAN, "Ada Lovelace", "RETAIL", new BigDecimal("100.00"), "EUR"));
 
             mvc.perform(post("/api/accounts/{id}/account-number", ID))
                     .andExpect(status().isOk())

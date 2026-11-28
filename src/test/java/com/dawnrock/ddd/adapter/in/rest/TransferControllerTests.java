@@ -61,11 +61,8 @@ class TransferControllerTests {
     private MoneyMovementCommands movements;
 
     private static TransferSummary transfer(String status) {
-        return TransferSummary.builder()
-                .sourceAccountId(SOURCE_ID).sourceAccountNumber("ES9121000418450200051332")
-                .targetAccountId(TARGET_ID).targetAccountNumber("ES7921000813610123456789")
-                .amount(new BigDecimal("25.00")).currency("EUR")
-                .occurredOn(Instant.parse("2026-10-25T10:15:30Z")).status(status).build();
+        return new TransferSummary(SOURCE_ID, "ES9121000418450200051332", TARGET_ID, "ES7921000813610123456789",
+                new BigDecimal("25.00"), "EUR", Instant.parse("2026-10-25T10:15:30Z"), status);
     }
 
     @Test

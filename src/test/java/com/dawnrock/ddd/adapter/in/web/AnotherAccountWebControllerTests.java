@@ -45,8 +45,7 @@ class AnotherAccountWebControllerTests extends AccountWebTestSupport {
     private static final UUID SECOND = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
 
     private static AccountSummary account(UUID id, String iban) {
-        return AccountSummary.builder().id(id).accountNumber(iban).holderName("Ada Lovelace")
-                .segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build();
+        return new AccountSummary(id, iban, "Ada Lovelace", "RETAIL", new BigDecimal("100.00"), "EUR");
     }
 
     private static AccountDetails details(UUID id) {

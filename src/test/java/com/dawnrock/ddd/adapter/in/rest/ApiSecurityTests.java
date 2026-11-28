@@ -113,8 +113,8 @@ class ApiSecurityTests {
     }
 
     private static AccountSummary summary() {
-        return AccountSummary.builder().id(ID).accountNumber("ES9121000418450200051332").holderName("Ada Lovelace")
-                .segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR").build();
+        return new AccountSummary(ID, "ES9121000418450200051332", "Ada Lovelace", "RETAIL", new BigDecimal("100.00"),
+                "EUR");
     }
 
     @Nested

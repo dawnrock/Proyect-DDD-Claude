@@ -99,9 +99,8 @@ class SignUpAuth0SessionTests {
     }
 
     private static AccountSummary opened() {
-        return AccountSummary.builder().id(UUID.randomUUID()).accountNumber("ES2199990001220000000001")
-                .holderName("Ada Lovelace").segment("RETAIL").balance(new BigDecimal("100.00")).currency("EUR")
-                .build();
+        return new AccountSummary(UUID.randomUUID(), "ES2199990001220000000001", "Ada Lovelace", "RETAIL",
+                new BigDecimal("100.00"), "EUR");
     }
 
     @Test
