@@ -42,14 +42,8 @@ public class TransferController {
     }
 
     private static TransferResponse toResponse(TransferSummary transfer) {
-        return TransferResponse.builder()
-                .sourceAccountId(transfer.sourceAccountId())
-                .sourceAccountNumber(transfer.sourceAccountNumber())
-                .targetAccountNumber(transfer.targetAccountNumber())
-                .amount(transfer.amount())
-                .currency(transfer.currency())
-                .occurredOn(transfer.occurredOn())
-                .status(transfer.status())
-                .build();
+        return new TransferResponse(transfer.sourceAccountId(), transfer.sourceAccountNumber(),
+                transfer.targetAccountNumber(), transfer.amount(), transfer.currency(), transfer.occurredOn(),
+                transfer.status());
     }
 }

@@ -34,9 +34,8 @@ class RecordJsonTests {
     @Test
     @DisplayName("El resumen de una cuenta se escribe con sus seis campos, en orden alfabético")
     void anAccountSummaryKeepsItsJson() {
-        AccountSummaryResponse summary = AccountSummaryResponse.builder().id(ID).accountNumber(IBAN)
-                .holderName("Ada Lovelace").segment("RETAIL").balance(new BigDecimal("1000.00")).currency("EUR")
-                .build();
+        AccountSummaryResponse summary = new AccountSummaryResponse(ID, IBAN, "Ada Lovelace", "RETAIL",
+                new BigDecimal("1000.00"), "EUR");
 
         assertThat(json.writeValueAsString(summary)).isEqualTo(
                 "{\"accountNumber\":\"" + IBAN + "\",\"balance\":1000.00,\"currency\":\"EUR\","
@@ -47,11 +46,10 @@ class RecordJsonTests {
     @Test
     @DisplayName("Un movimiento sin contrapartida omite counterpartAccountNumber y uno de transferencia lo incluye")
     void aTransactionOmitsTheMissingCounterpart() {
-        TransactionResponse deposit = TransactionResponse.builder().id(TRANSACTION_ID).type("DEPOSIT")
-                .amount(new BigDecimal("200.00")).currency("EUR").occurredOn(WHEN).status("APPROVED").build();
-        TransactionResponse transfer = TransactionResponse.builder().id(TRANSACTION_ID).type("WITHDRAWAL")
-                .amount(new BigDecimal("1.00")).currency("EUR").occurredOn(WHEN).status("REJECTED")
-                .counterpartAccountNumber(OTHER_IBAN).build();
+        TransactionResponse deposit = new TransactionResponse(TRANSACTION_ID, "DEPOSIT", new BigDecimal("200.00"),
+                "EUR", WHEN, "APPROVED", null);
+        TransactionResponse transfer = new TransactionResponse(TRANSACTION_ID, "WITHDRAWAL", new BigDecimal("1.00"),
+                "EUR", WHEN, "REJECTED", OTHER_IBAN);
 
         assertThat(json.writeValueAsString(deposit)).isEqualTo(
                 "{\"amount\":200.00,\"currency\":\"EUR\",\"id\":\"66666666-7777-8888-9999-000000000000\","
@@ -65,15 +63,12 @@ class RecordJsonTests {
     @Test
     @DisplayName("El detalle de una cuenta lleva sus movimientos como lista, también vacía")
     void accountDetailsKeepTheirJson() {
-        TransactionResponse deposit = TransactionResponse.builder().id(TRANSACTION_ID).type("DEPOSIT")
-                .amount(new BigDecimal("200.00")).currency("EUR").occurredOn(WHEN).status("APPROVED").build();
-        AccountDetailsResponse details = AccountDetailsResponse.builder().id(ID).accountNumber(IBAN)
-                .holderName("Ada Lovelace").holderTaxId("12345678Z").holderEmail("ada@example.com")
-                .segment("RETAIL").balance(new BigDecimal("1200.00")).currency("EUR")
-                .transactions(List.of(deposit)).build();
-        AccountDetailsResponse empty = AccountDetailsResponse.builder().id(ID).accountNumber(IBAN)
-                .holderName("Ada Lovelace").holderTaxId("12345678Z").holderEmail("")
-                .segment("RETAIL").balance(BigDecimal.ZERO).currency("EUR").transactions(List.of()).build();
+        TransactionResponse deposit = new TransactionResponse(TRANSACTION_ID, "DEPOSIT", new BigDecimal("200.00"),
+                "EUR", WHEN, "APPROVED", null);
+        AccountDetailsResponse details = new AccountDetailsResponse(ID, IBAN, "Ada Lovelace", "12345678Z",
+                "ada@example.com", "RETAIL", new BigDecimal("1200.00"), "EUR", List.of(deposit));
+        AccountDetailsResponse empty = new AccountDetailsResponse(ID, IBAN, "Ada Lovelace", "12345678Z", "", "RETAIL",
+                BigDecimal.ZERO, "EUR", List.of());
 
         assertThat(json.writeValueAsString(details)).isEqualTo(
                 "{\"accountNumber\":\"" + IBAN + "\",\"balance\":1200.00,\"currency\":\"EUR\","
@@ -91,9 +86,8 @@ class RecordJsonTests {
     @Test
     @DisplayName("El resultado de una transferencia se escribe con sus siete campos, en orden alfabético")
     void aTransferKeepsItsJson() {
-        TransferResponse transfer = TransferResponse.builder().sourceAccountId(ID).sourceAccountNumber(IBAN)
-                .targetAccountNumber(OTHER_IBAN).amount(new BigDecimal("300.00")).currency("EUR").occurredOn(WHEN)
-                .status("APPROVED").build();
+        TransferResponse transfer = new TransferResponse(ID, IBAN, OTHER_IBAN, new BigDecimal("300.00"), "EUR", WHEN,
+                "APPROVED");
 
         assertThat(json.writeValueAsString(transfer)).isEqualTo(
                 "{\"amount\":300.00,\"currency\":\"EUR\",\"occurredOn\":\"2026-11-28T10:15:30Z\","
@@ -104,7 +98,7 @@ class RecordJsonTests {
     @Test
     @DisplayName("El token de acceso se escribe con accessToken, tokenType y expiresIn")
     void theAccessTokenKeepsItsJson() {
-        TokenResponse token = TokenResponse.builder().accessToken("a.b.c").tokenType("Bearer").expiresIn(900).build();
+        TokenResponse token = new TokenResponse("a.b.c", "Bearer", 900);
 
         assertThat(json.writeValueAsString(token))
                 .isEqualTo("{\"accessToken\":\"a.b.c\",\"expiresIn\":900,\"tokenType\":\"Bearer\"}");

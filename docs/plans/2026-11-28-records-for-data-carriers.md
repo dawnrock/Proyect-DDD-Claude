@@ -80,7 +80,7 @@ Order: from the outside in (responses first, which nothing else depends on), the
 - **Acceptance criteria:**
   - [x] The test passes against the current Immutables types, so it can detect any change in T2. The JSON is in **alphabetical order** (Jackson 3's default), not in declaration order: the test pins it.
 
-### [ ] T2 — REST responses as `record`s (~10 min)
+### [x] T2 — REST responses as `record`s (~10 min)
 
 - **Layer:** adapter.in
 - **Files:** the five `*ResponseDef.java` in `adapter.in.rest` and their mapping in the controllers
@@ -89,7 +89,8 @@ Order: from the outside in (responses first, which nothing else depends on), the
   1. Turn each one into a `record` named without `Def`, with `List.copyOf` for lists and `requireNonNull` where the attribute was mandatory.
   2. Replace `X.builder()…build()` with the constructor in the controllers.
 - **Acceptance criteria:**
-  - [ ] T1 passes unchanged; `node scripts/contract-test.mjs` passes.
+  - [x] T1 passes unchanged (only its construction syntax changed); `node scripts/contract-test.mjs` passes (738/738).
+- **Found by T1:** a `record` is serialized in the order of its components (Jackson puts creator properties first, even with `@JsonPropertyOrder(alphabetic = true)`), while the Immutables types came out alphabetically. Each response `record` carries an explicit `@JsonPropertyOrder({...})` with its fields in alphabetical order, so the JSON stays byte-for-byte the same.
 
 ### [ ] T3 — Views as `record`s: `AccountSummary`, `TransactionSummary`, `TransferSummary` (~10 min)
 

@@ -99,39 +99,19 @@ public class AccountController {
     }
 
     static AccountSummaryResponse toResponse(AccountSummary summary) {
-        return AccountSummaryResponse.builder()
-                .id(summary.id())
-                .accountNumber(summary.accountNumber())
-                .holderName(summary.holderName())
-                .segment(summary.segment())
-                .balance(summary.balance())
-                .currency(summary.currency())
-                .build();
+        return new AccountSummaryResponse(summary.id(), summary.accountNumber(), summary.holderName(),
+                summary.segment(), summary.balance(), summary.currency());
     }
 
     private static AccountDetailsResponse toResponse(AccountDetails details) {
-        return AccountDetailsResponse.builder()
-                .id(details.id())
-                .accountNumber(details.accountNumber())
-                .holderName(details.holderName())
-                .holderTaxId(details.holderTaxId())
-                .holderEmail(details.holderEmail())
-                .segment(details.segment())
-                .balance(details.balance())
-                .currency(details.currency())
-                .transactions(details.transactions().stream().map(AccountController::toResponse).toList())
-                .build();
+        return new AccountDetailsResponse(details.id(), details.accountNumber(), details.holderName(),
+                details.holderTaxId(), details.holderEmail(), details.segment(), details.balance(), details.currency(),
+                details.transactions().stream().map(AccountController::toResponse).toList());
     }
 
     private static TransactionResponse toResponse(TransactionSummary transaction) {
-        return TransactionResponse.builder()
-                .id(transaction.id())
-                .type(transaction.type())
-                .amount(transaction.amount())
-                .currency(transaction.currency())
-                .occurredOn(transaction.occurredOn())
-                .status(transaction.status())
-                .counterpartAccountNumber(transaction.counterpartAccountNumber().orElse(null))
-                .build();
+        return new TransactionResponse(transaction.id(), transaction.type(), transaction.amount(),
+                transaction.currency(), transaction.occurredOn(), transaction.status(),
+                transaction.counterpartAccountNumber().orElse(null));
     }
 }
