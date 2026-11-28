@@ -182,6 +182,18 @@ Order: from the outside in (responses first, which nothing else depends on), the
 - **Files:** `docs/ia/estado-del-proyecto.md`, `decisiones.md`, `historial.md`
 - **Depends on:** T10
 
+### [x] T12 — Review corrections (~10 min)
+
+- **Layer:** tests · docs
+- **Files:** `HexagonalArchitectureTests.java`, `docs/ia/pendientes.md`, seven frozen contracts in `docs/contracts/`
+- **Depends on:** T11
+- **What to do:**
+  1. `revisor-ddd`: `dataCarriersAreRecords` did not cover `Caller` (no matching suffix); it is now named explicitly, and the predicate is grouped with parentheses.
+  2. `pendientes.md` still named `SignUpCommandDef.EMAIL_MESSAGE`.
+  3. The frozen contracts that name `*Def` types or Immutables behaviour get a "Since #219" line, as was done for #174; their body keeps the wording of its time. `fase-1-capas.md` describes the frozen phase 1 and is left as it is.
+- **Acceptance criteria:**
+  - [x] `./mvnw verify` green.
+
 ## Global acceptance criteria
 
 **Specific:**

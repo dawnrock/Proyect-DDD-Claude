@@ -42,13 +42,14 @@ class HexagonalArchitectureTests {
 
     /** Raíz de {@code adapter.in}: soporte de seguridad compartido por los adaptadores de entrada (ADR 0008). */
     private static final String ADAPTER_IN_SUPPORT = "com.dawnrock.ddd.adapter.in";
-    /** Commands, queries y vistas de {@code application}; peticiones y respuestas de la API REST (#219). */
+    /** Commands, queries, vistas y {@code Caller} de {@code application}; peticiones y respuestas de la API REST (#219). */
     private static final DescribedPredicate<JavaClass> DATA_CARRIERS = describe(
-            "commands, queries and views of application, and requests and responses of the REST API",
-            type -> "com.dawnrock.ddd.application".equals(type.getPackageName())
-                    && endsWithAny(type.getSimpleName(), "Command", "Query", "Summary", "Details")
-                    || "com.dawnrock.ddd.adapter.in.rest".equals(type.getPackageName())
-                    && endsWithAny(type.getSimpleName(), "Request", "Response"));
+            "commands, queries, views and Caller of application, and requests and responses of the REST API",
+            type -> ("com.dawnrock.ddd.application".equals(type.getPackageName())
+                    && (endsWithAny(type.getSimpleName(), "Command", "Query", "Summary", "Details")
+                    || "Caller".equals(type.getSimpleName())))
+                    || ("com.dawnrock.ddd.adapter.in.rest".equals(type.getPackageName())
+                    && endsWithAny(type.getSimpleName(), "Request", "Response")));
 
     /**
      * Los anillos del hexágono: el modelo no depende de nadie, los servicios de dominio solo del modelo, la aplicación
@@ -182,8 +183,8 @@ class HexagonalArchitectureTests {
     }
 
     /**
-     * Los objetos de datos fuera del dominio son {@code record} (#219, ADR 0028): los commands, queries y vistas de
-     * {@code application} y las peticiones y respuestas de la API REST. Un único mecanismo, sin Immutables.
+     * Los objetos de datos fuera del dominio son {@code record} (#219, ADR 0028): los commands, queries, vistas y
+     * {@code Caller} de {@code application} y las peticiones y respuestas de la API REST. Un único mecanismo, sin Immutables.
      */
     @ArchTest
     static void dataCarriersAreRecords(JavaClasses classes) {

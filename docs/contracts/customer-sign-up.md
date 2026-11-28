@@ -5,6 +5,7 @@
 - **Status:** frozen at `51c280f`
 - **Since #174 (application services split by use case):** `signUp` and `openAnotherAccount` belong to `AccountOpeningCommands` (implemented by `AccountOpeningService`) and `isUsernameTaken` to `CheckingAccountQueries` (implemented by `CheckingAccountQueryService`); `CheckingAccountCommands` and `CheckingAccountService` no longer exist. Signatures, commands, views and errors are unchanged.
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both accepted the signatures and asked only for clarifications, merged by the lead, since the teammates cannot message each other). Web-dev's question on `DomainException` in `adapter.in.web`: already allowed by D4 in `HexagonalArchitectureTests`.
+- **Since #219 (records instead of Immutables, ADR 0028):** the `*Def` types named here are now `record`s without the `Def` suffix (`OpenAccountCommandDef` → `OpenAccountCommand`…), built with static factories or the canonical constructor; a `null` optional value (currency, holder name, e-mail, owner) takes its default in the compact constructor. The rest of this frozen contract keeps the wording of its time.
 
 Builds on the frozen contracts `open-query-list-accounts.md`, `deposits-withdrawals.md`, `money-transfers.md`, `login-roles.md` and `account-factory.md`. Business rules R28-R32 are new (glossary). Mapping with `Monolithic`: R28 ↔ R27, R29 ↔ R28, R30 ↔ R29 (+ the username of the 2026-11-15 change), R31 ↔ R30, R32 ↔ R31.
 

@@ -4,6 +4,7 @@
 - **Status:** frozen at `0bdd261`
 - **Since #174 (application services split by use case):** on `Hexagonal`, `transfer` belongs to the input port `MoneyMovementCommands`, implemented by `MoneyMovementService`, which creates nothing itself: `config` hands it `MoneyTransferService`. `Monolithic` keeps the concrete `CheckingAccountService` described here.
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed with minor changes; the teammates could not message each other, so the lead merged both reviews)
+- **Since #219 (records instead of Immutables, ADR 0028):** the `*Def` types named here are now `record`s without the `Def` suffix (`OpenAccountCommandDef` → `OpenAccountCommand`…), built with static factories or the canonical constructor; a `null` optional value (currency, holder name, e-mail, owner) takes its default in the compact constructor. The rest of this frozen contract keeps the wording of its time.
 
 Builds on the frozen contracts of #5 (`open-query-list-accounts.md`) and #6 (`deposits-withdrawals.md`): `CheckingAccountService`, `AccountDetails`, `AccountSummary`, `AccountNotFoundException`, the web 404 advice and the shared presentation validation are reused as they are.
 

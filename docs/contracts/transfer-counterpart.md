@@ -4,6 +4,7 @@
 - **Status:** frozen at `4d12b7c`
 - **Since #174 (application services split by use case):** `transfer` belongs to the input port `MoneyMovementCommands`, implemented by `MoneyMovementService`; `CheckingAccountCommands` no longer exists. Signatures and views are unchanged.
 - **Agreed by:** backend-dev, web-dev (rounds: 1; both agreed with clarifications, merged by the lead)
+- **Since #219 (records instead of Immutables, ADR 0028):** the `*Def` types named here are now `record`s without the `Def` suffix (`OpenAccountCommandDef` → `OpenAccountCommand`…), built with static factories or the canonical constructor; a `null` optional value (currency, holder name, e-mail, owner) takes its default in the compact constructor. The rest of this frozen contract keeps the wording of its time.
 
 Extends the transaction view of `deposits-withdrawals.md` (#6) and `money-transfers.md` (#7). Transfers are still recorded as a `WITHDRAWAL` on the source and a `DEPOSIT` on the target (#7 decision); each of those two transactions now also records the **counterpart account** (the other account of the transfer). The signatures of the input ports do not change: the back tasks (T1-T3) only fill the new field. No domain event changes.
 
