@@ -103,7 +103,7 @@ Order: from the outside in (responses first, which nothing else depends on), the
 - **Acceptance criteria:**
   - [x] `./mvnw verify` green; no test changes beyond the construction syntax (a `String` counterpart is now wrapped in `Optional.of`).
 
-### [ ] T4 — `AccountDetails` and `Caller` as `record`s (~10 min)
+### [x] T4 — `AccountDetails` and `Caller` as `record`s (~10 min)
 
 - **Layer:** application
 - **Files:** `AccountDetailsDef.java` (two defaults, list copy), `CallerDef.java`, call sites
@@ -112,8 +112,8 @@ Order: from the outside in (responses first, which nothing else depends on), the
   1. `AccountDetails.of(…)` with empty tax id, e-mail and transactions.
   2. `Caller.customer(username)`, `Caller.administrator(username)` and `Caller.system()`; replace the 40 `builder().username(…).admin(…)` calls.
 - **Acceptance criteria:**
-  - [ ] Defaults behave as before (a test with the optional fields missing); `./mvnw verify` green.
-  - [ ] No `admin(true)`/`admin(false)` left at call sites.
+  - [x] Defaults behave as before (`ApplicationRecordsTests`, proven by removing the tax id default: red); `./mvnw verify` green.
+  - [x] No `admin(true)`/`admin(false)` left at call sites (`CurrentCaller` keeps `new Caller(name, admin)`: the flag comes from the authorities).
 
 ### [ ] T5 — Money commands: `DepositCommand`, `WithdrawCommand`, `TransferCommand` (~10 min)
 

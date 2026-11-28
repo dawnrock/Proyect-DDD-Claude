@@ -114,7 +114,7 @@ class Auth0WebLoginTests {
     @DisplayName("Un cliente vincula su identidad de Auth0 con su contraseña, entra con su usuario y su rol, ve solo sus "
             + "cuentas y cierra la sesión también en Auth0")
     void aCustomerLinksTheIdentitySignsInSeesOnlyTheirAccountsAndLogsOutOfAuth0() throws Exception {
-        Caller admin = Caller.builder().username("admin").admin(true).build();
+        Caller admin = Caller.administrator("admin");
         UUID adasAccount = commands.openAccount(admin, account("Ada Lovelace", "12345678Z", "ada")).id();
         UUID gracesAccount = commands.openAccount(admin, account("Grace Hopper", "87654321X", "grace")).id();
         MockHttpSession session = new MockHttpSession();

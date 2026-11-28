@@ -108,7 +108,7 @@ class AccountOpeningServiceTests {
 
         assertThat(publishedBatches(publisher)).singleElement().satisfies(events -> assertThat(events)
                 .hasAtLeastOneElementOfType(CheckingAccountOpened.class));
-        assertThat(queries.listAccounts(Caller.builder().username("grace").admin(false).build()))
+        assertThat(queries.listAccounts(Caller.customer("grace")))
                 .extracting(AccountSummary::id).containsExactly(summary.id());
     }
 

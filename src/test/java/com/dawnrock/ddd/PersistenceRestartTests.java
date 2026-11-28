@@ -16,7 +16,7 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import com.dawnrock.ddd.adapter.in.CustomerRegistration;
 import com.dawnrock.ddd.application.AccountSummary;
 import com.dawnrock.ddd.application.Caller;
-import com.dawnrock.ddd.application.CallerDef;
+import com.dawnrock.ddd.application.Caller;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
 import com.dawnrock.ddd.application.SignUpCommand;
 
@@ -39,7 +39,7 @@ class PersistenceRestartTests {
     }
 
     private static List<AccountSummary> accounts(ConfigurableApplicationContext context) {
-        return context.getBean(CheckingAccountQueries.class).listAccounts(CallerDef.system());
+        return context.getBean(CheckingAccountQueries.class).listAccounts(Caller.system());
     }
 
     @Test
@@ -61,7 +61,7 @@ class PersistenceRestartTests {
             assertThat(accounts(second)).hasSize(4)
                     .extracting(AccountSummary::accountNumber).contains(signedUp.accountNumber());
             assertThat(second.getBean(CheckingAccountQueries.class)
-                    .listAccounts(Caller.builder().username("margaret").admin(false).build()))
+                    .listAccounts(Caller.customer("margaret")))
                     .extracting(AccountSummary::id).containsExactly(signedUp.id());
             assertThat(second.getBean(PasswordEncoder.class).matches("apolo-once",
                     second.getBean(UserDetailsManager.class).loadUserByUsername("margaret").getPassword())).isTrue();

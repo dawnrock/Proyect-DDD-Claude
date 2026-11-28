@@ -100,7 +100,7 @@ class Auth0SignUpTests {
         // El cliente, su cuenta, el usuario y el vínculo existen; la identidad pendiente se ha ido
         assertThat(session.getAttribute(PendingIdentity.SESSION_ATTRIBUTE)).isNull();
         assertThat(identities.usernameOf(ExternalIdentities.AUTH0, SUBJECT)).contains(USERNAME);
-        List<AccountSummary> accounts = queries.listAccounts(Caller.builder().username(USERNAME).admin(false).build());
+        List<AccountSummary> accounts = queries.listAccounts(Caller.customer(USERNAME));
         assertThat(accounts).singleElement().satisfies(account ->
                 assertThat(account.holderName()).isEqualTo("Katherine Johnson"));
 

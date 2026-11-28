@@ -45,7 +45,7 @@ class CustomerRegistrationTests {
 
     private static final String PASSWORD = "demo-1234";
     private static final String IP = "203.0.113.5";
-    private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+    private static final Caller ADMIN = Caller.administrator("admin");
 
     private final PasswordEncoder encoder = new SecuritySupport().passwordEncoder();
     private CheckingAccountRepository accounts;

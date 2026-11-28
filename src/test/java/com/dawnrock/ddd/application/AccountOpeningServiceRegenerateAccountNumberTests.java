@@ -21,8 +21,8 @@ import com.dawnrock.ddd.support.ApplicationServicesFixture;
 /** El administrador sustituye el IBAN de una cuenta por otro que genera el banco (R32). */
 class AccountOpeningServiceRegenerateAccountNumberTests {
 
-    private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
-    private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
+    private static final Caller ADMIN = Caller.administrator("admin");
+    private static final Caller ADA = Caller.customer("ada");
 
     private CheckingAccountRepository accounts;
     private CheckingAccountQueryService service;

@@ -30,7 +30,7 @@ import com.dawnrock.ddd.application.OpenAccountCommand;
 @ExtendWith(OutputCaptureExtension.class)
 class OutboxRestartTests {
 
-    private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+    private static final Caller ADMIN = Caller.administrator("admin");
 
     private final String database = "jdbc:h2:mem:outbox-restart-" + UUID.randomUUID()
             + ";MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1";

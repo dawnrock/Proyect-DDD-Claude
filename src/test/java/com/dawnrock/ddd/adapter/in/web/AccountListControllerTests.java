@@ -224,7 +224,7 @@ class AccountListControllerTests extends AccountWebTestSupport {
                     .andExpect(content().string(containsString("#plus\"></use></svg>Abrir cuenta")))
                     .andExpect(content().string(not(containsString("Mis cuentas"))));
 
-            verify(queries).listAccounts(Caller.builder().username("admin").admin(true).build());
+            verify(queries).listAccounts(Caller.administrator("admin"));
         }
 
         @Test
@@ -243,7 +243,7 @@ class AccountListControllerTests extends AccountWebTestSupport {
                     .andExpect(content().string(not(containsString("Abrir cuenta"))))
                     .andExpect(content().string(not(containsString("/accounts/new"))));
 
-            verify(queries).listAccounts(Caller.builder().username("ada").admin(false).build());
+            verify(queries).listAccounts(Caller.customer("ada"));
         }
 
         @Test

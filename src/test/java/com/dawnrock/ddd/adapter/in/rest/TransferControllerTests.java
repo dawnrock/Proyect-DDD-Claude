@@ -211,7 +211,7 @@ class TransferControllerTests {
     @WithMockUser(username = "ada", roles = "USER")
     @DisplayName("Un usuario puede transferir: el servicio recibe su Caller de usuario")
     void aUserCanTransferWithTheirCaller() throws Exception {
-        Caller ada = Caller.builder().username("ada").admin(false).build();
+        Caller ada = Caller.customer("ada");
         given(movements.transfer(any(Caller.class), any())).willReturn(transfer("APPROVED"));
 
         mvc.perform(post("/api/transfers").contentType(MediaType.APPLICATION_JSON).content(BODY))

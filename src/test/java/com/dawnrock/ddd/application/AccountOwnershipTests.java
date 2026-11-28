@@ -22,9 +22,9 @@ import com.dawnrock.ddd.support.ApplicationServicesFixture;
  */
 class AccountOwnershipTests {
 
-    private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
-    private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
-    private static final Caller GRACE = Caller.builder().username("grace").admin(false).build();
+    private static final Caller ADMIN = Caller.administrator("admin");
+    private static final Caller ADA = Caller.customer("ada");
+    private static final Caller GRACE = Caller.customer("grace");
 
     private CheckingAccountRepository accounts;
     private AccountOwnershipRepository owners;
@@ -138,7 +138,7 @@ class AccountOwnershipTests {
         @Test
         @DisplayName("Un usuario sin cuentas obtiene una lista vacía")
         void aUserWithoutAccountsGetsAnEmptyList() {
-            assertThat(service.listAccounts(Caller.builder().username("alan").admin(false).build())).isEmpty();
+            assertThat(service.listAccounts(Caller.customer("alan"))).isEmpty();
         }
 
         @Test
@@ -220,7 +220,7 @@ class AccountOwnershipTests {
         @Test
         @DisplayName("El llamador de sistema (la demo) ingresa, retira y transfiere en cuentas de otros usuarios")
         void theSystemCallerOperatesOtherUsersAccounts() {
-            Caller system = CallerDef.system();
+            Caller system = Caller.system();
 
             movements.deposit(system, deposit(adas));
             movements.withdraw(system, withdraw(graces));

@@ -91,7 +91,7 @@ class DddLabApplicationTests {
 	@ExtendWith(OutputCaptureExtension.class)
 	@DisplayName("Un ingreso llega al consumidor de auditoría a través del publicador de eventos")
 	void aDepositReachesTheAuditConsumer(CapturedOutput output) {
-		Caller admin = Caller.builder().username("admin").admin(true).build();
+		Caller admin = Caller.administrator("admin");
 		UUID accountId = commands.openAccount(admin, OpenAccountCommand.builder()
 				.holderName("Ada Lovelace")
 				.holderTaxId("12345678Z")

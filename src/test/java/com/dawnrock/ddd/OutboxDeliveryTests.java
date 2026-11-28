@@ -34,7 +34,7 @@ import com.dawnrock.ddd.domain.model.MoneyDeposited;
 @Import(OutboxDeliveryTests.FailingDepositConsumer.class)
 class OutboxDeliveryTests {
 
-    private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+    private static final Caller ADMIN = Caller.administrator("admin");
 
     @Autowired
     private AccountOpeningCommands commands;

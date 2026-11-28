@@ -313,8 +313,8 @@ class AccountControllerTests {
     @DisplayName("Seguridad (#50)")
     class Security {
 
-        private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
-        private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+        private static final Caller ADA = Caller.customer("ada");
+        private static final Caller ADMIN = Caller.administrator("admin");
 
         @Test
         @DisplayName("Sin credenciales cualquier operación responde 401 No autenticado y no llama al servicio")
@@ -427,13 +427,9 @@ class AccountControllerTests {
         @DisplayName("Responde 200 con el detalle y sus movimientos")
         void responds200WithTheDetailsAndTheirTransactions() throws Exception {
             UUID transactionId = UUID.fromString("66666666-7777-8888-9999-000000000000");
-            given(queries.findAccount(any(Caller.class), eq(ID))).willReturn(AccountDetails.builder()
-                    .id(ID).accountNumber(IBAN).holderName("Ada Lovelace").holderTaxId("12345678Z")
-                    .holderEmail("ada@example.com").segment("RETAIL")
-                    .balance(new BigDecimal("100.00")).currency("EUR")
-                    .addTransactions(TransactionSummary.of(transactionId, "DEPOSIT", new BigDecimal("100.00"), "EUR",
-                            Instant.parse("2026-10-23T10:15:30Z"), "APPROVED"))
-                    .build());
+            given(queries.findAccount(any(Caller.class), eq(ID))).willReturn(new AccountDetails(ID, IBAN,
+                    "Ada Lovelace", "12345678Z", "ada@example.com", "RETAIL", new BigDecimal("100.00"), "EUR",
+                    List.of(TransactionSummary.of(transactionId, "DEPOSIT", new BigDecimal("100.00"), "EUR", Instant.parse("2026-10-23T10:15:30Z"), "APPROVED"))));
 
             mvc.perform(get("/api/accounts/{id}", ID))
                     .andExpect(status().isOk())
@@ -453,15 +449,9 @@ class AccountControllerTests {
         @Test
         @DisplayName("Un movimiento de transferencia lleva counterpartAccountNumber y los demás no incluyen la clave")
         void aTransferTransactionCarriesTheCounterpartAndTheOthersOmitTheKey() throws Exception {
-            given(queries.findAccount(any(Caller.class), eq(ID))).willReturn(AccountDetails.builder()
-                    .id(ID).accountNumber(IBAN).holderName("Ada Lovelace").segment("RETAIL")
-                    .balance(new BigDecimal("0.00")).currency("EUR")
-                    .addTransactions(TransactionSummary.of(UUID.randomUUID(), "DEPOSIT", new BigDecimal("100.00"),
-                            "EUR", Instant.parse("2026-10-23T10:15:30Z"), "APPROVED"))
-                    .addTransactions(new TransactionSummary(UUID.randomUUID(), "WITHDRAWAL", new BigDecimal("100.00"),
-                            "EUR", Instant.parse("2026-10-23T10:16:30Z"), "APPROVED",
-                            Optional.of("ES7921000813610123456789")))
-                    .build());
+            given(queries.findAccount(any(Caller.class), eq(ID))).willReturn(new AccountDetails(ID, IBAN,
+                    "Ada Lovelace", "", "", "RETAIL", new BigDecimal("0.00"), "EUR",
+                    List.of(TransactionSummary.of(UUID.randomUUID(), "DEPOSIT", new BigDecimal("100.00"), "EUR", Instant.parse("2026-10-23T10:15:30Z"), "APPROVED"), new TransactionSummary(UUID.randomUUID(), "WITHDRAWAL", new BigDecimal("100.00"), "EUR", Instant.parse("2026-10-23T10:16:30Z"), "APPROVED", Optional.of("ES7921000813610123456789")))));
 
             mvc.perform(get("/api/accounts/{id}", ID))
                     .andExpect(status().isOk())
@@ -700,7 +690,7 @@ class AccountControllerTests {
     class RegenerateAccountNumber {
 
         private static final String NEW_IBAN = "ES6699990001740000000001";
-        private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+        private static final Caller ADMIN = Caller.administrator("admin");
 
         @Test
         @DisplayName("Un administrador recibe 200 con el resumen y el IBAN nuevo")

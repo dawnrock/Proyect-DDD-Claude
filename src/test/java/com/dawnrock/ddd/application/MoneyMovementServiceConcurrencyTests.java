@@ -25,7 +25,7 @@ import com.dawnrock.ddd.support.ApplicationServicesFixture;
  */
 class MoneyMovementServiceConcurrencyTests {
 
-    private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+    private static final Caller ADMIN = Caller.administrator("admin");
     private static final int THREADS = 8;
     private static final int OPERATIONS_PER_THREAD = 300;
     private static final int ROUNDS = 5;

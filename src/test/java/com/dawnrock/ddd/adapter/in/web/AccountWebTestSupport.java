@@ -5,6 +5,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -36,9 +37,9 @@ import com.dawnrock.ddd.application.TransferSummary;
 @Import({WebFormat.class, WebSecurityConfig.class, SecuritySupport.class, TestUsers.class, AccountDetailView.class})
 abstract class AccountWebTestSupport {
 
-    protected static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+    protected static final Caller ADMIN = Caller.administrator("admin");
 
-    protected static final Caller ADA = Caller.builder().username("ada").admin(false).build();
+    protected static final Caller ADA = Caller.customer("ada");
 
     protected static final UUID ACCOUNT_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
 
@@ -78,15 +79,8 @@ abstract class AccountWebTestSupport {
     }
 
     protected static AccountDetails details(TransactionSummary... transactions) {
-        return AccountDetails.builder()
-                .id(ACCOUNT_ID)
-                .accountNumber("ES1234567890123456789012")
-                .holderName("Ana Pérez")
-                .segment("HIGH_NET_WORTH")
-                .balance(new BigDecimal("150.00"))
-                .currency("EUR")
-                .addTransactions(transactions)
-                .build();
+        return new AccountDetails(ACCOUNT_ID, "ES1234567890123456789012", "Ana Pérez", "", "", "HIGH_NET_WORTH",
+                new BigDecimal("150.00"), "EUR", List.of(transactions));
     }
 
     protected static TransferSummary transfer(String amount, String status) {

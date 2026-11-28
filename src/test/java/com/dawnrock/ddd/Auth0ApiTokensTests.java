@@ -83,7 +83,7 @@ class Auth0ApiTokensTests {
         mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
         identities.link(ExternalIdentities.AUTH0, ADA, "ada");
         identities.link(ExternalIdentities.AUTH0, ADMIN, "admin");
-        Caller admin = Caller.builder().username("admin").admin(true).build();
+        Caller admin = Caller.administrator("admin");
         adasAccount = commands.openAccount(admin, account("Ada Lovelace", "12345678Z", "ada")).id();
         gracesAccount = commands.openAccount(admin, account("Grace Hopper", "87654321X", "grace")).id();
     }

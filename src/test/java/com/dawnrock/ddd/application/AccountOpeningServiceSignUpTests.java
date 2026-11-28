@@ -22,7 +22,7 @@ import com.dawnrock.ddd.support.ApplicationServicesFixture;
 /** Alta de un cliente nuevo con su primera cuenta (R28-R30). Adaptadores en memoria reales. */
 class AccountOpeningServiceSignUpTests {
 
-    private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+    private static final Caller ADMIN = Caller.administrator("admin");
 
     private CheckingAccountRepository accounts;
     private AccountOwnershipRepository owners;
@@ -77,7 +77,7 @@ class AccountOpeningServiceSignUpTests {
 
         assertThat(accounts.findById(summary.id()).orElseThrow().primaryHolder().taxId())
                 .isEqualTo(new TaxId("00000000T"));
-        assertThat(service.listAccounts(Caller.builder().username("margaret").admin(false).build()))
+        assertThat(service.listAccounts(Caller.customer("margaret")))
                 .containsExactly(summary);
     }
 

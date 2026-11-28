@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.dawnrock.ddd.adapter.in.SegmentLabels;
 import com.dawnrock.ddd.application.AccountSummary;
-import com.dawnrock.ddd.application.CallerDef;
+import com.dawnrock.ddd.application.Caller;
 import com.dawnrock.ddd.application.AccountOpeningCommands;
 import com.dawnrock.ddd.application.CheckingAccountQueries;
 import com.dawnrock.ddd.application.MoneyMovementCommands;
@@ -51,11 +51,11 @@ public class DomainModelRunner implements ApplicationRunner {
     /**
      * Abre las cuentas de demostración y, con los IBAN generados que devuelven sus resúmenes, ingresa en la de Ada,
      * retira de la de Alan una vez con saldo y otra sin él, y transfiere de Grace a Ada por el IBAN de Ada. Opera como
-     * {@code CallerDef.system()}, un administrador.
+     * {@code Caller.system()}, un administrador.
      */
     @Override
     public void run(ApplicationArguments args) {
-        if (!queries.listAccounts(CallerDef.system()).isEmpty()) {
+        if (!queries.listAccounts(Caller.system()).isEmpty()) {
             // Con la base persistente (#150) la demo se carga una sola vez, no en cada arranque
             log.info("[demo] datos ya cargados: no se abren las cuentas de demostración");
             return;
@@ -73,7 +73,7 @@ public class DomainModelRunner implements ApplicationRunner {
     }
 
     private AccountSummary open(OpenAccountCommand command) {
-        AccountSummary account = commands.openAccount(CallerDef.system(), command);
+        AccountSummary account = commands.openAccount(Caller.system(), command);
         log.info("[demo] Abrir cuenta · {} · {} · {} · {} {} · propietario {}", account.accountNumber(),
                 account.holderName(), SegmentLabels.of(account.segment()), account.balance(), account.currency(),
                 command.ownerUsername());
@@ -81,21 +81,21 @@ public class DomainModelRunner implements ApplicationRunner {
     }
 
     private void deposit(AccountSummary account, String amount) {
-        TransactionSummary deposit = movements.deposit(CallerDef.system(),
+        TransactionSummary deposit = movements.deposit(Caller.system(),
                 DepositCommand.builder().accountId(account.id()).amount(new BigDecimal(amount)).build());
         log.info("[demo] Ingresar · {} · {} {} · {}", account.accountNumber(), deposit.amount(), deposit.currency(),
                 deposit.approved() ? "aprobado" : "rechazado");
     }
 
     private void withdraw(AccountSummary account, String amount) {
-        TransactionSummary withdrawal = movements.withdraw(CallerDef.system(),
+        TransactionSummary withdrawal = movements.withdraw(Caller.system(),
                 WithdrawCommand.builder().accountId(account.id()).amount(new BigDecimal(amount)).build());
         log.info("[demo] Retirar · {} · {} {} · {}", account.accountNumber(), withdrawal.amount(),
                 withdrawal.currency(), withdrawal.approved() ? "aprobada" : "rechazada");
     }
 
     private void transfer(AccountSummary source, AccountSummary target, String amount) {
-        TransferSummary transfer = movements.transfer(CallerDef.system(), TransferCommand.builder()
+        TransferSummary transfer = movements.transfer(Caller.system(), TransferCommand.builder()
                 .sourceAccountId(source.id())
                 .targetAccountNumber(target.accountNumber())
                 .amount(new BigDecimal(amount))

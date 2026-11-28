@@ -485,9 +485,8 @@ class SignUpControllerTests {
     class SesionTrasElAlta {
 
         private AccountDetails details(UUID id) {
-            return AccountDetails.builder().id(id).accountNumber("ES2199990001220000000001")
-                    .holderName("Margaret Hamilton").segment("RETAIL").balance(new BigDecimal("100.00"))
-                    .currency("EUR").build();
+            return AccountDetails.of(id, "ES2199990001220000000001", "Margaret Hamilton", "RETAIL",
+                    new BigDecimal("100.00"), "EUR");
         }
 
         @Test

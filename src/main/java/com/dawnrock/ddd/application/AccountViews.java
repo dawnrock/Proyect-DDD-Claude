@@ -30,17 +30,10 @@ final class AccountViews {
 
     /** El detalle de la cuenta; el correo del titular sale de sus datos de cliente (vacío si no los tiene). */
     static AccountDetails toDetails(CheckingAccount account, String holderEmail) {
-        return AccountDetails.builder()
-                .id(account.id())
-                .accountNumber(account.accountNumber().value())
-                .holderName(account.primaryHolder().fullName())
-                .holderTaxId(account.primaryHolder().taxId().value())
-                .holderEmail(holderEmail)
-                .segment(account.primaryHolder().segment().name())
-                .balance(account.currentBalance().amount())
-                .currency(account.currentBalance().currency().getCurrencyCode())
-                .transactions(account.transactions().stream().map(AccountViews::toTransaction).toList())
-                .build();
+        return new AccountDetails(account.id(), account.accountNumber().value(), account.primaryHolder().fullName(),
+                account.primaryHolder().taxId().value(), holderEmail, account.primaryHolder().segment().name(),
+                account.currentBalance().amount(), account.currentBalance().currency().getCurrencyCode(),
+                account.transactions().stream().map(AccountViews::toTransaction).toList());
     }
 
     static TransactionSummary toTransaction(Transaction transaction) {

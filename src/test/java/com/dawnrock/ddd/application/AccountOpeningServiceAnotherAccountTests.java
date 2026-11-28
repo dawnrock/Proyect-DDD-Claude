@@ -20,9 +20,9 @@ import com.dawnrock.ddd.support.ApplicationServicesFixture;
 /** Abrir otra cuenta un cliente que ya tiene una: el titular sale de sus datos de cliente. */
 class AccountOpeningServiceAnotherAccountTests {
 
-    private static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
-    private static final Caller ADA = Caller.builder().username("ada").admin(false).build();
-    private static final Caller GRACE = Caller.builder().username("grace").admin(false).build();
+    private static final Caller ADMIN = Caller.administrator("admin");
+    private static final Caller ADA = Caller.customer("ada");
+    private static final Caller GRACE = Caller.customer("grace");
 
     private CheckingAccountRepository accounts;
     private CheckingAccountQueryService service;
@@ -77,7 +77,7 @@ class AccountOpeningServiceAnotherAccountTests {
     @Test
     @DisplayName("Un administrador no puede abrir otra cuenta aunque su usuario coincida con el de un cliente")
     void anAdministratorCannotOpenAnotherAccount() {
-        Caller adminNamedAda = Caller.builder().username("ada").admin(true).build();
+        Caller adminNamedAda = Caller.administrator("ada");
 
         assertThatExceptionOfType(NotACustomerException.class)
                 .isThrownBy(() -> opening.openAnotherAccount(ADMIN, deposit("200.00")));

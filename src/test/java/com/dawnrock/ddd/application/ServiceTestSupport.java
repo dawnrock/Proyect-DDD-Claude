@@ -15,7 +15,7 @@ import com.dawnrock.ddd.domain.model.DomainEventPublisher;
 final class ServiceTestSupport {
 
     /** Los casos de uso se piden como administrador; la propiedad se prueba en sus tests propios. */
-    static final Caller ADMIN = Caller.builder().username("admin").admin(true).build();
+    static final Caller ADMIN = Caller.administrator("admin");
 
     private ServiceTestSupport() {
     }

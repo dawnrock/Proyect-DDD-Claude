@@ -1,6 +1,6 @@
 package com.dawnrock.ddd.application;
 
-import org.immutables.value.Value;
+import java.util.Objects;
 
 /**
  * Quién pide un caso de uso: su usuario y si es administrador. Lo construye la presentación a partir de la
@@ -10,16 +10,24 @@ import org.immutables.value.Value;
  * <p>Un administrador accede a todas las cuentas y es el único que abre cuentas; un usuario (cliente) solo a las
  * suyas. La identidad no es lenguaje del dominio de cuentas: no llega a {@code domain}.
  */
-@ApplicationValue
-@Value.Immutable
-public interface CallerDef {
+public record Caller(String username, boolean admin) {
 
-    String username();
+    public Caller {
+        Objects.requireNonNull(username, "username");
+    }
 
-    boolean admin();
+    /** Un cliente: solo accede a sus cuentas. */
+    public static Caller customer(String username) {
+        return new Caller(username, false);
+    }
+
+    /** Un administrador: accede a todas las cuentas y abre cuentas. */
+    public static Caller administrator(String username) {
+        return new Caller(username, true);
+    }
 
     /** Administrador interno para procesos sin usuario (por ejemplo, los datos de demostración). */
-    static Caller system() {
-        return Caller.builder().username("system").admin(true).build();
+    public static Caller system() {
+        return administrator("system");
     }
 }

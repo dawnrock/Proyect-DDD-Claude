@@ -144,7 +144,7 @@ class ApiSecurityTests {
                             .contentType(MediaType.APPLICATION_JSON).content(OPEN_BODY))
                     .andExpect(status().isCreated());
 
-            verify(commands).openAccount(eq(Caller.builder().username("admin").admin(true).build()), any());
+            verify(commands).openAccount(eq(Caller.administrator("admin")), any());
         }
 
         @Test
@@ -161,7 +161,7 @@ class ApiSecurityTests {
             mvc.perform(post("/api/accounts").header(HttpHeaders.AUTHORIZATION, noRoles)
                             .contentType(MediaType.APPLICATION_JSON).content(OPEN_BODY))
                     .andExpect(status().isForbidden());
-            verify(queries).listAccounts(Caller.builder().username("ada").admin(false).build());
+            verify(queries).listAccounts(Caller.customer("ada"));
             verifyNoInteractions(commands, movements);
         }
 
