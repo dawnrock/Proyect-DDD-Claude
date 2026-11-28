@@ -43,6 +43,7 @@ import com.dawnrock.ddd.domain.model.WithdrawalRejected;
 import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
 import com.dawnrock.ddd.support.MutableClock;
 import com.dawnrock.ddd.support.ApplicationServicesFixture;
+import com.dawnrock.ddd.support.CommandBuilders;
 
 /** Ingresos, retiradas y transferencias con los adaptadores en memoria detrás de los puertos (#174). */
 class MoneyMovementServiceTests {
@@ -354,7 +355,7 @@ class MoneyMovementServiceTests {
     class SegmentReviewBeforeDebit {
 
         /** Abre con el patrimonio mínimo (alto patrimonio por saldo) y retira hasta dejar la cuenta en descubierto. */
-        private UUID cuentaEnDescubierto(OpenAccountCommand.Builder command) {
+        private UUID cuentaEnDescubierto(CommandBuilders.OpenAccountBuilder command) {
             UUID id = opening.openAccount(ADMIN, command.initialDeposit(new BigDecimal("100000")).build()).id();
             movements.withdraw(ADMIN, WithdrawCommand.of(id, new BigDecimal("100500")));
             return id;

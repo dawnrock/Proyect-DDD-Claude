@@ -9,12 +9,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import com.dawnrock.ddd.support.CommandBuilders;
 
 /** Reglas de formato del command de otra cuenta del cliente, antes de llegar al dominio. */
 class OpenAnotherAccountCommandTests {
 
-    private static OpenAnotherAccountCommand.Builder validCommand() {
-        return OpenAnotherAccountCommand.builder().initialDeposit(new BigDecimal("100.00"));
+    private static CommandBuilders.OpenAnotherAccountBuilder validCommand() {
+        return CommandBuilders.openAnotherAccount().initialDeposit(new BigDecimal("100.00"));
     }
 
     @Test

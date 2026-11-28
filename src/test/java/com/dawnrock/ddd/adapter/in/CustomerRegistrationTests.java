@@ -39,6 +39,7 @@ import com.dawnrock.ddd.domain.model.CheckingAccountRepository;
 import com.dawnrock.ddd.domain.model.DuplicateCustomerException;
 import com.dawnrock.ddd.domain.model.InsufficientInitialDepositException;
 import com.dawnrock.ddd.support.ApplicationServicesFixture;
+import com.dawnrock.ddd.support.CommandBuilders;
 
 /** Alta con usuario: la aplicación no conoce Spring Security, así que las credenciales se crean aquí. */
 class CustomerRegistrationTests {
@@ -75,8 +76,8 @@ class CustomerRegistrationTests {
                 new InMemoryExternalIdentities(manager::userExists), Clock.systemUTC(), new AuthProperties(true));
     }
 
-    private static SignUpCommand.Builder signUp() {
-        return SignUpCommand.builder()
+    private static CommandBuilders.SignUpBuilder signUp() {
+        return CommandBuilders.signUp()
                 .fullName("Margaret Hamilton")
                 .taxId("00000000T")
                 .email("margaret@example.com")
@@ -125,9 +126,8 @@ class CustomerRegistrationTests {
     @Test
     @DisplayName("El usuario que el administrador dio a un cliente no se puede tomar en el alta, aunque aún no pueda entrar")
     void theUsernameOfACustomerWithoutLoginCannotBeTakenOnSignUp() {
-        opening.openAccount(ADMIN, OpenAccountCommand.builder()
-                .holderTaxId("12345678Z").holderName("Ada Lovelace").holderEmail("ada@example.com")
-                .ownerUsername("margaret").initialDeposit(new BigDecimal("100")).build());
+        opening.openAccount(ADMIN, OpenAccountCommand.of("Ada Lovelace", "12345678Z", "ada@example.com",
+                new BigDecimal("100"), "margaret"));
 
         assertThatExceptionOfType(UsernameTakenException.class)
                 .isThrownBy(() -> registration.register(signUp().build(), PASSWORD, IP));
@@ -311,7 +311,7 @@ class CustomerRegistrationTests {
             registration.register(signUp().build(), PASSWORD, "198.51.100.1");
         }
 
-        private SignUpCommand.Builder another() {
+        private CommandBuilders.SignUpBuilder another() {
             return signUp().taxId("12345678Z").username("otra").email("otra@example.com");
         }
 

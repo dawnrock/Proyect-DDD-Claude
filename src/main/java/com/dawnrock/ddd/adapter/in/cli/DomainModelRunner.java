@@ -104,12 +104,6 @@ public class DomainModelRunner implements ApplicationRunner {
 
     private static OpenAccountCommand account(String holderName, String holderTaxId, String holderEmail,
                                               String initialDeposit, String owner) {
-        return OpenAccountCommand.builder()
-                .holderName(holderName)
-                .holderTaxId(holderTaxId)
-                .holderEmail(holderEmail)
-                .initialDeposit(new BigDecimal(initialDeposit))
-                .ownerUsername(owner)
-                .build();
+        return OpenAccountCommand.of(holderName, holderTaxId, holderEmail, new BigDecimal(initialDeposit), owner);
     }
 }

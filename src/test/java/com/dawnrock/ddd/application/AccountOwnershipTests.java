@@ -15,6 +15,7 @@ import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
 import com.dawnrock.ddd.domain.model.CheckingAccountRepository;
 import com.dawnrock.ddd.support.TestAccounts;
 import com.dawnrock.ddd.support.ApplicationServicesFixture;
+import com.dawnrock.ddd.support.CommandBuilders;
 
 /**
  * Reglas de propiedad de las cuentas (#50): un administrador accede a todo; un usuario solo a sus cuentas, y una ajena
@@ -43,8 +44,8 @@ class AccountOwnershipTests {
     }
 
     /** Un cliente por propietario: cada usuario es de un único cliente (R30). */
-    private static OpenAccountCommand.Builder command(String owner) {
-        return OpenAccountCommand.builder()
+    private static CommandBuilders.OpenAccountBuilder command(String owner) {
+        return CommandBuilders.openAccount()
                 .holderName("Titular")
                 .holderTaxId("grace".equals(owner) ? "87654321X" : "12345678Z")
                 .holderEmail("titular@example.com")

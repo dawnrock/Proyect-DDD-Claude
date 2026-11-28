@@ -36,17 +36,11 @@ public class CustomerController {
     @PostMapping
     public ResponseEntity<AccountSummaryResponse> signUp(@Valid @RequestBody SignUpRequest request,
                                                          HttpServletRequest http) {
-        SignUpCommand.Builder command = SignUpCommand.builder()
-                .fullName(request.fullName())
-                .taxId(request.taxId())
-                .email(request.email())
-                .username(request.username())
-                .initialDeposit(request.initialDeposit());
-        if (request.currency() != null) {
-            command.currency(request.currency());
-        }
+        // Sin divisa en la petición, el command usa EUR
+        SignUpCommand command = new SignUpCommand(request.fullName(), request.taxId(), request.email(),
+                request.username(), request.initialDeposit(), request.currency());
 
-        AccountSummaryResponse body = AccountController.toResponse(registration.register(command.build(), request.password(),
+        AccountSummaryResponse body = AccountController.toResponse(registration.register(command, request.password(),
                 clientIpResolver.resolve(http)));
         return ResponseEntity.created(URI.create("/api/accounts/" + body.id())).body(body);
     }

@@ -127,7 +127,7 @@ Order: from the outside in (responses first, which nothing else depends on), the
   - [x] The existing validation tests pass without changing their expected messages.
 - **Deviation:** the test of a transfer without target account expected Immutables' `IllegalStateException` ("some of required attributes are not set"); the `record` throws `NullPointerException` with the attribute name, so the test now expects that exception and that message. The REST and web adapters lost their `if (currency != null)` branches: a `null` currency becomes `EUR` in the compact constructor (`CommandValidation.DEFAULT_CURRENCY`).
 
-### [ ] T6 — Account opening and sign-up commands (~15 min)
+### [x] T6 — Account opening and sign-up commands (~15 min)
 
 - **Layer:** application
 - **Files:** `OpenAccountCommandDef.java`, `OpenAnotherAccountCommandDef.java`, `SignUpCommandDef.java`, call sites (adapters and tests)
@@ -135,7 +135,8 @@ Order: from the outside in (responses first, which nothing else depends on), the
 - **What to do:**
   1. Same as T5; the pattern and message constants become `static final` fields. Factories `OpenAccountCommand.forHolder` and `.of`, `OpenAnotherAccountCommand.of`, `SignUpCommand.of`; remove the adapters' `requireNonNullElse(…, "")`, now done by the compact constructor.
 - **Acceptance criteria:**
-  - [ ] The validation tests and the web/REST sign-up and opening tests pass unchanged.
+  - [x] The validation tests and the web/REST sign-up and opening tests pass unchanged (expected messages and values untouched).
+- **Deviation:** 29 test call sites used a builder as a *template* (a valid command whose test changes one field, or the "first failing rule" tests that fix fields one by one). Instead of repeating every argument of the canonical constructor, they use test builders in `src/test/.../support/CommandBuilders` (Lombok `@Builder` on static methods that call the `record` constructor; `CLAUDE.md` allows `@Builder` only in test builders, which is where it is). Complete chains became factories or the canonical constructor as planned. The adapters lost their `requireNonNullElse(…, "")` and `if (currency != null)`: the compact constructors do it.
 
 ### [ ] T7 — Remove `ApplicationValue` and the Immutables setup tests (~5 min)
 

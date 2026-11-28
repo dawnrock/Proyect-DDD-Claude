@@ -368,13 +368,7 @@ public class SignUpController {
     }
 
     private static SignUpCommand toCommand(SignUpForm form) {
-        return SignUpCommand.builder()
-                .fullName(form.getFullName())
-                .taxId(form.getTaxId())
-                .email(form.getEmail())
-                .username(form.getUsername())
-                .initialDeposit(form.getInitialDeposit())
-                .currency(form.getCurrency())
-                .build();
+        return new SignUpCommand(form.getFullName(), form.getTaxId(), form.getEmail(), form.getUsername(),
+                form.getInitialDeposit(), form.getCurrency());
     }
 }

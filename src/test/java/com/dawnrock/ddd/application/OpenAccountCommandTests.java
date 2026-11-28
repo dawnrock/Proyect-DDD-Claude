@@ -14,11 +14,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import com.dawnrock.ddd.support.CommandBuilders;
 
 class OpenAccountCommandTests {
 
-    private static OpenAccountCommand.Builder validCommand() {
-        return OpenAccountCommand.builder()
+    private static CommandBuilders.OpenAccountBuilder validCommand() {
+        return CommandBuilders.openAccount()
                 .holderTaxId("12345678Z")
                 .initialDeposit(new BigDecimal("100.00"));
     }
@@ -103,19 +104,19 @@ class OpenAccountCommandTests {
         assertThat(validCommand().holderEmail("   ").build().holderEmail()).isEqualTo("   ");
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> validCommand().ownerUsername("   ").build())
-                .withMessage(OpenAccountCommandDef.OWNER_USERNAME_MESSAGE);
+                .withMessage(OpenAccountCommand.OWNER_USERNAME_MESSAGE);
     }
 
     @Test
     @DisplayName("Con varios datos mal, se informa la primera regla en orden: documento, correo, usuario, divisa y depósito")
     void withSeveralWrongFieldsTheFirstRuleInOrderIsReported() {
-        OpenAccountCommand.Builder command = OpenAccountCommand.builder()
+        CommandBuilders.OpenAccountBuilder command = CommandBuilders.openAccount()
                 .holderTaxId("x").holderEmail("x").ownerUsername("X").currency("eur").initialDeposit(BigDecimal.ZERO);
-        List<Function<OpenAccountCommand.Builder, OpenAccountCommand.Builder>> fixes = List.of(
+        List<Function<CommandBuilders.OpenAccountBuilder, CommandBuilders.OpenAccountBuilder>> fixes = List.of(
                 b -> b.holderTaxId("12345678Z"), b -> b.holderEmail("ada@example.com"), b -> b.ownerUsername("ada"),
                 b -> b.currency("EUR"));
         List<String> messages = List.of("El documento debe ser un DNI o un NIE", "El correo electrónico no es válido",
-                OpenAccountCommandDef.OWNER_USERNAME_MESSAGE, "La divisa eur no es un código ISO 4217 válido",
+                OpenAccountCommand.OWNER_USERNAME_MESSAGE, "La divisa eur no es un código ISO 4217 válido",
                 "El depósito inicial debe ser positivo");
 
         for (int i = 0; i < messages.size(); i++) {
@@ -140,12 +141,10 @@ class OpenAccountCommandTests {
         private static final Function<String, Object> OPEN = deposit ->
                 validCommand().initialDeposit(new BigDecimal(deposit)).build();
 
-        private static final Function<String, Object> SIGN_UP = deposit -> SignUpCommand.builder()
-                .fullName("Margaret Hamilton").taxId("X1234567L").email("margaret@example.com")
-                .username("margaret").initialDeposit(new BigDecimal(deposit)).build();
+        private static final Function<String, Object> SIGN_UP = deposit -> SignUpCommand.of("Margaret Hamilton",
+                "X1234567L", "margaret@example.com", "margaret", new BigDecimal(deposit));
 
-        private static final Function<String, Object> ANOTHER = deposit -> OpenAnotherAccountCommand.builder()
-                .initialDeposit(new BigDecimal(deposit)).build();
+        private static final Function<String, Object> ANOTHER = deposit -> OpenAnotherAccountCommand.of(new BigDecimal(deposit));
 
         @ParameterizedTest
         @ValueSource(strings = {"0.001", "0.004"})
@@ -198,8 +197,8 @@ class OpenAccountCommandTests {
         @DisplayName("Un usuario del alta mal formado se rechaza con un mensaje que nombra todos los caracteres aceptados")
         void aMalformedSignUpUsernameNamesAllTheCharacters() {
             assertThatIllegalArgumentException()
-                    .isThrownBy(() -> SignUpCommand.builder().fullName("Margaret Hamilton").taxId("00000000T")
-                            .email("margaret@example.com").username("Ab").initialDeposit(new BigDecimal("100.00")).build())
+                    .isThrownBy(() -> SignUpCommand.of("Margaret Hamilton", "00000000T", "margaret@example.com", "Ab",
+                            new BigDecimal("100.00")))
                     .withMessage("El usuario debe tener " + FORMAT);
         }
     }

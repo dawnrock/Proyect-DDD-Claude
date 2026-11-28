@@ -138,8 +138,7 @@ class Auth0ApiTokensTests {
     }
 
     private static OpenAccountCommand account(String holderName, String taxId, String owner) {
-        return OpenAccountCommand.builder().holderName(holderName).holderTaxId(taxId)
-                .holderEmail(owner + "@example.com").initialDeposit(new BigDecimal("100")).ownerUsername(owner).build();
+        return OpenAccountCommand.of(holderName, taxId, owner + "@example.com", new BigDecimal("100"), owner);
     }
 
     private static String openBody(String taxId, String owner) {

@@ -54,13 +54,8 @@ class OutboxRestartTests {
         UUID accountId;
         try (ConfigurableApplicationContext first = start()) {
             AccountOpeningCommands commands = first.getBean(AccountOpeningCommands.class);
-            accountId = commands.openAccount(ADMIN, OpenAccountCommand.builder()
-                    .holderName("Grace Hopper")
-                    .holderTaxId("87654321X")
-                    .holderEmail("grace@example.com")
-                    .initialDeposit(new BigDecimal("100"))
-                    .ownerUsername("grace")
-                    .build()).id();
+            accountId = commands.openAccount(ADMIN, OpenAccountCommand.of("Grace Hopper", "87654321X",
+                    "grace@example.com", new BigDecimal("100"), "grace")).id();
             first.getBean(MoneyMovementCommands.class).deposit(ADMIN, DepositCommand.of(accountId, new BigDecimal("25")));
 
             assertThat(pendingEvents(first)).as("el primer arranque no ha entregado nada").isEqualTo(3);

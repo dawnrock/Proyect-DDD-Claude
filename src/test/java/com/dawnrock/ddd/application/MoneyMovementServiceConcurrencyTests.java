@@ -38,8 +38,7 @@ class MoneyMovementServiceConcurrencyTests {
     }
 
     private static AccountSummary open(AccountOpeningCommands opening, String holder, String taxId, String owner) {
-        return opening.openAccount(ADMIN, OpenAccountCommand.builder().holderName(holder).holderTaxId(taxId)
-                .holderEmail(owner + "@example.com").initialDeposit(INITIAL).ownerUsername(owner).build());
+        return opening.openAccount(ADMIN, OpenAccountCommand.of(holder, taxId, owner + "@example.com", INITIAL, owner));
     }
 
     @Test

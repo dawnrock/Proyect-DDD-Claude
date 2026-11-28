@@ -21,6 +21,7 @@ import com.dawnrock.ddd.domain.model.EmailAddress;
 import com.dawnrock.ddd.domain.model.InsufficientInitialDepositException;
 import com.dawnrock.ddd.domain.model.TaxId;
 import com.dawnrock.ddd.support.ApplicationServicesFixture;
+import com.dawnrock.ddd.support.CommandBuilders;
 
 /**
  * Alta de cuenta del administrador para un cliente nuevo o existente, identificado por su documento (contrato
@@ -51,8 +52,8 @@ class AccountOpeningServiceAdminOpeningTests {
         opening = fixture.accountOpeningService();
     }
 
-    private static OpenAccountCommand.Builder command() {
-        return OpenAccountCommand.builder()
+    private static CommandBuilders.OpenAccountBuilder command() {
+        return CommandBuilders.openAccount()
                 .holderName("Ada Lovelace")
                 .holderTaxId("12345678Z")
                 .holderEmail("ada@example.com")
@@ -60,8 +61,8 @@ class AccountOpeningServiceAdminOpeningTests {
                 .ownerUsername("ada");
     }
 
-    private static OpenAccountCommand.Builder other() {
-        return OpenAccountCommand.builder()
+    private static CommandBuilders.OpenAccountBuilder other() {
+        return CommandBuilders.openAccount()
                 .holderName("Margaret Hamilton")
                 .holderTaxId("00000000T")
                 .holderEmail("margaret@example.com")
@@ -87,8 +88,8 @@ class AccountOpeningServiceAdminOpeningTests {
     void anExistingCustomerGetsAnotherAccountWithOnlyTheirDocument() {
         AccountSummary first = opening.openAccount(ADMIN, command().build());
 
-        AccountSummary second = opening.openAccount(ADMIN, OpenAccountCommand.builder()
-                .holderTaxId(" 12345678 z ").initialDeposit(new BigDecimal("75")).build());
+        AccountSummary second = opening.openAccount(ADMIN, OpenAccountCommand.forHolder(" 12345678 z ",
+                new BigDecimal("75")));
 
         assertThat(second.holderName()).isEqualTo("Ada Lovelace");
         assertThat(second.accountNumber()).isNotEqualTo(first.accountNumber());
@@ -157,8 +158,8 @@ class AccountOpeningServiceAdminOpeningTests {
     @DisplayName("El alta pública no puede usar el usuario que el administrador dio a un cliente")
     void publicSignUpCannotUseAnotherCustomersUsername() {
         opening.openAccount(ADMIN, command().build());
-        SignUpCommand signUp = SignUpCommand.builder().fullName("Margaret Hamilton").taxId("00000000T")
-                .email("margaret@example.com").username("ada").initialDeposit(new BigDecimal("100")).build();
+        SignUpCommand signUp = SignUpCommand.of("Margaret Hamilton", "00000000T", "margaret@example.com", "ada",
+                new BigDecimal("100"));
 
         assertThat(service.isUsernameTaken("ada")).isTrue();
         assertThatIllegalArgumentException().isThrownBy(() -> opening.signUp(signUp));
@@ -172,8 +173,8 @@ class AccountOpeningServiceAdminOpeningTests {
                 new EmailAddress("ada@example.com")));
 
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> opening.openAccount(ADMIN, OpenAccountCommand.builder()
-                        .holderTaxId("12345678Z").initialDeposit(new BigDecimal("75")).build()))
+                .isThrownBy(() -> opening.openAccount(ADMIN, OpenAccountCommand.forHolder("12345678Z",
+                        new BigDecimal("75"))))
                 .withMessageContaining("no tiene usuario");
         assertThat(accounts.findAll()).isEmpty();
     }
@@ -205,7 +206,7 @@ class AccountOpeningServiceAdminOpeningTests {
         opening.openAccount(ADMIN, command().build());
 
         AccountSummary another = opening.openAnotherAccount(ADA,
-                OpenAnotherAccountCommand.builder().initialDeposit(new BigDecimal("60")).build());
+                OpenAnotherAccountCommand.of(new BigDecimal("60")));
 
         assertThat(another.holderName()).isEqualTo("Ada Lovelace");
         assertThat(service.listAccounts(ADA)).hasSize(2);

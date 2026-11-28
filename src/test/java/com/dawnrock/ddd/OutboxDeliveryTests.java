@@ -51,13 +51,8 @@ class OutboxDeliveryTests {
     @Test
     @DisplayName("Un consumidor que falla no hace fallar el ingreso: su evento queda pendiente con un intento y los demás se entregan")
     void aFailingConsumerDoesNotBreakTheDepositAndItsEventStaysPending() {
-        UUID accountId = commands.openAccount(ADMIN, OpenAccountCommand.builder()
-                .holderName("Ada Lovelace")
-                .holderTaxId("12345678Z")
-                .holderEmail("ada@example.com")
-                .initialDeposit(new BigDecimal("100"))
-                .ownerUsername("ada")
-                .build()).id();
+        UUID accountId = commands.openAccount(ADMIN, OpenAccountCommand.of("Ada Lovelace", "12345678Z",
+                "ada@example.com", new BigDecimal("100"), "ada")).id();
 
         assertThatNoException().isThrownBy(() -> movements.deposit(ADMIN,
                 DepositCommand.of(accountId, new BigDecimal("25"))));

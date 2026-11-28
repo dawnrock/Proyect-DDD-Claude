@@ -10,8 +10,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
-import com.dawnrock.ddd.application.OpenAccountCommandDef;
-import com.dawnrock.ddd.application.SignUpCommandDef;
+import com.dawnrock.ddd.application.OpenAccountCommand;
+import com.dawnrock.ddd.application.SignUpCommand;
 import com.dawnrock.ddd.adapter.in.CustomerRegistration;
 import com.dawnrock.ddd.adapter.in.Usernames;
 
@@ -53,19 +53,19 @@ public class SignUpForm {
     private String fullName;
 
     @NotBlank(groups = PersonalData.class, message = "El documento es obligatorio")
-    @Pattern(groups = PersonalData.class, regexp = OpenAccountCommandDef.TAX_ID_PATTERN,
-            message = OpenAccountCommandDef.TAX_ID_MESSAGE)
+    @Pattern(groups = PersonalData.class, regexp = OpenAccountCommand.TAX_ID_PATTERN,
+            message = OpenAccountCommand.TAX_ID_MESSAGE)
     private String taxId;
 
     @NotBlank(groups = PersonalData.class, message = "El correo electrónico es obligatorio")
-    @Pattern(groups = PersonalData.class, regexp = SignUpCommandDef.EMAIL_PATTERN,
+    @Pattern(groups = PersonalData.class, regexp = SignUpCommand.EMAIL_PATTERN,
             message = "El correo electrónico no es válido")
     private String email;
 
     /** Usuario con el que entrará; mismo formato que el command. */
     @NotBlank(groups = {Access.class, ExternalAccess.class}, message = "El usuario es obligatorio")
-    @Pattern(groups = {Access.class, ExternalAccess.class}, regexp = OpenAccountCommandDef.USERNAME_PATTERN,
-            message = OpenAccountCommandDef.USERNAME_MESSAGE)
+    @Pattern(groups = {Access.class, ExternalAccess.class}, regexp = OpenAccountCommand.USERNAME_PATTERN,
+            message = OpenAccountCommand.USERNAME_MESSAGE)
     private String username;
 
     /** Solo vive en la sesión del servidor entre los pasos 2 y 3; ninguna plantilla la pinta. */

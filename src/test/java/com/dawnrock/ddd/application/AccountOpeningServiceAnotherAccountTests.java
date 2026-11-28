@@ -35,12 +35,12 @@ class AccountOpeningServiceAnotherAccountTests {
         ApplicationServicesFixture fixture = ApplicationServicesFixture.builder().accounts(accounts).build();
         service = fixture.queryService();
         opening = fixture.accountOpeningService();
-        first = opening.signUp(SignUpCommand.builder().fullName("Ada Lovelace").taxId("12345678Z")
-                .email("ada@example.com").username("ada").initialDeposit(new BigDecimal("1000")).build());
+        first = opening.signUp(SignUpCommand.of("Ada Lovelace", "12345678Z", "ada@example.com", "ada",
+                new BigDecimal("1000")));
     }
 
     private static OpenAnotherAccountCommand deposit(String amount) {
-        return OpenAnotherAccountCommand.builder().initialDeposit(new BigDecimal(amount)).build();
+        return OpenAnotherAccountCommand.of(new BigDecimal(amount));
     }
 
     @Test
@@ -98,7 +98,7 @@ class AccountOpeningServiceAnotherAccountTests {
     @DisplayName("Un depósito en otra divisa se rechaza y no se abre la cuenta")
     void aDepositInAnotherCurrencyIsRejected() {
         assertThatExceptionOfType(CurrencyMismatchException.class).isThrownBy(() -> opening.openAnotherAccount(ADA,
-                OpenAnotherAccountCommand.builder().initialDeposit(new BigDecimal("200")).currency("USD").build()));
+                new OpenAnotherAccountCommand(new BigDecimal("200"), "USD")));
         assertThat(service.listAccounts(ADA)).hasSize(1);
     }
 }

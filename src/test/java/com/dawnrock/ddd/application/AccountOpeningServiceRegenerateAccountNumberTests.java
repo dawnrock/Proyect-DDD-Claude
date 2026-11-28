@@ -35,8 +35,8 @@ class AccountOpeningServiceRegenerateAccountNumberTests {
         ApplicationServicesFixture fixture = ApplicationServicesFixture.builder().accounts(accounts).build();
         service = fixture.queryService();
         opening = fixture.accountOpeningService();
-        account = opening.signUp(SignUpCommand.builder().fullName("Ada Lovelace").taxId("12345678Z")
-                .email("ada@example.com").username("ada").initialDeposit(new BigDecimal("1000")).build());
+        account = opening.signUp(SignUpCommand.of("Ada Lovelace", "12345678Z", "ada@example.com", "ada",
+                new BigDecimal("1000")));
     }
 
     @Test

@@ -18,6 +18,7 @@ import com.dawnrock.ddd.domain.model.DuplicateCustomerException;
 import com.dawnrock.ddd.domain.model.InsufficientInitialDepositException;
 import com.dawnrock.ddd.domain.model.TaxId;
 import com.dawnrock.ddd.support.ApplicationServicesFixture;
+import com.dawnrock.ddd.support.CommandBuilders;
 
 /** Alta de un cliente nuevo con su primera cuenta (R28-R30). Adaptadores en memoria reales. */
 class AccountOpeningServiceSignUpTests {
@@ -47,8 +48,8 @@ class AccountOpeningServiceSignUpTests {
         opening = fixture.accountOpeningService();
     }
 
-    private static SignUpCommand.Builder signUp() {
-        return SignUpCommand.builder()
+    private static CommandBuilders.SignUpBuilder signUp() {
+        return CommandBuilders.signUp()
                 .fullName("Margaret Hamilton")
                 .taxId("00000000T")
                 .email("Margaret@Example.com")

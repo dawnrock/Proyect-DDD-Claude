@@ -11,7 +11,7 @@ import lombok.Setter;
 
 /**
  * Formulario de «Abrir otra cuenta» de un cliente: solo el depósito (y la divisa). El titular sale del cliente que lo
- * pide. Misma validación que {@code OpenAnotherAccountCommandDef}, según "Shared input-adapter validation" de
+ * pide. Misma validación que {@code OpenAnotherAccountCommand}, según "Shared input-adapter validation" de
  * {@code docs/contracts/customer-sign-up.md}.
  */
 @Getter

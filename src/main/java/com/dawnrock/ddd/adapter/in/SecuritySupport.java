@@ -18,7 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
-import com.dawnrock.ddd.application.OpenAccountCommandDef;
+import com.dawnrock.ddd.application.OpenAccountCommand;
 
 /**
  * Lo que comparten las dos cadenas de seguridad (web y API, ADR 0008): el cifrado de contraseñas, los usuarios y el
@@ -28,7 +28,7 @@ import com.dawnrock.ddd.application.OpenAccountCommandDef;
  * {@link SecurityUsersProperties} y, si están definidas, de las variables de entorno {@code APP_ADMIN_USERNAME} y
  * {@code APP_ADMIN_PASSWORD} (un administrador). Sin perfil {@code demo} ni variables no
  * hay usuarios: la aplicación arranca, pero nadie puede entrar. Un nombre de usuario que no cumple
- * {@link OpenAccountCommandDef#USERNAME_PATTERN} se rechaza al arrancar, porque nunca podría ser propietario de una
+ * {@link OpenAccountCommand#USERNAME_PATTERN} se rechaza al arrancar, porque nunca podría ser propietario de una
  * cuenta.
  */
 @Configuration
@@ -110,9 +110,9 @@ public class SecuritySupport {
     }
 
     private static UserDetails user(String username, String passwordHash, String role) {
-        if (username == null || !username.matches(OpenAccountCommandDef.USERNAME_PATTERN)) {
+        if (username == null || !username.matches(OpenAccountCommand.USERNAME_PATTERN)) {
             throw new IllegalStateException("El usuario '%s' no cumple el formato %s"
-                    .formatted(username, OpenAccountCommandDef.USERNAME_PATTERN));
+                    .formatted(username, OpenAccountCommand.USERNAME_PATTERN));
         }
         if (!ROLES.contains(role)) {
             throw new IllegalStateException("El rol del usuario %s debe ser ADMIN o USER: %s".formatted(username, role));

@@ -48,13 +48,8 @@ class PersistenceRestartTests {
         AccountSummary signedUp;
         try (ConfigurableApplicationContext first = start()) {
             assertThat(accounts(first)).hasSize(3);
-            signedUp = first.getBean(CustomerRegistration.class).register(SignUpCommand.builder()
-                    .fullName("Margaret Hamilton")
-                    .taxId("00000000T")
-                    .email("margaret@example.com")
-                    .username("margaret")
-                    .initialDeposit(new BigDecimal("100.00"))
-                    .build(), "apolo-once", "203.0.113.7");
+            signedUp = first.getBean(CustomerRegistration.class).register(SignUpCommand.of("Margaret Hamilton",
+                    "00000000T", "margaret@example.com", "margaret", new BigDecimal("100.00")), "apolo-once", "203.0.113.7");
         }
 
         try (ConfigurableApplicationContext second = start()) {

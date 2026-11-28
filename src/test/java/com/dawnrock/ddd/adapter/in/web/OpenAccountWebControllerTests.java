@@ -86,14 +86,8 @@ class OpenAccountWebControllerTests extends AccountWebTestSupport {
                     .andExpect(redirectedUrl("/"))
                     .andExpect(flash().attributeExists("message"));
 
-            verify(commands).openAccount(ADMIN, OpenAccountCommand.builder()
-                    .holderName("Ana Pérez")
-                    .holderTaxId("12345678z")
-                    .holderEmail("ana@example.com")
-                    .initialDeposit(new BigDecimal("100.00"))
-                    .currency("EUR")
-                    .ownerUsername("ana")
-                    .build());
+            verify(commands).openAccount(ADMIN, new OpenAccountCommand("Ana Pérez", "12345678z", "ana@example.com",
+                    new BigDecimal("100.00"), "ana", "EUR"));
         }
 
         @Test
@@ -155,8 +149,8 @@ class OpenAccountWebControllerTests extends AccountWebTestSupport {
                     .andExpect(model().attributeHasErrors("form"))
                     .andExpect(content().string(containsString("obligatorio para un cliente nuevo")));
 
-            verify(commands).openAccount(ADMIN, OpenAccountCommand.builder()
-                    .holderTaxId("12345678Z").initialDeposit(new BigDecimal("100.00")).currency("EUR").build());
+            verify(commands).openAccount(ADMIN, new OpenAccountCommand(null, "12345678Z", null,
+                    new BigDecimal("100.00"), null, "EUR"));
         }
 
         @Test
@@ -301,9 +295,8 @@ class OpenAccountWebControllerTests extends AccountWebTestSupport {
                             .param("initialDeposit", "100.00").param("currency", "EUR"))
                     .andExpect(status().is3xxRedirection());
 
-            verify(commands).openAccount(ADMIN, OpenAccountCommand.builder()
-                    .holderName("Ana Pérez").holderTaxId("12345678Z").holderEmail("ana@example.com")
-                    .ownerUsername("ana.perez").initialDeposit(new BigDecimal("100.00")).currency("EUR").build());
+            verify(commands).openAccount(ADMIN, new OpenAccountCommand("Ana Pérez", "12345678Z", "ana@example.com",
+                    new BigDecimal("100.00"), "ana.perez", "EUR"));
         }
 
         @Test
@@ -315,8 +308,8 @@ class OpenAccountWebControllerTests extends AccountWebTestSupport {
                             .param("initialDeposit", "100.00").param("currency", "EUR"))
                     .andExpect(status().is3xxRedirection());
 
-            verify(commands).openAccount(ADMIN, OpenAccountCommand.builder()
-                    .holderTaxId("12345678Z").initialDeposit(new BigDecimal("100.00")).currency("EUR").build());
+            verify(commands).openAccount(ADMIN, new OpenAccountCommand(null, "12345678Z", null,
+                    new BigDecimal("100.00"), null, "EUR"));
         }
 
         @Test

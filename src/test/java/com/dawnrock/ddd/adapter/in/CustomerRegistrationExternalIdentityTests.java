@@ -30,6 +30,7 @@ import com.dawnrock.ddd.domain.model.CheckingAccountRepository;
 import com.dawnrock.ddd.domain.model.DuplicateCustomerException;
 import com.dawnrock.ddd.domain.model.InsufficientInitialDepositException;
 import com.dawnrock.ddd.support.ApplicationServicesFixture;
+import com.dawnrock.ddd.support.CommandBuilders;
 
 /**
  * Alta con una identidad de Auth0, sin contraseña local (#198, ADR 0024). Contrato:
@@ -67,8 +68,8 @@ class CustomerRegistrationExternalIdentityTests {
                 externalIdentities, NOW_CLOCK, new AuthProperties(true));
     }
 
-    private static SignUpCommand.Builder signUp() {
-        return SignUpCommand.builder()
+    private static CommandBuilders.SignUpBuilder signUp() {
+        return CommandBuilders.signUp()
                 .fullName("Margaret Hamilton")
                 .taxId("00000000T")
                 .email("margaret@example.com")

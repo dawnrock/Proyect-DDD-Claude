@@ -26,6 +26,7 @@ import com.dawnrock.ddd.adapter.out.persistence.PersistenceTestAdapters;
 import com.dawnrock.ddd.adapter.out.taxagency.TaxAgencyTestAdapters;
 import com.dawnrock.ddd.domain.model.CheckingAccountFactory;
 import com.dawnrock.ddd.support.ApplicationServicesFixture;
+import com.dawnrock.ddd.support.CommandBuilders;
 
 /** Apertura de cuentas con la factoría y los adaptadores en memoria detrás de los puertos (#174). */
 @DisplayName("Abrir cuenta con la factoría")
@@ -48,8 +49,8 @@ class AccountOpeningServiceTests {
         opening = fixture.accountOpeningService();
     }
 
-    private OpenAccountCommand.Builder byTaxId(String taxId) {
-        return OpenAccountCommand.builder()
+    private CommandBuilders.OpenAccountBuilder byTaxId(String taxId) {
+        return CommandBuilders.openAccount()
                 .holderName("Grace Hopper")
                 .holderTaxId(taxId)
                 .holderEmail("grace@example.com")

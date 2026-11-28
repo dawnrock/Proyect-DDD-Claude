@@ -2,7 +2,6 @@ package com.dawnrock.ddd.adapter.in.rest;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -48,17 +47,11 @@ public class AccountController {
     @PostMapping
     public ResponseEntity<AccountSummaryResponse> openAccount(
             Authentication authentication, @Valid @RequestBody OpenAccountRequest request) {
-        OpenAccountCommand.Builder command = OpenAccountCommand.builder()
-                .holderTaxId(request.holderTaxId())
-                .holderName(Objects.requireNonNullElse(request.holderName(), ""))
-                .holderEmail(Objects.requireNonNullElse(request.holderEmail(), ""))
-                .initialDeposit(request.initialDeposit())
-                .ownerUsername(Objects.requireNonNullElse(request.ownerUsername(), ""));
-        if (request.currency() != null) {
-            command.currency(request.currency());
-        }
+        // Los campos del titular que falten quedan vacíos y la divisa que falte es EUR: lo hace el command
+        OpenAccountCommand command = new OpenAccountCommand(request.holderName(), request.holderTaxId(),
+                request.holderEmail(), request.initialDeposit(), request.ownerUsername(), request.currency());
 
-        AccountSummaryResponse body = toResponse(commands.openAccount(CurrentCaller.from(authentication), command.build()));
+        AccountSummaryResponse body = toResponse(commands.openAccount(CurrentCaller.from(authentication), command));
         return ResponseEntity.created(URI.create("/api/accounts/" + body.id())).body(body);
     }
 

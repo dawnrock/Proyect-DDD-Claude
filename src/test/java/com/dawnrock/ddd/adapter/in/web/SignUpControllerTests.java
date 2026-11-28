@@ -152,7 +152,7 @@ class SignUpControllerTests {
                     .andExpect(status().isOk())
                     .andExpect(view().name("signup/data"))
                     .andExpect(content().string(containsString(
-                            com.dawnrock.ddd.application.OpenAccountCommandDef.TAX_ID_MESSAGE)))
+                            com.dawnrock.ddd.application.OpenAccountCommand.TAX_ID_MESSAGE)))
                     .andExpect(content().string(containsString("El correo electrónico no es válido")));
         }
 
