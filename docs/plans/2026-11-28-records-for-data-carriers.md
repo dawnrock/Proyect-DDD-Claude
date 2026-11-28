@@ -157,7 +157,7 @@ Order: from the outside in (responses first, which nothing else depends on), the
 - **Acceptance criteria:**
   - [x] `./mvnw clean verify` green with the static analysis unchanged (no new PMD/SpotBugs/Checkstyle warnings). Removed: the dependency, `immutables.version`, the processor, the SpotBugs exclusion for `@org.immutables.value.Generated`, and the Checkstyle `sourceDirectories` / PMD `excludeRoots` that only kept generated code out (`checkstyle-suppressions.xml` had nothing for it).
 
-### [ ] T9 — ArchUnit: data carriers are `record`s (~5 min)
+### [x] T9 — ArchUnit: data carriers are `record`s (~5 min)
 
 - **Layer:** tests
 - **Files:** `HexagonalArchitectureTests.java`
@@ -166,7 +166,7 @@ Order: from the outside in (responses first, which nothing else depends on), the
   1. Rule: classes in `application` named `*Command`, `*Query`, `*Summary`, `*Details` and in `adapter.in.rest` named `*Request`/`*Response` are `record`s. Validate it by sabotage (a class instead of a record → red).
   2. Remove `org.immutables` from the rules that mention it.
 - **Acceptance criteria:**
-  - [ ] The rule fails with a non-record carrier and passes after reverting.
+  - [x] The rule fails with a non-record carrier (a temporary `application.SabotageQuery` class) and passes after reverting. It is one explicit predicate (`DATA_CARRIERS`): ArchUnit folds chained `.and()/.or()` from left to right, which would not express the intended condition. The only `org.immutables` mention in the rules was the D1 comment, cleaned in T7.
 
 ### [ ] T10 — Documentation (~10 min)
 
