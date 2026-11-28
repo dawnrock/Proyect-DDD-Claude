@@ -146,7 +146,7 @@ Order: from the outside in (responses first, which nothing else depends on), the
 - **Acceptance criteria:**
   - [x] `grep -r "org.immutables" src` returns nothing (the JSON round trip of the responses is covered by `RecordJsonTests`; the request records were already records).
 
-### [ ] T8 — Remove Immutables from the build (~5 min)
+### [x] T8 — Remove Immutables from the build (~5 min)
 
 - **Layer:** build
 - **Files:** `pom.xml`, `checkstyle-suppressions.xml`, `spotbugs-exclude.xml`
@@ -155,7 +155,7 @@ Order: from the outside in (responses first, which nothing else depends on), the
   1. Remove the `value-annotations` dependency, `immutables.version` and the `org.immutables:value` processor (Lombok stays the only one in `annotationProcessorPaths`).
   2. Remove the exclusions that only existed for generated code in `target/generated-sources`.
 - **Acceptance criteria:**
-  - [ ] `./mvnw verify` green with the static analysis unchanged (no new PMD/SpotBugs/Checkstyle warnings).
+  - [x] `./mvnw clean verify` green with the static analysis unchanged (no new PMD/SpotBugs/Checkstyle warnings). Removed: the dependency, `immutables.version`, the processor, the SpotBugs exclusion for `@org.immutables.value.Generated`, and the Checkstyle `sourceDirectories` / PMD `excludeRoots` that only kept generated code out (`checkstyle-suppressions.xml` had nothing for it).
 
 ### [ ] T9 — ArchUnit: data carriers are `record`s (~5 min)
 
