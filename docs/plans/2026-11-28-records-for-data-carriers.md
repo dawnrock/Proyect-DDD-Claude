@@ -138,13 +138,13 @@ Order: from the outside in (responses first, which nothing else depends on), the
   - [x] The validation tests and the web/REST sign-up and opening tests pass unchanged (expected messages and values untouched).
 - **Deviation:** 29 test call sites used a builder as a *template* (a valid command whose test changes one field, or the "first failing rule" tests that fix fields one by one). Instead of repeating every argument of the canonical constructor, they use test builders in `src/test/.../support/CommandBuilders` (Lombok `@Builder` on static methods that call the `record` constructor; `CLAUDE.md` allows `@Builder` only in test builders, which is where it is). Complete chains became factories or the canonical constructor as planned. The adapters lost their `requireNonNullElse(…, "")` and `if (currency != null)`: the compact constructors do it.
 
-### [ ] T7 — Remove `ApplicationValue` and the Immutables setup tests (~5 min)
+### [x] T7 — Remove `ApplicationValue` and the Immutables setup tests (~5 min)
 
 - **Layer:** application · tests
 - **Files:** `ApplicationValue.java`, `ImmutablesSetupTests.java`, `JacksonImmutablesTests.java`
 - **Depends on:** T2-T6
 - **Acceptance criteria:**
-  - [ ] `grep -r "org.immutables" src` returns nothing.
+  - [x] `grep -r "org.immutables" src` returns nothing (the JSON round trip of the responses is covered by `RecordJsonTests`; the request records were already records).
 
 ### [ ] T8 — Remove Immutables from the build (~5 min)
 

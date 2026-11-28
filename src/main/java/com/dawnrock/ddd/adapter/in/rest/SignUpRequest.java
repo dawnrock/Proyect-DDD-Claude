@@ -14,8 +14,8 @@ import com.dawnrock.ddd.application.SignUpCommand;
 import com.dawnrock.ddd.adapter.in.CustomerRegistration;
 
 /**
- * Cuerpo de {@code POST /api/customers}. Es un {@code record} (no un DTO de Immutables) porque Hibernate Validator solo
- * ve las restricciones de campos y getters JavaBean. Aplica la validación compartida con el formulario web del alta
+ * Cuerpo de {@code POST /api/customers}, con las restricciones de Bean Validation en sus componentes. Aplica la
+ * validación compartida con el formulario web del alta
  * ("Shared input-adapter validation" del contrato). La letra de control del documento no se comprueba aquí: la comprueba
  * el dominio y responde 400. {@code currency} es opcional ({@code EUR}).
  */

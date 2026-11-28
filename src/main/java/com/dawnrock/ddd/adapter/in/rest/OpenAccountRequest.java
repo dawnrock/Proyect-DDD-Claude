@@ -12,9 +12,8 @@ import com.dawnrock.ddd.application.OpenAccountCommand;
 import com.dawnrock.ddd.application.SignUpCommand;
 
 /**
- * Cuerpo de {@code POST /api/accounts}. Es un {@code record} y no un DTO de Immutables porque Hibernate
- * Validator solo ve las restricciones de campos y getters JavaBean. Aplica la misma validación que el
- * formulario web ("Shared presentation validation" del contrato {@code docs/contracts/account-factory.md}), de modo
+ * Cuerpo de {@code POST /api/accounts}, con las restricciones de Bean Validation en sus componentes. Aplica la misma
+ * validación que el formulario web ("Shared presentation validation" del contrato {@code docs/contracts/account-factory.md}), de modo
  * que lo que acepta nunca hace que el dominio lance {@code IllegalArgumentException}.
  *
  * <p>No lleva IBAN ni segmento: el IBAN lo genera la factoría y el segmento lo deciden los ingresos verificados del
